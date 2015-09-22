@@ -32,9 +32,13 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.framework.AuthenticationFilter;
+import org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
+import org.forgerock.http.Filter;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -47,6 +51,10 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
+import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
+import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.SingletonResourceProvider;
@@ -55,7 +63,6 @@ import org.forgerock.json.resource.http.HttpContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.jaspi.config.AuthenticationConfig;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -68,9 +75,41 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.PROPERTY
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ID;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.USER_CREDENTIAL;
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 
 /**
- * An implementation of the AuthenticationConfig that reads and holds the authentication configuration.
+ * Configures the authentication chains based on authentication.json.
+ *
+ * Example:
+ *
+ * <pre>
+ *     <code>
+ * {
+ *     "serverAuthConfig" : {
+ *         "sessionModule" : {
+ *             "name" : "JWT_SESSION",
+ *                 "properties" : {
+ *                     "someSetting" : "some-value"
+ *                 }
+ *         },
+ *         "authModules" : [
+ *             {
+ *                 "name" : "IWA",
+ *                 "properties" : {
+ *                     "someSetting" : "some-value"
+ *                 }
+ *             },
+ *             {
+ *                 "name" : "PASSTHROUGH",
+ *                 "properties" : {
+ *                     "someSetting" : "some-value"
+ *                 }
+ *             }
+ *         ]
+ *     }
+ * }
+ *     </code>
+ * </pre>
  */
 @Component(name = AuthenticationService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
@@ -79,7 +118,7 @@ import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.USER_CRE
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Service"),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/authentication")
 })
-public class AuthenticationService implements AuthenticationConfig, SingletonResourceProvider {
+public class AuthenticationService implements SingletonResourceProvider {
 
     /** The PID for this Component. */
     public static final String PID = "org.forgerock.openidm.authentication";
@@ -112,9 +151,17 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
 
+    /** Script Registry service. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    protected ScriptRegistry scriptRegistry;
+
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
+
+    /** The CHF filter to wrap the CAF filter */
+    @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.jaspi.config)")
+    private AuthFilterWrapper authFilterWrapper;
 
     /** a factory Function to build an Authenticator from an auth module config */
     private AuthenticatorFactory toAuthenticatorFromProperties;
@@ -164,6 +211,8 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
         logger.info("Activating Authentication Service with configuration {}", context.getProperties());
         config = enhancedConfig.getConfigurationAsJson(context);
 
+        authFilterWrapper.setFilter(configureAuthenticationFilter(config));
+
         // factory Function that instantiates an Authenticator from an auth module's config properties
         toAuthenticatorFromProperties = new AuthenticatorFactory(connectionFactory, cryptoService);
 
@@ -195,16 +244,99 @@ public class AuthenticationService implements AuthenticationConfig, SingletonRes
         config = null;
         toAuthenticatorFromProperties = null;
         authenticators.clear();
+
+        // remove CAF filter from CHF filter wrapper
+        if (authFilterWrapper != null) {
+            try {
+                authFilterWrapper.setFilter(AuthFilterWrapper.PASSTHROUGH_FILTER);
+            } catch (Exception ex) {
+                logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
+            }
+        }
     }
 
-    // ----- Implementation of AuthenticationConfig interface
+    /**
+     * Configures the commons Authentication Filter with the given configuration.
+     *
+     * @param jsonConfig The authentication configuration.
+     */
+    private Filter configureAuthenticationFilter(JsonValue jsonConfig) {
+
+        if (jsonConfig == null) {
+            // No configurations found
+            logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
+            return null;
+        }
+
+        // make copy of config
+        final JsonValue moduleConfig = new JsonValue(jsonConfig);
+        final JsonValue serverAuthContext = moduleConfig.get(SERVER_AUTH_CONTEXT_KEY).required();
+        final JsonValue sessionConfig = serverAuthContext.get(AuthenticationService.SESSION_MODULE_KEY);
+        final JsonValue authModulesConfig = serverAuthContext.get(AuthenticationService.AUTH_MODULES_KEY);
+
+        return AuthenticationFilter.builder()
+                .logger(logger)
+                .auditApi(new JaspiAuditApi(connectionFactory))
+                .sessionModule(processModuleConfiguration(sessionConfig))
+                .authModules(
+                        FluentIterable.from(authModulesConfig)
+                                // transform each module config to a builder
+                                .transform(new Function<JsonValue, AuthenticationModuleBuilder>() {
+                                    @Override
+                                    public AuthenticationModuleBuilder apply(JsonValue authModuleConfig) {
+                                        return processModuleConfiguration(authModuleConfig);
+                                    }
+                                })
+                                        // weed out nulls
+                                .filter(new Predicate<AuthenticationModuleBuilder>() {
+                                            @Override
+                                            public boolean apply(AuthenticationModuleBuilder builder) {
+                                                return builder != null;
+                                            }
+                                        }
+                                )
+                                .toList())
+                .build();
+    }
 
     /**
-     * {@inheritDoc}
+     * Process the module configuration for a specific module, checking to see if the module is enabled and
+     * resolving the module class name if an alias is used.
+     *
+     * @param moduleConfig The specific module configuration json.
+     * @return Whether the module is enabled or not.
      */
-    @Override
-    public JsonValue getConfig() {
-        return config;
+    private AuthenticationModuleBuilder processModuleConfiguration(JsonValue moduleConfig) {
+
+        if (moduleConfig.isDefined(MODULE_CONFIG_ENABLED) && !moduleConfig.get(MODULE_CONFIG_ENABLED).asBoolean()) {
+            return null;
+        }
+        moduleConfig.remove(MODULE_CONFIG_ENABLED);
+
+        AsyncServerAuthModule module;
+        if (moduleConfig.isDefined("name")) {
+            module = moduleConfig.get("name").asEnum(IDMAuthModule.class).newInstance(connectionFactory, cryptoService);
+        } else {
+            logger.warn("Unable to create auth module from config " + moduleConfig.toString());
+            return null;
+        }
+
+        JsonValue moduleProperties = moduleConfig.get("properties");
+        if (moduleProperties.isDefined("privateKeyPassword")) {
+            // decrypt/de-obfuscate privateKey password
+            moduleProperties.put("privateKeyPassword",
+                    JettyPropertyUtil.decryptOrDeobfuscate(moduleProperties.get("privateKeyPassword").asString()));
+        }
+
+        if (moduleProperties.isDefined("keystorePassword")) {
+            // decrypt/de-obfuscate keystore password
+            moduleProperties.put("keystorePassword",
+                    JettyPropertyUtil.decryptOrDeobfuscate(moduleProperties.get("keystorePassword").asString()));
+        }
+
+        // wrap all auth modules in an IDMJaspiModuleWrapper to apply the IDM business logic
+        return configureModule(new IDMJaspiModuleWrapper(module, connectionFactory, cryptoService, scriptRegistry))
+                .withSettings(moduleProperties.asMap());
     }
 
     // ----- Implementation of SingletonResourceProvider interface

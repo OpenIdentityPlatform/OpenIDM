@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.jaspi.modules;
 
+import static org.forgerock.json.JsonValue.*;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
@@ -35,7 +36,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.jaspi.auth.Authenticator;
 import org.forgerock.openidm.jaspi.auth.Authenticator.AuthenticatorResult;
 import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
 import org.forgerock.services.context.Context;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;
@@ -46,20 +46,18 @@ import org.testng.annotations.Test;
 */
 public class DelegatedAuthModuleTest {
 
-    private OSGiAuthnFilterHelper authnFilterHelper;
-
     private DelegatedAuthModule module;
 
     private Authenticator authenticator;
 
     @BeforeMethod
     public void setUp() throws ResourceException {
-        authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
         AuthenticatorFactory authenticatorFactory = mock(AuthenticatorFactory.class);
         authenticator = mock(Authenticator.class);
         when(authenticatorFactory.apply(any(JsonValue.class))).thenReturn(authenticator);
 
-        module = new DelegatedAuthModule(authnFilterHelper, authenticatorFactory);
+        module = new DelegatedAuthModule(authenticatorFactory);
+        module.initialize(null, null, null, json(object(field("queryOnResource", ""))).asMap());
     }
 
     @Test
@@ -158,8 +156,7 @@ public class DelegatedAuthModuleTest {
         assertEquals(authStatus, AuthStatus.SEND_FAILURE);
     }
 
-    // FIXME
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void shouldValidateRequestWhenAuthenticationSuccessful() throws ResourceException, AuthException {
 
         //Given
@@ -191,8 +188,7 @@ public class DelegatedAuthModuleTest {
         assertEquals(authStatus, AuthStatus.SUCCESS);
     }
 
-    // FIXME
-    @Test(enabled = false)
+    @Test(enabled = true)
     public void shouldValidateRequestWhenAuthenticationFailed() throws ResourceException, AuthException {
 
         //Given

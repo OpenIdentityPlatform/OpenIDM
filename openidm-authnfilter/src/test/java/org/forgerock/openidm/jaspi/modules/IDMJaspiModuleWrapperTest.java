@@ -38,7 +38,8 @@ import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.openidm.jaspi.config.OSGiAuthnFilterHelper;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promises;
@@ -53,7 +54,7 @@ import org.testng.annotations.Test;
  */
 public class IDMJaspiModuleWrapperTest {
 
-    private OSGiAuthnFilterHelper authnFilterHelper;
+    private ConnectionFactory connectionFactory;
     private RoleCalculatorFactory roleCalculatorFactory;
     private AugmentationScriptExecutor scriptExecutor;
     private AsyncServerAuthModule authModule;
@@ -62,8 +63,7 @@ public class IDMJaspiModuleWrapperTest {
     @BeforeMethod
     public void setUp() {
         try {
-            authnFilterHelper = mock(OSGiAuthnFilterHelper.class);
-            when(authnFilterHelper.getConnectionFactory()).thenReturn(mock(ConnectionFactory.class));
+            connectionFactory = mock(ConnectionFactory.class);
 
             authModule = mock(AsyncServerAuthModule.class);
             when(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
@@ -104,7 +104,9 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_CONTINUE));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
                 .getOrThrowUninterruptibly();
@@ -139,7 +141,9 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
                 .getOrThrowUninterruptibly();
@@ -174,7 +178,9 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
                 .getOrThrowUninterruptibly();
@@ -219,7 +225,9 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         AuthStatus authStatus = wrapper.validateRequest(messageInfo, clientSubject, serviceSubject)
                 .getOrThrowUninterruptibly();
@@ -260,7 +268,9 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         wrapper.validateRequest(messageInfo, clientSubject, serviceSubject).getOrThrowUninterruptibly();
 
@@ -283,7 +293,9 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject).getOrThrowUninterruptibly();
 
@@ -311,7 +323,9 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject).getOrThrowUninterruptibly();
 
@@ -341,7 +355,9 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authnFilterHelper, authModule, roleCalculatorFactory, scriptExecutor);
+        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+                connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
+                roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
         AuthStatus authStatus = wrapper.secureResponse(messageInfo, serviceSubject).getOrThrowUninterruptibly();
 

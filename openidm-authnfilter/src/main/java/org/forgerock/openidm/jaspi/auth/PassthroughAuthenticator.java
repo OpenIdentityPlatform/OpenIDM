@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.jaspi.auth;
 
+import static org.forgerock.util.Reject.checkNotNull;
+
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Requests;
@@ -40,8 +42,8 @@ public class PassthroughAuthenticator implements Authenticator {
      */
     public PassthroughAuthenticator(ConnectionFactory connectionFactory,
             String passThroughAuth) {
-        this.connectionFactory = connectionFactory;
-        this.passThroughAuth = passThroughAuth;
+        this.connectionFactory = checkNotNull(connectionFactory);
+        this.passThroughAuth = checkNotNull(passThroughAuth);
     }
 
     /**
