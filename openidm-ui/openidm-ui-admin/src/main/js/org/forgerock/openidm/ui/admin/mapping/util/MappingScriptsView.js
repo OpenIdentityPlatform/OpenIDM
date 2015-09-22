@@ -41,12 +41,17 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView", [
     var MappingScriptsView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/util/MappingScriptsTemplate.html",
 
-        init: function() {
+        init: function(args) {
             this.model.availableScripts = _.clone(this.model.scripts);
             this.model.scriptEditors = [];
             this.model.sync = this.getSyncConfig();
             this.model.mapping = this.getCurrentMapping();
             this.model.mappingName = this.getMappingName();
+            this.model.hasWorkflow = true;
+
+            if(!_.isUndefined(args) && args.hasWorkFlow === false) {
+                this.model.hasWorkflow = false;
+            }
 
             var addedEvents = _.keys(_.pick(this.model.mapping, this.model.scripts)),
                 eventName,
@@ -60,7 +65,7 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView", [
                     selectEvents: _.difference(this.model.availableScripts, addedEvents),
                     addedEvents: addedEvents,
                     currentObject: this.model.mapping,
-                    hasWorkflow: true
+                    hasWorkflow: this.model.hasWorkflow
                 });
 
             } else if (this.model.scripts.length === 1) {
