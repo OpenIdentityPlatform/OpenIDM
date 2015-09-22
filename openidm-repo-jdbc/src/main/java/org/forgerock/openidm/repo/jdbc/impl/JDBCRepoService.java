@@ -757,9 +757,12 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             return ds.getConnection();
         } else {
             java.util.Properties properties = new java.util.Properties();
-            if (!"".equals(user) && !"".equals(password)) {
+            if (StringUtils.isNotBlank(user)) {
                 properties.put("user", user);
-                properties.put("password", password);
+
+                if (StringUtils.isNotBlank(password)) {
+                    properties.put("password", password);
+                }
             }
             if (StringUtils.isNotBlank(kerberosServerPrincipal)) {
                 properties.put(CONFIG_KERBEROS_PRINCIPAL, kerberosServerPrincipal);
@@ -1050,7 +1053,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                             + ") needs to be configured to connect to a DB.");
                 }
                 dbUrl = connectionConfig.get(CONFIG_DB_URL).required().asString();
-                user = connectionConfig.get(CONFIG_USER).required().asString();
+                user = connectionConfig.get(CONFIG_USER).defaultTo("").asString();
                 password = connectionConfig.get(CONFIG_PASSWORD).defaultTo("").asString();
                 kerberosServerPrincipal = connectionConfig.get(CONFIG_KERBEROS_PRINCIPAL).defaultTo("").asString();
                 securityMechanism = connectionConfig.get(CONFIG_SECURITY_MECHANISM).defaultTo("").asString();
