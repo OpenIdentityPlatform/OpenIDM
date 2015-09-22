@@ -124,7 +124,7 @@ class ManagedObjectProperty {
         if (!encryptionValue.isNull()) {
             setEncryptor();
         }
-        hashingValue = config.get("securehash");
+        hashingValue = config.get("secureHash");
         if (!hashingValue.isNull()) {
             hashingValue.get("algorithm").required();
         }
