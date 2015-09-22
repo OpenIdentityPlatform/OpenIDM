@@ -27,6 +27,7 @@
 package org.forgerock.openidm.crypto;
 
 import java.security.MessageDigest;
+import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -51,10 +52,10 @@ public class FieldStorageSchemeImpl implements FieldStorageScheme {
     /**
      * The number of bytes of random data to use as the salt when generating the hashes.
      */
-    private static final int NUM_SALT_BYTES = 8;
+    private static final int NUM_SALT_BYTES = 16;
 
     /**
-     * The message digest that will actually be used to generate the 256-bit SHA-2 hashes.
+     * The message digest that will actually be used to generate the hashes.
      */
     private MessageDigest messageDigest;
 
@@ -66,7 +67,7 @@ public class FieldStorageSchemeImpl implements FieldStorageScheme {
     /** 
      * The secure random number generator to use to generate the salt values. 
      */
-    private Random random;
+    private SecureRandom random;
 
     /** 
      * Size of the digest in bytes.
@@ -83,12 +84,12 @@ public class FieldStorageSchemeImpl implements FieldStorageScheme {
     public FieldStorageSchemeImpl(int digestSize, String algorithm) throws Exception {
         this.messageDigest = MessageDigest.getInstance(algorithm);
         this.digestLock = new Object();
-        this.random     = new Random();
+        this.random     = new SecureRandom();
         this.digestSize = digestSize;
     }
 
     @Override
-    public String encodeField(String plaintext) {
+    public String hashField(String plaintext) {
         int plainBytesLength = plaintext.length();
         byte[] saltBytes     = new byte[NUM_SALT_BYTES];
         byte[] plainPlusSalt = new byte[plainBytesLength + NUM_SALT_BYTES];

@@ -26,7 +26,7 @@ public interface FieldStorageScheme {
      * @param plaintext a plain text version of the field to encode.
      * @return a hashed, salted, and encoded field.
      */
-    public String encodeField(String plaintext);
+    public String hashField(String plaintext);
     
     /**
      * Returns true if the supplied plain text field matches the supplied stored field after being
