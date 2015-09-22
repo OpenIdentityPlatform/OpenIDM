@@ -57,6 +57,7 @@ import org.forgerock.audit.AuditException;
 import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.AuditServiceProxy;
+import org.forgerock.audit.AuditingContext;
 import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.json.AuditJsonConfig;
@@ -416,7 +417,7 @@ public class AuditServiceImpl implements AuditService {
         }
 
         // Don't audit the audit log
-        if (context.containsContext(AuditContext.class)) {
+        if (context.containsContext(AuditingContext.class)) {
             return newResourceResponse(null, null, request.getContent()).asPromise();
         }
 

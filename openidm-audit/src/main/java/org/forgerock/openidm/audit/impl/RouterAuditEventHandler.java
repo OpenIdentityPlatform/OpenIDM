@@ -28,6 +28,7 @@ import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import org.forgerock.audit.AuditingContext;
 import org.forgerock.audit.DependencyProvider;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.services.context.Context;
@@ -101,7 +102,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
             final JsonValue auditEventContent) {
         try {
             final String auditEventId = auditEventContent.get(ResourceResponse.FIELD_CONTENT_ID).asString();
-            return newResultPromise(getConnectionFactory().getConnection().create(new AuditContext(context),
+            return newResultPromise(getConnectionFactory().getConnection().create(new AuditingContext(context),
                     newCreateRequest(
                             resourcePath.concat(auditEventTopic),
                             auditEventId,
@@ -117,7 +118,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
     public Promise<ResourceResponse, ResourceException> readEvent(final Context context, final String auditEventTopic,
             final String auditEventId) {
         try {
-            return newResultPromise(getConnectionFactory().getConnection().read(new AuditContext(context),
+            return newResultPromise(getConnectionFactory().getConnection().read(new AuditingContext(context),
                     newReadRequest(resourcePath.concat(auditEventTopic), auditEventId)));
         } catch (ClassNotFoundException e) {
             return new InternalServerErrorException(e).asPromise();
@@ -135,7 +136,7 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
             newRequest.setResourcePath(resourcePath.concat(queryRequest.getResourcePathObject()));
 
             return newResultPromise(
-                    connectionFactory.getConnection().query(new AuditContext(context), newRequest,
+                    connectionFactory.getConnection().query(new AuditingContext(context), newRequest,
                             new QueryResourceHandler() {
                                 @Override
                                 public boolean handleResource(ResourceResponse resourceResponse) {
