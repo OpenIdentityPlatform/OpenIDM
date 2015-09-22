@@ -291,7 +291,7 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
     public JsonValue hash(JsonValue value, String algorithm) throws JsonException, JsonCryptoException {
         final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
         final String plainTextField = value.asString();
-        final String encodedField = fieldStorageScheme.encodeField(plainTextField);
+        final String encodedField = fieldStorageScheme.hashField(plainTextField);
         return json(object(
                 field("$crypto", object(
                         field("value", object(
