@@ -43,7 +43,7 @@
         "updateScriptFileName" : "UpdateScript.groovy",
         "syncScriptFileName" : "SyncScript.groovy",
         "schemaScriptFileName" : "SchemaScript.groovy",
-        "classpath" : [
+        "scriptRoots" : [
             "&{launcher.project.location}/tools"
         ]
     },

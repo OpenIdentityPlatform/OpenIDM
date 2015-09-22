@@ -78,7 +78,7 @@ switch ( objectClass ) {
                                 JsonValueUtil.fromEntries(
                                     field("id", row.userid)
                                 ).getObject()
-                        attribute 'authorizationId',
+                        attribute 'authorization',
                                 JsonValueUtil.fromEntries(
                                     field("id", row.principal),
                                     field("roles",

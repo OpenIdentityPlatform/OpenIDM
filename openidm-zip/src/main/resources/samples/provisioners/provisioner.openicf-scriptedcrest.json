@@ -64,7 +64,7 @@
         "tolerance": 10,
         "disabledGlobalASTTransformations": null,
         "targetDirectory": null,
-        "classpath": ["&{launcher.project.location}/tools"]
+        "scriptRoots": ["&{launcher.project.location}/tools"]
     },
     "objectTypes": {
         "groups": {
