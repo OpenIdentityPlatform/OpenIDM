@@ -158,6 +158,11 @@ public final class ServerConstants {
     public static final String SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER = "AES/CBC/PKCS5Padding";
 
     /**
+     * The name of the default cryptography hashing algorithm that will be used.
+     */
+    public static final String SECURITY_CRYPTOGRAPHY_DEFAULT_HASHING_ALGORITHM = "SHA-256";
+
+    /**
      * The default location relative to the openidm root of the boot properties
      * file. Override by setting system property
      * {@code CONFIG_BOOT_FILE_LOCATION}
