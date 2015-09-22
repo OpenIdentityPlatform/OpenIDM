@@ -36,7 +36,7 @@
         "autoCommit" : true,
         "reloadScriptOnExecution" : false,
         "jdbcDriver" : "com.mysql.jdbc.Driver",
-        "classpath" : ["&{launcher.project.location}/tools"],
+        "scriptRoots" : ["&{launcher.project.location}/tools"],
         "createScriptFileName" : "CreateScript.groovy",
         "testScriptFileName" : "TestScript.groovy",
         "searchScriptFileName" : "SearchScript.groovy"
@@ -100,10 +100,10 @@
                     "nativeName" : "client",
                     "nativeType" : "object"
                 },
-                "authorizationId" : {
+                "authorization" : {
                     "type" : "object",
                     "required" : false,
-                    "nativeName" : "authorizationId",
+                    "nativeName" : "authorization",
                     "nativeType" : "object"
                 },
                 "resourceOperation" : {
