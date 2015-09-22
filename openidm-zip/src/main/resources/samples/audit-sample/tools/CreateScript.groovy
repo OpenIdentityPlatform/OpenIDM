@@ -83,11 +83,11 @@ switch ( objectClass ) {
                     attributeMap.get("client")?.getValue()?.get(0)?.get("ip"),
                     attributeMap.get("client")?.getValue()?.get(0)?.get("port"),
                     attributeMap.get("authentication")?.getValue()?.get(0)?.get("id"),
-                    attributeMap.get("authorizationid")?.getValue()?.get(0)?.get("id"),
-                    attributeMap.get("authorizationid")?.getValue()?.get(0)?.get("roles") != null
-                            ? json(attributeMap.get("authorizationid")?.getValue()?.get(0)?.get("roles")).toString()
+                    attributeMap.get("authorization")?.getValue()?.get(0)?.get("id"),
+                    attributeMap.get("authorization")?.getValue()?.get(0)?.get("roles") != null
+                            ? json(attributeMap.get("authorization")?.getValue()?.get(0)?.get("roles")).toString()
                             : null,
-                    attributeMap.get("authorizationid")?.getValue()?.get(0)?.get("component"),
+                    attributeMap.get("authorization")?.getValue()?.get(0)?.get("component"),
                     attributeMap.get("resource")?.getValue()?.get(0)?.get("uri"),
                     attributeMap.get("resource")?.getValue()?.get(0)?.get("protocol"),
                     attributeMap.get("resource")?.getValue()?.get(0)?.get("method"),
