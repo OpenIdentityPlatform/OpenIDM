@@ -2,110 +2,333 @@
     "user":"admin",
     "password":"admin",
     "rootPassword" : "7A5DEAB30884B4C8026A047F13D4A67BDEDC7CA227AA8F4D477727EABE5541B4",
-    "queries":{
-        "get-by-field-value":"select * FROM ${_resource} WHERE ${field} = :value",
-        "get-users-of-role":"select userName FROM ${_resource} WHERE roles CONTAINS( :role )",
-        "query-all-ids":"select _openidm_id from ${_resource}",
-        "query-all":"select * from ${_resource}",
-        "links-for-firstId":"SELECT * FROM ${_resource} WHERE linkType = :linkType AND firstId = :firstId",
-        "links-for-secondId":"SELECT * FROM ${_resource} WHERE linkType = :linkType AND secondId = :secondId",
-        "links-for-linkType":"SELECT * FROM ${_resource} WHERE linkType = :linkType",
-        "credential-query":"SELECT * FROM ${_resource} WHERE userName = :username",
-        "credential-internaluser-query":"SELECT * FROM internal_user WHERE _openidm_id = :username",
-        "for-userName":"SELECT * FROM ${_resource} WHERE userName = :uid",
-        "get-notifications-for-user":"select * FROM ${_resource} WHERE receiverId = :userId order by createDate desc",
-        "scan-tasks":"SELECT * FROM ${_resource} WHERE ${dotnotation:property} < :condition.before AND ${taskState.completed} is NULL",
-        "query-cluster-instances":"SELECT * FROM cluster_states WHERE timestamp <= :timestamp AND (state = '1' OR state = '2')"
-    },
-    "dbStructure":{
-        "orientdbClass":{
-            "internal_user":{
-            },
-            "managed_organization":{
-            },
-            "managed_role":{
-            },
-            "managed_user":{
-            },
-            "managed_group":{
-            },
-            "managed_system":{
-            },
-            "managed_account":{
-            },
-            "ui_notification":{
-            },
-            "link":{
-                "index":[
-                    {
-                        "propertyName":"linkType",
-                        "propertyType":"string",
-                        "indexType":"notunique"
-                    },
-                    {
-                        "propertyNames" : [ "linkType", "firstId" ],
-                        "propertyType":"string",
-                        "indexType":"notunique"
-                    },
-                    {
-                        "propertyNames" : [ "linkType", "secondId" ],
-                        "propertyType":"string",
-                        "indexType":"notunique"
-                    },
-                    {
-                        "propertyName":"reconId",
-                        "propertyType":"string",
-                        "indexType":"notunique"
-                    }
-                ]
-            },
-            "synchronisation_pooledSyncStage":{
-                "index":[
-                    {
-                        "propertyName":"sourceId",
-                        "propertyType":"string",
-                        "indexType":"unique"
-                    },
-                    {
-                        "propertyName":"targetId",
-                        "propertyType":"string",
-                        "indexType":"unique"
-                    },
-                    {
-                        "propertyName":"reconId",
-                        "propertyType":"string",
-                        "indexType":"notunique"
-                    }
-                ]
-            },
-            "config":{
-            },
-            "scheduler":{
-            },
-            "cluster_states":{
-            },
-            "scheduler_triggers":{
-            },
-            "scheduler_jobs":{
-            },
-            "scheduler_calendars":{
-            },
-            "scheduler_jobGroups":{
-            },
-            "scheduler_triggerGroups":{
-            },
-            "audit_recon":{
-                "index":[
-                    {
-                        "propertyName":"reconId",
-                        "propertyType":"string",
-                        "indexType":"notunique"
-                    }
-                ]
-            },
-            "audit_activity":{
+    "queries" : {
+        "get-by-field-value" : "select * FROM ${unquoted:_resource} WHERE ${unquoted:field} = ${value} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "get-by-field-value-count" : "select count(*) AS total FROM ${unquoted:_resource} WHERE ${unquoted:field} = ${value}",
+        "get-users-of-direct-role" : "select * FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$' OR ${role} IN roles SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "get-users-of-direct-role-count" : "select count(_openidm_id) AS total FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$' OR ${role} IN roles",
+        "query-all-ids" : "select _openidm_id, @version from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "query-all-ids-count" : "select count(_openidm_id) AS total from ${unquoted:_resource}",
+        "query-all" : "select * from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "query-all-count" : "select count(*) AS total from ${unquoted:_resource}",
+        "links-for-firstId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND firstId = ${firstId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-firstId-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND firstId = ${firstId}",
+        "links-for-secondId" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND secondId = ${secondId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-secondId-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType} AND secondId = ${secondId} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-linkType" : "SELECT * FROM ${unquoted:_resource} WHERE linkType = ${linkType} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "links-for-linkType-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE linkType = ${linkType}",
 
+        "credential-query" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${username} AND coalesce(accountStatus, 'active') <> 'inactive'",
+        "credential-internaluser-query" : "SELECT * FROM internal_user WHERE _openidm_id = ${username}",
+
+        "for-userName" : "SELECT * FROM ${unquoted:_resource} WHERE userName = ${uid} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "for-userName-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE userName = ${uid}",
+        "get-notifications-for-user" : "select * FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "get-notifications-for-user-count" : "select count(*) AS total FROM ${unquoted:_resource} WHERE receiverId = ${userId} order by createDate desc",
+        "scan-tasks" : "SELECT * FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "scan-tasks-count" : "SELECT count(*) AS total FROM ${unquoted:_resource} WHERE ${dotnotation:property} < ${condition.before} AND ${dotnotation:taskState.completed} is NULL",
+
+        "query-cluster-failed-instances" : "SELECT * FROM cluster_states WHERE timestamp <= ${timestamp} AND (state = '1' OR state = '2')",
+        "query-cluster-instances" : "SELECT * FROM cluster_states",
+        "query-cluster-events" : "SELECT * FROM cluster_events WHERE instanceId = ${instanceId}",
+
+        "get-managed-users" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "get-managed-users-filtered" : "SELECT _openidm_id, userName, mail, givenName, sn, accountStatus FROM managed_user LET $userNameLike = if((\"${unquoted:userName}\" = ''), '%%', \"${unquoted:userName}%\"), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((\"${unquoted:sn}\" = ''), '%%', \"${unquoted:sn}%\"), $givenNameLike = if((\"${unquoted:givenName}\" = ''), '%%', \"${unquoted:givenName}%\") WHERE userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '') ORDER BY ${unquoted:orderBy} ${unquoted:orderByDir} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
+        "get-managed-users-count" : "SELECT COUNT(*) AS total FROM managed_user",
+        "get-managed-users-filtered-count" : "SELECT COUNT(*) AS total FROM managed_user LET $userNameLike = if((\"${unquoted:userName}\" = ''), '%%', \"${unquoted:userName}%\"), $mailLike = if((${mail} = ''), '%%', '${unquoted:mail}%'), $snLike = if((\"${unquoted:sn}\" = ''), '%%', \"${unquoted:sn}%\"), $givenNameLike = if((\"${unquoted:givenName}\" = ''), '%%', \"${unquoted:givenName}%\") WHERE  userName LIKE $userNameLike AND mail LIKE $mailLike AND sn LIKE $snLike AND givenName LIKE $givenNameLike AND (accountStatus = ${accountStatus} OR ${accountStatus} = '')",
+        "get-recons" : "SELECT reconId, timestamp, mapping, message FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY timestamp DESC"
+    },
+    "commands" : {
+        "purge-by-recon-expired" : "DELETE FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND timestamp < ${timestamp}",
+        "purge-by-recon-ids-to-keep" : "DELETE FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconId NOT IN [${list:reconIds}]"
+    },
+    "dbStructure" : {
+        "orientdbClass" : {
+            "internal_user" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_user" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "userName",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "givenName",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "sn",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "mail",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "accountStatus",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    }
+                ]
+            },
+            "managed_role" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_group" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "ui_notification" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "link" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyNames" : [ "linkType", "linkQualifier", "firstId" ],
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyNames" : [ "linkType", "linkQualifier", "secondId" ],
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "synchronisation_pooledSyncStage" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "sourceId",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "targetId",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    },
+                    {
+                        "propertyName" : "reconId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    }
+                ]
+            },
+            "config" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "cluster_states" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "cluster_events" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_triggers" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_jobs" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_calendars" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_jobGroups" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "scheduler_triggerGroups" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "security_keys" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "security" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "audit_recon" : {
+                "index" : [
+                    {
+                        "propertyName" : "reconId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "targetObjectId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "sourceObjectId",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "linkQualifier",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "timestamp",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "mapping",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "entryType",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "situation",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "status",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "action",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    }
+                ]
+            },
+            "audit_authentication" : {},
+            "audit_activity" : {},
+            "audit_access" : {
+                "index" : [
+                    {
+                        "propertyName" : "status",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyName" : "principal",
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
             }
+                ]
+            },
+            "audit_sync" : {},
+            "audit_config" : {},
+            "_studio_bookmark" : {}
         }
     },
     "globalConfiguration" : {
