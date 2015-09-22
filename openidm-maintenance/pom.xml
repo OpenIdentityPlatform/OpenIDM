@@ -141,6 +141,16 @@
                                     <artifactId>org.apache.felix.fileinstall</artifactId>
                                     <version>3.2.6</version>
                                 </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.osgi</groupId>
+                                    <artifactId>org.osgi.compendium</artifactId>
+                                    <version>4.2.0</version>
+                                </artifactItem>
+                                <artifactItem>
+                                    <groupId>org.apache.felix</groupId>
+                                    <artifactId>org.apache.felix.scr</artifactId>
+                                    <version>1.6.0</version>
+                                </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/osgi/bundle</outputDirectory>
                             <overWriteReleases>false</overWriteReleases>
