@@ -1,0 +1,66 @@
+{{#if mapping}}
+    {{#if recon}}
+    <div class="recon-widget-header clearfix">
+        <div class="title text-primary">
+            <i class="fa fa-map-marker"></i>{{mapping.name}}{{#if showPopover}}<i class="fa fa-caret-down"></i>{{/if}}
+        </div>
+        <div class="timestamp">
+            <span><i class="fa fa-clock-o"></i>{{recon.convertedTime}}</span>
+            <span class="seperator">|</span>
+            <span class="view-mapping"><a target="_blank" href="#properties/{{mapping.name}}/"><i class="fa fa-pencil"></i>{{t "dashboard.reconWidget.editMapping"}}</span></a>
+        </div>
+    </div>
+    <div class="recon-widget-details row">
+        <div class="col-md-4">
+            <div class="recon-success recon-block">
+                <div class="recon-subtitle">
+                    {{t "dashboard.reconWidget.success"}}
+                </div>
+                <div class="recon-number">
+                    <span class="large">{{recon.statusSummary.SUCCESS}}</span> {{t "dashboard.reconWidget.entries"}}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="recon-failure recon-block">
+                <div class="recon-subtitle">
+                    {{t "dashboard.reconWidget.failure"}}
+                </div>
+                <div class="recon-number">
+                    <span class="large">{{recon.statusSummary.FAILURE}}</span> {{t "dashboard.reconWidget.entries"}}
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="recon-duration recon-block">
+                <div class="recon-subtitle">
+                    {{t "dashboard.reconWidget.duration"}}
+                </div>
+                <div class="recon-number">
+                    <span class="large"> {{recon.convertedDuration}}</span> {{t "dashboard.reconWidget.completion"}}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="recon-chart"></div>
+    {{else}}
+    <div class="well recon-message">
+        <div class="message-icon text-primary"><i class="fa fa-refresh"></i></div>
+        <h3>{{t "dashboard.reconWidget.noReconcileTitle"}}</h3>
+        <p>
+            {{t "dashboard.reconWidget.noReconcileMessage"}}
+        </p>
+        <a href="#mapping/"><button class="btn btn-default btn-transparent"><i class="fa fa-map-marker"></i>{{t "dashboard.reconWidget.selectAMapping"}}</button></a>
+    </div>
+    {{/if}}
+{{else}}
+    <div class="well recon-message">
+        <div class="message-icon text-primary"><i class="fa fa-flag"></i></div>
+        <h3>{{t "dashboard.reconWidget.getStartedTitle"}}</h3>
+        <p>
+            {{t "dashboard.reconWidget.getStartedMessage"}}
+        </p>
+        <a href="#mapping/add/"><button class="btn btn-default btn-transparent"><i class="fa fa-plus"></i>{{t "dashboard.reconWidget.newMapping"}}</button></a>
+        <a href="#connectors/add/"><button class="btn btn-default btn-transparent"><i class="fa fa-plus"></i>{{t "dashboard.reconWidget.newConnector"}}</button></a>
+    </div>
+{{/if}}

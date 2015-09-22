@@ -2,35 +2,321 @@
   Dashboard
 */
 
-.widget-heading {
-  height:45px;
-}
-
-.widget-heading button {
-  bottom:8px;
-  color: #777;
-}
-
-.widget-heading button:hover {
-  bottom:8px;
-  color: #36625a;
+.page-header.widget-header {
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-size: 13px;
+  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+  margin-top:20px;
 }
 
 .dashboard-loading-message {
-  position:absolute;
+  position: absolute;
   top: 50%;
-  margin-top:-25px;
+  margin-top: -25px;
   left: 50%;
   margin-left: -60px;
   border: 2px solid @panel-hover-color;
-  background-color:@base-theme-color;
-  color:white;
-  padding:20px;
+  background-color: @base-theme-color;
+  color: white;
+  padding: 20px;
+}
+
+
+.dashboard-details .widget-title {
+  text-align: center;
+  color: #333;
+  font-weight: 300;
+  font-size: 24px;
+}
+
+/*
+  Donut Widget
+*/
+.widget-header.donut-header {
+  position: absolute;
+  top: 120px;
+  left: 50%;
+  margin-left: -100px;
+  width: 200px;
+  text-align: center;
+
+  .header {
+    font-weight: bold;
+    font-size: 12px;
+    color: #2a2f32;
+    letter-spacing: 1px;
+  }
+
+  .percent {
+    font-size: 42px;
+    font-weight: 300;
+    padding-left:10px;
+  }
+
+  .percent.warning {
+    color: #f0ad4e;
+  }
+
+  .percent.danger {
+    color: #a94442;
+  }
+}
+
+.widget-body {
+  .widget-icons {
+    height:16px;
+  }
+}
+
+.left-chart .widget-header.donut-header,
+.right-chart .widget-header.donut-header,
+.center-chart .widget-header.donut-header {
+  top: 50px;
+}
+
+/*
+  Health Widget
+*/
+
+.refresh-health-info {
+  cursor:pointer;
+  opacity: .7;
+  float:right;
+  margin-right:35px;
+}
+
+.refresh-health-info:hover {
+  opacity: 1;
+}
+/*
+  Recon Widget
+*/
+
+.popover.recon-popover {
+  max-width:350px;
+  padding:0px;
+
+  .popover-content {
+    padding:0px;
+  }
+}
+
+.recon-chart {
+  width:100%;
+}
+
+.recon-list {
+  list-style:none;
+  padding:0px;
+  margin-top:5px;
+
+  li {
+    padding-left: 10px;
+    padding-right: 10px;
+    margin-top: 10px;
+  }
+
+  .recon-list-item {
+    cursor:pointer;
+
+    &:hover {
+      background-color:#f5f5f5;
+    }
+  }
+}
+
+.widget-body {
+  .btn-transparent {
+    background-color:transparent;
+  }
+
+  .recon-widget-header {
+    .title {
+      cursor: pointer;
+      float:left;
+
+      .fa-map-marker {
+        margin-right: 5px;
+      }
+
+      .fa-caret-down {
+        margin-left: 5px;
+      }
+    }
+
+    .timestamp {
+      color: #666666;
+      float:right;
+
+      .seperator {
+        color:#e4e4e4;
+        padding-left:5px;
+        padding-right:5px;
+      }
+
+      .fa {
+        margin-right: 5px;
+      }
+    }
+  }
+
+  .recon-widget-details {
+    .recon-block {
+      color: white;
+      border-radius: 5px;
+      margin-top: 20px;
+      letter-spacing: 1px;
+      padding-bottom:5px;
+
+      &.recon-success {
+        background-color: #519387;
+      }
+
+      &.recon-failure {
+        background-color: #a94442;
+      }
+
+      &.recon-duration {
+        background-color: #337ab7;
+      }
+
+      .recon-subtitle {
+        position: relative;
+        top: 10px;
+        left: 10px;
+        color: rgba(255,255,255,.5);
+      }
+
+      .recon-number {
+        margin-top: 15px;
+        margin-left: 10px;
+        font-weight: 300;
+
+        .large {
+          font-size: 34px;
+        }
+      }
+    }
+  }
+}
+
+.recon-message {
+  text-align: center;
+  padding-bottom: 40px;
+
+  .message-icon {
+    font-size:42px;
+  }
+
+  h3 {
+    margin-top:0px;
+  }
+}
+
+/*
+  Resource Widget
+*/
+
+.resource-widget {
+  .btn-transparent {
+    margin-bottom:15px;
+  }
+
+  .no-resource {
+    text-align:center;
+    line-height: 18px;
+
+    .title {
+      font-weight:500;
+      font-size:16px;
+      margin-bottom:5px;
+    }
+
+    .message {
+      padding-left: 20px;
+      padding-right: 20px;
+    }
+  }
+
+  .resource-group {
+    .resource-circle {
+      .icon-circle(25px);
+      color:white;
+      float:left;
+    }
+
+    .resource-details {
+      width:100%;
+      overflow:hidden;
+
+      .resource-name {
+        margin-bottom:0px;
+
+        .resource-circle {
+          margin-right:10px;
+        }
+      }
+
+      .resounce-type {
+        padding-left:35px;
+        color: #999999;
+        margin-bottom:0px;
+      }
+    }
+
+    .list-group-item {
+      padding:15px;
+    }
+
+    .list-title {
+      .title {
+        float:left;
+        text-transform: uppercase;
+        font-weight:bold;
+        font-size:13px;
+        letter-spacing:1px;
+        color:#333333;
+      }
+
+      .view-all {
+        float:right;
+      }
+    }
+  }
 }
 
 /*
   Quick Start Widget
 */
-#dashboardWidgets .panel-body .card-container {
-  margin-bottom:0px;
+
+#dashboardWidgets {
+  margin-bottom: 50px;
+
+  .panel-body .card-container {
+    margin-bottom: 0px;
+  }
+}
+
+@media (max-width: @screen-sm) {
+  .dashboard-details .widget-title {
+    margin-bottom:15px;
+  }
+
+  .widget-body {
+    .recon-widget-header {
+      .title {
+        float: none;
+      }
+
+      .timestamp {
+        float: none;
+      }
+    }
+  }
+
+  .widget-header.donut-header {
+    top: 105px;
+  }
 }

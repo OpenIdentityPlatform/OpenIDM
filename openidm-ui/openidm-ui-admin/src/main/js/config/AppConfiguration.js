@@ -127,6 +127,11 @@ define("config/AppConfiguration", [
                         "admin" : {
                             "role": "ui-admin",
                             "urls": {
+                                "dashboard": {
+                                    "name": "config.AppConfiguration.Navigation.links.dashboard",
+                                    "icon": "fa fa-dashboard",
+                                    "url": "#dashboard/"
+                                },
                                 "configuration": {
                                     "name": "Configure",
                                     "icon": "fa fa-wrench",

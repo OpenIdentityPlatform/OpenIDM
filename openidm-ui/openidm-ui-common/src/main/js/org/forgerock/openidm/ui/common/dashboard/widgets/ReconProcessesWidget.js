@@ -57,7 +57,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
             render: function(args, callback) {
                 this.element = args.element;
                 this.data.widgetType = args.type;
-                this.model.menu = args.menu;
 
                 this.reconUsageWidget(callback);
             },
@@ -71,18 +70,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
                     this.$el.find(".dashboard-loading-message").show();
 
                     svg = dimple.newSvg(this.$el[0], "100%", 390);
-
-                    if(this.model.menu) {
-                        this.model.menu.find(".pause").show();
-
-                        this.model.menu.find(".start").bind("click", _.bind(function(){
-                            this.startPoll();
-                        }, this));
-
-                        this.model.menu.find(".pause").bind("click", _.bind(function(){
-                            this.pausePoll();
-                        }, this));
-                    }
 
                     this.model.reconChart = new dimple.chart(svg, []);
                     this.model.reconChart.setBounds(this.model.chartX, this.model.chartY, this.model.chartWidth, this.model.chartHeight);
@@ -149,20 +136,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
                         }, this), this.model.refreshSpeed);
                     }
                 }, this));
-            },
-
-            pausePoll: function() {
-                this.model.menu.find(".start").show();
-                this.model.menu.find(".pause").hide();
-
-                clearTimeout(this.model.pollTimer);
-            },
-
-            startPoll: function() {
-                this.model.menu.find(".start").hide();
-                this.model.menu.find(".pause").show();
-
-                this.reconUsagePolling();
             }
         });
 

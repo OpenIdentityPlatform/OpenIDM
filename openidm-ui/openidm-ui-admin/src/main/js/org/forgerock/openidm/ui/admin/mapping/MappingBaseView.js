@@ -105,9 +105,6 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
             event.preventDefault();
 
             UIUtils.confirmDialog($.t("templates.mapping.confirmDeleteMapping", {"mappingName": this.data.mapping.name}), "danger", _.bind(function(){
-                console.log(this.data.syncConfig);
-                console.log(this.data.mapping);
-
                 this.data.syncConfig.mappings = _.filter(this.data.syncConfig.mappings, function(mapping) {
                     return mapping.name !== this.data.mapping.name;
                 }, this);
