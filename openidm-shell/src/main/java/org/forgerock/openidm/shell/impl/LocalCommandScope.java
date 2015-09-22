@@ -290,25 +290,25 @@ public class LocalCommandScope extends CustomCommandScope {
      *
      * @param session command session,
      * @param isString whether the input is a string
-     * @param name the name of the string to encrypt
+     * @param stringValue the value of the string to hash
      */
     @Descriptor("Hash the input string.")
     public void securehash(CommandSession session,
             @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
             @Parameter(names = { "-a", "--algorithm" }, absentValue = "SHA-256") String algorithm,
-            @Descriptor("source string to encrypt") String name) {
+            @Descriptor("source string to hash") String stringValue) {
         try {
             CryptoServiceImpl cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
             cryptoSvc.activate(null);
 
-            JsonValue value = new JsonValue(isString ? name : mapper.readValue(name, Object.class));
+            JsonValue value = new JsonValue(isString ? stringValue : mapper.readValue(stringValue, Object.class));
             JsonValue secure = cryptoSvc.hash(value, algorithm);
 
             StringWriter wr = new StringWriter();
             mapper.writerWithDefaultPrettyPrinter().writeValue(wr, secure.getObject());
-            session.getConsole().println("-----BEGIN ENCRYPTED VALUE-----");
+            session.getConsole().println("-----BEGIN HASHED VALUE-----");
             session.getConsole().println(wr.toString());
-            session.getConsole().println("------END ENCRYPTED VALUE------");
+            session.getConsole().println("------END HASHED VALUE------");
         } catch (JsonCryptoException e) {
             e.printStackTrace();
         } catch (IOException e) {
