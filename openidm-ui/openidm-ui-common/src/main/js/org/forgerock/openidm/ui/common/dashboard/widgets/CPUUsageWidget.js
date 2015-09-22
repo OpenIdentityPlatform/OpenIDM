@@ -90,7 +90,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
                         this.model.cpuChart.setBounds(this.model.chartX, this.model.chartY, this.model.chartWidth, this.model.chartHeight);
                         this.model.cpuChart.addMeasureAxis("p", "memory");
 
-                        //
                         if(percent > this.model.dangerThreshold) {
                             color = this.model.dangerChartColor;
                             percentClass = "danger";
@@ -101,6 +100,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
 
                         this.model.cpuChart.assignColor("Free", "#dddddd", "#f7f7f7");
                         this.model.cpuChart.assignColor("Used", color, "#f7f7f7");
+                        this.model.cpuChart.assignClass("Used", "used-cpu");
 
                         pieChart = this.model.cpuChart.addSeries("type", dimple.plot.pie);
                         pieChart.addOrderRule("type", true);
@@ -121,6 +121,43 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
                             callback();
                         }
                     }, this));
+                }, this));
+            },
+
+            refresh: function() {
+                SystemHealthDelegate.getOsHealth().then(_.bind(function(widgetData) {
+                    var percent = Math.round((widgetData.systemLoadAverage / widgetData.availableProcessors) * 100),
+                        usedCpu = this.$el.find(".used-cpu");
+
+                    this.$el.find(".percent").html(percent +"%");
+                    this.$el.find(".percent").toggleClass("danger", false);
+                    this.$el.find(".percent").toggleClass("warning", false);
+
+                    if(percent > this.model.dangerThreshold) {
+                        usedCpu.attr("fill", this.model.dangerChartColor);
+                        usedCpu.css("fill", this.model.dangerChartColor);
+
+                        this.$el.find(".percent").toggleClass("danger", true);
+                    } else if (percent > this.model.warningThreshold) {
+                        usedCpu.attr("fill", this.model.warningChartColor);
+                        usedCpu.css("fill", this.model.warningChartColor);
+
+                        this.$el.find(".percent").toggleClass("warning", true);
+                    } else {
+                        usedCpu.attr("fill", this.model.defaultChartColor);
+                        usedCpu.css("fill", this.model.defaultChartColor);
+                    }
+
+                    this.model.cpuChart.data = [{
+                        "memory" : widgetData.availableProcessors - widgetData.systemLoadAverage,
+                        "type" : "Free"
+                    },
+                    {
+                        "memory" : widgetData.systemLoadAverage,
+                        "type" : "Used"
+                    }];
+
+                    this.model.cpuChart.draw(1000);
                 }, this));
             },
 

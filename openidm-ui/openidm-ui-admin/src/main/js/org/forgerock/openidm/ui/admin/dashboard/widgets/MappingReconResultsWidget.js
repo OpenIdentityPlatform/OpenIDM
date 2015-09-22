@@ -47,7 +47,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidg
             noBaseTemplate: true,
             template: "templates/admin/dashboard/widgets/MappingReconResultsWidgetTemplate.html",
             partials: [
-              "templates/admin/partials/popover.html"
+              "partials/_popover.html"
             ],
             model : {
                 lookup: {
@@ -143,7 +143,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidg
 
                                 return list;
                             }, this),
-                            template: handlebars.compile("{{> templates/admin/partials/popover popoverClass='recon-popover'}}")(),
+                            template: handlebars.compile("{{> _popover popoverClass='recon-popover'}}")(),
                             trigger: 'click',
                             placement: 'bottom',
                             container: 'body',

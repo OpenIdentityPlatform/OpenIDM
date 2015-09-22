@@ -91,6 +91,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
 
                 this.model.chart.assignColor("Free", "#dddddd", "#f7f7f7");
                 this.model.chart.assignColor("Used", color, "#f7f7f7");
+                this.model.chart.assignClass("Used", "used-memory");
 
                 ring = this.model.chart.addSeries("type", dimple.plot.pie);
                 ring.innerRadius = "85%";
@@ -113,39 +114,32 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                 this.parentRender(_.bind(function() {
                     SystemHealthDelegate.getMemoryHealth().then(_.bind(function (widgetData) {
                         var svg = [],
-                            heapData = [
-                                {
-                                    "memory": widgetData.heapMemoryUsage.used,
-                                    "type": "Used"
-                                },
-                                {
-                                    "memory": widgetData.heapMemoryUsage.max - widgetData.heapMemoryUsage.used,
-                                    "type": "Free"
-                                }
-                            ],
-                            nonHeapData = [
-                                {
-                                    "memory": widgetData.nonHeapMemoryUsage.used,
-                                    "type": "Used"
-                                },
-                                {
-                                    "memory": widgetData.nonHeapMemoryUsage.max - widgetData.nonHeapMemoryUsage.used,
-                                    "type": "Free"
-                                }
-                            ],
+                            data,
                             percent;
+
+                        if(this.data.widgetType === "lifeCycleMemoryHeap") {
+                            widgetData = widgetData.heapMemoryUsage;
+                        } else {
+                            widgetData = widgetData.nonHeapMemoryUsage;
+                        }
+
+                        data = [
+                            {
+                                "memory": widgetData.used,
+                                "type": "Used"
+                            },
+                            {
+                                "memory": widgetData.max - widgetData.used,
+                                "type": "Free"
+                            }
+                        ];
 
                         this.$el.find(".dashboard-details").show();
 
                         svg.push(dimple.newSvg(this.$el.find(".widget-chart")[0], this.model.canvasWidth, this.model.canvasHeight));
 
-                        if (this.data.widgetType === "lifeCycleMemoryHeap") {
-                            percent = Math.round((widgetData.heapMemoryUsage.used / widgetData.heapMemoryUsage.max) * 100);
-                            this.drawChart(svg[0], heapData, percent);
-                        } else if (this.data.widgetType === "lifeCycleMemoryNonHeap") {
-                            percent = Math.round((widgetData.nonHeapMemoryUsage.used / widgetData.nonHeapMemoryUsage.max) * 100);
-                            this.drawChart(svg[0], nonHeapData, percent);
-                        }
+                        percent = Math.round((widgetData.used / widgetData.max) * 100);
+                        this.drawChart(svg[0], data, percent);
 
                         this.$el.find(".widget-header").show();
 
@@ -162,38 +156,50 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                 }
             },
 
-            memoryUsageLoad: function() {
-                SystemHealthDelegate.getMemoryHealth().then(_.bind(function(widgetData){
-                    if(this.model.heapChart) {
-                        this.model.heapChart.data = [
-                            {
-                                "memory" : widgetData.heapMemoryUsage.used,
-                                "type" : "Used"
-                            },
-                            {
-                                "memory" : widgetData.heapMemoryUsage.max - widgetData.heapMemoryUsage.used,
-                                "type" : "Free"
-                            }
-                        ];
+            refresh: function() {
+                SystemHealthDelegate.getMemoryHealth().then(_.bind(function(widgetData) {
+                    var percent,
+                        usedCpu = this.$el.find(".used-memory");
 
-                        this.model.heapChart.draw(this.model.drawTime);
+                    if(this.data.widgetType === "lifeCycleMemoryHeap") {
+                        widgetData = widgetData.heapMemoryUsage;
+                    } else {
+                        widgetData = widgetData.nonHeapMemoryUsage;
                     }
 
-                    if(this.model.nonHeapChart) {
+                    percent = Math.round((widgetData.used / widgetData.max) * 100);
 
-                        this.model.nonHeapChart.data = [
-                            {
-                                "memory" : widgetData.nonHeapMemoryUsage.used,
-                                "type" : "Used"
-                            },
-                            {
-                                "memory" : widgetData.nonHeapMemoryUsage.max - widgetData.nonHeapMemoryUsage.used,
-                                "type" : "Free"
-                            }
-                        ];
+                    this.$el.find(".percent").html(percent +"%");
+                    this.$el.find(".percent").toggleClass("danger", false);
+                    this.$el.find(".percent").toggleClass("warning", false);
 
-                        this.model.nonHeapChart.draw(this.model.drawTime);
+                    if(percent > this.model.dangerThreshold) {
+                        usedCpu.attr("fill", this.model.dangerChartColor);
+                        usedCpu.css("fill", this.model.dangerChartColor);
+
+                        this.$el.find(".percent").toggleClass("danger", true);
+                    } else if (percent > this.model.warningThreshold) {
+                        usedCpu.attr("fill", this.model.warningChartColor);
+                        usedCpu.css("fill", this.model.warningChartColor);
+
+                        this.$el.find(".percent").toggleClass("warning", true);
+                    } else {
+                        usedCpu.attr("fill", this.model.defaultChartColor);
+                        usedCpu.css("fill", this.model.defaultChartColor);
                     }
+
+                    this.model.chart.data = [
+                        {
+                            "memory": widgetData.used,
+                            "type": "Used"
+                        },
+                        {
+                            "memory": widgetData.max - widgetData.used,
+                            "type": "Free"
+                        }
+                    ];
+
+                    this.model.chart.draw(1000);
                 }, this));
             }
         });
