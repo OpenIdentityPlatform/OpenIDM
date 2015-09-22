@@ -68,6 +68,7 @@ public class LocalCommandScope extends CustomCommandScope {
         Map<String, String> help = new HashMap<String, String>();
         help.put("validate", getLongHeader("validate"));
         help.put("encrypt", getLongHeader("encrypt"));
+        help.put("secureHash", getLongHeader("secureHash"));
         help.put("keytool", getLongHeader("keytool"));
         return help;
     }
@@ -263,6 +264,51 @@ public class LocalCommandScope extends CustomCommandScope {
             session.getConsole().println("-----BEGIN ENCRYPTED VALUE-----");
             session.getConsole().println(wr.toString());
             session.getConsole().println("------END ENCRYPTED VALUE------");
+        } catch (JsonCryptoException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Hashes the input string with a randomly generated salt.
+     *
+     * @param session command session
+     * @param isString whether the input is a string
+     */
+    @Descriptor("Hash the input string.")
+    public void secureHash(CommandSession session,
+            @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
+            @Parameter(names = { "-a", "--algorithm" }, absentValue = "SHA-256") String algorithm) {
+        session.getConsole().append("Enter the ").append(isString ? "String" : "Json").println(" value");
+        secureHash(session, isString, algorithm, loadFromConsole(session));
+    }
+
+    /**
+     * Hashes the input string with a randomly generated salt.
+     *
+     * @param session command session,
+     * @param isString whether the input is a string
+     * @param stringValue the value of the string to hash
+     */
+    @Descriptor("Hash the input string.")
+    public void secureHash(CommandSession session,
+            @Parameter(names = { "-j", "--json" }, presentValue = "false", absentValue = "true") boolean isString,
+            @Parameter(names = { "-a", "--algorithm" }, absentValue = "SHA-256") String algorithm,
+            @Descriptor("source string to hash") String stringValue) {
+        try {
+            CryptoServiceImpl cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
+            cryptoSvc.activate(null);
+
+            JsonValue value = new JsonValue(isString ? stringValue : mapper.readValue(stringValue, Object.class));
+            JsonValue secure = cryptoSvc.hash(value, algorithm);
+
+            StringWriter wr = new StringWriter();
+            mapper.writerWithDefaultPrettyPrinter().writeValue(wr, secure.getObject());
+            session.getConsole().println("-----BEGIN HASHED VALUE-----");
+            session.getConsole().println(wr.toString());
+            session.getConsole().println("------END HASHED VALUE------");
         } catch (JsonCryptoException e) {
             e.printStackTrace();
         } catch (IOException e) {

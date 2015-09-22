@@ -346,6 +346,45 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     }
 
     protected void bindCryptoService(final CryptoService cryptoService) {
+        // hash(any value, string algorithm)
+        openidm.put("hash", new Function<JsonValue>() {
+
+            static final long serialVersionUID = 1L;
+
+            public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                if (arguments.length == 2) {
+                    JsonValue value = null;
+                    String algorithm = null;
+                    if (arguments[0] instanceof Map
+                            || arguments[0] instanceof List
+                            || arguments[0] instanceof String
+                            || arguments[0] instanceof Number
+                            || arguments[0] instanceof Boolean) {
+                        value = new JsonValue(arguments[0]);
+                    } else if (arguments[0] instanceof JsonValue) {
+                        value = (JsonValue) arguments[0];
+                    } else {
+                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage( "hash", arguments));
+                    }
+                    if (arguments[1] instanceof String) {
+                        algorithm = (String) arguments[1];
+                    } else if (arguments[1] == null) {
+                        algorithm = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_HASHING_ALGORITHM;
+                    } else {
+                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage( "hash", arguments));
+                    }
+
+                    try {
+                        return cryptoService.hash(value, algorithm);
+                    } catch (JsonCryptoException e) {
+                        throw new InternalServerErrorException(e.getMessage(), e);
+                    }
+                } else {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage( "hash", arguments));
+                }
+            }
+        });
         // encrypt(any value, string cipher, string alias)
         openidm.put("encrypt", new Function<JsonValue>() {
 
@@ -366,23 +405,20 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     } else if (arguments[0] instanceof JsonValue) {
                         value = (JsonValue) arguments[0];
                     } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                                "encrypt", arguments));
+                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
                     }
                     if (arguments[1] instanceof String) {
                         cipher = (String) arguments[1];
-                    } else if (arguments[0] == null) {
+                    } else if (arguments[1] == null) {
                         cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
                     } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                                "encrypt", arguments));
+                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
                     }
 
                     if (arguments[2] instanceof String) {
                         alias = (String) arguments[2];
                     } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                                "encrypt", arguments));
+                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
                     }
                     try {
                         return cryptoService.encrypt(value, cipher, alias);
@@ -390,8 +426,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                         throw new InternalServerErrorException(e.getMessage(), e);
                     }
                 } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                            "encrypt", arguments));
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
                 }
             }
         });

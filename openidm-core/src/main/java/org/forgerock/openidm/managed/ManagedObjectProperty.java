@@ -82,6 +82,9 @@ class ManagedObjectProperty {
     
     /** The encryption configuration */
     private JsonValue encryptionValue;
+    
+    /** The hashing configuration */
+    private JsonValue hashingValue;
 
     /**
      * Constructs a new managed object property.
@@ -120,6 +123,10 @@ class ManagedObjectProperty {
         encryptionValue = config.get("encryption");
         if (!encryptionValue.isNull()) {
             setEncryptor();
+        }
+        hashingValue = config.get("secureHash");
+        if (!hashingValue.isNull()) {
+            hashingValue.get("algorithm").required();
         }
 
         scope = config.get("scope").defaultTo(Scope.PUBLIC.name()).asEnum(Scope.class);
@@ -227,9 +234,8 @@ class ManagedObjectProperty {
     }
 
     /**
-     * Performs tasks when a property is to be stored in the repository,
-     * including: executing the {@code onStore} script and encrypting the
-     * property.
+     * Performs tasks when a property is to be stored in the repository, including: executing 
+     * the {@code onStore} script and encrypting or hashing the property.
      *
      * @param value
      *            the JSON value to be stored in the repository.
@@ -238,23 +244,28 @@ class ManagedObjectProperty {
      */
     void onStore(Context context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onStore", onStore, value);
-
         setEncryptor();
-        if (encryptor != null && value.isDefined(name)) {
-            if (!cryptoService.isEncrypted(value)) {
-                try {
-                    value.put(name,
-                            new JsonCrypto(encryptor.getType(), encryptor.encrypt(value.get(name))).toJsonValue());
-                } catch (JsonCryptoException jce) {
-                    String msg = name + " property encryption exception";
-                    logger.debug(msg, jce);
-                    throw new InternalServerErrorException(msg, jce);
-                } catch (JsonException je) {
-                    String msg = name + " property transformation exception";
-                    logger.debug(msg, je);
-                    throw new InternalServerErrorException(msg, je);
+        try {
+            if (encryptor != null && value.isDefined(name)) {
+                if (!cryptoService.isEncrypted(value)) {
+                    value.put(name, new JsonCrypto(encryptor.getType(), 
+                            encryptor.encrypt(value.get(name))).toJsonValue());
+                } 
+            } else if (!hashingValue.isNull() && value.isDefined(name)) {
+                // Hash the field if not already hashed
+                if (!cryptoService.isEncrypted(value)) {
+                    String algorithm = hashingValue.get("algorithm").asString();
+                    value.put(name, cryptoService.hash(value.get(name), algorithm));
                 }
             }
+        } catch (JsonCryptoException jce) {
+            String msg = name + " property encryption exception";
+            logger.debug(msg, jce);
+            throw new InternalServerErrorException(msg, jce);
+        } catch (JsonException je) {
+            String msg = name + " property transformation exception";
+            logger.debug(msg, je);
+            throw new InternalServerErrorException(msg, je);
         }
     }
 
@@ -267,10 +278,20 @@ class ManagedObjectProperty {
         return name;
     }
 
+    /**
+     * Returns a boolean indicating if the property is private.
+     * 
+     * @return true if the property is private, false otherwise.
+     */
     boolean isPrivate() {
         return Scope.PRIVATE.equals(scope);
     }
-    
+
+    /**
+     * Returns a boolean indicating if the property is virtual.
+     * 
+     * @return true if the property is virtual, false otherwise.
+     */
     boolean isVirtual() {
         return PropertyType.VIRTUAL.equals(type);
     }

@@ -25,8 +25,10 @@
 // TODO: Expose as a set of resource actions.
 package org.forgerock.openidm.crypto.impl;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -41,6 +43,9 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
+
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
@@ -53,7 +58,14 @@ import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
 import org.forgerock.openidm.cluster.ClusterUtils;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.crypto.CryptoConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.FieldStorageScheme;
+import org.forgerock.openidm.crypto.SaltedMD5FieldStorageScheme;
+import org.forgerock.openidm.crypto.SaltedSHA1FieldStorageScheme;
+import org.forgerock.openidm.crypto.SaltedSHA256FieldStorageScheme;
+import org.forgerock.openidm.crypto.SaltedSHA384FieldStorageScheme;
+import org.forgerock.openidm.crypto.SaltedSHA512FieldStorageScheme;
 import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.BundleContext;
@@ -273,6 +285,65 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
     @Override
     public boolean isEncrypted(String value) {
         return JsonUtil.isEncrypted(value);
+    }
+
+    @Override
+    public JsonValue hash(JsonValue value, String algorithm) throws JsonException, JsonCryptoException {
+        final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
+        final String plainTextField = value.asString();
+        final String encodedField = fieldStorageScheme.hashField(plainTextField);
+        return json(object(
+                field("$crypto", object(
+                        field("value", object(
+                                field("algorithm", algorithm),
+                                field("data", encodedField))),
+                        field("type", CryptoConstants.STORAGE_TYPE_HASH)))));
+    }
+
+    @Override
+    public boolean isHashed(JsonValue value) {
+        return value != null 
+                &&!value.isNull() 
+                && JsonCrypto.isJsonCrypto(value) 
+                && value.get("$crypto").get("value").isDefined("algorithm");
+    }
+    
+    /**
+     * Returns a {@link FieldStorageScheme} instance based on the supplied algorithm.
+     * 
+     * @param algorithm a string representing a storage scheme algorithm
+     * @return a field storage scheme implementation.
+     * @throws JsonCryptoException
+     */
+    private FieldStorageScheme getFieldStorageScheme(String algorithm) throws JsonCryptoException {
+        try {
+            if (algorithm.equals(CryptoConstants.ALGORITHM_MD5)) {
+                return new SaltedMD5FieldStorageScheme();
+            } else if (algorithm.equals(CryptoConstants.ALGORITHM_SHA_1)) {
+                return new SaltedSHA1FieldStorageScheme();
+            } else if (algorithm.equals(CryptoConstants.ALGORITHM_SHA_256)) {
+                return new SaltedSHA256FieldStorageScheme();
+            } else if (algorithm.equals(CryptoConstants.ALGORITHM_SHA_384)) {
+                return new SaltedSHA384FieldStorageScheme();
+            } else if (algorithm.equals(CryptoConstants.ALGORITHM_SHA_512)) {
+                return new SaltedSHA512FieldStorageScheme();
+            } else {
+                throw new JsonCryptoException("Unsupported field storage algorithm " + algorithm);
+            }
+        } catch (Exception e) {
+            throw new JsonCryptoException(e.getMessage(), e);
+        }
+    }
+
+    @Override
+    public boolean matches(String plainTextValue, JsonValue value) throws JsonCryptoException {
+        if (isHashed(value)) {
+            JsonValue cryptoValue = value.get("$crypto").get("value");
+            String algorithm = cryptoValue.get("algorithm").asString();
+            final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
+            return fieldStorageScheme.fieldMatches(plainTextValue, cryptoValue.get("data").asString());
+        }
+        return false;
     }
 
 }
