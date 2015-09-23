@@ -138,7 +138,7 @@ if (filter != null) {
             CONTAINS          : '$left ${not ? "NOT " : ""}LIKE ?',
             ENDSWITH          : '$left ${not ? "NOT " : ""}LIKE ?',
             STARTSWITH        : '$left ${not ? "NOT " : ""}LIKE ?',
-            EQUALS            : '$left ${not ? "<>" : "="} ?',
+            EQUALS            : '${not ? "NOT " : ""} $left <=> ?',
             GREATERTHAN       : '$left ${not ? "<=" : ">"} ?',
             GREATERTHANOREQUAL: '$left ${not ? "<" : ">="} ?',
             LESSTHAN          : '$left ${not ? ">=" : "<"} ?',
