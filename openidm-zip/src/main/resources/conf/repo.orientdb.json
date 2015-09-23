@@ -328,6 +328,7 @@
                 ]
             },
             "audit_sync" : {},
+            "audit_config" : {},
             "_studio_bookmark" : {}
         }
     },
