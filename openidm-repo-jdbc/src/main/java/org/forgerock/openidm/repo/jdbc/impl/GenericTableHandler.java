@@ -264,7 +264,7 @@ public class GenericTableHandler implements TableHandler {
             String objString = mapper.writeValueAsString(obj);
 
             logger.trace("Populating statement {} with params {}, {}, {}, {}",
-                    createStatement, typeId, localId, rev, objString);
+                    queryMap.get(QueryDefinition.CREATEQUERYSTR), typeId, localId, rev, objString);
             createStatement.setLong(1, typeId);
             createStatement.setString(2, localId);
             createStatement.setString(3, rev);
@@ -355,7 +355,7 @@ public class GenericTableHandler implements TableHandler {
                     }
                     if (logger.isTraceEnabled()) {
                         logger.trace("Populating statement {} with params {}, {}, {}, {}, {}",
-                                propCreateStatement, dbId, localId, propkey, proptype, propvalue);
+                                queryMap.get(QueryDefinition.PROPCREATEQUERYSTR), dbId, localId, propkey, proptype, propvalue);
                     }
                     propCreateStatement.setLong(1, dbId);
                     propCreateStatement.setString(2, propkey);
@@ -439,7 +439,8 @@ public class GenericTableHandler implements TableHandler {
         try {
             readTypeStatement = getPreparedStatement(connection, QueryDefinition.READTYPEQUERYSTR);
 
-            logger.trace("Populating prepared statement {} for {}", readTypeStatement, type);
+            logger.trace("Populating prepared statement {} for {}",
+                    queryMap.get(QueryDefinition.READTYPEQUERYSTR), type);
             readTypeStatement.setString(1, type);
 
             logger.debug("Executing: {}", readTypeStatement);

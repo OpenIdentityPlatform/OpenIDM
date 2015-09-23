@@ -144,6 +144,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     public static final String CONFIG_DB_SCHEMA = "defaultCatalog";
     public static final String CONFIG_MAX_BATCH_SIZE = "maxBatchSize";
 
+    public static final String CONFIG_KERBEROS_PRINCIPAL = "kerberosServerPrincipal";
+    public static final String CONFIG_SECURITY_MECHANISM = "securityMechanism";
+
     private boolean useDataSource;
     private String jndiName;
     private DataSource ds;
@@ -151,6 +154,8 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     private String dbUrl;
     private String user;
     private String password;
+    private String kerberosServerPrincipal;
+    private String securityMechanism;
 
     private int maxTxRetry = 5;
 
@@ -751,7 +756,18 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         if (useDataSource) {
             return ds.getConnection();
         } else {
-            return DriverManager.getConnection(dbUrl, user, password);
+            java.util.Properties properties = new java.util.Properties();
+            if (!"".equals(user) && !"".equals(password)) {
+                properties.put("user", user);
+                properties.put("password", password);
+            }
+            if (StringUtils.isNotBlank(kerberosServerPrincipal)) {
+                properties.put(CONFIG_KERBEROS_PRINCIPAL, kerberosServerPrincipal);
+            }
+            if (StringUtils.isNotBlank(securityMechanism)) {
+                properties.put(CONFIG_SECURITY_MECHANISM, securityMechanism);
+            }
+            return DriverManager.getConnection(dbUrl, properties);
         }
     }
 
@@ -1036,6 +1052,8 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 dbUrl = connectionConfig.get(CONFIG_DB_URL).required().asString();
                 user = connectionConfig.get(CONFIG_USER).required().asString();
                 password = connectionConfig.get(CONFIG_PASSWORD).defaultTo("").asString();
+                kerberosServerPrincipal = connectionConfig.get(CONFIG_KERBEROS_PRINCIPAL).defaultTo("").asString();
+                securityMechanism = connectionConfig.get(CONFIG_SECURITY_MECHANISM).defaultTo("").asString();
                 logger.info(
                         "Using DB connection configured via Driver Manager with Driver {} and URL",
                         dbDriver, dbUrl);
@@ -1123,7 +1141,8 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         switch (databaseType) {
         case DB2:
             return
-                    new MappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
+                    // DB2 uses Oracle(!) MappedTableHandler implementation - not a mistake!
+                    new OracleMappedTableHandler(table, objectToColumn, dbSchemaName, explicitQueries, explicitCommands,
                             new DB2SQLExceptionHandler(), cryptoServiceAccessor);
         case ORACLE:
             return
