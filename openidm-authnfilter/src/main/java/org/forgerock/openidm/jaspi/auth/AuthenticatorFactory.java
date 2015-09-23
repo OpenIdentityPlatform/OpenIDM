@@ -16,10 +16,14 @@
 
 package org.forgerock.openidm.jaspi.auth;
 
+import javax.inject.Provider;
+
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.NeverThrowsException;
 
 import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
@@ -38,12 +42,13 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
     /** property for the password if using static authentication */
     private static final String PASSWORD_PROPERTY = "password";
 
-    private final ConnectionFactory connectionFactory;
-    private final CryptoService cryptoService;
+    private final Provider<ConnectionFactory> connectionFactoryProvider;
+    private final Provider<CryptoService> cryptoServiceProvider;
 
-    public AuthenticatorFactory(final ConnectionFactory connectionFactory, final CryptoService cryptoService) {
-        this.connectionFactory = connectionFactory;
-        this.cryptoService = cryptoService;
+    public AuthenticatorFactory(final Provider<ConnectionFactory> connectionFactoryProvider,
+            final Provider<CryptoService> cryptoServiceProvider) {
+        this.connectionFactoryProvider = connectionFactoryProvider;
+        this.cryptoServiceProvider = cryptoServiceProvider;
     }
 
     /**
@@ -56,7 +61,7 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
     @Override
     public Authenticator apply(JsonValue jsonValue) {
         if (!jsonValue.get(QUERY_ID).isNull()) {
-            return new ResourceQueryAuthenticator(cryptoService, connectionFactory,
+            return new ResourceQueryAuthenticator(cryptoServiceProvider, connectionFactoryProvider,
                     jsonValue.get(QUERY_ON_RESOURCE).required().asString(),
                     jsonValue.get(QUERY_ID).required().asString(),
                     jsonValue.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).required().asString(),
@@ -67,7 +72,7 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
                     jsonValue.get(USERNAME_PROPERTY).required().asString(),
                     jsonValue.get(PASSWORD_PROPERTY).required().asString());
         } else {
-            return new PassthroughAuthenticator(connectionFactory,
+            return new PassthroughAuthenticator(connectionFactoryProvider,
                     jsonValue.get(QUERY_ON_RESOURCE).required().asString());
         }
     }

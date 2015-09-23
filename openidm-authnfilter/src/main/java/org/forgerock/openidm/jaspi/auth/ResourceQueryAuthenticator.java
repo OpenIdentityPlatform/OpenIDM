@@ -18,7 +18,6 @@ package org.forgerock.openidm.jaspi.auth;
 
 import org.eclipse.jetty.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.security.Password;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -34,17 +33,18 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashSet;
 import java.util.Set;
+import javax.inject.Provider;
 
 /**
  * Authenticator class which performs authentication against managed/internal user tables using a queryId to fetch
  * the complete local user data and validates the password locally.
  */
-public class ResourceQueryAuthenticator implements Authenticator {
+class ResourceQueryAuthenticator implements Authenticator {
 
     private static final Logger logger = LoggerFactory.getLogger(ResourceQueryAuthenticator.class);
 
-    private final CryptoService cryptoService;
-    private final ConnectionFactory connectionFactory;
+    private final Provider<CryptoService> cryptoServiceProvider;
+    private final Provider<ConnectionFactory> connectionFactoryProvider;
     private final String queryOnResource;
     private final String queryId;
     private final String authenticationIdProperty;
@@ -52,7 +52,6 @@ public class ResourceQueryAuthenticator implements Authenticator {
 
     /**
      * Constructs an instance of the ResourceQueryAuthenticator.
-     *
      * @param cryptoService The CryptoService.
      * @param connectionFactory The ConnectionFactory.
      * @param queryOnResource The query resource.
@@ -60,7 +59,7 @@ public class ResourceQueryAuthenticator implements Authenticator {
      * @param authenticationIdProperty The user id property.
      * @param userCredentialProperty The user credential property.
      */
-    public ResourceQueryAuthenticator(CryptoService cryptoService, ConnectionFactory connectionFactory,
+    public ResourceQueryAuthenticator(Provider<CryptoService> cryptoService, Provider<ConnectionFactory> connectionFactory,
             String queryOnResource, String queryId,  String authenticationIdProperty, String userCredentialProperty) {
 
         Reject.ifNull(cryptoService, "CryptoService is null");
@@ -70,8 +69,8 @@ public class ResourceQueryAuthenticator implements Authenticator {
         Reject.ifNull(authenticationIdProperty, "authenticationId property is not defined");
         Reject.ifNull(userCredentialProperty, "userCredential property is not defined");
 
-        this.cryptoService = cryptoService;
-        this.connectionFactory = connectionFactory;
+        this.cryptoServiceProvider = cryptoService;
+        this.connectionFactoryProvider = connectionFactory;
         this.queryOnResource = queryOnResource;
         this.queryId = queryId;
         this.authenticationIdProperty = authenticationIdProperty;
@@ -91,23 +90,30 @@ public class ResourceQueryAuthenticator implements Authenticator {
         Reject.ifNull(username, "Provided username was null");
         Reject.ifNull(context, "Router context was null");
 
+        final CryptoService cryptoService = cryptoServiceProvider.get();
+        if (cryptoService == null) {
+            throw new InternalServerErrorException("No CryptoService available");
+        }
+
         final ResourceResponse resource = getResource(username, context);
-        if (resource != null && cryptoService.isHashed(resource.getContent().get(userCredentialProperty))) {
-            try {
-                if (cryptoService.matches(password, resource.getContent().get(userCredentialProperty))) {
+        if (resource != null) {
+            if (cryptoService.isHashed(resource.getContent().get(userCredentialProperty))) {
+                try {
+                    if (cryptoService.matches(password, resource.getContent().get(userCredentialProperty))) {
+                        return AuthenticatorResult.authenticationSuccess(resource);
+                    }
+                } catch (JsonCryptoException jce) {
+                    throw new InternalServerErrorException(jce.getMessage(), jce);
+                }
+            } else {
+                final UserInfo userInfo = getRepoUserInfo(username, resource);
+                if (userInfo == null) {
+                    // getResource already logged why
+                    return AuthenticatorResult.FAILED;
+                } else if (userInfo.checkCredential(password)) {
+                    logger.debug("Authentication succeeded for {}", username);
                     return AuthenticatorResult.authenticationSuccess(resource);
                 }
-            } catch (JsonCryptoException jce) {
-                throw new InternalServerErrorException(jce.getMessage(), jce);
-            }
-        } else {
-            final UserInfo userInfo = getRepoUserInfo(username, resource);
-            if (userInfo == null) {
-                // getResource already logged why
-                return AuthenticatorResult.FAILED;
-            } else if (userInfo.checkCredential(password)) {
-                logger.debug("Authentication succeeded for {}", username);
-                return AuthenticatorResult.authenticationSuccess(resource);
             }
         }
         logger.debug("Authentication failed for {} due to invalid credentials", username);
@@ -118,6 +124,11 @@ public class ResourceQueryAuthenticator implements Authenticator {
         QueryRequest request = Requests.newQueryRequest(queryOnResource)
                 .setQueryId(queryId)
                 .setAdditionalParameter(authenticationIdProperty, username);
+
+        final ConnectionFactory connectionFactory = connectionFactoryProvider.get();
+        if (connectionFactory == null) {
+            throw new InternalServerErrorException("No ConnectionFactory available");
+        }
 
         final Set<ResourceResponse> result = new HashSet<>();
         connectionFactory.getConnection().query(context, request, result);
@@ -139,6 +150,10 @@ public class ResourceQueryAuthenticator implements Authenticator {
     }
 
     private UserInfo getRepoUserInfo(String username, ResourceResponse resource) throws ResourceException {
+        final CryptoService cryptoService = cryptoServiceProvider.get();
+        if (cryptoService == null) {
+            throw new InternalServerErrorException("No CryptoService available");
+        }
         if (username == null || resource == null) {
             return null;
         }

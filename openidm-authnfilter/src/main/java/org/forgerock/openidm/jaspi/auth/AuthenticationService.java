@@ -19,6 +19,7 @@ package org.forgerock.openidm.jaspi.auth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -33,6 +34,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder;
 import org.forgerock.guava.common.base.Function;
@@ -128,16 +130,15 @@ public class AuthenticationService implements SingletonResourceProvider {
     /** Re-authentication password header. */
     private static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
 
-    // note: 'static final' required to avoid error with use in static context below
-    public static final String SERVER_AUTH_CONTEXT_KEY = "serverAuthContext";
-    public static final String SESSION_MODULE_KEY = "sessionModule";
-    public static final String AUTH_MODULES_KEY = "authModules";
-    public static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
-    public static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
-    public static final String MODULE_CONFIG_ENABLED = "enabled";
+    private static final String SERVER_AUTH_CONTEXT_KEY = "serverAuthContext";
+    private static final String SESSION_MODULE_KEY = "sessionModule";
+    private static final String AUTH_MODULES_KEY = "authModules";
+    private static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
+    private static final String AUTH_MODULE_NAME_KEY = "name";
+    private static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
+    private static final String MODULE_CONFIG_ENABLED = "enabled";
 
     private JsonValue config;
-
 
     /** The authenticators to delegate to.*/
     private List<Authenticator> authenticators = new ArrayList<>();
@@ -163,9 +164,27 @@ public class AuthenticationService implements SingletonResourceProvider {
     @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.jaspi.config)")
     private AuthFilterWrapper authFilterWrapper;
 
-    /** a factory Function to build an Authenticator from an auth module config */
-    private AuthenticatorFactory toAuthenticatorFromProperties;
+    /** An on-demand Provider for the ConnectionFactory */
+    private final Provider<ConnectionFactory> connectionFactoryProvider =
+            new Provider<ConnectionFactory>() {
+                @Override
+                public ConnectionFactory get() {
+                    return connectionFactory;
+                }
+            };
 
+    /** An on-demand Provider for the CryptoService */
+    private final Provider<CryptoService> cryptoServiceProvider =
+            new Provider<CryptoService>() {
+                @Override
+                public CryptoService get() {
+                    return cryptoService;
+                }
+            };
+
+    /** a factory Function to build an Authenticator from an auth module config */
+    private final AuthenticatorFactory toAuthenticatorFromProperties =
+            new AuthenticatorFactory(connectionFactoryProvider, cryptoServiceProvider);
 
     /** A {@link Predicate} that returns whether the auth module is enabled */
     private static final Predicate<JsonValue> enabledAuthModules =
@@ -207,14 +226,11 @@ public class AuthenticationService implements SingletonResourceProvider {
      * @param context The ComponentContext
      */
     @Activate
-    public synchronized void activate(ComponentContext context) {
+    public synchronized void activate(ComponentContext context) throws AuthenticationException {
         logger.info("Activating Authentication Service with configuration {}", context.getProperties());
         config = enhancedConfig.getConfigurationAsJson(context);
 
         authFilterWrapper.setFilter(configureAuthenticationFilter(config));
-
-        // factory Function that instantiates an Authenticator from an auth module's config properties
-        toAuthenticatorFromProperties = new AuthenticatorFactory(connectionFactory, cryptoService);
 
         // the auth module list config lives under at /serverAuthConfig/authModule
         final JsonValue authModuleConfig = config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
@@ -242,13 +258,12 @@ public class AuthenticationService implements SingletonResourceProvider {
     public void deactivate(ComponentContext context) {
         logger.debug("OpenIDM Config for Authentication {} is deactivated.", config.get(Constants.SERVICE_PID));
         config = null;
-        toAuthenticatorFromProperties = null;
         authenticators.clear();
 
         // remove CAF filter from CHF filter wrapper
         if (authFilterWrapper != null) {
             try {
-                authFilterWrapper.setFilter(AuthFilterWrapper.PASSTHROUGH_FILTER);
+                authFilterWrapper.reset();
             } catch (Exception ex) {
                 logger.warn("Failure reported during unregistering of authentication filter: {}", ex.getMessage(), ex);
             }
@@ -259,43 +274,31 @@ public class AuthenticationService implements SingletonResourceProvider {
      * Configures the commons Authentication Filter with the given configuration.
      *
      * @param jsonConfig The authentication configuration.
+     * @return the CAF filter produced from the json config
+     * @throws AuthenticationException on missing or incorrect configuration, or failure to construct an auth module
+     *      from the config
      */
-    private Filter configureAuthenticationFilter(JsonValue jsonConfig) {
-
-        if (jsonConfig == null) {
-            // No configurations found
-            logger.warn("Could not find any configurations for the AuthnFilter, filter will not function");
-            return null;
+    private Filter configureAuthenticationFilter(JsonValue jsonConfig) throws AuthenticationException {
+        if (jsonConfig == null || jsonConfig.size() == 0) {
+            throw new AuthenticationException("No auth modules configured");
         }
 
         // make copy of config
-        final JsonValue moduleConfig = new JsonValue(jsonConfig);
+        final JsonValue moduleConfig = jsonConfig.copy();
         final JsonValue serverAuthContext = moduleConfig.get(SERVER_AUTH_CONTEXT_KEY).required();
         final JsonValue sessionConfig = serverAuthContext.get(AuthenticationService.SESSION_MODULE_KEY);
         final JsonValue authModulesConfig = serverAuthContext.get(AuthenticationService.AUTH_MODULES_KEY);
+
+        final List<AuthenticationModuleBuilder> authModuleBuilders = new ArrayList<>();
+        for (final JsonValue authModuleConfig : authModulesConfig) {
+            authModuleBuilders.add(processModuleConfiguration(authModuleConfig));
+        }
 
         return AuthenticationFilter.builder()
                 .logger(logger)
                 .auditApi(new JaspiAuditApi(connectionFactory))
                 .sessionModule(processModuleConfiguration(sessionConfig))
-                .authModules(
-                        FluentIterable.from(authModulesConfig)
-                                // transform each module config to a builder
-                                .transform(new Function<JsonValue, AuthenticationModuleBuilder>() {
-                                    @Override
-                                    public AuthenticationModuleBuilder apply(JsonValue authModuleConfig) {
-                                        return processModuleConfiguration(authModuleConfig);
-                                    }
-                                })
-                                        // weed out nulls
-                                .filter(new Predicate<AuthenticationModuleBuilder>() {
-                                            @Override
-                                            public boolean apply(AuthenticationModuleBuilder builder) {
-                                                return builder != null;
-                                            }
-                                        }
-                                )
-                                .toList())
+                .authModules(authModuleBuilders)
                 .build();
     }
 
@@ -306,7 +309,8 @@ public class AuthenticationService implements SingletonResourceProvider {
      * @param moduleConfig The specific module configuration json.
      * @return Whether the module is enabled or not.
      */
-    private AuthenticationModuleBuilder processModuleConfiguration(JsonValue moduleConfig) {
+    private AuthenticationModuleBuilder processModuleConfiguration(JsonValue moduleConfig)
+            throws AuthenticationException {
 
         if (moduleConfig.isDefined(MODULE_CONFIG_ENABLED) && !moduleConfig.get(MODULE_CONFIG_ENABLED).asBoolean()) {
             return null;
@@ -314,11 +318,14 @@ public class AuthenticationService implements SingletonResourceProvider {
         moduleConfig.remove(MODULE_CONFIG_ENABLED);
 
         AsyncServerAuthModule module;
-        if (moduleConfig.isDefined("name")) {
-            module = moduleConfig.get("name").asEnum(IDMAuthModule.class).newInstance(connectionFactory, cryptoService);
+        if (moduleConfig.isDefined(AUTH_MODULE_NAME_KEY)) {
+            module = moduleConfig.get(AUTH_MODULE_NAME_KEY).asEnum(IDMAuthModule.class)
+                    .newInstance(toAuthenticatorFromProperties);
+        } else if (moduleConfig.isDefined(AUTH_MODULE_CLASS_NAME_KEY)) {
+            module = constructAuthModuleByClassName(moduleConfig.get(AUTH_MODULE_CLASS_NAME_KEY).asString());
         } else {
             logger.warn("Unable to create auth module from config " + moduleConfig.toString());
-            return null;
+            throw new AuthenticationException("Auth module config lacks 'name' and 'className' attribute");
         }
 
         JsonValue moduleProperties = moduleConfig.get("properties");
@@ -339,9 +346,19 @@ public class AuthenticationService implements SingletonResourceProvider {
                 .withSettings(moduleProperties.asMap());
     }
 
+    private AsyncServerAuthModule constructAuthModuleByClassName(String authModuleClassName)
+            throws AuthenticationException {
+        try {
+            return Class.forName(authModuleClassName).asSubclass(AsyncServerAuthModule.class).newInstance();
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
+            logger.error("Failed to construct Auth Module instance", e);
+            throw new AuthenticationException("Failed to construct Auth Module instance", e);
+        }
+    }
+
     // ----- Implementation of SingletonResourceProvider interface
 
-    private enum Action { reauthenticate };
+    private enum Action { reauthenticate }
 
     /**
      * Action support, including reauthenticate action {@inheritDoc}

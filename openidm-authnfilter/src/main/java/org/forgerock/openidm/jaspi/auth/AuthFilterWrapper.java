@@ -36,12 +36,12 @@ import org.osgi.service.component.ComponentContext;
  */
 @Component(name = AuthFilterWrapper.PID, policy = ConfigurationPolicy.IGNORE,
         configurationFactory = false, immediate = true)
-@Service(value = {Filter.class, AuthFilterWrapper.class})
+@Service(value = { Filter.class, AuthFilterWrapper.class })
 public class AuthFilterWrapper implements Filter {
     public static final String PID = "org.forgerock.openidm.jaspi.config";
 
     /** Null Object Filter to forward request on when authentication filter is not configured. */
-    static final Filter PASSTHROUGH_FILTER = new Filter() {
+    private static final Filter PASSTHROUGH_FILTER = new Filter() {
         @Override
         public Promise<Response, NeverThrowsException> filter(Context context, Request request, Handler next) {
             return next.handle(context, request);
@@ -57,16 +57,33 @@ public class AuthFilterWrapper implements Filter {
      */
     @Activate
     protected void activate(ComponentContext context) {
-        setFilter(PASSTHROUGH_FILTER);
+        reset();
     }
 
     @Deactivate
     protected synchronized void deactivate(ComponentContext context) {
-        setFilter(PASSTHROUGH_FILTER);
+        reset();
     }
 
+    /**
+     * Set the wrapped filter to the given {@link Filter}.  Used when the CAF
+     * {@link org.forgerock.caf.authentication.framework.AuthenticationFilter} has been initialized.
+     *
+     * @param filter the auth filter to wrap
+     */
     synchronized void setFilter(Filter filter) {
+        if (filter == null) {
+            this.filter = PASSTHROUGH_FILTER;
+        }
         this.filter = filter;
+    }
+
+    /**
+     * Reset the wrapped filter to pass-through; i.e., when the CAF filter becomes unavailable or is in the process of
+     * being reconstructed.
+     */
+    void reset() {
+        setFilter(PASSTHROUGH_FILTER);
     }
 
     @Override

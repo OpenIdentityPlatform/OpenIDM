@@ -30,10 +30,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.security.auth.message.MessageInfo;
 
 import org.forgerock.caf.authentication.api.MessageInfoContext;
-import org.forgerock.caf.authentication.framework.AuthenticationFramework;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.http.SecurityContextFactory;
 
