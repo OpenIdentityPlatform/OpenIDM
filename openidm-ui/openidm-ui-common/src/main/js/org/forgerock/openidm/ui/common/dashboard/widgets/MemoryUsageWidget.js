@@ -73,17 +73,22 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                     color = this.model.defaultChartColor,
                     percentClass = "text-primary";
 
-                if(percent > this.model.dangerThreshold) {
-                    color =  this.model.dangerChartColor;
-                    percentClass = "danger";
-                } else if (percent > this.model.warningThreshold) {
-                    color =  this.model.warningChartColor;
-                    percentClass = "warning";
+                if(percent !== "N/A") {
+                    percent = percent + "%";
+
+                    if(percent > this.model.dangerThreshold) {
+                        color =  this.model.dangerChartColor;
+                        percentClass = "danger";
+                    } else if (percent > this.model.warningThreshold) {
+                        color =  this.model.warningChartColor;
+                        percentClass = "warning";
+                    }
                 }
+
                 //widget-header
                 this.$el.find(".widget-header").toggleClass("donut-header", true);
                 this.$el.find(".widget-header").html('<div class="header">' +$.t("dashboard.used") +'</div>'
-                    + '<div class="percent ' +percentClass +'">' +percent  +'%</div>');
+                    + '<div class="percent ' +percentClass +'">' +percent  +'</div>');
 
                 this.model.chart =  new dimple.chart(svg, data);
                 this.model.chart.setBounds(this.model.chartX, this.model.chartY, this.model.chartWidth, this.model.chartHeight);
@@ -123,22 +128,38 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                             widgetData = widgetData.nonHeapMemoryUsage;
                         }
 
-                        data = [
-                            {
-                                "memory": widgetData.used,
-                                "type": "Used"
-                            },
-                            {
-                                "memory": widgetData.max - widgetData.used,
-                                "type": "Free"
-                            }
-                        ];
-
                         this.$el.find(".dashboard-details").show();
 
                         svg.push(dimple.newSvg(this.$el.find(".widget-chart")[0], this.model.canvasWidth, this.model.canvasHeight));
 
-                        percent = Math.round((widgetData.used / widgetData.max) * 100);
+                        if(widgetData.max === -1) {
+                            percent = "N/A";
+
+                            data = [
+                                {
+                                    "memory": 0,
+                                    "type": "Used"
+                                },
+                                {
+                                    "memory": 1,
+                                    "type": "Free"
+                                }
+                            ];
+                        } else {
+                            percent = Math.round((widgetData.used / widgetData.max) * 100);
+
+                            data = [
+                                {
+                                    "memory": widgetData.used,
+                                    "type": "Used"
+                                },
+                                {
+                                    "memory": widgetData.max - widgetData.used,
+                                    "type": "Free"
+                                }
+                            ];
+                        }
+
                         this.drawChart(svg[0], data, percent);
 
                         this.$el.find(".widget-header").show();
@@ -167,37 +188,56 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                         widgetData = widgetData.nonHeapMemoryUsage;
                     }
 
-                    percent = Math.round((widgetData.used / widgetData.max) * 100);
+                    if(widgetData.max === -1) {
+                        percent = "N/A";
 
-                    this.$el.find(".percent").html(percent +"%");
-                    this.$el.find(".percent").toggleClass("danger", false);
-                    this.$el.find(".percent").toggleClass("warning", false);
+                        this.model.chart.data = [
+                            {
+                                "memory": 0,
+                                "type": "Used"
+                            },
+                            {
+                                "memory":1,
+                                "type": "Free"
+                            }
+                        ];
 
-                    if(percent > this.model.dangerThreshold) {
-                        usedCpu.attr("fill", this.model.dangerChartColor);
-                        usedCpu.css("fill", this.model.dangerChartColor);
-
-                        this.$el.find(".percent").toggleClass("danger", true);
-                    } else if (percent > this.model.warningThreshold) {
-                        usedCpu.attr("fill", this.model.warningChartColor);
-                        usedCpu.css("fill", this.model.warningChartColor);
-
-                        this.$el.find(".percent").toggleClass("warning", true);
+                        this.$el.find(".percent").html(percent);
                     } else {
-                        usedCpu.attr("fill", this.model.defaultChartColor);
-                        usedCpu.css("fill", this.model.defaultChartColor);
-                    }
+                        percent = Math.round((widgetData.used / widgetData.max) * 100);
 
-                    this.model.chart.data = [
-                        {
-                            "memory": widgetData.used,
-                            "type": "Used"
-                        },
-                        {
-                            "memory": widgetData.max - widgetData.used,
-                            "type": "Free"
+                        this.model.chart.data = [
+                            {
+                                "memory": widgetData.used,
+                                "type": "Used"
+                            },
+                            {
+                                "memory": widgetData.max - widgetData.used,
+                                "type": "Free"
+                            }
+                        ];
+
+
+                        this.$el.find(".percent").html(percent + "%");
+                        this.$el.find(".percent").toggleClass("danger", false);
+                        this.$el.find(".percent").toggleClass("warning", false);
+
+                        if(percent > this.model.dangerThreshold) {
+                            usedCpu.attr("fill", this.model.dangerChartColor);
+                            usedCpu.css("fill", this.model.dangerChartColor);
+
+                            this.$el.find(".percent").toggleClass("danger", true);
+                        } else if (percent > this.model.warningThreshold) {
+                            usedCpu.attr("fill", this.model.warningChartColor);
+                            usedCpu.css("fill", this.model.warningChartColor);
+
+                            this.$el.find(".percent").toggleClass("warning", true);
+                        } else {
+                            usedCpu.attr("fill", this.model.defaultChartColor);
+                            usedCpu.css("fill", this.model.defaultChartColor);
                         }
-                    ];
+
+                    }
 
                     this.model.chart.draw(1000);
                 }, this));

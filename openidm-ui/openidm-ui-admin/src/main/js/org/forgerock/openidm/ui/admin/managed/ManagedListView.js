@@ -133,8 +133,15 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
                             editable: false,
                             cell: Backgrid.Cell.extend({
                                 render: function () {
-                                    var display = '<a class="table-clink" href="#connectors/edit/'+this.model.attributes.cleanUrlName +'/"><div class="image circle">'
-                                        + '<i class="' +this.model.attributes.iconClass +'"></i></div>' +this.model.attributes.name +'</a>';
+                                    var icon = this.model.attributes.iconClass,
+                                        display;
+
+                                    if(this.model.attributes.schema.icon)  {
+                                        icon = "fa " +this.model.attributes.schema.icon;
+                                    }
+
+                                    display = '<a class="table-clink" href="#connectors/edit/'+this.model.attributes.cleanUrlName +'/"><div class="image circle">'
+                                        + '<i class="' +icon +'"></i></div>' +this.model.attributes.name +'</a>';
 
                                     this.$el.html(display);
 
