@@ -32,7 +32,7 @@ import org.forgerock.util.Reject;
 /**
  * Authenticates a static user against the provided configuration properties.
  */
-public class StaticAuthenticator implements Authenticator {
+class StaticAuthenticator implements Authenticator {
 
     /** Always use a _rev of 1 */
     private static final String RESOURCE_REV = "1";

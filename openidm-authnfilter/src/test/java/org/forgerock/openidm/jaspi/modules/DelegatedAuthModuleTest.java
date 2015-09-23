@@ -71,8 +71,8 @@ public class DelegatedAuthModuleTest {
         Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-Username", null);
-        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
+        request.getHeaders().put("X-OpenIDM-Username", null);
+        request.getHeaders().put("X-OpenIDM-Password", "PASSWORD");
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
@@ -95,8 +95,8 @@ public class DelegatedAuthModuleTest {
         Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-Username", "");
-        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
+        request.getHeaders().put("X-OpenIDM-Username", "");
+        request.getHeaders().put("X-OpenIDM-Password", "PASSWORD");
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
@@ -119,8 +119,8 @@ public class DelegatedAuthModuleTest {
         Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
-        request.getHeaders().putSingle("X-OpenIDM-Password", null);
+        request.getHeaders().put("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().put("X-OpenIDM-Password", null);
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
@@ -143,8 +143,8 @@ public class DelegatedAuthModuleTest {
         Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
-        request.getHeaders().putSingle("X-OpenIDM-Password", "");
+        request.getHeaders().put("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().put("X-OpenIDM-Password", "");
 
         //When
         AuthStatus authStatus = module.validateRequest(messageInfo, clientSubject, serviceSubject)
@@ -170,8 +170,8 @@ public class DelegatedAuthModuleTest {
         Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
-        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
+        request.getHeaders().put("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().put("X-OpenIDM-Password", "PASSWORD");
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
         messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 
@@ -202,8 +202,8 @@ public class DelegatedAuthModuleTest {
         Request request = new Request();
 
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-Username", "USERNAME");
-        request.getHeaders().putSingle("X-OpenIDM-Password", "PASSWORD");
+        request.getHeaders().put("X-OpenIDM-Username", "USERNAME");
+        request.getHeaders().put("X-OpenIDM-Password", "PASSWORD");
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
         messageInfoMap.put(AuditTrail.AUDIT_INFO_KEY, auditInfoMap);
 

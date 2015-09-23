@@ -33,43 +33,6 @@
     <name>OpenIDM JASPI Authentication Filter</name>
     <packaging>bundle</packaging>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-scr-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>generate-scr-scrdescriptor</id>
-                        <goals>
-                            <goal>scr</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Import-Package>*</Import-Package>
-                        <Export-Package>
-                            org.forgerock.openidm.jaspi.config;version=${project.version}
-                        </Export-Package>
-                    </instructions>
-                </configuration>
-                <!--<configuration>-->
-                    <!--<instructions>-->
-                        <!--<Export-Package>-->
-                            <!--org.forgerock.openidm.jaspi.modules;version="${project.version}"-->
-                        <!--</Export-Package>-->
-                    <!--</instructions>-->
-                <!--</configuration>-->
-            </plugin>
-        </plugins>
-    </build>
-
     <dependencies>
         <!-- OpenIDM Dependencies -->
         <dependency>
@@ -148,6 +111,12 @@
             <artifactId>forgerock-guava-collect</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+            <version>1_2</version>
+        </dependency>
+
         <!-- OSGI Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -182,4 +151,34 @@
             <scope>test</scope>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-scr-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <id>generate-scr-scrdescriptor</id>
+                        <goals>
+                            <goal>scr</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.felix</groupId>
+                <artifactId>maven-bundle-plugin</artifactId>
+                <extensions>true</extensions>
+                <configuration>
+                    <instructions>
+                        <Import-Package>*</Import-Package>
+                        <Export-Package>
+                            org.forgerock.openidm.jaspi.config;version=${project.version}
+                        </Export-Package>
+                    </instructions>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
 </project>

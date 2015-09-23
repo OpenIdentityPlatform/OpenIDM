@@ -18,8 +18,11 @@ package org.forgerock.openidm.jaspi.auth;
 
 import static org.forgerock.util.Reject.checkNotNull;
 
+import javax.inject.Provider;
+
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
@@ -29,20 +32,20 @@ import org.forgerock.services.context.Context;
  * Contains logic to perform authentication by passing the request through to be authenticated against a OpenICF
  * connector, or an endpoint accepting an "authenticate" action with supplied username and password parameters.
  */
-public class PassthroughAuthenticator implements Authenticator {
+class PassthroughAuthenticator implements Authenticator {
 
-    private final ConnectionFactory connectionFactory;
+    private final Provider<ConnectionFactory> connectionFactoryProvider;
     private final String passThroughAuth;
 
     /**
      * Constructs an instance of the PassthroughAuthenticator.
      *
-     * @param connectionFactory the ConnectionFactory for making an authenticate request on the router
+     * @param connectionFactoryProvider the ConnectionFactory for making an authenticate request on the router
      * @param passThroughAuth the passThroughAuth resource
      */
-    public PassthroughAuthenticator(ConnectionFactory connectionFactory,
+    public PassthroughAuthenticator(Provider<ConnectionFactory> connectionFactoryProvider,
             String passThroughAuth) {
-        this.connectionFactory = checkNotNull(connectionFactory);
+        this.connectionFactoryProvider = checkNotNull(connectionFactoryProvider);
         this.passThroughAuth = checkNotNull(passThroughAuth);
     }
 
@@ -58,6 +61,10 @@ public class PassthroughAuthenticator implements Authenticator {
      */
     public AuthenticatorResult authenticate(String username, String password, Context context) throws ResourceException {
 
+        final ConnectionFactory connectionFactory = connectionFactoryProvider.get();
+        if (connectionFactory == null) {
+            throw new InternalServerErrorException("No ConnectionFactory available");
+        }
         final ActionResponse result = connectionFactory.getConnection().action(context,
                 Requests.newActionRequest(passThroughAuth, "authenticate")
                         .setAdditionalParameter("username", username)

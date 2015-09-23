@@ -192,8 +192,6 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
             MessagePolicy responseMessagePolicy, CallbackHandler handler, Map<String, Object> options) {
 
         properties = new JsonValue(options);
-// FIXME resurrect instantiation-by-classname or remove this
-//        authModule = authModuleConstructor.construct(properties.get("authModuleClassName").asString());
         return authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options)
                 .then(new Function<Void, Void, AuthenticationException>() {
                     @Override

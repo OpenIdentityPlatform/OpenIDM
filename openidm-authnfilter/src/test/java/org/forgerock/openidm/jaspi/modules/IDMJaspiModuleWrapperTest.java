@@ -319,7 +319,7 @@ public class IDMJaspiModuleWrapperTest {
         given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-NoSession", "true");
+        request.getHeaders().put("X-OpenIDM-NoSession", "true");
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When
@@ -351,7 +351,7 @@ public class IDMJaspiModuleWrapperTest {
         given(authModule.secureResponse(Matchers.<MessageInfoContext>anyObject(), Matchers.<Subject>anyObject()))
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
         given(messageInfo.getRequest()).willReturn(request);
-        request.getHeaders().putSingle("X-OpenIDM-NoSession", null);
+        request.getHeaders().put("X-OpenIDM-NoSession", null);
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When

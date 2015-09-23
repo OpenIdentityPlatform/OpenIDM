@@ -58,8 +58,20 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
 
     private final static Logger logger = LoggerFactory.getLogger(DelegatedAuthModule.class);
 
+    /**
+     * A NullObject {@link Authenticator} implementation.
+     */
+    private static final Authenticator NULL_AUTHENTICATOR = new Authenticator() {
+        @Override
+        public AuthenticatorResult authenticate(String username, String password, Context context)
+                throws ResourceException {
+            return AuthenticatorResult.FAILED;
+        }
+    };
+
     private final AuthenticatorFactory authenticatorFactory;
 
+    private Authenticator authenticator = NULL_AUTHENTICATOR;
     private String queryOnResource = "";
     private JsonValue options = new JsonValue(null);
 
@@ -100,6 +112,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
             CallbackHandler handler, Map<String, Object> options) {
         this.options = new JsonValue(options);
         queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
+        authenticator = authenticatorFactory.apply(this.options);
         return newResultPromise(null);
     }
 
@@ -165,7 +178,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
                     new RootContext(),
                     securityContextMapper.getAuthenticationId(),
                     securityContextMapper.getAuthorizationId());
-            Authenticator.AuthenticatorResult result = authenticatorFactory.apply(options).authenticate(
+            Authenticator.AuthenticatorResult result = authenticator.authenticate(
                     credential.username, credential.password, context);
             final ResourceResponse resource = result.getResource();
             if (resource != null) {

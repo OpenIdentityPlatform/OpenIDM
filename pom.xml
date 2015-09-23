@@ -461,45 +461,6 @@
                 <version>${commons.forgerock-i18n.version}</version>
             </dependency>
 
-            <!-- TODO-crest3 override BOM dependence as CAF2 is not ready -->
-            <!--
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-auth-filter-common</artifactId>
-                <version>1.6.0-CREST3-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-iwa-module</artifactId>
-                <version>1.6.0-CREST3-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-jwt-session-module</artifactId>
-                <version>1.6.0-CREST3-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-openam-session-module</artifactId>
-                <version>1.6.0-CREST3-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-openid-connect-module</artifactId>
-                <version>1.6.0-CREST3-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-jaspi-runtime</artifactId>
-                <version>1.6.0-CREST3-SNAPSHOT</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>authz-framework-api</artifactId>
-                <version>1.6.0-CREST3-SNAPSHOT</version>
-            </dependency>
-            -->
-
             <!-- Commons -->
             <dependency>
                 <groupId>org.apache.commons</groupId>
