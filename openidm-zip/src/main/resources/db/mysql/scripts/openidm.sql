@@ -485,38 +485,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `openidm`.`update`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`updates` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `status` VARCHAR(64) NOT NULL ,
-  `statusMessage` VARCHAR(256) DEFAULT NULL ,
-  `completedTasks` INT DEFAULT 0 ,
-  `totalTasks` INT DEFAULT 0 ,
-  `startDate` VARCHAR(29) NOT NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
-  `endDate` VARCHAR(29) DEFAULT NULL ,
-  `userName` VARCHAR(256) NOT NULL ,
-  `nodeId` VARCHAR(64) DEFAULT NULL ,
-  PRIMARY KEY (`id`) )
-  ENGINE = InnoDB;
-
--- -----------------------------------------------------
--- Table `openidm`.`updatefile`
--- -----------------------------------------------------
-CREATE  TABLE IF NOT EXISTS `openidm`.`updatefile` (
-  `updateId` BIGINT UNSIGNED NOT NULL ,
-  `filePath` TEXT NOT NULL ,
-  `fileState` VARCHAR(64) NOT NULL ,
-  `backupFile` TEXT DEFAULT NULL ,
-  `stockFile` TEXT DEFAULT NULL ,
-  CONSTRAINT `fk_updatefileupdateid_updatesid`
-  FOREIGN KEY (`updateId` )
-  REFERENCES `openidm`.`updates` (`id` )
-    ON DELETE CASCADE
-    ON UPDATE NO ACTION)
-  ENGINE = InnoDB;
-
 delimiter //
 
 create procedure `openidm`.`getAllFromTable` (t_schema varchar(255), t_name varchar(255), order_by varchar(255), order_dir varchar(255), num_rows bigint, skip bigint, acceptable_order_by varchar(512))

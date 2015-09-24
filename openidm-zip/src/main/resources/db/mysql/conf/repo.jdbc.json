@@ -111,6 +111,11 @@
                 "mainTable" : "relationships",
                 "propertiesTable" : "relationshipproperties",
                 "searchableDefault" : true
+            },
+            "updates" : {
+                "mainTable" : "updateobjects",
+                "propertiesTable" : "updateobjectproperties",
+                "searchableDefault" : true
             }
         },
         "explicitMapping" : {
@@ -294,30 +299,6 @@
                     "_id" : "objectid",
                     "_rev" : "rev",
                     "keyPair" : "keypair"
-                }
-            },
-            "update" : {
-                "table" : "updates",
-                "objectToColumn" : {
-                    "_id" : "id",
-                    "status" : "status",
-                    "statusMessage" : "statusMessage",
-                    "completedTasks" : "completedTasks",
-                    "totalTasks" : "totalTasks",
-                    "startDate" : "startDate",
-                    "endDate" : "endDate",
-                    "userName" : "userName",
-                    "nodeId" : "nodeId"
-                }
-            },
-            "update/file" : {
-                "table" : "updatefile",
-                "objectToColumn" : {
-                    "updateId" : "updateId",
-                    "filePath" : "filePath",
-                    "fileState" : "fileState",
-                    "backupFile" : "backupFile",
-                    "stockFile" : "stockFile"
                 }
             }
         }

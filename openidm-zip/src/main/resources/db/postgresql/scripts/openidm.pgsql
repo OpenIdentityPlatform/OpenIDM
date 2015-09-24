@@ -448,35 +448,6 @@ CREATE INDEX idx_clusterobjectproperties_prop ON openidm.clusterobjectproperties
 
 
 -- -----------------------------------------------------
--- Table openidm.updates
--- -----------------------------------------------------
-CREATE TABLE openidm.updates (
-  id BIGSERIAL NOT NULL,
-  status VARCHAR(64) NOT NULL,
-  statusMessage VARCHAR(256) NULL,
-  completedTasks INT,
-  totalTasks INT,
-  startDate VARCHAR(29) NOT NULL,
-  endDate VARCHAR(29) NULL,
-  userName VARCHAR(256) NOT NULL,
-  nodeId VARCHAR(64) NULL
-);
-
-
--- -----------------------------------------------------
--- Table openidm.updatefile
--- -----------------------------------------------------
-CREATE TABLE openidm.updatefile (
-  updateId BIGINT NOT NULL,
-  filePath TEXT NOT NULL,
-  fileState VARCHAR(64) NOT NULL,
-  backupFile TEXT NULL,
-  stockFile TEXT NULL,
-  CONSTRAINT fk_updatefileupdateid_updatesid FOREIGN KEY (updateId) REFERENCES openidm.updates (id) ON DELETE CASCADE ON UPDATE NO ACTION
-);
-
-
--- -----------------------------------------------------
 -- Data for table openidm.internaluser
 -- -----------------------------------------------------
 START TRANSACTION;
