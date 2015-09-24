@@ -56,8 +56,8 @@ def auditactivity = new ObjectClass("auditactivity")
 def auditaccess = new ObjectClass("auditaccess")
 def auditsync = new ObjectClass("auditsync")
 
-// If using paged results, set the  where clause and whereParams to query
-// based on activitydate
+// Use the specified _pagedResultsCookie to query based on
+// activitydate and auto-incrememnt id
 if (options.pagedResultsCookie != null) {
     def cookieProps = options.pagedResultsCookie.split(",");
     assert cookieProps.size() == 2
@@ -66,8 +66,8 @@ if (options.pagedResultsCookie != null) {
     whereParams = [ cookieProps[0], cookieProps[1].toInteger()]
 }
 
-// Determine what properties will be used to sort the query
-def orderBy = []
+// Default to order by id
+def orderBy = ["id ASC"]
 
 if (options.sortKeys != null && options.sortKeys.size() > 0) {
     // Translate sortKeys to actual SQL columns
@@ -77,6 +77,7 @@ if (options.sortKeys != null && options.sortKeys.size() > 0) {
         "timestamp" : "activitydate"
     ]
     
+    orderBy.clear()
     options.sortKeys.each {
         def key = it.toString();
         def field = key.substring(1,key.size())
@@ -89,15 +90,18 @@ if (options.sortKeys != null && options.sortKeys.size() > 0) {
             orderBy.add(field + " DESC")
         }
     }
-    orderBy = " ORDER BY " + orderBy.join(",")
-} else {
-    orderBy = ""
 }
+orderBy = " ORDER BY " + orderBy.join(",")
 
-// Set SQL LIMIT based on the specified _pageSize
+// Set LIMIT based on the specified _pageSize
 def limit = ""
 if (options.pageSize != null) {
     limit = " LIMIT " + options.pageSize.toString()
+
+    // Set OFFSET based on the specified _pagedResultsOffset
+    if (options.pagedResultsOffset != null) {
+        limit += " OFFSET " + options.pagedResultsOffset.toString()
+    }
 }
 
 // Keep track of lastActivitydate and lastId so we can
@@ -231,8 +235,8 @@ switch ( objectClass ) {
                 handleCollectedData();
 
                 dataCollector = [
-                    uid : row.objectid as String,
-                    id : row.objectid,
+                    id : row.id as String,
+                    uid : row.objectid,
                     activity : row.activity,
                     activitydate : row.activitydate,
                     transactionid : row.transactionid,
@@ -260,7 +264,7 @@ switch ( objectClass ) {
             }
 
             lastActivitydate = row.activitydate
-            lastId = row.objectid
+            lastId = row.id
             resultCount++
         });
 
@@ -275,7 +279,7 @@ switch ( objectClass ) {
             if (dataCollector.uid != "") {
                 handler {
                     uid dataCollector.uid
-                    id dataCollector.uid
+                    id dataCollector.id
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'authentication',
@@ -304,8 +308,8 @@ switch ( objectClass ) {
                 handleCollectedData();
 
                 dataCollector = [
-                    uid : row.objectid as String,
-                    id : row.objectid,
+                    id : row.id as String,
+                    uid : row.objectid,
                     transactionid : row.transactionid,
                     activitydate : row.activitydate,
                     userid : row.userid,
@@ -318,7 +322,7 @@ switch ( objectClass ) {
             }
 
             lastActivitydate = row.activitydate
-            lastId = row.objectid
+            lastId = row.id
             resultCount++
         });
 
@@ -375,8 +379,8 @@ switch ( objectClass ) {
                 handleCollectedData();
 
                 dataCollector = [
-                    uid : row.objectid as String,
-                    id : row.objectid,
+                    id : row.id as String,
+                    uid : row.objectid,
                     activitydate : row.activitydate,
                     activity : row.activity,
                     transactionid : row.transactionid,
@@ -399,7 +403,7 @@ switch ( objectClass ) {
             }
 
             lastActivitydate = row.activitydate
-            lastId = row.objectid
+            lastId = row.id
             resultCount++
         });
 
@@ -452,8 +456,8 @@ switch ( objectClass ) {
                 handleCollectedData();
 
                 dataCollector = [
-                    uid : row.objectid as String,
-                    id : row.objectid,
+                    id : row.id as String,
+                    uid : row.objectid,
                     transactionid : row.transactionid,
                     activitydate : row.activitydate,
                     eventname : row.eventname,
@@ -477,7 +481,7 @@ switch ( objectClass ) {
             }
 
             lastActivitydate = row.activitydate
-            lastId = row.objectid
+            lastId = row.id
             resultCount++
         });
 
@@ -524,8 +528,8 @@ switch ( objectClass ) {
                 handleCollectedData();
 
                 dataCollector = [
-                    uid : row.objectid as String,
-                    id : row.objectid,
+                    id : row.id as String,
+                    uid : row.objectid,
                     transactionid : row.transactionid,
                     activitydate : row.activitydate,
                     eventname : row.eventname,
@@ -543,7 +547,7 @@ switch ( objectClass ) {
             }
 
             lastActivitydate = row.activitydate
-            lastId = row.objectid
+            lastId = row.id
             resultCount++
         });
 
@@ -554,8 +558,10 @@ switch ( objectClass ) {
         log.warn("Didn't match objectClass " + objectClass);
 }
 
-// If paging is not wanted just return the default SearchResult object
-if (orderBy.toString().isEmpty() || limit.toString().isEmpty() || resultCount < options.pageSize) {
+// If _pageSize has not been specified or if a custom _sortyKey has been
+// specified return the default SearchResult object.  We do not support
+// paging with arbitrary sort keys.
+if (options.sortKeys || limit.toString().isEmpty() || resultCount < options.pageSize) {
     return new SearchResult();
 }
 
