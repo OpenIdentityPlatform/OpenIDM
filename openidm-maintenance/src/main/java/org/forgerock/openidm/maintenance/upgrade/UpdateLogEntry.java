@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class UpdateLogEntry {
     private String id;
-    private String status;
+    private UpdateManagerImpl.UpdateStatus status;
     private String statusMessage;
     private int completedTasks;
     private int totalTasks;
@@ -48,11 +48,11 @@ public class UpdateLogEntry {
         return this;
     }
 
-    public String getStatus() {
+    public UpdateManagerImpl.UpdateStatus getStatus() {
         return status;
     }
 
-    public UpdateLogEntry setStatus(String status) {
+    public UpdateLogEntry setStatus(UpdateManagerImpl.UpdateStatus status) {
         this.status = status;
         return this;
     }
@@ -136,7 +136,7 @@ public class UpdateLogEntry {
     public JsonValue toJson() {
         JsonValue ret = json(object(
                 field("_id", getId()),
-                field("status", getStatus()),
+                field("status", getStatus().toString()),
                 field("completedTasks", getCompletedTasks()),
                 field("totalTasks", getTotalTasks()),
                 field("startDate", getStartDate()),

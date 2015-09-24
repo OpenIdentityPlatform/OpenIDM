@@ -13,7 +13,8 @@ UI Endpoints for Update Process
             "version" : "OpenIDM v4.5.0",
             "checksum" : "bleeblooblah",
             "description" : "Full product installation",
-            "resource" : "<url for online docs>"
+            "resource" : "<url for online docs>",
+            "restartRequired" : true | false
         }, {
             ...
         }
@@ -21,10 +22,7 @@ UI Endpoints for Update Process
 
 2. Get list of file changes for a given update archive:
 
-	ACTION openidm/maintenance/update?_action=preview
-	{
-		"archive" : "OpenIDM-4.5.0.zip"
-	}
+	ACTION openidm/maintenance/update?_action=preview&archive=OpenIDM-4.5.0.zip
 
 	returns:
 	[
@@ -36,12 +34,18 @@ UI Endpoints for Update Process
 		}
 	]
 
+2b. Get applicable license for an update archive:
+
+	ACTION openidm/maintenance/update?_action=getLicense&archive=OpenIDM-4.5.0.zip
+
+	returns:
+    {
+        "license" : "<WALL O' TEXT>"
+    }
+
 3. Perform update using a given update archive
 
-	ACTION openidm/maintenance/update?_action=update
-	{
-		"archive" : "OpenIDM-4.5.0.zip"
-	}
+	ACTION openidm/maintenance/update?_action=update&archive=OpenIDM-4.5.0.zip
 
 	returns:
 	{
@@ -56,7 +60,7 @@ UI Endpoints for Update Process
 
 4. Get status of running update
 
-	READ openidm/repo/update/someIDstring
+	READ openidm/maintenance/update/log/someIDstring
 
 	returns (while still in progress):
 	{
@@ -95,7 +99,7 @@ UI Endpoints for Update Process
 
 5. Get list of updates
 
-	QUERY openidm/repo/update?_queryFilter=_id+pr
+	QUERY openidm/maintenance/update/log/?_queryFilter=true
 
 	returns:
 	[
@@ -114,7 +118,7 @@ UI Endpoints for Update Process
 		...
 	]
 
-	The id can be passed to READ openidm/repo/update/someIDstring to fetch the log if terminal or just status
+	The id can be passed to READ openidm/maintenance/update/log/someIDstring to fetch the log if terminal or just status
 	otherwise.
 
 
@@ -137,7 +141,7 @@ FileState States:
 
 Update Stati:
 
-    IN_PROGRESS     Update hasstarted but not yet completed
+    IN_PROGRESS     Update has started but not yet completed
     COMPLETE        Update has completed
     FAILED          Update failed but has not yet reverted
     REVERTED        Update failed and was reverted
