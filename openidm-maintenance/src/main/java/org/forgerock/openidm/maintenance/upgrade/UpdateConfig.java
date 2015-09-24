@@ -37,7 +37,7 @@ import org.forgerock.json.resource.ResourceException;
 /**
  * Config object patching utility.
  */
-public class UpgradeConfig {
+public class UpdateConfig {
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
@@ -48,9 +48,9 @@ public class UpgradeConfig {
      * @param context the context for the patch request.
      * @param resourceName the name of the resource to be patched.
      * @param patch a JsonPatch to be applied to the named config resource.
-     * @throws UpgradeException
+     * @throws UpdateException
      */
-    public void patchConfig(Context context, String resourceName, JsonValue patch) throws UpgradeException {
+    public void patchConfig(Context context, String resourceName, JsonValue patch) throws UpdateException {
         try {
             PatchRequest request = Requests.newPatchRequest(resourceName);
             for (PatchOperation op : PatchOperation.valueOfList(patch)) {
@@ -58,7 +58,7 @@ public class UpgradeConfig {
             }
             connectionFactory.getConnection().patch(context, request);
         } catch (ResourceException e) {
-            throw new UpgradeException("Patch request failed", e);
+            throw new UpdateException("Patch request failed", e);
         }
     }
 }

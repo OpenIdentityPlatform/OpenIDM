@@ -19,27 +19,27 @@ package org.forgerock.openidm.maintenance.upgrade;
 /**
  * A server side error occurred during the maintenance
  */
-public class UpgradeException extends Exception {
+public class UpdateException extends Exception {
 
     private static final long serialVersionUID = 1L;
 
     /**
      * Constructs a new exception with {@code null} as its detail message.
      */
-    public UpgradeException() {
+    public UpdateException() {
     }
     
     /**
      * Constructs a new exception with the specified detail message.
      */
-    public UpgradeException(String message) {
+    public UpdateException(String message) {
         super(message);
     }
     
     /**
      * Constructs a new exception with the specified detail message and nested throwable.
      */
-    public UpgradeException(String message, Throwable ex) {
+    public UpdateException(String message, Throwable ex) {
         super(message, ex);
     }
 }

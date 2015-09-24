@@ -55,7 +55,7 @@ public class BundleHandler {
      * @param symbolicName is the key used to look up installed bundles
      *                     in the Felix framework.
      */
-    public void upgradeBundle(Path newBundle, String symbolicName) throws UpgradeException {
+    public void upgradeBundle(Path newBundle, String symbolicName) throws UpdateException {
         // check to see if the bundle is installed in the list of bundles
         List<Bundle> installedBundles = getBundles(symbolicName);
         if (!installedBundles.isEmpty()) {
@@ -74,11 +74,11 @@ public class BundleHandler {
      * @param bundle Location where the Bundle is installed.
      * @return Path to location where Bundle is located.
      */
-    private Path getBundlePath(Bundle bundle) throws UpgradeException {
+    private Path getBundlePath(Bundle bundle) throws UpdateException {
         try {
             return Paths.get(new URI(bundle.getLocation()).getPath());
         } catch (URISyntaxException e) {
-            throw new UpgradeException(e.getMessage(), e);
+            throw new UpdateException(e.getMessage(), e);
         }
     }
 
@@ -96,9 +96,9 @@ public class BundleHandler {
      *
      * @param installedBundles bundles installed with the same symbolic name.
      * @param newBundlePath URI to the new @{Bundle}
-     * @throws UpgradeException if anything goes wrong with copying or deleting the files.
+     * @throws UpdateException if anything goes wrong with copying or deleting the files.
      */
-    private void replaceBundle(List<Bundle> installedBundles, Path newBundlePath) throws UpgradeException {
+    private void replaceBundle(List<Bundle> installedBundles, Path newBundlePath) throws UpdateException {
         try {
             Path oldBundlePath = getBundlePath(installedBundles.get(0));
             for (Bundle b : installedBundles) {
@@ -108,7 +108,7 @@ public class BundleHandler {
             }
             Files.copy(newBundlePath, oldBundlePath.getParent().resolve(newBundlePath.getFileName()));
         } catch (IOException e) {
-            throw new UpgradeException("Cannot replace file " + newBundlePath.toString(), e);
+            throw new UpdateException("Cannot replace file " + newBundlePath.toString(), e);
         }
 
     }
@@ -118,14 +118,14 @@ public class BundleHandler {
      *
      * @param path file path to current installed Bundle.
      * @return Path with appended archive extension.
-     * @throws UpgradeException if getting the we cannot
+     * @throws UpdateException if getting the we cannot
      *         retrieve the Path
      */
-    private Path concatArchiveExtension(Path path) throws UpgradeException {
+    private Path concatArchiveExtension(Path path) throws UpdateException {
         try {
             return Paths.get(new URI(path.toUri().toString().concat(archiveExtension)));
         } catch (URISyntaxException e) {
-            throw new UpgradeException(e.getMessage(), e);
+            throw new UpdateException(e.getMessage(), e);
         }
     }
 
@@ -152,52 +152,52 @@ public class BundleHandler {
     /**
      *  Update a current installed bundle.
      * @param bundle that will be updated
-     * @throws UpgradeException
+     * @throws UpdateException
      */
-    public void updateBundle(Bundle bundle) throws UpgradeException {
+    public void updateBundle(Bundle bundle) throws UpdateException {
         try {
             bundle.update();
         } catch (BundleException e) {
-            throw new UpgradeException("Cannot update bundle " + bundle.toString(), e);
+            throw new UpdateException("Cannot update bundle " + bundle.toString(), e);
         }
     }
 
     /**
      *  Stop a currently running bundle.
      * @param bundle that will be stopped
-     * @throws UpgradeException
+     * @throws UpdateException
      */
-    public void stopBundle(Bundle bundle) throws UpgradeException {
+    public void stopBundle(Bundle bundle) throws UpdateException {
         try {
             bundle.stop();
         } catch (BundleException e) {
-            throw new UpgradeException("Cannot stop bundle " + bundle.toString(), e);
+            throw new UpdateException("Cannot stop bundle " + bundle.toString(), e);
         }
     }
 
     /**
      * Uninstall a currently installed bundle.
      * @param bundle that will be uninstalled
-     * @throws UpgradeException
+     * @throws UpdateException
      */
-    public void uninstallBundle(Bundle bundle) throws UpgradeException {
+    public void uninstallBundle(Bundle bundle) throws UpdateException {
         try {
             bundle.uninstall();
         } catch (BundleException e) {
-            throw new UpgradeException("Cannot uninstall bundle " + bundle.toString(), e);
+            throw new UpdateException("Cannot uninstall bundle " + bundle.toString(), e);
         }
     }
 
     /**
      * Installs a bundle in the OSGI Framework.
      * @param path to bundle which will be installed
-     * @throws UpgradeException
+     * @throws UpdateException
      */
-    public void installBundle(Path path) throws UpgradeException {
+    public void installBundle(Path path) throws UpdateException {
         try {
             context.installBundle(path.toUri().toString());
         } catch (BundleException e) {
-            throw new UpgradeException("Cannot install bundle " + path.toUri().toString(), e);
+            throw new UpdateException("Cannot install bundle " + path.toUri().toString(), e);
         }
 
     }
@@ -205,13 +205,13 @@ public class BundleHandler {
     /**
      * Start the bundle.
      * @param bundle to be started
-     * @throws UpgradeException
+     * @throws UpdateException
      */
-    public void startBundle(Bundle bundle) throws UpgradeException{
+    public void startBundle(Bundle bundle) throws UpdateException{
         try {
             bundle.start();
         } catch (BundleException e) {
-            throw new UpgradeException("Cannot start bundle " + bundle.toString(), e);
+            throw new UpdateException("Cannot start bundle " + bundle.toString(), e);
         }
     }
 }

@@ -37,6 +37,9 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.openidm.maintenance.upgrade.UpdateException;
+import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
+import org.forgerock.openidm.maintenance.upgrade.UpdateManagerImpl;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.resource.ActionRequest;
@@ -60,8 +63,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.openidm.maintenance.upgrade.UpgradeException;
-import org.forgerock.openidm.maintenance.upgrade.UpgradeManager;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -86,7 +87,8 @@ public class UpdateService implements RequestHandler {
 
     private static final String ARCHIVE_NAME = "archive";
 
-    private final UpgradeManager upgradeManager = new UpgradeManager();
+    @Reference(policy=ReferencePolicy.STATIC)
+    private UpdateManager updateManager;
 
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
@@ -107,7 +109,8 @@ public class UpdateService implements RequestHandler {
     private enum Action {
         available,
         preview,
-        update
+        update,
+        license
     }
 
     /**
@@ -122,6 +125,8 @@ public class UpdateService implements RequestHandler {
                 return handlePreviewUpdate(request.getAdditionalParameters());
             case update:
                 return handleInstallUpdate(request.getAdditionalParameters());
+            case license:
+                return handleLicense(request.getAdditionalParameters());
             default:
                 return new NotSupportedException(request.getAction() + " is not supported").asPromise();
         }
@@ -129,8 +134,8 @@ public class UpdateService implements RequestHandler {
 
     private Promise<ActionResponse, ResourceException> handleListAvailable() {
         try {
-            return newActionResponse(upgradeManager.listAvailableUpdates()).asPromise();
-        } catch (UpgradeException e) {
+            return newActionResponse(updateManager.listAvailableUpdates()).asPromise();
+        } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
@@ -140,11 +145,11 @@ public class UpdateService implements RequestHandler {
             if (!parameters.containsKey(ARCHIVE_NAME)) {
                 return new BadRequestException("Archive name not specified.").asPromise();
             }
-            return newActionResponse(upgradeManager.report(
+            return newActionResponse(updateManager.report(
                     Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
                             parameters.get(ARCHIVE_NAME)),
                     IdentityServer.getInstance().getInstallLocation().toPath())).asPromise();
-        } catch (UpgradeException e) {
+        } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
@@ -159,18 +164,28 @@ public class UpdateService implements RequestHandler {
                 ActionResponse response = connectionFactory.getConnection().action(new RootContext(),
                         Requests.newActionRequest("/maintenance", "status"));
                 if (!response.getJsonContent().get("maintenanceEnabled").asBoolean().equals(Boolean.TRUE)) {
-                    throw new UpgradeException("Must be in maintenance mode prior to installing an update.");
+                    throw new UpdateException("Must be in maintenance mode prior to installing an update.");
                 }
             } catch (ResourceException e) {
-                throw new UpgradeException("Unable to check maintenance mode status.", e);
+                throw new UpdateException("Unable to check maintenance mode status.", e);
             }
 
-            return newActionResponse(upgradeManager.upgrade(
+            return newActionResponse(updateManager.upgrade(
                     Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
                             parameters.get(ARCHIVE_NAME)),
                     IdentityServer.getInstance().getInstallLocation().toPath(),
                     false)).asPromise();
-        } catch (UpgradeException e) {
+        } catch (UpdateException e) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        }
+    }
+
+    private Promise<ActionResponse, ResourceException> handleLicense(Map<String, String> parameters) {
+        try {
+            return newActionResponse(updateManager.getLicense(
+                    Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
+                            parameters.get(ARCHIVE_NAME)))).asPromise();
+        } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
