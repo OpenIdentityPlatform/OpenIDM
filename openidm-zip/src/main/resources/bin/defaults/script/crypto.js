@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
@@ -24,15 +24,31 @@
 
 /*global exports, openidm */
 
-exports.encrypt = function (value, cipher, alias) {
+(function () {
 
-    cipher = cipher || 'AES/CBC/PKCS5Padding';
-    alias = alias || identityServer.getProperty('openidm.config.crypto.alias', 'true', true);
-
-    if (typeof value === 'undefined' || value === null || openidm.isEncrypted(value)) {
+    var canBeEncrypted= function (value) {
         // we are not going to do anything if the value is undefined/null/already encrypted
-        return value;
-    }
+        return typeof value !== 'undefined' && value !== null && !openidm.isEncrypted(value);
+    };
 
-    return openidm.encrypt(value, cipher, alias);
-};
+    exports.encrypt = function (value, cipher, alias) {
+
+        cipher = cipher || 'AES/CBC/PKCS5Padding';
+        alias = alias || identityServer.getProperty('openidm.config.crypto.alias', 'true', true);
+
+        if (!canBeEncrypted(value)) {
+            return value;
+        }
+
+        return openidm.encrypt(value, cipher, alias);
+    };
+
+    exports.hash = function (value, algorithm) {
+        algorithm = algorithm || "SHA-256";
+        if (!canBeEncrypted(value) || typeof value !== "string") {
+            return value;
+        }
+        return openidm.hash(value, algorithm);
+    };
+
+}());
