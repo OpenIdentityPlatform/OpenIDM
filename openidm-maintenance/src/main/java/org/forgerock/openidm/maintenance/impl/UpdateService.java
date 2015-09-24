@@ -86,6 +86,7 @@ public class UpdateService implements RequestHandler {
     public static final String PID = "org.forgerock.openidm.maintenance.update";
 
     private static final String ARCHIVE_NAME = "archive";
+    private static final String ARCHIVE_DIRECTORY = "/bin/update/";
 
     @Reference(policy=ReferencePolicy.STATIC)
     private UpdateManager updateManager;
@@ -146,7 +147,7 @@ public class UpdateService implements RequestHandler {
                 return new BadRequestException("Archive name not specified.").asPromise();
             }
             return newActionResponse(updateManager.report(
-                    Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
+                    Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
                             parameters.get(ARCHIVE_NAME)),
                     IdentityServer.getInstance().getInstallLocation().toPath())).asPromise();
         } catch (UpdateException e) {
@@ -171,7 +172,7 @@ public class UpdateService implements RequestHandler {
             }
 
             return newActionResponse(updateManager.upgrade(
-                    Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
+                    Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
                             parameters.get(ARCHIVE_NAME)),
                     IdentityServer.getInstance().getInstallLocation().toPath(),
                     false)).asPromise();
@@ -183,7 +184,7 @@ public class UpdateService implements RequestHandler {
     private Promise<ActionResponse, ResourceException> handleLicense(Map<String, String> parameters) {
         try {
             return newActionResponse(updateManager.getLicense(
-                    Paths.get(IdentityServer.getInstance().getInstallLocation() + "/bin/update/" +
+                    Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
                             parameters.get(ARCHIVE_NAME)))).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
