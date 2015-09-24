@@ -97,7 +97,7 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
      */
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
-        return new NotSupportedException("Not allowed on update history service").asPromise();
+        return new NotSupportedException("Not allowed on update log service").asPromise();
     }
 
     /**
@@ -105,7 +105,7 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        return new NotSupportedException("Not allowed on update history service").asPromise();
+        return new NotSupportedException("Not allowed on update log service").asPromise();
     }
 
     /**
@@ -113,7 +113,7 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return new NotSupportedException("Not allowed on update history service").asPromise();
+        return new NotSupportedException("Not allowed on update log service").asPromise();
     }
 
     /**
@@ -121,31 +121,22 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return new NotSupportedException("Not allowed on update history service").asPromise();
+        return new NotSupportedException("Not allowed on update log service").asPromise();
     }
 
     /**
-     * Query update history objects
+     * Query update history objects (wrapper to conceal repo endpoint)
      */
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
             final QueryResourceHandler handler) {
-        request.setResourcePath("repo/updates");
+        QueryRequest newRequest = Requests.copyOfQueryRequest(request).setResourcePath("repo/updates");
         try {
             QueryResponse result = connectionFactory.getConnection().query(
-                    context, request, new QueryResourceHandler() {
+                    context, newRequest, new QueryResourceHandler() {
                         @Override
                         public boolean handleResource(ResourceResponse resourceResponse) {
-                            JsonValue content = resourceResponse.getContent();
-                            try {
-                                if (!content.get("status").asString().equals("IN_PROGRESS")) {
-                                    content.add("files", fetchFiles(content.get("_id").asLong()));
-                                }
-                                return handler.handleResource(resourceResponse);
-                            } catch (ResourceException e) {
-                                logger.debug("Failed to retrieve file list for update " + content.get("_id"));
-                                return false;
-                            }
+                            return handler.handleResource(resourceResponse);
                         }
                     });
             return result.asPromise();
@@ -154,34 +145,14 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
         }
     }
 
-    private List<JsonValue> fetchFiles(Long updateId) throws ResourceException {
-        QueryRequest request = Requests.newQueryRequest("repo/updatefile")
-                .setQueryExpression("\"updateId\" eq " + updateId);
-        final List<JsonValue> files = new ArrayList<>();
-        connectionFactory.getConnection().query(ContextUtil.createInternalContext(), request,
-                new QueryResourceHandler() {
-                    @Override
-                    public boolean handleResource(ResourceResponse resourceResponse) {
-                        files.add(resourceResponse.getContent());
-                        return true;
-                    }
-                });
-        return files;
-    }
-
     /**
-     * Read an update history object
+     * Read an update history object (wrapper to conceal repo endpoint)
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
-        request.setResourcePath("repo/updates");
+        ReadRequest newRequest = Requests.copyOfReadRequest(request).setResourcePath("repo/updates");
         try {
-            ResourceResponse result = connectionFactory.getConnection().read(context, request);
-            JsonValue content = result.getContent();
-            if (!content.get("status").asString().equals("IN_PROGRESS")) {
-                content.add("files", fetchFiles(content.get("_id").asLong()));
-            }
-            return result.asPromise();
+            return connectionFactory.getConnection().read(context, newRequest).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }
