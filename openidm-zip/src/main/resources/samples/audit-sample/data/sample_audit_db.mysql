@@ -5,6 +5,7 @@ USE audit;
 -- Table `auditaccess`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `auditaccess` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `objectid` VARCHAR(38) NOT NULL ,
   `activity` VARCHAR(24) NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
@@ -29,7 +30,8 @@ CREATE  TABLE IF NOT EXISTS `auditaccess` (
   `http_headers` TEXT ,
   `status` VARCHAR(20) NULL ,
   `elapsedtime` VARCHAR(13) NULL ,
-  PRIMARY KEY (`objectid`),
+  INDEX `idx_auditrecon_objectid` (`objectid` ASC),
+  INDEX `idx_auditrecon_activitydate` (`activitydate` ASC),
   INDEX `idx_auditaccess_status` (`status` ASC),
   INDEX `idx_auditaccess_principal` (`principal`(28) ASC) )
 ENGINE = InnoDB;
@@ -38,6 +40,7 @@ ENGINE = InnoDB;
 -- Table `auditauthentication`
 -- -----------------------------------------------------
 CREATE TABLE IF NOT EXISTS `auditauthentication` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `objectid` VARCHAR(38) NOT NULL ,
   `transactionid` VARCHAR(56) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
@@ -47,8 +50,9 @@ CREATE TABLE IF NOT EXISTS `auditauthentication` (
   `principals` TEXT ,
   `context` TEXT ,
   `sessionid` VARCHAR(255) ,
-  `entries` TEXT ,
-  PRIMARY KEY (`objectid`)
+  `entries` TEXT,
+  INDEX `idx_auditrecon_objectid` (`objectid` ASC),
+  INDEX `idx_auditrecon_activitydate` (`activitydate` ASC)
 )
   ENGINE = InnoDB;
 
@@ -56,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `auditauthentication` (
 -- Table `auditactivity`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `auditactivity` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `objectid` VARCHAR(38) NOT NULL ,
   `activity` VARCHAR(24) NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
@@ -75,7 +80,8 @@ CREATE  TABLE IF NOT EXISTS `auditactivity` (
   `message` TEXT NULL,
   `activityobjectid` VARCHAR(255) ,
   `status` VARCHAR(20) ,
-  PRIMARY KEY (`objectid`) ,
+  INDEX `idx_auditrecon_objectid` (`objectid` ASC),
+  INDEX `idx_auditrecon_activitydate` (`activitydate` ASC),
   INDEX `idx_auditactivity_transactionid` (`transactionid` ASC)
 )
 ENGINE = InnoDB;
@@ -84,6 +90,7 @@ ENGINE = InnoDB;
 -- Table `auditrecon`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `auditrecon` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `objectid` VARCHAR(38) NOT NULL ,
   `transactionid` VARCHAR(56) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
@@ -103,8 +110,8 @@ CREATE  TABLE IF NOT EXISTS `auditrecon` (
   `ambiguoustargetobjectids` MEDIUMTEXT NULL ,
   `reconaction` VARCHAR(36) NULL ,
   `entrytype` VARCHAR(7) NULL ,
-  `reconid` VARCHAR(56) NULL ,
-  PRIMARY KEY (`objectid`) ,
+  `reconid` VARCHAR(56) NULL,
+  INDEX `idx_auditrecon_objectid` (`objectid` ASC),
   INDEX `idx_auditrecon_reconid` (`reconid` ASC),
   INDEX `idx_auditrecon_targetobjectid` (`targetobjectid`(28) ASC),
   INDEX `idx_auditrecon_sourceobjectid` (`sourceobjectid`(28) ASC),
@@ -120,6 +127,7 @@ ENGINE = InnoDB;
 -- Table `auditsync`
 -- -----------------------------------------------------
 CREATE  TABLE IF NOT EXISTS `auditsync` (
+  `id` int(11) NOT NULL AUTO_INCREMENT PRIMARY KEY,
   `objectid` VARCHAR(38) NOT NULL ,
   `transactionid` VARCHAR(56) NOT NULL ,
   `activitydate` VARCHAR(29) NULL COMMENT 'Date format: 2011-09-09T14:58:17.654+02:00' ,
@@ -134,8 +142,9 @@ CREATE  TABLE IF NOT EXISTS `auditsync` (
   `situation` VARCHAR(24) NULL ,
   `sourceobjectid` VARCHAR(511) NULL ,
   `status` VARCHAR(20) NULL ,
-  `targetobjectid` VARCHAR(511) NULL ,
-  PRIMARY KEY (`objectid`)
+  `targetobjectid` VARCHAR(511) NULL,
+  INDEX `idx_auditrecon_objectid` (`objectid` ASC),
+  INDEX `idx_auditrecon_activitydate` (`activitydate` ASC)
 )
 ENGINE = InnoDB;
 
