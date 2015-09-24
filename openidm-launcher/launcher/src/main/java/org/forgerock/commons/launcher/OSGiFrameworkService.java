@@ -56,7 +56,6 @@ import org.forgerock.json.fluent.JsonException;
 import org.forgerock.json.fluent.JsonTransformer;
 import org.forgerock.json.fluent.JsonValue;
 import org.json.simple.parser.JSONParser;
-import org.kohsuke.args4j.Argument;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
 import org.kohsuke.args4j.Option;
@@ -130,7 +129,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
     /**
      * Properties to initiate the OSGi Framework
      */
-    private Map configurationProperties = null;
+    private Map<String, String> configurationProperties = new HashMap<String, String>();
 
     /**
      * Configuration of this {@link OSGiFrameworkService#init()}.
@@ -358,17 +357,14 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         loadSystemProperties(launcherConfiguration, projectLocation);
 
         // Read configuration properties.
-        configurationProperties = loadConfigProperties(launcherConfiguration, projectLocation);
+        loadConfigProperties(configurationProperties, launcherConfiguration, projectLocation);
         configurationProperties.putAll(bootParameters);
 
         // Copy framework properties from the system properties.
         copySystemProperties(configurationProperties);
 
-        // If there is a passed in bundle cache directory, then
-        // that overwrites anything in the config file.
-        configurationProperties.put(Constants.FRAMEWORK_STORAGE, URLDecoder.decode(getFileForPath(
-                null != getStorageDir() ? getStorageDir() : "felix-cache", getWorkingURI())
-                .getAbsolutePath(), "UTF-8"));
+        configurationProperties.put(Constants.FRAMEWORK_STORAGE,
+                URLDecoder.decode(getFileForPath(determineStorageDir(), getWorkingURI()).getAbsolutePath(), "UTF-8"));
 
         // Append the custom bootProperties
         for (Map.Entry<String, Object> entry : loadBootProperties(launcherConfiguration,
@@ -397,6 +393,32 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             });
         }
 
+    }
+
+    /**
+     * If there is a passed in bundle cache directory (-s), then
+     * that overwrites anything in the config file, then if
+     * the config.properties file doesn't provide the setting, default to
+     * "felix-cache".
+     * <p/>
+     * Refer to config.properties: org.osgi.framework.storage
+     *
+     * @return The directory to store the "felix-cache".
+     */
+    private String determineStorageDir() {
+        // If there is a passed in bundle cache directory, then
+        // that overwrites anything in the config file.
+        String cmdLineStorageDir = getStorageDir();
+        String sysPropsStorageDir = configurationProperties.get(Constants.FRAMEWORK_STORAGE);
+        String determinedStorageDir;
+        if (null != cmdLineStorageDir) {
+            determinedStorageDir = cmdLineStorageDir;
+        } else if (null != sysPropsStorageDir) {
+            determinedStorageDir = sysPropsStorageDir;
+        } else {
+            determinedStorageDir = "felix-cache";
+        }
+        return determinedStorageDir;
     }
 
     protected void registerServices(BundleContext bundleContext) throws Exception {
@@ -546,11 +568,14 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
      * located in the <tt>conf/</tt> directory and is called "
      * <tt>config.properties</tt>".
      * </p>
-     * 
-     * @return A <tt>Map<String, Object></tt> instance or <tt>null</tt> if there
-     *         was an error.
+     *
+     * @param configurationProperties Current evaluated properties.
+     * @param configuration Configuration of where the config properties file is located or the already loaded Map of
+     * config settings.
+     * @param projectDirectory Working directory to start looking for the properties file.
      */
-    protected Map<String, String> loadConfigProperties(JsonValue configuration, URI projectDirectory) {
+    protected void loadConfigProperties(
+            Map<String, String> configurationProperties, JsonValue configuration, URI projectDirectory) {
         JsonValue systemProperties = configuration.get(CONFIG_PROPERTIES_PROP);
         if (systemProperties.isMap()) {
             // Substitute all variables
@@ -559,19 +584,22 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             Properties props =
                     loadPropertyFile(projectDirectory, systemProperties.expect(String.class)
                             .defaultTo(CONFIG_PROPERTIES_FILE_VALUE).asString());
-            if (props == null)
-                return new HashMap<String, String>(0);
+            if (props == null) {
+                configurationProperties.clear();
+            }
             // Perform variable substitution on specified properties.
             systemProperties = (new JsonValue(props, null, Arrays.asList(transformer))).copy();
         }
-        Map<String, String> config = new HashMap<String, String>(systemProperties.size());
+
         for (Map.Entry<String, Object> entry : systemProperties.asMap().entrySet()) {
-            if (entry.getValue() instanceof String) {
-                // Excluce the null and non String values
-                config.put(entry.getKey(), (String) entry.getValue());
+            Object value = entry.getValue();
+            if (value instanceof String) {
+                // Exclude the null and non String values
+                Object newValue =
+                        ConfigurationUtil.substVars((String) value, propertyAccessor);
+                configurationProperties.put(entry.getKey(), (String) newValue);
             }
         }
-        return config;
     }
 
     /**
@@ -637,7 +665,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         return props;
     }
 
-    protected void copySystemProperties(Map<String, Object> configProps) {
+    protected void copySystemProperties(Map<String, String> configProps) {
         for (Enumeration e = System.getProperties().propertyNames(); e.hasMoreElements();) {
             String key = (String) e.nextElement();
             if (key.startsWith("org.osgi.framework.")) {
