@@ -110,7 +110,7 @@ public class UpdateService implements RequestHandler {
         available,
         preview,
         update,
-        license
+        getLicense
     }
 
     /**
@@ -125,7 +125,7 @@ public class UpdateService implements RequestHandler {
                 return handlePreviewUpdate(request.getAdditionalParameters());
             case update:
                 return handleInstallUpdate(request.getAdditionalParameters());
-            case license:
+            case getLicense:
                 return handleLicense(request.getAdditionalParameters());
             default:
                 return new NotSupportedException(request.getAction() + " is not supported").asPromise();

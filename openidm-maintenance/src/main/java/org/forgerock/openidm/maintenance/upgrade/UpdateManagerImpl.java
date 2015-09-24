@@ -103,7 +103,7 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String JSON_EXT = ".json";
     private static final String PATCH_EXT = ".patch";
     private static final Path ARCHIVE_PATH = Paths.get("bin/update");
-    private static final String LICENSE_PATH = "legal-notices/CDDLv1_0.txt";
+    private static final String LICENSE_PATH = "legal-notices/license.txt";
 
     // Archive manifest keys
     private static final String PROP_PRODUCT = "product";
@@ -113,6 +113,12 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_RESOURCE = "resource";
     private static final String PROP_RESTARTREQUIRED = "restartRequired";
+
+    public enum UpdateStatus {
+        IN_PROGRESS,
+        COMPLETE,
+        FAILED
+    }
 
     /** The update logging service */
     @Reference(policy = ReferencePolicy.STATIC)
@@ -426,7 +432,7 @@ public class UpdateManagerImpl implements UpdateManager {
                         // perform upgrade
                         final JsonValue result = json(object());
                         UpdateLogEntry updateEntry = new UpdateLogEntry();
-                        updateEntry.setStatus("IN_PROGRESS")
+                        updateEntry.setStatus(UpdateStatus.IN_PROGRESS)
                                 .setStatusMessage("Initializing update")
                                 .setTotalTasks(archive.getFiles().size())
                                 .setStartDate(getDateString())
@@ -451,7 +457,7 @@ public class UpdateManagerImpl implements UpdateManager {
                                     result.put(path.toString(), "skipped");
                                 } else if (path.startsWith(CONF_PATH) &&
                                         path.getFileName().toString().endsWith(PATCH_EXT)) {
-                                    new UpdateConfig().patchConfig(ContextUtil.createInternalContext(),
+                                    UpdateConfig.getUpdateConfig().patchConfig(ContextUtil.createInternalContext(),
                                             "repo/config", json(FileUtil.readFile(path.toFile())));
                                     result.put(path.toString(), "patched");
                                 } else {
@@ -480,7 +486,7 @@ public class UpdateManagerImpl implements UpdateManager {
                                 }
                             } catch (IOException e) {
                                 logUpdate(updateEntry.setEndDate(getDateString())
-                                        .setStatus("FAILED")
+                                        .setStatus(UpdateStatus.FAILED)
                                         .setStatusMessage("Update failed."));
                                 throw new UpdateException("Unable to upgrade " + path.toString(), e);
                             }
@@ -488,7 +494,7 @@ public class UpdateManagerImpl implements UpdateManager {
                                     .setStatusMessage("Processed " + path.getFileName().toString()));
                         }
                         logUpdate(updateEntry.setEndDate(getDateString())
-                                .setStatus("COMPLETE")
+                                .setStatus(UpdateStatus.COMPLETE)
                                 .setStatusMessage("Update complete."));
 
                         if (Boolean.valueOf(updateProperties.getProperty(PROP_RESTARTREQUIRED).toUpperCase())) {
@@ -498,6 +504,31 @@ public class UpdateManagerImpl implements UpdateManager {
                         return result;
                     }
                 });
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public JsonValue getLicense(Path archive) throws UpdateException {
+        try {
+            ZipFile zip = new ZipFile(archive.toFile());
+            Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
+            zip.extractFile("openidm/" + LICENSE_PATH, tmpDir.toString());
+            File file = new File(tmpDir.toString() + "openidm/" + LICENSE_PATH);
+            if (!file.exists()) {
+                throw new UpdateException("Unable to locate a license file.");
+            }
+            try (FileInputStream inp = new FileInputStream(file)) {
+                byte[] data = new byte[(int) file.length()];
+                inp.read(data);
+                return json(object(field("license", new String(data, "UTF-8"))));
+            } catch (IOException e) {
+                throw new UpdateException("Unable to load package properties.", e);
+            }
+        } catch (IOException | ZipException e) {
+            throw new UpdateException("Unable to load package properties.", e);
+        }
     }
 
     private void logUpdate(UpdateLogEntry entry) throws UpdateException {
@@ -523,34 +554,6 @@ public class UpdateManagerImpl implements UpdateManager {
             try (InputStream inp = new FileInputStream(tmpDir.toString() + "/openidm/package.properties")) {
                 prop.load(inp);
                 return prop;
-            } catch (IOException e) {
-                throw new UpdateException("Unable to load package properties.", e);
-            }
-        } catch (IOException | ZipException e) {
-            throw new UpdateException("Unable to load package properties.", e);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public JsonValue getLicense(Path archive) throws UpdateException {
-        try {
-            ZipFile zip = new ZipFile(archive.toFile());
-            Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
-            zip.extractFile("openidm/" + LICENSE_PATH, tmpDir.toString());
-            File file = new File(tmpDir.toString() + "openidm/" + LICENSE_PATH);
-            if (!file.exists()) {
-                file = new File(LICENSE_PATH);
-            }
-            if (!file.exists()) {
-                throw new UpdateException("Unable to locate a license file.");
-            }
-            try (FileInputStream inp = new FileInputStream(file)) {
-                byte[] data = new byte[(int) file.length()];
-                inp.read(data);
-                return json(object(field("license", new String(data, "UTF-8"))));
             } catch (IOException e) {
                 throw new UpdateException("Unable to load package properties.", e);
             }
