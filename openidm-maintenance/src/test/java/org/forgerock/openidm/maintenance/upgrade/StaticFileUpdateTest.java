@@ -145,13 +145,13 @@ public class StaticFileUpdateTest {
      * Test keeping a file with no differences.  This should throw an exception as there are no differences
      * to keep.
      */
-    @Test(expectedExceptions = IOException.class)
+    @Test
     public void testKeepIsUnchanged() throws IOException {
         Files.write(tempFile, oldBytes);
         FileStateChecker fileStateChecker = mock(FileStateChecker.class);
         when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.UNCHANGED);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
-        update.keep(tempFile);
+        assertThat(update.keep(tempFile)).isNull();
     }
 
     /**
