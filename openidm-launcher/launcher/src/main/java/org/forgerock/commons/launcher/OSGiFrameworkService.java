@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -129,7 +129,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
     /**
      * Properties to initiate the OSGi Framework
      */
-    private Map<String, String> configurationProperties = new HashMap<String, String>();
+    private Map configurationProperties = new HashMap<String, Object>();
 
     /**
      * Configuration of this {@link OSGiFrameworkService#init()}.
@@ -409,12 +409,12 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         // If there is a passed in bundle cache directory, then
         // that overwrites anything in the config file.
         String cmdLineStorageDir = getStorageDir();
-        String sysPropsStorageDir = configurationProperties.get(Constants.FRAMEWORK_STORAGE);
+        Object configPropsStorageDir = configurationProperties.get(Constants.FRAMEWORK_STORAGE);
         String determinedStorageDir;
         if (null != cmdLineStorageDir) {
             determinedStorageDir = cmdLineStorageDir;
-        } else if (null != sysPropsStorageDir) {
-            determinedStorageDir = sysPropsStorageDir;
+        } else if (configPropsStorageDir instanceof String) {
+            determinedStorageDir = (String) configPropsStorageDir;
         } else {
             determinedStorageDir = "felix-cache";
         }
@@ -433,7 +433,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
 
     protected Map<String, String> getConfigurationProperties() {
         if (null == configurationProperties) {
-            configurationProperties = new HashMap<String, String>();
+            configurationProperties = new HashMap<String, Object>();
         }
         return configurationProperties;
     }
@@ -575,7 +575,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
      * @param projectDirectory Working directory to start looking for the properties file.
      */
     protected void loadConfigProperties(
-            Map<String, String> configurationProperties, JsonValue configuration, URI projectDirectory) {
+            Map<String, Object> configurationProperties, JsonValue configuration, URI projectDirectory) {
         JsonValue systemProperties = configuration.get(CONFIG_PROPERTIES_PROP);
         if (systemProperties.isMap()) {
             // Substitute all variables
@@ -597,7 +597,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                 // Exclude the null and non String values
                 Object newValue =
                         ConfigurationUtil.substVars((String) value, propertyAccessor);
-                configurationProperties.put(entry.getKey(), (String) newValue);
+                configurationProperties.put(entry.getKey(), newValue);
             }
         }
     }
