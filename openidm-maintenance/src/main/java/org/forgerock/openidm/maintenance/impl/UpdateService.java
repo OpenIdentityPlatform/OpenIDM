@@ -62,7 +62,9 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.promise.Promise;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -88,6 +90,8 @@ public class UpdateService implements RequestHandler {
     private static final String ARCHIVE_NAME = "archive";
     private static final String ARCHIVE_DIRECTORY = "/bin/update/";
 
+    private BundleContext bundleContext = null;
+
     @Reference(policy=ReferencePolicy.STATIC)
     private UpdateManager updateManager;
 
@@ -99,6 +103,7 @@ public class UpdateService implements RequestHandler {
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Update service {}", compContext.getProperties());
         logger.info("Update service started.");
+        bundleContext = compContext.getBundleContext();
     }
 
     @Deactivate
@@ -125,7 +130,8 @@ public class UpdateService implements RequestHandler {
             case preview:
                 return handlePreviewUpdate(request.getAdditionalParameters());
             case update:
-                return handleInstallUpdate(request.getAdditionalParameters());
+                return handleInstallUpdate(request.getAdditionalParameters(),
+                        context.asContext(SecurityContext.class).getAuthenticationId());
             case getLicense:
                 return handleLicense(request.getAdditionalParameters());
             default:
@@ -155,7 +161,8 @@ public class UpdateService implements RequestHandler {
         }
     }
 
-    private Promise<ActionResponse, ResourceException> handleInstallUpdate(Map<String, String> parameters) {
+    private Promise<ActionResponse, ResourceException> handleInstallUpdate(Map<String, String> parameters,
+            String userName) {
         try {
             if (!parameters.containsKey(ARCHIVE_NAME)) {
                 return new BadRequestException("Archive name not specified.").asPromise();
@@ -174,7 +181,7 @@ public class UpdateService implements RequestHandler {
             return newActionResponse(updateManager.upgrade(
                     Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
                             parameters.get(ARCHIVE_NAME)),
-                    IdentityServer.getInstance().getInstallLocation().toPath())).asPromise();
+                    IdentityServer.getInstance().getInstallLocation().toPath(), userName, bundleContext)).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
