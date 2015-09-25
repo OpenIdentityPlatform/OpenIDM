@@ -62,8 +62,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param propertyName      Name of property on first object represents the relationship
      */
     public SingletonRelationshipProvider(ConnectionFactory connectionFactory, ResourcePath resourcePath, 
-            JsonPointer propertyName, ActivityLogger activityLogger) {
-        super(connectionFactory, resourcePath, propertyName, activityLogger);
+            JsonPointer propertyName, ActivityLogger activityLogger, 
+            final ManagedObjectSyncService managedObjectSyncService) {
+        super(connectionFactory, resourcePath, propertyName, activityLogger, managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,

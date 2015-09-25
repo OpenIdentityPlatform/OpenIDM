@@ -90,7 +90,7 @@ import java.util.concurrent.atomic.AtomicReference;
  * Provides access to a set of managed objects of a given type: managed/[type]/{id}.
  *
  */
-class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
+class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, ManagedObjectSyncService {
 
     /** Actions supported by this resource provider */
     enum Action {
@@ -208,8 +208,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         for (JsonPointer relationship : schema.getRelationshipFields()) {
             final SchemaField field = schema.getField(relationship);
-            relationshipProviders.put(relationship,
-                    RelationshipProvider.newProvider(connectionFactory, managedObjectPath, field, activityLogger));
+            relationshipProviders.put(relationship, RelationshipProvider.newProvider(connectionFactory, 
+                    managedObjectPath, field, activityLogger, this));
         }
         
         for (ScriptHook hook : ScriptHook.values()) {
@@ -1168,20 +1168,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         return stripped;
     }
 
-    
-    /**
-     * Sends a sync action request to the synchronization service
-     *
-     * @param context the Context of the request
-     * @param request the Request being processed
-     * @param resourceId the additional resourceId parameter telling the synchronization service which object
-     *                   is being synchronized
-     * @param action the {@link org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction}
-     * @param oldValue the previous object value before the change (if applicable, or null if not)
-     * @param newValue the object value to sync
-     * @throws ResourceException in case of a failure that was not handled by the ResultHandler
-     */
-    private void performSyncAction(final Context context, final Request request, final String resourceId,
+    @Override
+    public void performSyncAction(final Context context, final Request request, final String resourceId,
             final SynchronizationService.SyncServiceAction action, final JsonValue oldValue, final JsonValue newValue)
         throws ResourceException {
 

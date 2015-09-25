@@ -72,8 +72,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param propertyName Name of property on first object represents the relationship
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, ActivityLogger activityLogger) {
-        super(connectionFactory, resourcePath, propertyName, activityLogger);
+            final JsonPointer propertyName, ActivityLogger activityLogger, 
+            final ManagedObjectSyncService managedObjectSyncService) {
+        super(connectionFactory, resourcePath, propertyName, activityLogger,managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("{firstId}/" + propertyName.leaf()), Resources.newCollection(this));
