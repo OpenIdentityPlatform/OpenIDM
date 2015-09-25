@@ -253,7 +253,7 @@ public abstract class RelationshipProvider {
             createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
             
             // If the request is asynchronous then create and return the promise after formatting.
-            if (context.containsContext(AsyncContext.class)) {
+            if (context.containsContext(ManagedObjectSetContext.class)) {
                 return getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
             }
             
@@ -296,7 +296,7 @@ public abstract class RelationshipProvider {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
             
             // If the request is asynchronous then create and return the promise after formatting.
-            if (context.containsContext(AsyncContext.class)) {
+            if (context.containsContext(ManagedObjectSetContext.class)) {
                 return getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
             }
             
@@ -336,7 +336,7 @@ public abstract class RelationshipProvider {
                     convertToRepoObject(firstResourcePath(context, request), request.getContent());
 
             // If the request is asynchronous then update (if changed) and return the promise after formatting.
-            if (context.containsContext(AsyncContext.class)) {
+            if (context.containsContext(ManagedObjectSetContext.class)) {
                 return getConnection()
                         // current resource in the db
                         .readAsync(context, readRequest)
@@ -394,7 +394,7 @@ public abstract class RelationshipProvider {
 
         try {
             // If the request is asynchronous then delete and return the promise after formatting.
-            if (context.containsContext(AsyncContext.class)) {
+            if (context.containsContext(ManagedObjectSetContext.class)) {
                 return deleteAsync(context, path, deleteRequest);
             }
 

@@ -21,15 +21,16 @@ import org.forgerock.services.context.AbstractContext;
 import org.forgerock.services.context.Context;
 
 /**
- * A {@link Context} which represents an asynchronous request.
+ * A {@link Context} which represents a request coming from (or through) a {@link ManagedObjectSet}.
  */
-public class AsyncContext  extends AbstractContext {
+public class ManagedObjectSetContext  extends AbstractContext {
     
-    public AsyncContext(final Context parent) {
-        super(parent, "async");
+    public ManagedObjectSetContext(final Context parent) {
+        super(parent, "managedObjectSet");
     }
 
-    public AsyncContext(final JsonValue savedContext, final ClassLoader classLoader) throws ResourceException {
+    public ManagedObjectSetContext(final JsonValue savedContext, final ClassLoader classLoader) 
+            throws ResourceException {
         super(savedContext, classLoader);
     }
 }
