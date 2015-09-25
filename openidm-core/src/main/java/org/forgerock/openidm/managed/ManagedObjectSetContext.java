@@ -23,7 +23,7 @@ import org.forgerock.services.context.Context;
 /**
  * A {@link Context} which represents a request coming from (or through) a {@link ManagedObjectSet}.
  */
-public class ManagedObjectSetContext  extends AbstractContext {
+public class ManagedObjectSetContext extends AbstractContext {
     
     public ManagedObjectSetContext(final Context parent) {
         super(parent, "managedObjectSet");

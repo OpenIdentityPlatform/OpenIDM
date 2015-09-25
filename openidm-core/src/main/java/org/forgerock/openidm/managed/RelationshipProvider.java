@@ -49,6 +49,8 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.sync.impl.SynchronizationService;
+import org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -72,6 +74,11 @@ public abstract class RelationshipProvider {
      * The activity logger.
      */
     protected final ActivityLogger activityLogger;
+    
+    /**
+     * A service for sending sync events on managed objects
+     */
+    protected final ManagedObjectSyncService managedObjectSyncService;
 
     /** The name of the firstId field in the repo */
     protected static final String REPO_FIELD_FIRST_ID = "firstId";
@@ -169,13 +176,14 @@ public abstract class RelationshipProvider {
      * @return A new relationship provider instance
      */
     public static RelationshipProvider newProvider(final ConnectionFactory connectionFactory,
-            final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger) {
+            final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger,
+            final ManagedObjectSyncService managedObjectSyncService) {
         if (relationshipField.isArray()) {
-            return new CollectionRelationshipProvider(connectionFactory,
-                    resourcePath, new JsonPointer(relationshipField.getName()), activityLogger);
+            return new CollectionRelationshipProvider(connectionFactory, resourcePath, 
+                    new JsonPointer(relationshipField.getName()), activityLogger, managedObjectSyncService);
         } else {
-            return new SingletonRelationshipProvider(connectionFactory,
-                    resourcePath, new JsonPointer(relationshipField.getName()), activityLogger);
+            return new SingletonRelationshipProvider(connectionFactory, resourcePath, 
+                    new JsonPointer(relationshipField.getName()), activityLogger, managedObjectSyncService);
         }
     }
 
@@ -187,11 +195,13 @@ public abstract class RelationshipProvider {
      * @param propertyName Name of property on first object represents the relationship
      */
     protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, ActivityLogger activityLogger) {
+            final JsonPointer propertyName, ActivityLogger activityLogger,
+            final ManagedObjectSyncService managedObjectSyncService) {
         this.connectionFactory = connectionFactory;
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
         this.activityLogger = activityLogger;
+        this.managedObjectSyncService = managedObjectSyncService;
     }
 
     /**
@@ -272,7 +282,9 @@ public abstract class RelationshipProvider {
             activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue.getContent(), 
                     afterValue.getContent(), Status.SUCCESS);
             
-            // TODO: Do sync on the managed object
+            // Do sync on the managed object
+            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
+                    SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
             return newResultPromise(response);
         } catch (ResourceException e) {
@@ -295,14 +307,16 @@ public abstract class RelationshipProvider {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
             
+            Promise<ResourceResponse, ResourceException> promise = 
+                    getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
+            
             // If the request is asynchronous then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectSetContext.class)) {
-                return getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
+                return promise;
             }
             
             // Read the relationship
-            final ResourceResponse response = 
-                    getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE).getOrThrow();
+            final ResourceResponse response = promise.getOrThrow();
             
             // Get the value of the managed object
             final ResourceResponse value = getManagedObject(context);
@@ -368,8 +382,10 @@ public abstract class RelationshipProvider {
             activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue.getContent(), 
                     afterValue.getContent(), Status.SUCCESS);
 
-            // TODO: Do sync on the managed object
-            
+            // Do sync on the managed object
+            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
+                    SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
+
             return newResultPromise(result);
         } catch (ResourceException e) {
             return e.asPromise();
@@ -412,6 +428,10 @@ public abstract class RelationshipProvider {
                     null, Status.SUCCESS);
 
             // TODO: Do sync on the managed object
+
+            // Do sync on the managed object
+            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
+                    SyncServiceAction.notifyDelete, beforeValue.getContent(), null);
             
             return newResultPromise(result);
         } catch (ResourceException e) {
