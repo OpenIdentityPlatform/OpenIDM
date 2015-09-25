@@ -498,7 +498,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             if (relationshipValue != null) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
-                persisted.add(provider.setRelationshipValueForResource(new AsyncContext(context), resourceId, 
+                persisted.add(provider.setRelationshipValueForResource(new ManagedObjectSetContext(context), resourceId, 
                         relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
                             @Override
                             public JsonValue apply(JsonValue jsonValue) throws ResourceException {
@@ -670,8 +670,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             final RelationshipProvider provider = entry.getValue();
             
             try {
-                joined.put(field, 
-                        provider.getRelationshipValueForResource(context, resourceId).getOrThrow().getObject());
+                joined.put(field, provider.getRelationshipValueForResource(new ManagedObjectSetContext(context), 
+                        resourceId).getOrThrow().getObject());
             } catch (NotFoundException e) {
                 joined.put(field, null);
             }
@@ -737,7 +737,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             // Delete any relationships associated with this resource
             final List<Promise<JsonValue, ResourceException>> deleted = new ArrayList<>();
             for (RelationshipProvider relationshipProvider : relationshipProviders.values()) {
-                deleted.add(relationshipProvider.clear(new AsyncContext(context), resourceId));
+                deleted.add(relationshipProvider.clear(new ManagedObjectSetContext(context), resourceId));
             }
             // Wait for deletions to complete before continuing
             when(deleted).getOrThrowUninterruptibly();
