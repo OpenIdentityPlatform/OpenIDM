@@ -25,7 +25,7 @@ public interface UpdateLogService {
      * Log a new update entry in the repo
      *
      * @param entry a new update entry.
-     * @throws org.forgerock.json.resource.ResourceException
+     * @throws ResourceException
      */
     public void logUpdate(UpdateLogEntry entry) throws ResourceException;
 
