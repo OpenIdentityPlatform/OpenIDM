@@ -15,12 +15,6 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
-import static org.forgerock.json.JsonValue.json;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -30,7 +24,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -48,7 +41,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.maintenance.upgrade.UpdateFileLogEntry;
 import org.forgerock.openidm.maintenance.upgrade.UpdateLogEntry;
 import org.forgerock.openidm.maintenance.upgrade.UpdateLogService;
 import org.forgerock.openidm.util.ContextUtil;
