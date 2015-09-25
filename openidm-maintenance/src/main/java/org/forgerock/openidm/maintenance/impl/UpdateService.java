@@ -174,8 +174,7 @@ public class UpdateService implements RequestHandler {
             return newActionResponse(updateManager.upgrade(
                     Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
                             parameters.get(ARCHIVE_NAME)),
-                    IdentityServer.getInstance().getInstallLocation().toPath(),
-                    false)).asPromise();
+                    IdentityServer.getInstance().getInstallLocation().toPath())).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
