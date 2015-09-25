@@ -164,9 +164,10 @@ public class InfoService extends AbstractScriptedService {
                         }
                     });
         } catch (ResourceException e) {
+            logger.debug("Unable to retrieve most recent update from repo", e);
             return "0";
         }
 
-        return results.size() > 0 ? results.get(0).get("_id").asString() : "0";
+        return results.size() > 0 ? results.get(0).get(ResourceResponse.FIELD_ID).asString() : "0";
     }
 }
