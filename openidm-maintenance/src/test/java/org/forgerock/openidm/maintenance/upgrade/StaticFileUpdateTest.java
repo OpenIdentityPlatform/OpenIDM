@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Date;
 
 import org.apache.commons.io.FileUtils;
 import org.forgerock.util.Function;
@@ -55,16 +56,17 @@ public class StaticFileUpdateTest {
 
     private static final ProductVersion oldVersion = new ProductVersion("3.2.0", "5000");
     private static final ProductVersion newVersion = new ProductVersion("4.0.0", "6000");
+    private static final long timestamp = new Date().getTime();
 
     private static final byte[] oldBytes = "oldcontent".getBytes();
     private static final byte[] newBytes = "newcontent".getBytes();
 
     private Path getOldVersionPath(Path file) {
-        return Paths.get(file + OLD_SUFFIX + oldVersion.toString());
+        return Paths.get(file + OLD_SUFFIX + timestamp);
     }
 
     private Path getNewVersionPath(Path file) {
-        return Paths.get(file + NEW_SUFFIX + newVersion.toString());
+        return Paths.get(file + NEW_SUFFIX + timestamp);
     }
 
     private Path tempPath;
@@ -107,8 +109,7 @@ public class StaticFileUpdateTest {
                                 return function.apply(new ByteArrayInputStream(newBytes));
                             }
                         });
-        StaticFileUpdate update = new StaticFileUpdate(fileStateChecker, tempPath, archive, oldVersion);
-        return update;
+        return new StaticFileUpdate(fileStateChecker, tempPath, archive, oldVersion, timestamp);
     }
 
     /**

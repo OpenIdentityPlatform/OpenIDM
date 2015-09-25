@@ -76,11 +76,13 @@ import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
+import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -118,6 +120,9 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String PROP_DESCRIPTION = "description";
     private static final String PROP_RESOURCE = "resource";
     private static final String PROP_RESTARTREQUIRED = "restartRequired";
+
+    private static final String BUNDLE_BACKUP_EXT = ".OLD-";
+    private static final String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 
     public enum UpdateStatus {
         IN_PROGRESS,
@@ -426,8 +431,8 @@ public class UpdateManagerImpl implements UpdateManager {
      * {@inheritDoc}
      */
     @Override
-    public JsonValue upgrade(final Path archiveFile, final Path installDir)
-        throws UpdateException {
+    public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName,
+            final BundleContext bundleContext) throws UpdateException {
 
         final Properties prop = readProperties(archiveFile.toFile());
         if (!"OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT)) ||
@@ -449,15 +454,16 @@ public class UpdateManagerImpl implements UpdateManager {
                         .setStatusMessage("Initializing update")
                         .setTotalTasks(archive.getFiles().size())
                         .setStartDate(getDateString())
-                        .setNodeId("foo")                   // TODO
-                        .setUserName("me");                 // TODO
+                        .setNodeId(IdentityServer.getInstance().getNodeName())
+                        .setUserName(userName);
                 try {
                     updateLogService.logUpdate(updateEntry);
                 } catch (ResourceException e) {
                     throw new UpdateException("Unable to log update.", e);
                 }
 
-                new UpdateThread(updateEntry, archive, fileStateChecker, installDir, prop, tempUnzipDir).start();
+                new UpdateThread(updateEntry, archive, fileStateChecker, installDir, prop, tempUnzipDir, bundleContext)
+                        .start();
 
                 return updateEntry.toJson();
             } catch (Exception e) {
@@ -500,18 +506,21 @@ public class UpdateManagerImpl implements UpdateManager {
         private final StaticFileUpdate staticFileUpdate;
         private final Properties updateProperties;
         private final Path tempDirectory;
+        private final BundleContext bundleContext;
+        private final long timestamp = new Date().getTime();
 
         public UpdateThread(UpdateLogEntry updateEntry, Archive archive, FileStateChecker fileStateChecker,
-                Path installDir, Properties updateProperties, Path tempDirectory) {
+                Path installDir, Properties updateProperties, Path tempDirectory, BundleContext bundleContext) {
             this.updateEntry = updateEntry;
             this.archive = archive;
             this.fileStateChecker = fileStateChecker;
             this.updateProperties = updateProperties;
             this.tempDirectory = tempDirectory;
+            this.bundleContext = bundleContext;
 
             this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
                     archive, new ProductVersion(ServerConstants.getVersion(),
-                    ServerConstants.getRevision()));
+                    ServerConstants.getRevision()), timestamp);
         }
 
         public void run() {
@@ -519,7 +528,24 @@ public class UpdateManagerImpl implements UpdateManager {
                 for (final Path path : archive.getFiles()) {
                     try {
                         if (path.startsWith(BUNDLE_PATH)) {
-                            // TODO do bundle upgrade
+                            BundleHandler bundleHandler = new BundleHandler(bundleContext,
+                                    BUNDLE_BACKUP_EXT + timestamp);
+                            Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
+                            Attributes manifest = readManifest(newPath);
+                            String symbolicName = manifest.getValue(BUNDLE_SYMBOLICNAME);
+                            if (symbolicName == null) {
+                                // treat it as a static file
+                                Path backupFile = staticFileUpdate.replace(path);
+                                if (backupFile != null) {
+                                    UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                                            .setFilePath(path.toString())
+                                            .setFileState(fileStateChecker.getCurrentFileState(path).name());
+                                    fileEntry.setBackupFile(backupFile.toString());
+                                    logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                                }
+                            } else {
+                                bundleHandler.upgradeBundle(newPath, symbolicName);
+                            }
                         } else if (path.startsWith(CONF_PATH) &&
                                 path.getFileName().toString().endsWith(JSON_EXT)) {
                             // a json config in the default project - ignore it
@@ -601,6 +627,7 @@ public class UpdateManagerImpl implements UpdateManager {
             }
         }
     }
+
     private void logUpdate(UpdateLogEntry entry) throws UpdateException {
         try {
             updateLogService.updateUpdate(entry);
@@ -632,13 +659,13 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
-    private Attributes readManifest(File jarFile) throws UpdateException {
+    private Attributes readManifest(Path jarFile) throws UpdateException {
         try {
-            return FileUtil.readManifest(jarFile);
+            return FileUtil.readManifest(jarFile.toFile());
         } catch (FileNotFoundException e) {
-            throw new UpdateException("File " + jarFile.getName() + " does not exist.", e);
+            throw new UpdateException("File " + jarFile.toFile().getName() + " does not exist.", e);
         } catch (IOException e) {
-            throw new UpdateException("Error while reading from " + jarFile.getName(), e);
+            throw new UpdateException("Error while reading from " + jarFile.toFile().getName(), e);
         }
     }
 

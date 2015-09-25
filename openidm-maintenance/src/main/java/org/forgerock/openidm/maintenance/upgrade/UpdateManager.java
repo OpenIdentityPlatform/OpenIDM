@@ -16,6 +16,7 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 import org.forgerock.json.JsonValue;
+import org.osgi.framework.BundleContext;
 
 import java.nio.file.Path;
 
@@ -49,11 +50,13 @@ public interface UpdateManager {
      *
      * @param archiveFile the {@link Path} to a ZIP archive containing a new version of OpenIDM
      * @param installDir the base directory where OpenIDM is installed
+     * @param userName the name of the user who initiated the update install
+     * @param bundleContext the BundleContext used when installing new bundles
      * @return a json response with the report of what was done to each file
      * @throws UpdateException on failure to perform upgrade
      */
-    public JsonValue upgrade(final Path archiveFile, final Path installDir)
-            throws UpdateException;
+    public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName,
+            final BundleContext bundleContext) throws UpdateException;
 
     /**
      * List the applicable update archives found in the update directory.

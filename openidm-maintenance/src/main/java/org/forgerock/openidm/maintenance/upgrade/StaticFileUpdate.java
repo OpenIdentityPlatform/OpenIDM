@@ -30,6 +30,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
+import java.util.Date;
 import java.util.EnumSet;
 import java.util.Set;
 
@@ -48,14 +49,16 @@ class StaticFileUpdate {
     private final Archive archive;
     private final ProductVersion currentVersion;
     private final ProductVersion upgradedVersion;
+    private final long timestamp;
 
     StaticFileUpdate(final FileStateChecker fileStateChecker, final Path openidmRoot, final Archive archive,
-            final ProductVersion currentVersion) {
+            final ProductVersion currentVersion, final long timestamp) {
         this.fileStateChecker = fileStateChecker;
         this.root = openidmRoot;
         this.archive = archive;
         this.currentVersion = currentVersion;
         this.upgradedVersion = archive.getVersion();
+        this.timestamp = timestamp;
     }
 
     /**
@@ -84,7 +87,7 @@ class StaticFileUpdate {
         Path destination = null;
         final Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
         if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
-            destination = root.resolve(path.toString() + OLD_SUFFIX + currentVersion.toString());
+            destination = root.resolve(path.toString() + OLD_SUFFIX + timestamp);
             Files.move(root.resolve(path),
                     destination,
                     StandardCopyOption.REPLACE_EXISTING);
@@ -108,7 +111,7 @@ class StaticFileUpdate {
      */
     Path keep(final Path path) throws IOException {
         if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
-            final Path destination = root.resolve(path.toString() + NEW_SUFFIX + upgradedVersion.toString());
+            final Path destination = root.resolve(path.toString() + NEW_SUFFIX + timestamp);
             archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
                 @Override
                 public Void apply(InputStream inputStream) throws IOException {
