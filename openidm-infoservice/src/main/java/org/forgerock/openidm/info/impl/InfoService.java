@@ -144,10 +144,10 @@ public class InfoService extends AbstractScriptedService {
         handler.put("version", object(
                 field("productVersion", ServerConstants.getVersion()),
                 field("productRevision", ServerConstants.getRevision()),
-                field("lastUpdateId", getLatestUpdateId())));
+                field("lastUpdateId", getLatestUpdateId(context))));
     }
 
-    private String getLatestUpdateId() {
+    private String getLatestUpdateId(Context context) {
         final List<JsonValue> results = new ArrayList<>();
         QueryRequest request = Requests.newQueryRequest("repo/updates")
                 .setQueryId("query-all-ids")
@@ -155,7 +155,7 @@ public class InfoService extends AbstractScriptedService {
                 .setPageSize(1);
 
         try {
-            connectionFactory.getConnection().query(ContextUtil.createInternalContext(), request,
+            connectionFactory.getConnection().query(context, request,
                     new QueryResourceHandler() {
                         @Override
                         public boolean handleResource(ResourceResponse resourceResponse) {
