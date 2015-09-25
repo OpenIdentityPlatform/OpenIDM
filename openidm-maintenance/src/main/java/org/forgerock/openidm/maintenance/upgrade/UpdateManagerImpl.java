@@ -362,12 +362,10 @@ public class UpdateManagerImpl implements UpdateManager {
                         for (Path path : archive.getFiles()) {
                             try {
                                 FileState state = fileStateChecker.getCurrentFileState(path);
-                                if (!FileState.UNCHANGED.equals(state)) {
-                                    result.add(object(
-                                            field("filePath", path.toString()),
-                                            field("fileState", state.toString())
-                                    ));
-                                }
+                                result.add(object(
+                                        field("filePath", path.toString()),
+                                        field("fileState", state.toString())
+                                ));
                             } catch (IOException e) {
                                 throw new UpdateException("Unable to determine file state for " + path.toString(), e);
                             }
