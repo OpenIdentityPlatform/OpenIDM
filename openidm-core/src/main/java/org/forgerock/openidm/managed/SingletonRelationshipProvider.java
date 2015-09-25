@@ -40,6 +40,7 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -50,6 +51,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
+    
     private final RequestHandler requestHandler;
 
     /**
@@ -59,8 +61,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param resourcePath      Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName      Name of property on first object represents the relationship
      */
-    public SingletonRelationshipProvider(ConnectionFactory connectionFactory, ResourcePath resourcePath, JsonPointer propertyName) {
-        super(connectionFactory, resourcePath, propertyName);
+    public SingletonRelationshipProvider(ConnectionFactory connectionFactory, ResourcePath resourcePath, 
+            JsonPointer propertyName, ActivityLogger activityLogger) {
+        super(connectionFactory, resourcePath, propertyName, activityLogger);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,
@@ -78,22 +81,31 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(Context context, String resourceId) {
-        return fetch(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue, ResourceException>() {
+        return queryRelationship(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue, 
+                ResourceException>() {
             @Override
             public Promise<JsonValue, ResourceException> apply(ResourceResponse value) throws ResourceException {
                 return newResultPromise(value.getContent());
             }
         });
     }
-
-    private Promise<ResourceResponse, ResourceException> fetch(Context context, String resourceId) {
+    
+    /**
+     * Queries relationships, returning the relationship associated with this providers resource path and the specified 
+     * relationship field.
+     * 
+     * @param context
+     * @param resourceId
+     * @return
+     */
+    private Promise<ResourceResponse, ResourceException> queryRelationship(Context context, String relationshipField) {
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, relationshipField);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(resourceId)),
+                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(relationshipField)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
             ));
 
@@ -109,7 +121,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             return e.asPromise();
         }
     }
-
+    
     /**
      * Persist the supplied {@link JsonValue} {@code value} as the new state of this singleton relationship on
      * {@code resourceId}.
@@ -123,7 +135,8 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @return The persisted instance of {@code value}
      */
     @Override
-    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, JsonValue value) {
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, 
+            JsonValue value) {
         if (value.isNotNull()) {
             try {
                 final JsonValue id = value.get(FIELD_PROPERTIES.child("_id"));
@@ -175,8 +188,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final ReadRequest request) {
-        return relationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
+    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, 
+            final ReadRequest request) {
+        return getRelationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(String relationshipId) throws ResourceException {
                 return readInstance(context, relationshipId, request);
@@ -186,8 +200,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final UpdateRequest request) {
-        return relationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
+    public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, 
+            final UpdateRequest request) {
+        return getRelationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(String relationshipId) throws ResourceException {
                 return updateInstance(context, relationshipId, request);
@@ -197,8 +212,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(final Context context, final PatchRequest request) {
-        return relationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
+    public Promise<ResourceResponse, ResourceException> patchInstance(final Context context, 
+            final PatchRequest request) {
+        return getRelationshipId(context).thenAsync(new AsyncFunction<String, ResourceResponse, ResourceException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(String relationshipId) throws ResourceException {
                 return patchInstance(context, relationshipId, request);
@@ -208,8 +224,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(final Context context, final ActionRequest request) {
-        return relationshipId(context).thenAsync(new AsyncFunction<String, ActionResponse, ResourceException>() {
+    public Promise<ActionResponse, ResourceException> actionInstance(final Context context, 
+            final ActionRequest request) {
+        return getRelationshipId(context).thenAsync(new AsyncFunction<String, ActionResponse, ResourceException>() {
             @Override
             public Promise<ActionResponse, ResourceException> apply(String relationshipId) throws ResourceException {
                 return actionInstance(context, relationshipId, request);
@@ -218,16 +235,16 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     }
 
     /**
-     * Return the relationship id of the current singleton value.
-     *
+     * Return the id of the relationship that this singleton represents.  The {@link Context} is used to find the id of 
+     * the managed object for this request.
+     * 
      * @param context The current context
      * @return The id of the current relationship this singleton represents
      */
-    private Promise<String, ResourceException> relationshipId(Context context) {
-        final String firstId =
-                context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
+    private Promise<String, ResourceException> getRelationshipId(Context context) {
+        final String managedObjectId = getManagedObjectId(context);
 
-        return fetch(context, firstId)
+        return queryRelationship(context, managedObjectId)
                 .then(new Function<ResourceResponse, String, ResourceException>() {
                     @Override
                     public String apply(ResourceResponse value) throws ResourceException {

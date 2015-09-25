@@ -23,6 +23,11 @@ import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -32,6 +37,7 @@ import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -45,16 +51,13 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
-
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * A {@link RelationshipProvider} representing a collection (array) of relationships for the given field.
@@ -68,8 +71,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName Name of property on first object represents the relationship
      */
-    public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, final JsonPointer propertyName) {
-        super(connectionFactory, resourcePath, propertyName);
+    public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
+            final JsonPointer propertyName, ActivityLogger activityLogger) {
+        super(connectionFactory, resourcePath, propertyName, activityLogger);
 
         final Router router = new Router();
         router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("{firstId}/" + propertyName.leaf()), Resources.newCollection(this));
@@ -90,7 +94,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
-            queryCollection(context, queryRequest, new QueryResourceHandler() {
+            queryCollection(new AsyncContext(context), queryRequest, new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resourceResponse) {
                     relationships.add(resourceResponse);
@@ -308,18 +312,37 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
 
             if (request.getQueryFilter() != null) {
-                filter.and(request.getQueryFilter());
+                filter = QueryFilter.and(filter, request.getQueryFilter());
             }
 
             queryRequest.setQueryFilter(filter);
-            return connectionFactory.getConnection().queryAsync(context, queryRequest, new QueryResourceHandler() {
+            
+            final Promise<QueryResponse, ResourceException> response = getConnection().queryAsync(context, queryRequest, 
+                    new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
                     return handler.handleResource(FORMAT_RESPONSE_NO_EXCEPTION.apply(resource));
                 }
             });
+            
+            if (context.containsContext(AsyncContext.class)) {
+                return response;   
+            }
+            
+            QueryResponse result = response.getOrThrow();
+            
+            // Get the value of the managed object
+            final ResourceResponse value = getManagedObject(context);
+            
+            // Do activity logging.
+            activityLogger.log(context, request, "query", getManagedObjectPath(context), null, value.getContent(), 
+                    Status.SUCCESS);
+            
+            return newResultPromise(result);
         } catch (ResourceException e) {
             return e.asPromise();
+        } catch (Exception e) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 }

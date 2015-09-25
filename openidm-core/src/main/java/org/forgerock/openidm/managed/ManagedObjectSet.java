@@ -209,7 +209,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         for (JsonPointer relationship : schema.getRelationshipFields()) {
             final SchemaField field = schema.getField(relationship);
             relationshipProviders.put(relationship,
-                    RelationshipProvider.newProvider(connectionFactory, managedObjectPath, field));
+                    RelationshipProvider.newProvider(connectionFactory, managedObjectPath, field, activityLogger));
         }
         
         for (ScriptHook hook : ScriptHook.values()) {
@@ -220,7 +220,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         for (JsonValue property : config.get("properties").expect(List.class)) {
             properties.add(new ManagedObjectProperty(scriptRegistry, cryptoService, property));
         }
-        enforcePolicies = Boolean.parseBoolean(IdentityServer.getInstance().getProperty("openidm.policy.enforcement.enabled", "true"));
+        enforcePolicies = Boolean.parseBoolean(IdentityServer.getInstance()
+                .getProperty("openidm.policy.enforcement.enabled", "true"));
         logger.debug("Instantiated managed object set: {}", name);
     }
 
@@ -249,8 +250,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     /**
-     * Executes a script if it exists, populating an {@code "object"} property
-     * in the root scope.
+     * Executes a script if it exists, populating an {@code "object"} property in the root scope.
      *
      * @param hook
      *            the script-hook to execute
@@ -311,8 +311,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     /**
-     * Executes all of the necessary trigger scripts when an object is retrieved
-     * from the repository.
+     * Executes all of the necessary trigger scripts when an object is retrieved from the repository.
      *
      * @param context the current Context
      * @param request the Request being processed
@@ -342,8 +341,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     /**
-     * Executes all of the necessary trigger scripts when an object is to be
-     * stored in the repository.
+     * Executes all of the necessary trigger scripts when an object is to be stored in the repository.
      *
      * @param value
      *            the JSON value to be stored in the repository.
@@ -468,6 +466,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
         UpdateRequest updateRequest = Requests.newUpdateRequest(repoId(resourceId), newValue);
         updateRequest.setRevision(rev);
         ResourceResponse response = connectionFactory.getConnection().update(context, updateRequest);
+        
+        // Put relationships back in before we respond
+        response.getContent().asMap().putAll(persistRelationships.asMap());
 
         // Execute the postUpdate script if configured
         execScript(context, ScriptHook.postUpdate, response.getContent(),
@@ -475,9 +476,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
                 oldValue, response.getContent());
-
-        // Put relationships back in before we respond
-        response.getContent().asMap().putAll(persistRelationships.asMap());
 
         return response;
     }
@@ -491,7 +489,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param json A JsonValue map that contains relationship fields and value(s) to be persisted
      * @return A {@link JsonValue} map containing each relationship field and its persisted value(s)
      */
-    private JsonValue persistRelationships(Context context, String resourceId, final JsonValue json) throws ResourceException {
+    private JsonValue persistRelationships(Context context, String resourceId, final JsonValue json) 
+            throws ResourceException {
         final List<Promise<JsonValue, ResourceException>> persisted = new ArrayList<>();
 
         for (final JsonPointer relationshipField : relationshipProviders.keySet()) {
@@ -499,8 +498,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             if (relationshipValue != null) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
-                persisted.add(provider.setRelationshipValueForResource(context, resourceId, relationshipValue).then(
-                        new Function<JsonValue, JsonValue, ResourceException>() {
+                persisted.add(provider.setRelationshipValueForResource(new AsyncContext(context), resourceId, 
+                        relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
                             @Override
                             public JsonValue apply(JsonValue jsonValue) throws ResourceException {
                                 return json(object(field(relationshipField.leaf(), jsonValue.getObject())));
@@ -526,9 +525,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     /**
-     * Applies a patch document to an object, or by finding an object in the
-     * object set itself via query parameters. As this is an action, the patch
-     * document to be applied is in the {@code _entity} parameter.
+     * Applies a patch document to an object, or by finding an object in the object set itself via query parameters. As 
+     * this is an action, the patch document to be applied is in the {@code _entity} parameter.
      *
      * @param context the current Context
      * @param request the {@link ActionRequest}
@@ -610,6 +608,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             activityLogger.log(context, request, "create", managedId(createResponse.getId()).toString(),
                     null, createResponse.getContent(), Status.SUCCESS);
 
+            // Place persisted relationships in content before sending to the handler
+            createResponse.getContent().asMap().putAll(persistedRelationships.asMap());
+
             // Execute the postCreate script if configured
             execScript(context, ScriptHook.postCreate, createResponse.getContent(),
                     prepareScriptBindings(context, request, resourceId, new JsonValue(null),
@@ -619,9 +620,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
             performSyncAction(context, request, createResponse.getId(),
             		SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), createResponse.getContent());
-
-            // Place persisted relationships in content before sending to the handler
-            createResponse.getContent().asMap().putAll(persistedRelationships.asMap());
+            
             return prepareResponse(context, createResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
@@ -660,15 +659,22 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
      * @param context The current context
      * @param resourceId The id of the resource to fetch relationships of
      * @return A {@link JsonValue} map containing all relationship fields and their values
+     * @throws ResourceException 
      */
-    private JsonValue fetchRelationshipFields(Context context, String resourceId) throws ExecutionException, InterruptedException {
+    private JsonValue fetchRelationshipFields(Context context, String resourceId) 
+            throws ExecutionException, InterruptedException, ResourceException {
         final JsonValue joined = json(object());
 
         for (Map.Entry<JsonPointer, RelationshipProvider> entry : relationshipProviders.entrySet()) {
             final JsonPointer field = entry.getKey();
             final RelationshipProvider provider = entry.getValue();
-
-            joined.put(field, provider.getRelationshipValueForResource(context, resourceId).get().getObject());
+            
+            try {
+                joined.put(field, 
+                        provider.getRelationshipValueForResource(context, resourceId).getOrThrow().getObject());
+            } catch (NotFoundException e) {
+                joined.put(field, null);
+            }
         }
 
         return joined;
@@ -712,21 +718,26 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
                 + request.getRevision());
         try {
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-
             ResourceResponse resource = connectionFactory.getConnection().read(context, readRequest);
+            
+            // Populate the relationship fields in the read resource
+            final JsonValue relationships = fetchRelationshipFields(context, resourceId);
+            resource.getContent().asMap().putAll(relationships.asMap());
+            
             execScript(context, ScriptHook.onDelete, decrypt(resource.getContent()), null);
 
+            // Delete the resource
             DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
             deleteRequest.setResourcePath(repoId(resourceId));
             if (deleteRequest.getRevision() == null) {
                 deleteRequest.setRevision(resource.getRevision());
             }
-            ResourceResponse deletedResource = connectionFactory.getConnection().delete(context, deleteRequest);
+            connectionFactory.getConnection().delete(context, deleteRequest);
 
-            // Delete any relationships assocated with this resource
+            // Delete any relationships associated with this resource
             final List<Promise<JsonValue, ResourceException>> deleted = new ArrayList<>();
             for (RelationshipProvider relationshipProvider : relationshipProviders.values()) {
-                deleted.add(relationshipProvider.clear(context, resourceId));
+                deleted.add(relationshipProvider.clear(new AsyncContext(context), resourceId));
             }
             // Wait for deletions to complete before continuing
             when(deleted).getOrThrowUninterruptibly();
@@ -736,13 +747,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
 
             // Execute the postDelete script if configured
             execScript(context, ScriptHook.postDelete, null, prepareScriptBindings(context, request, resourceId,
-                    deletedResource.getContent(), new JsonValue(null)));
+                    resource.getContent(), new JsonValue(null)));
 
             // Perform notifyDelete synchronization
             performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
 
-            return prepareResponse(context, deletedResource, request.getFields()).asPromise();
+            return prepareResponse(context, resource, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -1010,8 +1021,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     
 
     /**
-     * Prepares the response contents by removing the following: any private properties (if the request is
-     * from an external call), any virtual or relationship properties that are not set to returnByDefault.
+     * Prepares the response contents by removing the following: any private properties (if the request is from an 
+     * external call), any virtual or relationship properties that are not set to returnByDefault.
      * 
      * @param context the current ServerContext
      * @param resource the Resource to prepare
@@ -1115,10 +1126,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener {
     }
 
     /**
-     * Expands the provided resource represented by a {@link JsonValue} relationship object.  A read request 
-     * will be issued for the resource identified by the "_ref" field in the supplied relationship object. A
-     * supplied {@link List} of fields indicates which fields to read and then merge with the relationship
-     * object.
+     * Expands the provided resource represented by a {@link JsonValue} relationship object.  A read request  will be 
+     * issued for the resource identified by the "_ref" field in the supplied relationship object. A supplied 
+     * {@link List} of fields indicates which fields to read and then merge with the relationship object.
      *    
      * @param context the {@link Context} of the request
      * @param value the value of the relationship object
