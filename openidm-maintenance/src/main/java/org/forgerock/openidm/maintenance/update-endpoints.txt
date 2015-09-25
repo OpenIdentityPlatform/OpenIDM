@@ -60,7 +60,7 @@ UI Endpoints for Update Process
 
 4. Get status of running update
 
-	READ openidm/maintenance/update/log/someIDstring
+	QUERY openidm/maintenance/update/log?_queryFilter=_id+eq+%22someIDstring%22
 
 	returns (while still in progress):
 	{

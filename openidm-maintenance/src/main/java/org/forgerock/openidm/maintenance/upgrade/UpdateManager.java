@@ -49,11 +49,10 @@ public interface UpdateManager {
      *
      * @param archiveFile the {@link Path} to a ZIP archive containing a new version of OpenIDM
      * @param installDir the base directory where OpenIDM is installed
-     * @param keep whether to keep the files (replace if false)
      * @return a json response with the report of what was done to each file
      * @throws UpdateException on failure to perform upgrade
      */
-    public JsonValue upgrade(final Path archiveFile, final Path installDir, final boolean keep)
+    public JsonValue upgrade(final Path archiveFile, final Path installDir)
             throws UpdateException;
 
     /**

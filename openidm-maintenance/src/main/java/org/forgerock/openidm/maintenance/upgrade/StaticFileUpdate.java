@@ -119,8 +119,7 @@ class StaticFileUpdate {
                 }
             });
             return destination;
-        } else {
-            throw new IOException("No such file " + path.toString() + " to keep!");
         }
+        return null;
     }
 }

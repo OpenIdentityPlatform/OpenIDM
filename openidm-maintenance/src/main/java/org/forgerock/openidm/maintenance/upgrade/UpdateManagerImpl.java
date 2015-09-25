@@ -71,10 +71,15 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
@@ -123,6 +128,10 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The update logging service */
     @Reference(policy = ReferencePolicy.STATIC)
     private UpdateLogService updateLogService;
+
+    /** The connection factory */
+    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
+    protected ConnectionFactory connectionFactory;
 
     /**
      * Execute a {@link Function} on an input stream for the given {@link Path}.
@@ -308,8 +317,8 @@ public class UpdateManagerImpl implements UpdateManager {
             if (file.getName().endsWith(".zip")) {
                 try {
                     Properties prop = readProperties(file);
-                    if ("OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT))) {
-                        // TODO also check version compatibility?
+                    if ("OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT)) &&
+                            ServerConstants.getVersion().equals(prop.getProperty(PROP_UPGRADESVERSION))) {
                         updates.add(object(
                                 field("archive", file.getName()),
                                 field("fileSize", file.length()),
@@ -417,93 +426,46 @@ public class UpdateManagerImpl implements UpdateManager {
      * {@inheritDoc}
      */
     @Override
-    public JsonValue upgrade(final Path archiveFile, final Path installDir, final boolean keep)
+    public JsonValue upgrade(final Path archiveFile, final Path installDir)
         throws UpdateException {
 
-        return usingArchive(archiveFile, installDir,
-                new UpgradeAction<JsonValue>() {
-                    @Override
-                    public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker)
-                            throws UpdateException {
-                        final StaticFileUpdate staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
-                                archive, new ProductVersion(ServerConstants.getVersion(),
-                                ServerConstants.getRevision()));
+        final Properties prop = readProperties(archiveFile.toFile());
+        if (!"OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT)) ||
+                !ServerConstants.getVersion().equals(prop.getProperty(PROP_UPGRADESVERSION))) {
+            throw new UpdateException("Update archive does not apply to the installed product.");
+        }
 
-                        // perform upgrade
-                        final JsonValue result = json(object());
-                        UpdateLogEntry updateEntry = new UpdateLogEntry();
-                        updateEntry.setStatus(UpdateStatus.IN_PROGRESS)
-                                .setStatusMessage("Initializing update")
-                                .setTotalTasks(archive.getFiles().size())
-                                .setStartDate(getDateString())
-                                .setNodeId("foo")                   // TODO
-                                .setUserName("me");                 // TODO
-                        try {
-                            updateLogService.logUpdate(updateEntry);
-                        } catch (ResourceException e) {
-                            throw new UpdateException("Unable to log update.", e);
-                        }
+        Path tempUnzipDir = null;
+        try {
+            tempUnzipDir = Files.createTempDirectory("openidm-upgrade-");
+            try {
+                final ZipArchive archive = new ZipArchive(archiveFile, tempUnzipDir);
+                final ChecksumFile checksumFile = new ChecksumFile(installDir.resolve(CHECKSUMS_FILE));
+                final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
 
-                        Properties updateProperties = readProperties(archiveFile.toFile());
+                // perform upgrade
+                UpdateLogEntry updateEntry = new UpdateLogEntry();
+                updateEntry.setStatus(UpdateStatus.IN_PROGRESS)
+                        .setStatusMessage("Initializing update")
+                        .setTotalTasks(archive.getFiles().size())
+                        .setStartDate(getDateString())
+                        .setNodeId("foo")                   // TODO
+                        .setUserName("me");                 // TODO
+                try {
+                    updateLogService.logUpdate(updateEntry);
+                } catch (ResourceException e) {
+                    throw new UpdateException("Unable to log update.", e);
+                }
 
-                        for (final Path path : archive.getFiles()) {
-                            try {
-                                if (path.startsWith(BUNDLE_PATH)) {
-                                    // TODO do bundle upgrade
-                                    result.put(path.toString(), "installed");
-                                } else if (path.startsWith(CONF_PATH) &&
-                                        path.getFileName().toString().endsWith(JSON_EXT)) {
-                                    // a json config in the default project - ignore it
-                                    result.put(path.toString(), "skipped");
-                                } else if (path.startsWith(CONF_PATH) &&
-                                        path.getFileName().toString().endsWith(PATCH_EXT)) {
-                                    UpdateConfig.getUpdateConfig().patchConfig(ContextUtil.createInternalContext(),
-                                            "repo/config", json(FileUtil.readFile(path.toFile())));
-                                    result.put(path.toString(), "patched");
-                                } else {
-                                    // normal static file; update it
-                                    UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                            .setFilePath(path.toString())
-                                            .setFileState(fileStateChecker.getCurrentFileState(path).name());
+                new UpdateThread(updateEntry, archive, fileStateChecker, installDir, prop, tempUnzipDir).start();
 
-                                    boolean readOnly = path.startsWith("ui/default") || path.startsWith("bin");
-
-                                    if (keep && !readOnly) {
-                                        Path stockFile = staticFileUpdate.keep(path);
-                                        fileEntry.setStockFile(stockFile.toString());
-                                        result.put(path.toString(), "kept");
-                                    } else {
-                                        Path backupFile = staticFileUpdate.replace(path);
-                                        if (backupFile != null) {
-                                            fileEntry.setBackupFile(backupFile.toString());
-                                            result.put(path.toString(), "replaced");
-                                        }
-                                    }
-
-                                    if (fileEntry.getStockFile() != null || fileEntry.getBackupFile() != null) {
-                                        logUpdate(updateEntry.addFile(fileEntry.toJson()));
-                                    }
-                                }
-                            } catch (IOException e) {
-                                logUpdate(updateEntry.setEndDate(getDateString())
-                                        .setStatus(UpdateStatus.FAILED)
-                                        .setStatusMessage("Update failed."));
-                                throw new UpdateException("Unable to upgrade " + path.toString(), e);
-                            }
-                            logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
-                                    .setStatusMessage("Processed " + path.getFileName().toString()));
-                        }
-                        logUpdate(updateEntry.setEndDate(getDateString())
-                                .setStatus(UpdateStatus.COMPLETE)
-                                .setStatusMessage("Update complete."));
-
-                        if (Boolean.valueOf(updateProperties.getProperty(PROP_RESTARTREQUIRED).toUpperCase())) {
-                            // TODO rewire / restart
-                        }
-
-                        return result;
-                    }
-                });
+                return updateEntry.toJson();
+            } catch (Exception e) {
+                throw new UpdateException(e.getMessage(), e);
+            }
+        } catch (IOException e) {
+            throw new UpdateException("Cannot create temporary directory to unzip archive");
+        }
     }
 
     /**
@@ -531,6 +493,114 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
+    private class UpdateThread extends Thread {
+        private final UpdateLogEntry updateEntry;
+        private final Archive archive;
+        private final FileStateChecker fileStateChecker;
+        private final StaticFileUpdate staticFileUpdate;
+        private final Properties updateProperties;
+        private final Path tempDirectory;
+
+        public UpdateThread(UpdateLogEntry updateEntry, Archive archive, FileStateChecker fileStateChecker,
+                Path installDir, Properties updateProperties, Path tempDirectory) {
+            this.updateEntry = updateEntry;
+            this.archive = archive;
+            this.fileStateChecker = fileStateChecker;
+            this.updateProperties = updateProperties;
+            this.tempDirectory = tempDirectory;
+
+            this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
+                    archive, new ProductVersion(ServerConstants.getVersion(),
+                    ServerConstants.getRevision()));
+        }
+
+        public void run() {
+            try {
+                for (final Path path : archive.getFiles()) {
+                    try {
+                        if (path.startsWith(BUNDLE_PATH)) {
+                            // TODO do bundle upgrade
+                        } else if (path.startsWith(CONF_PATH) &&
+                                path.getFileName().toString().endsWith(JSON_EXT)) {
+                            // a json config in the default project - ignore it
+                        } else if (path.startsWith(CONF_PATH) &&
+                                path.getFileName().toString().endsWith(PATCH_EXT)) {
+                            patchConfig(ContextUtil.createInternalContext(),
+                                    "repo/config", json(FileUtil.readFile(path.toFile())));
+                        } else {
+                            // normal static file; update it
+                            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                                    .setFilePath(path.toString())
+                                    .setFileState(fileStateChecker.getCurrentFileState(path).name());
+
+                            boolean readOnly = path.startsWith("ui/default") || path.startsWith("bin");
+
+                            if (!readOnly) {
+                                Path stockFile = staticFileUpdate.keep(path);
+                                if (stockFile != null) {
+                                    fileEntry.setStockFile(stockFile.toString());
+                                }
+                            } else {
+                                Path backupFile = staticFileUpdate.replace(path);
+                                if (backupFile != null) {
+                                    fileEntry.setBackupFile(backupFile.toString());
+                                }
+                            }
+
+                            if (fileEntry.getStockFile() != null || fileEntry.getBackupFile() != null) {
+                                logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                            }
+                        }
+                    } catch (IOException e) {
+                        logUpdate(updateEntry.setEndDate(getDateString())
+                                .setStatus(UpdateStatus.FAILED)
+                                .setStatusMessage("Update failed."));
+                        throw new UpdateException("Unable to upgrade " + path.toString(), e);
+                    }
+                    logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
+                            .setStatusMessage("Processed " + path.getFileName().toString()));
+                }
+                logUpdate(updateEntry.setEndDate(getDateString())
+                        .setStatus(UpdateStatus.COMPLETE)
+                        .setStatusMessage("Update complete."));
+            } catch (Exception e) {
+                logger.debug("Failed to install update!", e);
+                return;
+            } finally {
+                try {
+                    if (tempDirectory != null) {
+                        FileUtils.deleteDirectory(tempDirectory.toFile());
+                    }
+                } catch (IOException e) {
+                    logger.error("Could not remove temporary directory: " + tempDirectory.toString(), e);
+                }
+            }
+
+            if (Boolean.valueOf(updateProperties.getProperty(PROP_RESTARTREQUIRED).toUpperCase())) {
+                // TODO rewire / restart
+            }
+        }
+
+        /**
+         * Apply a JsonPatch to a config object on the router.
+         *
+         * @param context the context for the patch request.
+         * @param resourceName the name of the resource to be patched.
+         * @param patch a JsonPatch to be applied to the named config resource.
+         * @throws UpdateException
+         */
+        private void patchConfig(Context context, String resourceName, JsonValue patch) throws UpdateException {
+            try {
+                PatchRequest request = Requests.newPatchRequest(resourceName);
+                for (PatchOperation op : PatchOperation.valueOfList(patch)) {
+                    request.addPatchOperation(op);
+                }
+                UpdateManagerImpl.this.connectionFactory.getConnection().patch(context, request);
+            } catch (ResourceException e) {
+                throw new UpdateException("Patch request failed", e);
+            }
+        }
+    }
     private void logUpdate(UpdateLogEntry entry) throws UpdateException {
         try {
             updateLogService.updateUpdate(entry);
