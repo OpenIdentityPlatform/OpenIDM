@@ -29,8 +29,9 @@
         </form>
 
         <div id="analysisGridContainer">
-            <table class="recon-grid" id="analysisGrid"></table>
-            <div class="recon-pager" id="analysisGridGridPager"></div>
+            <div id="analysisGrid" class="table-responsive"></div>
+            <div id="analysisGrid-paginator"></div>
+        </div>
         </div>
         {{else}}
         <button id="doSyncButton" class="btn btn-primary" type="button" title="{{t "templates.mapping.syncNow"}}" class="button">
