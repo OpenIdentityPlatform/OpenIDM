@@ -846,7 +846,7 @@
             <includes>
                 <include>provisioner.openicf*ldap.json</include>
             </includes>
-            <outputDirectory>/openidm/ui/default/admin/public/templates/admin/connector/configs/ldap</outputDirectory>
+            <outputDirectory>/openidm/ui/admin/default/public/templates/admin/connector/configs/ldap</outputDirectory>
         </fileSet>
         <!-- Setup roles samples  -->
         <fileSet>
@@ -1021,7 +1021,7 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/ui/default/selfservice</outputDirectory>
+            <outputDirectory>/openidm/ui/selfservice/default</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-enduser</include>
             </includes>
@@ -1030,7 +1030,7 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/ui/default/admin</outputDirectory>
+            <outputDirectory>/openidm/ui/admin/default</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-admin</include>
             </includes>

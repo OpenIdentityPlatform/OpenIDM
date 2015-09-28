@@ -3,6 +3,8 @@
     "urlContextRoot" : "/admin",
     "bundle" : {
         "name" : "org.forgerock.openidm.ui-admin",
-        "resourceDir" : "/public"
+        "resourceDir" : "/public",
+        "defaultDir" : "/ui/admin/default",
+        "extensionDir" : "/ui/admin/extension"
     }
 }
