@@ -563,7 +563,9 @@
                 "or": "OR",
                 "removeTitle": "Remove this item",
                 "addTitle": "Add new field or group item"
-            }
+            },
+            "notFound": "Not Found",
+            "multipleMatchesFound": "Multiple Matches Found"
         },
         "scheduler": {
             "scheduler": "Scheduler",
