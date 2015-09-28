@@ -308,7 +308,7 @@ Run the Sample
 
 4. Show paging results with page size of 2
 
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET 'https://localhost:8443/openidm/system/hrdb/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id'
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET 'https://localhost:8443/openidm/system/hrdb/account?_queryFilter=uid+sw+%22%22&_pageSize=2&_sortKeys=timestamp,id'
 
     {
       "result":[
@@ -326,9 +326,10 @@ Run the Sample
     }
 
 5. Use the pagedResultsCookie from the result in step 10 for the next query to
-   retrieve the next result set. Make sure you encode the date:time.
+   retrieve the next result set. The value of the pagedResultsCookie must be 
+   URL-encoded.
 
-    $ curl -k -u "openidm-admin:openidm-admin" --request GET 'https://localhost:8443/openidm/system/hrdb/account?_queryFilter=uid+sw+""&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010:07:57.0,2'
+    $ curl -k -u "openidm-admin:openidm-admin" --request GET 'https://localhost:8443/openidm/system/hrdb/account?_queryFilter=uid+sw+%22%22&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010%3A07%3A57.0%2C2'
 
     {
       "result":[
@@ -344,11 +345,3 @@ Run the Sample
       "pagedResultsCookie":"2014-09-11 10:07:57.0,4",
       "remainingPagedResults":-1
     }
-
-
-You can log in to the OpenIDM UI (https://localhost:8443/) with any of
-the users that were created in the repository by the reconciliation operation.
-Consult the values from the sample3/tools/ResetDatabaseScript.groovy script to
-retrieve the clear text passwords of each of these users. Users can update their
-profiles or passwords. Any changes will be automatically synchronized back to
-the MySQL database.
