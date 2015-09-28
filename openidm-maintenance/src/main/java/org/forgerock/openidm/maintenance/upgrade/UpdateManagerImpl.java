@@ -121,7 +121,7 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String PROP_RESOURCE = "resource";
     private static final String PROP_RESTARTREQUIRED = "restartRequired";
 
-    private static final String BUNDLE_BACKUP_EXT = ".OLD-";
+    private static final String BUNDLE_BACKUP_EXT = ".old-";
     private static final String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 
     public enum UpdateStatus {
@@ -362,10 +362,12 @@ public class UpdateManagerImpl implements UpdateManager {
                         for (Path path : archive.getFiles()) {
                             try {
                                 FileState state = fileStateChecker.getCurrentFileState(path);
-                                result.add(object(
-                                        field("filePath", path.toString()),
-                                        field("fileState", state.toString())
-                                ));
+                                if (!FileState.UNCHANGED.equals(state)) {
+                                    result.add(object(
+                                            field("filePath", path.toString()),
+                                            field("fileState", state.toString())
+                                    ));
+                                }
                             } catch (IOException e) {
                                 throw new UpdateException("Unable to determine file state for " + path.toString(), e);
                             }
