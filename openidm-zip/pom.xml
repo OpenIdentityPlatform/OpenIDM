@@ -395,7 +395,7 @@
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>launcher-zip</artifactId>
-            <version>1.1.0</version>
+            <version>1.1.1-SNAPSHOT</version>
             <type>zip</type>
         </dependency>
         <dependency>
