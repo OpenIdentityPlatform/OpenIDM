@@ -427,8 +427,6 @@ public abstract class RelationshipProvider {
             activityLogger.log(context, request, "delete", getManagedObjectPath(context), beforeValue.getContent(), 
                     null, Status.SUCCESS);
 
-            // TODO: Do sync on the managed object
-
             // Do sync on the managed object
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
                     SyncServiceAction.notifyDelete, beforeValue.getContent(), null);
