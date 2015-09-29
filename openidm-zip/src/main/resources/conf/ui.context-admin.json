@@ -4,7 +4,7 @@
     "bundle" : {
         "name" : "org.forgerock.openidm.ui-admin",
         "resourceDir" : "/public",
-        "defaultDir" : "/ui/admin/default",
-        "extensionDir" : "/ui/admin/extension"
+        "defaultDir" : "&{launcher.install.location}/ui/admin/default",
+        "extensionDir" : "&{launcher.install.location}/ui/admin/extension"
     }
 }
