@@ -330,6 +330,8 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
             } else {
                 throw new JsonCryptoException("Unsupported field storage algorithm " + algorithm);
             }
+        } catch (JsonCryptoException e) {
+            throw e;
         } catch (Exception e) {
             throw new JsonCryptoException(e.getMessage(), e);
         }
