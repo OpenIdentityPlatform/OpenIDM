@@ -24,10 +24,13 @@
 
 package org.forgerock.openidm.shell.impl;
 
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -37,7 +40,7 @@ import java.util.Map;
 import java.util.logging.Level;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.services.context.Context;
+import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -58,6 +61,7 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.restlet.data.ChallengeResponse;
 import org.restlet.data.ChallengeScheme;
@@ -352,15 +356,9 @@ public class HttpRemoteJsonResource implements Connection {
                         .getStatus().getCode(), clientResource.getStatus().getDescription(),
                         clientResource.getStatus().getThrowable());
             }
-
-            JsonValue result = null;
-
-            if (null != response && !(response instanceof EmptyRepresentation)) {
-                result = new JsonValue(getJacksonObject(response));
-            } else {
-                result = new JsonValue(null);
-            }
-            return result;
+            return (null != response && !(response instanceof EmptyRepresentation)
+                    ? json(Json.readJson(response.getText()))
+                    : json(null));
         } catch (JsonValueException jve) {
             throw new BadRequestException(jve);
         } catch (org.restlet.resource.ResourceException e) {
@@ -380,11 +378,6 @@ public class HttpRemoteJsonResource implements Connection {
                 response.release();
             }
         }
-    }
-
-    @SuppressWarnings({ "rawtypes", "unchecked" })
-    private Map<String, Object> getJacksonObject(Representation response) throws IOException {
-        return (Map<String, Object>) new JacksonRepresentation<Map>(response, Map.class).getObject();
     }
 
     private JsonValue getRequestValue(Request request) throws Exception {
