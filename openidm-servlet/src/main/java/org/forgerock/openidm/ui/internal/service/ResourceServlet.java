@@ -24,10 +24,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.Hashtable;
-import java.util.List;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -44,6 +42,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.PropertyUtil;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -72,15 +71,13 @@ public final class ResourceServlet extends HttpServlet {
     private static final String CONFIG_BUNDLE = "bundle";
     private static final String CONFIG_NAME = "name";
     private static final String CONFIG_RESOURCE_DIR = "resourceDir";
+    private static final String CONFIG_DEFAULT_DIR = "defaultDir";
+    private static final String CONFIG_EXTENSION_DIR = "extensionDir";
 
     //TODO Decide where to put the web and the java resources. Now both are in root
-    private Bundle bundle;
-    private BundleListener bundleListener;
-    private String bundleName;
+    private JsonValue bundleConfig;
     private String resourceDir;
     private String contextRoot;
-    
-    private List<String> extFolders;
     
     @Reference
     private WebContainer webContainer;
@@ -125,42 +122,25 @@ public final class ResourceServlet extends HttpServlet {
             }
             target = prependSlash(target);
 
-            File extFile = null;
-            String extFileCanonical = null;
-            String resName = resourceDir + target;
-            String extDir = IdentityServer.getInstance().getProperty("openidm.ui.extension.dir",
-                    "&{launcher.install.location}/ui/extension", true);
-            for (String ext : extFolders) {
-                if (target.startsWith(ext)) {
-                    // Try to find in extensions folder
-                    extFile = new File(extDir + target);
-                    File extDirFile = new File(extDir);
-                    extFileCanonical = extFile.getCanonicalPath();
-                    if (!extFileCanonical.startsWith(extDirFile.getCanonicalPath())) {
-                        extFile = null;
-                    }
-                    break;
-                }
-            }
-
-            // Look in the bundle rather than the servlet context, as we're using shared servlet contexts
+            // Locate the file in extension dir first, fall back to default dir
             URL url = null;
-            if (extFile != null && extFile.exists()) {
-                url = extFile.getCanonicalFile().toURI().toURL();
+            String loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
+                    CONFIG_EXTENSION_DIR).required().asString() + resourceDir, IdentityServer.getInstance(), false);
+            File file = new File(loadDir + target);
+            if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
+                url = file.getCanonicalFile().toURI().toURL();
             } else {
-                // this handles the case of a servlet request before the BundleListener has associated the
-                // correct bundle to this servlet instance
-                if (bundle == null) {
+                loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
+                        CONFIG_DEFAULT_DIR).required().asString() + resourceDir, IdentityServer.getInstance(), false);
+                file = new File(loadDir + target);
+                if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
+                    url = file.getCanonicalFile().toURI().toURL();
+                } else {
                     res.sendError(HttpServletResponse.SC_NOT_FOUND);
                 }
-                url = bundle.getResource(resName);
             }
 
-            if (url == null) {
-                res.sendError(HttpServletResponse.SC_NOT_FOUND);
-            } else {
-                handle(req, res, url, resName);
-            }
+            handle(req, res, url, resourceDir + target);
         }
     }
 
@@ -190,63 +170,17 @@ public final class ResourceServlet extends HttpServlet {
             logger.info("UI does not specify bundle name - unable to register servlet");
             return;
         }
-        else if (config.get(CONFIG_BUNDLE) == null
-                || config.get(CONFIG_BUNDLE).isNull()
-                || !config.get(CONFIG_BUNDLE).isMap()
-                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR) == null
+        else if (config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR) == null
                 || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).isNull()) {
             logger.info("UI does not specify bundle resourceDir - unable to register servlet");
             return;
         }
 
-        bundleName = config.get(CONFIG_BUNDLE).get(CONFIG_NAME).asString();
+        bundleConfig = config.get(CONFIG_BUNDLE);
         resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
-        if (bundleName != null) {
-            for (Bundle aBundle : context.getBundleContext().getBundles()) {
-                if (bundleName.equals(aBundle.getSymbolicName())) {
-                    this.bundle = aBundle;
-                    break;
-                }
-            }
-        }
-        
-        if (bundle == null) {
-            logger.info("Could not find bundle " + bundleName+ " (not loaded yet?) - will wait for bundle-start");
-        }
-
-        // handle bundle-start events to associate bundle to this ResourceServlet instance;
-        // Felix's filesystem-installer may load the filesystem bundles after this servlet
-        // instance is activated
-        bundleListener = new BundleListener() {
-            public void bundleChanged(BundleEvent event) {
-                if (event == null) {
-                    logger.debug("BundleEvent is null for bundle {}", bundleName);
-                    return;
-                }
-                Bundle bundle = event.getBundle();
-                if (bundle != null && bundle.getSymbolicName() != null && bundle.getSymbolicName().equals(bundleName)) {
-                    if (event.getType() == BundleEvent.STARTED) {
-                        ResourceServlet.this.bundle = bundle;
-                        logger.info("Bundle " + bundleName + " associated with servlet instance");
-                    } else if (event.getType() == BundleEvent.STOPPED) {
-                        ResourceServlet.this.bundle = null;
-                        logger.info("Bundle " + bundleName + " stopped; disassociated with servlet instance");
-                    }
-                }
-            }
-        };
-
-        context.getBundleContext().addBundleListener(bundleListener);
-
-        extFolders = new ArrayList<String>();
-        extFolders.add("/css/");
-        extFolders.add("/images/");
-        extFolders.add("/locales/");
-        extFolders.add("/templates/");
-
-        Dictionary<String, Object> props = new Hashtable<String, Object>();
+        Dictionary<String, Object> props = new Hashtable<>();
         webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
         logger.debug("Registered UI servlet at {}", contextRoot);
     }
@@ -255,9 +189,6 @@ public final class ResourceServlet extends HttpServlet {
      * Clears the servlet, unregistering it with the WebContainer and removing the bundle listener.
      */
     private void clear() {
-        if (bundleListener != null) {
-            bundle.getBundleContext().removeBundleListener(bundleListener);
-        }
         webContainer.unregister(contextRoot);
         logger.debug("Unregistered UI servlet at {}", contextRoot);
     }
