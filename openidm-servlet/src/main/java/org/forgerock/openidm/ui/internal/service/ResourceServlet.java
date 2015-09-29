@@ -42,6 +42,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.PropertyUtil;
 import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleEvent;
@@ -74,8 +75,6 @@ public final class ResourceServlet extends HttpServlet {
     private static final String CONFIG_EXTENSION_DIR = "extensionDir";
 
     //TODO Decide where to put the web and the java resources. Now both are in root
-    private Bundle bundle;
-    private BundleListener bundleListener;
     private JsonValue bundleConfig;
     private String resourceDir;
     private String contextRoot;
@@ -125,14 +124,14 @@ public final class ResourceServlet extends HttpServlet {
 
             // Locate the file in extension dir first, fall back to default dir
             URL url = null;
-            String loadDir = IdentityServer.getInstance().getInstallLocation().getPath() +
-                    bundleConfig.get(CONFIG_EXTENSION_DIR).required().asString() + resourceDir;
+            String loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
+                    CONFIG_EXTENSION_DIR).required().asString() + resourceDir, IdentityServer.getInstance(), false);
             File file = new File(loadDir + target);
             if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
                 url = file.getCanonicalFile().toURI().toURL();
             } else {
-                loadDir = IdentityServer.getInstance().getInstallLocation().getPath() +
-                        bundleConfig.get(CONFIG_DEFAULT_DIR).required().asString() + resourceDir;
+                loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
+                        CONFIG_DEFAULT_DIR).required().asString() + resourceDir, IdentityServer.getInstance(), false);
                 file = new File(loadDir + target);
                 if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
                     url = file.getCanonicalFile().toURI().toURL();
@@ -181,10 +180,6 @@ public final class ResourceServlet extends HttpServlet {
         resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
-        if (bundle == null) {
-            logger.info("Could not find bundle " + bundleConfig + " (not loaded yet?) - will wait for bundle-start");
-        }
-
         Dictionary<String, Object> props = new Hashtable<>();
         webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
         logger.debug("Registered UI servlet at {}", contextRoot);
@@ -194,9 +189,6 @@ public final class ResourceServlet extends HttpServlet {
      * Clears the servlet, unregistering it with the WebContainer and removing the bundle listener.
      */
     private void clear() {
-        if (bundleListener != null) {
-            bundle.getBundleContext().removeBundleListener(bundleListener);
-        }
         webContainer.unregister(contextRoot);
         logger.debug("Unregistered UI servlet at {}", contextRoot);
     }

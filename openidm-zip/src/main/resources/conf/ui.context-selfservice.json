@@ -4,7 +4,7 @@
     "bundle" : {
         "name" : "org.forgerock.openidm.ui-enduser",
         "resourceDir" : "/public",
-        "defaultDir" : "/ui/selfservice/default",
-        "extensionDir" : "/ui/selfservice/extension"
+        "defaultDir" : "&{launcher.install.location}/ui/selfservice/default",
+        "extensionDir" : "&{launcher.install.location}/ui/selfservice/extension"
     }
 }
