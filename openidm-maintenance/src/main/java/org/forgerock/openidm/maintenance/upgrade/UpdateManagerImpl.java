@@ -485,10 +485,10 @@ public class UpdateManagerImpl implements UpdateManager {
                 inp.read(data);
                 return json(object(field("license", new String(data, "UTF-8"))));
             } catch (IOException e) {
-                throw new UpdateException("Unable to load package properties.", e);
+                throw new UpdateException("Unable to load license file.", e);
             }
         } catch (IOException | ZipException e) {
-            throw new UpdateException("Unable to load package properties.", e);
+            return json(object());
         }
     }
 
@@ -522,65 +522,63 @@ public class UpdateManagerImpl implements UpdateManager {
                 String installDir = IdentityServer.getInstance().getInstallLocation().toString();
 
                 for (final Path path : archive.getFiles()) {
-                    try {
-                        if (path.startsWith(BUNDLE_PATH)) {
-                            BundleHandler bundleHandler = new BundleHandler(bundleContext,
-                                    BUNDLE_BACKUP_EXT + timestamp);
-                            Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
+                    if (path.startsWith(BUNDLE_PATH)) {
+                        BundleHandler bundleHandler = new BundleHandler(bundleContext,
+                                BUNDLE_BACKUP_EXT + timestamp);
+                        Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
+                        String symbolicName = null;
+                        try {
                             Attributes manifest = readManifest(newPath);
-                            String symbolicName = manifest.getValue(Constants.BUNDLE_SYMBOLICNAME);
-                            if (symbolicName == null) {
-                                // treat it as a static file
-                                Path backupFile = staticFileUpdate.replace(path);
-                                if (backupFile != null) {
-                                    UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                            .setFilePath(path.toString())
-                                            .setFileState(fileStateChecker.getCurrentFileState(path).name());
-                                    fileEntry.setBackupFile(backupFile.toString());
-                                    logUpdate(updateEntry.addFile(fileEntry.toJson()));
-                                }
-                            } else {
-                                bundleHandler.upgradeBundle(newPath, symbolicName);
-                            }
-                        } else if (path.getFileName().toString().endsWith(JSON_EXT) &&
-                                !projectDir.equals(installDir) &&
-                                path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
-                            // a json config in the current project - ignore it
-                        } else if (path.startsWith(CONF_PATH) &&
-                                path.getFileName().toString().endsWith(JSON_EXT)) {
-                            // a json config in the default project - ignore it
-                        } else if (path.startsWith(CONF_PATH) &&
-                                path.getFileName().toString().endsWith(PATCH_EXT)) {
-                            // a patch file for a config in the repo
-                            patchConfig(ContextUtil.createInternalContext(),
-                                    "repo/config", json(FileUtil.readFile(path.toFile())));
-                        } else {
-                            // normal static file; update it
-                            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                    .setFilePath(path.toString())
-                                    .setFileState(fileStateChecker.getCurrentFileState(path).name());
-
-                            if (!isReadOnly(path)) {
-                                Path stockFile = staticFileUpdate.keep(path);
-                                if (stockFile != null) {
-                                    fileEntry.setStockFile(stockFile.toString());
-                                }
-                            } else {
-                                Path backupFile = staticFileUpdate.replace(path);
-                                if (backupFile != null) {
-                                    fileEntry.setBackupFile(backupFile.toString());
-                                }
-                            }
-
-                            if (fileEntry.getStockFile() != null || fileEntry.getBackupFile() != null) {
+                            symbolicName = manifest.getValue(Constants.BUNDLE_SYMBOLICNAME);
+                        } catch (Exception e) {
+                            // jar does not contain a manifest
+                        }
+                        if (symbolicName == null) {
+                            // treat it as a static file
+                            Path backupFile = staticFileUpdate.replace(path);
+                            if (backupFile != null) {
+                                UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                                        .setFilePath(path.toString())
+                                        .setFileState(fileStateChecker.getCurrentFileState(path).name());
+                                fileEntry.setBackupFile(backupFile.toString());
                                 logUpdate(updateEntry.addFile(fileEntry.toJson()));
                             }
+                        } else {
+                            bundleHandler.upgradeBundle(newPath, symbolicName);
                         }
-                    } catch (IOException e) {
-                        logUpdate(updateEntry.setEndDate(getDateString())
-                                .setStatus(UpdateStatus.FAILED)
-                                .setStatusMessage("Update failed."));
-                        throw new UpdateException("Unable to upgrade " + path.toString(), e);
+                    } else if (path.getFileName().toString().endsWith(JSON_EXT) &&
+                            !projectDir.equals(installDir) &&
+                            path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
+                        // a json config in the current project - ignore it
+                    } else if (path.startsWith(CONF_PATH) &&
+                            path.getFileName().toString().endsWith(JSON_EXT)) {
+                        // a json config in the default project - ignore it
+                    } else if (path.startsWith(CONF_PATH) &&
+                            path.getFileName().toString().endsWith(PATCH_EXT)) {
+                        // a patch file for a config in the repo
+                        patchConfig(ContextUtil.createInternalContext(),
+                                "repo/config", json(FileUtil.readFile(path.toFile())));
+                    } else {
+                        // normal static file; update it
+                        UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                                .setFilePath(path.toString())
+                                .setFileState(fileStateChecker.getCurrentFileState(path).name());
+
+                        if (!isReadOnly(path)) {
+                            Path stockFile = staticFileUpdate.keep(path);
+                            if (stockFile != null) {
+                                fileEntry.setStockFile(stockFile.toString());
+                            }
+                        } else {
+                            Path backupFile = staticFileUpdate.replace(path);
+                            if (backupFile != null) {
+                                fileEntry.setBackupFile(backupFile.toString());
+                            }
+                        }
+
+                        if (fileEntry.getStockFile() != null || fileEntry.getBackupFile() != null) {
+                            logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                        }
                     }
                     logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
                             .setStatusMessage("Processed " + path.getFileName().toString()));
@@ -589,6 +587,11 @@ public class UpdateManagerImpl implements UpdateManager {
                         .setStatus(UpdateStatus.COMPLETE)
                         .setStatusMessage("Update complete."));
             } catch (Exception e) {
+                try {
+                    logUpdate(updateEntry.setEndDate(getDateString())
+                            .setStatus(UpdateStatus.FAILED)
+                            .setStatusMessage("Update failed."));
+                } catch (UpdateException ue) {}
                 logger.debug("Failed to install update!", e);
                 return;
             } finally {
@@ -668,7 +671,7 @@ public class UpdateManagerImpl implements UpdateManager {
             return FileUtil.readManifest(jarFile.toFile());
         } catch (FileNotFoundException e) {
             throw new UpdateException("File " + jarFile.toFile().getName() + " does not exist.", e);
-        } catch (IOException e) {
+        } catch (Exception e) {
             throw new UpdateException("Error while reading from " + jarFile.toFile().getName(), e);
         }
     }
