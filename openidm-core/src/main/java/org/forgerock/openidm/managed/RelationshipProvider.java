@@ -23,6 +23,7 @@ import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
@@ -37,8 +38,11 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
@@ -49,15 +53,25 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public abstract class RelationshipProvider {
+    
+    /**
+     * Setup logging for the {@link RelationshipProvider}.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(RelationshipProvider.class);
+    
     /** Used for accessing the repo */
     protected final ConnectionFactory connectionFactory;
 
@@ -262,7 +276,7 @@ public abstract class RelationshipProvider {
             createRequest.setResourcePath(REPO_RESOURCE_PATH);
             createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
             
-            // If the request is asynchronous then create and return the promise after formatting.
+            // If the request is from ManagedObjectSet then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectSetContext.class)) {
                 return getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
             }
@@ -310,7 +324,7 @@ public abstract class RelationshipProvider {
             Promise<ResourceResponse, ResourceException> promise = 
                     getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
             
-            // If the request is asynchronous then create and return the promise after formatting.
+            // If the request is from ManagedObjectSet then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectSetContext.class)) {
                 return promise;
             }
@@ -346,10 +360,9 @@ public abstract class RelationshipProvider {
         try {
             final String rev = request.getRevision();
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
-            final JsonValue newValue = 
-                    convertToRepoObject(firstResourcePath(context, request), request.getContent());
+            final JsonValue newValue = convertToRepoObject(firstResourcePath(context, request), request.getContent());
 
-            // If the request is asynchronous then update (if changed) and return the promise after formatting.
+            // If the request is from ManagedObjectSet then update (if changed) and return the promise after formatting.
             if (context.containsContext(ManagedObjectSetContext.class)) {
                 return getConnection()
                         // current resource in the db
@@ -369,8 +382,7 @@ public abstract class RelationshipProvider {
             final ResourceResponse beforeValue = getManagedObject(context);
 
             // Read the relationship
-            final ResourceResponse oldResource = 
-                    getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE).getOrThrow();
+            final ResourceResponse oldResource = getConnection().readAsync(context, readRequest).getOrThrow();
             
             // Perform update
             result = updateIfChanged(context, relationshipId, rev, oldResource, newValue).getOrThrow();
@@ -409,7 +421,7 @@ public abstract class RelationshipProvider {
         deleteRequest.setResourcePath(path);
 
         try {
-            // If the request is asynchronous then delete and return the promise after formatting.
+            // If the request is from ManagedObjectSet then delete and return the promise after formatting.
             if (context.containsContext(ManagedObjectSetContext.class)) {
                 return deleteAsync(context, path, deleteRequest);
             }
@@ -498,14 +510,88 @@ public abstract class RelationshipProvider {
 
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String relationshipId, 
             PatchRequest request) {
-        return notSupportedOnInstance(request).asPromise();
+        Promise<ResourceResponse, ResourceException> promise = null;
+        String revision = request.getRevision();
+        boolean forceUpdate = (revision == null);
+        boolean retry = forceUpdate;
+        boolean fromManagedObjectSet = context.containsContext(ManagedObjectSetContext.class);
+
+        do {
+            logger.debug("Attempting to patch relationship {}", request.getResourcePath());
+            try {
+
+                // Read in object
+                ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
+                ResourceResponse oldResource = connectionFactory.getConnection().readAsync(context, readRequest)
+                        .then(FORMAT_RESPONSE).getOrThrow();
+                
+                // If we haven't defined a revision, we need to get the current revision
+                if (revision == null) {
+                    revision = oldResource.getRevision();
+                }
+                
+                ResourceResponse managedObjectBefore = null;
+                
+                if (!fromManagedObjectSet) {
+                    // Get the before value of the managed object
+                    managedObjectBefore = getManagedObject(context);
+                }
+                
+                JsonValue newValue = oldResource.getContent().copy();
+                boolean modified = JsonValuePatch.apply(newValue, request.getPatchOperations());
+                if (!modified) {
+                    logger.debug("Patching did not modify the relatioship {}", request.getResourcePath());
+                    return newResultPromise(null);
+                }
+                
+                // Update (if changed) and format
+                promise = updateIfChanged(context, relationshipId, revision, 
+                        newResourceResponse(oldResource.getId(), oldResource.getRevision(), 
+                        convertToRepoObject(firstResourcePath(context, request), oldResource.getContent())), 
+                        convertToRepoObject(firstResourcePath(context, request), newValue));
+                
+                // If the request is from ManagedObjectSet then return the promise
+                if (fromManagedObjectSet) {
+                    return promise;
+                }
+                
+                // Get the before value of the managed object
+                final ResourceResponse managedObjectAfter = getManagedObject(context);
+
+                // Do activity logging.
+                activityLogger.log(context, request, "update", getManagedObjectPath(context), 
+                        managedObjectBefore.getContent(), managedObjectAfter.getContent(), Status.SUCCESS);
+
+                // Do sync on the managed object
+                managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
+                        SyncServiceAction.notifyUpdate, managedObjectBefore.getContent(), 
+                        managedObjectAfter.getContent());
+
+
+                retry = false;
+                logger.debug("Patch retationship successful!");
+            } catch (PreconditionFailedException e) {
+                if (forceUpdate) {
+                    logger.debug("Unable to update due to revision conflict. Retrying.");
+                } else {
+                    // If it fails and we're not trying to force an update, we gave it our best shot
+                    return e.asPromise();
+                }
+            } catch (ResourceException e) {
+                return e.asPromise();
+            } catch (Exception e) {
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
+            }
+        } while (retry);
+        
+        // Return the result
+        return promise;
     }
 
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String relationshipId, 
             ActionRequest request) {
         return notSupportedOnInstance(request).asPromise();
     }
-
 
     /**
      * Returns the path of the first resource in this relationship using the firstId parameter from either the URI or 
