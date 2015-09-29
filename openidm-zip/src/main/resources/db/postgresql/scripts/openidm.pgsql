@@ -47,25 +47,6 @@ CREATE INDEX idx_genericobjectproperties_prop ON openidm.genericobjectproperties
 
 
 -- -----------------------------------------------------
--- Table openidm.relationships
--- -----------------------------------------------------
-
-CREATE TABLE openidm.relationships (
-  id BIGSERIAL NOT NULL,
-  objectid VARCHAR(255) NOT NULL,
-  rev VARCHAR(30) NOT NULL,
-  firstid VARCHAR(255) NOT NULL,
-  firstpropname VARCHAR(32) NOT NULL,
-  secondid VARCHAR(255) NOT NULL,
-  properties JSON,
-  PRIMARY KEY (id)
-);
-
-CREATE UNIQUE INDEX idx_relationships_uniq ON openidm.relationships (firstid, firstpropname, secondid);
-CREATE UNIQUE INDEX idx_relationships_objectid ON openidm.relationships (objectid);
-CREATE INDEX idx_relationships_first ON openidm.relationships (firstId,firstpropname);
-
--- -----------------------------------------------------
 -- Table openidm.managedobjects
 -- -----------------------------------------------------
 
@@ -132,6 +113,35 @@ CREATE TABLE openidm.configobjectproperties (
 
 CREATE INDEX fk_configobjectproperties_configobjects ON openidm.configobjectproperties (configobjects_id);
 CREATE INDEX idx_configobjectproperties_prop ON openidm.configobjectproperties (propkey,propvalue);
+
+-- -----------------------------------------------------
+-- Table openidm.relationships
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.relationships (
+  id BIGSERIAL NOT NULL,
+  objecttypes_id BIGINT NOT NULL,
+  objectid VARCHAR(255) NOT NULL,
+  rev VARCHAR(38) NOT NULL,
+  fullobject JSON,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_relationships_objecttypes FOREIGN KEY (objecttypes_id) REFERENCES openidm.objecttypes (id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT idx_relationships_object UNIQUE (objecttypes_id, objectid)
+);
+
+-- -----------------------------------------------------
+-- Table openidm.relationshipproperties
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.relationshipproperties (
+  relationships_id BIGINT NOT NULL,
+  propkey VARCHAR(255) NOT NULL,
+  proptype VARCHAR(32) DEFAULT NULL,
+  propvalue TEXT,
+  CONSTRAINT fk_relationshipproperties_relationships FOREIGN KEY (relationships_id) REFERENCES openidm.relationships (id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+CREATE INDEX fk_relationshipproperties_relationships ON openidm.relationshipproperties (relationships_id);
+CREATE INDEX idx_relationshipproperties_prop ON openidm.relationshipproperties (propkey,propvalue);
 
 
 -- -----------------------------------------------------

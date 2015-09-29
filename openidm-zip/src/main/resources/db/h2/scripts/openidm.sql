@@ -41,19 +41,6 @@ CREATE INDEX  IF NOT EXISTS  `openidm`.`fk_genericobjectproperties_genericobject
 
 CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_genericobjectproperties_prop` ON `openidm`.`genericobjectproperties` (`propkey` ASC, `propvalue` ASC);
 
-CREATE TABLE IF NOT EXISTS `openidm`.`relationships` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `objectid` VARCHAR(255) NOT NULL,
-  `rev` VARCHAR(30) NOT NULL,
-  `firstid` VARCHAR(255) NOT NULL,
-  `firstpropname` VARCHAR(32) NOT NULL,
-  `secondid` VARCHAR(255) NOT NULL,
-  `properties` MEDIUMTEXT NULL,
-  PRIMARY KEY (`id`)
-);
-
-CREATE INDEX IF NOT EXISTS `openidm`.`fk_relationships_first` ON `openidm.relationships` (`firstid` ASC, `firstpropname` ASC);
-
 CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
   `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
@@ -118,6 +105,38 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_configobjectproperties_configobjects` ON `openidm`.`configobjectproperties`(`configobjects_id` ASC);
 CREATE INDEX IF NOT EXISTS `openidm`.`idx_configobjectproperties_prop` ON `openidm`.`configobjectproperties`(`propkey` ASC, `propvalue` ASC);
 
+
+CREATE  TABLE IF NOT EXISTS `openidm`.`relationships` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `fullobject` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`id`) ,
+  UNIQUE INDEX `idx_relationships_object` (`objecttypes_id` ASC, `objectid` ASC) ,
+  CONSTRAINT `fk_relationships_objecttypes`
+    FOREIGN KEY (`objecttypes_id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION);
+
+
+CREATE INDEX IF NOT EXISTS `openidm`.`fk_relationships_objecttypes` ON `openidm`.`relationships`(`objecttypes_id` ASC);
+
+
+CREATE  TABLE IF NOT EXISTS `openidm`.`relationshipproperties` (
+  `relationships_id` BIGINT UNSIGNED NOT NULL ,
+  `propkey` VARCHAR(255) NOT NULL ,
+  `proptype` VARCHAR(255) NULL ,
+  `propvalue` TEXT NULL ,
+  CONSTRAINT `fk_relationshipproperties_relationships`
+    FOREIGN KEY (`relationships_id` )
+    REFERENCES `openidm`.`relationships` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION);
+
+CREATE INDEX IF NOT EXISTS `openidm`.`fk_relationshipproperties_relationships` ON `openidm`.`relationshipproperties`(`relationships_id` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_relationshipproperties_prop` ON `openidm`.`relationshipproperties`(`propkey` ASC, `propvalue` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   `objectid` VARCHAR(38) NOT NULL ,

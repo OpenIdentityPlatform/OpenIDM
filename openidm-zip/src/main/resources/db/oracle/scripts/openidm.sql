@@ -370,6 +370,68 @@ CREATE INDEX fk_configobjects_objecttypes ON configobjects
 )
 ;
 
+-- DROP TABLE relationshipproperties CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table relationshipproperties ...
+CREATE TABLE relationshipproperties (
+  relationships_id NUMBER(24,0) NOT NULL,
+  propkey VARCHAR2(255 CHAR) NOT NULL,
+  proptype VARCHAR2(255 CHAR),
+  propvalue VARCHAR2(2000 CHAR)
+);
+
+
+PROMPT Creating Index fk_relationshipproperties_conf on relationshipproperties ...
+CREATE INDEX fk_relationshipproperties_conf ON relationshipproperties
+(
+  relationships_id
+)
+;
+PROMPT Creating Index idx_relationshippropert_1 on relationshipproperties ...
+CREATE INDEX idx_relationshippropert_1 ON relationshipproperties
+(
+  propkey,
+  propvalue
+)
+;
+
+-- DROP TABLE relationships CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table relationships ...
+CREATE TABLE relationships (
+  id NUMBER(24,0) NOT NULL,
+  objecttypes_id NUMBER(24,0) NOT NULL,
+  objectid VARCHAR2(255 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  fullobject CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint PRIMARY_3 on table relationships ...
+ALTER TABLE relationships
+ADD CONSTRAINT PRIMARY_3 PRIMARY KEY
+(
+  id
+)
+ENABLE
+;
+PROMPT Creating Unique Index idx_relationships_object on relationships...
+CREATE UNIQUE INDEX idx_relationships_object ON relationships
+(
+  objecttypes_id,
+  objectid
+)
+;
+PROMPT Creating Index fk_relationships_objecttypes on relationships ...
+CREATE INDEX fk_relationships_objecttypes ON relationships
+(
+  objecttypes_id
+)
+;
+
+
 -- DROP TABLE genericobjectproperties CASCADE CONSTRAINTS;
 
 

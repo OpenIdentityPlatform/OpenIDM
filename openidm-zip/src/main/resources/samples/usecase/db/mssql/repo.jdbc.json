@@ -116,6 +116,11 @@
                 "mainTable" : "clusterobjects",
                 "propertiesTable" : "clusterobjectproperties",
                 "searchableDefault" : true
+            },
+            "relationship" : {
+                "mainTable" : "relationships",
+                "propertiesTable" : "relationshipproperties",
+                "searchableDefault" : true
             }
         },
         "explicitMapping" : {
@@ -128,20 +133,6 @@
                     "firstId" : "firstid",
                     "secondId" : "secondid",
                     "linkQualifier" : "linkqualifier"
-                }
-            },
-            "relationship" : {
-                "table": "relationships",
-                "objectToColumn" : {
-                    "_id": "objectid",
-                    "_rev": "rev",
-                    "properties": {
-                        "column": "properties",
-                        "type": "JSON_MAP"
-                    },
-                    "firstId": "firstid",
-                    "firstPropertyName": "firstpropname",
-                    "secondId": "secondid"
                 }
             },
             "ui/notification" : {
