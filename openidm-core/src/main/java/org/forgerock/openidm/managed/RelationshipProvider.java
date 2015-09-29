@@ -18,14 +18,14 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ExecutionException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.routing.UriRouterContext;
@@ -38,9 +38,7 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
@@ -54,9 +52,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.patch.JsonValuePatch;
-import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction;
-import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -114,9 +110,9 @@ public abstract class RelationshipProvider {
     /** The name of the secondId field in resource response */
     public static final JsonPointer FIELD_REFERENCE = SchemaField.FIELD_REFERENCE;
     /** The name of the field containing the id */
-    public static final JsonPointer FIELD_ID = FIELD_PROPERTIES.child("_id");
+    public static final JsonPointer FIELD_ID = FIELD_PROPERTIES.child(FIELD_CONTENT_ID);
     /** The name of the field containing the revision */
-    public static final JsonPointer FIELD_REV = FIELD_PROPERTIES.child("_rev");
+    public static final JsonPointer FIELD_REV = FIELD_PROPERTIES.child(FIELD_CONTENT_REVISION);
 
     /**
      * Function to format a resource from the repository to that expected by the provider consumer. This is simply a 
@@ -173,8 +169,8 @@ public abstract class RelationshipProvider {
                         properties.putAll(repoProperties);
                     }
 
-                    properties.put("_id", raw.getId());
-                    properties.put("_rev", raw.getRevision());
+                    properties.put(FIELD_CONTENT_ID, raw.getId());
+                    properties.put(FIELD_CONTENT_REVISION, raw.getRevision());
                     
 
                     formatted.put(SchemaField.FIELD_REFERENCE, raw.getContent().get(REPO_FIELD_SECOND_ID).asString());
@@ -639,8 +635,8 @@ public abstract class RelationshipProvider {
 
         if (properties != null) {
             // Remove "soft" fields that were placed in properties for the ResourceResponse
-            properties.remove("_id");
-            properties.remove("_rev");
+            properties.remove(FIELD_CONTENT_ID);
+            properties.remove(FIELD_CONTENT_REVISION);
         }
 
         return json(object(
