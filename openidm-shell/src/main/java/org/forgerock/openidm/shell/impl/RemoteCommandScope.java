@@ -41,12 +41,12 @@ import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
@@ -89,6 +89,7 @@ public class RemoteCommandScope extends CustomCommandScope {
         help.put("configimport", getLongHeader("configimport"));
         help.put("configexport", getLongHeader("configexport"));
         help.put("configureconnector", getLongHeader("configureconnector"));
+        help.put("update", getLongHeader("update"));
         return help;
     }
 
@@ -129,6 +130,66 @@ public class RemoteCommandScope extends CustomCommandScope {
                 throw new IllegalArgumentException("Port must be a number");
             }
         }
+    }
+
+    /**
+     * Handles the Update (upgrade/patch) process.
+     * @param session session that invoked the command.
+     * @param userPass user:passwd to be used on rest calls.
+     * @param idmUrl url to the idm instance.
+     * @param idmPort port that idm is running on.
+     * @param acceptLicense if true, the accept license step is skipped.
+     * @param archive The simple file name of the archive that is already in bin/update.
+     */
+    @Descriptor("Update the system with the provided update file.")
+    public void update(CommandSession session,
+            @Descriptor(USER_PASS_DESC)
+            @MetaVar(USER_PASS_METAVAR)
+            @Parameter(names = {"-u", "--user"}, absentValue = USER_PASS_DEFAULT)
+            final String userPass,
+
+            @Descriptor(IDM_URL_DESC)
+            @MetaVar(IDM_URL_METAVAR)
+            @Parameter(names = {"--url"}, absentValue = IDM_URL_DEFAULT)
+            final String idmUrl,
+
+            @Descriptor(IDM_PORT_DESC)
+            @MetaVar(IDM_PORT_METAVAR)
+            @Parameter(names = {"-P", "--port"}, absentValue = IDM_PORT_DEFAULT)
+            final String idmPort,
+
+            @Descriptor("Automatically accepts the product license (if present). " +
+                    "Defaults to 'false' to ask for acceptance.")
+            @Parameter(names = {"--acceptLicense"}, presentValue = "true", absentValue = "false")
+            final boolean acceptLicense,
+
+            @Descriptor("Timeout value to wait for jobs to finish. " +
+                    "Defaults to -1 to exit immediately if jobs are running.")
+            @MetaVar("TIME")
+            @Parameter(names = {"--maxJobsFinishWaitTimeMs"}, absentValue = "-1")
+            final long maxJobsFinishWaitTimeMs,
+
+            @Descriptor("Timeout value to wait for update process to complete. Defaults to 30000 ms.")
+            @MetaVar("TIME")
+            @Parameter(names = {"--maxUpdateWaitTimeMs"}, absentValue = "30000")
+            final long maxUpdateWaitTimeMs,
+
+            @Descriptor("Log file path. (optional) Defaults to logs/update.log")
+            @MetaVar("LOG_FILE")
+            @Parameter(names = {"-l", "--log"}, absentValue = "logs/update.log")
+            final String logFilePath,
+
+            @Descriptor("Log only to the log file.")
+            @Parameter(names = {"-Q", "--Quiet"}, presentValue = "true", absentValue = "false")
+            final boolean quietMode,
+
+            @Descriptor("Filename of the Update archive within bin/update.")
+            String archive) {
+
+        processOptions(userPass, idmUrl, idmPort);
+        new UpdateCommand(session, resource, archive, maxJobsFinishWaitTimeMs, maxUpdateWaitTimeMs, acceptLicense,
+                logFilePath, quietMode)
+                .execute();
     }
 
     /**
