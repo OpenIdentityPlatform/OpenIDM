@@ -40,6 +40,27 @@
   }
 }
 
+.toggle-header {
+  margin-bottom:20px;
+
+  .checkbox-slider {
+    display:inline-block;
+  }
+}
+
+h3.block-header {
+  border: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #5F686E;
+  padding-bottom: 10px;
+  margin-top: 0;
+  border-bottom: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
 .ui-jqgrid {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
@@ -277,6 +298,7 @@ table.placeholder {
 .schema-panel {
   border-top: 1px solid #eee;
   padding-top: 5px;
+
   h3 {
     margin-top: 0px;
   }
@@ -626,6 +648,13 @@ Dialog Catch
 /*
   Tab content
 */
+
+.tab-pane {
+  &>.panel.panel-default {
+    border-top: 0;
+    border-radius: 0;
+  }
+}
 
 .panel-collapse-group {
   border:none;

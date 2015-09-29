@@ -1,0 +1,21 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="input-{{property}}">{{t label}}</label>
+    <div class="col-sm-6">
+        <input
+                id="input-{{property}}"
+                class="form-control"
+                type="{{#if type}}{{type}}{{else}}text{{/if}}"
+                name="{{property}}"
+                value="{{value}}"
+        {{#if readonly}}readonly{{/if}}
+        {{#if required}}required data-validator="required"{{/if}}
+        />
+        {{#unless noValidation}}
+        <div class="validation-message"></div>
+        <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+        {{/unless}}
+        {{#if helpKey}}
+        <div class="help-block">{{t helpKey}}</div>
+        {{/if}}
+    </div>
+</div>

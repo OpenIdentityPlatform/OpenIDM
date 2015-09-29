@@ -230,14 +230,16 @@
 
   .mapping {
     margin-bottom: 40px;
+    height:175px;
 
-    &:hover .panel,
-    &:focus .panel {
-      border-color: @base-theme-color;
+    .panel.panel-default {
+      border:0px;
     }
 
     .panel-footer .btn-link {
       padding: 0 15px 0;
+      margin-top: 0px;
+      height: 72px;
     }
   }
 }
@@ -245,9 +247,11 @@
 /*
   Mapping card styles
 */
+
 .mapping {
   margin-bottom: 20px;
   position: relative;
+  height:auto;
 
   h4.connector-role {
     font-weight: 400;
@@ -316,6 +320,7 @@
     h3 {
       margin: 0;
       font-weight: 700;
+      text-align:left;
       font-size: 21px;
     }
 
@@ -494,6 +499,7 @@
     }
   }
 }
+
 
 /*
   Mapping base view sync details

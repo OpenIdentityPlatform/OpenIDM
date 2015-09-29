@@ -160,7 +160,27 @@ define("config/AppConfiguration", [
                                             "name": "config.AppConfiguration.Navigation.links.systemPref",
                                             "icon": "fa fa-cog",
                                             "inactive": false
+                                        },
+                                        {
+                                            divider: true
+                                        },
+                                        {
+                                            "header": true,
+                                            "headerTitle": "config.AppConfiguration.Navigation.links.userSelfService"
+                                        },
+                                        {
+                                            "url": "#selfservice/userregistration/",
+                                            "name": "config.AppConfiguration.Navigation.links.userRegistration",
+                                            "icon": "fa fa-user",
+                                            "inactive": false
+                                        },
+                                        {
+                                            "url": "#selfservice/passwordreset/",
+                                            "name": "config.AppConfiguration.Navigation.links.passwordReset",
+                                            "icon": "fa fa-key",
+                                            "inactive": false
                                         }
+
                                     ]
                                 },
                                 "managed": {

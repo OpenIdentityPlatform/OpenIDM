@@ -34,12 +34,12 @@
         <forgerock-ui.version>6.0.0</forgerock-ui.version>
     </properties>
 
-      <artifactId>openidm-ui</artifactId>
-      <name>OpenIDM UI Parent</name>
-      <packaging>pom</packaging>
-      <modules>
-          <module>openidm-ui-common</module>
-          <module>openidm-ui-admin</module>
-          <module>openidm-ui-enduser</module>
-      </modules>
-  </project>
+    <artifactId>openidm-ui</artifactId>
+    <name>OpenIDM UI Parent</name>
+    <packaging>pom</packaging>
+    <modules>
+        <module>openidm-ui-common</module>
+        <module>openidm-ui-admin</module>
+        <module>openidm-ui-enduser</module>
+    </modules>
+</project>
