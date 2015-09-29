@@ -144,7 +144,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 // Split relationships in to to-be-updated (_id present) and to-be-created
                 for (JsonValue relationship : value) {
                     final JsonValue id =
-                            relationship.get(CollectionRelationshipProvider.FIELD_PROPERTIES.child("_id"));
+                            relationship.get(FIELD_ID);
                     if (id != null && id.isNotNull()) { // need update
                         relationshipsToUpdate.add(relationship);
                         relationshipsToKeep.add(id.asString());
@@ -171,7 +171,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             for (JsonValue toUpdate : relationshipsToUpdate) {
                 final UpdateRequest updateRequest = Requests.newUpdateRequest("", toUpdate);
                 updateRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
-                promises.add(updateInstance(context, toUpdate.get(CollectionRelationshipProvider.FIELD_PROPERTIES.child("_id")).asString(), updateRequest));
+                promises.add(updateInstance(context, toUpdate.get(FIELD_ID).asString(), updateRequest));
             }
 
             for (JsonValue toCreate : relationshipsToCreate) {
@@ -211,7 +211,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
 
                 for (JsonValue relationship : existingRelationships) {
-                    final String id = relationship.get(SchemaField.FIELD_PROPERTIES).get("_id").asString();
+                    final String id = relationship.get(FIELD_ID).asString();
 
                     // Delete if we're not told to keep this id
                     if (!relationshipsToKeep.contains(id)) {
@@ -247,7 +247,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 final List<Promise<ResourceResponse, ResourceException>> deleted = new ArrayList<>();
 
                 for (JsonValue relationship : existing) {
-                    final String id = relationship.get(SchemaField.FIELD_PROPERTIES).get("_id").asString();
+                    final String id = relationship.get(FIELD_ID).asString();
                     deleted.add(deleteInstance(context, id, Requests.newDeleteRequest("")));
                 }
 

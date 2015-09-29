@@ -20,7 +20,9 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import org.forgerock.http.routing.UriRouterContext;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -46,9 +48,6 @@ import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
-
-import java.util.ArrayList;
-import java.util.List;
 
 class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
     
@@ -140,13 +139,13 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             JsonValue value) {
         if (value.isNotNull()) {
             try {
-                final JsonValue id = value.get(FIELD_PROPERTIES.child("_id"));
+                final JsonValue id = value.get(FIELD_ID);
 
                 // Update if we got an id, otherwise replace
                 if (id != null && id.isNotNull()) {
                     final UpdateRequest updateRequest = Requests.newUpdateRequest("", value);
                     updateRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
-                    return updateInstance(context, value.get(FIELD_PROPERTIES.child("_id")).asString(), updateRequest)
+                    return updateInstance(context, value.get(FIELD_ID).asString(), updateRequest)
                             .then(new Function<ResourceResponse, JsonValue, ResourceException>() {
                                 @Override
                                 public JsonValue apply(ResourceResponse resourceResponse) throws ResourceException {
@@ -181,7 +180,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
         return getRelationshipValueForResource(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
             @Override
             public JsonValue apply(JsonValue relationship) throws ResourceException {
-                return deleteInstance(context, relationship.get(SchemaField.FIELD_PROPERTIES).get("_id").asString(), 
+                return deleteInstance(context, relationship.get(FIELD_ID).asString(), 
                         Requests.newDeleteRequest("")).getOrThrowUninterruptibly().getContent();
             }
         });
