@@ -176,7 +176,7 @@ public final class ResourceServlet extends HttpServlet {
             return;
         }
 
-        bundleConfig = config.get(CONFIG_BUNDLE); //.get(CONFIG_NAME).asString();
+        bundleConfig = config.get(CONFIG_BUNDLE);
         resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
