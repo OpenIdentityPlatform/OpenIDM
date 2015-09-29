@@ -312,6 +312,7 @@
         <module>openidm-scheduler</module>
         <module>openidm-script</module>
         <module>openidm-security-jetty</module>
+        <module>openidm-selfservice</module>
         <module>openidm-shell</module>
         <module>openidm-security</module>
         <module>openidm-smartevent</module>
