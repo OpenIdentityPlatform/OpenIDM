@@ -113,6 +113,10 @@ public abstract class RelationshipProvider {
     public static final JsonPointer FIELD_PROPERTIES = SchemaField.FIELD_PROPERTIES;
     /** The name of the secondId field in resource response */
     public static final JsonPointer FIELD_REFERENCE = SchemaField.FIELD_REFERENCE;
+    /** The name of the field containing the id */
+    public static final JsonPointer FIELD_ID = FIELD_PROPERTIES.child("_id");
+    /** The name of the field containing the revision */
+    public static final JsonPointer FIELD_REV = FIELD_PROPERTIES.child("_rev");
 
     /**
      * Function to format a resource from the repository to that expected by the provider consumer. This is simply a 
