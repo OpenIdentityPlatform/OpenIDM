@@ -82,8 +82,8 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(Context context, String resourceId) {
-        return queryRelationship(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue, 
-                ResourceException>() {
+        return queryRelationship(context, resourceId).then(FORMAT_RESPONSE)
+                .thenAsync(new AsyncFunction<ResourceResponse, JsonValue, ResourceException>() {
             @Override
             public Promise<JsonValue, ResourceException> apply(ResourceResponse value) throws ResourceException {
                 return newResultPromise(value.getContent());
@@ -99,14 +99,14 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param resourceId
      * @return
      */
-    private Promise<ResourceResponse, ResourceException> queryRelationship(Context context, String relationshipField) {
+    private Promise<ResourceResponse, ResourceException> queryRelationship(Context context, String managedObjectId) {
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, relationshipField);
+            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, managedObjectId);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(relationshipField)),
+                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
             ));
 
@@ -116,7 +116,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 return new NotFoundException().asPromise();
             } else {
                 // TODO OPENIDM-4094 - check size and throw illegal state if more than one?
-                return newResultPromise(FORMAT_RESPONSE.apply(relationships.get(0)));
+                return newResultPromise(relationships.get(0));
             }
         } catch (ResourceException e) {
             return e.asPromise();
