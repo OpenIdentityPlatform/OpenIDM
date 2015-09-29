@@ -18,6 +18,8 @@ package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -452,17 +454,20 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
          * @return a {@link JsonPointer} representing the modified field
          */
         private JsonPointer getRelationshipPointer(JsonPointer field) {
+            // /_revProperties/_id to /_id
             if (FIELD_ID.equals(field)) {
-                return new JsonPointer("/_id");
+                return new JsonPointer(FIELD_CONTENT_ID);
             }
+            // /_refProperties/_rev to /_rev
             if (FIELD_REV.equals(field)) {
-                return new JsonPointer("/_rev");
+                return new JsonPointer(FIELD_CONTENT_REVISION);
             }
+            // /_ref to /secondId
             if (FIELD_REFERENCE.equals(field.toString())) {
-                return new JsonPointer("/secondId");
+                // TODO: OPENIDM-4043 this will need to be updated with bi-directional support
+                return new JsonPointer(REPO_FIELD_SECOND_ID);
             }
-
-            // Translate /_refProperties/... to /properties/...
+            // /_refProperties/... to /properties/...
             if (FIELD_PROPERTIES.leaf().equals(field.get(0))) {
                 JsonPointer ptr = new JsonPointer(REPO_FIELD_PROPERTIES);
                 for (String s : field.relativePointer(field.size() - 1)) {
@@ -471,6 +476,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 return ptr;
             }
 
+            // TODO: OPENIDM-4153 don't expose direct repo properties
             return field;
         }
     }
