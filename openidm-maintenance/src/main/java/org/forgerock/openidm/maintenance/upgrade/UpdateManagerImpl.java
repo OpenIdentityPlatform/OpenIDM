@@ -521,10 +521,10 @@ public class UpdateManagerImpl implements UpdateManager {
                 String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 String installDir = IdentityServer.getInstance().getInstallLocation().toString();
 
+                BundleHandler bundleHandler = new BundleHandler(bundleContext, BUNDLE_BACKUP_EXT + timestamp);
+
                 for (final Path path : archive.getFiles()) {
                     if (path.startsWith(BUNDLE_PATH)) {
-                        BundleHandler bundleHandler = new BundleHandler(bundleContext,
-                                BUNDLE_BACKUP_EXT + timestamp);
                         Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
                         String symbolicName = null;
                         try {
@@ -660,6 +660,8 @@ public class UpdateManagerImpl implements UpdateManager {
                 return prop;
             } catch (IOException e) {
                 throw new UpdateException("Unable to load package properties.", e);
+            } finally {
+                new File(tmpDir.toString() + "/openidm/package.properties").delete();
             }
         } catch (IOException | ZipException e) {
             throw new UpdateException("Unable to load package properties.", e);
