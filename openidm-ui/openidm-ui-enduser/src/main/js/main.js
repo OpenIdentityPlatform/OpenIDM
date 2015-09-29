@@ -34,13 +34,15 @@ require.config({
             "UserProfileView": "org/forgerock/openidm/ui/profile/UserProfileView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
             "RegisterView": "org/forgerock/openidm/ui/registration/UserRegistrationView",
-            "ChangeSecurityDataDialog": "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog"
+            "ChangeSecurityDataDialog": "org/forgerock/openidm/ui/profile/ChangeSecurityDataDialog",
+            // TODO: Remove this when there are no longer any references to the "underscore" dependency
+            "underscore": "lodash"
         }
     },
     paths: {
         i18next: "libs/i18next-1.7.3-min",
         backbone: "libs/backbone-1.1.2-min",
-        underscore: "libs/lodash-2.4.1-min",
+        lodash: "libs/lodash-3.10.1-min",
         js2form: "libs/js2form-2.0",
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
