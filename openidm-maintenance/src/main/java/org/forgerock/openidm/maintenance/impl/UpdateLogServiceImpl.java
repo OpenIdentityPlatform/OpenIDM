@@ -142,7 +142,8 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
-        ReadRequest newRequest = Requests.copyOfReadRequest(request).setResourcePath("repo/updates");
+        ReadRequest newRequest = Requests.copyOfReadRequest(request)
+                .setResourcePath("repo/updates/" + request.getResourcePath());
         try {
             return connectionFactory.getConnection().read(context, newRequest).asPromise();
         } catch (ResourceException e) {
