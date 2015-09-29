@@ -25,6 +25,17 @@ import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 
+import java.util.ArrayList;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicReference;
+
+import javax.script.ScriptException;
+
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -52,6 +63,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
@@ -75,16 +87,6 @@ import org.forgerock.util.Pair;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptException;
-import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * Provides access to a set of managed objects of a given type: managed/[type]/{id}.
@@ -598,10 +600,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             // includes per-property encryption
             onStore(context, value);
 
-            CreateRequest createRequest = Requests.copyOfCreateRequest(request)
-                    .setNewResourceId(resourceId)
-                    .setResourcePath(repoId(null))
-                    .setContent(value);
+            CreateRequest createRequest = Requests.newCreateRequest(repoId(null), resourceId, value);
 
             ResourceResponse createResponse = connectionFactory.getConnection().create(context, createRequest);
 
@@ -727,8 +726,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             execScript(context, ScriptHook.onDelete, decrypt(resource.getContent()), null);
 
             // Delete the resource
-            DeleteRequest deleteRequest = Requests.copyOfDeleteRequest(request);
-            deleteRequest.setResourcePath(repoId(resourceId));
+            DeleteRequest deleteRequest = Requests.newDeleteRequest(repoId(resourceId));
             if (deleteRequest.getRevision() == null) {
                 deleteRequest.setRevision(resource.getRevision());
             }
@@ -885,9 +883,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) {
         logger.debug("query name={} id={}", name, request.getResourcePath());
-
-        QueryRequest repoRequest = Requests.copyOfQueryRequest(request);
-        repoRequest.setResourcePath(repoId(null));
         
         // The "executeOnRetrieve" parameter is used to indicate if is returning a full managed object
         String executeOnRetrieve = request.getAdditionalParameter("executeOnRetrieve");
@@ -900,6 +895,20 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         final List<Map<String,Object>> results = new ArrayList<Map<String,Object>>();
         final ResourceException[] ex = new ResourceException[]{null};
         try {
+            // Create new QueryRequest to send to the repository
+            // Does not include any fields specified in the current request
+            QueryRequest repoRequest = Requests.newQueryRequest(repoId(null));
+            repoRequest.setQueryId(request.getQueryId());
+            repoRequest.setQueryFilter(request.getQueryFilter());
+            repoRequest.setQueryExpression(request.getQueryExpression());
+            repoRequest.setPageSize(request.getPageSize());
+            repoRequest.setPagedResultsOffset(request.getPagedResultsOffset());
+            repoRequest.setPagedResultsCookie(request.getPagedResultsCookie());
+            repoRequest.setTotalPagedResultsPolicy(request.getTotalPagedResultsPolicy());
+            repoRequest.addSortKey(request.getSortKeys().toArray(new SortKey[request.getSortKeys().size()]));
+            for (String key : request.getAdditionalParameters().keySet()) {
+                repoRequest.setAdditionalParameter(key, request.getAdditionalParameter(key));
+            }
         	
         	QueryResponse queryResponse = connectionFactory.getConnection().query(context, repoRequest,
             		new QueryResourceHandler() {

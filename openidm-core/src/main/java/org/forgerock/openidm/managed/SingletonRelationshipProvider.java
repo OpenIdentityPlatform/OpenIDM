@@ -82,8 +82,8 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(Context context, String resourceId) {
-        return queryRelationship(context, resourceId).then(FORMAT_RESPONSE)
-                .thenAsync(new AsyncFunction<ResourceResponse, JsonValue, ResourceException>() {
+        return queryRelationship(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue, 
+                ResourceException>() {
             @Override
             public Promise<JsonValue, ResourceException> apply(ResourceResponse value) throws ResourceException {
                 return newResultPromise(value.getContent());
@@ -116,7 +116,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 return new NotFoundException().asPromise();
             } else {
                 // TODO OPENIDM-4094 - check size and throw illegal state if more than one?
-                return newResultPromise(relationships.get(0));
+                return newResultPromise(FORMAT_RESPONSE.apply(relationships.get(0)));
             }
         } catch (ResourceException e) {
             return e.asPromise();
@@ -180,9 +180,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     public Promise<JsonValue, ResourceException> clear(final Context context, final String resourceId) {
         return getRelationshipValueForResource(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
             @Override
-            public JsonValue apply(JsonValue jsonValue) throws ResourceException {
-                return deleteInstance(context, jsonValue.get("_id").asString(), Requests.newDeleteRequest(""))
-                        .getOrThrowUninterruptibly().getContent();
+            public JsonValue apply(JsonValue relationship) throws ResourceException {
+                return deleteInstance(context, relationship.get(SchemaField.FIELD_PROPERTIES).get("_id").asString(), 
+                        Requests.newDeleteRequest("")).getOrThrowUninterruptibly().getContent();
             }
         });
     }
