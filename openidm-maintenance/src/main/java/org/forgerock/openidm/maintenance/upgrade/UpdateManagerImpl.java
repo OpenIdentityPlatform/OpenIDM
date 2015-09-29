@@ -155,7 +155,7 @@ public class UpdateManagerImpl implements UpdateManager {
     private class ZipArchive implements Archive {
         private final Path upgradeRoot;
         private final Set<Path> filePaths;
-        private final ProductVersion version;
+        private ProductVersion version = null;
 
         ZipArchive(Path zipFilePath, Path destination) throws ArchiveException {
             upgradeRoot = destination.resolve("openidm");
@@ -198,16 +198,15 @@ public class UpdateManagerImpl implements UpdateManager {
                     version = new ProductVersion(
                             String.valueOf(getVersion.invoke(null)),
                             String.valueOf(getRevision.invoke(null)));
+                    logger.info("Upgrading to " + version);
                 }
             } catch (IOException
                     | ClassNotFoundException
                     | IllegalAccessException
                     | InvocationTargetException
                     | NoSuchMethodException e) {
-                throw new ArchiveException("Can't determine product version from upgrade archive", e);
+                logger.info("Archive does not contain a product version; Assumed to be a patch.");
             }
-
-            System.out.println("Upgrading to " + version);
         }
 
         @Override
