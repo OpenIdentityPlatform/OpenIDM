@@ -31,7 +31,7 @@
     </parent>
 
     <properties>
-        <forgerock-ui.version>2.2.0-SNAPSHOT</forgerock-ui.version>
+        <forgerock-ui.version>4.1.0</forgerock-ui.version>
     </properties>
 
       <artifactId>openidm-ui</artifactId>

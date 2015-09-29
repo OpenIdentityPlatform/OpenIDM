@@ -26,10 +26,11 @@
 
 define("org/forgerock/openidm/ui/common/util/ThemeManager", [
     "jquery",
+    "lodash",
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
-], function($, constants,conf,configDelegate) {
+], function($, _, constants,conf,configDelegate) {
 
     var obj = {},
         themePromise;
@@ -49,11 +50,13 @@ define("org/forgerock/openidm/ui/common/util/ThemeManager", [
             href: theme.path + theme.icon
         }).appendTo("head");
 
-        $("<link/>", {
-            rel: "stylesheet",
-            type: "text/css",
-            href: theme.stylesheet
-        }).appendTo("head");
+        _.forEach(theme.stylesheets, function(stylesheet) {
+            $("<link/>", {
+                rel: "stylesheet",
+                type: "text/css",
+                href: stylesheet
+            }).appendTo("head");
+        });
     };
 
 
