@@ -169,6 +169,11 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
 
             cpuUsageLoad: function() {
                 SystemHealthDelegate.getOsHealth().then(_.bind(function(widgetData){
+                    //Temp fix for multi core processing exceeding the availableProcessors
+                    if(widgetData.availableProcessors > widgetData.systemLoadAverage) {
+                        widgetData.systemLoadAverage = widgetData.availableProcessors;
+                    }
+
                     if(this.model.cpuChart) {
                         this.model.cpuChart.data = [
                             {
