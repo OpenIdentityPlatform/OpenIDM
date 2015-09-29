@@ -1,0 +1,28 @@
+<div role="tabpanel" class="tab-pane" id="advanced">
+    <div class="panel panel-default">
+        <div class="panel-body">
+            <form id="advancedOptions" class="form-horizontal">
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{t "templates.selfservice.snapshotToken"}}</label>
+                    <div class="col-sm-6">
+                        <select name="snapshotToken.name" class="form-control" id="sessionOnly">
+                            <option value="JWT">JWT</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="col-sm-3 control-label">{{t "templates.selfservice.tokenExpire"}}</label>
+                    <div class="col-sm-6">
+                        <input type="text" name="snapshotToken.tokenExpiry" class="form-control" value="{{config.snapshotToken.tokenExpiry}}">
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div class="panel-footer">
+            <div class="pull-right">
+                <button name="saveConfig" class="btn btn-primary save-config" type="button">{{t "common.form.save"}}</button>
+            </div>
+            <div style="clear:both;"></div>
+        </div>
+    </div>
+</div>

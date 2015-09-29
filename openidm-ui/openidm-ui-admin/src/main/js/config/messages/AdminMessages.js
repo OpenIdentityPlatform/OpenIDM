@@ -175,6 +175,22 @@ define("config/messages/AdminMessages", [
         "emailConfigSaveSuccess": {
             msg: "config.messages.settingMessages.saveEmailSuccess",
             type: "info"
+        },
+        "selfServiceUserRegistrationSave" : {
+            msg: "config.messages.selfService.userRegistrationSave",
+            type: "info"
+        },
+        "selfServiceUserRegistrationDelete": {
+            msg: "config.messages.selfService.userRegistrationDelete",
+            type: "error"
+        },
+        "selfServicePasswordSave" : {
+            msg: "config.messages.selfService.passwordSave",
+            type: "info"
+        },
+        "selfServicePasswordDelete": {
+            msg: "config.messages.selfService.passwordDelete",
+            type: "error"
         }
     };
 

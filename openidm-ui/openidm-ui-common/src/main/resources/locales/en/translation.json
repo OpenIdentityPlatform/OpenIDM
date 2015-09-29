@@ -151,6 +151,12 @@
             "settingMessages" : {
                 "saveSelfServiceSuccess": "Self service URL has been updated.",
                 "saveEmailSuccess": "Email configuration has been saved."
+            },
+            "selfService" : {
+                "userRegistrationSave" : "User registration configuration saved",
+                "userRegistrationDelete" : "User registration configuration deleted",
+                "passwordSave" : "Password configuration saved",
+                "passwordDelete" : "Password configuration deleted"
             }
         },
         "AppConfiguration" : {
@@ -173,7 +179,10 @@
                     "startProcess" : "Start process",
                     "mapping" : "Mappings",
                     "authentication": "Authentication",
-                    "roles": "Roles"
+                    "roles": "Roles",
+                    "userSelfService" : "User Self-Service",
+                    "userRegistration" : "User Registration",
+                    "passwordReset" : "Password Reset"
                 }
             }
         }
@@ -423,6 +432,94 @@
             "definition": "Definition",
             "by": "by",
             "created": "Created"
+        },
+        "selfservice" : {
+            "emailValidationPasswordDialog" : "Configure Password Email Validation",
+            "passwordSelfServiceHelp" : "Configure the end-user password reset experience.",
+            "userRegistrationSelfServiceHelp" : "Configure the end-user registration experience.",
+            "enableUserRegistration" : "Enable User Registration",
+            "enablePassword" : "Enable Password Reset",
+            "userRegistration" : "User Registration",
+            "passwordReset" : "Password Reset",
+            "options" : "Options",
+            "advanced" : "Advanced",
+            "registrationSteps" : "Registration Steps",
+            "passwordSteps" : "Password Reset Steps",
+            "emailValidation" : "Email Validation",
+            "emailValidationDescription" : "Configure email sent during user registration process",
+            "kbaTitle" : "KBA Stage",
+            "kbaHelp" : "Configure questions used during user registration",
+            "userDetailsTitle" : "User Details",
+            "userDetailsHelp" : "Configure where user detail is collected",
+            "registrationForm" : "Registration Form",
+            "registrationFormDescription" : "Configure user registration form",
+            "passwordResetForm" : "Password Reset Form",
+            "passwordResetFormDescription" : "Configure password reset form",
+            "stateless" : "Stateless",
+            "local" : "Local",
+            "storage" : "Storage",
+            "snapshotToken" : "Snapshot Token",
+            "tokenExpire" : "Token LifeTime (milliseconds)",
+            "password" : {
+                "resetStageTitle" : "Configure Password Reset Form",
+                "userIdValidationTitle" : "Configure Validation Email"
+            },
+            "user" : {
+                "selfRegistrationTitle" : "Configure Registration Form",
+                "emailValidationTitle" : "Configure Validation Email",
+                "kbaStageTitle" : "Configure KBA Stage",
+                "userDetailsTitle" : "Configure User Details"
+            },
+            "userRegistrationForm" : {
+                "identityServiceUrl" : "Identity Service URL",
+                "identityServiceUrlHelp" : "",
+                "identityUsernameField" : "Identity Username Field",
+                "identityUsernameFieldHelp" : "Account Property",
+                "identityEmailField" : "Identity Email Field",
+                "identityEmailFieldHelp" : "Email property"
+            },
+            "kbaStage" : {
+                "kbaProperty" : "KBA Property Name",
+                "kbaPropertyHelp" : "",
+                "questionId" : "Question Id",
+                "questionIdHelp" : "Unique Id for the question",
+                "question" : "Question",
+                "questionHelp" : "Security question for user registration"
+            },
+            "userIdValidation" : {
+                "queryFields" : "Query Fields",
+                "queryFieldsHelp" : "",
+                "identityIdField" : "Identity Id Field",
+                "identityIdFieldHelp"  : "",
+                "identityEmailField" : "Identity Email Field",
+                "identityEmailFieldHelp" : "",
+                "identityServiceUrl"  : "Identity Service URL",
+                "identityServiceUrlHelp" : ""
+            },
+            "selfRegistration" : {
+                "identityServiceUrl"  : "Identity Service URL",
+                "identityServiceUrlHelp" : ""
+            },
+            "userEmailValidation" : {
+                "emailServiceUrl" : "Email Service URL",
+                "emailServiceUrlHelp" : "",
+                "emailFrom" : "Email From",
+                "emailSubject" : "Email Subject",
+                "emailMessage" : "Email Message",
+                "emailMessageHelp" : "",
+                "verificationLinkToken" : "Verification Link Token",
+                "verificationLinkTokenHelp" : "",
+                "emailVerificationLink" : "Email Verification Link",
+                "emailVerificationLinkHelp" : "Include verification link in the email"
+            },
+            "userDetails" : {
+                "identityEmailField" : "Identity Email Field",
+                "identityEmailFieldHelp" : ""
+            },
+            "resetStage" : {
+                "passwordField" : "Password Field",
+                "passwordFieldHelp" : ""
+            }
         },
         "managed" : {
             "addManagedTitle" : "Add Managed Object",

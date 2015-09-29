@@ -1,0 +1,20 @@
+<div class="card wide-card disabled" data-type="{{type}}">
+    <div class="card-body">
+        <div class="switch-holder pull-left">
+            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                <label>
+                    <input {{#unless ../enableSelfService}} disabled="true" {{/unless}} class="section-check" type="checkbox"><span></span>
+                </label>
+            </div>
+        </div>
+        <div class="details pull-left">
+            <h3>{{title}}</h3>
+            <p class="status text-muted">{{help}}</p>
+        </div>
+        <div class="pull-right">
+            <button type="button" class="btn btn-link" data-toggle="dropdown" aria-expanded="false">
+                <i class="fa fa-pencil"></i>
+            </button>
+        </div>
+    </div>
+</div>

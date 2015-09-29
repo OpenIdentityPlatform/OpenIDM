@@ -1,0 +1,40 @@
+<div class="container">
+    <div class="page-header">
+        <h1>{{t "templates.selfservice.userRegistration"}}</h1>
+    </div>
+    <div class="toggle-header">
+        <label class="control-label">{{t "templates.selfservice.enableUserRegistration"}}</label>
+        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+            <label>
+                <input class="all-check" type="checkbox"><span></span>
+            </label>
+        </div>
+    </div>
+    <div>
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" id="optionTab" class="active"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
+            <li role="presentation" id="advancedTab"><a href="#advanced" data-toggle="tab" aria-controls="advanced" role="tab">{{t "templates.selfservice.advanced"}}</a></li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="options">
+                <div class="panel panel-default ">
+                    <div class="panel-body">
+                        <p class="section-help">{{t "templates.selfservice.userRegistrationSelfServiceHelp"}}</p>
+
+                        <h3 class="block-header">{{t "templates.selfservice.registrationSteps"}}</h3>
+                        <div class="selfservice-holder">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    {{#each configList}}
+                                        {{> selfservice/_selfserviceblock this}}
+                                    {{/each}}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {{> selfservice/_advancedoptions }}
+        </div>
+    </div>
+</div>

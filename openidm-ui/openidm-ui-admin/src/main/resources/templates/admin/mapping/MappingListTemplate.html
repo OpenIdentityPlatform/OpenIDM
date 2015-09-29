@@ -23,75 +23,74 @@
     {{#if mappingConfig.length}}
     <div id="mappingConfigHolder" class="mapping-listing mappings-list">
         {{#each mappingConfig}}
-        <div class="mapping mapping-config-body" mapping="{{name}}">
+        <div class="wide-card card mapping mapping-config-body" mapping="{{name}}">
             <div class="panel panel-default">
-                <div class="front">
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="connector source">
-                                <div class="panel-body">
-                                    <div class="media">
-                                        <a class="media-left" href="#">
-                                            <div class="image circle">
-                                                <i class="mapping-icon left-icon {{sourceIcon}}"></i>
-                                            </div>
-                                        </a>
-                                        <div class="media-body">
-                                            <h4 class="connector-role">{{t "templates.mapping.source"}}</h4>
-                                            <h3>{{source}}</h3>
-                                            <p class="">{{sourceType}}</p>
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="connector source">
+                            <div class="panel-body">
+                                <div class="media">
+                                    <a class="media-left" href="#">
+                                        <div class="image circle">
+                                            <i class="mapping-icon left-icon {{sourceIcon}}"></i>
                                         </div>
-                                    </div>
-                                </div>
-                                <div class="arrow">
-                                    <div class="arrow-inner">
+                                    </a>
+                                    <div class="media-body">
+                                        <h4 class="connector-role">{{t "templates.mapping.source"}}</h4>
+                                        <h3>{{source}}</h3>
+                                        <p class="">{{sourceType}}</p>
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-sm-6">
-                            <div class="connector target">
-                                <div class="panel-body">
-                                    <div class="media">
-                                        <a class="media-left" href="#">
-                                            <div class="image circle">
-                                                <i class="mapping-icon left-icon {{targetIcon}}"></i>
-                                            </div>
-                                        </a>
-                                        <div class="media-body">
-                                            <h4 class="connector-role">{{t "templates.mapping.target"}}</h4>
-                                            <h3>{{target}}</h3>
-                                            <p>{{targetType}}</p>
-                                        </div>
-                                    </div>
+                            <div class="arrow">
+                                <div class="arrow-inner">
                                 </div>
                             </div>
                         </div>
                     </div>
-
-                    <div class="panel-footer">
-                        <div class="row no-gutters">
-                            <div class="col-sm-6">
-                                <div class="connector-info">
-                                    <h2 class="connector-name mapping-config-header sync-label">
-                                        {{name}}
-                                    </h2>
-                                    <div class="connector-status text-danger">
-                                        <span id="{{name}}_syncStatus"></span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-sm-6">
-                                <div class="connector-actions">
-                                    <div>
-                                        <button type="button" class="btn btn-link button icon-button"><i class="fa fa-pencil"></i> <span>{{t "common.form.edit"}}</span></button>
-                                        <button type="button" class="btn btn-link button icon-button delete-button"><i class="fa fa-times"></i> <span>{{t "common.form.delete"}}</span></button>
+                    <div class="col-sm-6">
+                        <div class="connector target">
+                            <div class="panel-body">
+                                <div class="media">
+                                    <a class="media-left" href="#">
+                                        <div class="image circle">
+                                            <i class="mapping-icon left-icon {{targetIcon}}"></i>
+                                        </div>
+                                    </a>
+                                    <div class="media-body">
+                                        <h4 class="connector-role">{{t "templates.mapping.target"}}</h4>
+                                        <h3>{{target}}</h3>
+                                        <p>{{targetType}}</p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                <div class="panel-footer">
+                    <div class="row no-gutters">
+                        <div class="col-sm-6">
+                            <div class="connector-info">
+                                <h2 class="connector-name mapping-config-header sync-label">
+                                    {{name}}
+                                </h2>
+                                <div class="connector-status text-danger">
+                                    <span id="{{name}}_syncStatus"></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="connector-actions">
+                                <div>
+                                    <button type="button" class="btn btn-link button icon-button"><i class="fa fa-pencil"></i> <span>{{t "common.form.edit"}}</span></button>
+                                    <button type="button" class="btn btn-link button icon-button delete-button"><i class="fa fa-times"></i> <span>{{t "common.form.delete"}}</span></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
         {{/each}}

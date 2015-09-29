@@ -33,6 +33,16 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: "dashboard/"
         },
+        "userRegistrationView" : {
+            view: "org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView",
+            role: "ui-admin",
+            url: "selfservice/userregistration/"
+        },
+        "passwordResetView" : {
+            view: "org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView",
+            role: "ui-admin",
+            url: "selfservice/passwordreset/"
+        },
         "connectorListView" : {
             view: "org/forgerock/openidm/ui/admin/connector/ConnectorListView",
             role: "ui-admin",
