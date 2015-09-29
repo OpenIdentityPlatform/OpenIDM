@@ -78,26 +78,6 @@ CREATE INDEX fk_genericobjects_objecttypes ON [openidm].[genericobjects] (object
 END
 
 -- -----------------------------------------------------
--- Table `openidm`.`relationships`
--- -----------------------------------------------------
-IF NOT EXISTS (SELECT name FROM sysobjects where name='relationships' AND xtype='U')
-BEGIN
-CREATE  TABLE [openidm].[relationsips]
-(
-  id NUMERIC(19,0) NOT NULL IDENTITY ,
-  objectid NVARCHAR(255) NOT NULL ,
-  firstid NVARCHAR(255) NOT NULL ,
-  firstpropname NVARCHAR(32) NOT NULL ,
-  secondid NVARCHAR(255) NOT NULL ,
-  rev NVARCHAR(38) NOT NULL ,
-  properties NTEXT NULL ,
-  PRIMARY KEY CLUSTERED (id),
-);
-CREATE INDEX idx_relationships_first ON [openidm].[relationships] (firstid ASC, firstpropname ASC);
-CREATE UNIQUE INDEX idx_relationships_objectid ON [openidm].[relationships] (objectid ASC);
-END
-
--- -----------------------------------------------------
 -- Table `openidm`.`genericobjectproperties`
 -- -----------------------------------------------------
 IF NOT EXISTS (SELECT name FROM sysobjects where name='genericobjectproperties' AND xtype='U')
@@ -209,6 +189,50 @@ CREATE INDEX fk_configobjectproperties_configobjects ON [openidm].[configobjectp
 CREATE INDEX idx_configobjectproperties_prop ON [openidm].[configobjectproperties] (propkey ASC, propvalue ASC);
 END
 
+
+-- -----------------------------------------------------
+-- Table `openidm`.`relationships`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='relationships' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[relationships]
+(
+  id NUMERIC(19,0) NOT NULL IDENTITY ,
+  objecttypes_id NUMERIC(19,0) NOT NULL ,
+  objectid NVARCHAR(255) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  fullobject NTEXT NULL ,
+  CONSTRAINT fk_relationships_objecttypes
+    FOREIGN KEY (objecttypes_id)
+    REFERENCES [openidm].[objecttypes] (id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION,
+  PRIMARY KEY CLUSTERED (id),
+);
+CREATE INDEX fk_relationships_objecttypes ON [openidm].[relationships] (objecttypes_id ASC);
+CREATE UNIQUE INDEX idx_relationships_object ON [openidm].[relationships] (objecttypes_id ASC, objectid ASC);
+END
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`relationshipproperties`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='relationshipproperties' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[relationshipproperties] (
+  relationships_id NUMERIC(19,0) NOT NULL ,
+  propkey NVARCHAR(255) NOT NULL ,
+  proptype NVARCHAR(255) NULL ,
+  propvalue NVARCHAR(195) NULL ,
+  CONSTRAINT fk_relationshipproperties_relationships
+    FOREIGN KEY (relationships_id)
+    REFERENCES [openidm].[relationships] (id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+);
+CREATE INDEX fk_relationshipproperties_relationships ON [openidm].[relationshipproperties] (relationships_id ASC);
+CREATE INDEX idx_relationshipproperties_prop ON [openidm].[relationshipproperties] (propkey ASC, propvalue ASC);
+END
 
 -- -----------------------------------------------------
 -- Table `openidm`.`links`

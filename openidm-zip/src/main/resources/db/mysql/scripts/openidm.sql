@@ -53,21 +53,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
--- -----------------------------------------------------
--- Table `openidm`.`relationships`
--- -----------------------------------------------------
-CREATE TABLE IF NOT EXISTS `openidm`.`relationships` (
-  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT,
-  `objectid` VARCHAR(255) NOT NULL,
-  `rev` VARCHAR(30) NOT NULL,
-  `firstid` VARCHAR(255) NOT NULL,
-  `firstpropname` VARCHAR(32) NOT NULL,
-  `secondid` VARCHAR(255) NOT NULL,
-  `properties` MEDIUMTEXT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE INDEX `idx_relationships_object` (`objectid` ASC)
-) ENGINE = InnoDB;
-
 
 -- -----------------------------------------------------
 -- Table `openidm`.`managedobjects`
@@ -144,6 +129,43 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+
+-- -----------------------------------------------------
+-- Table `openidm`.`relationships`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`relationships` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `fullobject` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_relationships_objecttypes` (`objecttypes_id` ASC) ,
+  UNIQUE INDEX `idx_relationships_object` (`objecttypes_id` ASC, `objectid` ASC) ,
+  CONSTRAINT `fk_relationships_objecttypes`
+  FOREIGN KEY (`objecttypes_id` )
+  REFERENCES `openidm`.`objecttypes` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+  ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`relationshipproperties`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`relationshipproperties` (
+  `relationships_id` BIGINT UNSIGNED NOT NULL ,
+  `propkey` VARCHAR(255) NOT NULL ,
+  `proptype` VARCHAR(255) NULL ,
+  `propvalue` VARCHAR(2000) NULL ,
+  INDEX `fk_relationshipproperties_relationships` (`relationships_id` ASC) ,
+  INDEX `idx_relationshipproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  CONSTRAINT `fk_relationshipproperties_relationships`
+  FOREIGN KEY (`relationships_id` )
+  REFERENCES `openidm`.`relationships` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+  ENGINE = InnoDB;
 
 -- -----------------------------------------------------
 -- Table `openidm`.`links`
