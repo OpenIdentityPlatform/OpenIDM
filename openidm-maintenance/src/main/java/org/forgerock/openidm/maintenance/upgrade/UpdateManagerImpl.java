@@ -45,13 +45,9 @@ import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.attribute.PosixFilePermission;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
 import java.util.Date;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
@@ -122,7 +118,6 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String PROP_RESTARTREQUIRED = "restartRequired";
 
     private static final String BUNDLE_BACKUP_EXT = ".old-";
-    private static final String BUNDLE_SYMBOLICNAME = "Bundle-SymbolicName";
 
     public enum UpdateStatus {
         IN_PROGRESS,
@@ -530,7 +525,7 @@ public class UpdateManagerImpl implements UpdateManager {
                                     BUNDLE_BACKUP_EXT + timestamp);
                             Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
                             Attributes manifest = readManifest(newPath);
-                            String symbolicName = manifest.getValue(BUNDLE_SYMBOLICNAME);
+                            String symbolicName = manifest.getValue(Constants.BUNDLE_SYMBOLICNAME);
                             if (symbolicName == null) {
                                 // treat it as a static file
                                 Path backupFile = staticFileUpdate.replace(path);
