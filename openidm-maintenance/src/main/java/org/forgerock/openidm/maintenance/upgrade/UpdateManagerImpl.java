@@ -54,6 +54,7 @@ import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.jar.Attributes;
+import java.util.regex.Pattern;
 
 import difflib.DiffUtils;
 import difflib.Patch;
@@ -518,6 +519,9 @@ public class UpdateManagerImpl implements UpdateManager {
 
         public void run() {
             try {
+                String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
+                String installDir = IdentityServer.getInstance().getInstallLocation().toString();
+
                 for (final Path path : archive.getFiles()) {
                     try {
                         if (path.startsWith(BUNDLE_PATH)) {
@@ -539,11 +543,16 @@ public class UpdateManagerImpl implements UpdateManager {
                             } else {
                                 bundleHandler.upgradeBundle(newPath, symbolicName);
                             }
+                        } else if (path.getFileName().toString().endsWith(JSON_EXT) &&
+                                !projectDir.equals(installDir) &&
+                                path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
+                            // a json config in the current project - ignore it
                         } else if (path.startsWith(CONF_PATH) &&
                                 path.getFileName().toString().endsWith(JSON_EXT)) {
                             // a json config in the default project - ignore it
                         } else if (path.startsWith(CONF_PATH) &&
                                 path.getFileName().toString().endsWith(PATCH_EXT)) {
+                            // a patch file for a config in the repo
                             patchConfig(ContextUtil.createInternalContext(),
                                     "repo/config", json(FileUtil.readFile(path.toFile())));
                         } else {
@@ -552,9 +561,7 @@ public class UpdateManagerImpl implements UpdateManager {
                                     .setFilePath(path.toString())
                                     .setFileState(fileStateChecker.getCurrentFileState(path).name());
 
-                            boolean readOnly = path.startsWith("ui/default") || path.startsWith("bin");
-
-                            if (!readOnly) {
+                            if (!isReadOnly(path)) {
                                 Path stockFile = staticFileUpdate.keep(path);
                                 if (stockFile != null) {
                                     fileEntry.setStockFile(stockFile.toString());
@@ -621,6 +628,11 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
+    private boolean isReadOnly(Path path) {
+        Pattern uiDefaults = Pattern.compile("^ui/*/default");
+        return path.startsWith("bin") || uiDefaults.matcher(path.toString()).find();
+    }
+
     private void logUpdate(UpdateLogEntry entry) throws UpdateException {
         try {
             updateLogService.updateUpdate(entry);
@@ -681,7 +693,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
         String workingDir = "";
         final String targetFileName = new File(url.getPath()).getName();
-        final File patchDir = new File(workingDir, "patch/bin");
+        final File patchDir = ARCHIVE_PATH.toFile();
         patchDir.mkdirs();
         final File targetFile = new File(patchDir, targetFileName);
         final FileOutputStream fos;
