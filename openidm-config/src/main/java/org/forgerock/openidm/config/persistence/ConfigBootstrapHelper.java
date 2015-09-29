@@ -192,30 +192,17 @@ public class ConfigBootstrapHelper {
      * @throws java.io.IOException
      */
     public static void installAllConfig(ConfigurationAdmin configAdmin) throws IOException {
-        IdentityServer identityServer = IdentityServer.getInstance();
-        
         String enabled = System.getProperty(OPENIDM_FILEINSTALL_ENABLED, "true");
         String poll = System.getProperty(OPENIDM_FILEINSTALL_POLL, "2000");
         String dir = getConfigFileInstallDir();
         String filter = System.getProperty(OPENIDM_FILEINSTALL_FILTER, ".*\\.cfg|.*\\.json");
         String start = System.getProperty(OPENIDM_FILEINSTALL_BUNDLES_NEW_START, "false");
 
-        String uiConfigEnabled = identityServer.getProperty(OPENIDM_UI_FILEINSTALL_ENABLED, "true");
-        String uiPoll = identityServer.getProperty(OPENIDM_UI_FILEINSTALL_POLL, "2000");
-        String uiDir = identityServer.getProperty(OPENIDM_UI_FILEINSTALL_DIR, "ui/default");
-
         Configuration config = configAdmin.createFactoryConfiguration(FELIX_FILEINSTALL_PID, null);
         
-        Configuration uiConfig = configAdmin.createFactoryConfiguration(FELIX_FILEINSTALL_PID, null);
-    
         Dictionary props = config.getProperties();
         if (props == null) {
             props = new Hashtable();
-        }
-        
-        Dictionary uiProps = uiConfig.getProperties();
-        if (uiProps == null) {
-            uiProps = new Hashtable();
         }
         
         if ("true".equals(enabled)) {
@@ -231,17 +218,6 @@ public class ConfigBootstrapHelper {
         } else {
             logger.info("Configuration from file disabled");
         }
-        
-        if ("true".equals(uiConfigEnabled)) {
-            uiProps.put("felix.fileinstall.poll", uiPoll);
-            uiProps.put("felix.fileinstall.dir", uiDir);
-            uiProps.put("config.factory-pid", "ui");
-            uiConfig.update(uiProps);
-            logger.info("UI file installer enabled");
-        } else {
-            logger.info("UI file installer disabled");
-        }
-        
     }
     
     /**
