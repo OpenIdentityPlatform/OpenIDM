@@ -249,7 +249,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 .then(new Function<ResourceResponse, String, ResourceException>() {
                     @Override
                     public String apply(ResourceResponse value) throws ResourceException {
-                        return value.getId();
+                        return value.getContent().get(FIELD_ID).asString();
                     }
                 });
     }
