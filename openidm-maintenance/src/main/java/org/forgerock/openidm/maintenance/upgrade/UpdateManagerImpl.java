@@ -476,7 +476,7 @@ public class UpdateManagerImpl implements UpdateManager {
             ZipFile zip = new ZipFile(archive.toFile());
             Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
             zip.extractFile("openidm/" + LICENSE_PATH, tmpDir.toString());
-            File file = new File(tmpDir.toString() + "openidm/" + LICENSE_PATH);
+            File file = new File(tmpDir.toString() + "/openidm/" + LICENSE_PATH);
             if (!file.exists()) {
                 throw new UpdateException("Unable to locate a license file.");
             }
