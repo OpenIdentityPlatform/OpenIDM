@@ -102,6 +102,12 @@ public class UpdateService implements RequestHandler {
     @Activate
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Update service {}", compContext.getProperties());
+
+        // Ensure archive directory exists
+        if (!Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY).toFile().exists()) {
+            Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY).toFile().mkdirs();
+        }
+
         logger.info("Update service started.");
         bundleContext = compContext.getBundleContext();
     }
