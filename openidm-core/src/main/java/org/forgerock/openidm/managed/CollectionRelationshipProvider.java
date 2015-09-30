@@ -35,6 +35,7 @@ import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
@@ -52,7 +53,9 @@ import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Router;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.services.context.Context;
@@ -311,8 +314,39 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
     @Override
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
         try {
-            final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
-            queryRequest.setResourcePath(REPO_RESOURCE_PATH);
+            if (request.getQueryExpression() != null) {
+                return new BadRequestException(HttpUtils.PARAM_QUERY_EXPRESSION + " not supported").asPromise();
+            }
+
+            /*
+             * Create new request copying all attributes but fields.
+             * This must be done so field filtering can be handled by CREST externally on
+             * the transformed resource response.
+             */
+            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
+
+            if (request.getQueryId() != null) {
+                if ("query-all".equals(request.getQueryId())) {
+                    request.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
+                } else if ("query-all-ids".equals(request.getQueryId())) {
+                    queryRequest.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
+                    // This should be the only field ever set on queryRequest
+                    queryRequest.addField(FIELD_ID);
+                } else {
+                    return new BadRequestException("Invalid " + HttpUtils.PARAM_QUERY_ID + ": only query-all and query-all-ids supported").asPromise();
+                }
+            }
+
+            queryRequest.setQueryFilter(request.getQueryFilter());
+            queryRequest.setPageSize(request.getPageSize());
+            queryRequest.setPagedResultsOffset(request.getPagedResultsOffset());
+            queryRequest.setPagedResultsCookie(request.getPagedResultsCookie());
+            queryRequest.setTotalPagedResultsPolicy(request.getTotalPagedResultsPolicy());
+            queryRequest.addSortKey(request.getSortKeys().toArray(new SortKey[request.getSortKeys().size()]));
+            for (String key : request.getAdditionalParameters().keySet()) {
+                queryRequest.setAdditionalParameter(key, request.getAdditionalParameter(key));
+            }
+
             QueryFilter<JsonPointer> filter = QueryFilter.and(
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
@@ -327,7 +361,12 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
-                    return handler.handleResource(FORMAT_RESPONSE_NO_EXCEPTION.apply(resource));
+                    // Manually filter for query-all-ids
+                    // We must manually filter here post-format since the original fields do not match on the repo
+                    final ResourceResponse filtered = Resources.filterResource(
+                            FORMAT_RESPONSE_NO_EXCEPTION.apply(resource),
+                            queryRequest.getFields());
+                    return handler.handleResource(filtered);
                 }
             });
             
