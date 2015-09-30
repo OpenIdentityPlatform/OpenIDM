@@ -27,6 +27,7 @@ package org.forgerock.openidm.maintenance.upgrade;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.PosixFilePermission;
@@ -84,21 +85,33 @@ class StaticFileUpdate {
      */
     Path replace(final Path path) throws IOException {
         Path destination = null;
-        final Set<PosixFilePermission> permissions = Files.getPosixFilePermissions(path);
-        if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
-            destination = root.resolve(path.toString() + OLD_SUFFIX + timestamp);
-            Files.move(root.resolve(path),
-                    destination,
-                    StandardCopyOption.REPLACE_EXISTING);
+        Set<PosixFilePermission> permissions = null;
+        try {
+            permissions = Files.getPosixFilePermissions(path);
+            if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
+                destination = root.resolve(path.toString() + OLD_SUFFIX + timestamp);
+                Files.move(root.resolve(path),
+                        destination,
+                        StandardCopyOption.REPLACE_EXISTING);
+            }
+        } catch (NoSuchFileException e) {
+            // this is ok, just install the new file
         }
+
+        final Set<PosixFilePermission> perms = permissions;
         archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
             @Override
             public Void apply(InputStream inputStream) throws IOException {
                 Files.copy(inputStream, root.resolve(path), StandardCopyOption.REPLACE_EXISTING);
-                Files.setPosixFilePermissions(path, permissions);
+                if (perms != null) {
+                    Files.setPosixFilePermissions(path, perms);
+                }
                 return null;
             }
         });
+
+        fileStateChecker.updateState(path);
+
         return destination;
     }
 
@@ -120,6 +133,9 @@ class StaticFileUpdate {
                     return null;
                 }
             });
+
+            fileStateChecker.updateState(path);
+
             return destination;
         }
         return null;
