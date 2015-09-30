@@ -46,7 +46,6 @@ public class OpenIDMELResolver extends ELResolver {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(OpenIDMELResolver.class);
     private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
-    private ClassLoader classLoader;
     private ScriptRegistry scriptRegistry;
 
     public OpenIDMELResolver(Map<String, JavaDelegate> delegateMap) {
@@ -56,14 +55,13 @@ public class OpenIDMELResolver extends ELResolver {
     @Override
     public Object getValue(ELContext elContext, Object base, Object property) {
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
-        classLoader = session.getClassLoader();
         scriptRegistry = session.getOpenIDMScriptRegistry();
         Map<String, String> scriptJson = new HashMap<String, String>(3);
         Bindings bindings = null;
         String key = (String) property;
         try {
             JsonValue openidmContext = (JsonValue) elContext.getELResolver().getValue(elContext, null, ActivitiConstants.OPENIDM_CONTEXT);
-            org.forgerock.services.context.Context context = new ActivitiContext(openidmContext, classLoader);
+            org.forgerock.services.context.Context context = new ActivitiContext(openidmContext, this.getClass().getClassLoader());
             ScriptEntry script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", "groovy"));
             if (script == null) {
                 scriptJson.put("source", "");

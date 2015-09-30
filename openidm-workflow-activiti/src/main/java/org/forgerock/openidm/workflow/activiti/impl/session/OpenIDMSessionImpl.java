@@ -22,14 +22,12 @@ import org.forgerock.script.ScriptRegistry;
  */
 public class OpenIDMSessionImpl implements OpenIDMSession {
 
-    private ClassLoader classLoader;
     private ScriptRegistry scriptRegistry;
 
     public OpenIDMSessionImpl() {
     }
 
-    public OpenIDMSessionImpl(ClassLoader classLoader, ScriptRegistry scriptRegistry) {
-        this.classLoader = classLoader;
+    public OpenIDMSessionImpl(ScriptRegistry scriptRegistry) {
         this.scriptRegistry = scriptRegistry;
     }
 
@@ -39,16 +37,6 @@ public class OpenIDMSessionImpl implements OpenIDMSession {
 
     @Override
     public void close() {
-    }
-
-    @Override
-    public ClassLoader getClassLoader() {
-        return classLoader;
-    }
-
-    @Override
-    public void setClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
     }
 
     @Override
