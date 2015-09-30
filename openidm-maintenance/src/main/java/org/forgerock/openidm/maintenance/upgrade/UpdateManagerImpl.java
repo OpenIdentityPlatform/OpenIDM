@@ -545,6 +545,7 @@ public class UpdateManagerImpl implements UpdateManager {
                             }
                         } else {
                             bundleHandler.upgradeBundle(newPath, symbolicName);
+                            fileStateChecker.updateState(path);
                         }
                     } else if (path.getFileName().toString().endsWith(JSON_EXT) &&
                             !projectDir.equals(installDir) &&
