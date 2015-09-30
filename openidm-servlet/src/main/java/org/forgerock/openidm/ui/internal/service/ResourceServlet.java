@@ -125,7 +125,7 @@ public final class ResourceServlet extends HttpServlet {
             // Locate the file in extension dir first, fall back to default dir
             URL url = null;
             String loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
-                    CONFIG_EXTENSION_DIR).required().asString() + resourceDir, IdentityServer.getInstance(), false);
+                    CONFIG_EXTENSION_DIR).required().asString(), IdentityServer.getInstance(), false);
             File file = new File(loadDir + target);
             if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
                 url = file.getCanonicalFile().toURI().toURL();
