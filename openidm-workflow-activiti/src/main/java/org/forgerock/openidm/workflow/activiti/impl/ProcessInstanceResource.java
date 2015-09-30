@@ -126,6 +126,8 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             String businessKey = ActivitiUtil.removeBusinessKeyFromRequest(request);
             String processDefinitionId = ActivitiUtil.removeProcessDefinitionIdFromRequest(request);
             Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
+            // Wrap the current CREST context in a special-purpose ActivitiContext so we can be sure of what
+            // we are deserializing later.
             variables.put(ActivitiConstants.OPENIDM_CONTEXT, new ActivitiContext(context).toJsonValue());
             ProcessInstance instance;
             if (processDefinitionId == null) {

@@ -161,12 +161,6 @@ public class ActivitiServiceImpl implements RequestHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
-            bind = "bindClassLoader", unbind = "unbindClassLoader",
-            target = "(service.pid=org.forgerock.openidm.router)"
-    )
-    private ClassLoader classLoader;
-
     private final OpenIDMExpressionManager expressionManager = new OpenIDMExpressionManager();
     private final SharedIdentityService identityService = new SharedIdentityService();
     private final OpenIDMSessionFactory idmSessionFactory = new OpenIDMSessionFactory();
@@ -498,16 +492,6 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     public void unbindDataSource(DataSource dataSource) {
         this.dataSource = null;
-    }
-
-    public void bindClassLoader(ClassLoader classLoader) {
-        this.classLoader = classLoader;
-        this.idmSessionFactory.setClassLoader(classLoader);
-    }
-
-    public void unbindClassLoader(ClassLoader classLoader) {
-        this.classLoader = null;
-        this.idmSessionFactory.setClassLoader(null);
     }
 
     public void bindCryptoService(final CryptoService service) {

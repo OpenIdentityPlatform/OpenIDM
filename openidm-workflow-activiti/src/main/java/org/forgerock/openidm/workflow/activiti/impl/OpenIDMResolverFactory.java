@@ -58,7 +58,6 @@ public class OpenIDMResolverFactory implements ResolverFactory {
         ScriptEntry script;
 
         OpenIDMSession session = Context.getCommandContext().getSession(OpenIDMSession.class);
-        ClassLoader classLoader = session.getClassLoader();
         ScriptRegistry scriptRegistry = session.getOpenIDMScriptRegistry();
         JsonValue openidmContext = (JsonValue) variableScope.getVariable(ActivitiConstants.OPENIDM_CONTEXT);
 
@@ -132,7 +131,7 @@ public class OpenIDMResolverFactory implements ResolverFactory {
         }
 
         try {
-            context = new ActivitiContext(openidmContext, classLoader);
+            context = new ActivitiContext(openidmContext, this.getClass().getClassLoader());
             script = scriptRegistry.takeScript(new ScriptName("ActivitiScript", language));
             if (script == null) {
                 scriptJson.put("source", "");

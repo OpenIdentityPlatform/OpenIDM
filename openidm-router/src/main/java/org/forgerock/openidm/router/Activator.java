@@ -41,8 +41,6 @@ public class Activator implements BundleActivator {
     private ServiceRegistration factoryServiceRegistration = null;
     private ServiceRegistration<RequestHandler> routerServiceRegistration = null;
 
-    private ServiceRegistration<ClassLoader> classLoaderRegistration = null;
-
     @Override
     public void start(BundleContext context) throws Exception {
         routerRegistry = new RouterRegistryImpl(context);
@@ -61,14 +59,6 @@ public class Activator implements BundleActivator {
 
         routerServiceRegistration =
                 context.registerService(RequestHandler.class, routerRegistry.getInternalRouter(), properties);
-
-        properties = new Hashtable<>(5);
-        properties.put(Constants.SERVICE_DESCRIPTION, "Router route group service");
-        properties.put(Constants.SERVICE_VENDOR, ServerConstants.SERVER_VENDOR_NAME);
-        properties.put(Constants.SERVICE_PID, "org.forgerock.openidm.router");
-
-        classLoaderRegistration =
-                context.registerService(ClassLoader.class, this.getClass().getClassLoader(), properties);
     }
 
     @Override
@@ -83,10 +73,6 @@ public class Activator implements BundleActivator {
         if (null != routerServiceRegistration) {
             routerServiceRegistration.unregister();
             routerServiceRegistration = null;
-        }
-        if (null != classLoaderRegistration) {
-            classLoaderRegistration.unregister();
-            classLoaderRegistration = null;
         }
     }
 }
