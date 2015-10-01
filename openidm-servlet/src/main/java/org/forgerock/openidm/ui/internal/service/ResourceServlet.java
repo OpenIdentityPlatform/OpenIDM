@@ -70,13 +70,11 @@ public final class ResourceServlet extends HttpServlet {
     private static final String CONFIG_CONTEXT_ROOT = "urlContextRoot";
     private static final String CONFIG_BUNDLE = "bundle";
     private static final String CONFIG_NAME = "name";
-    private static final String CONFIG_RESOURCE_DIR = "resourceDir";
     private static final String CONFIG_DEFAULT_DIR = "defaultDir";
     private static final String CONFIG_EXTENSION_DIR = "extensionDir";
 
     //TODO Decide where to put the web and the java resources. Now both are in root
     private JsonValue bundleConfig;
-    private String resourceDir;
     private String contextRoot;
     
     @Reference
@@ -131,7 +129,7 @@ public final class ResourceServlet extends HttpServlet {
                 url = file.getCanonicalFile().toURI().toURL();
             } else {
                 loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
-                        CONFIG_DEFAULT_DIR).required().asString() + resourceDir, IdentityServer.getInstance(), false);
+                        CONFIG_DEFAULT_DIR).required().asString(), IdentityServer.getInstance(), false);
                 file = new File(loadDir + target);
                 if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
                     url = file.getCanonicalFile().toURI().toURL();
@@ -140,7 +138,7 @@ public final class ResourceServlet extends HttpServlet {
                 }
             }
 
-            handle(req, res, url, resourceDir + target);
+            handle(req, res, url, target);
         }
     }
 
@@ -170,14 +168,8 @@ public final class ResourceServlet extends HttpServlet {
             logger.info("UI does not specify bundle name - unable to register servlet");
             return;
         }
-        else if (config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR) == null
-                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).isNull()) {
-            logger.info("UI does not specify bundle resourceDir - unable to register servlet");
-            return;
-        }
 
         bundleConfig = config.get(CONFIG_BUNDLE);
-        resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
         Dictionary<String, Object> props = new Hashtable<>();
