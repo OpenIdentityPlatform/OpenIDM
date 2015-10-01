@@ -448,8 +448,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             return newResourceResponse(resourceId, rev, null);
         }
 
-        final JsonValue persistRelationships = persistRelationships(context, resourceId, newValue);
-        newValue.asMap().putAll(persistRelationships.asMap());
+        // Persists all relationship fields that are present in the new value and updates their values.
+        newValue.asMap().putAll(persistRelationships(context, resourceId, newValue).asMap());
 
         // Execute the onUpdate script if configured
         execScript(context, ScriptHook.onUpdate, newValue,
@@ -458,8 +458,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, newValue);
 
-        // Strip relationships from object before storing
-        newValue = stripRelationshipFields(newValue);
+        // Remove relationships so they don't get persisted
+        JsonValue strippedRelationshipFields = stripRelationshipFields(newValue);
 
         // Perform pre-property encryption
         onStore(context, newValue); // performs per-property encryption
@@ -470,7 +470,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         ResourceResponse response = connectionFactory.getConnection().update(context, updateRequest);
         
         // Put relationships back in before we respond
-        response.getContent().asMap().putAll(persistRelationships.asMap());
+        response.getContent().asMap().putAll(strippedRelationshipFields.asMap());
 
         // Execute the postUpdate script if configured
         execScript(context, ScriptHook.postUpdate, response.getContent(),
@@ -587,15 +587,16 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         try {
             // decrypt any incoming encrypted properties
             JsonValue value = decrypt(content);
-            final JsonValue persistedRelationships = persistRelationships(context, resourceId, value);
-            value.asMap().putAll(persistedRelationships.asMap());
+            
+            // Persists all relationship fields that are present in the new value and updates their values.
+            value.asMap().putAll(persistRelationships(context, resourceId, value).asMap());
 
             execScript(context, ScriptHook.onCreate, value, null);
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(context, value);
 
             // Remove relationships so they don't get persisted
-            value = stripRelationshipFields(value);
+            JsonValue strippedRelationshipFields = stripRelationshipFields(value);
 
             // includes per-property encryption
             onStore(context, value);
@@ -608,7 +609,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     null, createResponse.getContent(), Status.SUCCESS);
 
             // Place persisted relationships in content before sending to the handler
-            createResponse.getContent().asMap().putAll(persistedRelationships.asMap());
+            createResponse.getContent().asMap().putAll(strippedRelationshipFields.asMap());
 
             // Execute the postCreate script if configured
             execScript(context, ScriptHook.postCreate, createResponse.getContent(),
@@ -1160,18 +1161,19 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     }
 
     /**
-     * Returns a deep copy of the supplied {@link JsonValue}.
-     * Used to remove special relation fields before persisting the
-     * value to the repository.
+     * Removes all relationship fields from the supplied {@link JsonValue} instance of a managed object.  Returns a 
+     * {@link JsonValue} object containing the stripped fields.
      *
      * @param value The JsonValue map to strip relationship fields from
-     * @return A deep copy of the JsonValue value with relationship fields removed
+     * @return A {@link JsonValue} object containing the stripped fields.
      */
     protected JsonValue stripRelationshipFields(JsonValue value) {
-        final JsonValue stripped = value.copy();
+        final JsonValue stripped = json(object());
 
         for (JsonPointer field : schema.getRelationshipFields()) {
-            stripped.remove(field);
+            JsonValue fieldValue = value.get(field);
+            stripped.put(field, fieldValue != null ? fieldValue.getObject() : null);
+            value.remove(field);
         }
 
         return stripped;
