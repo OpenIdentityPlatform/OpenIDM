@@ -27,15 +27,16 @@ package org.forgerock.openidm.managed;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.openidm.util.RelationshipUtil;
 
 /**
  * Represents a single field or property in a managed object's schema
  */
 public class SchemaField {
 
-    public static JsonPointer FIELD_ALL_RELATIONSHIPS = new JsonPointer("*_ref");
-    public static JsonPointer FIELD_REFERENCE = new JsonPointer("_ref");
-    public static JsonPointer FIELD_PROPERTIES = new JsonPointer("_refProperties");
+    public static JsonPointer FIELD_ALL_RELATIONSHIPS = new JsonPointer("*" + RelationshipUtil.REFERENCE_ID);
+    public static JsonPointer FIELD_REFERENCE = new JsonPointer(RelationshipUtil.REFERENCE_ID);
+    public static JsonPointer FIELD_PROPERTIES = new JsonPointer(RelationshipUtil.REFERENCE_PROPERTIES);
 
     /** Schema field types */
     enum SchemaFieldType {

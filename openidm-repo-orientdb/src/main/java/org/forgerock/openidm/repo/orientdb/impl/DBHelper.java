@@ -54,7 +54,9 @@ import com.orientechnologies.orient.core.storage.OStorage;
 import java.util.Collection;
 import java.util.Set;
 
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.object;
 
 /**
@@ -415,18 +417,17 @@ public class DBHelper {
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
         String defaultAdminPwd = "openidm-admin";
-        ArrayList defaultAdminRoles = new ArrayList();
-        defaultAdminRoles.add("openidm-admin");
-        defaultAdminRoles.add("openidm-authorized");
-        populateDefaultUser(defaultTableName, db, defaultAdminUser,
-                defaultAdminPwd, defaultAdminRoles);
+        List defaultAdminRoles = json(array(
+                object(field("_ref", "repo/internal/role/openidm-admin")),
+                object(field("_ref", "repo/internal/role/openidm-authorized")))).asList();
+        populateDefaultUser(defaultTableName, db, defaultAdminUser, defaultAdminPwd, defaultAdminRoles);
         logger.trace("Created default user {}. Please change the assigned default password.",
                 defaultAdminUser);
 
         String anonymousUser = "anonymous";
         String anonymousPwd = "anonymous";
-        ArrayList anonymousRoles = new ArrayList();
-        anonymousRoles.add("openidm-reg");
+        List anonymousRoles = json(array(
+                object(field("_ref", "repo/internal/role/openidm-reg")))).asList();
         populateDefaultUser(defaultTableName, db, anonymousUser, anonymousPwd, anonymousRoles);
         logger.trace("Created default user {} for registration purposes.", anonymousUser);
     }
@@ -438,7 +439,7 @@ public class DBHelper {
         defaultAdmin.put("_openidm_id", user);
         defaultAdmin.put("userName", user);
         defaultAdmin.put("password", pwd);
-        defaultAdmin.put("roles", roles);
+        defaultAdmin.put("authzRoles", roles);
 
         try {
             ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, db, defaultTableName);
