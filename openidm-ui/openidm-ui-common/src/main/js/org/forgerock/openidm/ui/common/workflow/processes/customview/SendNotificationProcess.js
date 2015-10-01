@@ -30,9 +30,12 @@ define("org/forgerock/openidm/ui/common/workflow/processes/customview/SendNotifi
     "org/forgerock/openidm/ui/common/workflow/processes/AbstractProcessForm",
     "UserDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/common/notifications/NotificationViewHelper"
-], function($, _, AbstractProcessForm, userDelegate, conf, validatorsManager, notificationViewHelper) {
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function($, _,
+            AbstractProcessForm,
+            userDelegate,
+            conf,
+            validatorsManager) {
     var SendNotificationProcess = AbstractProcessForm.extend({
 
         template: "templates/workflow/processes/customview/SendNotificationTemplate.html",
@@ -43,11 +46,11 @@ define("org/forgerock/openidm/ui/common/workflow/processes/customview/SendNotifi
              this.data.loggedUser = conf.loggedUser.toJSON();
 
              nTypes = {};
-             for (notificationType in notificationViewHelper.notificationTypes) {
-                 nTypes[notificationType] = $.t(notificationViewHelper.notificationTypes[notificationType].name);
+             for (notificationType in conf.globalData.notificationTypes) {
+                 nTypes[notificationType] = $.t(conf.globalData.notificationTypes[notificationType].name);
              }
              this.data.notificationTypes = nTypes;
-             this.data.defaultNotificationType = notificationViewHelper.defaultType;
+             this.data.defaultNotificationType = conf.globalData.notificationTypes.defaultType;
 
             _.bind(function() {
 

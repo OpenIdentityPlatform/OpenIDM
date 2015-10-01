@@ -1,5 +1,20 @@
-<div id="processList">
-{{#each processDefinitions}}
-    <div class='process-item'><a href='#' class='processName'>{{name}}</a><input type='hidden' name='id' value='{{_id}}' /></div>
-{{/each}}
-</div>
+<ul id="processList" class="list-group">
+    {{#each processDefinitions}}
+    <li class="list-group-item process-item">
+        <div class="media-left">
+            <div class="image circle bg-primary">
+                <i class="fa fa-check"></i>
+            </div>
+        </div>
+        <div class="media-body media-middle">
+            <span class="media-title">{{name}}</span>
+        </div>
+        <div class="media-right">
+            <a href="#" class="details-link"><i class="fa fa-caret-right"></i>{{t "common.form.details"}}</a>
+        </div>
+
+        <input type='hidden' name='id' value='{{_id}}' />
+        <div class="process-item-holder"></div>
+    </li>
+    {{/each}}
+</ul>

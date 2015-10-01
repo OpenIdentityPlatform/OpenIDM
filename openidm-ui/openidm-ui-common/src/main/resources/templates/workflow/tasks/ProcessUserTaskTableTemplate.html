@@ -1,42 +1,35 @@
-<div class="panel panel-collapse">
-    <div class="panel-heading" role="tab">
-        <div class="row">
-            <div class="col-xs-8">
-                <h4 class="panel-title">
-                    <a data-toggle="collapse" href="#{{id}}Base" aria-expanded="false" aria-controls="{{id}}Base" class="collapsed">{{taskName}}</a>
-                </h4>
-            </div>
-            <div class="col-xs-4">
-                <div class="pull-right">
-                    <div class="badge">
-                        {{taskCount}}
-                    </div>
-                </div>
-            </div>
+{{#each tasks}}
+<li class="list-group-item">
+    <div class="media-left">
+        <div class="image circle bg-primary">
+            <i class="fa fa-check"></i>
         </div>
     </div>
-    <div id="{{id}}Base" class="panel-collapse collapse" role="tabpanel" aria-labelledby="{{id}}Heading" aria-expanded="false" style="height: 0px;">
-        <div class="panel-body">
-            <table class="table">
-                <thead class="table-header">
-                <tr>
-                    {{#headers}}
-                    <th>{{.}}</th>
-                    {{/headers}}
-                </tr>
-                </thead>
-                <tbody>
-                {{#tasks}}
-                <tr>
-                    {{#.}}
-                    <td>{{{.}}}</td>
-                    {{/.}}
-                </tr>
+    <div class="media-body media-middle">
+        <div class="media-title">
+            {{../taskName}}
+        </div>
+        <div class="subtitle text-muted">
+            {{#if assignee}}
+            {{convertedTask.[3]}}
+            {{else}}
+            {{t "dashboard.notAssigned"}}
+            {{/if}}
+        </div>
+    </div>
+    <div class="media-right">
+        <div class="claim-item">
+            {{#unless assignee}}
+            <select name="assignedUser" value="null" class="form-control">
+                <option value="null">{{t "common.task.unassign"}}</option>
+                <option value="me">{{t "common.task.assignToMe"}}</option>
+            </select>
+            {{/unless}}
 
-                {{/tasks}}
-                </tbody>
-            </table>
-            <div class="clear"></div>
+            <a href="#" class="details-link"><i class="fa fa-caret-right"></i>{{t "common.form.details"}}</a>
+            <input type="hidden" value="{{_id}}" name="taskId">
+            <input type="hidden" value="{{assignee}}" name="assignedUser">
         </div>
     </div>
-</div>
+</li>
+{{/each}}

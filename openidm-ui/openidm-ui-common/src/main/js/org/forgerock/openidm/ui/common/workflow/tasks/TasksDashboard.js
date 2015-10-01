@@ -55,14 +55,16 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard", [
             this.registerListeners();
 
             this.parentRender(function() {
-                var notificationsView;
+                var notificationsView,
+                    notifications;
 
                 this.candidateTasks.render("all", $("#candidateTasks"));
                 this.myTasks.render("assigned", $("#myTasks"));
                 startProcessView.render();
 
                 //notifications
-                notificationDelegate.getNotificationsForUser(function(notifications) {
+                notificationDelegate.getNotificationsForUser(function(notificationsList) {
+                    notifications = notificationsList.notifications;
 
                     notifications.sort(function(a, b) {
                         if (a.requestDate < b.requestDate) {
@@ -74,8 +76,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard", [
                         return 0;
                     });
 
-                    notificationsView = new NotificationsView();
-                    notificationsView.render({el: $("#notifications"), items: notifications});
+                    NotificationsView.render({el: $("#notifications"), items: notifications});
                 });
 
                 if (callback) {
@@ -89,29 +90,32 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard", [
         },
 
         showDetails: function(event) {
-            //eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "completeTask", args: [event.id], trigger: false});
-
-            $("#taskDetails").closest("tr").remove();
-
-            var root, tr;
+            var root,
+                listItem;
 
             root = event.category === "assigned" ? $("#myTasks") : $("#candidateTasks");
-            tr = root.find("[name=taskId][value="+event.id+"]").closest("tr");
+            listItem = root.find("[name=taskId][value="+event.id+"]").parents(".list-group-item");
 
-            tr.after(this.getDetailsRow());
+            if(listItem.find("#listItem").length === 0) {
+                $("#taskDetails").remove();
 
-            taskDetailsView.render(event.task, event.definition, event.category, function() {
-                if(event.category === "all") {
-                    $("#taskDetails input:enabled, #taskDetails select:enabled").filter(function(){return $(this).val() === "";}).parent().hide();
-                    $("#taskDetails input, #taskDetails select").attr("disabled", "true");
-                    $("#taskDetails span").hide();
-                }
+                listItem.append('<div id="taskDetails"></div>');
 
-                if(root.find("#taskContent").html() === "") {
-                    root.find("#taskContent").css("text-align","left");
-                    root.find("#taskContent").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noDataRequired"));
-                }
-            });
+                taskDetailsView.render(event.task, event.definition, event.category, function() {
+                    if(event.category === "all") {
+                        //$("#taskDetails input:enabled, #taskDetails select:enabled").filter(function(){return $(this).val() === "";}).parent().hide();
+                        $("#taskDetails input, #taskDetails select").attr("disabled", "true");
+                        $("#taskDetails span").hide();
+                    }
+
+                    if(root.find("#taskContent").html() === "") {
+                        root.find("#taskContent").css("text-align","left");
+                        root.find("#taskContent").html($.t("openidm.ui.admin.tasks.StartProcessDashboardView.noDataRequired"));
+                    }
+                });
+            } else {
+                $("#taskDetails").remove();
+            }
         },
 
         registerListeners: function() {

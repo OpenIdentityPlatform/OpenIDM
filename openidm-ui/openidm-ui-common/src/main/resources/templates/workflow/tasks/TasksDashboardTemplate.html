@@ -1,62 +1,37 @@
 <div class="col-sm-8">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-check-circle"></i></div>{{t "common.task.myTasks"}}</h4>
+            <h4 class="panel-title widget-section-title">{{t "common.task.myTasks"}}</h4>
         </div>
-        <div class="panel-body">
-            <div id="myTasks"></div>
-        </div>
-    </div>
-
-    <div class="panel panel-default">
-        <div class="panel-heading">
-            <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-gears"></i></div>{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h4>
-        </div>
-        <div class="panel-body">
-            <div id="candidateTasks"></div>
+        <div class="dashboard-list">
+            <ul class="list-group" id="myTasks"></ul>
         </div>
     </div>
 
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-globe"></i></div>Processes</h4>
+            <h4 class="panel-title widget-section-title">{{t "templates.admin.tasks.TasksDashboardTemplate.tasksFromGroupsQueue"}}</h4>
         </div>
-        <div class="panel-body" id="processContentBody">
-            <div class="panel panel-collapse">
-                <div class="panel-heading" role="tab" id="headingThree">
-                    <div class="row">
-                        <div class="col-xs-8">
-                            <h4 class="panel-title">
-                                <a data-toggle="collapse" href="#collapseThree" aria-expanded="false" aria-controls="collapseThree" class="collapsed">Processes</a>
-                            </h4>
-                        </div>
-                        <div class="col-xs-4">
-                            <div class="pull-right">
-                                <div id="processBadge" style="display:none" class="badge"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree" aria-expanded="false" style="height: 0px;">
-                    <div class="panel-body">
-                        <div id="processes"></div>
-                    </div>
-                </div>
-            </div>
+        <div class="dashboard-list">
+            <ul class="list-group" id="candidateTasks"></ul>
+        </div>
+    </div>
 
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            <h4 class="panel-title widget-section-title">{{t "common.task.processes"}}</h4>
         </div>
+        <div class="dashboard-list" id="processes"></div>
     </div>
 
 </div>
 <div class="col-sm-4">
     <div class="panel panel-default">
         <div class="panel-heading">
-            <h4 class="panel-title"><div class="panel-title-icon"><i class="fa fa-bell"></i></div>Notifications</h4>
+            <h4 class="panel-title widget-section-title"><div class="panel-title-icon"></div>{{t "common.notification.notifications"}}</h4>
         </div>
-        <div class="panel-body">
-            {{#shouldDisplayNotifications}}
-            <div id="notifications"></div>
-            {{/shouldDisplayNotifications}}
-        </div>
+        {{#shouldDisplayNotifications}}
+        <div id="notifications"></div>
+        {{/shouldDisplayNotifications}}
     </div>
 </div>
