@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboard
         template: "templates/workflow/processes/StartProcessDashboardTemplate.html",
 
         events: {
-            "click .processName": "showStartProcessView"
+            "click .details-link": "showStartProcessView"
         },
 
         element: "#processes",
@@ -55,7 +55,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboard
 
                 this.parentRender(function() {
                     if(processDefinitions.length === 0) {
-                        $("#processContentBody").html("<h5 class='text-center'>" +$.t("openidm.ui.admin.tasks.StartProcessDashboardView.noProcesses") +"</h5>");
+                        $("#processList").html('<li class="list-group-item"><h5 class="text-center">' +$.t("openidm.ui.admin.tasks.StartProcessDashboardView.noProcesses") +'</h5></li>');
                     } else {
                         $("#processBadge").html(processDefinitions.length);
                         $("#processBadge").show();
@@ -65,19 +65,25 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboard
                         this.renderStartProcessView(processId);
                     }
                 });
-
-
             }, this));
         },
 
         showStartProcessView: function(event) {
             event.preventDefault();
-            var id = $(event.target).parent().find('[name="id"]').val();
+            var parent = $(event.target).parents(".process-item"),
+                id = parent.find('[name="id"]').val();
 
-            $("#processDetails").remove();
-            $(".selected-process").removeClass('selected-process');
-            $(event.target).closest('div').addClass('selected-process');
-            $(event.target).closest('div').append('<div id="processDetails" style="margin-top: 10px;"></div>');
+            this.$el.find(".claim-item .fa-caret-down").toggleClass("fa-caret-right", true);
+            this.$el.find(".claim-item .fa-caret-down").toggleClass("fa-caret-down", false);
+
+            parent.find(".details-link .fa").toggleClass("fa-caret-right", false);
+            parent.find(".details-link .fa").toggleClass("fa-caret-down", true);
+
+            this.$el.find("#processDetails").remove();
+
+            this.$el.find(".selected-process").removeClass('selected-process');
+            $(event.target).parents(".process-item").find('.process-item-holder').addClass('selected-process');
+            $(event.target).parents(".process-item").find('.process-item-holder').append('<div id="processDetails" style="margin-top: 10px;"></div>');
 
             this.renderStartProcessView(id);
         },

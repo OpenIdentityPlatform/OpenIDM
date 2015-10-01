@@ -7,6 +7,7 @@
         "cpuUsage" : "CPU Usage",
         "resources" : "Resources",
         "lastReconciliation" : "Last Reconciliation",
+        "notAssigned" : "Not Assigned",
         "systemHealth" : "System Health",
         "loading" : "Loading...",
         "used" : "USED",
@@ -1498,6 +1499,7 @@
         },
         "task" : {
             "unassigned" : "Unassigned",
+            "unassign" : "Unassign",
             "assignToMe" : "Assign to me",
             "claim" : "Claim",
             "unclaim" : "Unclaim",

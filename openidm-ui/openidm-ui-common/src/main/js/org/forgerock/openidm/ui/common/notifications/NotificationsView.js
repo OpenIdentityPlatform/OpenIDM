@@ -26,122 +26,81 @@
 
 define("org/forgerock/openidm/ui/common/notifications/NotificationsView", [
     "jquery",
-    "org/forgerock/commons/ui/common/components/LineTableView",
-    "org/forgerock/openidm/ui/common/notifications/NotificationViewHelper",
+    "underscore",
+    "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/notifications/NotificationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/DateUtil",
-    "jqueryui"
-], function($, LineTableView, notificationViewHelper, notificationDelegate, eventManager, constants, conf, dateUtil) {
-    var NotificationsView = LineTableView.extend({
-
-        typeToIconMapping: [],
-
+    "org/forgerock/commons/ui/common/util/DateUtil"
+], function($, _,
+            AbstractView,
+            notificationDelegate,
+            eventManager,
+            constants,
+            conf,
+            DateUtil) {
+    var NotificationsView = AbstractView.extend({
         events: {
-            "click a[name=deleteLink]" : "deleteLink",
-            "click a[name=moreItems]" : "moreItems",
-            "click a[name=title]" : "title",
-            "mouseleave #itemsView" : "closeOpenItems"
+            "click .list-item-close" : "deleteLink"
+        },
+        element: "#notifications",
+        template: "templates/notifications/NotificationMessageTemplate.html",
+        noBaseTemplate: true,
+        data: {
+
         },
 
-        generateItemView: function(item) {
-            var iconLink, message, requester, requestDate, requestDateString, deleteLink, id, notType;
+        render: function(args, callback) {
+            this.element = args.el;
+            this.data.notifications = args.items;
 
-            notType = notificationViewHelper.notificationTypes[item.notificationType];
-            if (notType) {
-                iconLink = notificationViewHelper.notificationTypes[item.notificationType].iconPath;
-            }
-
-            message = item.message;
-            requester = item.requester;
-            requestDate = dateUtil.formatDate(item.createDate);
-
-            deleteLink = '<a class="delete-icon" name="deleteLink" href="#" style="float: right;"><i class="fa fa-times"></i></a>';
-            id = item._id;
-
-
-            return '<div class="notification-title">'
-                +  "<span><i class='message-icon fa fa-comment-o'></i></span>"
-                +  deleteLink + '<a name="title" href="#">' + message + '</a>'
-                + '<div style="clear: both;"></div>'
-                + '</div>'
-                + '<div class="notification-details" style="clear: both;">'
-                + '<div class="details"> '
-                + $.t("common.application.requestedBy") +': '
-                + (requester ? requester : $.t("common.user.system")) + '</br>'
-                + requestDate + '</div>'
-                + '<input type="hidden" name="id" value=' + id + ' />'
-                + '</div>';
-        },
-
-        noItemsMessage: function(item) {
-            return "<h5 class='text-center'>" + $.t("openidm.ui.apps.dashboard.NotificationsView.noNotifications") + "</h5>";
-        },
-
-        seeMoreItemsMessage: function(item) {
-            return $.t("openidm.ui.apps.dashboard.NotificationsView.seeMoreNotifications");
-        },
-
-        maxToShow: 0,
-
-        getHeightForItemsNumber: function(itemsNumber) {
-            return this.itemHeight * ( itemsNumber - 1 ) + this.openItemHeight;
-        },
-
-        itemHeight: 55,
-
-        openItemHeight: 110,
-
-        render: function(params) {
-            this.parentRender(params);
-            this.installAccordion();
-        },
-
-        installAccordion: function(){
-            $("#items").accordion({
-                event: "click",
-                active: false,
-                collapsible:true
+            _.each(this.data.notifications, function(notification){
+                notification.createDate = DateUtil.formatDate(notification.createDate, "MMMM dd, yyyy HH:mm");
             });
+
+            this.parentRender(_.bind(function() {
+                if(callback) {
+                    callback();
+                }
+            }));
         },
 
         deleteLink: function(event) {
             var notificationId,
                 self = this;
+
             event.preventDefault();
 
-            notificationId = $(event.target).parent().parent().next().find("input[name=id]").val();
+            notificationId = $(event.target).parents(".list-group-item").find("input[name=id]").val();
 
-            notificationDelegate.deleteEntity(notificationId, function() {
-                self.removeItemAndRebuild(notificationId);
-                self.installAccordion();
-            }, function() {
-                eventManager.sendEvent(constants.EVENT_NOTIFICATION_DELETE_FAILED);
-                notificationDelegate.getNotificationsForUser(function(notifications) {
-                    self.items = notifications;
-                    self.rebuildView();
-                    self.installAccordion();
-                }, function() {
-                    eventManager.sendEvent(constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR);
-                    self.rebuildView();
-                    self.installAccordion();
+            notificationDelegate.deleteEntity(notificationId, _.bind(function() {
+                    $(event.target).parents(".list-group-item").remove();
+
+                    this.data.notifications = _.filter(this.data.notifications, function(notification){
+                        return notificationId !== notification.id;
+                    }, this);
+
+                    self.render({
+                        "el" : self.$el,
+                        "notifications" : this.data.notifications
+                    });
+                }, this),
+                function() {
+                    eventManager.sendEvent(constants.EVENT_NOTIFICATION_DELETE_FAILED);
+
+                    notificationDelegate.getNotificationsForUser(function(notificationList) {
+                        self.render({
+                            "el" : self.$el,
+                            "notifications" : notificationList.notifications
+                        });
+                    }, function() {
+                        eventManager.sendEvent(constants.EVENT_GET_NOTIFICATION_FOR_USER_ERROR);
+                    });
                 });
-            });
 
-        },
-
-        title: function(event){
-            event.preventDefault();
-            $("#items").accordion("option", "activate", $(event.target).parent().index() / 2);
-        },
-
-        closeOpenItems: function(){
-            $("#items").accordion( "option", "activate", false );
         }
-
     });
 
-    return NotificationsView;
+    return new NotificationsView();
 });

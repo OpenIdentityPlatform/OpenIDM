@@ -25,6 +25,7 @@
 /*global define */
 
 define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
+    "jquery",
     "underscore",
     "form2js",
     "org/forgerock/commons/ui/common/main/AbstractView",
@@ -37,7 +38,18 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
     "org/forgerock/commons/ui/common/util/FormGenerationUtils",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
-], function(_, form2js, AbstractView, validatorsManager, eventManager, constants, workflowManager, formManager, templateStartProcessForm, formGenerationUtils, dateUtil, ModuleLoader) {
+], function($, _,
+            form2js,
+            AbstractView,
+            validatorsManager,
+            eventManager,
+            constants,
+            workflowManager,
+            formManager,
+            templateStartProcessForm,
+            formGenerationUtils,
+            dateUtil,
+            ModuleLoader) {
     var StartProcessView = AbstractView.extend({
         template: "templates/workflow/processes/StartProcessTemplate.html",
 
@@ -53,6 +65,10 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
             if(event) {
                 event.preventDefault();
             }
+
+            //since this view is limited have to go above to set arrows correct
+            $("#processes").find(".details-link .fa").toggleClass("fa-caret-right", true);
+            $("#processes").find(".details-link .fa").toggleClass("fa-caret-down", false);
 
             this.$el.empty();
         },

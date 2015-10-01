@@ -1,12 +1,14 @@
 /*
   Dashboard
 */
-
-.page-header.widget-header {
+.widget-section-title {
   text-transform: uppercase;
   letter-spacing: 1px;
   font-size: 13px;
   font-weight: 500;
+}
+
+.page-header.widget-section-title {
   border-bottom: 1px solid #ddd;
   margin-top:20px;
 }
@@ -23,12 +25,76 @@
   padding: 20px;
 }
 
-
 .dashboard-details .widget-title {
   text-align: center;
   color: #333;
   font-weight: 300;
   font-size: 24px;
+}
+
+/*
+  Workflow
+*/
+.dashboard-list {
+  .list-group {
+    margin-bottom:0px;
+
+    .list-group-item {
+      margin-bottom: 0px;
+      border-left: none;
+      border-right: none;
+      padding: 15px;
+      border-top: none;
+      border-radius:0px;
+
+      .process-name,
+      .details-link {
+        width:60px;
+        display:inline-block;
+        margin-left:15px;
+        float:right;
+
+        .fa {
+          margin-right:5px;
+        }
+      }
+
+      .subtitle {
+        font-size:12px;
+      }
+
+      .claim-item {
+        width: 230px;
+
+        select {
+          display:inline-block;
+          width:150px;
+        }
+
+        .fa {
+          span {
+            margin-left:10px;
+          }
+        }
+      }
+
+      .image {
+        &.circle {
+          .icon-circle(28px);
+          float: left;
+          margin-right: 10px;
+        }
+      }
+
+      .list-item-close {
+        cursor:pointer;
+      }
+    }
+
+    &:last-child {
+      border-bottom-width:0px;
+    }
+  }
 }
 
 /*

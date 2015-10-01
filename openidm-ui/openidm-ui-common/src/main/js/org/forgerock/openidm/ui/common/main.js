@@ -25,7 +25,6 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/common/main", [
-    "./notifications/NotificationViewHelper", //needed here so that it can register its event in time
     "./delegates/SiteConfigurationDelegate",
     "./components/Footer",
     "./login/InternalLoginHelper"
