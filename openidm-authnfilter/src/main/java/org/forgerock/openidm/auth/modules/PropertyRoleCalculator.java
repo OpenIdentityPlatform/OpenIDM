@@ -16,8 +16,12 @@
 
 package org.forgerock.openidm.auth.modules;
 
+import java.util.Map;
+
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.util.RelationshipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -67,8 +71,15 @@ class PropertyRoleCalculator implements RoleCalculator {
                         securityContextMapper.addRole(role);
                     }
                 } else  if (userDetail.get(userRoles).isList()) {
-                    for (String role : userDetail.get(userRoles).asList(String.class)) {
-                        securityContextMapper.addRole(role);
+                    for (JsonValue role : userDetail.get(userRoles)) {
+                        if (RelationshipUtil.isRelationship(role)) {
+                            // Role is specified as a relationship Object
+                            JsonPointer roleId = new JsonPointer(role.get(RelationshipUtil.REFERENCE_ID).asString());
+                            securityContextMapper.addRole(roleId.leaf());
+                        } else {
+                            // Role is specified as a String
+                            securityContextMapper.addRole(role.asString());
+                        }
                     }
                 } else {
                     logger.warn("Unknown roles type retrieved from user query, expected collection: {} type: {}",

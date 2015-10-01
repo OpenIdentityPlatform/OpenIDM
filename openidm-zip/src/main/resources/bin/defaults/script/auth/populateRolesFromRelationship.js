@@ -35,30 +35,30 @@
     var _ = require("lib/lodash"),
         user = openidm.read(security.authorizationId.component + "/" + security.authorizationId.id);
 
-    if (!_.has(properties.propertyMapping, 'internalRolesRelationship')) {
+    if (!_.has(properties.propertyMapping, 'userRoles')) {
         throw {
             "code" : 500,
-            "message" : "Authentication not properly configured; missing internalRolesRelationship propertyMapping entry"
+            "message" : "Authentication not properly configured; missing userRoles propertyMapping entry"
         };
     }
 
-    if (!user || !_.has(user, properties.propertyMapping.internalRolesRelationship)) {
+    if (!user || !_.has(user, properties.propertyMapping.userRoles)) {
         throw {
             "code" : 401,
-            "message" : "Unable to find property " + properties.propertyMapping.internalRolesRelationship + " for user"
+            "message" : "Unable to find property " + properties.propertyMapping.userRoles + " for user"
         };
     }
 
     security.authorizationId = {
         'id': security.authorizationId.id,
         'component': security.authorizationId.component,
-        'roles': _.chain(user[properties.propertyMapping.internalRolesRelationship])
+        'roles': _.chain(user[properties.propertyMapping.userRoles])
                     .filter(function (r) {
-                        return org.forgerock.json.resource.ResourceName.valueOf(r._ref).startsWith("repo/internal/role");
+                        return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).startsWith("repo/internal/role");
                     })
                     .map(function (r) {
                         // appending empty string gets the value from java into a format more familiar to JS
-                        return org.forgerock.json.resource.ResourceName.valueOf(r._ref).leaf() + "";
+                        return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).leaf() + "";
                     })
                     .value()
     };
