@@ -68,15 +68,12 @@ public final class ResourceServlet extends HttpServlet {
     /** config parameter keys */
     private static final String CONFIG_ENABLED = "enabled";
     private static final String CONFIG_CONTEXT_ROOT = "urlContextRoot";
-    private static final String CONFIG_BUNDLE = "bundle";
-    private static final String CONFIG_NAME = "name";
-    private static final String CONFIG_RESOURCE_DIR = "resourceDir";
     private static final String CONFIG_DEFAULT_DIR = "defaultDir";
     private static final String CONFIG_EXTENSION_DIR = "extensionDir";
 
     //TODO Decide where to put the web and the java resources. Now both are in root
-    private JsonValue bundleConfig;
-    private String resourceDir;
+    private String defaultDir;
+    private String extensionDir;
     private String contextRoot;
     
     @Reference
@@ -124,14 +121,12 @@ public final class ResourceServlet extends HttpServlet {
 
             // Locate the file in extension dir first, fall back to default dir
             URL url = null;
-            String loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
-                    CONFIG_EXTENSION_DIR).required().asString(), IdentityServer.getInstance(), false);
+            String loadDir = (String) PropertyUtil.substVars(extensionDir, IdentityServer.getInstance(), false);
             File file = new File(loadDir + target);
             if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
                 url = file.getCanonicalFile().toURI().toURL();
             } else {
-                loadDir = (String) PropertyUtil.substVars(bundleConfig.get(
-                        CONFIG_DEFAULT_DIR).required().asString() + resourceDir, IdentityServer.getInstance(), false);
+                loadDir = (String) PropertyUtil.substVars(defaultDir, IdentityServer.getInstance(), false);
                 file = new File(loadDir + target);
                 if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
                     url = file.getCanonicalFile().toURI().toURL();
@@ -140,7 +135,7 @@ public final class ResourceServlet extends HttpServlet {
                 }
             }
 
-            handle(req, res, url, resourceDir + target);
+            handle(req, res, url, target);
         }
     }
 
@@ -157,27 +152,21 @@ public final class ResourceServlet extends HttpServlet {
         if (!config.get(CONFIG_ENABLED).isNull() && Boolean.FALSE.equals(config.get(CONFIG_ENABLED).asBoolean())) {
             logger.info("UI is disabled - not registering UI servlet");
             return;
-        }
-        else if (config.get(CONFIG_CONTEXT_ROOT) == null || config.get(CONFIG_CONTEXT_ROOT).isNull()) {
+        } else if (config.get(CONFIG_CONTEXT_ROOT) == null || config.get(CONFIG_CONTEXT_ROOT).isNull()) {
             logger.info("UI does not specify contextRoot - unable to register servlet");
             return;
-        }
-        else if (config.get(CONFIG_BUNDLE) == null
-                || config.get(CONFIG_BUNDLE).isNull()
-                || !config.get(CONFIG_BUNDLE).isMap()
-                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME) == null
-                || config.get(CONFIG_BUNDLE).get(CONFIG_NAME).isNull()) {
-            logger.info("UI does not specify bundle name - unable to register servlet");
+        } else if (config.get(CONFIG_DEFAULT_DIR) == null
+                || config.get(CONFIG_DEFAULT_DIR).isNull()) {
+            logger.info("UI does not specify default directory - unable to register servlet");
             return;
-        }
-        else if (config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR) == null
-                || config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).isNull()) {
-            logger.info("UI does not specify bundle resourceDir - unable to register servlet");
+        } else if (config.get(CONFIG_EXTENSION_DIR) == null
+                || config.get(CONFIG_EXTENSION_DIR).isNull()) {
+            logger.info("UI does not specify extension directory - unable to register servlet");
             return;
         }
 
-        bundleConfig = config.get(CONFIG_BUNDLE);
-        resourceDir = prependSlash(config.get(CONFIG_BUNDLE).get(CONFIG_RESOURCE_DIR).asString());
+        defaultDir = config.get(CONFIG_DEFAULT_DIR).asString();
+        extensionDir = config.get(CONFIG_EXTENSION_DIR).asString();
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
         Dictionary<String, Object> props = new Hashtable<>();

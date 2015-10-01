@@ -228,13 +228,13 @@ module.exports = function(grunt) {
                     {
                         cwd     : 'openidm-ui-admin/target/www',
                         src     : ['**'],
-                        dest    : '../openidm-zip/target/openidm/ui/default/admin/public'
+                        dest    : '../openidm-zip/target/openidm/ui/admin/default'
                     },
 
                     {
                         cwd     : 'openidm-ui-enduser/target/www',
                         src     : ['**'],
-                        dest    : '../openidm-zip/target/openidm/ui/default/selfservice/public'
+                        dest    : '../openidm-zip/target/openidm/ui/selfservice/default'
                     }
                 ]
             }
