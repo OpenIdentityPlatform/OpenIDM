@@ -311,7 +311,7 @@
                     <instructions>
                         <Import-Package>*</Import-Package>
                         <Include-Resource>
-                            public=target/www
+                            default=target/www
                         </Include-Resource>
                     </instructions>
                 </configuration>
