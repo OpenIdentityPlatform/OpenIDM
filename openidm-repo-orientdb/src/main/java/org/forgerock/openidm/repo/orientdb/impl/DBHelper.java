@@ -33,6 +33,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.openidm.config.enhanced.InvalidException;
+import org.forgerock.openidm.util.RelationshipUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,7 @@ import com.orientechnologies.orient.core.metadata.security.OSecurity;
 import com.orientechnologies.orient.core.metadata.security.OUser;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.core.storage.OStorage;
+
 import java.util.Collection;
 import java.util.Set;
 
@@ -417,17 +419,18 @@ public class DBHelper {
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
         String defaultAdminPwd = "openidm-admin";
-        List defaultAdminRoles = json(array(
-                object(field("_ref", "repo/internal/role/openidm-admin")),
-                object(field("_ref", "repo/internal/role/openidm-authorized")))).asList();
+        List<Map> defaultAdminRoles = json(array(
+                object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-admin")),
+                object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-authorized"))))
+                .asList(Map.class);
         populateDefaultUser(defaultTableName, db, defaultAdminUser, defaultAdminPwd, defaultAdminRoles);
         logger.trace("Created default user {}. Please change the assigned default password.",
                 defaultAdminUser);
 
         String anonymousUser = "anonymous";
         String anonymousPwd = "anonymous";
-        List anonymousRoles = json(array(
-                object(field("_ref", "repo/internal/role/openidm-reg")))).asList();
+        List<Map> anonymousRoles = json(array(
+                object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-reg")))).asList(Map.class);
         populateDefaultUser(defaultTableName, db, anonymousUser, anonymousPwd, anonymousRoles);
         logger.trace("Created default user {} for registration purposes.", anonymousUser);
     }

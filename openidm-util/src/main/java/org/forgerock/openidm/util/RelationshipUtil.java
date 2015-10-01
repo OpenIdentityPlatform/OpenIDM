@@ -15,7 +15,8 @@
  */
 package org.forgerock.openidm.util;
 
-import org.forgerock.json.JsonPointer;
+import java.util.Map;
+
 import org.forgerock.json.JsonValue;
 
 /**
@@ -26,12 +27,12 @@ public class RelationshipUtil {
     /**
      * The id of the resource that the relationship references
      */
-    public static JsonPointer REFERENCE_ID = new JsonPointer("_ref");
+    public static String REFERENCE_ID = "_ref";
     
     /**
      * The map of properties associated with the relationship
      */
-    public static JsonPointer REFERENCE_PROPERTIES = new JsonPointer("_refProperties");
+    public static String REFERENCE_PROPERTIES = "_refProperties";
 
     /**
      * Returns true if the supplied {@link JsonValue} is an instance of a relationship, meaning that is is a {@link Map} 
@@ -41,6 +42,6 @@ public class RelationshipUtil {
      * @return true if the value is an relationship, false otherwise.
      */
     public static boolean isRelationship(JsonValue value) {
-        return value.isMap() && value.keys().contains(REFERENCE_ID.leaf());
+        return value.isMap() && value.keys().contains(REFERENCE_ID);
     }
 }
