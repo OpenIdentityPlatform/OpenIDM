@@ -180,8 +180,18 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
         return getRelationshipValueForResource(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
             @Override
             public JsonValue apply(JsonValue relationship) throws ResourceException {
-                return deleteInstance(context, relationship.get(FIELD_ID).asString(), 
+                return deleteInstance(context, relationship.get(FIELD_ID).asString(),
                         Requests.newDeleteRequest("")).getOrThrowUninterruptibly().getContent();
+            }
+        }).thenCatch(new Function<ResourceException, JsonValue, ResourceException>() {
+            @Override
+            public JsonValue apply(ResourceException e) throws ResourceException {
+                // Since we wish to clear here NotFound is not an error. Return empty json
+                if (e instanceof NotFoundException) {
+                    return json(null);
+                } else {
+                    throw e;
+                }
             }
         });
     }
