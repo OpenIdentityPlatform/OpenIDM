@@ -24,7 +24,9 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -53,6 +55,7 @@ import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction;
+import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -300,7 +303,7 @@ public abstract class RelationshipProvider {
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
                     SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
-            return newResultPromise(response);
+            return expandFields(context, request, response);
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -339,7 +342,7 @@ public abstract class RelationshipProvider {
             activityLogger.log(context, request, "read", getManagedObjectPath(context), null, value.getContent(), 
                     Status.SUCCESS);
 
-            return newResultPromise(response);
+            return expandFields(context, request, response);
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -398,7 +401,7 @@ public abstract class RelationshipProvider {
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
                     SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
 
-            return newResultPromise(result);
+            return expandFields(context, request, result);
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -443,7 +446,7 @@ public abstract class RelationshipProvider {
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
                     SyncServiceAction.notifyDelete, beforeValue.getContent(), null);
             
-            return newResultPromise(result);
+            return expandFields(context, request, result);
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -687,5 +690,49 @@ public abstract class RelationshipProvider {
      */
     protected Connection getConnection() throws ResourceException {
         return connectionFactory.getConnection();
+    }
+    
+    /**
+     * Performs resourceExpansion on the supplied response based on the fields specified in the current request.
+     * 
+     * @param context the current {@link Context} object
+     * @param request the current {@link Request} object
+     * @param response the {@link ResourceResponse} to expand fields on.
+     * @return A promise containing the response with the expanded fields, if any.
+     * @throws ResourceException
+     */
+    @SuppressWarnings("unchecked")
+    protected Promise<ResourceResponse, ResourceException> expandFields(final Context context, final Request request, 
+            ResourceResponse response) throws ResourceException {
+        List<JsonPointer> refFields = new ArrayList<JsonPointer>();
+        List<JsonPointer> otherFields = new ArrayList<JsonPointer>();
+        for (JsonPointer field : (List<JsonPointer>)request.getFields()) {
+            if (!field.toString().startsWith(SchemaField.FIELD_REFERENCE.toString())
+                    && !field.toString().startsWith(SchemaField.FIELD_PROPERTIES.toString())) {
+                refFields.add(field);
+            } else {
+                otherFields.add(field);
+            }
+        }
+        if (!refFields.isEmpty()) {
+            // Perform the field expansion
+            ReadRequest readRequest = 
+                    Requests.newReadRequest(response.getContent().get(SchemaField.FIELD_REFERENCE).asString());
+            readRequest.addField(refFields.toArray(new JsonPointer[refFields.size()]));
+            ResourceResponse readResponse = getConnection().read(context, readRequest);
+            response.getContent().asMap().putAll(readResponse.getContent().asMap());
+
+            for (JsonPointer field : otherFields) {
+                response.addField(field);
+            }
+            for (JsonPointer field : refFields) {
+                if (field.equals(new JsonPointer("*"))) {
+                    response.addField(new JsonPointer(""));
+                } else {
+                    response.addField(field);
+                }
+            }
+        }
+        return newResultPromise(response);  
     }
 }
