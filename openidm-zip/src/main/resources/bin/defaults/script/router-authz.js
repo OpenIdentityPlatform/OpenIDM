@@ -250,6 +250,79 @@ function ownDataOnly() {
 
 }
 
+/**
+ * Look through the whole patchOperation set and return false if any
+ * field in the set refers to something other than those provided in the argument
+ * @param {Array} allowedFields - The list of fields which the patch operations are allowed to target
+ * @returns {Boolean}
+ */
+function restrictPatchToFields(allowedFields) {
+    return _.reduce(request.patchOperations, function (result, patchOp) {
+        // removes leading slashses from jsonpointer field specifications
+        var simpleField = patchOp.field.replace(/^\//, '');
+        return result && (_.indexOf(allowedFields, simpleField) !== -1);
+    }, true);
+}
+
+/**
+ * Given a managed object name and the global request details, look up the
+ * schema for the object and ensure that each of the changed properties in
+ * the request are marked as "userEditable" : true.
+ * @param {string} objectName - the name of the managed object (ex: "user")
+ * @returns {Boolean}
+ */
+function onlyEditableManagedObjectProperties(objectName) {
+    var managedConfig = openidm.read("config/managed"),
+        managedObjectConfig = _.findWhere(managedConfig.objects, {"name": objectName}),
+        currentObject;
+
+    if (!managedObjectConfig || !managedObjectConfig.schema || !managedObjectConfig.schema.properties) {
+        return false;
+    }
+
+    if (request.method === "create") {
+        // Every property provided during the create call must be checked
+        return _.reduce(_.keys(request.content), function (result, propertyName) {
+            return result &&
+                _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
+                managedObjectConfig.schema.properties[propertyName].userEditable === true;
+        }, true);
+    } else if (request.method === "update") {
+        // Only those properties which have changed must be checked
+        currentObject = openidm.read(request.resourcePath);
+        return _.reduce(_.keys(request.content), function (result, propertyName) {
+            return result &&
+                (
+                    // either the value has not changed...
+                    _.isEqual(request.content[propertyName], currentObject[propertyName]) ||
+                    // or the user is allowed to edit it
+                    (
+                        _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
+                        managedObject.schema.properties[propertyName].userEditable === true
+                    )
+                );
+        }, true);
+    } else if (request.method === "patch") {
+        // Every field being patched must be checked
+        return restrictPatchToFields(
+            // generate an array of all userEditable properties in the schema
+            _.chain(managedObjectConfig.schema.properties)
+             .pairs()
+             .filter(function (pair) {
+                 // pair[1] is the property content
+                 return pair[1].userEditable === true;
+             })
+             .map(function (pair) {
+                 // pair[0] is the property name
+                 return pair[0];
+             })
+             .value()
+        );
+    }
+    return false;
+}
+
+/* DEPRECATED FUNCTION */
 function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
     var i = 0,requestedRoles = [],params = {},currentUser = {}, operations,
         getTopLevelProp = function (prop) {

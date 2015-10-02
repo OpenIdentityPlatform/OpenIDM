@@ -43,8 +43,9 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
         },
         model: {
             surpressSave: false,
+            uiConfigurationParameter: "passwordReset",
             serviceType: "password",
-            configUrl: "selfservice/password",
+            configUrl: "selfservice/reset",
             msgType: "selfServicePassword",
             "configDefault": {
                 "stageConfigs": [
@@ -57,11 +58,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                         "identityIdField" : "_id",
                         "identityEmailField" : "mail",
                         "identityServiceUrl" : "managed/user",
-
                         "email" : {
                             "serviceUrl": "/email",
                             "from": "info@admin.org",
                             "subject": "Reset password email",
+                            "mimeType" : "text/html",
                             "message": "<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
                             "verificationLinkToken": "%link%",
                             "verificationLink": "http://localhost:9999/example/#passwordReset/"

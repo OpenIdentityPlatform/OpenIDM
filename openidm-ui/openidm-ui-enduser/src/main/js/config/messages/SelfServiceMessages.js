@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
@@ -24,37 +24,10 @@
 
 /*global define*/
 
-/**
- * @author jdabrowski
- */
 define("config/messages/SelfServiceMessages", [
 ], function() {
-    
+
     var obj = {
-            //admin
-            "cannotDeleteYourself": {
-                msg: "config.messages.AdminMessages.cannotDeleteYourself",
-                type: "error"
-            },
-            "userDeleted": {
-                msg: "config.messages.AdminMessages.userDeleted",
-                type: "info"
-            },
-            "userDeleteError": {
-                msg: "config.messages.AdminMessages.userDeleteError",
-                type: "error"
-            },
-            "userValidationError": {
-                msg: "config.messages.AdminMessages.userValidationError",
-                type: "error"
-            },
-
-            //applications
-            "userApplicationsUpdate": {
-                msg: "config.messages.AdminMessages.userApplicationsUpdate",
-                type: "info"
-            },
-
             //tasks
             "completedTask": {
                 msg: "config.messages.AdminMessages.completedTask",
@@ -77,6 +50,6 @@ define("config/messages/SelfServiceMessages", [
                 type: "error"
             }
     };
-    
+
     return obj;
 });

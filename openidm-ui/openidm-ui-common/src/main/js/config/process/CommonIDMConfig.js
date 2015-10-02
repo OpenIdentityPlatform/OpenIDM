@@ -38,16 +38,19 @@ define("config/process/CommonIDMConfig", [
                 dependencies: [
                     "org/forgerock/commons/ui/common/main/Router",
                     "org/forgerock/commons/ui/common/main/Configuration",
-                    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate"
+                    "org/forgerock/commons/ui/common/util/ModuleLoader",
+                    "org/forgerock/commons/ui/common/SiteConfigurator"
                 ],
-                processDescription: function(event, router, conf, configurationDelegate) {
+                processDescription: function(event, router, conf, ModuleLoader, SiteConfigurator) {
                     if (conf.loggedUser.has("needsResetPassword") && !ignorePassword) {
-                        if (typeof configurationDelegate.checkForDifferences === "function") {
-                            configurationDelegate.checkForDifferences();
-                        }
+                        ModuleLoader.load(SiteConfigurator.configuration.delegate).then(function (configurationDelegate) {
+                            if (typeof configurationDelegate.checkForDifferences === "function") {
+                                configurationDelegate.checkForDifferences();
+                            }
 
-                        eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
-                        ignorePassword = true;
+                            eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
+                            ignorePassword = true;
+                        });
                     } else {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
                     }
