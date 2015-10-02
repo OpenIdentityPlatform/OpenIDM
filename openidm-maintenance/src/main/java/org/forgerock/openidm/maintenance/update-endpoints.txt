@@ -121,6 +121,16 @@ UI Endpoints for Update Process
 	The id can be passed to READ openidm/maintenance/update/log/someIDstring to fetch the log if terminal or just status
 	otherwise.
 
+6. Optionally restart IDM immediately.  IDM can be restarted at any time with this call.  If an update has completed
+    and is sleeping prior to the automatic restart this method call will interrupt that sleep to restart immediately.
+
+    POST openidm/maintenance/update?_action=restart
+
+    returns:
+    {}
+
+
+
 
 FileState States:
 
