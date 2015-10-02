@@ -14,7 +14,7 @@
  * Copyright 2011-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.auth;
+package org.forgerock.openidm.auth;
 
 import org.eclipse.jetty.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.security.Password;

@@ -14,14 +14,14 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.*;
-import static org.forgerock.openidm.jaspi.modules.MappingRoleCalculator.GroupComparison;
+import static org.forgerock.openidm.auth.modules.MappingRoleCalculator.GroupComparison;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
 
 import javax.script.ScriptException;
@@ -63,7 +63,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A Jaspi ServerAuthModule that is designed to wrap any other Jaspi ServerAuthModule. This module provides
+ * A CAF {@link AsyncServerAuthModule} that is designed to wrap any other AsyncServerAuthModule. This module provides
  * IDM specific authentication processing to the authentication mechanism of underlying auth module.
  * <br/>
  * This allows IDM to use any common auth module and still benefit from automatic role calculation
@@ -71,9 +71,9 @@ import org.slf4j.LoggerFactory;
  *
  * @since 3.0.0
  */
-public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
+public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
 
-    private static final Logger logger = LoggerFactory.getLogger(IDMJaspiModuleWrapper.class);
+    private static final Logger logger = LoggerFactory.getLogger(IDMAuthModuleWrapper.class);
 
     public static final String QUERY_ID = "queryId";
     public static final String QUERY_ON_RESOURCE = "queryOnResource";
@@ -113,14 +113,14 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
     private RoleCalculator roleCalculator;
 
     /**
-     * Constructs a new instance of the IDMJaspiModuleWrapper.
+     * Constructs a new instance of the IDMAuthModuleWrapper.
      *
      * @param authModule The auth module wrapped by this module.
      * @param connectionFactory
      * @param cryptoService
      * @param scriptRegistry
      */
-    public IDMJaspiModuleWrapper(AsyncServerAuthModule authModule,
+    public IDMAuthModuleWrapper(AsyncServerAuthModule authModule,
             ConnectionFactory connectionFactory, CryptoService cryptoService, ScriptRegistry scriptRegistry) {
         this.authModule = authModule;
         this.connectionFactory = connectionFactory;
@@ -131,13 +131,13 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
     }
 
     /**
-     * Constructs a new instance of the IDMJaspiModuleWrapper with the provided parameters, for test use.
+     * Constructs a new instance of the IDMAuthModuleWrapper with the provided parameters, for test use.
      *
      * @param authModule The auth module wrapped by this module.
      * @param roleCalculatorFactory An instance of the RoleCalculatorFactory.
      * @param augmentationScriptExecutor An instance of the AugmentationScriptExecutor.
      */
-    IDMJaspiModuleWrapper(
+    IDMAuthModuleWrapper(
             AsyncServerAuthModule authModule,
             ConnectionFactory connectionFactory, CryptoService cryptoService, ScriptRegistry scriptRegistry,
             RoleCalculatorFactory roleCalculatorFactory,
@@ -162,7 +162,7 @@ public class IDMJaspiModuleWrapper implements AsyncServerAuthModule {
 
     @Override
     public String getModuleId() {
-        return "IDMJaspiModuleWrapper";
+        return "IDMAuthModuleWrapper";
     }
 
     /**

@@ -14,7 +14,7 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
 import static org.forgerock.json.JsonValue.field;
@@ -38,7 +38,7 @@ import org.forgerock.json.resource.http.SecurityContextFactory;
 /**
  * A JsonValue-wrapper to contain the security context information before the SecurityContext proper is built.
  * <br/>
- * The authenticationId and authorizationId are backed by the Jaspi MessageInfo; setting the authenticationId
+ * The authenticationId and authorizationId are backed by the CAF MessageInfo; setting the authenticationId
  * or any attribute on the authorizationId results in those properties being automatically set in the MessageInfo
  * authentication context map.  This map is added to the request automatically without any further action required.
  */
@@ -101,10 +101,6 @@ class SecurityContextMapper {
         messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, authorizationId);
         return this;
     }
-
-    // since the other fields are authorization data, they will already be persisted in MessageInfo
-    // automatically since the map at authData.get(AUTHORIZATION_ID) is already backed by
-    // MessageInfo.getMap().get(JaspiRuntime.ATTRIBUTE_AUTH_CONTEXT)
 
     SecurityContextMapper setUserId(String userId) {
         authData.get(AUTHORIZATION_ID).put(AUTHZID_ID, userId);

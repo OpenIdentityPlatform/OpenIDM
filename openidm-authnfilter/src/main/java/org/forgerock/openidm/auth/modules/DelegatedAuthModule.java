@@ -14,11 +14,10 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.*;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -43,16 +42,16 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
-import org.forgerock.openidm.jaspi.auth.Authenticator;
-import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
+import org.forgerock.openidm.auth.Authenticator;
+import org.forgerock.openidm.auth.AuthenticatorFactory;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Authentication Filter modules for the JASPI common Authentication Filter. Validates client requests by passing though
- * to a OpenICF Connector.
+ * Authentication Filter module for the Common Authentication Filter. Validates client requests by passing though
+ * to a OpenICF Connector or other delegated endpoint.
  */
 public class DelegatedAuthModule implements AsyncServerAuthModule {
 
@@ -111,7 +110,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
     public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
             CallbackHandler handler, Map<String, Object> options) {
         this.options = new JsonValue(options);
-        queryOnResource = new JsonValue(options).get(QUERY_ON_RESOURCE).required().asString();
+        queryOnResource = new JsonValue(options).get(IDMAuthModuleWrapper.QUERY_ON_RESOURCE).required().asString();
         authenticator = authenticatorFactory.apply(this.options);
         return newResultPromise(null);
     }
@@ -136,8 +135,8 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
         try {
             logger.debug("DelegatedAuthModule: Delegating call to remote authentication");
 
-            if (authenticate(HEADER_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)
-                    || authenticate(BASIC_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)) {
+            if (authenticate(IDMAuthModuleWrapper.HEADER_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)
+                    || authenticate(IDMAuthModuleWrapper.BASIC_AUTH_CRED_HELPER.getCredential(request), messageInfo, securityContextMapper)) {
 
                 logger.debug("DelegatedAuthModule: Authentication successful");
 
@@ -148,7 +147,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
                     }
                 });
 
-                // Auth success will be logged in IDMJaspiModuleWrapper
+                // Auth success will be logged in IDMAuthModuleWrapper
                 return newResultPromise(SUCCESS);
             } else {
                 logger.debug("DelegatedAuthModule: Authentication failed");
@@ -161,7 +160,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
         }
     }
 
-    private boolean authenticate(Credential credential, MessageInfoContext messageInfo,
+    private boolean authenticate(IDMAuthModuleWrapper.Credential credential, MessageInfoContext messageInfo,
             SecurityContextMapper securityContextMapper) throws AuthenticationException {
 
         if (!credential.isComplete()) {
@@ -183,7 +182,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
             final ResourceResponse resource = result.getResource();
             if (resource != null) {
                 final JsonValue messageMap = new JsonValue(messageInfo.getRequestContextMap());
-                messageMap.put(IDMJaspiModuleWrapper.AUTHENTICATED_RESOURCE,
+                messageMap.put(IDMAuthModuleWrapper.AUTHENTICATED_RESOURCE,
                         json(object(
                                 field(ResourceResponse.FIELD_CONTENT_ID, resource.getId()),
                                 field(ResourceResponse.FIELD_CONTENT_REVISION, resource.getRevision()),

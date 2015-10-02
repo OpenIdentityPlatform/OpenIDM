@@ -14,7 +14,7 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import static org.forgerock.json.JsonValue.*;
 import static org.mockito.BDDMockito.given;
@@ -33,9 +33,9 @@ import org.forgerock.caf.authentication.framework.AuditTrail;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.jaspi.auth.Authenticator;
-import org.forgerock.openidm.jaspi.auth.Authenticator.AuthenticatorResult;
-import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
+import org.forgerock.openidm.auth.Authenticator;
+import org.forgerock.openidm.auth.Authenticator.AuthenticatorResult;
+import org.forgerock.openidm.auth.AuthenticatorFactory;
 import org.forgerock.services.context.Context;
 import org.mockito.Matchers;
 import org.testng.annotations.BeforeMethod;

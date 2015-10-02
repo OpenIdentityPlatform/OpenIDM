@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceResponse;

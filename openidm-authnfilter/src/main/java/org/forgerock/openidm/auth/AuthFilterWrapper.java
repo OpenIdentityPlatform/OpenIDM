@@ -13,7 +13,7 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.openidm.jaspi.auth;
+package org.forgerock.openidm.auth;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -38,7 +38,7 @@ import org.osgi.service.component.ComponentContext;
         configurationFactory = false, immediate = true)
 @Service(value = { Filter.class, AuthFilterWrapper.class })
 public class AuthFilterWrapper implements Filter {
-    public static final String PID = "org.forgerock.openidm.jaspi.config";
+    public static final String PID = "org.forgerock.openidm.auth.config";
 
     /** Null Object Filter to forward request on when authentication filter is not configured. */
     private static final Filter PASSTHROUGH_FILTER = new Filter() {

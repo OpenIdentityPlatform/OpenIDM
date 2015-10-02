@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import static javax.security.auth.message.AuthStatus.*;
 import static org.forgerock.util.promise.Promises.newResultPromise;

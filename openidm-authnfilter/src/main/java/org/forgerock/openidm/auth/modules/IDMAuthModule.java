@@ -14,14 +14,15 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.jaspi.modules.iwa.IWAModule;
 import org.forgerock.jaspi.modules.openid.OpenIdConnectModule;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.jaspi.modules.session.openam.OpenAMSessionModule;
-import org.forgerock.openidm.jaspi.auth.AuthenticatorFactory;
+import org.forgerock.openidm.auth.Authenticator;
+import org.forgerock.openidm.auth.AuthenticatorFactory;
 
 /**
  * Enum that represents all the core IDM Authentication modules.
@@ -49,7 +50,7 @@ public enum IDMAuthModule {
             return new ClientCertAuthModule();
         }
     },
-    /** Delegated auth module using an {@link org.forgerock.openidm.jaspi.auth.Authenticator} */
+    /** Delegated auth module using an {@link Authenticator} */
     DELEGATED {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
