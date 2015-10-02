@@ -62,8 +62,7 @@ define("config/AppConfiguration", [
                         {"routes":"config/routes/CommonRoutesConfig"},
                         {"routes":"config/routes/CommonIDMRoutesConfig"},
                         {"routes":"config/routes/SelfServiceRoutesConfig"},
-                        {"routes":"config/routes/UserRoutesConfig"},
-                        {"routes":"config/routes/IDMRoutesConfig"}
+                        {"routes":"config/routes/UserRoutesConfig"}
                     ]
                 }
             },

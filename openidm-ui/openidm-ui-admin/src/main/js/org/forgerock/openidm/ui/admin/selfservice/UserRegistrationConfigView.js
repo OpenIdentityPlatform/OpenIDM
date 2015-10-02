@@ -45,6 +45,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
         },
         model: {
             surpressSave: false,
+            uiConfigurationParameter: "selfRegistration",
             serviceType: "user",
             configUrl: "selfservice/registration",
             msgType: "selfServiceUserRegistration",
@@ -53,12 +54,12 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     {
                         "name" : "emailValidation",
                         "email" : {
-                            "serviceUrl": "/email",
-                            "from": "info@admin.org",
-                            "subject": "Register new account",
-                            "message": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-                            "verificationLinkToken": "%link%",
-                            "verificationLink": "http://localhost:9999/example/#register/"
+                            "from" : "info@admin.org",
+                            "subject" : "Register new account",
+                            "mimeType" : "text/html",
+                            "message" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+                            "verificationLinkToken" : "%link%",
+                            "verificationLink" : "https://localhost:8443/#register/"
                         }
                     },
                     {
@@ -103,6 +104,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 help: $.t("templates.selfservice.emailValidationDescription")
             },
             {
+                type: "userDetails",
+                title: $.t("templates.selfservice.userDetailsTitle"),
+                help: $.t("templates.selfservice.userDetailsHelp")
+            },
+            {
                 type: "kbaStage",
                 title: $.t("templates.selfservice.kbaTitle"),
                 help: $.t("templates.selfservice.kbaHelp")
@@ -111,11 +117,6 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 type: "selfRegistration",
                 title: $.t("templates.selfservice.registrationForm"),
                 help: $.t("templates.selfservice.registrationFormDescription")
-            },
-            {
-                type: "userDetails",
-                title: $.t("templates.selfservice.userDetailsTitle"),
-                help: $.t("templates.selfservice.userDetailsHelp")
             }];
 
             this.selfServiceRender(args, callback);

@@ -248,7 +248,7 @@
             "LoginTemplate" : {
                 "loginRemember" : "Remember my username",
                 "noAccountQuestion" : "Don't have an account?",
-                "registerAccount" : "Register?",
+                "registerAccount" : "Register",
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset your password",
                 "siteIdentificationHeader": "Site Identification",
@@ -460,7 +460,7 @@
             "local" : "Local",
             "storage" : "Storage",
             "snapshotToken" : "Snapshot Token",
-            "tokenExpire" : "Token LifeTime (milliseconds)",
+            "tokenExpire" : "Token LifeTime (seconds)",
             "password" : {
                 "resetStageTitle" : "Configure Password Reset Form",
                 "userIdValidationTitle" : "Configure Validation Email"
@@ -505,6 +505,7 @@
                 "emailServiceUrl" : "Email Service URL",
                 "emailServiceUrlHelp" : "",
                 "emailFrom" : "Email From",
+                "mimeType" : "Mime Type (text/html or text/plain)",
                 "emailSubject" : "Email Subject",
                 "emailMessage" : "Email Message",
                 "emailMessageHelp" : "",
@@ -1448,6 +1449,32 @@
             }
         },
         "user" : {
+            "passwordReset" : {
+                "title": "Reset Your Password",
+                "completed": "Your password has been successfully reset.",
+                "failed": "Unable to reset your password",
+                "tryAgain": "Try Resetting Your Password Again",
+                "return": "Return to Login Page"
+            },
+            "selfRegistration" : {
+                "title": "Register Your Account",
+                "completed": "Your account has been successfully registered.",
+                "failed": "Unable to register your account",
+                "tryAgain": "Try Registering Again",
+                "return": "Return to Login Page"
+            },
+            "kba" : {
+                "description": "The Security Question selected and corresponding answer provided by you will be used to help identify you in the event that you forget your password.",
+                "provideAnother": "Add another question",
+                "selectQuestion": "Select a security question",
+                "provideYourOwn": "Provide your own",
+                "customQuestion": "Custom Security Question",
+                "answer": "Security Answer"
+            },
+            "userIdValidation" : "Enter the username or email address associated with your account. We will send you an email with a link that will allow you to reset your password.",
+            "emailValidation" : "Enter your email address to proceed. We will send you an email with a link that will allow you to continue registering.",
+            "send": "Send",
+            "validateCode" : "An email has been sent to the address you entered. Click the link in that email to proceed.",
             "manager" : "Manager",
             "user" : "User",
             "login" : "Login",

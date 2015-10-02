@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
@@ -24,55 +24,15 @@
 
 /*global define*/
 
-/**
- * @author jdabrowski
- */
 define("config/routes/SelfServiceRoutesConfig", [
 ], function() {
-    
+
     var obj = {
         "dashboard": {
             view: "org/forgerock/openidm/ui/dashboard/Dashboard",
-            role: "ui-user,ui-admin",
+            role: "ui-user",
             url: "dashboard/",
             forceUpdate: true
-        },
-        "processesDashboard": {
-            view: "org/forgerock/openidm/ui/dashboard/workflow/processes/StartProcessDashboardView",
-            role: "ui-admin",
-            url: "processes/",
-            forceUpdate: true
-        },
-        "startProcesses": {
-            view: "org/forgerock/openidm/ui/dashboard/workflow/processes/StartProcessDashboardView",
-            role: "ui-admin",
-            url: /^processes\/([A-Za-z0-9:]+)/,
-            pattern: "processes/?/"
-        },
-        "completeTask": {
-            view: "org/forgerock/openidm/ui/dashboard/Dashboard",
-            role: "ui-admin",
-            url: /^tasks\/([0-9]+)/,
-            pattern: "tasks/?/"
-        },
-        "adminListManagedObjectView" : {
-            view: "org/forgerock/openidm/ui/common/resource/ListResourceView",
-            role: "ui-admin",
-            url: /^resource\/(managed)\/(.+)\/list\/$/,
-            pattern: "resource/?/?/list/"
-        },
-        "adminEditManagedObjectView" : {
-            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
-            role: "ui-admin",
-            url: /^resource\/(managed)\/(.+)\/edit\/(.+)$/,
-            pattern: "resource/?/?/edit/?",
-            forceUpdate: true
-        },
-        "adminNewManagedObjectView" : {
-            view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
-            role: "ui-admin",
-            url: /^resource\/(managed)\/(.+)\/add\/$/,
-            pattern: "resource/?/?/add/"
         }
     };
 

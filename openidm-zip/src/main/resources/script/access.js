@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
@@ -23,8 +23,8 @@
  */
 
 
-// A configuration for allowed HTTP requests. Each entry in the configuration contains a pattern 
-// to match against the incoming request ID and, in the event of a match, the associated roles, 
+// A configuration for allowed HTTP requests. Each entry in the configuration contains a pattern
+// to match against the incoming request ID and, in the event of a match, the associated roles,
 // methods, and actions that are allowed for requests on that particular pattern.
 //
 // pattern:  A pattern to match against an incoming request's resource ID
@@ -37,87 +37,62 @@
 // A single '*' character indicates all possible values.  With patterns ending in "/*", the "*"
 // acts as a wild card to indicate the pattern accepts all resource IDs "below" the specified
 // pattern (prefix).  For example the pattern "managed/*" would match "managed/user" or anything
-// starting with "managed/".  Note: it would not match "managed", which would need to have its 
+// starting with "managed/".  Note: it would not match "managed", which would need to have its
 // own entry in the config.
 
-/*jslint vars:true*/ 
+/*jslint vars:true*/
 
-var allowedPropertiesForManagedUser =   "userName,password,mail,givenName,sn,telephoneNumber," + 
-                                        "postalAddress,address2,city,stateProvince,postalCode,country,siteImage," + 
+var allowedPropertiesForManagedUser =   "userName,password,mail,givenName,sn,telephoneNumber," +
+                                        "postalAddress,address2,city,stateProvince,postalCode,country,siteImage," +
                                         "passPhrase,securityAnswer,securityQuestion";
-var httpAccessConfig = 
-{ 
+var httpAccessConfig =
+{
     "configs" : [
          // proxy back to configured OpenAM server endpoints
-         {  
+        {
             "pattern"    : "endpoint/openam/*",
             "roles"      : "*",
             "methods"    : "*",
             "actions"    : "*"
-         },
+        },
         // Anyone can read from these endpoints
-        {  
+        {
            "pattern"    : "info/*",
            "roles"      : "*",
            "methods"    : "read",
            "actions"    : "*"
         },
-        {  
+        {
             "pattern"    : "config/ui/themeconfig",
             "roles"      : "*",
             "methods"    : "read",
             "actions"    : "*"
-         },
-        {  
+        },
+        {
            "pattern"    : "config/ui/configuration",
            "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "read",
            "actions"    : "*"
         },
-        // These options should only be available anonymously if securityQA is enabled
-        {  
-           "pattern"    : "config/ui/secquestions",
-           "roles"      : "openidm-reg,openidm-authorized",
-           "methods"    : "read",
-           "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
-        },
-        {  
-           "pattern"    : "managed/user",
-           "roles"      : "openidm-reg,openidm-authorized",
-           "methods"    : "create",
-           "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"')"
-        },
 
-        // Anonymous user can call the siteIdentification endpoint if it is enabled:
-        {  
-           "pattern"    : "endpoint/siteIdentification",
-           "roles"      : "openidm-reg,openidm-authorized",
-           "methods"    : "*",
-           "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('siteIdentification')"
-        },
-
-        // Anonymous user can call the securityQA endpoint if it enabled:
-        {  
-           "pattern"    : "endpoint/securityQA",
-           "roles"      : "openidm-reg,openidm-authorized",
-           "methods"    : "*",
-           "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('securityQuestions')"
-        },
-        // This is needed by both self reg and security questions
-        {  
-           "pattern"    : "policy/managed/user/*",
+        {
+           "pattern"    : "selfservice/registration",
            "roles"      : "openidm-reg,openidm-authorized",
            "methods"    : "read,action",
-           "actions"    : "*",
-           "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('securityQuestions')"
+           "actions"    : "submitRequirements",
+           "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
+        },
+
+        {
+           "pattern"    : "selfservice/reset",
+           "roles"      : "openidm-reg,openidm-authorized",
+           "methods"    : "read,action",
+           "actions"    : "submitRequirements",
+           "customAuthz" : "checkIfUIIsEnabled('passwordReset')"
         },
 
         // openidm-admin can request nearly anything (some exceptions being a few system and repo endpoints)
-        {  
+        {
             "pattern"   : "*",
             "roles"     : "openidm-admin",
             "methods"   : "*", // default to all methods allowed
@@ -126,7 +101,7 @@ var httpAccessConfig =
             "excludePatterns": "system/*,repo,repo/*"
         },
         // additional rules for openidm-admin that selectively enable certain parts of system/
-        {  
+        {
             "pattern"   : "system/*",
             "roles"     : "openidm-admin",
             "methods"   : "create,read,update,delete,patch,query", // restrictions on 'action'
@@ -134,60 +109,68 @@ var httpAccessConfig =
             "customAuthz" : "disallowQueryExpression()"
         },
         // Note that these actions are available directly on system as well
-        {  
+        {
             "pattern"   : "system/*",
             "roles"     : "openidm-admin",
             "methods"   : "action",
             "actions"   : "test,testConfig,createconfiguration,liveSync,authenticate"
         },
         // Disallow command action on repo
-        {  
+        {
             "pattern"   : "repo",
             "roles"     : "openidm-admin",
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*", // default to all actions allowed
             "customAuthz" : "disallowCommandAction()"
         },
-        {  
+        {
             "pattern"   : "repo/*",
             "roles"     : "openidm-admin",
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*", // default to all actions allowed
             "customAuthz" : "disallowCommandAction()"
         },
-        
+
         // Additional checks for authenticated users
-        {  
+        {
             "pattern"   : "policy/*",
             "roles"     : "openidm-authorized", // openidm-authorized is logged-in users
             "methods"   : "read,action",
             "actions"   : "*"
         },
-        {  
+        {
             "pattern"   : "config/ui/*",
             "roles"     : "openidm-authorized",
             "methods"   : "read",
             "actions"   : "*"
         },
-        {  
+        {
             "pattern"   : "authentication",
             "roles"     : "openidm-authorized",
             "methods"   : "action",
             "actions"   : "reauthenticate"
         },
 
-        // This rule is primarily controlled by the ownDataOnly function - that will only allow 
-        // access to the endpoint from which the user originates 
+        // This rule is primarily controlled by the ownDataOnly function - that will only allow
+        // access to the endpoint from which the user originates
         // (For example a managed/user with the _id of bob will only be able to access managed/user/bob)
-        {   
+
+        {
             "pattern"   : "*",
             "roles"     : "openidm-authorized",
-            "methods"   : "read,update,patch,action",
-            "actions"   : "patch",
-            "customAuthz" : "ownDataOnly() && managedUserRestrictedToAllowedProperties('"+allowedPropertiesForManagedUser+"') && disallowQueryExpression()"
+            "methods"   : "read",
+            "actions"   : "*",
+            "customAuthz" : "ownDataOnly()"
+        },
+        {
+            "pattern"   : "*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "update,patch",
+            "actions"   : "*",
+            "customAuthz" : "ownDataOnly() && onlyEditableManagedObjectProperties('user')"
         },
 
-        // enforcement of which notifications you can read and delete is done within the endpoint 
+        // enforcement of which notifications you can read and delete is done within the endpoint
         {
             "pattern"   : "endpoint/usernotifications",
             "roles"     : "openidm-authorized",
@@ -209,7 +192,7 @@ var httpAccessConfig =
             "methods"   : "query",
             "actions"   : "*",
             "customAuthz" : "request.additionalParameters.userId === context.security.authorization.id"
-        },        
+        },
         {
             "pattern"   : "endpoint/gettasksview",
             "roles"     : "openidm-authorized",
@@ -260,8 +243,7 @@ var httpAccessConfig =
             "methods"   : "read,create,update,delete",
             "actions"   : ""
         }
-    ] 
+    ]
 };
 
 // Additional custom authorization functions go here
-

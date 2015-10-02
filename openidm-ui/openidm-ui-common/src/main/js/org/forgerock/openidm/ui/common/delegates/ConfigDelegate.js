@@ -82,6 +82,8 @@ define("org/forgerock/openidm/ui/common/delegates/ConfigDelegate", [
     };
 
     obj.updateEntity = function(id, objectParam, successCallback, errorCallback) {
+        // _id is not needed in calls to the config service, and can sometimes cause problems by being there.
+        delete objectParam._id;
         return Object.getPrototypeOf(obj).updateEntity.call(obj, id, objectParam, successCallback, errorCallback)
             .always(function () {
                 delete conf.delegateCache.config[id];

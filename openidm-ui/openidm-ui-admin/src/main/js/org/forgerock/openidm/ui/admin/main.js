@@ -28,6 +28,5 @@
 define("org/forgerock/openidm/ui/admin/main", [
     "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
     "./connector/ConnectorRegistry",
-    "./login/LoginView",
     "./delegates/SiteConfigurationDelegate"
 ]);

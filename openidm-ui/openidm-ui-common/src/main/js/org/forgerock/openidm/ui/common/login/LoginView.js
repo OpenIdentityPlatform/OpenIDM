@@ -24,7 +24,7 @@
 
 /*global define */
 
-define("org/forgerock/openidm/ui/admin/login/LoginView", [
+define("org/forgerock/openidm/ui/common/login/LoginView", [
     "underscore",
     "org/forgerock/commons/ui/common/LoginView",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"

@@ -29,10 +29,11 @@ require.config({
         "*" : {
             "Footer": "org/forgerock/openidm/ui/common/components/Footer",
             "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
-            "LoginView": "org/forgerock/openidm/ui/LoginView",
+            "LoginView": "org/forgerock/openidm/ui/common/login/LoginView",
             "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
-            "RegisterView": "org/forgerock/openidm/ui/registration/UserRegistrationView",
+            "RegisterView": "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
+            "PasswordResetView": "org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView",
             // TODO: Remove this when there are no longer any references to the "underscore" dependency
             "underscore": "lodash"
         }
@@ -130,7 +131,7 @@ require([
     "org/forgerock/commons/ui/common/main/EventManager",
 
     "org/forgerock/commons/ui/common/main",
-    "org/forgerock/openidm/ui/main",
+    "org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegate",
     "config/main",
 
     "jquery",

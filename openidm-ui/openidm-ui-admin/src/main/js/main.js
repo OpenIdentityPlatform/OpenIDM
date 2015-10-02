@@ -29,7 +29,7 @@ require.config({
         "*" : {
             "Footer": "org/forgerock/openidm/ui/common/components/Footer",
             "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
-            "LoginView": "org/forgerock/openidm/ui/admin/login/LoginView",
+            "LoginView": "org/forgerock/openidm/ui/common/login/LoginView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
             // TODO: Remove this when there are no longer any references to the "underscore" dependency
             "underscore": "lodash"
@@ -120,9 +120,6 @@ require.config({
             deps: ["jquery"]
         },
         jquerySortable: {
-            deps: ["jquery"]
-        },
-        i18nGrid: {
             deps: ["jquery"]
         },
         xdate: {
