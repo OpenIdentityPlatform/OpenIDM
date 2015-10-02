@@ -24,6 +24,7 @@
 package org.forgerock.openidm.maintenance.impl;
 
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
@@ -124,7 +125,8 @@ public class UpdateService implements RequestHandler {
         preview,
         update,
         getLicense,
-        restart
+        restart,
+        lastUpdateId
     }
 
     /**
@@ -145,6 +147,9 @@ public class UpdateService implements RequestHandler {
             case restart:
                 updateManager.restartNow();
                 return newActionResponse(json(object())).asPromise();
+            case lastUpdateId:
+                return newActionResponse(json(object(field("lastUpdateId", updateManager.getLastUpdateId()))))
+                        .asPromise();
             default:
                 return new NotSupportedException(request.getAction() + " is not supported").asPromise();
         }
