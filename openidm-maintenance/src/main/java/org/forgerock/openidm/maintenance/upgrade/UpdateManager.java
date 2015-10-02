@@ -80,4 +80,10 @@ public interface UpdateManager {
      * Restart IDM now, interrupting a sleeping UpdateThread if it exists
      */
     public void restartNow();
+
+    /**
+     * Return the id of the most recently installed update, default to "0".
+     * @return string representing the most recent update id
+     */
+    public String getLastUpdateId();
 }

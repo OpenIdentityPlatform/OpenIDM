@@ -129,6 +129,14 @@ UI Endpoints for Update Process
     returns:
     {}
 
+7. Return the id of the most recently successfully installed update
+
+    POST openidm/maintenance/update?_action=lastUpdateId
+
+    returns:
+    {
+        "lastUpdateId" : "<value>"
+    }
 
 
 

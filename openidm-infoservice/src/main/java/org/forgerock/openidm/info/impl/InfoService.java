@@ -26,10 +26,8 @@ package org.forgerock.openidm.info.impl;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.object;
 
-import java.util.ArrayList;
 import java.util.Dictionary;
 import java.util.EnumSet;
-import java.util.List;
 
 import javax.script.Bindings;
 
@@ -44,19 +42,12 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
 import org.forgerock.openidm.script.AbstractScriptedService;
-import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -81,8 +72,6 @@ public class InfoService extends AbstractScriptedService {
      * Setup logging for the {@link InfoService}.
      */
     private static final Logger logger = LoggerFactory.getLogger(InfoService.class);
-
-    private String lastUpdateId = null;
 
     /** HealthInfo service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -145,41 +134,6 @@ public class InfoService extends AbstractScriptedService {
 
         handler.put("version", object(
                 field("productVersion", ServerConstants.getVersion()),
-                field("productRevision", ServerConstants.getRevision()),
-                field("lastUpdateId", getLatestUpdateId(context))));
-    }
-
-    /**
-     * Return the last update ID.  ID is collected only once per restart of IDM unless resetLastUpdateId()
-     * is called.
-     *
-     * @param context the request context
-     * @return
-     */
-    private String getLatestUpdateId(Context context) {
-        if (lastUpdateId == null) {
-            final List<JsonValue> results = new ArrayList<>();
-            QueryRequest request = Requests.newQueryRequest("repo/updates")
-                    .setQueryId("query-all-ids")
-                    .addSortKey(SortKey.descendingOrder("startDate"))
-                    .setPageSize(1);
-
-            try {
-                connectionFactory.getConnection().query(context, request,
-                        new QueryResourceHandler() {
-                            @Override
-                            public boolean handleResource(ResourceResponse resourceResponse) {
-                                results.add(resourceResponse.getContent());
-                                return true;
-                            }
-                        });
-            } catch (ResourceException e) {
-                logger.debug("Unable to retrieve most recent update from repo", e);
-                return "0";
-            }
-
-            lastUpdateId = results.size() > 0 ? results.get(0).get(ResourceResponse.FIELD_ID).asString() : "0";
-        }
-        return lastUpdateId;
+                field("productRevision", ServerConstants.getRevision())));
     }
 }

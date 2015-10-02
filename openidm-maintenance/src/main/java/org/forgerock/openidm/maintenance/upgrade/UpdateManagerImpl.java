@@ -47,6 +47,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -72,8 +73,12 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.ContextUtil;
@@ -123,6 +128,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
     protected final AtomicBoolean restartImmediately = new AtomicBoolean(false);
     private UpdateThread updateThread = null;
+    private String lastUpdateId = null;
 
     public enum UpdateStatus {
         IN_PROGRESS,
@@ -506,6 +512,37 @@ public class UpdateManagerImpl implements UpdateManager {
         if (updateThread == null) {
             new UpdateThread().restart();
         }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public String getLastUpdateId() {
+        if (lastUpdateId == null) {
+            final List<JsonValue> results = new ArrayList<>();
+            QueryRequest request = Requests.newQueryRequest("repo/updates")
+                    .setQueryId("query-all-ids")
+                    .addSortKey(SortKey.descendingOrder("startDate"))
+                    .setPageSize(1);
+
+            try {
+                connectionFactory.getConnection().query(ContextUtil.createInternalContext(), request,
+                        new QueryResourceHandler() {
+                            @Override
+                            public boolean handleResource(ResourceResponse resourceResponse) {
+                                results.add(resourceResponse.getContent());
+                                return true;
+                            }
+                        });
+            } catch (ResourceException e) {
+                logger.debug("Unable to retrieve most recent update from repo", e);
+                return "0";
+            }
+
+            lastUpdateId = results.size() > 0 ? results.get(0).get(ResourceResponse.FIELD_ID).asString() : "0";
+        }
+        return lastUpdateId;
     }
 
     private class UpdateThread extends Thread {
