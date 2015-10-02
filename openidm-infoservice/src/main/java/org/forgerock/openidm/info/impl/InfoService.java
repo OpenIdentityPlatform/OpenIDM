@@ -82,6 +82,8 @@ public class InfoService extends AbstractScriptedService {
      */
     private static final Logger logger = LoggerFactory.getLogger(InfoService.class);
 
+    private String lastUpdateId = null;
+
     /** HealthInfo service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private HealthInfo healthInfoSvc;
@@ -147,27 +149,37 @@ public class InfoService extends AbstractScriptedService {
                 field("lastUpdateId", getLatestUpdateId(context))));
     }
 
+    /**
+     * Return the last update ID.  ID is collected only once per restart of IDM unless resetLastUpdateId()
+     * is called.
+     *
+     * @param context the request context
+     * @return
+     */
     private String getLatestUpdateId(Context context) {
-        final List<JsonValue> results = new ArrayList<>();
-        QueryRequest request = Requests.newQueryRequest("repo/updates")
-                .setQueryId("query-all-ids")
-                .addSortKey(SortKey.descendingOrder("startDate"))
-                .setPageSize(1);
+        if (lastUpdateId == null) {
+            final List<JsonValue> results = new ArrayList<>();
+            QueryRequest request = Requests.newQueryRequest("repo/updates")
+                    .setQueryId("query-all-ids")
+                    .addSortKey(SortKey.descendingOrder("startDate"))
+                    .setPageSize(1);
 
-        try {
-            connectionFactory.getConnection().query(context, request,
-                    new QueryResourceHandler() {
-                        @Override
-                        public boolean handleResource(ResourceResponse resourceResponse) {
-                            results.add(resourceResponse.getContent());
-                            return true;
-                        }
-                    });
-        } catch (ResourceException e) {
-            logger.debug("Unable to retrieve most recent update from repo", e);
-            return "0";
+            try {
+                connectionFactory.getConnection().query(context, request,
+                        new QueryResourceHandler() {
+                            @Override
+                            public boolean handleResource(ResourceResponse resourceResponse) {
+                                results.add(resourceResponse.getContent());
+                                return true;
+                            }
+                        });
+            } catch (ResourceException e) {
+                logger.debug("Unable to retrieve most recent update from repo", e);
+                return "0";
+            }
+
+            lastUpdateId = results.size() > 0 ? results.get(0).get(ResourceResponse.FIELD_ID).asString() : "0";
         }
-
-        return results.size() > 0 ? results.get(0).get(ResourceResponse.FIELD_ID).asString() : "0";
+        return lastUpdateId;
     }
 }
