@@ -442,7 +442,7 @@ public class DBHelper {
         defaultAdmin.put("_openidm_id", user);
         defaultAdmin.put("userName", user);
         defaultAdmin.put("password", pwd);
-        defaultAdmin.put("authzRoles", roles);
+        defaultAdmin.put("roles", roles);
 
         try {
             ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, db, defaultTableName);
