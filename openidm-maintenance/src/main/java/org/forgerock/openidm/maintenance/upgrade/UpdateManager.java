@@ -75,4 +75,9 @@ public interface UpdateManager {
      * @throws UpdateException on failure to provide a license.
      */
     public JsonValue getLicense(Path archive) throws UpdateException;
+
+    /**
+     * Restart IDM now, interrupting a sleeping UpdateThread if it exists
+     */
+    public void restartNow();
 }

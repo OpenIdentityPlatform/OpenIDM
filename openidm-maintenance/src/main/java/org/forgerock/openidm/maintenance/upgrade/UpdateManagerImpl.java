@@ -53,6 +53,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Attributes;
 import java.util.regex.Pattern;
 
@@ -119,6 +120,9 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String PROP_RESTARTREQUIRED = "restartRequired";
 
     private static final String BUNDLE_BACKUP_EXT = ".old-";
+
+    protected final AtomicBoolean restartImmediately = new AtomicBoolean(false);
+    private UpdateThread updateThread = null;
 
     public enum UpdateStatus {
         IN_PROGRESS,
@@ -455,8 +459,9 @@ public class UpdateManagerImpl implements UpdateManager {
                     throw new UpdateException("Unable to log update.", e);
                 }
 
-                new UpdateThread(updateEntry, archive, fileStateChecker, installDir, prop, tempUnzipDir, bundleContext)
-                        .start();
+                updateThread = new UpdateThread(updateEntry, archive, fileStateChecker, installDir, prop,
+                        tempUnzipDir, bundleContext);
+                updateThread.start();
 
                 return updateEntry.toJson();
             } catch (Exception e) {
@@ -492,6 +497,17 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void restartNow() {
+        restartImmediately.set(true);
+        if (updateThread == null) {
+            new UpdateThread().restart();
+        }
+    }
+
     private class UpdateThread extends Thread {
         private final UpdateLogEntry updateEntry;
         private final Archive archive;
@@ -501,6 +517,16 @@ public class UpdateManagerImpl implements UpdateManager {
         private final Path tempDirectory;
         private final BundleContext bundleContext;
         private final long timestamp = new Date().getTime();
+
+        public UpdateThread() {
+            this.updateEntry = null;
+            this.archive = null;
+            this.fileStateChecker = null;
+            this.staticFileUpdate = null;
+            this.updateProperties = null;
+            this.tempDirectory = null;
+            this.bundleContext = null;
+        }
 
         public UpdateThread(UpdateLogEntry updateEntry, Archive archive, FileStateChecker fileStateChecker,
                 Path installDir, Properties updateProperties, Path tempDirectory, BundleContext bundleContext) {
@@ -517,6 +543,10 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         public void run() {
+            if (updateEntry == null) {
+                return;
+            }
+
             try {
                 String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 String installDir = IdentityServer.getInstance().getInstallLocation().toString();
@@ -606,8 +636,21 @@ public class UpdateManagerImpl implements UpdateManager {
             }
 
             if (Boolean.valueOf(updateProperties.getProperty(PROP_RESTARTREQUIRED).toUpperCase())) {
-                // TODO rewire / restart
+                restart();
             }
+        }
+
+        protected void restart() {
+            long timeout = System.currentTimeMillis() + 30000;
+            try {
+                do {
+                    sleep(200);
+                } while (System.currentTimeMillis() < timeout && !restartImmediately.get());
+            } catch (Exception e) {
+                // restart now
+            }
+
+            // TODO restart
         }
 
         /**

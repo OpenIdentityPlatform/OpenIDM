@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
 import java.nio.file.Paths;
@@ -39,7 +41,6 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.maintenance.upgrade.UpdateException;
 import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
-import org.forgerock.openidm.maintenance.upgrade.UpdateManagerImpl;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.resource.ActionRequest;
@@ -122,7 +123,8 @@ public class UpdateService implements RequestHandler {
         available,
         preview,
         update,
-        getLicense
+        getLicense,
+        restart
     }
 
     /**
@@ -140,6 +142,9 @@ public class UpdateService implements RequestHandler {
                         context.asContext(SecurityContext.class).getAuthenticationId());
             case getLicense:
                 return handleLicense(request.getAdditionalParameters());
+            case restart:
+                updateManager.restartNow();
+                return newActionResponse(json(object())).asPromise();
             default:
                 return new NotSupportedException(request.getAction() + " is not supported").asPromise();
         }
