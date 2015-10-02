@@ -91,7 +91,7 @@ public class ServletComponent implements EventHandler {
     @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.router)")
     protected ConnectionFactory connectionFactory;
 
-    @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.jaspi.config)")
+    @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.auth.config)")
     private Filter authFilter;
 
     @Reference

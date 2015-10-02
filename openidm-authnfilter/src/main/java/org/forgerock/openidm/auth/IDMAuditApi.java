@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.auth;
+package org.forgerock.openidm.auth;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
@@ -35,13 +35,13 @@ import java.util.UUID;
 /**
  * Creates audit entries for each authentication attempt.
  */
-public class JaspiAuditApi implements AuditApi {
+public class IDMAuditApi implements AuditApi {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(JaspiAuditApi.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(IDMAuditApi.class);
 
     private final ConnectionFactory connectionFactory;
 
-    JaspiAuditApi(ConnectionFactory connectionFactory) {
+    IDMAuditApi(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
     }
 

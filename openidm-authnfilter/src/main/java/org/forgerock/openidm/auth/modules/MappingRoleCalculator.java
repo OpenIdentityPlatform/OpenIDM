@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import java.util.List;
 import java.util.Map;

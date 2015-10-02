@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,7 +36,7 @@ class RoleCalculatorFactory {
      * @param userRoles The object attribute representing the role assignment.
      * @param groupMembership The object attribute representing the group membership.
      * @param roleMapping The mapping between OpenIDM roles and pass-through auth groups.
-     * @param groupComparison The method of {@link org.forgerock.openidm.jaspi.modules.MappingRoleCalculator.GroupComparison} to use.
+     * @param groupComparison The method of {@link MappingRoleCalculator.GroupComparison} to use.
      * @return A RoleCalculator instance.
      */
     RoleCalculator create(final List<String> defaultRoles, final String userRoles,

@@ -14,23 +14,21 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.auth;
+package org.forgerock.openidm.auth;
 
 import javax.inject.Provider;
 
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.NeverThrowsException;
 
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.PROPERTY_MAPPING;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ID;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.USER_CREDENTIAL;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
 
 /**
  * A factory Function to build an Authenticator from an auth module config.

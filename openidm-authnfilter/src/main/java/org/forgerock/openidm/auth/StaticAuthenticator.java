@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS. All rights reserved.
  */
 
-package org.forgerock.openidm.jaspi.auth;
+package org.forgerock.openidm.auth;
 
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;

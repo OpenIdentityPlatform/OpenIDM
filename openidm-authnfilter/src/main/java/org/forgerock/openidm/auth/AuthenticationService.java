@@ -14,7 +14,7 @@
  * Copyright 2013-2015 ForgeRock AS
  */
 
-package org.forgerock.openidm.jaspi.auth;
+package org.forgerock.openidm.auth;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -54,8 +54,8 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
-import org.forgerock.openidm.jaspi.modules.IDMAuthModule;
-import org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper;
+import org.forgerock.openidm.auth.modules.IDMAuthModule;
+import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.services.context.Context;
@@ -72,11 +72,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.AUTHENTICATION_ID;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.PROPERTY_MAPPING;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ID;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.QUERY_ON_RESOURCE;
-import static org.forgerock.openidm.jaspi.modules.IDMJaspiModuleWrapper.USER_CREDENTIAL;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
 import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 
 /**
@@ -161,7 +161,7 @@ public class AuthenticationService implements SingletonResourceProvider {
     private EnhancedConfig enhancedConfig;
 
     /** The CHF filter to wrap the CAF filter */
-    @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.jaspi.config)")
+    @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.auth.config)")
     private AuthFilterWrapper authFilterWrapper;
 
     /** An on-demand Provider for the ConnectionFactory */
@@ -296,7 +296,7 @@ public class AuthenticationService implements SingletonResourceProvider {
 
         return AuthenticationFilter.builder()
                 .logger(logger)
-                .auditApi(new JaspiAuditApi(connectionFactory))
+                .auditApi(new IDMAuditApi(connectionFactory))
                 .sessionModule(processModuleConfiguration(sessionConfig))
                 .authModules(authModuleBuilders)
                 .build();
@@ -341,8 +341,8 @@ public class AuthenticationService implements SingletonResourceProvider {
                     JettyPropertyUtil.decryptOrDeobfuscate(moduleProperties.get("keystorePassword").asString()));
         }
 
-        // wrap all auth modules in an IDMJaspiModuleWrapper to apply the IDM business logic
-        return configureModule(new IDMJaspiModuleWrapper(module, connectionFactory, cryptoService, scriptRegistry))
+        // wrap all auth modules in our wrapper to apply the IDM business logic
+        return configureModule(new IDMAuthModuleWrapper(module, connectionFactory, cryptoService, scriptRegistry))
                 .withSettings(moduleProperties.asMap());
     }
 

@@ -14,7 +14,7 @@
  * Copyright 2013-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.modules;
+package org.forgerock.openidm.auth.modules;
 
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
 import static org.mockito.BDDMockito.given;
@@ -52,7 +52,7 @@ import org.testng.annotations.Test;
  * Tests IDMUserAuthModule using "internal/user" resource/query
  *
  */
-public class IDMJaspiModuleWrapperTest {
+public class IDMAuthModuleWrapperTest {
 
     private ConnectionFactory connectionFactory;
     private RoleCalculatorFactory roleCalculatorFactory;
@@ -104,7 +104,7 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_CONTINUE));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
@@ -141,7 +141,7 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
@@ -178,7 +178,7 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_FAILURE));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
@@ -225,7 +225,7 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
@@ -268,7 +268,7 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
@@ -293,7 +293,7 @@ public class IDMJaspiModuleWrapperTest {
                 .willReturn(Promises.<AuthStatus, AuthenticationException>newResultPromise(AuthStatus.SEND_SUCCESS));
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
@@ -323,7 +323,7 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);
@@ -355,7 +355,7 @@ public class IDMJaspiModuleWrapperTest {
         given(messageInfo.getRequestContextMap()).willReturn(messageInfoMap);
 
         //When
-        IDMJaspiModuleWrapper wrapper = new IDMJaspiModuleWrapper(authModule,
+        IDMAuthModuleWrapper wrapper = new IDMAuthModuleWrapper(authModule,
                 connectionFactory, mock(CryptoService.class), mock(ScriptRegistry.class),
                 roleCalculatorFactory, scriptExecutor);
         wrapper.initialize(messagePolicy, messagePolicy, handler, options);

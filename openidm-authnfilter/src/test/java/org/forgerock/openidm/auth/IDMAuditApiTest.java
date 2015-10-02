@@ -14,7 +14,7 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.jaspi.auth;
+package org.forgerock.openidm.auth;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.array;
@@ -30,13 +30,12 @@ import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.openidm.jaspi.auth.JaspiAuditApi;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.CreateRequest;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
 
-public class JaspiAuditApiTest {
+public class IDMAuditApiTest {
 
     @Test
     public void testAudit() throws Exception {
@@ -45,7 +44,7 @@ public class JaspiAuditApiTest {
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         final Connection connection = mock(Connection.class);
         final ArgumentCaptor<CreateRequest> createRequestArgumentCaptor = ArgumentCaptor.forClass(CreateRequest.class);
-        final JaspiAuditApi jaspiAuditApi = new JaspiAuditApi(connectionFactory);
+        final IDMAuditApi auditApi = new IDMAuditApi(connectionFactory);
 
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connection.create(any(Context.class), createRequestArgumentCaptor.capture()))
@@ -67,7 +66,7 @@ public class JaspiAuditApiTest {
         ));
 
         //when
-        jaspiAuditApi.audit(jsonValue);
+        auditApi.audit(jsonValue);
 
         //then
         final JsonValue createRequestContent = createRequestArgumentCaptor.getValue().getContent();
