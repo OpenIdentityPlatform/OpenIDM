@@ -34,28 +34,7 @@
 /*jslint regexp:false sub:true */
 /*global httpAccessConfig */
 
-
-//reinventing the wheel a bit, here; eventually move to underscore's isEqual method
-function deepCompare(obj1, obj2) {
-    var i,t1 = typeof(obj1), t2 = typeof(obj2);
-    if (t1 !== t2) {
-        return false; // mismatching types indicate a failed match
-    } else if ((t1 === "string" || t1 === "number" || t1 === "boolean")) {
-        return obj1 === obj2; // simple comparisons work in this case
-    } else { // they must both be objects, so traverse them
-        for (i in obj1) {
-            if (!deepCompare(obj1[i], obj2[i])) { // recurse through the object, checking each child property
-                return false;
-            }
-        }
-        for (i in obj2) { // checks for any properties in obj2 which were not in obj1, and so missed above
-            if (typeof(obj1[i]) === "undefined") {
-                return false;
-            }
-        }
-        return true;
-    }
-}
+var _ = require("lib/lodash");
 
 function matchesResourceIdPattern(id, pattern) {
     if (pattern === "*") {
@@ -364,7 +343,7 @@ function managedUserRestrictedToAllowedProperties(allowedPropertiesList) {
         for (i in request.content) {
             // if the new value does not match the current value, then they must be updating it
             // if the field they are attempting to update isn't allowed for them, then reject request.
-            if (!deepCompare(currentUser[i], request.content[i]) && !containsIgnoreCase(allowedPropertiesList,i)) {
+            if (!_.isEqual(currentUser[i], request.content[i]) && !containsIgnoreCase(allowedPropertiesList,i)) {
                 return false;
             }
         }
@@ -436,6 +415,10 @@ function passesAccessConfig(id, roles, method, action) {
     return false;
 }
 
+function isSelfServiceRequest() {
+    return (context.current.name === "selfservice");
+}
+
 function isAJAXRequest() {
     var headers = context.http.headers;
 
@@ -464,7 +447,7 @@ function allow() {
     var roles,
         action;
 
-    if (!context.caller.external) {
+    if (!(context.caller.external || isSelfServiceRequest())) {
         return true;
     }
 
@@ -474,30 +457,26 @@ function allow() {
         action = request.action;
     }
 
-    // Check REST requests against the access configuration
-    if (context.caller.external) {
-        // We only need to block non-AJAX requests when the action is not "read"
-        if (request.method !== "read" && !isAJAXRequest()) {
-            return false;
-        }
-
-        logger.debug("Access Check for HTTP request for resource id: {}, role: {}, method: {}, action: {}", request.resourcePath, roles, request.method, action);
-
-        if (passesAccessConfig(request.resourcePath, roles, request.method, action)) {
-
-            logger.debug("Request allowed");
-            return true;
-        }
+    // We only need to block non-AJAX requests when the action is not "read"
+    if (request.method !== "read" && !isAJAXRequest()) {
+        return false;
     }
+
+    logger.debug("Access Check for HTTP request for resource id: {}, role: {}, method: {}, action: {}", request.resourcePath, roles, request.method, action);
+
+    return passesAccessConfig(request.resourcePath, roles, request.method, action);
 }
 
 // Load the access configuration script (httpAccessConfig obj)
 load(identityServer.getProjectLocation() + "/script/access.js");
 
 if (!allow()) {
-//    console.log(request);
+//    console.log(JSON.stringify(request));
+//    console.log(JSON.stringify(context, null, 4));
     throw {
         "code" : 403,
         "message" : "Access denied"
     };
+} else {
+    logger.debug("Request allowed");
 }

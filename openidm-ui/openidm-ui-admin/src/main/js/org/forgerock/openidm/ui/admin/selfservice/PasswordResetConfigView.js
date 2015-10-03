@@ -52,20 +52,19 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                     {
                         "name" : "userIdValidation",
                         "queryFields" : [
-                            "_id",
+                            "userName",
                             "mail"
                         ],
                         "identityIdField" : "_id",
                         "identityEmailField" : "mail",
                         "identityServiceUrl" : "managed/user",
                         "email" : {
-                            "serviceUrl": "/email",
                             "from": "info@admin.org",
                             "subject": "Reset password email",
                             "mimeType" : "text/html",
                             "message": "<h3>This is your reset email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
                             "verificationLinkToken": "%link%",
-                            "verificationLink": "http://localhost:9999/example/#passwordReset/"
+                            "verificationLink": "https://localhost:8443/#passwordReset/"
                         }
                     },
                     {
@@ -74,8 +73,14 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                         "identityPasswordField" : "password"
                     }
                 ],
-                "snapshotToken": {
-                    "name": "jwt",
+                "snapshotToken" : {
+                    "type": "jwt",
+                    "sharedKey" : "!tHiSsOmEsHaReDkEy!",
+                    "keyPairAlgorithm" : "RSA",
+                    "keyPairSize" : 1024,
+                    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+                    "encryptionMethod" : "A128CBC_HS256",
+                    "jwsAlgorithm" : "HS256",
                     "tokenExpiry": 180
                 },
                 "storage": "stateless"
