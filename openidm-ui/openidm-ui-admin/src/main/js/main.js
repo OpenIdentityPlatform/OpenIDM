@@ -171,6 +171,7 @@ require([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "jsonEditor",
+    "org/forgerock/openidm/ui/common/util/JSONEditorSetupUtils",
 
     "org/forgerock/commons/ui/common/main",
     "org/forgerock/openidm/ui/common/main",

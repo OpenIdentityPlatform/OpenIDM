@@ -29,8 +29,9 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
     "underscore",
     "jsonEditor",
     "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
-], function($, _, JSONEditor, AbstractView, resourceDelegate) {
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils"
+], function($, _, JSONEditor, AbstractView, resourceDelegate, resourceCollectionUtils) {
 
     var LinkedView = AbstractView.extend({
         template: "templates/admin/linkedView/LinkedView.html",
@@ -116,6 +117,8 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
                                 schema.properties[prop].propertyOrder = propCount++;
                             });
                         }
+                        
+                        schema.properties = resourceCollectionUtils.convertRelationshipTypes(schema.properties);
 
                         this.editor = new JSONEditor(
                                 this.$el.find("#linkedViewContent")[0],

@@ -56,6 +56,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                 if(args) {
                     this.element = args.element;
                     this.data.prop = args.prop;
+                    this.data.serviceUrl = args.prop.relationshipUrl;
 
                     this.onChange = args.onChange;
 
@@ -63,27 +64,20 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                         this.data.propTitle = schema.title || this.data.prop.title;
 
                         this.data.headerValues = resourceCollectionUtils.getHeaderValues(this.data.prop.items.resourceCollection.query.fields, schema.properties);
-
-                        parentRender();
+                        
+                        resourceDelegate.searchResource("true", this.data.serviceUrl).then(_.bind(function(resource){
+                            this.data.prop.value = resource.result;
+                            parentRender();
+                        },this));
                     }, this));
                 } else {
                     parentRender();
                 }
             },
             setupAutocomplete: function(prop) {
-                var autocompleteField = this.$el.parent().find("#autoCompleteResourceCollection_" + prop.propName),
-                    onChange = _.bind(function(value) {
-                        var newVal = this.data.prop.items.resourceCollection.path + "/" + value;
+                var autocompleteField = this.$el.parent().find("#autoCompleteResourceCollection_" + prop.propName);
 
-                        if(!_.contains(this.data.prop.value, newVal)) {
-                            if(!this.data.prop.value) {
-                                this.data.prop.value = [];
-                            }
-                            this.data.prop.value.push(newVal);
-                        }
-                    }, this);
-
-                    resourceCollectionUtils.setupAutocompleteField(autocompleteField, prop, { onChange: onChange });
+                    resourceCollectionUtils.setupAutocompleteField(autocompleteField, prop);
             },
             convertToHuman: function() {
                 var listElements = this.$el.find(".resourceListItem");
