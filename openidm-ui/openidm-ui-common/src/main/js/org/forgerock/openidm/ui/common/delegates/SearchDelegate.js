@@ -39,7 +39,7 @@ define("org/forgerock/openidm/ui/common/delegates/SearchDelegate", [
             "url":  "/" + resource + "?_sortKeys=" + props[0] + "&_pageSize=" + maxPageSize + "&_queryFilter=" + conditions.join(" or (") + new Array(conditions.length).join(")")// [a,b] => "a or (b)"; [a,b,c] => "a or (b or (c))"
         }).then(
             function (qry) {
-                return _.first(qry.result,maxPageSize);//we never want more than 10 results from search in case _pageSize does not work
+                return _.take(qry.result,maxPageSize);//we never want more than 10 results from search in case _pageSize does not work
             },
             function (error){
                 console.error(error);

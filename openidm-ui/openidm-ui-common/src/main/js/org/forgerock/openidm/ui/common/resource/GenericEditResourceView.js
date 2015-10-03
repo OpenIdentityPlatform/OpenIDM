@@ -32,6 +32,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
@@ -46,6 +47,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
         eventManager,
         constants,
         uiUtils,
+        serviceInvoker,
         resourceDelegate,
         searchDelegate,
         messagesManager,
@@ -66,85 +68,89 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
         },
         render: function(args, callback) {
             var resourceReadPromise,
-                schemaPromise = resourceDelegate.getSchema(args),
                 objectId = (args[0] === "managed") ? args[2] : args[3],
                 displayField;
+                
 
-            this.data.args = args;
-
-            this.data.objectType = args[0];
-            this.isSystemResource = false;
-            this.objectName = args[1];
-            this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
-
-            if(objectId){
-                resourceReadPromise = resourceDelegate.readResource(this.data.serviceUrl, objectId);
-                this.objectId = objectId;
-                this.data.newObject = false;
-            } else {
-                resourceReadPromise = $.Deferred().resolve({});
-                this.data.newObject = true;
-            }
-
-            if (this.data.objectType === "system") {
-                this.isSystemResource = true;
-                this.objectName += "/" + args[2];
-            }
-
-            $.when(resourceReadPromise, schemaPromise).then(_.bind(function(resource, schema){
-                this.data.objectTitle = schema.title || this.objectName;
-
-                this.data.schema = schema;
-
-                if(this.isSystemResource) {
-                    this.data.objectTitle = this.objectName;
+            resourceDelegate.getSchema(args).then(_.bind(function (schema) {
+                this.data.args = args;
+                
+                this.data.objectType = args[0];
+                this.isSystemResource = false;
+                this.objectName = args[1];
+                this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
+    
+                if(objectId){
+                    resourceReadPromise = serviceInvoker.restCall({ 
+                        url: this.data.serviceUrl +"/" + objectId + "?_fields=" + resourceCollectionUtils.getFieldsToExpand(schema.properties) 
+                    });
+                    this.objectId = objectId;
+                    this.data.newObject = false;
+                } else {
+                    resourceReadPromise = $.Deferred().resolve({});
+                    this.data.newObject = true;
                 }
-
-                if(!this.data.newObject) {
+    
+                if (this.data.objectType === "system") {
+                    this.isSystemResource = true;
+                    this.objectName += "/" + args[2];
+                }
+    
+                resourceReadPromise.then(_.bind(function(resource){
+                    this.data.objectTitle = schema.title || this.objectName;
+    
+                    this.data.schema = schema;
+    
                     if(this.isSystemResource) {
-                        displayField = _.chain(schema.properties)
-                                        .map(function(val, key) { val.name = key; return val; })
-                                        .where({ nativeName: "__NAME__" })
-                                        .value();
-
-                        if(displayField) {
-                            displayField = displayField[0].name;
-                        } else {
-                            displayField = _.keys(schema.properties)[0];
-                        }
-                    } else {
-                        displayField = schema.order[0];
+                        this.data.objectTitle = this.objectName;
                     }
-
-                    this.data.objectDisplayText = resource[0][displayField];
-                }
-
-                this.data.backBtnText = $.t("templates.admin.ResourceEdit.backToList",{ objectTitle: this.data.objectTitle });
-
-                this.parentRender(function(){
-                    this.setupEditor(resource, schema);
-
+    
                     if(!this.data.newObject) {
-                        this.linkedView = new LinkedView();
-                        this.linkedView.element = "#linkedView";
-
-                        this.linkedView.render({id: resource[0]._id, resourcePath: this.data.objectType + "/" + this.objectName + "/" });
+                        if(this.isSystemResource) {
+                            displayField = _.chain(schema.properties)
+                                            .map(function(val, key) { val.name = key; return val; })
+                                            .where({ nativeName: "__NAME__" })
+                                            .value();
+    
+                            if(displayField) {
+                                displayField = displayField[0].name;
+                            } else {
+                                displayField = _.keys(schema.properties)[0];
+                            }
+                        } else {
+                            displayField = schema.order[0];
+                        }
+    
+                        this.data.objectDisplayText = resource[displayField];
                     }
-
-                    if(callback) {
-                        callback();
-                    }
-                });
+    
+                    this.data.backBtnText = $.t("templates.admin.ResourceEdit.backToList",{ objectTitle: this.data.objectTitle });
+    
+                    this.parentRender(function(){
+                        this.setupEditor(resource, schema);
+    
+                        if(!this.data.newObject) {
+                            this.linkedView = new LinkedView();
+                            this.linkedView.element = "#linkedView";
+    
+                            this.linkedView.render({id: resource._id, resourcePath: this.data.objectType + "/" + this.objectName + "/" });
+                        }
+    
+                        if(callback) {
+                            callback();
+                        }
+                    });
+                },this));
             },this));
         },
         setupEditor: function(resource, schema){
             var propCount = 0,
                 filteredProperties,
-                filteredObject = resource[0];
+                filteredObject = resource;
 
             this.oldObject = $.extend(true, {}, filteredObject);
 
-            filteredProperties = _.omit(schema.properties,function(p) { return !p.viewable; });
+            filteredProperties = resourceCollectionUtils.convertRelationshipTypes(_.omit(schema.properties,function(p) { return !p.viewable; }));
 
             if(!_.isEmpty(filteredProperties)){
                 filteredObject = _.pick(filteredObject, _.keys(filteredProperties));
@@ -201,7 +207,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             } else {
                 if(!this.data.newObject) {
                     _.each(newValue, _.bind(function(val,key) {
-                        if((!this.oldObject[key] && val && val.length) || (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) {
+                        var relationshipType = this.data.schema.properties[key] && this.data.schema.properties[key].typeRelationship;
+                        if((!this.oldObject[key] && val && val.length) || (!relationshipType && (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) || (relationshipType && val.length && JSON.parse(val)._ref !== this.oldObject[key]._ref)) {
                             if(this.data.schema.properties && this.data.schema.properties[key] && this.data.schema.properties[key].title && this.data.schema.properties[key].title.length) {
                                 changedFields.push(this.data.schema.properties[key].title);
                             } else {
@@ -286,7 +293,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 }, this);
 
                 _.each(this.$el.find(".resourceCollectionArrayValue"), function(element) {
-                    formVal[$(element).attr("propName")] = JSON.parse($(element).val());
+                    formVal[$(element).attr("propname")] = JSON.parse($(element).val());
                 });
             }
 
@@ -317,6 +324,9 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
             } else {
                 if (!this.isSystemResource) {
+                    _.each(this.$el.find(".resourceCollectionValue"), function(element) {
+                        formVal[$(element).attr("propname")] = JSON.parse($(element).val());
+                    });
                     resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
                 } else {
                     resourceDelegate.updateResource(this.data.serviceUrl, this.oldObject._id, formVal, successCallback);
@@ -382,7 +392,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                         if (prop.type === "array") {
                             if(prop.items.resourceCollection && _.has(filteredObject,key)) {
-                                prop.value = filteredObject[key];
+                                prop.relationshipUrl = _this.data.objectType + "/" + _this.objectName + "/" + _this.objectId + "/" + prop.propName;
                                 return convertArrayField(prop);
                             }
                         }
@@ -414,21 +424,22 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                         autocompleteField = $('<select class="form-control selectize" type="text" style="display:none !important;" id="' + autocompleteID + '"></select>'),
                         onChange = function (value) {
                             var readPath = field.resourceCollection.path + "/" + value;
-                            _this.editor.getEditor("root" + field.selector.replace("\\","")).setValue(readPath);
+                            _this.editor.getEditor("root" + field.selector.replace("\\","")).setValue(JSON.stringify({ "_ref": readPath }));
                         };
 
-                    el.attr("style","display: none !important").after(autocompleteField);
+                    el.attr("style","display: none !important");
+                    el.attr("propname",field.propName);
+                    el.addClass("resourceCollectionValue");
+                    el.after(autocompleteField);
 
                     resourceCollectionUtils.setupAutocompleteField(autocompleteField, field, { onChange: onChange });
 
                     if(!_this.data.newObject && el.val() && el.val().length){
-                        return resourceDelegate.readResource("/" + constants.context,el.val()).then(function(result){
-                            autocompleteField[0].selectize.addOption(result);
-                            autocompleteField[0].selectize.setValue(result._id);
-                        });
-                    } else {
-                        return $.Deferred().resolve();
+                            autocompleteField[0].selectize.addOption(JSON.parse(el.val()));
+                            autocompleteField[0].selectize.setValue(JSON.parse(el.val())._id);
                     }
+                        
+                    return $.Deferred().resolve();
                 };
 
                 convertArrayField = function(prop) {

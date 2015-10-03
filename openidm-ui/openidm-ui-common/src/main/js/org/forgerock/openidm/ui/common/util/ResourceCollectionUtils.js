@@ -134,6 +134,80 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
         }
     };
+    
+    
+    /**
+     * convertRelationshipTypes loops over every property looking for 
+     * arrays of relationship types or single value relationship types
+     * once found the type is converted to "string" for jsonEditor and the
+     * typeRelationship flag is set to true
+     * 
+     * this function is recursive...when a property is an object the function
+     * calls itself to deal with cases where relationship types are nested
+     *
+     * @param {Object[]} properties
+     * @returns {Object[]}
+     */
+    obj.convertRelationshipTypes = function (properties) {
+        _.each(properties, function(prop,key) {
+            if (prop.type === "object") {
+                prop = obj.convertRelationshipTypes(prop.properties);
+            }
+
+            if (prop.type === "array") {
+                if(prop.items.type === "relationship" && _.has(properties,key)) {
+                    prop.items.type = "string";
+                    prop.items.typeRelationship = true;
+                }
+            }
+
+            if(prop.type === "relationship" && _.has(properties,key)) {
+                prop.type = "string";
+                prop.typeRelationship = true;
+            }
+        });
+        
+        return properties;
+    };
+    
+    /**
+     * getFieldsToExpand loops over every property looking for single value relationship types
+     * once found a string of a list of properties defined in the resourceCollection.query.fields property 
+     * is constructed for the use in the _fields parameter of a query url
+     * 
+     * this function is recursive...when a property is an object the function
+     * calls itself to deal with cases where relationship types are nested
+     *
+     * @param {Object[]} properties
+     * @returns {String}
+     */
+    obj.getFieldsToExpand = function (properties) {
+        var fieldsArray = ["*"],
+            addFields = function (propName, fields) {
+                fieldsArray.push(propName + "/_id");
+                _.each(fields, function (field) {
+                    if (field.indexOf("/") > 0) {
+                        field = field.split("/")[0];
+                    }
+                    
+                    fieldsArray.push(propName + "/" + field);
+                });
+            };
+        
+        _.each(properties, function(prop,key) {
+            if (prop.type === "object") {
+                prop = obj.getFieldsToExpand(prop.properties);
+            }
+
+            if(prop.type === "relationship") {
+                if (prop.resourceCollection) {
+                    addFields(key, prop.resourceCollection.query.fields);
+                }
+            }
+        });
+        
+        return fieldsArray.join(",");
+    };
 
     Handlebars.registerHelper('nestedLookup', function(property,key) {
         return property[key];

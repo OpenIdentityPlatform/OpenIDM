@@ -144,13 +144,32 @@
                         "viewable" : true,
                         "type" : "array",
                         "items" : {
-                            "type" : "string",
+                            "type" : "relationship",
+                            "returnByDefault" : true,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
+                                    }
+                                }
+                            },
                             "resourceCollection" : {
                                 "path" : "repo/internal/role",
                                 "query" : {
                                     "queryFilter" : "true",
-                                    "fields" : [ "_id", "description"],
-                                    "sortKeys" : [ "_id" ]
+                                    "fields" : [
+                                        "_id",
+                                        "description"
+                                    ],
+                                    "sortKeys" : [
+                                        "_id"
+                                    ]
                                 }
                             }
                         }
