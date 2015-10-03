@@ -60,54 +60,138 @@
                     "authzRoles"
                 ],
                 "properties" : {
+                    "_id" : {
+                        "type" : "string",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "userEditable" : false,
+                        "policies" : [
+                            {
+                                "policyId" : "cannot-contain-characters",
+                                "params" : {
+                                    "forbiddenChars" : ["/"]
+                                }
+                            }
+                        ]
+                    },
+                    "password" : {
+                        "type" : "string",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "minLength" : 8,
+                        "userEditable" : true,
+                        "policies" : [
+                            {
+                                "policyId" : "at-least-X-capitals",
+                                "params" : {
+                                    "numCaps" : 1
+                                }
+                            },
+                            {
+                                "policyId" : "at-least-X-numbers",
+                                "params" : {
+                                    "numNums" : 1
+                                }
+                            },
+                            {
+                                "policyId" : "cannot-contain-others",
+                                "params" : {
+                                    "disallowedFields" : [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ]
+                                }
+                            },
+                            {
+                                "policyId" : "re-auth-required",
+                                "params" : {
+                                    "exceptRoles" : [
+                                        "system",
+                                        "openidm-admin",
+                                        "openidm-reg",
+                                        "openidm-cert"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "kbaInfo" : {
+                        "type" : "array",
+                        "userEditable" : true,
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "answer" : {
+                                    "type" : "string"
+                                },
+                                "customQuestion" : {
+                                    "type" : "string"
+                                },
+                                "questionId" : {
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    },
                     "mail" : {
                         "title" : "Email Address",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true,
+                        "pattern" : ".+@.+"
                     },
                     "sn" : {
                         "title" : "Last Name",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true
                     },
                     "address2" : {
                         "type" : "string",
                         "title" : "Address 2",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "givenName" : {
                         "title" : "First Name",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true
                     },
                     "city" : {
                         "type" : "string",
                         "title" : "City",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "country" : {
                         "type" : "string",
                         "title" : "Country",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "postalCode" : {
                         "type" : "string",
                         "title" : "Postal Code",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "accountStatus" : {
                         "title" : "Status",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : false
                     },
                     "roles" : {
                         "description" : "",
                         "title" : "Managed Roles",
                         "viewable" : true,
+                        "userEditable" : false,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
@@ -136,6 +220,7 @@
                         "title" : "OpenIDM Roles",
                         "viewable" : true,
                         "type" : "array",
+                        "userEditable" : false,
                         "items" : {
                             "type" : "relationship",
                             "returnByDefault" : true,
@@ -190,23 +275,43 @@
                     "telephoneNumber" : {
                         "type" : "string",
                         "title" : "Mobile Phone",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true,
+                        "pattern" : "^\\+?([0-9\\- \\(\\)])*$"
                     },
                     "stateProvince" : {
                         "type" : "string",
                         "title" : "State/Province",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "postalAddress" : {
                         "type" : "string",
                         "title" : "Address 1",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "userName" : {
                         "title" : "Username",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true,
+                        "minLength" : 1,
+                        "policies" : [
+                            {
+                                "policyId" : "unique"
+                            },
+                            {
+                                "policyId" : "no-internal-user-conflict"
+                            },
+                            {
+                                "policyId" : "cannot-contain-characters",
+                                "params" : {
+                                    "forbiddenChars" : ["/"]
+                                }
+                            }
+                        ]
                     },
                     "manager" : {
                         "type" : "relationship",
@@ -238,7 +343,8 @@
                                     "userName"
                                 ]
                             }
-                        }
+                        },
+                        "userEditable" : false
                     }
                 },
                 "type" : "object",

@@ -42,9 +42,6 @@
 
 /*jslint vars:true*/
 
-var allowedPropertiesForManagedUser =   "userName,password,mail,givenName,sn,telephoneNumber," +
-                                        "postalAddress,address2,city,stateProvince,postalCode,country,siteImage," +
-                                        "passPhrase,securityAnswer,securityQuestion";
 var httpAccessConfig =
 {
     "configs" : [
@@ -75,6 +72,7 @@ var httpAccessConfig =
            "actions"    : "*"
         },
 
+        // externally-visisble Self-Service endpoints
         {
            "pattern"    : "selfservice/registration",
            "roles"      : "openidm-reg,openidm-authorized",
@@ -89,6 +87,36 @@ var httpAccessConfig =
            "methods"    : "read,action",
            "actions"    : "submitRequirements",
            "customAuthz" : "checkIfUIIsEnabled('passwordReset')"
+        },
+
+        // rules governing requests originating from forgerock-selfservice
+        {
+            "pattern"   : "managed/user",
+            "roles"     : "openidm-reg",
+            "methods"   : "create",
+            "actions"   : "*",
+            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user')"
+        },
+        {
+            "pattern"   : "managed/user",
+            "roles"     : "openidm-reg",
+            "methods"   : "query",
+            "actions"   : "*",
+            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest()"
+        },
+        {
+            "pattern"   : "managed/user/*",
+            "roles"     : "openidm-reg",
+            "methods"   : "patch",
+            "actions"   : "*",
+            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user')"
+        },
+        {
+            "pattern"   : "external/email",
+            "roles"     : "openidm-reg",
+            "methods"   : "action",
+            "actions"   : "send",
+            "customAuthz" : "(checkIfUIIsEnabled('passwordReset') || checkIfUIIsEnabled('selfRegistration')) && isSelfServiceRequest()"
         },
 
         // openidm-admin can request nearly anything (some exceptions being a few system and repo endpoints)
@@ -234,7 +262,7 @@ var httpAccessConfig =
             "roles"     : "openidm-cert",
             "methods"   : "patch,action",
             "actions"   : "patch",
-            "customAuthz" : "isQueryOneOf({'managed/user': ['for-userName']}) && managedUserRestrictedToAllowedProperties('password')"
+            "customAuthz" : "isQueryOneOf({'managed/user': ['for-userName']}) && restrictPatchToFields(['password'])"
         },
         // Security Management
         {

@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
             configUrl: "selfservice/registration",
             msgType: "selfServiceUserRegistration",
             "configDefault": {
-                "stageConfigs": [
+                "stageConfigs" : [
                     {
                         "name" : "emailValidation",
                         "email" : {
@@ -69,17 +69,19 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     {
                         "name" : "kbaStage",
                         "kbaPropertyName" : "kbaInfo",
-                        "questions":[
+                        "questions" : [
                             {
-                                "id":"1",
-                                "question":{
-                                    "en":"What's your favorite color?"
+                                "id" : "1",
+                                "question" : {
+                                    "en" : "What's your favorite color?",
+                                    "en_GB" : "What's your favorite colour?",
+                                    "fr" : "Quelle est votre couleur préférée?"
                                 }
                             },
                             {
-                                "id":"2",
-                                "question":{
-                                    "en":"Who was your first employer?"
+                                "id" : "2",
+                                "question" : {
+                                    "en" : "Who was your first employer?"
                                 }
                             }
                         ]
@@ -89,11 +91,17 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                         "identityServiceUrl" : "managed/user"
                     }
                 ],
-                "snapshotToken": {
-                    "name": "jwt",
-                    "tokenExpiry": 180
+                "snapshotToken" : {
+                    "type" : "jwt",
+                    "sharedKey" : "!tHiSsOmEsHaReDkEy!",
+                    "keyPairAlgorithm" : "RSA",
+                    "keyPairSize" : 1024,
+                    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+                    "encryptionMethod" : "A128CBC_HS256",
+                    "jwsAlgorithm" : "HS256",
+                    "tokenExpiry" : 180
                 },
-                "storage": "stateless"
+                "storage" : "stateless"
             },
             "saveConfig": {}
         },
