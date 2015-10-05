@@ -419,68 +419,68 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
     private static class RelationshipQueryFilterVisitor implements QueryFilterVisitor<QueryFilter<JsonPointer>, Boolean, JsonPointer> {
 
         @Override
-        public QueryFilter<JsonPointer> visitAndFilter(Boolean parameter, List<QueryFilter<JsonPointer>> subFilters) {
+        public QueryFilter<JsonPointer> visitAndFilter(Boolean isReverse, List<QueryFilter<JsonPointer>> subFilters) {
             return QueryFilter.and(visitQueryFilters(subFilters));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitBooleanLiteralFilter(Boolean parameter, boolean value) {
+        public QueryFilter<JsonPointer> visitBooleanLiteralFilter(Boolean isReverse, boolean value) {
             return value ? QueryFilter.<JsonPointer>alwaysTrue() : QueryFilter.<JsonPointer>alwaysFalse();
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitContainsFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.contains(getRelationshipPointer(parameter, field), valueAssertion);
+        public QueryFilter<JsonPointer> visitContainsFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.contains(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitEqualsFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.equalTo(getRelationshipPointer(parameter, field), valueAssertion);
+        public QueryFilter<JsonPointer> visitEqualsFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.equalTo(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitExtendedMatchFilter(Boolean parameter, JsonPointer field, String operator, Object valueAssertion) {
-            return QueryFilter.comparisonFilter(getRelationshipPointer(parameter, field), operator, valueAssertion);
+        public QueryFilter<JsonPointer> visitExtendedMatchFilter(Boolean isReverse, JsonPointer field, String operator, Object valueAssertion) {
+            return QueryFilter.comparisonFilter(getRelationshipPointer(isReverse, field), operator, valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitGreaterThanFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.greaterThan(getRelationshipPointer(parameter, field), valueAssertion);
+        public QueryFilter<JsonPointer> visitGreaterThanFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.greaterThan(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitGreaterThanOrEqualToFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.greaterThanOrEqualTo(getRelationshipPointer(parameter, field), valueAssertion);
+        public QueryFilter<JsonPointer> visitGreaterThanOrEqualToFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.greaterThanOrEqualTo(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitLessThanFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.lessThan(getRelationshipPointer(parameter, field), valueAssertion);
+        public QueryFilter<JsonPointer> visitLessThanFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.lessThan(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitLessThanOrEqualToFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.lessThanOrEqualTo(getRelationshipPointer(parameter, field), valueAssertion);
+        public QueryFilter<JsonPointer> visitLessThanOrEqualToFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.lessThanOrEqualTo(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitNotFilter(Boolean parameter, QueryFilter<JsonPointer> subFilter) {
+        public QueryFilter<JsonPointer> visitNotFilter(Boolean isReverse, QueryFilter<JsonPointer> subFilter) {
             return QueryFilter.not(subFilter.accept(new RelationshipQueryFilterVisitor(), null));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitOrFilter(Boolean parameter, List<QueryFilter<JsonPointer>> subFilters) {
+        public QueryFilter<JsonPointer> visitOrFilter(Boolean isReverse, List<QueryFilter<JsonPointer>> subFilters) {
             return QueryFilter.or(visitQueryFilters(subFilters));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitPresentFilter(Boolean parameter, JsonPointer field) {
-            return QueryFilter.present(getRelationshipPointer(parameter, field));
+        public QueryFilter<JsonPointer> visitPresentFilter(Boolean isReverse, JsonPointer field) {
+            return QueryFilter.present(getRelationshipPointer(isReverse, field));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitStartsWithFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.startsWith(getRelationshipPointer(parameter, field), valueAssertion);
+        public QueryFilter<JsonPointer> visitStartsWithFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.startsWith(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         /**
