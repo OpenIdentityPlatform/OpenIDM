@@ -41,7 +41,7 @@
                     "source" : "roles",
                     "transform" : {
                         "type" : "text/javascript",
-                        "source" : "source.split(',')"
+                        "source" : "var _ = require('lib/lodash'); _.map(source.split(','), function(role) { return {'_ref': role} });"
                     },
                     "target" : "roles"
                 }
@@ -115,7 +115,7 @@
                     "source" : "roles",
                     "transform" : {
                         "type" : "text/javascript",
-                        "source" : "source.join(',')"
+                        "source" : "var _ = require('lib/lodash'); _.map(source, function(role) { return source['_ref'] }).join(',');"
                     },
                     "target" : "roles"
                 }
