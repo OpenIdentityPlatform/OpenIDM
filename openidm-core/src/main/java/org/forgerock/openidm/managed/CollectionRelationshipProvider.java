@@ -91,9 +91,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param propertyName Name of property on first object represents the relationship
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, final boolean inverted, ActivityLogger activityLogger,
+            final JsonPointer propertyName, final boolean isReverse, ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, inverted, activityLogger,managedObjectSyncService);
+        super(connectionFactory, resourcePath, propertyName, isReverse, activityLogger,managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("{firstId}/" + propertyName.leaf()), Resources.newCollection(this));
@@ -358,7 +358,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             }
 
             QueryFilter<JsonPointer> filter = QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(inverted ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
+                    QueryFilter.equalTo(new JsonPointer(isReverse ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
 
             if (request.getQueryFilter() != null) {

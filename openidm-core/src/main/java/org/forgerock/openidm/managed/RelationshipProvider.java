@@ -83,8 +83,8 @@ public abstract class RelationshipProvider {
     /** The property representing this relationship */
     protected final JsonPointer propertyName;
 
-    /** If this is an inverse relationship */
-    protected final boolean inverted;
+    /** If this is a reverse relationship */
+    protected final boolean isReverse;
     
     /**
      * The activity logger.
@@ -179,7 +179,7 @@ public abstract class RelationshipProvider {
                     properties.put(FIELD_CONTENT_REVISION, raw.getRevision());
 
                     formatted.put(SchemaField.FIELD_REFERENCE, raw.getContent().get(
-                            inverted ? REPO_FIELD_FIRST_ID : REPO_FIELD_SECOND_ID).asString());
+                            isReverse ? REPO_FIELD_FIRST_ID : REPO_FIELD_SECOND_ID).asString());
                     formatted.put(SchemaField.FIELD_PROPERTIES, properties);
 
                     // Return the resource without _id or _rev
@@ -199,23 +199,23 @@ public abstract class RelationshipProvider {
             final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
         final String propertyName;
-        final boolean inverted;
+        final boolean reverse;
 
-        if (relationshipField.getType() == SchemaField.SchemaFieldType.INVERSE_RELATIONSHIP) {
-            propertyName = relationshipField.getInversePropertyName();
-            inverted = true;
+        if (relationshipField.isReverseRelationship()) {
+            propertyName = relationshipField.getReversePropertyName();
+            reverse = true;
         } else {
             propertyName = relationshipField.getName();
-            inverted = false;
+            reverse = false;
         }
 
         if (relationshipField.isArray()) {
             return new CollectionRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(propertyName), inverted,
+                    new JsonPointer(propertyName), reverse,
                     activityLogger, managedObjectSyncService);
         } else {
             return new SingletonRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(propertyName), inverted,
+                    new JsonPointer(propertyName), reverse,
                     activityLogger, managedObjectSyncService);
         }
     }
@@ -226,15 +226,15 @@ public abstract class RelationshipProvider {
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName Name of property on first object represents the relationship
-     * @param inverted Wether or not this relationship is inverted (matching on secondId instead of first)
+     * @param isReverse Wether or not this relationship is isReverse (matching on secondId instead of first)
      */
     protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, final boolean inverted, ActivityLogger activityLogger,
+            final JsonPointer propertyName, final boolean isReverse, ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
         this.connectionFactory = connectionFactory;
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
-        this.inverted = inverted;
+        this.isReverse = isReverse;
         this.activityLogger = activityLogger;
         this.managedObjectSyncService = managedObjectSyncService;
     }
@@ -660,7 +660,7 @@ public abstract class RelationshipProvider {
             properties.remove(FIELD_CONTENT_REVISION);
         }
 
-        if (inverted) {
+        if (isReverse) {
             return json(object(
                     field(REPO_FIELD_FIRST_ID, object.get(FIELD_REFERENCE).asString()),
                     field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
