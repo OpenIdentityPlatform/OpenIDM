@@ -37,7 +37,6 @@ require.config({
     },
     paths: {
         i18next: "libs/i18next-1.7.3-min",
-        i18nGrid: "libs/i18n/grid.locale-en",
         backbone: "libs/backbone-1.1.2-min",
         "backbone.paginator": "libs/backbone.paginator.min-2.0.2-min",
         "backbone-relational": "libs/backbone-relational-0.9.0-min",
@@ -52,7 +51,6 @@ require.config({
         jquery: "libs/jquery-2.1.1-min",
         jqueryui: "libs/jquery-ui-1.11.1-min",
         jquerySortable: "libs/jquery-nestingSortable-0.9.12",
-        jqgrid: "libs/jquery.jqGrid-4.5.4-min",
         gentleSelect: "libs/jquery-gentleSelect-0.1.3.1-min",
         cron: "libs/jquery-cron-r2427",
         xdate: "libs/xdate-0.8-min",
@@ -126,9 +124,6 @@ require.config({
         },
         i18nGrid: {
             deps: ["jquery"]
-        },
-        jqgrid: {
-            deps: ["jqueryui", "i18nGrid"]
         },
         xdate: {
             exports: "xdate"
