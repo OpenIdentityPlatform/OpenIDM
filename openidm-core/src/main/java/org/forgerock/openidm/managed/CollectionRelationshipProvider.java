@@ -60,6 +60,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -334,16 +335,14 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
              * the transformed resource response.
              */
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-            final boolean queryAllIds = "query-all-ids".equals(request.getQueryId());
+            final boolean queryAllIds = ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId());
 
             if (request.getQueryId() != null) {
-                if ("query-all".equals(request.getQueryId())) {
-                    request.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
-                } else if ("query-all-ids".equals(request.getQueryId())) {
-                    queryRequest.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
+                request.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
+                if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
                     // This should be the only field ever set on queryRequest
-                    queryRequest.addField(FIELD_ID);
-                } else {
+                    request.addField(FIELD_ID);
+                } else if (!"query-all".equals(request.getQueryId())) {
                     return new BadRequestException("Invalid " + HttpUtils.PARAM_QUERY_ID + ": only query-all and query-all-ids supported").asPromise();
                 }
             }
