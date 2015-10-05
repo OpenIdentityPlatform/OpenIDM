@@ -88,7 +88,12 @@ public class BundleHandlerTest {
         assertNotNull(service.getSystemBundle());
         context = service.getSystemBundle().getBundleContext();
         setInstalledBundles(context);
-        bundleHandler = new BundleHandler(context, ARCHIVE_EXTENSION);
+        bundleHandler = new BundleHandler(context, ARCHIVE_EXTENSION, new LogHandler() {
+            @Override
+            public void log(Path filePath, Path backupPath) {
+
+            }
+        });
         bundlePath = Paths.get(service.getProjectURI().resolve("bundle/HelloWorld-1.0-SNAPSHOT.jar"));
     }
 

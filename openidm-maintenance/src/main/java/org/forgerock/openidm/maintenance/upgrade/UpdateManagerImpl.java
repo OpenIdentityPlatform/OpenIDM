@@ -588,7 +588,21 @@ public class UpdateManagerImpl implements UpdateManager {
                 String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 String installDir = IdentityServer.getInstance().getInstallLocation().toString();
 
-                BundleHandler bundleHandler = new BundleHandler(bundleContext, BUNDLE_BACKUP_EXT + timestamp);
+                BundleHandler bundleHandler = new BundleHandler(bundleContext, BUNDLE_BACKUP_EXT + timestamp,
+                        new LogHandler() {
+                            @Override
+                            public void log(Path filePath, Path backupPath) {
+                                try {
+                                    UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                                            .setFilePath(filePath.toString())
+                                            .setFileState(fileStateChecker.getCurrentFileState(filePath).name());
+                                    fileEntry.setBackupFile(backupPath.toString());
+                                    logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                                } catch (Exception e) {
+                                    logger.debug("Failed to log updated file: " + filePath.toString());
+                                }
+                            }
+                        });
 
                 for (final Path path : archive.getFiles()) {
                     if (path.startsWith(BUNDLE_PATH)) {

@@ -40,10 +40,12 @@ public class BundleHandler {
 
     private BundleContext context;
     private final String archiveExtension;
+    private final LogHandler updateLogger;
 
-    public BundleHandler(BundleContext context, final String archiveExtension) {
+    public BundleHandler(BundleContext context, final String archiveExtension, final LogHandler updateLogger) {
         this.context = context;
         this.archiveExtension = archiveExtension;
+        this.updateLogger = updateLogger;
     }
 
     /**
@@ -104,7 +106,7 @@ public class BundleHandler {
             for (Bundle b : installedBundles) {
                 Path path = getBundlePath(b);
                 Files.move(path, concatArchiveExtension(path));
-                // TODO log move
+                updateLogger.log(newBundlePath, concatArchiveExtension(path));
             }
             Files.copy(newBundlePath, oldBundlePath.getParent().resolve(newBundlePath.getFileName()));
         } catch (IOException e) {
