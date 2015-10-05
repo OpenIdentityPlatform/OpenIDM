@@ -207,8 +207,8 @@ public class ManagedObjectService implements RequestHandler {
     @Activate
     protected void activate(ComponentContext context) throws Exception {
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
-        for (JsonValue value : configuration.get("objects").expect(List.class)) {
-            final ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, value);
+        for (JsonValue managedObjectConfig : configuration.get("objects").expect(List.class)) {
+            final ManagedObjectSet objectSet = new ManagedObjectSet(scriptRegistry, cryptoService, syncRoute, connectionFactory, managedObjectConfig);
             if (managedRoutes.containsKey(objectSet.getName())) {
                 throw new ComponentException("Duplicate definition of managed object type: " + objectSet.getName());
             }

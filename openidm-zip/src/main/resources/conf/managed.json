@@ -204,9 +204,13 @@
                         "viewable" : true,
                         "searchable" : false,
                         "properties" : {
-                        	"_ref" : {
-                        	    "type" : "string"
-                        	}
+                        	"_ref" : { "type" : "string" },
+                            "_refProperties": {
+                                "type": "object",
+                                "properties": {
+                                    "_id": { "type": "string" }
+                                }
+                            }
                         },
                         "resourceCollection" : {
                             "path" : "managed/user",
@@ -295,6 +299,41 @@
                             "name",
                             "description"
                         ]
+                    },
+                    "members" : {
+                        "description" : "",
+                        "title" : "Role Members",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "inverse_relationship",
+                            "inversePropertyName": "roles",
+                            "returnByDefault" : false,
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : {
+                                "path" : "managed/user",
+                                "label" : "User",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ],
+                                    "sortKeys" : [
+                                        "userName"
+                                    ]
+                                }
+                            }
+                        }
                     },
                     "assignments" : {
                         "description" : "",

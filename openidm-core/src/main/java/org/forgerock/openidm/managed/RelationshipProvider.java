@@ -82,6 +82,9 @@ public abstract class RelationshipProvider {
 
     /** The property representing this relationship */
     protected final JsonPointer propertyName;
+
+    /** If this is an inverse relationship */
+    protected final boolean inverted;
     
     /**
      * The activity logger.
@@ -124,7 +127,7 @@ public abstract class RelationshipProvider {
      *
      * @see #FORMAT_RESPONSE_NO_EXCEPTION
      */
-    protected static final Function<ResourceResponse, ResourceResponse, ResourceException> FORMAT_RESPONSE =
+    protected final Function<ResourceResponse, ResourceResponse, ResourceException> FORMAT_RESPONSE =
             new Function<ResourceResponse, ResourceResponse, ResourceException>() {
                 @Override
                 public ResourceResponse apply(ResourceResponse resourceResponse) throws ResourceException {
@@ -160,7 +163,7 @@ public abstract class RelationshipProvider {
      *     }
      * </pre>
      */
-    protected static final Function<ResourceResponse, ResourceResponse, NeverThrowsException> FORMAT_RESPONSE_NO_EXCEPTION =
+    protected final Function<ResourceResponse, ResourceResponse, NeverThrowsException> FORMAT_RESPONSE_NO_EXCEPTION =
             new Function<ResourceResponse, ResourceResponse, NeverThrowsException>() {
                 @Override
                 public ResourceResponse apply(final ResourceResponse raw) {
@@ -174,15 +177,15 @@ public abstract class RelationshipProvider {
 
                     properties.put(FIELD_CONTENT_ID, raw.getId());
                     properties.put(FIELD_CONTENT_REVISION, raw.getRevision());
-                    
 
-                    formatted.put(SchemaField.FIELD_REFERENCE, raw.getContent().get(REPO_FIELD_SECOND_ID).asString());
+                    formatted.put(SchemaField.FIELD_REFERENCE, raw.getContent().get(
+                            inverted ? REPO_FIELD_FIRST_ID : REPO_FIELD_SECOND_ID).asString());
                     formatted.put(SchemaField.FIELD_PROPERTIES, properties);
 
                     // Return the resource without _id or _rev
                     return newResourceResponse(null, null, formatted);
                 }
-    };
+            };
 
     /**
      * Get a new {@link RelationshipProvider} instance associated with the given resource path and field
@@ -195,12 +198,25 @@ public abstract class RelationshipProvider {
     public static RelationshipProvider newProvider(final ConnectionFactory connectionFactory,
             final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
+        final String propertyName;
+        final boolean inverted;
+
+        if (relationshipField.getType() == SchemaField.SchemaFieldType.INVERSE_RELATIONSHIP) {
+            propertyName = relationshipField.getInversePropertyName();
+            inverted = true;
+        } else {
+            propertyName = relationshipField.getName();
+            inverted = false;
+        }
+
         if (relationshipField.isArray()) {
             return new CollectionRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(relationshipField.getName()), activityLogger, managedObjectSyncService);
+                    new JsonPointer(propertyName), inverted,
+                    activityLogger, managedObjectSyncService);
         } else {
             return new SingletonRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(relationshipField.getName()), activityLogger, managedObjectSyncService);
+                    new JsonPointer(propertyName), inverted,
+                    activityLogger, managedObjectSyncService);
         }
     }
 
@@ -210,13 +226,15 @@ public abstract class RelationshipProvider {
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName Name of property on first object represents the relationship
+     * @param inverted Wether or not this relationship is inverted (matching on secondId instead of first)
      */
     protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, ActivityLogger activityLogger,
+            final JsonPointer propertyName, final boolean inverted, ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
         this.connectionFactory = connectionFactory;
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
+        this.inverted = inverted;
         this.activityLogger = activityLogger;
         this.managedObjectSyncService = managedObjectSyncService;
     }
@@ -642,12 +660,21 @@ public abstract class RelationshipProvider {
             properties.remove(FIELD_CONTENT_REVISION);
         }
 
-        return json(object(
-                field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
-                field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
-                field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE).asString()),
-                field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
-        ));
+        if (inverted) {
+            return json(object(
+                    field(REPO_FIELD_FIRST_ID, object.get(FIELD_REFERENCE).asString()),
+                    field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
+                    field(REPO_FIELD_SECOND_ID, firstResourcePath.toString()),
+                    field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
+            ));
+        } else {
+            return json(object(
+                    field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
+                    field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
+                    field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE).asString()),
+                    field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
+            ));
+        }
     }
     
     /**

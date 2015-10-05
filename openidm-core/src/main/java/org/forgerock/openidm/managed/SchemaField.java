@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.managed;
 
+import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
+
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -41,7 +43,8 @@ public class SchemaField {
     /** Schema field types */
     enum SchemaFieldType {
         CORE, 
-        RELATIONSHIP
+        RELATIONSHIP,
+        INVERSE_RELATIONSHIP
     }
     
     /** The field name */
@@ -61,6 +64,9 @@ public class SchemaField {
     
     /** A boolean indicating if the field is an array */
     private boolean isArray = false;
+
+    /** Matches against firstPropertyName if this is an inverse relationship */
+    private String inversePropertyName;
     
     /**
      * Constructor
@@ -101,18 +107,32 @@ public class SchemaField {
                 this.returnByDefault = schema.get("returnByDefault").defaultTo(false).asBoolean();
             }
         }
+
+        if (!isNullOrEmpty(schema.get("inversePropertyName").asString())) {
+            this.inversePropertyName = schema.get("inversePropertyName").asString();
+        }
     }
     
     private void setType(String type) {
         if (type.equals("relationship")) {
             this.type = SchemaFieldType.RELATIONSHIP;
+        } else if (type.equals("inverse_relationship")) {
+            this.type = SchemaFieldType.INVERSE_RELATIONSHIP;
         } else if (type.equals("null")) {
             this.nullable = true;
         } else {
             this.type = SchemaFieldType.CORE;
         }
     }
-    
+
+    public SchemaFieldType getType() {
+        return type;
+    }
+
+    public String getInversePropertyName() {
+        return inversePropertyName;
+    }
+
     /**
      * Returns a boolean indicating if the field is returned by default.
      * 
@@ -128,7 +148,7 @@ public class SchemaField {
      * @return true if the field is a relationship, false otherwise.
      */
     public boolean isRelationship() {
-        return type == SchemaFieldType.RELATIONSHIP;
+        return type == SchemaFieldType.RELATIONSHIP || type == SchemaFieldType.INVERSE_RELATIONSHIP;
     }
     
     /**
