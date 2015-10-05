@@ -520,7 +520,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 return new JsonPointer(FIELD_CONTENT_REVISION);
             }
             // /_ref to /secondId
-            if (FIELD_REFERENCE.equals(field.toString())) {
+            if (FIELD_REFERENCE.equals(field)) {
                 // TODO: OPENIDM-4043 this will need to be updated with bi-directional support
                 return new JsonPointer(REPO_FIELD_SECOND_ID);
             }
