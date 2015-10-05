@@ -18,7 +18,7 @@ package org.forgerock.openidm.workflow.activiti.impl.mixin;
 import java.util.Date;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
 

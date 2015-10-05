@@ -1993,14 +1993,18 @@ class ObjectMapping {
             if (script != null) {
                 Map<String, Object> scope = new HashMap<String, Object>();
                 scope.put("linkQualifier", getLinkQualifier());
+                scope.put("mappingConfig", config);
+                String sourceId = getSourceObjectId();
+                String targetId = getTargetObjectId();
                 // TODO: Once script engine can do on-demand get replace these forced loads
-                if (getSourceObjectId() != null) {
+                if (sourceId != null) {
                     JsonValue source = getSourceObject();
                     scope.put("source", null != source ? source.getObject() : null);
                 }
-                // Target may not have ID yet, e.g. an onCreate with the target object defined,
-                // but not stored/id assigned.
-                if (isTargetLoaded() || getTargetObjectId() != null) {
+                scope.put("sourceId", sourceId);
+                
+                // Target may not have ID yet (e.g. an onCreate with the target object defined, but not stored).
+                if (isTargetLoaded() || targetId != null) {
                     if (getTargetObject() != null) {
                         scope.put("target", getTargetObject().asMap());
                         if (oldTarget != null) {
@@ -2008,6 +2012,8 @@ class ObjectMapping {
                         }
                     }
                 }
+                scope.put("targetId", targetId);
+                
                 if (situation != null) {
                     scope.put("situation", situation.toString());
                 }
@@ -2017,7 +2023,8 @@ class ObjectMapping {
                     throw toSynchronizationException(se, name, type);
                 } catch (ScriptException se) {
                     LOGGER.debug("{} script encountered exception", name + " " + type, se);
-                    throw new SynchronizationException(new InternalErrorException(name + " " + type + " script encountered exception", se));
+                    throw new SynchronizationException(
+                            new InternalErrorException(name + " " + type + " script encountered exception", se));
                 }
             }
         }
