@@ -96,7 +96,6 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
@@ -352,11 +351,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             objectTypes.entrySet()) {
 
                                         objectClassHandlers.put(entry.getKey(),
-                                                Resources.newCollection(
-                                                        new ObjectClassResourceProvider(
-                                                                entry.getKey(),
-                                                                entry.getValue(),
-                                                                objectOperations.get(entry.getKey()))));
+                                                    new ObjectClassResourceProvider(
+                                                            entry.getKey(),
+                                                            entry.getValue(),
+                                                            objectOperations.get(entry.getKey())));
                                     }
 
                                     // TODO Fix this Map
@@ -1100,7 +1098,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      *
      * @ThreadSafe
      */
-    private class ObjectClassResourceProvider implements CollectionResourceProvider {
+    private class ObjectClassResourceProvider implements RequestHandler {
 
         private final ObjectClassInfoHelper objectClassInfoHelper;
         private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
@@ -1149,28 +1147,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             return facade;
         }
 
-        @Override
-        public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
-            try {
-                switch (request.getActionAsEnum(ObjectClassAction.class)) {
-                    case authenticate:
-                        return handleAuthenticate(context, request);
-                    case liveSync:
-                        return handleLiveSync(context, request);
-                    default:
-                        throw new BadRequestException("Unsupported action: " + request.getAction());
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (IllegalArgumentException e) { // from request.getActionAsEnum
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
         private Promise<ActionResponse, ResourceException> handleAuthenticate(Context context, ActionRequest request)
                 throws IOException {
             try {
@@ -1213,14 +1189,30 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
         }
 
-        @Override
-        public Promise<ActionResponse, ResourceException> actionInstance(
-                Context context, String resourceId, ActionRequest request) {
-            return new NotSupportedException("Actions are not supported for resource instances").asPromise();
+        public Promise<ActionResponse, ResourceException> handleAction(
+                Context context, ActionRequest request) {
+            try {
+                switch (request.getActionAsEnum(ObjectClassAction.class)) {
+                    case authenticate:
+                        return handleAuthenticate(context, request);
+                    case liveSync:
+                        return handleLiveSync(context, request);
+                    default:
+                        throw new BadRequestException("Unsupported action: " + request.getAction());
+                }
+            } catch (ResourceException e) {
+                return e.asPromise();
+            } catch (JsonValueException e) {
+                return new BadRequestException(e.getMessage(), e).asPromise();
+            } catch (IllegalArgumentException e) { // from request.getActionAsEnum
+                return new BadRequestException(e.getMessage(), e).asPromise();
+            } catch (Exception e) {
+                return new InternalServerErrorException(e.getMessage(), e).asPromise();
+            }
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
+        public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
             try {
                 final ConnectorFacade facade = getConnectorFacade0(CreateApiOp.class);
                 final Set<Attribute> createAttributes =
@@ -1241,7 +1233,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 return e.asPromise();
             } catch (ConnectorException e) {
                 return adaptConnectorException(context, request, e, getSource(objectClass),
-                        objectClassInfoHelper.getCreateResourceId(request), request.getContent(), null, activityLogger)
+                        objectClassInfoHelper.getFullResourceId(request), request.getContent(), null, activityLogger)
                         .asPromise();
             } catch (JsonValueException e) {
                 return new BadRequestException(e.getMessage(), e).asPromise();
@@ -1251,9 +1243,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> deleteInstance(
-                Context context, String resourceId, DeleteRequest request) {
+        public Promise<ResourceResponse, ResourceException> handleDelete(
+                Context context, DeleteRequest request) {
+            String resourceId = objectClassInfoHelper.getFullResourceId(request);
             try {
+                if (resourceId.isEmpty()) {
+                    throw new BadRequestException(
+                            "The resource collection " + request.getResourcePath() + " cannot be deleted");
+                }
                 final ConnectorFacade facade = getConnectorFacade0(DeleteApiOp.class);
                 final Uid uid = request.getRevision() != null
                         ? new Uid(resourceId, request.getRevision())
@@ -1290,10 +1287,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> patchInstance(Context context,
-                String resourceId, PatchRequest request) {
+        public Promise<ResourceResponse, ResourceException> handlePatch(
+                Context context, PatchRequest request) {
             JsonValue beforeValue = null;
+            String resourceId = objectClassInfoHelper.getFullResourceId(request);
             try {
+                if (resourceId.isEmpty()) {
+                    throw new BadRequestException(
+                            "The resource collection " + request.getResourcePath() + " cannot be patched");
+                }
+                
                 final ConnectorFacade facade = getConnectorFacade0(UpdateApiOp.class);
                 final Uid _uid = request.getRevision() != null
                         ? new Uid(resourceId, request.getRevision())
@@ -1379,10 +1382,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
 
         @Override
-        public Promise<QueryResponse, ResourceException> queryCollection(
+        public Promise<QueryResponse, ResourceException> handleQuery(
                 final Context context, final QueryRequest request, final QueryResourceHandler handler) {
             EventEntry measure = Publisher.start(getQueryEventName( objectClass, request), request, null);
+            String resourceId = objectClassInfoHelper.getFullResourceId(request);
             try {
+                if (!resourceId.isEmpty()) {
+                    throw new BadRequestException(
+                            "The resource instance " + request.getResourcePath() + " cannot be queried");
+                }
+                
                 final ConnectorFacade facade = getConnectorFacade0(SearchApiOp.class);
                 OperationOptionsBuilder operationOptionsBuilder = operations.get(SearchApiOp.class)
                             .build(jsonConfiguration, objectClassInfoHelper);
@@ -1480,9 +1489,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> readInstance(
-                Context context, String resourceId, ReadRequest request) {
+        public Promise<ResourceResponse, ResourceException> handleRead(
+                Context context, ReadRequest request) {
+            String resourceId = objectClassInfoHelper.getFullResourceId(request);
             try {
+                if (resourceId.isEmpty()) {
+                    throw new BadRequestException(
+                            "The resource collection " + request.getResourcePath() + " cannot be read");
+                }
+
                 final ConnectorFacade facade = getConnectorFacade0(GetApiOp.class);
                 Uid uid = new Uid(resourceId);
                 ConnectorObject connectorObject = getConnectorObject(facade, uid, request.getFields());
@@ -1513,10 +1528,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
 
         @Override
-        public Promise<ResourceResponse, ResourceException> updateInstance(
-                Context context, String resourceId, UpdateRequest request) {
+        public Promise<ResourceResponse, ResourceException> handleUpdate(
+                Context context, UpdateRequest request) {
             JsonValue content = request.getContent();
+            String resourceId = objectClassInfoHelper.getFullResourceId(request);
             try {
+                if (resourceId.isEmpty()) {
+                    throw new BadRequestException(
+                            "The resource collection " + request.getResourcePath() + " cannot be updated");
+                }
+
                 final ConnectorFacade facade = getConnectorFacade0(UpdateApiOp.class);
                 final Uid _uid = request.getRevision() != null
                         ? new Uid(resourceId, request.getRevision())
@@ -1638,37 +1659,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             return facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
         }
-
-        /*
-         * public JsonValue update(Id id, String rev, JsonValue object,
-         * JsonValue params) throws Exception { OperationHelper helper =
-         * operationHelperBuilder.build(id.getObjectType(), params,
-         * cryptoService); if (allowModification &&
-         * helper.isOperationPermitted(UpdateApiOp.class)) { JsonValue newName =
-         * object.get(Resource.FIELD_CONTENT_ID); ConnectorObject
-         * connectorObject = null; Set<Attribute> attributeSet = null;
-         *
-         * //TODO support case sensitive and insensitive rename detection! if
-         * (newName.isString() &&
-         * !id.getLocalId().equals(Id.unescapeUid(newName.asString()))) { //This
-         * is a rename connectorObject = helper.build(UpdateApiOp.class,
-         * newName.asString(), object); attributeSet =
-         * AttributeUtil.filterUid(connectorObject.getAttributes()); } else {
-         * connectorObject = helper.build(UpdateApiOp.class, id.getLocalId(),
-         * object); attributeSet = new HashSet<Attribute>(); for (Attribute
-         * attribute : connectorObject.getAttributes()) { if
-         * (attribute.is(Name.NAME) || attribute.is(Uid.NAME)) { continue; }
-         * attributeSet.add(attribute); } } OperationOptionsBuilder
-         * operationOptionsBuilder =
-         * helper.getOperationOptionsBuilder(UpdateApiOp.class, connectorObject,
-         * params); Uid uid =
-         * getConnectorFacade().update(connectorObject.getObjectClass(),
-         * connectorObject.getUid(), attributeSet,
-         * operationOptionsBuilder.build()); helper.resetUid(uid, object);
-         * return object; } else {
-         * logger.debug("Operation update of {} is not permitted", id); } return
-         * null; }
-         */
     }
 
     /**
