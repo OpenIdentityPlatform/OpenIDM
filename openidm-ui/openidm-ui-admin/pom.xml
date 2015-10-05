@@ -94,14 +94,6 @@
 
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>jquery.jqGrid</artifactId>
-            <version>4.5.4</version>
-            <classifier>min</classifier>
-            <type>js</type>
-        </dependency>
-
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>jquery-nestingSortable</artifactId>
             <version>0.9.12</version>
             <type>js</type>
