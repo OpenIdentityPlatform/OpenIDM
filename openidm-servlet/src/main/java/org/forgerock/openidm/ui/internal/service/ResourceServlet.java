@@ -130,12 +130,14 @@ public final class ResourceServlet extends HttpServlet {
                 file = new File(loadDir + target);
                 if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
                     url = file.getCanonicalFile().toURI().toURL();
-                } else {
-                    res.sendError(HttpServletResponse.SC_NOT_FOUND);
                 }
             }
 
-            handle(req, res, url, target);
+            if (url == null) {
+                res.sendError(HttpServletResponse.SC_NOT_FOUND);
+            } else {
+                handle(req, res, url, target);
+            }
         }
     }
 
