@@ -26,6 +26,7 @@ package org.forgerock.openidm.provisioner.openicf.commons;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.http.util.Paths.*;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -43,8 +44,11 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -164,23 +168,31 @@ public class ObjectClassInfoHelper {
     }
 
     /**
-     * Get the resourceId from a CreateRequest
-     * @param request CreateRequest
-     * @return resourceId to be used for creating the object
+     * Get the un-encoded resourceId from the specified Request
+     * @param request Request
+     * @return resourceId to be used for CRUDPAQ operations
      */
-    public String getCreateResourceId(final CreateRequest request) {
-        String nameValue = request.getNewResourceId();
-
-        if (null == nameValue) {
-            JsonValue o = request.getContent().get(nameAttribute);
-            if (o.isNull()) {
-                o = request.getContent().get(ResourceResponse.FIELD_CONTENT_ID);
+    public String getFullResourceId(final Request request) {
+        ResourcePath fullId = request.getResourcePathObject();
+        
+        // For everything but Create requests, simply decode the resource path.
+        // If this is a Create request, construct the fullId from a concatentation
+        // of the resource path and the user spcified id if present.
+        if (request.getRequestType().equals(RequestType.CREATE)) {
+            CreateRequest cr = (CreateRequest)request;
+            String newResourceId = cr.getNewResourceId();
+            if (null == newResourceId) {
+                JsonValue o = cr.getContent().get(nameAttribute);
+                if (o.isNull()) {
+                    o = cr.getContent().get(ResourceResponse.FIELD_CONTENT_ID);
+                }
+                if (o.isString()) {
+                    newResourceId = o.asString();
+                }
             }
-            if (o.isString()) {
-                nameValue = o.asString();
-            }
+            fullId = fullId.concat(newResourceId);
         }
-        return nameValue;
+        return urlDecode(fullId.toString());
     }
 
     /**
@@ -193,7 +205,7 @@ public class ObjectClassInfoHelper {
     public Set<Attribute> getCreateAttributes(final CreateRequest request,
             final CryptoService cryptoService) throws ResourceException {
         JsonValue content = request.getContent().required().expect(Map.class);
-        String nameValue = getCreateResourceId(request);
+        String nameValue = getFullResourceId(request);
 
         Set<String> keySet = content.keys();
         Map<String,Attribute> result = new HashMap<String, Attribute>(keySet.size());
