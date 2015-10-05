@@ -291,7 +291,10 @@ public class AuthenticationService implements SingletonResourceProvider {
 
         final List<AuthenticationModuleBuilder> authModuleBuilders = new ArrayList<>();
         for (final JsonValue authModuleConfig : authModulesConfig) {
-            authModuleBuilders.add(processModuleConfiguration(authModuleConfig));
+            AuthenticationModuleBuilder moduleBuilder = processModuleConfiguration(authModuleConfig);
+            if (moduleBuilder != null) {
+                authModuleBuilders.add(moduleBuilder);
+            }
         }
 
         return AuthenticationFilter.builder()
