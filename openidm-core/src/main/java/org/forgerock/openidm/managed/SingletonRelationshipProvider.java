@@ -61,9 +61,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param propertyName      Name of property on first object represents the relationship
      */
     public SingletonRelationshipProvider(ConnectionFactory connectionFactory, ResourcePath resourcePath, 
-            JsonPointer propertyName, ActivityLogger activityLogger, 
+            JsonPointer propertyName, final boolean inverted, ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, activityLogger, managedObjectSyncService);
+        super(connectionFactory, resourcePath, propertyName, inverted, activityLogger, managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,
@@ -101,11 +101,11 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     private Promise<ResourceResponse, ResourceException> queryRelationship(Context context, String managedObjectId) {
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
-            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, managedObjectId);
+//            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, managedObjectId);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
+                    QueryFilter.equalTo(new JsonPointer(inverted ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
             ));
 

@@ -74,13 +74,13 @@ import org.slf4j.LoggerFactory;
  * A {@link RelationshipProvider} representing a collection (array) of relationships for the given field.
  */
 class CollectionRelationshipProvider extends RelationshipProvider implements CollectionResourceProvider {
-    
+
     /**
      * Setup logging for the {@link CollectionRelationshipProvider}.
      */
     private static final Logger logger = LoggerFactory.getLogger(CollectionRelationshipProvider.class);
     
-    final static QueryFilterVisitor<QueryFilter<JsonPointer>, Object, JsonPointer> VISITOR = new RelationshipQueryFilterVisitor<>();
+    final static QueryFilterVisitor<QueryFilter<JsonPointer>, Boolean, JsonPointer> VISITOR = new RelationshipQueryFilterVisitor();
 
     private final RequestHandler requestHandler;
 
@@ -91,9 +91,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param propertyName Name of property on first object represents the relationship
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, ActivityLogger activityLogger, 
+            final JsonPointer propertyName, final boolean inverted, ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, activityLogger,managedObjectSyncService);
+        super(connectionFactory, resourcePath, propertyName, inverted, activityLogger,managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("{firstId}/" + propertyName.leaf()), Resources.newCollection(this));
@@ -358,7 +358,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             }
 
             QueryFilter<JsonPointer> filter = QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
+                    QueryFilter.equalTo(new JsonPointer(inverted ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
 
             if (request.getQueryFilter() != null) {
@@ -416,71 +416,71 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * A {@link QueryFilterVisitor} implementation which modifies the {@link JsonPointer} fields by prepending them
      * with the appropriate key where the full config object is located.
      */
-    private static class RelationshipQueryFilterVisitor<P> implements QueryFilterVisitor<QueryFilter<JsonPointer>, P, JsonPointer> {
+    private static class RelationshipQueryFilterVisitor implements QueryFilterVisitor<QueryFilter<JsonPointer>, Boolean, JsonPointer> {
 
         @Override
-        public QueryFilter<JsonPointer> visitAndFilter(P parameter, List<QueryFilter<JsonPointer>> subFilters) {
+        public QueryFilter<JsonPointer> visitAndFilter(Boolean parameter, List<QueryFilter<JsonPointer>> subFilters) {
             return QueryFilter.and(visitQueryFilters(subFilters));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitBooleanLiteralFilter(P parameter, boolean value) {
+        public QueryFilter<JsonPointer> visitBooleanLiteralFilter(Boolean parameter, boolean value) {
             return value ? QueryFilter.<JsonPointer>alwaysTrue() : QueryFilter.<JsonPointer>alwaysFalse();
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitContainsFilter(P parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.contains(getRelationshipPointer(field), valueAssertion);
+        public QueryFilter<JsonPointer> visitContainsFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.contains(getRelationshipPointer(parameter, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitEqualsFilter(P parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.equalTo(getRelationshipPointer(field), valueAssertion);
+        public QueryFilter<JsonPointer> visitEqualsFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.equalTo(getRelationshipPointer(parameter, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitExtendedMatchFilter(P parameter, JsonPointer field, String operator, Object valueAssertion) {
-            return QueryFilter.comparisonFilter(getRelationshipPointer(field), operator, valueAssertion);
+        public QueryFilter<JsonPointer> visitExtendedMatchFilter(Boolean parameter, JsonPointer field, String operator, Object valueAssertion) {
+            return QueryFilter.comparisonFilter(getRelationshipPointer(parameter, field), operator, valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitGreaterThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.greaterThan(getRelationshipPointer(field), valueAssertion);
+        public QueryFilter<JsonPointer> visitGreaterThanFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.greaterThan(getRelationshipPointer(parameter, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitGreaterThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.greaterThanOrEqualTo(getRelationshipPointer(field), valueAssertion);
+        public QueryFilter<JsonPointer> visitGreaterThanOrEqualToFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.greaterThanOrEqualTo(getRelationshipPointer(parameter, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitLessThanFilter(P parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.lessThan(getRelationshipPointer(field), valueAssertion);
+        public QueryFilter<JsonPointer> visitLessThanFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.lessThan(getRelationshipPointer(parameter, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitLessThanOrEqualToFilter(P parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.lessThanOrEqualTo(getRelationshipPointer(field), valueAssertion);
+        public QueryFilter<JsonPointer> visitLessThanOrEqualToFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.lessThanOrEqualTo(getRelationshipPointer(parameter, field), valueAssertion);
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitNotFilter(P parameter, QueryFilter<JsonPointer> subFilter) {
-            return QueryFilter.not(subFilter.accept(new RelationshipQueryFilterVisitor<>(), null));
+        public QueryFilter<JsonPointer> visitNotFilter(Boolean parameter, QueryFilter<JsonPointer> subFilter) {
+            return QueryFilter.not(subFilter.accept(new RelationshipQueryFilterVisitor(), null));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitOrFilter(P parameter, List<QueryFilter<JsonPointer>> subFilters) {
+        public QueryFilter<JsonPointer> visitOrFilter(Boolean parameter, List<QueryFilter<JsonPointer>> subFilters) {
             return QueryFilter.or(visitQueryFilters(subFilters));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitPresentFilter(P parameter, JsonPointer field) {
-            return QueryFilter.present(getRelationshipPointer(field));
+        public QueryFilter<JsonPointer> visitPresentFilter(Boolean parameter, JsonPointer field) {
+            return QueryFilter.present(getRelationshipPointer(parameter, field));
         }
 
         @Override
-        public QueryFilter<JsonPointer> visitStartsWithFilter(P parameter, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.startsWith(getRelationshipPointer(field), valueAssertion);
+        public QueryFilter<JsonPointer> visitStartsWithFilter(Boolean parameter, JsonPointer field, Object valueAssertion) {
+            return QueryFilter.startsWith(getRelationshipPointer(parameter, field), valueAssertion);
         }
 
         /**
@@ -509,7 +509,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
          * @param field a {@link JsonPointer} representing the field to modify.
          * @return a {@link JsonPointer} representing the modified field
          */
-        private JsonPointer getRelationshipPointer(JsonPointer field) {
+        private JsonPointer getRelationshipPointer(Boolean isReverse, JsonPointer field) {
             // /_revProperties/_id to /_id
             if (FIELD_ID.equals(field)) {
                 return new JsonPointer(FIELD_CONTENT_ID);
@@ -518,11 +518,20 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             if (FIELD_REV.equals(field)) {
                 return new JsonPointer(FIELD_CONTENT_REVISION);
             }
-            // /_ref to /secondId
-            if (FIELD_REFERENCE.equals(field)) {
-                // TODO: OPENIDM-4043 this will need to be updated with bi-directional support
-                return new JsonPointer(REPO_FIELD_SECOND_ID);
+
+            if (isReverse) {
+                // /_ref to /firstId
+                if (FIELD_REFERENCE.equals(field)) {
+                    return new JsonPointer(REPO_FIELD_FIRST_ID);
+                }
+            } else {
+                // /_ref to /secondId
+                if (FIELD_REFERENCE.equals(field)) {
+                    return new JsonPointer(REPO_FIELD_SECOND_ID);
+                }
             }
+
+            // /_ref to /secondId
             // /_refProperties/... to /properties/...
             if (FIELD_PROPERTIES.leaf().equals(field.get(0))) {
                 JsonPointer ptr = new JsonPointer(REPO_FIELD_PROPERTIES);
