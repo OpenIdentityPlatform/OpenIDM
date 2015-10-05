@@ -306,8 +306,9 @@
                         "viewable" : true,
                         "type" : "array",
                         "items" : {
-                            "type" : "inverse_relationship",
-                            "inversePropertyName": "roles",
+                            "type" : "relationship",
+                            "reverseRelationship": true,
+                            "reversePropertyName": "roles",
                             "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : { "type" : "string" },

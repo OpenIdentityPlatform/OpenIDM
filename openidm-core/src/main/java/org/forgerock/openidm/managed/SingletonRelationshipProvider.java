@@ -61,9 +61,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param propertyName      Name of property on first object represents the relationship
      */
     public SingletonRelationshipProvider(ConnectionFactory connectionFactory, ResourcePath resourcePath, 
-            JsonPointer propertyName, final boolean inverted, ActivityLogger activityLogger,
+            JsonPointer propertyName, final boolean isReverse, ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, inverted, activityLogger, managedObjectSyncService);
+        super(connectionFactory, resourcePath, propertyName, isReverse, activityLogger, managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,
@@ -105,7 +105,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(inverted ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
+                    QueryFilter.equalTo(new JsonPointer(isReverse ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
             ));
 
