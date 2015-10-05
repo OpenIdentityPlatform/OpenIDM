@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.ExecutionException;
 
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonPointer;
@@ -47,7 +46,6 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -89,9 +87,12 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName Name of property on first object represents the relationship
+     * @param isReverse If this provider represents a reverse relationship
+     * @param activityLogger The audit activity logger to use
+     * @param managedObjectSyncService Service to send sync events to
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, final boolean isReverse, ActivityLogger activityLogger,
+            final JsonPointer propertyName, final boolean isReverse, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
         super(connectionFactory, resourcePath, propertyName, isReverse, activityLogger,managedObjectSyncService);
 
@@ -506,6 +507,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
          * Converts /_ref to /secondId
          * Converts /_refProperties/... to /properties/...
          *
+         * @param isReverse Whether or not this is a reverse relationship
          * @param field a {@link JsonPointer} representing the field to modify.
          * @return a {@link JsonPointer} representing the modified field
          */
@@ -519,19 +521,11 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 return new JsonPointer(FIELD_CONTENT_REVISION);
             }
 
-            if (isReverse) {
-                // /_ref to /firstId
-                if (FIELD_REFERENCE.equals(field)) {
-                    return new JsonPointer(REPO_FIELD_FIRST_ID);
-                }
-            } else {
-                // /_ref to /secondId
-                if (FIELD_REFERENCE.equals(field)) {
-                    return new JsonPointer(REPO_FIELD_SECOND_ID);
-                }
+            // /_ref to /firstId or /secondId
+            if (FIELD_REFERENCE.equals(field)) {
+                return new JsonPointer(isReverse ? REPO_FIELD_FIRST_ID : REPO_FIELD_SECOND_ID);
             }
 
-            // /_ref to /secondId
             // /_refProperties/... to /properties/...
             if (FIELD_PROPERTIES.leaf().equals(field.get(0))) {
                 JsonPointer ptr = new JsonPointer(REPO_FIELD_PROPERTIES);
