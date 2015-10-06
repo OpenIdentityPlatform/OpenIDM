@@ -59,18 +59,19 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath      Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName      Name of property on first object represents the relationship
+     * @param uriPropertyName   Property name used on the URI for nested routes
      * @param isReverse If this provider represents a reverse relationship
      * @param activityLogger The audit activity logger to use
      * @param managedObjectSyncService Service to send sync events to
      */
     public SingletonRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath,
-            final JsonPointer propertyName, final boolean isReverse, final ActivityLogger activityLogger,
+            final JsonPointer propertyName, final String uriPropertyName, final boolean isReverse, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
         super(connectionFactory, resourcePath, propertyName, isReverse, activityLogger, managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,
-                uriTemplate(String.format("{%s}/%s", URI_PARAM_FIRST_ID, propertyName.leaf())),
+                uriTemplate(String.format("{%s}/%s", URI_PARAM_FIRST_ID, uriPropertyName)),
                 Resources.newSingleton(this));
         this.requestHandler = router;
     }

@@ -211,11 +211,11 @@ public abstract class RelationshipProvider {
 
         if (relationshipField.isArray()) {
             return new CollectionRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(propertyName), reverse,
+                    new JsonPointer(propertyName), relationshipField.getName(), reverse,
                     activityLogger, managedObjectSyncService);
         } else {
             return new SingletonRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(propertyName), reverse,
+                    new JsonPointer(propertyName), relationshipField.getName(), reverse,
                     activityLogger, managedObjectSyncService);
         }
     }
