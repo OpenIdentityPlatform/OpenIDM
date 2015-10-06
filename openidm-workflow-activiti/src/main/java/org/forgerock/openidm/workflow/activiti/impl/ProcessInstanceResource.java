@@ -56,6 +56,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
@@ -128,7 +129,8 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             Map<String, Object> variables = ActivitiUtil.getRequestBodyFromRequest(request);
             // Wrap the current CREST context in a special-purpose ActivitiContext so we can be sure of what
             // we are deserializing later.
-            variables.put(ActivitiConstants.OPENIDM_CONTEXT, new ActivitiContext(context).toJsonValue());
+            // Build custom context chain for Activiti
+            variables.put(ActivitiConstants.OPENIDM_CONTEXT, buildActivitiContext(context).toJsonValue());
             ProcessInstance instance;
             if (processDefinitionId == null) {
                 instance = processEngine.getRuntimeService().startProcessInstanceByKey(key, businessKey, variables);
@@ -152,6 +154,21 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
         } catch (Exception ex) {
             return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
         }
+    }
+
+    /**
+     * Store minimal context for Activiti workflows.  Copy root context id and security context details.
+     *
+     * @param context the requesting context
+     * @return a stripped-down context for workflow serialization
+     */
+    private Context buildActivitiContext(Context context) {
+        final RootContext root = context.asContext(RootContext.class);
+        final SecurityContext security = context.asContext(SecurityContext.class);
+
+        return new ActivitiContext(
+                new SecurityContext(
+                        new RootContext(root.getId()), security.getAuthenticationId(), security.getAuthorization()));
     }
 
     @Override
