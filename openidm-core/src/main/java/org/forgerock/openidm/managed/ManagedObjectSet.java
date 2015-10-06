@@ -924,6 +924,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                             return false;
                         }
                     }
+                    // Populate the relationship fields
+                    try {
+                        JsonValue relationships = fetchRelationshipFields(context, resource.getId());
+                        resource.getContent().asMap().putAll(relationships.asMap());
+                    } catch (ResourceException e) {
+                        ex[0] = e;
+                        return false;
+                    } catch (Exception e) {
+                        ex[0] = new InternalServerErrorException(e.getMessage(), e);
+                        return false;
+                    }
                     results.add(resource.getContent().asMap());
                     return handler.handleResource(prepareResponse(context, resource, request.getFields()));
                 }
