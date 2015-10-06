@@ -592,34 +592,33 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                 }, this));
 
                 if (!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")) {
-                    _.chain(currConnectors)
-                        .each(function(connector) {
-                            _.each(connector.objectTypes, function(objType) {
-                                var objTypeMap = {
-                                        name: connector.name,
-                                        fullName: "system/" + connector.name + "/" + objType
-                                    },
-                                    getProps = function(){
-                                        return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector) {
-                                            return connector.objectTypes[objType].properties;
-                                        });
-                                    };
-
-                                if (this.getCurrentMapping().source === objTypeMap.fullName) {
-                                    getProps().then(function(props){
-                                        objTypeMap.properties = _.keys(props).sort();
-                                        sourceProm.resolve(objTypeMap);
+                    _.each(currConnectors, function(connector) {
+                        _.each(connector.objectTypes, function(objType) {
+                            var objTypeMap = {
+                                    name: connector.name,
+                                    fullName: "system/" + connector.name + "/" + objType
+                                },
+                                getProps = function(){
+                                    return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector) {
+                                        return connector.objectTypes[objType].properties;
                                     });
-                                }
-                                if (this.getCurrentMapping().target === objTypeMap.fullName) {
-                                    getProps().then(_.bind(function(props) {
-                                        this.data.requiredProperties = _.keys(_.omit(props, function(val) { return !val.required; }));
-                                        objTypeMap.properties = _.keys(props).sort();
-                                        targetProm.resolve(objTypeMap);
-                                    }, this));
-                                }
-                            }, this);
+                                };
+
+                            if (this.getCurrentMapping().source === objTypeMap.fullName) {
+                                getProps().then(function(props){
+                                    objTypeMap.properties = _.keys(props).sort();
+                                    sourceProm.resolve(objTypeMap);
+                                });
+                            }
+                            if (this.getCurrentMapping().target === objTypeMap.fullName) {
+                                getProps().then(_.bind(function(props) {
+                                    this.data.requiredProperties = _.keys(_.omit(props, function(val) { return !val.required; }));
+                                    objTypeMap.properties = _.keys(props).sort();
+                                    targetProm.resolve(objTypeMap);
+                                }, this));
+                            }
                         }, this);
+                    }, this);
                 }
 
                 return $.when(sourceProm,targetProm).then(function(source,target) {
