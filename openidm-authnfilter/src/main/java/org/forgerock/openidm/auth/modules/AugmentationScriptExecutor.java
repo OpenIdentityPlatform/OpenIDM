@@ -68,7 +68,7 @@ class AugmentationScriptExecutor {
             script.put("properties", properties);
             JsonValue security = new JsonValue(new HashMap<String, Object>(2));
             security.put(SecurityContextMapper.AUTHENTICATION_ID, securityContextMapper.getAuthenticationId());
-            security.put(SecurityContextMapper.AUTHORIZATION_ID, securityContextMapper.getAuthorizationId());
+            security.put(SecurityContextMapper.AUTHORIZATION, securityContextMapper.getAuthorizationId());
             script.put("security", security);
 
             // expect updated security context
@@ -78,8 +78,8 @@ class AugmentationScriptExecutor {
             if (!updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).isNull()) {
                 securityContextMapper.setAuthenticationId(updatedSecurityContext.get(SecurityContextMapper.AUTHENTICATION_ID).asString());
             }
-            if (!updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).isNull()) {
-                securityContextMapper.setAuthorizationId((updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION_ID).asMap()));
+            if (!updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION).isNull()) {
+                securityContextMapper.setAuthorizationId((updatedSecurityContext.get(SecurityContextMapper.AUTHORIZATION).asMap()));
             }
         } catch (ScriptThrownException e) {
             final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
