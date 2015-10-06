@@ -72,10 +72,9 @@ public class AuthFilterWrapper implements Filter {
      * @param filter the auth filter to wrap
      */
     synchronized void setFilter(Filter filter) {
-        if (filter == null) {
-            this.filter = PASSTHROUGH_FILTER;
-        }
-        this.filter = filter;
+        this.filter = (filter == null)
+                ? PASSTHROUGH_FILTER
+                : filter;
     }
 
     /**
