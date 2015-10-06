@@ -45,7 +45,7 @@ import org.forgerock.json.resource.http.SecurityContextFactory;
 class SecurityContextMapper {
 
     public static final String AUTHENTICATION_ID = "authenticationId";
-    public static final String AUTHORIZATION_ID = "authorizationId";
+    public static final String AUTHORIZATION = "authorization";
 
     /** the MessageInfo auth context-backing map */
     private Map messageInfoMap;
@@ -63,7 +63,7 @@ class SecurityContextMapper {
         // create the JsonValue auth-data wrapper around the AUTHCID value
         authData = json(object(field(AUTHENTICATION_ID, messageInfoMap.get(SecurityContextFactory.ATTRIBUTE_AUTHCID))));
         // and the auth context map
-        authData.put(AUTHORIZATION_ID, contextMap);
+        authData.put(AUTHORIZATION, contextMap);
     }
 
     /**
@@ -97,44 +97,44 @@ class SecurityContextMapper {
      * @return the SecurityContextMapper
      */
     SecurityContextMapper setAuthorizationId(Map<String, Object> authorizationId) {
-        authData.put(AUTHORIZATION_ID, authorizationId);
+        authData.put(AUTHORIZATION, authorizationId);
         messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, authorizationId);
         return this;
     }
 
     SecurityContextMapper setUserId(String userId) {
-        authData.get(AUTHORIZATION_ID).put(AUTHZID_ID, userId);
+        authData.get(AUTHORIZATION).put(AUTHZID_ID, userId);
         return this;
     }
 
     String getUserId() {
-        return authData.get(AUTHORIZATION_ID).get(AUTHZID_ID).asString();
+        return authData.get(AUTHORIZATION).get(AUTHZID_ID).asString();
     }
 
     SecurityContextMapper setResource(String resource) {
-        authData.get(AUTHORIZATION_ID).put(AUTHZID_COMPONENT, resource);
+        authData.get(AUTHORIZATION).put(AUTHZID_COMPONENT, resource);
         return this;
     }
 
     String getResource() {
-        return authData.get(AUTHORIZATION_ID).get(AUTHZID_COMPONENT).asString();
+        return authData.get(AUTHORIZATION).get(AUTHZID_COMPONENT).asString();
     }
 
     SecurityContextMapper setRoles(List<String> roles) {
-        authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, new ArrayList<String>(roles));
+        authData.get(AUTHORIZATION).put(AUTHZID_ROLES, new ArrayList<String>(roles));
         return this;
     }
 
     SecurityContextMapper addRole(String role) {
-        if (authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).isNull()) {
-            authData.get(AUTHORIZATION_ID).put(AUTHZID_ROLES, new ArrayList<String>());
+        if (authData.get(AUTHORIZATION).get(AUTHZID_ROLES).isNull()) {
+            authData.get(AUTHORIZATION).put(AUTHZID_ROLES, new ArrayList<String>());
         }
-        authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES).add(role);
+        authData.get(AUTHORIZATION).get(AUTHZID_ROLES).add(role);
         return this;
     }
 
     List<String> getRoles() {
-        return Collections.unmodifiableList(authData.get(AUTHORIZATION_ID).get(AUTHZID_ROLES)
+        return Collections.unmodifiableList(authData.get(AUTHORIZATION).get(AUTHZID_ROLES)
                 .defaultTo(new ArrayList<String>()).asList(String.class));
     }
 
@@ -143,7 +143,7 @@ class SecurityContextMapper {
     }
 
     Map<String, Object> getAuthorizationId() {
-        return Collections.unmodifiableMap(authData.get(AUTHORIZATION_ID).asMap());
+        return Collections.unmodifiableMap(authData.get(AUTHORIZATION).asMap());
     }
 
     JsonValue asJsonValue() {
