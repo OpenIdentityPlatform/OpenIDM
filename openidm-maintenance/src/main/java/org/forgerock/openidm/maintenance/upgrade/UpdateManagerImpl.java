@@ -586,17 +586,19 @@ public class UpdateManagerImpl implements UpdateManager {
 
             try {
                 String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
-                String installDir = IdentityServer.getInstance().getInstallLocation().toString();
+                final String installDir = IdentityServer.getInstance().getInstallLocation().toString();
 
                 BundleHandler bundleHandler = new BundleHandler(bundleContext, BUNDLE_BACKUP_EXT + timestamp,
                         new LogHandler() {
                             @Override
                             public void log(Path filePath, Path backupPath) {
                                 try {
+                                    Path newPath = Paths.get(filePath.toString().substring(
+                                            tempDirectory.toString().length() + "/openidm/".length()));
                                     UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                            .setFilePath(filePath.toString())
-                                            .setFileState(fileStateChecker.getCurrentFileState(filePath).name());
-                                    fileEntry.setBackupFile(backupPath.toString());
+                                            .setFilePath(newPath.toString())
+                                            .setFileState(fileStateChecker.getCurrentFileState(newPath).name());
+                                    fileEntry.setBackupFile(backupPath.toString().substring(installDir.length() + 1));
                                     logUpdate(updateEntry.addFile(fileEntry.toJson()));
                                 } catch (Exception e) {
                                     logger.debug("Failed to log updated file: " + filePath.toString());

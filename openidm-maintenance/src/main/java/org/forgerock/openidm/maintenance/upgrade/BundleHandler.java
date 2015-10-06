@@ -105,8 +105,8 @@ public class BundleHandler {
             Path oldBundlePath = getBundlePath(installedBundles.get(0));
             for (Bundle b : installedBundles) {
                 Path path = getBundlePath(b);
-                Files.move(path, concatArchiveExtension(path));
                 updateLogger.log(newBundlePath, concatArchiveExtension(path));
+                Files.move(path, concatArchiveExtension(path));
             }
             Files.copy(newBundlePath, oldBundlePath.getParent().resolve(newBundlePath.getFileName()));
         } catch (IOException e) {
