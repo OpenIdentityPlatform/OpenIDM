@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -63,14 +55,17 @@ import difflib.Patch;
 import net.lingala.zip4j.core.ZipFile;
 import net.lingala.zip4j.exception.ZipException;
 import org.apache.commons.io.FileUtils;
+import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.commons.launcher.OSGiFrameworkService;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -86,7 +81,11 @@ import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.service.component.ComponentContext;
+import org.osgi.util.tracker.ServiceTracker;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -134,6 +133,26 @@ public class UpdateManagerImpl implements UpdateManager {
         IN_PROGRESS,
         COMPLETE,
         FAILED
+    }
+
+    /** The OSGiFramework Service **/
+    protected OSGiFrameworkService osgiFrameworkService;
+
+    @Activate
+    void activate(ComponentContext compContext) throws Exception {
+        logger.debug("Activating UpdateManagerImpl {}", compContext.getProperties());
+        BundleContext bundleContext = compContext.getBundleContext();
+        Filter filter = bundleContext
+                .createFilter("(" + Constants.OBJECTCLASS + "=org.forgerock.commons.launcher.OSGiFramework)");
+        ServiceTracker serviceTracker = new ServiceTracker(bundleContext, filter, null);
+        serviceTracker.open(true);
+        this.osgiFrameworkService = (OSGiFrameworkService) serviceTracker.getService();
+
+        if (osgiFrameworkService != null) {
+            logger.debug("Obtained OSGiFrameworkService", compContext.getProperties());
+        } else {
+            throw new InternalServerErrorException("Cannot instantiate service without OSGiFrameworkService");
+        }
     }
 
     /** The update logging service */
@@ -434,8 +453,8 @@ public class UpdateManagerImpl implements UpdateManager {
      * {@inheritDoc}
      */
     @Override
-    public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName,
-            final BundleContext bundleContext) throws UpdateException {
+    public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName)
+            throws UpdateException {
 
         final Properties prop = readProperties(archiveFile.toFile());
         if (!"OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT)) ||
@@ -466,7 +485,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 }
 
                 updateThread = new UpdateThread(updateEntry, archive, fileStateChecker, installDir, prop,
-                        tempUnzipDir, bundleContext);
+                        tempUnzipDir);
                 updateThread.start();
 
                 return updateEntry.toJson();
@@ -510,7 +529,11 @@ public class UpdateManagerImpl implements UpdateManager {
     public void restartNow() {
         restartImmediately.set(true);
         if (updateThread == null) {
-            new UpdateThread().restart();
+            try {
+                new UpdateThread().restart();
+            } catch (BundleException e) {
+                logger.debug("Failed to restart!", e);
+            }
         }
     }
 
@@ -552,7 +575,6 @@ public class UpdateManagerImpl implements UpdateManager {
         private final StaticFileUpdate staticFileUpdate;
         private final Properties updateProperties;
         private final Path tempDirectory;
-        private final BundleContext bundleContext;
         private final long timestamp = new Date().getTime();
 
         public UpdateThread() {
@@ -562,17 +584,15 @@ public class UpdateManagerImpl implements UpdateManager {
             this.staticFileUpdate = null;
             this.updateProperties = null;
             this.tempDirectory = null;
-            this.bundleContext = null;
         }
 
         public UpdateThread(UpdateLogEntry updateEntry, Archive archive, FileStateChecker fileStateChecker,
-                Path installDir, Properties updateProperties, Path tempDirectory, BundleContext bundleContext) {
+                Path installDir, Properties updateProperties, Path tempDirectory) {
             this.updateEntry = updateEntry;
             this.archive = archive;
             this.fileStateChecker = fileStateChecker;
             this.updateProperties = updateProperties;
             this.tempDirectory = tempDirectory;
-            this.bundleContext = bundleContext;
 
             this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
                     archive, new ProductVersion(ServerConstants.getVersion(),
@@ -588,7 +608,8 @@ public class UpdateManagerImpl implements UpdateManager {
                 String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 final String installDir = IdentityServer.getInstance().getInstallLocation().toString();
 
-                BundleHandler bundleHandler = new BundleHandler(bundleContext, BUNDLE_BACKUP_EXT + timestamp,
+                BundleHandler bundleHandler = new BundleHandler(
+                        osgiFrameworkService.getSystemBundle().getBundleContext(), BUNDLE_BACKUP_EXT + timestamp,
                         new LogHandler() {
                             @Override
                             public void log(Path filePath, Path backupPath) {
@@ -670,6 +691,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 logUpdate(updateEntry.setEndDate(getDateString())
                         .setStatus(UpdateStatus.COMPLETE)
                         .setStatusMessage("Update complete."));
+
             } catch (Exception e) {
                 try {
                     logUpdate(updateEntry.setEndDate(getDateString())
@@ -689,11 +711,15 @@ public class UpdateManagerImpl implements UpdateManager {
             }
 
             if (Boolean.valueOf(updateProperties.getProperty(PROP_RESTARTREQUIRED).toUpperCase())) {
-                restart();
+                try {
+                    restart();
+                } catch (BundleException e) {
+                    logger.debug("Failed to restart!", e);
+                }
             }
         }
 
-        protected void restart() {
+        protected void restart() throws BundleException {
             long timeout = System.currentTimeMillis() + 30000;
             try {
                 do {
@@ -702,8 +728,8 @@ public class UpdateManagerImpl implements UpdateManager {
             } catch (Exception e) {
                 // restart now
             }
-
-            // TODO restart
+            // Send updated FrameworkEvent
+            osgiFrameworkService.getSystemBundle().update();
         }
 
         /**

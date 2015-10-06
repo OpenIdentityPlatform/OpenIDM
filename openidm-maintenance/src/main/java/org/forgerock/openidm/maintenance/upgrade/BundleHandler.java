@@ -38,12 +38,13 @@ public class BundleHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(BundleHandler.class);
 
-    private BundleContext context;
     private final String archiveExtension;
     private final LogHandler updateLogger;
+    private BundleContext systemBundleContext;
 
-    public BundleHandler(BundleContext context, final String archiveExtension, final LogHandler updateLogger) {
-        this.context = context;
+    public BundleHandler(BundleContext systemBundleContext, final String archiveExtension,
+        final LogHandler updateLogger) {
+        this.systemBundleContext = systemBundleContext;
         this.archiveExtension = archiveExtension;
         this.updateLogger = updateLogger;
     }
@@ -142,7 +143,7 @@ public class BundleHandler {
      */
     private List<Bundle> getBundles(final String symbolicName) {
         List<Bundle> bundle = new ArrayList<>();
-        for (Bundle b : context.getBundles()) {
+        for (Bundle b : systemBundleContext.getBundles()) {
             if (symbolicName.equalsIgnoreCase(b.getSymbolicName())) {
                 logger.debug("Found bundle {} version : {}", symbolicName, b.getVersion());
                 bundle.add(b);
@@ -197,7 +198,7 @@ public class BundleHandler {
      */
     public void installBundle(Path path) throws UpdateException {
         try {
-            context.installBundle(path.toUri().toString());
+            systemBundleContext.installBundle(path.toUri().toString());
         } catch (BundleException e) {
             throw new UpdateException("Cannot install bundle " + path.toUri().toString(), e);
         }

@@ -113,13 +113,23 @@ echo $$ > "$OPENIDM_PID_FILE"
 cd "$PRGDIR"
 
 # start in normal mode
-exec java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
-	-Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
-	-classpath "$CLASSPATH" \
-	-Dopenidm.system.server.root="$OPENIDM_HOME" \
-	-Djava.awt.headless=true \
-	org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS
+MODE=0;
+# start in normal mode
+function START_IDM {
+(java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
+        -Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \
+        -classpath "$CLASSPATH" \
+        -Dopenidm.system.server.root="$OPENIDM_HOME" \
+        -Djava.awt.headless=true \
+        org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS)
+  MODE=$?;
+}
+
+while
+   START_IDM;
+   (($MODE == 255)); #Exit status out of range, exit -1
+do
+   continue;
+done
 
 # org.forgerock.commons.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
-
-cd -
