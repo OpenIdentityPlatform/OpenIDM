@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -87,6 +87,12 @@
             <artifactId>org.apache.felix.scr</artifactId>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>launcher</artifactId>
+            <version>1.1.1-SNAPSHOT</version>
+            <scope>provided</scope>
+        </dependency>
 
         <!-- Test Dependencies -->
         <dependency>
@@ -102,12 +108,6 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>launcher</artifactId>
-            <version>1.1.0</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -177,10 +177,10 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
+                        <Import-Package>org.forgerock.commons.launcher;version="[0,1]",*</Import-Package>
                         <Export-Package>
                             org.forgerock.openidm.maintenance;version="${project.version}"
                         </Export-Package>
-                        <Main-Class>org.forgerock.openidm.maintenance.Main</Main-Class>
                     </instructions>
                 </configuration>
             </plugin>

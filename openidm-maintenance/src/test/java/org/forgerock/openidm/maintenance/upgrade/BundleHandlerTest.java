@@ -31,8 +31,6 @@ public class BundleHandlerTest {
 
     private String[] arguments;
 
-    private BundleContext context;
-
     private OSGiFrameworkService service;
 
     private BundleHandler bundleHandler;
@@ -44,14 +42,14 @@ public class BundleHandlerTest {
 
     private Map<String, Bundle> installedBundles = new HashMap<String, Bundle>();
 
-    private void setInstalledBundles(BundleContext context) {
-        for (Bundle bundle : context.getBundles()) {
+    private void setInstalledBundles() {
+        for (Bundle bundle : service.getSystemBundle().getBundleContext().getBundles()) {
             installedBundles.put(bundle.getLocation(), bundle);
         }
     }
 
-    private void updateInstalledBundles(BundleContext context) {
-        for (Bundle bundle : context.getBundles()) {
+    private void updateInstalledBundles() {
+        for (Bundle bundle : service.getSystemBundle().getBundleContext().getBundles()) {
             installedBundles.put(bundle.getLocation(), bundle);
         }
     }
@@ -86,9 +84,9 @@ public class BundleHandlerTest {
         service.start();
         System.out.println("Framework Started - OK");
         assertNotNull(service.getSystemBundle());
-        context = service.getSystemBundle().getBundleContext();
-        setInstalledBundles(context);
-        bundleHandler = new BundleHandler(context, ARCHIVE_EXTENSION, new LogHandler() {
+        setInstalledBundles();
+        bundleHandler = new BundleHandler(service.getSystemBundle().getBundleContext(), ARCHIVE_EXTENSION,
+                new LogHandler() {
             @Override
             public void log(Path filePath, Path backupPath) {
 
@@ -110,12 +108,12 @@ public class BundleHandlerTest {
 
     private void uninstallBundle(Bundle bundle) throws Exception {
         bundleHandler.uninstallBundle(bundle);
-        updateInstalledBundles(context);
+        updateInstalledBundles();
     }
 
     private Bundle installBundle(Path path) throws Exception {
         bundleHandler.installBundle(path);
-        updateInstalledBundles(context);
+        updateInstalledBundles();
         return installedBundles.get(path.toUri().toString());
     }
 
