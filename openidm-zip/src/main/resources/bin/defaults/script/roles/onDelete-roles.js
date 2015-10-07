@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -22,18 +22,14 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/** 
+/**
  * Prevents roles from being deleted that are currently assigned to users
  */
 
-var users,
-    query = {
-        "_queryId": "get-users-of-direct-role", 
-        "role": "managed/role/" + object._id
-    };
+/*global object */
 
-// Query users of role
-users = openidm.query("managed/user", query).result;
+// Query members of a role
+var users = openidm.query("managed/role/" + object._id + "/members", {"_queryFilter": "true"}, ["*"]).result;
 
 if (users.length > 0) {
     throw {

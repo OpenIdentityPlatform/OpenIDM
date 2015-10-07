@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -22,18 +22,17 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-var users,
-    query = {
-        "_queryId": "get-users-of-direct-role", 
-        "role": resourceName.toString()
-    };
+/*global resourceName */
 
+// Don't bother querying for members if the resourceName is simply "managed/role", because
+// that would only be the case when this is a new role being created with a server-assigned _id;
+// in that case, there will never be existing members.
+if (!resourceName.toString().equals("managed/role")) {
+    var users = openidm.query(resourceName.toString() +'/members', {'_queryFilter': 'true'}, ['*']).result;
 
-// Query users of role
-users = openidm.query("managed/user", query).result;
-
-for (var i = 0; i < users.length; i++) {
-    var user = users[i];
-    logger.debug("Trigger sync check for user: {}", user);
-    openidm.action("managed/user/" + user._id, "triggerSyncCheck", {}, {});
+    for (var i = 0; i < users.length; i++) {
+        var user = users[i];
+        logger.debug("Trigger sync check for user: {}", user);
+        openidm.action("managed/user/" + user._id, "triggerSyncCheck", {}, {});
+    }
 }
