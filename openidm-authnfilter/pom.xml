@@ -70,10 +70,6 @@
         <!-- Forgerock commons dependencies -->
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-auth-filter-common</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-jaspi-iwa-module</artifactId>
         </dependency>
         <dependency>
