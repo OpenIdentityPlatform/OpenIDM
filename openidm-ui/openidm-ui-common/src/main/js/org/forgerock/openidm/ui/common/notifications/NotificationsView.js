@@ -76,15 +76,6 @@ define("org/forgerock/openidm/ui/common/notifications/NotificationsView", [
 
             notificationDelegate.deleteEntity(notificationId, _.bind(function() {
                     $(event.target).parents(".list-group-item").remove();
-
-                    this.data.notifications = _.filter(this.data.notifications, function(notification){
-                        return notificationId !== notification.id;
-                    }, this);
-
-                    self.render({
-                        "el" : self.$el,
-                        "notifications" : this.data.notifications
-                    });
                 }, this),
                 function() {
                     eventManager.sendEvent(constants.EVENT_NOTIFICATION_DELETE_FAILED);
