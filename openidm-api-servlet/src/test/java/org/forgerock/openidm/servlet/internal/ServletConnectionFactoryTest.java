@@ -41,6 +41,7 @@ import java.util.ServiceLoader;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
+import org.forgerock.openidm.servlet.MaintenanceFilterWrapper;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
@@ -106,8 +107,8 @@ public class ServletConnectionFactoryTest {
         filterService.bindRequestHandler(requestHandler);
         filterService.bindScriptRegistry(sr);
         filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.bindMaintenanceFilterWrapper(new MaintenanceFilterWrapper());
         filterService.activate(mock(ComponentContext.class));
-
         testable = filterService.getConnection();
     }
 

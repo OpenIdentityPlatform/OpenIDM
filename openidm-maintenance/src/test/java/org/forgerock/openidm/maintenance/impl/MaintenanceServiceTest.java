@@ -25,25 +25,41 @@ package org.forgerock.openidm.maintenance.impl;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
-import java.util.Dictionary;
-import java.util.List;
+import java.io.File;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.ServiceLoader;
 
-import org.apache.felix.scr.Component;
-import org.apache.felix.scr.Reference;
-import org.apache.felix.scr.ScrService;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.MemoryBackend;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.ServiceUnavailableException;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.servlet.MaintenanceFilterWrapper;
+import org.forgerock.openidm.servlet.internal.ServletConnectionFactory;
+import org.forgerock.script.engine.ScriptEngineFactory;
+import org.forgerock.script.registry.ScriptRegistryImpl;
+import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.resource.Router;
 import org.forgerock.http.routing.RoutingMode;
-import org.osgi.framework.Bundle;
-import org.osgi.service.component.ComponentInstance;
-import org.testng.annotations.BeforeMethod;
+import org.osgi.service.component.ComponentContext;
+import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import javax.script.Bindings;
+import javax.script.SimpleBindings;
 
 /**
  * Test the Maintenance Service
@@ -52,212 +68,66 @@ public class MaintenanceServiceTest {
     
     private MaintenanceService maintenanceService = new MaintenanceService();
     
-    private Router router = new Router();
-    private final Connection connection = Resources.newInternalConnection(router);
+    private Connection connection = null;
 
-    @BeforeMethod
-    public void setUp() {
-        List<Component> testComponents = new ArrayList<Component>();
-        testComponents.add(new TestComponent(1, "test.component.one"));
-        testComponents.add(new TestComponent(2, "test.component.two"));
-        testComponents.add(new TestComponent(3, "test.component.three"));
-        maintenanceService.scrService = new TestScrService(testComponents);
-        maintenanceService.setMaintenanceModeComponents(new String[] {
-                "test.component.one",
-                "test.component.two"
-        });
-        router.addRoute(RoutingMode.EQUALS, uriTemplate("maintenance"), maintenanceService);
+    @BeforeClass
+    public void BeforeClass() throws Exception {
+
+        URL config = MaintenanceServiceTest.class.getResource("/conf/router.json");
+        assertThat(config).isNotNull().overridingErrorMessage("router configuration is not found");
+
+        JsonValue configuration =
+                new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
+
+        final Router requestHandler = new Router();
+        requestHandler.addRoute(uriTemplate("/audit/recon"), new MemoryBackend());
+        requestHandler.addRoute(uriTemplate("/managed/user"), new MemoryBackend());
+        requestHandler.addRoute(uriTemplate("/system/OpenDJ/account"), new MemoryBackend());
+        requestHandler.addRoute(uriTemplate("/system/AD/account"), new MemoryBackend());
+        requestHandler.addRoute(RoutingMode.EQUALS, uriTemplate("maintenance"), maintenanceService);
+
+        final ConnectionFactory connectionFactory = Resources.newInternalConnectionFactory(requestHandler);
+        Bindings globalScope = new SimpleBindings();
+        globalScope.put("openidm", FunctionFactory.getResource(connectionFactory));
+
+        ScriptRegistryImpl sr =
+                new ScriptRegistryImpl(new HashMap<String, Object>(), ServiceLoader
+                        .load(ScriptEngineFactory.class), globalScope);
+
+        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(configuration);
+        when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class)))
+                .thenReturn("");
+
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindScriptRegistry(sr);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        MaintenanceFilterWrapper maintenanceFilterWrapper = new MaintenanceFilterWrapper();
+        filterService.bindMaintenanceFilterWrapper(maintenanceFilterWrapper);
+        filterService.testActivate(mock(ComponentContext.class));
+        connection = filterService.getConnection();
+
+        maintenanceService.bindMaintenanceFilterWrapper(maintenanceFilterWrapper);
     }
-    
-    @Test
-    public void testMaintenanceMode() throws Exception {
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testMaintenanceModeEnable() throws Exception {
         ActionRequest enableAction = Requests.newActionRequest("maintenance", "enable");
         assertThat(connection.action(new RootContext(), enableAction).getJsonContent()
                 .get("maintenanceEnabled").asBoolean());
-        assertThat(maintenanceService.scrService.getComponent(1).getState() == Component.STATE_DISABLED);
-        assertThat(maintenanceService.scrService.getComponent(2).getState() == Component.STATE_DISABLED);
-        assertThat(maintenanceService.scrService.getComponent(3).getState() == Component.STATE_ACTIVE);
-        
+        connection.delete(new RootContext(), Requests.newDeleteRequest("managed/user/0"));
+    }
+
+    @Test(expectedExceptions = NotFoundException.class)
+    public void testMaintenanceModeDisable() throws Exception {
+        ActionRequest enableAction = Requests.newActionRequest("maintenance", "enable");
+        assertThat(connection.action(new RootContext(), enableAction).getJsonContent()
+                .get("maintenanceEnabled").asBoolean());
+
         ActionRequest disableAction = Requests.newActionRequest("maintenance", "disable");
         assertThat(!connection.action(new RootContext(), disableAction).getJsonContent()
                 .get("maintenanceEnabled").asBoolean());
-        assertThat(maintenanceService.scrService.getComponent(1).getState() == Component.STATE_ACTIVE);
-        assertThat(maintenanceService.scrService.getComponent(2).getState() == Component.STATE_ACTIVE);
-        assertThat(maintenanceService.scrService.getComponent(3).getState() == Component.STATE_ACTIVE);
-    }
-
-
-    /**
-     * A testing implementation of {@link ScrService}.
-     */
-    class TestScrService implements ScrService {
-
-        public List<Component> components = new ArrayList<Component>();
-        
-        public TestScrService(List<Component> components) {
-            this.components = components;
-        }
-
-        @Override
-        public Component[] getComponents() {
-            return components.toArray(new Component[components.size()]);
-        }
-
-        @Override
-        public Component getComponent(long componentId) {
-            for (Component component : components) {
-                if (component.getId() == componentId) {
-                    return component;
-                }
-            }
-            return null;
-        }
-
-        @Override
-        public Component[] getComponents(String componentName) {
-            List<Component> componentsToReturn = new ArrayList<Component>();
-            for (Component component : components) {
-                if (component.getName().equals(componentName)) {
-                    componentsToReturn.add(component);
-                }
-            }
-            if (componentsToReturn.size() > 0) {
-                return componentsToReturn.toArray(new Component[componentsToReturn.size()]);
-            }
-            return null;
-        }
-
-        @Override
-        public Component[] getComponents(Bundle bundle) {
-            List<Component> componentsToReturn = new ArrayList<Component>();
-            for (Component component : components) {
-                if (component.getBundle().getBundleId() == bundle.getBundleId()) {
-                    componentsToReturn.add(component);
-                }
-            }
-            if (componentsToReturn.size() > 0) {
-                return componentsToReturn.toArray(new Component[componentsToReturn.size()]);
-            }
-            return null;
-        }
-    }
-    
-    class TestComponent implements Component {
-        
-        private long id;
-        private String name;
-        private int state;
-        
-        TestComponent(long id, String name) {
-            this.id = id;
-            this.name = name;
-            state = Component.STATE_ACTIVE;
-        }
-
-        @Override
-        public long getId() {
-            return id;
-        }
-
-        @Override
-        public String getName() {
-            return name;
-        }
-
-        @Override
-        public int getState() {
-            return state;
-        }
-
-        @Override
-        public Bundle getBundle() {
-            return null;
-        }
-
-        @Override
-        public String getFactory() {
-            return null;
-        }
-
-        @Override
-        public boolean isServiceFactory() {
-            return false;
-        }
-
-        @Override
-        public String getClassName() {
-            return null;
-        }
-
-        @Override
-        public boolean isDefaultEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isImmediate() {
-            return false;
-        }
-
-        @Override
-        public String[] getServices() {
-            return null;
-        }
-
-        @Override
-        public Dictionary getProperties() {
-            return null;
-        }
-
-        @Override
-        public Reference[] getReferences() {
-            return null;
-        }
-
-        @Override
-        public ComponentInstance getComponentInstance() {
-            return null;
-        }
-
-        @Override
-        public String getActivate() {
-            return null;
-        }
-
-        @Override
-        public boolean isActivateDeclared() {
-            return false;
-        }
-
-        @Override
-        public String getDeactivate() {
-            return null;
-        }
-
-        @Override
-        public boolean isDeactivateDeclared() {
-            return false;
-        }
-
-        @Override
-        public String getModified() {
-            return null;
-        }
-
-        @Override
-        public String getConfigurationPolicy() {
-            return null;
-        }
-
-        @Override
-        public void enable() {
-            state = Component.STATE_ACTIVE;
-        }
-
-        @Override
-        public void disable() {
-            state = Component.STATE_DISABLED;
-        }
-        
+        connection.delete(new RootContext(), Requests.newDeleteRequest("managed/user/0"));
     }
 }
