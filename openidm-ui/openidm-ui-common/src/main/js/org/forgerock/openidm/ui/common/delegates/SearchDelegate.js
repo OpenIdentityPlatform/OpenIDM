@@ -18,21 +18,21 @@ define("org/forgerock/openidm/ui/common/delegates/SearchDelegate", [
         var operator = (comparisonOperator) ? comparisonOperator : "sw",
             maxPageSize = 10,
             conditions = _(props)
-                            .reject(function(p){ return !p; })
-                            .map(function(p){
-                                var op = operator;
+                .reject(function(p){ return !p; })
+                .map(function(p){
+                    var op = operator;
 
-                                if(p === "_id" && op !== "neq"){
-                                    op = "eq";
-                                }
+                    if(p === "_id" && op !== "neq"){
+                        op = "eq";
+                    }
 
-                                if(op !== "pr") {
-                                    return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
-                                } else {
-                                    return p + ' pr';
-                                }
-                            })
-                            .value();
+                    if(op !== "pr") {
+                        return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
+                    } else {
+                        return p + ' pr';
+                    }
+                })
+                .value();
 
         return this.serviceCall({
             "type": "GET",
