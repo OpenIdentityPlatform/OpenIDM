@@ -121,13 +121,32 @@ public class ServletConnectionFactory implements ConnectionFactory {
     @Reference(target = "(org.forgerock.openidm.router=*)")
     protected RequestHandler requestHandler = null;
 
+    public void bindRequestHandler(RequestHandler rh) {
+        requestHandler = rh;
+    }
+
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scriptRegistry = null;
 
+    public void bindScriptRegistry(ScriptRegistry sr) {
+        scriptRegistry = sr;
+    }
+
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
+
+    public void bindEnhancedConfig(EnhancedConfig ec) {
+        enhancedConfig = ec;
+    }
+
+    @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.maintenancemodefilter)")
+    private Filter maintenanceFilterWrapper;
+
+    public void bindMaintenanceFilterWrapper(Filter f) {
+        maintenanceFilterWrapper = f;
+    }
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
@@ -148,6 +167,10 @@ public class ServletConnectionFactory implements ConnectionFactory {
         }
 
         logger.info("Servlet ConnectionFactory created.");
+    }
+
+    public void testActivate(ComponentContext context) throws ServletException, NamespaceException {
+        activate(context);
     }
 
     @Deactivate
@@ -368,6 +391,8 @@ public class ServletConnectionFactory implements ConnectionFactory {
         final JsonValue filterConfig = configuration.get("filters").expect(List.class);
         final List<Filter> filters = new ArrayList<>(filterConfig.size() + 1); // add one for the logging filter
 
+        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("((?!audit).)*"),
+                maintenanceFilterWrapper));
         filters.add(newLoggingFilter());
         filters.add(Filters.conditionalFilter(Filters.matchResourcePath("^(?!.*(^audit/)).*$"), auditFilter));
 
