@@ -1,0 +1,377 @@
+{
+    "objects" : [
+        {
+            "name" : "user",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "ui/onCreate-user-set-default-fields.js"
+            },
+            "onDelete" : {
+                "type" : "text/javascript",
+                "file" : "ui/onDelete-user-cleanup.js"
+            },
+            "properties" : [
+                {
+                    "name" : "securityAnswer",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    },
+                    "scope" : "private"
+                },
+                {
+                    "name" : "password",
+                    "encryption" : {
+                        "key" : "openidm-sym-default"
+                    },
+                    "scope" : "private"
+                },
+                {
+                    "name" : "effectiveRoles",
+                    "type" : "virtual",
+                    "onRetrieve" : {
+                        "type" : "text/javascript",
+                        "file" : "roles/effectiveRoles.js",
+                        "rolesPropName" : "roles"
+                    }
+                },
+                {
+                    "name" : "effectiveAssignments",
+                    "type" : "virtual",
+                    "onRetrieve" : {
+                        "type" : "text/javascript",
+                        "file" : "roles/effectiveAssignments.js",
+                        "effectiveRolesPropName" : "effectiveRoles"
+                    }
+                }
+            ],
+            "schema" : {
+                "id" : "http://jsonschema.net",
+                "title" : "User",
+                "viewable" : true,
+                "$schema" : "http://json-schema.org/draft-03/schema",
+                "order" : [
+                    "userName",
+                    "givenName",
+                    "sn",
+                    "mail",
+                    "accountStatus",
+                    "telephoneNumber",
+                    "postalAddress",
+                    "address2",
+                    "city",
+                    "postalCode",
+                    "country",
+                    "stateProvince",
+                    "roles",
+                    "manager",
+                    "authzRoles"
+                ],
+                "properties" : {
+                    "mail" : {
+                        "title" : "Email Address",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true
+                    },
+                    "sn" : {
+                        "title" : "Last Name",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true
+                    },
+                    "address2" : {
+                        "type" : "string",
+                        "title" : "Address 2",
+                        "viewable" : true
+                    },
+                    "givenName" : {
+                        "title" : "First Name",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true
+                    },
+                    "city" : {
+                        "type" : "string",
+                        "title" : "City",
+                        "viewable" : true
+                    },
+                    "country" : {
+                        "type" : "string",
+                        "title" : "Country",
+                        "viewable" : true
+                    },
+                    "postalCode" : {
+                        "type" : "string",
+                        "title" : "Postal Code",
+                        "viewable" : true
+                    },
+                    "accountStatus" : {
+                        "title" : "Status",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true
+                    },
+                    "roles" : {
+                        "description" : "",
+                        "title" : "Managed Roles",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "returnByDefault" : true,
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : {
+                                "path" : "managed/role",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : ["properties/name"],
+                                    "sortKeys" : ["properties/name"]
+                                }
+                            }
+                        }
+                    },
+                    "authzRoles" : {
+                        "description" : "",
+                        "title" : "OpenIDM Roles",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string",
+                            "resourceCollection" : {
+                                "path" : "repo/internal/role",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : [ "_id", "description"],
+                                    "sortKeys" : [ "_id" ]
+                                }
+                            }
+                        }
+                    },
+                    "effectiveRoles" : {
+                        "type" : "array",
+                        "title" : "Effective Roles",
+                        "viewable" : false,
+                        "items" : {
+                            "type" : "string",
+                            "returnByDefault" : true,
+                            "isVirtual" : true
+                        }
+                    },
+                    "effectiveAssignments" : {
+                        "type" : "array",
+                        "title" : "Effective Assignments",
+                        "viewable" : false,
+                        "items" : {
+                            "type" : "string",
+                            "returnByDefault" : true,
+                            "isVirtual" : true
+                        }
+                    },
+                    "telephoneNumber" : {
+                        "type" : "string",
+                        "title" : "Mobile Phone",
+                        "viewable" : true
+                    },
+                    "stateProvince" : {
+                        "type" : "string",
+                        "title" : "State/Province",
+                        "viewable" : true
+                    },
+                    "postalAddress" : {
+                        "type" : "string",
+                        "title" : "Address 1",
+                        "viewable" : true
+                    },
+                    "userName" : {
+                        "title" : "Username",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true
+                    },
+                    "manager" : {
+                        "type" : "relationship",
+                        "returnByDefault" : false,
+                        "description" : "",
+                        "title" : "Manager",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "properties" : {
+                        	"_ref" : { "type" : "string" },
+                            "_refProperties": {
+                                "type": "object",
+                                "properties": {
+                                    "_id": { "type": "string" }
+                                }
+                            }
+                        },
+                        "resourceCollection" : {
+                            "path" : "managed/user",
+                            "label" : "Reports",
+                            "query" : {
+                                "queryFilter" : "true",
+                                "fields" : [
+                                    "userName",
+                                    "givenName",
+                                    "sn"
+                                ],
+                                "sortKeys" : [
+                                    "userName"
+                                ]
+                            }
+                        }
+                    },
+                    "historicalAccounts" : {
+                        "description" : "Historical array of accounts",
+                        "title" : "Historical Accounts",
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "linkedDate": { "type": "string" },
+                                        "unlinkedDate": { "type": "string" }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                "type" : "object",
+                "required" : [
+                    "userName",
+                    "givenName",
+                    "sn",
+                    "mail"
+                ]
+            }
+        },
+        {
+            "name" : "role",
+            "postCreate" : {
+                "type" : "text/javascript",
+                "file" : "roles/update-users-of-role.js"
+            },
+            "postUpdate" : {
+                "type" : "text/javascript",
+                "file" : "roles/update-users-of-role.js"
+            },
+            "postDelete" : {
+                "type" : "text/javascript",
+                "file" : "roles/update-users-of-role.js"
+            },
+            "onDelete" : {
+                "type" : "text/javascript",
+                "file" : "roles/onDelete-roles.js"
+            },
+            "schema" : {
+                "$schema" : "http://forgerock.org/json-schema#",
+                "type" : "object",
+                "title" : "Role",
+                "description" : "",
+                "properties" : {
+                    "_id" : {
+                        "description" : "",
+                        "title" : "Name",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "type" : "string"
+                    },
+                    "properties" : {
+                        "description" : "",
+                        "title" : "Properties",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "type" : "object",
+                        "properties" : {
+                            "name" : {
+                                "description" : "The role name, used for display purposes.",
+                                "title" : "Name",
+                                "viewable" : true,
+                                "searchable" : true,
+                                "type" : "string"
+                            },
+                            "description" : {
+                                "description" : "",
+                                "title" : "Description",
+                                "viewable" : true,
+                                "searchable" : true,
+                                "type" : "string"
+                            }
+                        },
+                        "required" : [
+                            "name",
+                            "description"
+                        ],
+                        "order" : [
+                            "name",
+                            "description"
+                        ]
+                    },
+                    "members" : {
+                        "description" : "",
+                        "title" : "Role Members",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship": true,
+                            "reversePropertyName": "roles",
+                            "returnByDefault" : false,
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : {
+                                "path" : "managed/user",
+                                "label" : "User",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ],
+                                    "sortKeys" : [
+                                        "userName"
+                                    ]
+                                }
+                            }
+                        }
+                    },
+                    "assignments" : {
+                        "description" : "",
+                        "title" : "Assignments",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "type" : "string"
+                    }
+                },
+                "required" : [
+                    "_id",
+                    "properties"
+                ],
+                "order" : [
+                    "_id",
+                    "properties",
+                    "assignments"
+                ]
+            }
+        }
+    ]
+}
