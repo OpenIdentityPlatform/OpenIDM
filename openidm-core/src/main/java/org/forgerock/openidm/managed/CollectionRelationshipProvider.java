@@ -326,7 +326,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
 
             if (request.getQueryFilter() != null) {
-                filter = QueryFilter.and(filter, asRelationshipQueryFilter(request.getQueryFilter()));
+                filter = QueryFilter.and(filter, asRelationshipQueryFilter(isReverse, request.getQueryFilter()));
             }
 
             queryRequest.setQueryFilter(filter);
@@ -372,8 +372,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
         }
     }
 
-    static QueryFilter<JsonPointer> asRelationshipQueryFilter(QueryFilter<JsonPointer> filter) {
-        return filter.accept(VISITOR, null);
+    static QueryFilter<JsonPointer> asRelationshipQueryFilter(Boolean isReverse, QueryFilter<JsonPointer> filter) {
+        return filter.accept(VISITOR, isReverse);
     }
 
     /**
@@ -384,7 +384,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
         @Override
         public QueryFilter<JsonPointer> visitAndFilter(Boolean isReverse, List<QueryFilter<JsonPointer>> subFilters) {
-            return QueryFilter.and(visitQueryFilters(subFilters));
+            return QueryFilter.and(visitQueryFilters(isReverse, subFilters));
         }
 
         @Override
@@ -434,7 +434,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
         @Override
         public QueryFilter<JsonPointer> visitOrFilter(Boolean isReverse, List<QueryFilter<JsonPointer>> subFilters) {
-            return QueryFilter.or(visitQueryFilters(subFilters));
+            return QueryFilter.or(visitQueryFilters(isReverse, subFilters));
         }
 
         @Override
@@ -454,10 +454,10 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
          * @param subFilters a list of the filters to visit
          * @return a list of visited filters
          */
-        private List<QueryFilter<JsonPointer>> visitQueryFilters(List<QueryFilter<JsonPointer>> subFilters) {
+        private List<QueryFilter<JsonPointer>> visitQueryFilters(Boolean isReverse, List<QueryFilter<JsonPointer>> subFilters) {
             List<QueryFilter<JsonPointer>> visitedFilters = new ArrayList<>();
             for (QueryFilter<JsonPointer> filter : subFilters) {
-                visitedFilters.add(asRelationshipQueryFilter(filter));
+                visitedFilters.add(asRelationshipQueryFilter(isReverse, filter));
             }
             return visitedFilters;
         }
