@@ -49,6 +49,9 @@ import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 
+/**
+ * A {@link RelationshipProvider} representing a singleton relationship for the given field.
+ */
 class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
     
     private final RequestHandler requestHandler;

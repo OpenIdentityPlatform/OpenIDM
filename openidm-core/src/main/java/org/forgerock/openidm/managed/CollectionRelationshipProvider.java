@@ -41,11 +41,9 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -283,44 +281,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
     /** {@inheritDoc} */
     @Override
-    public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
-        return super.createInstance(context, request);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
-        return super.readInstance(context, resourceId, request);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
-        return super.updateInstance(context, resourceId, request);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId, final DeleteRequest request) {
-        return super.deleteInstance(context, resourceId, request);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
-        return super.patchInstance(context, resourceId, request);
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
         return notSupportedOnCollection(request).asPromise();
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
-        return super.actionInstance(context, resourceId, request);
     }
 
     /** {@inheritDoc} */

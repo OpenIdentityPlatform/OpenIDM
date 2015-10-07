@@ -133,11 +133,11 @@ public abstract class RelationshipProvider {
                 public ResourceResponse apply(ResourceResponse resourceResponse) throws ResourceException {
                     return FORMAT_RESPONSE_NO_EXCEPTION.apply(resourceResponse);
                 }
-    };
+            };
 
      /**
      * Function to format a resource from the repository to that expected by the provider consumer. First object
-     * properties are removed and {@code secondId} will be converted to {@code _ref}
+     * properties are removed and {@code secondId} (or {@code firstId} if {@link #isReverse}) will be converted to {@code _ref}
      *
      * This will convert repo resources in the format of:
      * <pre>
@@ -486,10 +486,8 @@ public abstract class RelationshipProvider {
             if (deleteRequest.getRevision() == null) {
                 // If no revision was supplied we must perform a read to get the latest revision
                 final ReadRequest readRequest = Requests.newReadRequest(path);
-                final Promise<ResourceResponse, ResourceException> readResult = 
-                        getConnection().readAsync(context, readRequest);
 
-                return readResult.thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                return getConnection().readAsync(context, readRequest).thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
                     @Override
                     public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse) 
                             throws ResourceException {
@@ -529,6 +527,14 @@ public abstract class RelationshipProvider {
         }
     }
 
+    /**
+     * Patch a relationship instance. Used by RequestHandler child classes.
+     *
+     * @param context the current context
+     * @param relationshipId The id of the relationship instance to patch
+     * @param request The patch request
+     * @return A promised patch response or exception
+     */
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String relationshipId, 
             PatchRequest request) {
         Promise<ResourceResponse, ResourceException> promise = null;
@@ -609,6 +615,14 @@ public abstract class RelationshipProvider {
         return promise;
     }
 
+    /**
+     * Perform an action on a relationship instance. Used by child RequsetHandler classes.
+     *
+     * @param context the current context
+     * @param relationshipId The id of the relationship instance to perform the action on
+     * @param request The action request
+     * @return A promised action response or exception
+     */
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String relationshipId, 
             ActionRequest request) {
         return notSupportedOnInstance(request).asPromise();
@@ -728,12 +742,11 @@ public abstract class RelationshipProvider {
      * @return A promise containing the response with the expanded fields, if any.
      * @throws ResourceException
      */
-    @SuppressWarnings("unchecked")
-    protected Promise<ResourceResponse, ResourceException> expandFields(final Context context, final Request request, 
+    protected Promise<ResourceResponse, ResourceException> expandFields(final Context context, final Request request,
             ResourceResponse response) throws ResourceException {
         List<JsonPointer> refFields = new ArrayList<JsonPointer>();
         List<JsonPointer> otherFields = new ArrayList<JsonPointer>();
-        for (JsonPointer field : (List<JsonPointer>)request.getFields()) {
+        for (JsonPointer field : request.getFields()) {
             if (!field.toString().startsWith(SchemaField.FIELD_REFERENCE.toString())
                     && !field.toString().startsWith(SchemaField.FIELD_PROPERTIES.toString())) {
                 refFields.add(field);
