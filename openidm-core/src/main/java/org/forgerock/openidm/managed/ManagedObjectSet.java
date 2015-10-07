@@ -832,6 +832,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 if (revision == null) {
                     rev = decrypted.get("_rev").asString();
                 }
+                
+                // Populate the relainshionships
+                final JsonValue relationships = fetchRelationshipFields(context, resource.getId());
+                decrypted.asMap().putAll(relationships.asMap());
 
                 JsonValue newValue = decrypted.copy();
                 boolean modified = JsonValuePatch.apply(newValue, patchOperations);
@@ -875,6 +879,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 }
             } catch (ResourceException e) {
                 throw e;
+            } catch (Exception e) {
+                throw new InternalServerErrorException(e.getMessage(), e);
             }
         } while (retry);
         return null;
