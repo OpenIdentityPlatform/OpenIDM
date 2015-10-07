@@ -129,14 +129,26 @@ public class SchemaField {
         }
     }
 
+    /**
+     * Returns the type of this schema field
+     * @return the type of this schema field
+     */
     public SchemaFieldType getType() {
         return type;
     }
 
+    /**
+     * Returns a boolean indicating if the field is a reverse relationship.
+     * @return true if the relationship is reverse, otherwise false.
+     */
     public boolean isReverseRelationship() {
         return isReverseRelationship;
     }
 
+    /**
+     * Returns the name used by the reverse relationship
+     * @return The property name used by the reverse relationship.
+     */
     public String getReversePropertyName() {
         return reversePropertyName;
     }

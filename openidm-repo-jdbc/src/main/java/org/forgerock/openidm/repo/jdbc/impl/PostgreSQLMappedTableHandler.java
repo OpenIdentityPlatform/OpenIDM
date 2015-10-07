@@ -23,6 +23,10 @@ import org.forgerock.openidm.util.Accessor;
 
 import java.util.Map;
 
+/**
+ * Mapped table handler for PostgreSQL that expects {@code JSON}-type columns for
+ * {@link ColumnMapping#TYPE_JSON_LIST} and {@link ColumnMapping#TYPE_JSON_MAP} property mappings.
+ */
 public class PostgreSQLMappedTableHandler extends MappedTableHandler {
     public PostgreSQLMappedTableHandler(String tableName, Map<String, Object> mapping, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig, SQLExceptionHandler sqlExceptionHandler, Accessor<CryptoService> cryptoServiceAccessor) throws InternalServerErrorException {
         super(tableName, mapping, dbSchemaName, queriesConfig, commandsConfig, sqlExceptionHandler, cryptoServiceAccessor);

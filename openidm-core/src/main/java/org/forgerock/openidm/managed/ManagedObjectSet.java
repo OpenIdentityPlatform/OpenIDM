@@ -1271,7 +1271,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     /**
      * Get the current map of {@link RelationshipProvider} for each relationship field.
      */
-    public Map<JsonPointer, RelationshipProvider> getRelationshipProviders() {
+    Map<JsonPointer, RelationshipProvider> getRelationshipProviders() {
         return relationshipProviders;
     }
 }
