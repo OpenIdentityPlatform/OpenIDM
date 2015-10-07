@@ -16,8 +16,8 @@
 
 package org.forgerock.openidm.patch;
 
-import org.forgerock.json.fluent.JsonValueException;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.PatchOperation;
 
 /**
@@ -32,7 +32,7 @@ public interface PatchValueTransformer {
      * @param subject the patch subject document.  Subject is unused by default, made available
      *               for use by custom transforms.
      * @return
-     * @throws org.forgerock.json.fluent.JsonValueException
+     * @throws org.forgerock.json.JsonValueException
      */
     public Object getTransformedValue(PatchOperation patch, JsonValue subject) throws JsonValueException;
 }

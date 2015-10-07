@@ -553,14 +553,13 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public void handlePatch(ServerContext context, PatchRequest request, ResultHandler<Resource> handler) {
-        ResourceName resourceName = request.getResourceNameObject();
-        ParsedId parsedId;
+    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        final ResourcePath resourcePath = request.getResourcePathObject();
+        final ParsedId parsedId;
         try {
-            parsedId = new ParsedId(resourceName);
+            parsedId = new ParsedId(resourcePath);
         } catch (BadRequestException e) {
-            handler.handleError(e);
-            return;
+            return e.asPromise();
         }
 
         try {
@@ -568,31 +567,39 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
             Dictionary existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
-                throw new NotFoundException("No existing configuration found for " + resourceName.toString() + ", can not patch the configuration.");
+                throw new NotFoundException("No existing configuration found for "
+                        + resourcePath.toString()
+                        + ", can not patch the configuration.");
             }
 
-            JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
-            JsonValue subject = enhancedConfig.getConfiguration(existingConfig, request.getResourceName(), false);
+            JsonValue subject = enhancedConfig.getConfiguration(existingConfig, request.getResourcePath(), false);
             JsonValuePatch.apply(subject, request.getPatchOperations());
 
-            existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, subject);
+            existingConfig = configCrypto.encrypt(
+                    parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, subject);
             config.update(existingConfig);
 
-            logger.debug("Patched existing configuration for {} with {}", resourceName.toString(), existingConfig);
-            Resource result = new Resource(request.getResourceName(), null, subject);
-            handler.handleResult(result);
-        } catch (ResourceException ex) {
-            handler.handleError(ex);
-        } catch (JsonValueException ex) {
-            logger.warn("Invalid configuration provided for {}:" + ex.getMessage(), resourceName.toString(), ex);
-            handler.handleError(new BadRequestException("Invalid configuration provided for " + resourceName.toString() + ": " + ex.getMessage(), ex));
-        } catch (WaitForMetaData ex) {
-            logger.info("No meta-data provider available yet to patch and encrypt configuration for {}, retry later.", parsedId.toString(), ex);
-            handler.handleError(new InternalServerErrorException("No meta-data provider available yet to patch and encrypt configuration for "
-                    + parsedId.toString() + ", retry later.", ex));
-        } catch (Exception ex) {
-            logger.warn("Failure to patch configuration for {}", resourceName.toString(), ex);
-            handler.handleError(new InternalServerErrorException("Failure to patch configuration for " + resourceName.toString() + ": " + ex.getMessage(), ex));
+            logger.debug("Patched existing configuration for {} with {}", resourcePath.toString(), existingConfig);
+            return newResourceResponse(request.getResourcePath(), null, subject).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
+        } catch (JsonValueException e) {
+            logger.warn("Invalid configuration provided for {}:" + e.getMessage(), resourcePath.toString(), e);
+            return new BadRequestException("Invalid configuration provided for " + resourcePath.toString()
+                    + ": " + e.getMessage(), e)
+                    .asPromise();
+        } catch (WaitForMetaData e) {
+            logger.info("No meta-data provider available yet to patch and encrypt configuration for {}, retry later.",
+                    parsedId.toString(), e);
+            return new InternalServerErrorException(
+                    "No meta-data provider available yet to patch and encrypt configuration for "
+                            + parsedId.toString() + ", retry later.", e)
+                    .asPromise();
+        } catch (Exception e) {
+            logger.warn("Failure to patch configuration for {}", resourcePath.toString(), e);
+            return new InternalServerErrorException("Failure to patch configuration for " + resourcePath.toString()
+                    + ": " + e.getMessage(), e)
+                    .asPromise();
         }
     }
 
