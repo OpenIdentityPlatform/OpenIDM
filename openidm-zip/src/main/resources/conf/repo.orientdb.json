@@ -6,8 +6,6 @@
     "queries" : {
         "get-by-field-value" : "select * FROM ${unquoted:_resource} WHERE ${unquoted:field} = ${value} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "get-by-field-value-count" : "select count(*) AS total FROM ${unquoted:_resource} WHERE ${unquoted:field} = ${value}",
-        "get-users-of-direct-role" : "select * FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$' OR ${role} IN roles SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
-        "get-users-of-direct-role-count" : "select count(_openidm_id) AS total FROM ${unquoted:_resource} WHERE roles matches '^(.*,)?${unquoted:role}(,.*)?$' OR ${role} IN roles",
         "query-all-ids" : "select _openidm_id, @version from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",
         "query-all-ids-count" : "select count(_openidm_id) AS total from ${unquoted:_resource}",
         "query-all" : "select * from ${unquoted:_resource} SKIP ${unquoted:_pagedResultsOffset} LIMIT ${unquoted:_pageSize}",

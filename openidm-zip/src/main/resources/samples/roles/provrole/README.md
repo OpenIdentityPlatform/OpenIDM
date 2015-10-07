@@ -22,7 +22,7 @@
      * "Portions Copyrighted [year] [name of copyright owner]"
      */
 
-Roles Sample: Roles and Provisioning 
+Roles Sample: Roles and Provisioning
 =====================================
 
 One of the great features of OpenIDM Roles is the ability to provision a set
@@ -222,12 +222,12 @@ Therefore you can assign the Employee role by using:
                    {
                        "operation" : "add",
                        "field" : "/roles/-",
-                       "value" : "managed/role/Employee"
+                       "value" : { "_ref": "managed/role/Employee" }
                    }
                  ]' \
                'https://localhost:8443/openidm/managed/user/8ff9639f-2a89-48a2-a0fd-9df4d5297eeb'
 
-               {"displayName":"Barbara Jensen","description":"Created for OpenIDM","givenName":"Barbara","mail":"bjensen@example.com","telephoneNumber":"1-360-229-7105","sn":"Jensen","userName":"bjensen","ldapGroups":["cn=openidm2,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":["openidm-authorized","managed/role/Employee"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/Employee"}],"_id":"8ff9639f-2a89-48a2-a0fd-9df4d5297eeb","_rev":"4","effectiveAssignments":{"ldap":{"attributes":[{"name":"employeeType","value":"Employee","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Employee"}]}}}
+               {"displayName":"Barbara Jensen","description":"Created for OpenIDM","givenName":"Barbara","mail":"bjensen@example.com","telephoneNumber":"1-360-229-7105","sn":"Jensen","userName":"bjensen","ldapGroups":["cn=openidm2,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":[{"_ref":"managed/role/Employee","_refProperties":{"_id":"193a60b6-7b2e-467e-a8fc-a59d67fca858","_rev":"1"}}],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/Employee","_refProperties":{"_id":"193a60b6-7b2e-467e-a8fc-a59d67fca858","_rev":"1"}}],"_id":"8ff9639f-2a89-48a2-a0fd-9df4d5297eeb","_rev":"4","effectiveAssignments":{"ldap":{"attributes":[{"name":"employeeType","value":"Employee","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget","assignedThrough":"managed/role/Employee"}]}}}
 
 Let's take a closer look at bjensen's entry for what we're really interested
 in, i.e. the roles, effective roles and effective assignments:
@@ -242,8 +242,20 @@ in, i.e. the roles, effective roles and effective assignments:
   "result" : [ {
     "_id" : "8ff9639f-2a89-48a2-a0fd-9df4d5297eeb",
     "userName" : "bjensen",
-    "roles" : [ "openidm-authorized", "managed/role/Employee" ],
-    "effectiveRoles" : [ { "_ref" : "managed/role/Employee" } ],
+    "roles" : [ {
+      "_ref" : "managed/role/Employee",
+      "_refProperties" : {
+        "_id" : "193a60b6-7b2e-467e-a8fc-a59d67fca858",
+        "_rev" : "1"
+      }
+    } ],
+    "effectiveRoles" : [ {
+      "_ref" : "managed/role/Employee",
+      "_refProperties" : {
+        "_id" : "193a60b6-7b2e-467e-a8fc-a59d67fca858",
+        "_rev" : "1"
+      }
+    } ],
     "effectiveAssignments" : {
       "ldap" : {
         "attributes" : [ {
@@ -428,7 +440,7 @@ at jdoe's entry to make sure we know the value of the identifier:
 
                {
                  "result" : [ {
-                   "_id" : "3f9ada28-2809-4909-aadf-815567b00a4d" 
+                   "_id" : "3f9ada28-2809-4909-aadf-815567b00a4d"
                  } ],
                  "resultCount" : 1,
                  "pagedResultsCookie" : null,
@@ -554,7 +566,7 @@ anymore and its employee type being undefined."
                  "resultCount" : 1,
                  "pagedResultsCookie" : null,
                  "remainingPagedResults" : -1
-               } 
+               }
 
 
 Note: some additional samples might be provided to demonstrate the different
@@ -642,4 +654,3 @@ to do just that:
                  }
                }' \
                'https://localhost:8443/openidm/managed/role/Contractor'
-
