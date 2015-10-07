@@ -174,7 +174,6 @@ public class HealthService
         "org.forgerock.commons.forgerock-audit-core",
         "org.forgerock.commons.forgerock-util",
         "org.forgerock.commons.forgerock-jaspi-runtime",
-        "org.forgerock.commons.forgerock-auth-filter-common",
         "org.forgerock.commons.forgerock-jaspi-.*-module",
         "org.forgerock.commons.guava.forgerock-guava-.*",
         "org.forgerock.commons.i18n-core",
