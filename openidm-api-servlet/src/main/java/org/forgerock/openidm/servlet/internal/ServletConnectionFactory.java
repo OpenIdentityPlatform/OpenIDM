@@ -391,7 +391,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
         final JsonValue filterConfig = configuration.get("filters").expect(List.class);
         final List<Filter> filters = new ArrayList<>(filterConfig.size() + 1); // add one for the logging filter
 
-        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("((?!audit).)*"),
+        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("((?!(audit|updates)).)*"),
                 maintenanceFilterWrapper));
         filters.add(newLoggingFilter());
         filters.add(Filters.conditionalFilter(Filters.matchResourcePath("^(?!.*(^audit/)).*$"), auditFilter));
