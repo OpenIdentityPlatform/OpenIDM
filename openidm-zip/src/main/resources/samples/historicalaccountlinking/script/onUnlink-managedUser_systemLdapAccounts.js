@@ -53,13 +53,13 @@ if (typeof queryResult !== 'undefined' && queryResult !== null) {
 
         id = account._refProperties._id;
         rev = account._refProperties._rev;
-        console.log("Updating historical account relationship for " + ref + " on managed user " + sourceId);
+        logger.debug("Updating historical account relationship for " + ref + " on managed user " + sourceId);
         // Update the relationship object
         result = openidm.update(historicalAccountsCollection + "/" + id, rev, account);
-        console.log("Deactivated historical account: " + result);
+        logger.debug("Deactivated historical account: " + result);
     } else {
-        console.log("account is undefined");
+        logger.debug("account is undefined");
     }
 } else {
-    console.log("queryResult is undefined");
+    logger.debug("queryResult is undefined");
 }
