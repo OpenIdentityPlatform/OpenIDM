@@ -58,23 +58,23 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessDefinitionsView", [
                     this.model.processes.state.pageSize = null;
 
                     processDefinitionGrid = new Backgrid.Grid({
-                        className: "table backgrid-table",
+                        className: "table backgrid",
                         emptyText: $.t("templates.workflows.processes.noProcessesDefinitions"),
                         columns: BackgridUtils.addSmallScreenCell([
-                        {
-                            name: "name",
-                            label: $.t("templates.processInstance.definition"),
-                            cell: Backgrid.Cell.extend({
-                                render: function () {
-                                    this.$el.html('<a href="#workflow/processdefinition/' +this.model.id +'">' +this.model.get("name") +'<small class="text-muted"> (' +this.model.id +')</small></a>');
+                            {
+                                name: "name",
+                                label: $.t("templates.processInstance.definition"),
+                                cell: Backgrid.Cell.extend({
+                                    render: function () {
+                                        this.$el.html('<a href="#workflow/processdefinition/' +this.model.id +'">' +this.model.get("name") +'<small class="text-muted"> (' +this.model.id +')</small></a>');
 
-                                    this.delegateEvents();
-                                    return this;
-                                }
-                            }),
-                            sortable: true,
-                            editable: false
-                        }], true),
+                                        this.delegateEvents();
+                                        return this;
+                                    }
+                                }),
+                                sortable: true,
+                                editable: false
+                            }], true),
                         collection: this.model.processes
                     });
 

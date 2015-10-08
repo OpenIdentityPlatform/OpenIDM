@@ -32,6 +32,12 @@
   background-color: transparent;
 }
 
+.form-group-header.fr-minimal-header {
+  border-bottom:0px;
+  margin-bottom:0px;
+  padding-bottom:0px;
+}
+
 .add-item-inline {
   .form-group {
     float: left;
@@ -46,6 +52,10 @@
   .checkbox-slider {
     display:inline-block;
   }
+}
+
+.row.no-gutters {
+  padding:0px;
 }
 
 h3.block-header {
@@ -837,130 +847,8 @@ Dialog Catch
   }
 }
 
-/*
-  Table Styles
-*/
-.table {
-  .sort-caret {
-    .fa-icon();
-
-    width: 5px;
-    position: relative;
-    font-weight:bold;
-    margin-left: 5px;
-    color: #999;
-  }
-
-  .empty {
-    width:100%;
-    text-align:center;
-    margin-top:50px;
-    margin-bottom:50px;
-    font-weight:bold;
-    background-color:#f7f7f7;
-
-    td {
-      padding-top:50px;
-      padding-bottom:50px;
-      font-size:18px;
-      color:@base-theme-color;
-    }
-  }
-
-  thead tr th{
-    font-size:12px;
-    text-transform: uppercase;
-    border-bottom: 2px solid #ddd;
-    letter-spacing: 1px;
-
-    a {
-      color: #2a2f32;
-      cursor: pointer;
-    }
-  }
-
-  tbody tr td{
-    padding: 12px 8px;
-  }
-
-  thead tr th a:hover {
-    text-decoration:none;
-  }
-}
-
-.backgrid-table thead {
-  border-bottom: 2px solid #ddd;
-}
-
-.backgrid-table {
-  .descending .sort-caret {
-    bottom:3px;
-
-    &:before {
-      content:@fa-var-sort-desc;
-    }
-  }
-
-  .ascending .sort-caret {
-    top: 3px;
-
-    &:before {
-      content:@fa-var-sort-asc;
-    }
-  }
-}
-
 .backgrid td.checkMarkCell {
-    padding-left:30px;
-}
-
-/*
-    Backgrid media query
-*/
-@media (max-width: 899px) {
-  .backgrid-table {
-    tbody > tr:first-of-type .smallScreenCell {
-      border-top: none;
-    }
-
-    thead {
-      display: none;
-    }
-
-    td.smallScreenCell {
-      a {
-        color: #2a2f32;
-        cursor: pointer;
-      }
-    }
-
-    th:not(.smallScreenCell), td:not(.smallScreenCell) {
-      display: none;
-      border: none;
-    }
-  }
-}
-
-@media (min-width: 900px) {
-  .backgrid-table {
-    .smallScreenCell {
-      display: none;
-    }
-
-    thead {
-      display: table-header-group;
-    }
-
-    th:not(.smallScreenCell), td:not(.smallScreenCell) {
-      display: table-cell;
-      border-bottom: 1px solid #eee;
-
-      a {
-        color: #2a2f32;
-        cursor: pointer;
-      }
-    }
-  }
+  padding-left:30px;
 }
 
 @media (max-width: 767px) {
