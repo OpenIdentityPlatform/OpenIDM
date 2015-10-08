@@ -44,34 +44,29 @@ import org.forgerock.util.promise.Promise;
 public class MaintenanceFilterWrapper implements Filter {
     public static final String PID = "org.forgerock.openidm.maintenancemodefilter";
 
-    private volatile Filter filter;
-    private final String filterLock = "";
+    private Boolean enabled = false;
+    private final Filter passthroughFilter = new PassthroughFilter();
+    private final Filter maintenanceFilter = new MaintenanceFilter();
 
     /**
-     * Set the wrapped filter to the given {@link Filter}.  Used when entering maintenance mode.
-     *
-     * @param filter the filter to wrap
+     * Used when entering maintenance mode, prevents write operations.
      */
-    public void setFilter(Filter filter) {
-        synchronized(filterLock) {
-            this.filter = filter == null ? new MaintenanceFilter() : filter;
-        }
+    public void enable() {
+        enabled = true;
     }
 
     /**
-     * Reset the wrapped filter to pass-through.
+     * Used when exiting maintenance mode, passes through all requests.
      */
-    public void reset() {
-        setFilter(new PassthroughFilter());
+    public void disable() {
+        enabled = false;
     }
 
     private Filter getFilter() {
-        if (filter == null) {
-            synchronized(filterLock) {
-                filter = new PassthroughFilter();
-            }
+        if (enabled) {
+            return maintenanceFilter;
         }
-        return filter;
+        return passthroughFilter;
     }
 
     @Override

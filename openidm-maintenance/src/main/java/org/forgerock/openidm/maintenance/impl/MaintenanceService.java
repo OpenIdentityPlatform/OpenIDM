@@ -119,7 +119,7 @@ public class MaintenanceService implements RequestHandler {
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext.getProperties());
         logger.info("Maintenance service stopped.");
-        maintenanceFilterWrapper.reset();
+        maintenanceFilterWrapper.disable();
         maintenanceEnabled = false;
     }
 
@@ -165,7 +165,7 @@ public class MaintenanceService implements RequestHandler {
     private void enableMaintenanceMode() throws ResourceException {
         if (maintenanceModeLock.tryAcquire()) {
             if (!maintenanceEnabled) {
-                maintenanceFilterWrapper.setFilter(null);
+                maintenanceFilterWrapper.enable();
                 maintenanceEnabled = true;
             }
             maintenanceModeLock.release();
@@ -183,7 +183,7 @@ public class MaintenanceService implements RequestHandler {
     private void disableMaintenanceMode() throws ResourceException {
         if (maintenanceModeLock.tryAcquire()) {
             if (maintenanceEnabled) {
-                maintenanceFilterWrapper.reset();
+                maintenanceFilterWrapper.disable();
                 maintenanceEnabled = false;
             }
             maintenanceModeLock.release();
