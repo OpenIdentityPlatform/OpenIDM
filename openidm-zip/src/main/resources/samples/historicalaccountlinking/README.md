@@ -18,7 +18,7 @@ Sample Historical Account Linking LDAP <-> Internal Repository
 =======================================================
 
 This sample shows you historical account linking between the OpenIDM's managed users and a local LDAP directory server, 
-such as OpenDJ.  Managed users in OpenIDM will maintain a list historically linked accounts on the local LDAP server. 
+such as OpenDJ.  Managed users in OpenIDM will maintain a list of historically linked accounts on the local LDAP server. 
 This list will be stored in the "historicalAccounts" field of a managed user and will contain all past and current 
 accounts. Each account will be represented as a relationship and will contain information about the date linked/unlinked 
 and whether the account is currently active.
