@@ -252,7 +252,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             }, this);
 
             attributesGrid = new Backgrid.Grid({
-                className: "table backgrid-table",
+                className: "table backgrid",
                 row: ClickableRow,
                 columns: BackgridUtils.addSmallScreenCell([
                     {
@@ -303,12 +303,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                     }
 
                                     iconElement.append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-filter"></i>'
-                                    +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +conditionIcon +'</pre></div></span>');
+                                        +'<div style="display:none;" class="tooltip-details">' + $.t("templates.mapping.conditionalUpon") +'<pre class="text-muted code-tooltip">' +conditionIcon +'</pre></div></span>');
                                 }
 
                                 if(this.model.attributes.attribute.transform) {
                                     iconElement.append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
-                                    +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +this.model.attributes.attribute.transform.source +'</pre></div></span>');
+                                        +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +this.model.attributes.attribute.transform.source +'</pre></div></span>');
                                 }
 
                                 this.$el.html(iconElement);

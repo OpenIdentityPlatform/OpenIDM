@@ -75,7 +75,7 @@ define("org/forgerock/openidm/ui/admin/workflow/TaskListView", [
                 Tasks.state.pageSize = null;
 
                 tasksGrid = new Backgrid.Grid({
-                    className: "table backgrid-table",
+                    className: "table backgrid",
                     emptyText: $.t("templates.workflows.tasks.noActiveTasks"),
                     columns: CustomCells.addSmallScreenCell([{
                         label: $.t("templates.workflows.tasks.task"),
@@ -166,7 +166,7 @@ define("org/forgerock/openidm/ui/admin/workflow/TaskListView", [
 
                         Tasks.getFirstPage();
                     },this),
-                    
+
                     render : {
                         item: function(item, escape) {
                             var userName = item.userName.length > 0 ? ' (' + escape(item.userName) + ')': "",
