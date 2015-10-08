@@ -456,13 +456,16 @@ public abstract class RelationshipProvider {
             // Perform the delete and wait for result
             result = deleteAsync(context, path, deleteRequest).getOrThrow();
             
+            // Get the before value of the managed object
+            final ResourceResponse afterValue = getManagedObject(context);
+            
             // Do activity logging.
             activityLogger.log(context, request, "delete", getManagedObjectPath(context), beforeValue.getContent(), 
                     null, Status.SUCCESS);
 
             // Do sync on the managed object
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
-                    SyncServiceAction.notifyDelete, beforeValue.getContent(), null);
+                    SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
             return expandFields(context, request, result);
         } catch (ResourceException e) {

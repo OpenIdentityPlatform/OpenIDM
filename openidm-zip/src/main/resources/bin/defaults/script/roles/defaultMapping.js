@@ -33,9 +33,9 @@
  */
 
 // The result map
-var map = { "result" : true };
-// The "assignments" configured for this mapping
-var assignments = config.assignmentsToMap;
+var map = { "result" : true },
+    mappingName = config.name
+    effectiveAssignments = source.effectiveAssignments;;
 
 // Default operations
 var defaultAssignmentOperation = "replaceTarget";
@@ -61,25 +61,11 @@ var operations = {
         } 
 }
 
-
-function mergeValues(target, name, value) {
-    if (target[name] != null && target[name] instanceof Array) {
-        for (var x = 0; x < value.length; x++) {
-            if (target[name].indexOf(value) == -1) {
-                target[name].push(value[x]);
-            }
-        }
-    } else if (target[name] != null && target[name] instanceof Object) {
-        var obj = target[name];
-        for (var key in value) {
-            obj[key] = value[key];
-        }
-    } else {
-        target[name] = value;
-    }
-}
-
-// Returns the script configuration with the necessary scope fields added
+/**
+ * Returns the script configuration with the necessary scope fields added.
+ * 
+ * @param script a script configuration or a script alias
+ */
 function getConfig(script) {
     var config;
     var scope = {};
@@ -106,6 +92,11 @@ function getConfig(script) {
     return scope;
 }
 
+/**
+ * Executes a script from the given configurations.
+ * 
+ * @param scriptConfig the script configuration
+ */
 function execOnScript(scriptConfig) {
     var result = openidm.action("script", "eval", getConfig(scriptConfig), {});
     for (key in target) { 
@@ -116,25 +107,16 @@ function execOnScript(scriptConfig) {
     }
 }
 
-function areAttributesEqual(attr1, attr2) {
-    return JSON.stringify(attr1) === JSON.stringify(attr2);
-}
-
 /**
- * Compares two assignments and returns true if their "name" and "assignedThrough" values are equal, otherwise returns false;
- */
-function doAssignmentsMatch(assignment1, assignment2) {
-    return assignment1.name === assignment2.name 
-        && assignment1.assignedThrough === assignment2.assignedThrough;
-}
-
-/**
- * Searches the given list for an assignment matching the given assignment.  
- * Returns the found assignment or null if no matching assignment is found.
+ * Searches the given list for an assignment relationship matching the given assignment relationship.  
+ * Returns the fetched assignment or null if no matching assignment is found.
+ * 
+ * @param assignment the assignment to search for
+ * @param listOfAssignments a list of assignments
  */
 function findAssignment(assignment, listOfAssignments) {
     for (var i = 0; i < listOfAssignments.length; i++) {
-        if (doAssignmentsMatch(assignment, listOfAssignments[i])) {
+        if (assignment._id === listOfAssignments[i]._id) {
             return listOfAssignments[i];
         }
     }
@@ -149,9 +131,9 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
     // Loop through old assignments
     if (typeof oldAssignments !== 'undefined' && oldAssignments !== null) {
         for (var x = 0; x < oldAssignments.length; x++) {
-            oldAssignment = oldAssignments[x];
+            var oldAssignment = oldAssignments[x];
             // Check that this assignment is relevant to this mapping
-            if (assignments.indexOf(oldAssignment.name) > -1) {
+            if ((oldAssignment !== null) && (mappingName === oldAssignment.mapping)) {
                 var assignmentRemoved = false;
                 // Get the Current assignment, may be null if it has been removed/unassigned
                 var currentAssignment = findAssignment(oldAssignment, currentAssignments);
@@ -178,7 +160,7 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
                         for (var j = 0; j < currentAttributes.length; j++) {
                             var currentAttribute = currentAttributes[j];
                             if (oldAttribute.name == currentAttribute.name) {
-                                if (areAttributesEqual(oldAttribute, currentAttribute)) {
+                                if (JSON.stringify(oldAttribute) === JSON.stringify(currentAttribute)) {
                                     // attribute was found and not updated
                                     removedOrUpdated = false;
                                 }
@@ -213,61 +195,58 @@ if (typeof oldSource !== 'undefined' && oldSource !== null) {
     }
 }
 
-// If any assignments are configured for this mapping, process any matching effectiveAssignments
-if (assignments != null) {
-    var effectiveAssignments = source.effectiveAssignments;
-    if (effectiveAssignments != null) {
-        // Used to carry information across different assignmentOperations
-        var attibutesInfo; attributesInfoMap = {};
-        for (var x = 0; x < effectiveAssignments.length; x++) {
-            assignment = effectiveAssignments[x];
-            // Check that this assignment is relevant to this mapping
-            if (assignments.indexOf(assignment.name) !== -1) {
-                var attributes = assignment.attributes;
-                var onAssignment = assignment.onAssignment;
-                var linkQualifiers = assignment.linkQualifiers;
+// Process effective assignments, if any
+if (effectiveAssignments != null) {
+    // Used to carry information across different assignmentOperations
+    var attibutesInfo; attributesInfoMap = {};
+    for (var x = 0; x < effectiveAssignments.length; x++) {
+        assignment = effectiveAssignments[x];
+        // Check that this assignment is relevant to this mapping
+        if ((assignment !== null) && (mappingName === assignment.mapping)) {
+            var attributes = assignment.attributes;
+            var onAssignment = assignment.onAssignment;
+            var linkQualifiers = assignment.linkQualifiers;
 
-                // Only map if no linkQualifiers were specified or the current linkQualifier is in the list of linkQualifiers specified in the assignment
-                if (typeof linkQualifiers === 'undefined' || linkQualifiers === null
-                        || linkQualifiers.indexOf(linkQualifier) > -1) {
+            // Only map if no linkQualifiers were specified or the current linkQualifier is in the list of linkQualifiers specified in the assignment
+            if (typeof linkQualifiers === 'undefined' || linkQualifiers === null
+                    || linkQualifiers.indexOf(linkQualifier) > -1) {
 
-                    // Check if an onAssignment script is configured
-                    if (typeof onAssignment !== 'undefined' && onAssignment !== null) {
-                        onAssignment.attributes = attributes;
-                        execOnScript(onAssignment);
+                // Check if an onAssignment script is configured
+                if (typeof onAssignment !== 'undefined' && onAssignment !== null) {
+                    onAssignment.attributes = attributes;
+                    execOnScript(onAssignment);
+                }
+
+                // Loop through attributes, performing the assignmentOperations
+                for (var i = 0; i < attributes.length; i++) {
+                    var attribute = attributes[i];
+                    var assignmentOperation = attribute.assignmentOperation;
+                    var value = attribute.value;
+                    var name = attribute.name;
+
+                    attributesInfo = attributesInfoMap[name];
+                    if (typeof attributesInfo === "undefined" || attributesInfo === null) {
+                        // Initialize if it has not already been defined for this attribute
+                        attributesInfo = {};
                     }
 
-                    // Loop through attributes, performing the assignmentOperations
-                    for (var i = 0; i < attributes.length; i++) {
-                        var attribute = attributes[i];
-                        var assignmentOperation = attribute.assignmentOperation;
-                        var value = attribute.value;
-                        var name = attribute.name;
-                        
-                        attributesInfo = attributesInfoMap[name];
-                        if (typeof attributesInfo === "undefined" || attributesInfo === null) {
-                            // Initialize if it has not already been defined for this attribute
-                            attributesInfo = {};
-                        }
-                        
-                        if (assignmentOperation == null) {
-                            // Default to replace and use the entire value
-                            assignmentOperation = defaultAssignmentOperation;
-                        }
-                        
-                        // Process the assignmentOperation
-                        var config = getConfig(assignmentOperation);
-                        config.attributeName = name;
-                        config.attributeValue = value;
-                        config.attributesInfo = attributesInfo;
-                        // The result of this call should be an object with a field "value" containing the updated target field's value
-                        var assignmentResult = openidm.action("script", "eval", config, {});
-                        // Set the new target field's value
-                        target[name] = assignmentResult.value;
-                        // Update any passed back attributesInfo
-                        if (assignmentResult.hasOwnProperty("attributesInfo")) {
-                            attributesInfoMap[name] = assignmentResult.attributesInfo;
-                        }
+                    if (assignmentOperation == null) {
+                        // Default to replace and use the entire value
+                        assignmentOperation = defaultAssignmentOperation;
+                    }
+
+                    // Process the assignmentOperation
+                    var config = getConfig(assignmentOperation);
+                    config.attributeName = name;
+                    config.attributeValue = value;
+                    config.attributesInfo = attributesInfo;
+                    // The result of this call should be an object with a field "value" containing the updated target field's value
+                    var assignmentResult = openidm.action("script", "eval", config, {});
+                    // Set the new target field's value
+                    target[name] = assignmentResult.value;
+                    // Update any passed back attributesInfo
+                    if (assignmentResult.hasOwnProperty("attributesInfo")) {
+                        attributesInfoMap[name] = assignmentResult.attributesInfo;
                     }
                 }
             }
@@ -275,4 +254,5 @@ if (assignments != null) {
     }
 }
 
+// Return the resulting map
 map;
