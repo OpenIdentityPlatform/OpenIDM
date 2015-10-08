@@ -16,7 +16,8 @@
 
 /**
  * When a managed/user is linked to a target resource, this adds a relationship to to the managed/user's 
- * historicalAccounts field.
+ * historicalAccounts field which also includes the linked date property and will set the historical account as being 
+ * active.
  * 
  * The newly added relationship is of the form:
  * 
@@ -42,8 +43,8 @@ var targetRef = mappingConfig.target + "/" + target._id,
     },
     result;
 
-console.log("Adding historical account " + targetRef + " to managed user " + source._id);
+logger.debug("Adding historical account " + targetRef + " to managed user " + source._id);
 
 result = openidm.create(sourcePath + "/historicalAccounts", null, historicalAccount);
 
-console.log("Created historical account: " + result);
+logger.debug("Created historical account: " + result);
