@@ -35,7 +35,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
     "org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidget",
-    "org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget"
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget"
 ], function($, _,
             AdminAbstractView,
             eventManager,
@@ -45,7 +46,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
             CPUUsageWidget,
             FullHealthWidget,
             MappingReconResultsWidget,
-            ResourceListWidget) {
+            ResourceListWidget,
+            QuickStartWidget) {
     var dwlInstance = {},
         DashboardWidgetLoader = AdminAbstractView.extend({
             template: "templates/dashboard/DashboardWidgetLoaderTemplate.html",
@@ -66,6 +68,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
              lastRecon - Widget to display the last recon per mapping
              barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
              resourceList - Displays the top 4 resources for connectors, mappings, and managed objects
+             quickStart - Widget displaying quick start cards to help users get start with core functionality
              */
             render: function(args, callback) {
                 this.element = args.element;
@@ -91,6 +94,9 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                     },
                     resourceList : {
                         name : $.t("dashboard.resources")
+                    },
+                    quickStart: {
+                        name: $.t("dashboard.quickStart.quickStartTitle")
                     }
                 };
 
@@ -116,6 +122,11 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                             break;
                         case "resourceList":
                             this.model.widget = ResourceListWidget.generateWidget(args, callback);
+                            break;
+                        case "quickStart":
+                            args.icons = args.widget.icons;
+
+                            this.model.widget = QuickStartWidget.generateWidget(args, callback);
                             break;
                     }
                 }, this));

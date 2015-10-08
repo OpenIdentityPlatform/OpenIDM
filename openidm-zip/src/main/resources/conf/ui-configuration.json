@@ -36,15 +36,15 @@
                 },
                 {
                     "type" : "quickStart",
-                    "size" : "medium",
+                    "size" : "large",
                     "cards" : [
                         {
-                            "name" : "dashboard.viewProfile",
+                            "name" : "dashboard.quickStart.viewProfile",
                             "icon" : "fa-user",
                             "href" : "#profile/details"
                         },
                         {
-                            "name" : "dashboard.changePassword",
+                            "name" : "dashboard.quickStart.changePassword",
                             "icon" : "fa-lock",
                             "href" : "#profile/password"
                         }
@@ -55,17 +55,63 @@
         "adminDashboard" : {
             "widgets" : [
                 {
-                    "type": "lastRecon",
-                    "size": "large",
-                    "barchart": false
+                    "type" : "quickStart",
+                    "size" : "large",
+                    "cards" : [
+                        {
+                            "name" : "dashboard.quickStart.addANewConnector",
+                            "icon" : "fa-database",
+                            "href" : "#connectors/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.createANewMapping",
+                            "icon" : "fa-map-marker",
+                            "href" : "#mapping/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.createANewRole",
+                            "icon" : "fa-check-square-o",
+                            "href" : "#resource/managed/role/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.addANewDevice",
+                            "icon" : "fa-tablet",
+                            "href" : "#managed/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.setupRegistration",
+                            "icon" : "fa-gear",
+                            "href" : "#selfservice/userregistration/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.setupPasswordReset",
+                            "icon" : "fa-gear",
+                            "href" : "#selfservice/passwordreset/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.createAUser",
+                            "icon" : "fa-user",
+                            "href" : "#resource/managed/user/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.setupAuthentication",
+                            "icon" : "fa-user",
+                            "href" : "#settings/"
+                        }
+                    ]
                 },
                 {
-                    "type": "systemHealthFull",
-                    "size": "large"
+                    "type" : "lastRecon",
+                    "size" : "large",
+                    "barchart" : false
                 },
                 {
-                    "type": "resourceList",
-                    "size": "large"
+                    "type" : "systemHealthFull",
+                    "size" : "large"
+                },
+                {
+                    "type" : "resourceList",
+                    "size" : "large"
                 }
             ]
         }

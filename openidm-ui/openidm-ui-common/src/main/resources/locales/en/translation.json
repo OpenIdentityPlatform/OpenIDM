@@ -15,8 +15,19 @@
         "pause" : "Pause",
         "start" : "Start",
         "refresh" : "Refresh",
-        "viewProfile" : "View Profile",
-        "changePassword" : "Change Password",
+        "quickStart" : {
+            "addANewConnector" : "Add a New Connector",
+            "createANewMapping" : "Create a New Mapping",
+            "createANewRole" : "Create a New Role",
+            "addANewDevice" : "Add a New Device",
+            "setupRegistration" : "Setup Registration",
+            "setupPasswordReset" : "Setup Password Reset",
+            "createAUser" : "Create a User",
+            "setupAuthentication" : "Setup Authentication",
+            "viewProfile" : "View Profile",
+            "changePassword" : "Change Password",
+            "quickStartTitle" : "Quick Start"
+        },
         "reconWidget" : {
             "editMapping" : "Edit Mapping",
             "success" : "SUCCESS",

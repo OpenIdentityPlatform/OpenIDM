@@ -75,28 +75,22 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
 
                 this.model.widgetList = {
                     lifeCycleMemoryBoth: {
-                        name : $.t("dashboard.memoryUsageBoth"),
-                        icon : "fa-heartbeat"
+                        name : $.t("dashboard.memoryUsageBoth")
                     },
                     lifeCycleMemoryHeap: {
-                        name : $.t("dashboard.memoryUsageHeap"),
-                        icon : "fa-heartbeat"
+                        name : $.t("dashboard.memoryUsageHeap")
                     },
                     lifeCycleMemoryNonHeap: {
-                        name : $.t("dashboard.memoryUsageNonHeap"),
-                        icon : "fa-heartbeat"
+                        name : $.t("dashboard.memoryUsageNonHeap")
                     },
                     reconUsage: {
-                        name: $.t("dashboard.reconProcesses"),
-                        icon: "fa-eye"
+                        name: $.t("dashboard.reconProcesses")
                     },
                     cpuUsage: {
-                        name: $.t("dashboard.cpuUsage"),
-                        icon : "fa-pie-chart"
+                        name: $.t("dashboard.cpuUsage")
                     },
                     quickStart: {
-                        name: "Quick Start",
-                        icon: "fa-key"
+                        name: $.t("dashboard.quickStart.quickStartTitle")
                     }
                 };
 
@@ -122,8 +116,6 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
                             this.model.widget = FullHealthWidget.generateWidget(args, callback);
                             break;
                         case "quickStart":
-                            this.$el.find(".dropdown-toggle").hide();
-
                             args.icons = args.widget.icons;
 
                             this.model.widget = QuickStartWidget.generateWidget(args, callback);
