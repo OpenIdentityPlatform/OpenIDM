@@ -563,7 +563,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 return "0";
             }
 
-            lastUpdateId = results.size() > 0 ? results.get(0).get(ResourceResponse.FIELD_ID).asString() : "0";
+            lastUpdateId = results.size() > 0 ? results.get(0).get(ResourceResponse.FIELD_CONTENT_ID).asString() : "0";
         }
         return lastUpdateId;
     }
