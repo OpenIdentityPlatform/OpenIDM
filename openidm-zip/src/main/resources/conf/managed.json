@@ -209,8 +209,8 @@
                                 "path" : "managed/role",
                                 "query" : {
                                     "queryFilter" : "true",
-                                    "fields" : ["properties/name"],
-                                    "sortKeys" : ["properties/name"]
+                                    "fields" : ["name"],
+                                    "sortKeys" : ["name"]
                                 }
                             }
                         }
@@ -257,7 +257,7 @@
                         "title" : "Effective Roles",
                         "viewable" : false,
                         "items" : {
-                            "type" : "string",
+                            "type" : "object",
                             "returnByDefault" : true,
                             "isVirtual" : true
                         }
@@ -267,7 +267,7 @@
                         "title" : "Effective Assignments",
                         "viewable" : false,
                         "items" : {
-                            "type" : "string",
+                            "type" : "object",
                             "returnByDefault" : true,
                             "isVirtual" : true
                         }
@@ -387,36 +387,19 @@
                         "searchable" : false,
                         "type" : "string"
                     },
-                    "properties" : {
-                        "description" : "",
-                        "title" : "Properties",
+                    "name" : {
+                        "description" : "The assignment name, used for display purposes.",
+                        "title" : "Name",
                         "viewable" : true,
-                        "searchable" : false,
-                        "type" : "object",
-                        "properties" : {
-                            "name" : {
-                                "description" : "The role name, used for display purposes.",
-                                "title" : "Name",
-                                "viewable" : true,
-                                "searchable" : true,
-                                "type" : "string"
-                            },
-                            "description" : {
-                                "description" : "",
-                                "title" : "Description",
-                                "viewable" : true,
-                                "searchable" : true,
-                                "type" : "string"
-                            }
-                        },
-                        "required" : [
-                            "name",
-                            "description"
-                        ],
-                        "order" : [
-                            "name",
-                            "description"
-                        ]
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "description" : {
+                        "description" : "The assignment description, used for display purposes.",
+                        "title" : "Description",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
                     },
                     "members" : {
                         "description" : "",
@@ -456,19 +439,147 @@
                     },
                     "assignments" : {
                         "description" : "",
-                        "title" : "Assignments",
+                        "title" : "Managed Assignments",
                         "viewable" : true,
-                        "searchable" : false,
-                        "type" : "string"
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "returnByDefault" : true,
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : {
+                                "path" : "managed/assignment",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : ["name"],
+                                    "sortKeys" : ["name"]
+                                }
+                            }
+                        }
                     }
                 },
                 "required" : [
-                    "properties"
+                    "name",
+                    "description"
                 ],
                 "order" : [
                     "_id",
-                    "properties",
+                    "name",
+                    "description",
                     "assignments"
+                ]
+            }
+        },
+        {
+            "name" : "assignment",
+            "schema" : {
+                "$schema" : "http://forgerock.org/json-schema#",
+                "type" : "object",
+                "title" : "Assignment",
+                "description" : "A role assignment",
+                "properties" : {
+                    "_id" : {
+                        "description" : "The assignment ID",
+                        "title" : "Name",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "type" : "string"
+                    },
+                    "name" : {
+                        "description" : "The assignment name, used for display purposes.",
+                        "title" : "Name",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "description" : {
+                        "description" : "The assignment description, used for display purposes.",
+                        "title" : "Description",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "attributes" : {
+                        "description" : "The attributes operated on by this assignment.",
+                        "title" : "Assignment Attributes",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "assignmentOperation" : {
+                                    "type" : "string"
+                                },
+                                "unassignmentOperation" : {
+                                    "type" : "string"
+                                },
+                                "name" : {
+                                    "type" : "string"
+                                },
+                                "value" : {
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    },
+                    "linkQualifiers" : {
+                        "description" : "Conditional link qualifiers to restrict this assignment to.",
+                        "title" : "Link Qualifiers",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string"
+                        }
+                    },
+                    "roles" : {
+                        "description" : "",
+                        "title" : "Managed Roles",
+                        "viewable" : true,
+                        "userEditable" : false,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship": true,
+                            "reversePropertyName": "assignments",
+                            "returnByDefault" : false,
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : {
+                                "path" : "managed/role",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : ["name"],
+                                    "sortKeys" : ["name"]
+                                }
+                            }
+                        }
+                    }
+                },
+                "required" : [
+                    "name",
+                    "description",
+                    "mapping"
+                ],
+                "order" : [
+                    "_id",
+                    "name",
+                    "description",
+                    "attributes",
+                    "linkQualifiers"
                 ]
             }
         }
