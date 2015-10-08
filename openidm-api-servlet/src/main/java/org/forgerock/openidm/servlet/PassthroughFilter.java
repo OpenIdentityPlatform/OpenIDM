@@ -35,7 +35,7 @@ import org.forgerock.util.promise.Promise;
 /**
  * Passthrough filter passes all requests through verbatim.
  */
-public class PassthroughFilter implements Filter {
+class PassthroughFilter implements Filter {
     @Override
     public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
             RequestHandler requestHandler) {

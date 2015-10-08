@@ -31,7 +31,7 @@ import org.forgerock.util.promise.Promise;
 /**
  * Maintenance filter disables CREST write operations.
  */
-public class MaintenanceFilter extends PassthroughFilter {
+class MaintenanceFilter extends PassthroughFilter {
     @Override
     public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
             RequestHandler requestHandler) {
