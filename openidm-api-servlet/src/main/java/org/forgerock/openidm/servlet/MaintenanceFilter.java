@@ -19,12 +19,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -36,11 +31,15 @@ import org.forgerock.util.promise.Promise;
 /**
  * Maintenance filter disables CREST write operations.
  */
-public class MaintenanceFilter implements Filter {
+public class MaintenanceFilter extends PassthroughFilter {
     @Override
     public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
             RequestHandler requestHandler) {
-        return requestHandler.handleAction(context, actionRequest);
+        if (actionRequest.getResourcePath().startsWith("maintenance")) {
+            return requestHandler.handleAction(context, actionRequest);
+        }
+        return new ServiceUnavailableException("Unable to perform action on " + actionRequest.getResourcePath() +
+                " in maintenance mode.").asPromise();
     }
 
     @Override
@@ -62,18 +61,6 @@ public class MaintenanceFilter implements Filter {
             RequestHandler requestHandler) {
         return new ServiceUnavailableException("Unable to patch on " + patchRequest.getResourcePath() +
                 " in maintenance mode.").asPromise();
-    }
-
-    @Override
-    public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest queryRequest,
-            QueryResourceHandler queryResourceHandler, RequestHandler requestHandler) {
-        return requestHandler.handleQuery(context, queryRequest, queryResourceHandler);
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest readRequest,
-            RequestHandler requestHandler) {
-        return requestHandler.handleRead(context, readRequest);
     }
 
     @Override
