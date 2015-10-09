@@ -126,20 +126,12 @@ public class AuditServiceImpl implements AuditService {
     @Reference(policy = ReferencePolicy.STATIC)
     private ScriptRegistry scriptRegistry;
 
-    public void bindScriptRegistry(ScriptRegistry sr) {
-        scriptRegistry = sr;
-    }
-
     private org.forgerock.audit.AuditService auditService;
     private JsonValue config; // Existing active configuration
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
-
-    public void bindEnhancedConfig(EnhancedConfig ec) {
-        enhancedConfig = ec;
-    }
 
     /** the script to execute to format exceptions */
     private static ScriptEntry exceptionFormatterScript = null;
