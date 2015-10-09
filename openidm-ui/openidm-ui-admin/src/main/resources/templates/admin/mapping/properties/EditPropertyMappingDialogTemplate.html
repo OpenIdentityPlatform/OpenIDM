@@ -56,29 +56,23 @@
             <div role="tabpanel" class="tab-pane" id="Condition_Script">
                 <p>{{t "templates.correlation.conditionScriptInfo"}}</p>
 
-                <div class="btn-group btn-group-tabs" data-toggle="buttons" id="conditionTabButtons" role="tablist">
-                    <label class="btn btn-default">
-                        <input data-target="noneTab" type="radio" name="conditionalUpdate" id="conditionalNone" value="none" class="conditionalUpdateType" aria-controls="conditions-scripts-tab" role="tab" data-toggle="tab"/> {{t "templates.correlation.noCondition"}}
-                    </label>
-                    <label class="btn btn-default">
-                        <input data-target="conditionFilterTab" type="radio" name="conditionalUpdate" id="conditionalFilter" value="conditionalFilter" aria-controls="conditions-scripts-tab" role="tab" data-toggle="tab"  class="conditionalUpdateType"/> {{t "templates.correlation.conditionFilter"}}
-                    </label>
-                    <label class="btn btn-default">
-                        <input data-target="conditionScriptTab" type="radio" name="conditionalUpdate" id="conditionalScript" value="script" aria-controls="conditions-scripts-tab" role="tab" data-toggle="tab"  class="conditionalUpdateType" /> {{t "templates.correlation.script"}}
-                    </label>
+                <div class="btn-group" data-toggle="btns" id="conditionTabButtons" role="tablist">
+                    <a class="btn toggle-view-btn btn-default" id="conditionalNone" href="#noneTab" data-toggle="tab">{{t "templates.correlation.noCondition"}}</a>
+                    <a class="btn toggle-view-btn btn-default"  id="conditionalFilter" href="#conditionFilterTab" data-toggle="tab">{{t "templates.correlation.conditionFilter"}}</a>
+                    <a class="btn toggle-view-btn btn-default"  id="conditionalScript" href="#conditionScriptTab" data-toggle="tab">{{t "templates.correlation.script"}}</a>
                 </div>
 
                 <div class="tab-content">
-                    <div style="display:none;" id="noneTab" class="tab-none">
+                    <div id="noneTab" class="tab-none tab-pane">
 
                     </div>
-                    <div style="display:none;"  id="conditionFilterTab" class="conditionalFilter">
+                    <div id="conditionFilterTab" class="conditionalFilter tab-pane">
                         <div class="col-sm-12 filter-form form-horizontal" id="conditionFilterHolder">
 
                         </div>
                         <div class="clearfix"></div>
                     </div>
-                    <div  style="display:none;" id="conditionScriptTab" class="conditionalScript">
+                    <div id="conditionScriptTab" class="conditionalScript tab-pane">
                         <div id="conditionScriptHolder"></div>
                     </div>
                 </div>

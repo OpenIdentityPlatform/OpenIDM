@@ -45,10 +45,13 @@
   background-color: @base-theme-color;
 }
 
-#connectorGrid .backgrid-table td,
-#managedGrid .backgrid-table td {
+#connectorGrid .backgrid td,
+#managedGrid .backgrid td {
   position: relative;
   top: 1px;
+  padding-top:18px;
+  padding-bottom:8px;
+  overflow:visible;
 }
 
 .connector-delete:hover,
@@ -62,13 +65,7 @@
   color:white;
 }
 
-#connectorGrid .backgrid-table td,
-#managedGrid .backgrid-table td {
-  padding-top:18px;
-  padding-bottom:8px;
-}
-
-.backgrid-table {
+.backgrid {
   .image.circle {
     overflow: hidden;
     background-color: @base-theme-color;
@@ -116,7 +113,7 @@
   }
 }
 
-.backgrid, .backgrid-table {
+.backgrid {
   .smallScreenCell .btn-group {
     float: right;
     position: relative;
