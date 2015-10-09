@@ -45,20 +45,21 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
         },
         model: {
             surpressSave: false,
+            uiConfigurationParameter: "selfRegistration",
             serviceType: "user",
             configUrl: "selfservice/registration",
             msgType: "selfServiceUserRegistration",
             "configDefault": {
-                "stageConfigs": [
+                "stageConfigs" : [
                     {
                         "name" : "emailValidation",
                         "email" : {
-                            "serviceUrl": "/email",
-                            "from": "info@admin.org",
-                            "subject": "Register new account",
-                            "message": "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-                            "verificationLinkToken": "%link%",
-                            "verificationLink": "http://localhost:9999/example/#register/"
+                            "from" : "info@admin.org",
+                            "subject" : "Register new account",
+                            "mimeType" : "text/html",
+                            "message" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+                            "verificationLinkToken" : "%link%",
+                            "verificationLink" : "https://localhost:8443/#register/"
                         }
                     },
                     {
@@ -68,17 +69,19 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     {
                         "name" : "kbaStage",
                         "kbaPropertyName" : "kbaInfo",
-                        "questions":[
+                        "questions" : [
                             {
-                                "id":"1",
-                                "question":{
-                                    "en":"What's your favorite color?"
+                                "id" : "1",
+                                "question" : {
+                                    "en" : "What's your favorite color?",
+                                    "en_GB" : "What's your favorite colour?",
+                                    "fr" : "Quelle est votre couleur préférée?"
                                 }
                             },
                             {
-                                "id":"2",
-                                "question":{
-                                    "en":"Who was your first employer?"
+                                "id" : "2",
+                                "question" : {
+                                    "en" : "Who was your first employer?"
                                 }
                             }
                         ]
@@ -88,11 +91,17 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                         "identityServiceUrl" : "managed/user"
                     }
                 ],
-                "snapshotToken": {
-                    "name": "jwt",
-                    "tokenExpiry": 180
+                "snapshotToken" : {
+                    "type" : "jwt",
+                    "sharedKey" : "!tHiSsOmEsHaReDkEy!",
+                    "keyPairAlgorithm" : "RSA",
+                    "keyPairSize" : 1024,
+                    "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+                    "encryptionMethod" : "A128CBC_HS256",
+                    "jwsAlgorithm" : "HS256",
+                    "tokenExpiry" : 180
                 },
-                "storage": "stateless"
+                "storage" : "stateless"
             },
             "saveConfig": {}
         },
@@ -103,6 +112,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 help: $.t("templates.selfservice.emailValidationDescription")
             },
             {
+                type: "userDetails",
+                title: $.t("templates.selfservice.userDetailsTitle"),
+                help: $.t("templates.selfservice.userDetailsHelp")
+            },
+            {
                 type: "kbaStage",
                 title: $.t("templates.selfservice.kbaTitle"),
                 help: $.t("templates.selfservice.kbaHelp")
@@ -111,11 +125,6 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 type: "selfRegistration",
                 title: $.t("templates.selfservice.registrationForm"),
                 help: $.t("templates.selfservice.registrationFormDescription")
-            },
-            {
-                type: "userDetails",
-                title: $.t("templates.selfservice.userDetailsTitle"),
-                help: $.t("templates.selfservice.userDetailsHelp")
             }];
 
             this.selfServiceRender(args, callback);

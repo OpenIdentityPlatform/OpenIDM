@@ -1,8 +1,7 @@
 {
     "configuration" : {
         "selfRegistration" : false,
-        "securityQuestions" : false,
-        "siteIdentification" : false,
+        "passwordReset" : false,
         "lang" : "en",
         "passwordResetLink" : "",
         "roles" : {

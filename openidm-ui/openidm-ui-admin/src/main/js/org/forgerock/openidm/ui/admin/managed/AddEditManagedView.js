@@ -301,6 +301,29 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                                         "required": true,
                                         "default": false
                                     },
+                                    "userEditable": {
+                                        "title": "End users allowed to edit?",
+                                        "type": "boolean",
+                                        "required": false,
+                                        "default": false
+                                    },
+                                    "policies": {
+                                        "title": "Validation policies",
+                                        "type": "array",
+                                        "required": false,
+                                        "items": {
+                                            "type": "object",
+                                            "properties": {
+                                                "policyId": {
+                                                    "type": "string",
+                                                    "title": "Policy"
+                                                },
+                                                "params": {
+                                                    "type": "object"
+                                                }
+                                            }
+                                        }
+                                    },
                                     "type": {
                                         "title": "Type",
                                         "$ref": "#/definitions/oneOfTypes"

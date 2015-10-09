@@ -25,8 +25,11 @@
 /*global define */
 
 define("org/forgerock/openidm/ui/admin/mapping/behaviors/ReconciliationScriptView", [
+    "jquery",
+    "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView"
-], function(MappingScriptsView) {
+], function($, _,
+            MappingScriptsView) {
     var ReconciliationScriptView = MappingScriptsView.extend({
         element: "#reconQueryView",
         noBaseTemplate: true,
@@ -43,6 +46,11 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/ReconciliationScriptVie
         render: function() {
             this.parentRender(function () {
                 this.init();
+
+                //Needs to be out of scope since this dom element isn't in the $el and we need access to the script widget
+                $("#reconQueryViewBody").on("shown.bs.collapse", _.bind(function() {
+                    this.model.scriptEditors.result.refresh();
+                }, this));
             });
         }
     });

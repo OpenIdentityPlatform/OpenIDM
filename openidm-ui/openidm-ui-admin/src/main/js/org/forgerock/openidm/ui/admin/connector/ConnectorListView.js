@@ -111,7 +111,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
 
                 this.parentRender(_.bind(function(){
                     connectorGrid = new Backgrid.Grid({
-                        className: "table backgrid-table",
+                        className: "table backgrid",
                         row: RenderRow,
                         columns: BackgridUtils.addSmallScreenCell([
                             {
@@ -203,7 +203,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                 tempConnector = _.clone(this.data.currentConnectors);
 
             if(selectedItem.length > 0) {
-                _.each(this.$el.find(".backgrid-table tbody tr"), function(row) {
+                _.each(this.$el.find(".backgrid tbody tr"), function(row) {
                     if($(row).attr("data-connector-title") === selectedItem.attr("data-connector-title")) {
                         alternateItem = $(row);
                     }
@@ -262,7 +262,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                     }
                 }, this);
 
-                _.each(this.$el.find(".backgrid-table tbody tr"), function(row) {
+                _.each(this.$el.find(".backgrid tbody tr"), function(row) {
                     if($(row).attr("data-type").toLowerCase().indexOf(search) > -1 || $(row).attr("data-name").toLowerCase().indexOf(search) > -1) {
                         $(row).fadeIn();
                     } else {
@@ -271,7 +271,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                 }, this);
             } else {
                 this.$el.find(".card-spacer").fadeIn();
-                this.$el.find(".backgrid-table tbody tr").fadeIn();
+                this.$el.find(".backgrid tbody tr").fadeIn();
             }
         }
     });
