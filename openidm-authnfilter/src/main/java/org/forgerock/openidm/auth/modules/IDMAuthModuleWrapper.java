@@ -80,8 +80,8 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
     public static final String PROPERTY_MAPPING = "propertyMapping";
     public static final String AUTHENTICATION_ID = "authenticationId";
     public static final String USER_CREDENTIAL = "userCredential";
+    public static final String USER_ROLES = "userRoles";
 
-    static final String USER_ROLES = "userRoles";
     static final String DEFAULT_USER_ROLES = "defaultUserRoles";
     private static final String GROUP_ROLE_MAPPING = "groupRoleMapping";
     private static final String GROUP_MEMBERSHIP = "groupMembership";

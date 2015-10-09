@@ -29,6 +29,7 @@ import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_M
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_ROLES;
 
 /**
  * A factory Function to build an Authenticator from an auth module config.
@@ -63,7 +64,8 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
                     jsonValue.get(QUERY_ON_RESOURCE).required().asString(),
                     jsonValue.get(QUERY_ID).required().asString(),
                     jsonValue.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).required().asString(),
-                    jsonValue.get(PROPERTY_MAPPING).get(USER_CREDENTIAL).required().asString());
+                    jsonValue.get(PROPERTY_MAPPING).get(USER_CREDENTIAL).required().asString(),
+                    jsonValue.get(PROPERTY_MAPPING).get(USER_ROLES).asString());
         } else if (!jsonValue.get(USERNAME_PROPERTY).isNull()
                 && !jsonValue.get(PASSWORD_PROPERTY).isNull()) {
             return new StaticAuthenticator(
@@ -75,4 +77,3 @@ public class AuthenticatorFactory implements Function<JsonValue, Authenticator> 
         }
     }
 }
-

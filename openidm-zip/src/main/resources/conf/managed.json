@@ -223,7 +223,7 @@
                         "userEditable" : false,
                         "items" : {
                             "type" : "relationship",
-                            "returnByDefault" : true,
+                            "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
