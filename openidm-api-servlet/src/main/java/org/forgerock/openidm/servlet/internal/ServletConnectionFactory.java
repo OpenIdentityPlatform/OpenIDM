@@ -127,10 +127,10 @@ public class ServletConnectionFactory implements ConnectionFactory {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig = null;
 
-    @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.maintenancemodefilter)")
-    private Filter maintenanceFilterWrapper;
+    @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.maintenance)")
+    private Filter maintenanceFilter = null;
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
@@ -151,10 +151,6 @@ public class ServletConnectionFactory implements ConnectionFactory {
         }
 
         logger.info("Servlet ConnectionFactory created.");
-    }
-
-    public void testActivate(ComponentContext context) throws ServletException, NamespaceException {
-        activate(context);
     }
 
     @Deactivate
@@ -370,13 +366,13 @@ public class ServletConnectionFactory implements ConnectionFactory {
      * @param auditFilter the audit filter to attach to the request handler
      * @return the RequestHandler decorated with a FilterChain consisting of any filters that are configured
      */
-    RequestHandler init(JsonValue configuration, final RequestHandler handler, final AuditFilter auditFilter)
+    RequestHandler init(JsonValue configuration, final RequestHandler handler, final Filter auditFilter)
             throws ScriptException, ResourceException {
         final JsonValue filterConfig = configuration.get("filters").expect(List.class);
-        final List<Filter> filters = new ArrayList<>(filterConfig.size() + 1); // add one for the logging filter
+        // # filters = config filters + maintenance + logging + audit
+        final List<Filter> filters = new ArrayList<>(filterConfig.size() + 3);
 
-        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("((?!(audit|updates)).)*"),
-                maintenanceFilterWrapper));
+        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("((?!(audit|updates)).)*"), maintenanceFilter));
         filters.add(newLoggingFilter());
         filters.add(Filters.conditionalFilter(Filters.matchResourcePath("^(?!.*(^audit/)).*$"), auditFilter));
 
@@ -400,7 +396,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
      * @throws org.forgerock.json.JsonValueException
      *             TODO.
      */
-    public Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
+    private Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
         FilterCondition filterCondition = null;
 
         final Pair<JsonPointer, ScriptEntry> condition = getScript(config.get("condition"));
