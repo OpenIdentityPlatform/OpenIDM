@@ -321,11 +321,17 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             }
 
             if(this.data.newObject){
+                formVal = _.omit(formVal,function (val) { return val === "" || val === null; });
                 resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
             } else {
                 if (!this.isSystemResource) {
                     _.each(this.$el.find(".resourceCollectionValue"), function(element) {
-                        formVal[$(element).attr("propname")] = JSON.parse($(element).val());
+                        var val = $(element).val();
+                        
+                        if (val.length) {
+                            val = JSON.parse($(element).val());
+                        }
+                        formVal[$(element).attr("propname")] = val;
                     });
                     resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
                 } else {
