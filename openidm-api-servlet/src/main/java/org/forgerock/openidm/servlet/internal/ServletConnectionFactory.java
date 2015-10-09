@@ -121,32 +121,16 @@ public class ServletConnectionFactory implements ConnectionFactory {
     @Reference(target = "(org.forgerock.openidm.router=*)")
     protected RequestHandler requestHandler = null;
 
-    public void bindRequestHandler(RequestHandler rh) {
-        requestHandler = rh;
-    }
-
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private ScriptRegistry scriptRegistry = null;
-
-    public void bindScriptRegistry(ScriptRegistry sr) {
-        scriptRegistry = sr;
-    }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
 
-    public void bindEnhancedConfig(EnhancedConfig ec) {
-        enhancedConfig = ec;
-    }
-
     @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.maintenancemodefilter)")
     private Filter maintenanceFilterWrapper;
-
-    public void bindMaintenanceFilterWrapper(Filter f) {
-        maintenanceFilterWrapper = f;
-    }
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {

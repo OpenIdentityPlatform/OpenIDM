@@ -84,10 +84,6 @@ public class MaintenanceService implements RequestHandler {
     @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.maintenancemodefilter)")
     private MaintenanceFilterWrapper maintenanceFilterWrapper;
 
-    public void bindMaintenanceFilterWrapper(MaintenanceFilterWrapper mfw) {
-        maintenanceFilterWrapper = mfw;
-    }
-
     /**
      * A boolean indicating if maintenance mode is currently enabled
      */
