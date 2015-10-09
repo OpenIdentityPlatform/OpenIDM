@@ -18,10 +18,11 @@ Sample Historical Account Linking LDAP <-> Internal Repository
 =======================================================
 
 This sample shows you historical account linking between the OpenIDM's managed users and a local LDAP directory server, 
-such as OpenDJ.  Managed users in OpenIDM will maintain a list of historically linked accounts on the local LDAP server. 
-This list will be stored in the "historicalAccounts" field of a managed user and will contain all past and current 
-accounts. Each account will be represented as a relationship and will contain information about the date linked/unlinked 
-and whether the account is currently active.
+such as OpenDJ. OpenIDM is the source of records and drives all changes to downstream systems. Managed users in OpenIDM 
+will maintain a list of historically linked accounts on the local LDAP server. This list will be stored in the 
+"historicalAccounts" field of a managed user and will contain all past and current accounts. Each account will be 
+represented as a relationship and will contain information about the date linked/unlinked and whether the account is 
+currently active.
 
 The sample includes the following customized configuration files:
 
@@ -43,9 +44,6 @@ This sample includes the following scripts:
 *   script/onUnlink-managedUser_systemLdapAccounts.js  Updates the relationship entry's properties representing the 
     linked target object with a "unlinkDate" specifying the date the target was unlinked, and sets "active" to false
     indicating that the target is no longer linked.
-*   script/onUnlink-systemLdapAccounts_managedUser.js  Updates the relationship entry's properties representing the 
-    linked source object with a "unlinkDate" specifying the date the source was unlinked, and sets "active" to false
-    indicating that the source is no longer linked. 
 
 Setup OpenDJ
 ------------
