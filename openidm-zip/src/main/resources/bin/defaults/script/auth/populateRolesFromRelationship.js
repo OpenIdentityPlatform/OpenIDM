@@ -21,7 +21,7 @@
  * global security - map of security context details as have been determined thus far
  *
  *      {
- *          "authorizationId": {
+ *          "authorization": {
  *              "id": "jsmith",
  *              "component": "managed/user",
  *              "roles": [ "openidm-authorized" ]
@@ -33,7 +33,7 @@
 (function () {
 
     var _ = require("lib/lodash"),
-        user = openidm.read(security.authorizationId.component + "/" + security.authorizationId.id);
+        user = openidm.read(security.authorization.component + "/" + security.authorization.id);
 
     if (!_.has(properties.propertyMapping, 'userRoles')) {
         throw {
@@ -49,9 +49,9 @@
         };
     }
 
-    security.authorizationId = {
-        'id': security.authorizationId.id,
-        'component': security.authorizationId.component,
+    security.authorization = {
+        'id': security.authorization.id,
+        'component': security.authorization.component,
         'roles': _.chain(user[properties.propertyMapping.userRoles])
                     .filter(function (r) {
                         return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).startsWith("repo/internal/role");

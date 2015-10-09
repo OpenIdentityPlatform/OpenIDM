@@ -31,7 +31,7 @@ define("org/forgerock/openidm/ui/common/components/Footer", [
     "org/forgerock/openidm/ui/common/delegates/InfoDelegate"
 ], function($, _, Footer, Configuration, InfoDelegate) {
     function isAdmin() {
-        return Configuration.loggedUser && Configuration.loggedUser.has("roles") && _.indexOf(Configuration.loggedUser.get("roles"), "ui-admin") > -1;
+        return Configuration.loggedUser && Configuration.loggedUser.has("roles") && _.indexOf(Configuration.loggedUser.uiroles, "ui-admin") > -1;
     }
 
     var Component = Footer.extend({

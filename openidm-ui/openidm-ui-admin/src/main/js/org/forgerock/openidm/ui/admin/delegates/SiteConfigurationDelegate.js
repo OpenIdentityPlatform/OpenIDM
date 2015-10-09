@@ -54,7 +54,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     SiteConfigurationDelegate.prototype.checkForDifferences = function(){
         var promise = $.Deferred();
 
-        if (conf.loggedUser && _.contains(conf.loggedUser.get("roles"),"ui-admin") &&
+        if (conf.loggedUser && _.contains(conf.loggedUser.uiroles,"ui-admin") &&
             Navigation.configuration.links.admin.urls.managed.urls.length === 0) {
 
             eventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION,

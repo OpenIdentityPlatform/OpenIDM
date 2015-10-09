@@ -50,7 +50,7 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
             this.data = {};
 
             if (conf.loggedUser) {
-                var roles = conf.loggedUser.get('roles');
+                var roles = conf.loggedUser.uiroles;
 
                 this.model.dashboard = conf.globalData.dashboard;
 
@@ -90,7 +90,7 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
         },
 
         loadWorkflow: function(roles, callback) {
-            if(_.indexOf(roles, 'openidm-admin') !== -1) {
+            if(_.indexOf(roles, 'ui-admin') !== -1) {
                 tasksDashboard.data.mode = "openidm-admin";
                 tasksDashboard.render([], callback);
             } else {

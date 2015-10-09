@@ -69,13 +69,13 @@ define("org/forgerock/openidm/ui/common/UserModel", [
         },
         getUIRoles: function (roles) {
             var getRoleFromRef = function (role) {
-                    if (role && role._ref) {
+                    if (_.isObject(role) && _.has(role, "_ref")) {
                         role = role._ref.split("/").pop();
                     }
-                    
+
                     return role;
                 };
-                
+
             return _.chain(roles)
                     .filter(function (r) {
                         return _.has(Configuration.globalData.roles, getRoleFromRef(r));
@@ -86,9 +86,6 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                     .value();
         },
         parse: function (response) {
-            var roles = response.roles || [];
-            response.roles = roles.concat(this.getUIRoles(roles));
-
             if (_.has(response, "password")) {
                 if (_.isString(response.password)) {
                     response.needsResetPassword = true;
@@ -124,6 +121,7 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                 this.id = sessionDetails.authorization.id;
                 this.url = "/" + Constants.context + "/" + sessionDetails.authorization.component;
                 this.component = sessionDetails.authorization.component;
+                this.uiroles = this.getUIRoles(sessionDetails.authorization.roles);
                 return $.when(this.fetch(), this.getValidationRules()).then(_.bind(function () {
                     return this;
                 }, this));
