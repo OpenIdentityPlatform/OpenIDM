@@ -124,7 +124,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
 
             this.parentRender(_.bind(function(){
                 managedObjectGrid = new Backgrid.Grid({
-                    className: "table backgrid-table",
+                    className: "table backgrid",
                     row: RenderRow,
                     columns: BackgridUtils.addSmallScreenCell([
                         {
@@ -205,7 +205,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
                 tempManaged = _.clone(this.data.currentManagedObjects);
 
             if(selectedItem.length > 0) {
-                _.each(this.$el.find(".backgrid-table tbody tr"), function(row) {
+                _.each(this.$el.find(".backgrid tbody tr"), function(row) {
                     if($(row).attr("data-managed-title") === selectedItem.attr("data-managed-title")) {
                         alternateItem = $(row);
                     }
@@ -262,7 +262,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
                     }
                 }, this);
 
-                _.each(this.$el.find(".backgrid-table tbody tr"), function(row) {
+                _.each(this.$el.find(".backgrid tbody tr"), function(row) {
                     if($(row).attr("data-managed-title").toLowerCase().indexOf(search) > -1) {
                         $(row).fadeIn();
                     } else {
@@ -271,7 +271,7 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
                 }, this);
             } else {
                 this.$el.find(".card-spacer").fadeIn();
-                this.$el.find(".backgrid-table tbody tr").fadeIn();
+                this.$el.find(".backgrid tbody tr").fadeIn();
             }
         }
     });

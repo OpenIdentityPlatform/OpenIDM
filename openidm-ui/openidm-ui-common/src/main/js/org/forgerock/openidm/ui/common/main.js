@@ -27,5 +27,6 @@
 define("org/forgerock/openidm/ui/common/main", [
     "./delegates/SiteConfigurationDelegate",
     "./components/Footer",
-    "./login/InternalLoginHelper"
+    "./login/InternalLoginHelper",
+    "./login/LoginView"
 ]);

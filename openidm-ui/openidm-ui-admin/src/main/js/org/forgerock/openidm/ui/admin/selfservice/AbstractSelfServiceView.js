@@ -52,8 +52,12 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 this.model.surpressSave = true;
                 this.$el.find(".section-check:not(:checked)").prop('checked', true).trigger("change");
                 this.model.surpressSave = false;
+                this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = true;
 
-                ConfigDelegate.createEntity(this.model.configUrl, this.model.saveConfig).then(_.bind(function() {
+                $.when(
+                    ConfigDelegate.createEntity(this.model.configUrl, this.model.saveConfig),
+                    ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
+                ).then(_.bind(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
                 }, this));
             } else {
@@ -62,8 +66,12 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 this.model.surpressSave = true;
                 this.$el.find(".section-check:checked").prop('checked', false).trigger("change");
                 this.model.surpressSave = false;
+                this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = false;
 
-                ConfigDelegate.deleteEntity(this.model.configUrl).then(_.bind(function() {
+                $.when(
+                    ConfigDelegate.deleteEntity(this.model.configUrl),
+                    ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
+                ).then(_.bind(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Delete");
                 }, this));
             }
@@ -175,7 +183,9 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             }
         },
         selfServiceRender: function(args, callback) {
-            ConfigDelegate.readEntity(this.model.configUrl).then(_.bind(function(result){
+            ConfigDelegate.readEntity("ui/configuration").then(_.bind(function (uiConfig) {
+                this.model.uiConfig = uiConfig;
+                ConfigDelegate.readEntity(this.model.configUrl).then(_.bind(function(result){
                     $.extend(true, this.model.saveConfig, result);
                     $.extend(true, this.data.config, result);
 
@@ -210,6 +220,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                         }
                     }, this));
                 },this));
+            }, this));
         },
         saveConfig: function() {
             var formData = form2js('advancedOptions', '.', true),

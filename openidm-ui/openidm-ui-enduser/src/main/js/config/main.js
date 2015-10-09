@@ -29,7 +29,6 @@ define("config/main", [
     "./routes/SelfServiceRoutesConfig",
     "./routes/UserRoutesConfig",
     "./routes/CommonIDMRoutesConfig",
-    "./routes/IDMRoutesConfig",
     "./messages/CommonMessages",
     "./messages/SelfServiceMessages",
     "./messages/UserMessages",

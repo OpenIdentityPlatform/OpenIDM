@@ -119,7 +119,7 @@ is rather unsightly:
                {"properties":{"name":"Contractor","description":"Role assigned to contract workers."},"_id":"c22316ba-2096-4272-af10-9b17c17e555b","_rev":"1"}
 
 An easier way to retrieve a role with a server side (or system) generated
-identifier is to use the query filter facility (see the section "Common Filter Expressions" 
+identifier is to use the query filter facility (see the section "Common Filter Expressions"
 in the Integrator's guide: http://openidm.forgerock.org/doc/bootstrap/integrators-guide/index.html#query-filters).
 
 The following query uses a filter expression to retrieve a role with a name
@@ -200,12 +200,14 @@ Let's use Felicitas Doe, the user we encounter in sample2b, as our test user:
                 }' \
                'https://localhost:8443/openidm/managed/user?_action=create'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"1"}
+               {"_id":"a8664d48-e0fb-4099-bac7-a27306f62e68","_rev":"1","mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Wed Oct 07 2015 12:48:00 GMT-0700 (PDT)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"effectiveAssignments":[],"roles":[],"authzRoles":[{"_ref":"repo/internal/role/openidm-authorized"}]}
 
-As can be seen from the result output, our new user has only one role: openidm-
-authorized; this role is assigned automatically when new users are created.
-But it is slightly different than the managed roles we've dealt with so far.
-It is an internal role used for authorization decisions inside OpenIDM.
+As can be seen from the result output, our new user has no entries under
+"roles". They do have an entry under "authzRoles" - openidm-authorized;
+this is a different type of role, and is assigned automatically when new
+users are created. It is slightly different than the managed roles we've
+dealt with so far; it is an internal role used for authorization decisions
+inside OpenIDM.
 
 So, how do we assign the Employee role to this new user who is now on the
 payroll? We need to update the user entry via a PATCH request and add
@@ -221,12 +223,12 @@ a pointer to the role itself:
                    {
                        "operation" : "add",
                        "field" : "/roles/-",
-                       "value" : "managed/role/Employee"
+                       "value" : {"_ref": "managed/role/Employee"}
                    }
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized",["managed/role/Employee"]],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref","managed/role/Employee"}],"effectiveAssignments":{},"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"2"}
+               {"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"2","mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Wed Oct 07 2015 12:48:00 GMT-0700 (PDT)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/Employee","_refProperties":{"_id":"4ad55750-a7be-431c-a104-2938afb322e7","_rev":"1"}}],"effectiveAssignments":[],"roles":[{"_ref":"managed/role/Employee","_refProperties":{"_id":"4ad55750-a7be-431c-a104-2938afb322e7","_rev":"1"}}],"authzRoles":null}
 
 Let's take a closer look at Felicitas' entry using the query filter mechanism:
 
@@ -239,12 +241,27 @@ Let's take a closer look at Felicitas' entry using the query filter mechanism:
                {
                  "result" : [ {
                    "_id" : "be30da0b-4c84-42c9-81bd-348a7779e840",
+                   "_rev" : "2",
                    "userName" : "fdoe",
-                   "roles" : [ "openidm-authorized", "managed/role/Employee" ],
-                   "effectiveRoles" : [ { "_ref" : "managed/role/Employee" } ]
+                   "roles" : [ {
+                     "_ref" : "managed/role/Employee",
+                     "_refProperties" : {
+                       "_id" : "4ad55750-a7be-431c-a104-2938afb322e7",
+                       "_rev" : "1"
+                     }
+                   } ],
+                   "effectiveRoles" : [ {
+                     "_ref" : "managed/role/Employee",
+                     "_refProperties" : {
+                       "_id" : "4ad55750-a7be-431c-a104-2938afb322e7",
+                       "_rev" : "1"
+                     }
+                   } ]
                  } ],
                  "resultCount" : 1,
                  "pagedResultsCookie" : null,
+                 "totalPagedResultsPolicy" : "NONE",
+                 "totalPagedResults" : -1,
                  "remainingPagedResults" : -1
                }
 
@@ -259,7 +276,7 @@ Let's imagine that the Employee role was erroneously assigned to Felicitas.
 We now need to remove this role from her entry. To do that we need to use
 a JSON Patch _remove_ operation. Since the role is part of an array, and is
 actually the 2nd element of that array (see output in section 3 above) the
-resulting PATCH request would look as follows: 
+resulting PATCH request would look as follows:
 
         $ curl --insecure \
                --header "Content-type: application/json" \
@@ -270,7 +287,7 @@ resulting PATCH request would look as follows:
                --data '[
                    {
                        "operation" : "remove",
-                       "field" : "/roles/1"
+                       "field" : "/roles/0"
                    }
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
@@ -299,12 +316,12 @@ with server-side generated identifier:
                    {
                        "operation" : "add",
                        "field" : "/roles/-",
-                       "value" : "managed/role/c22316ba-2096-4272-af10-9b17c17e555b"
+                       "value" : {"_ref":"managed/role/c22316ba-2096-4272-af10-9b17c17e555b"}
                    }
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized","managed/role/c22316ba-2096-4272-af10-9b17c17e555b"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/c22316ba-2096-4272-af10-9b17c17e555b"}],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"6","effectiveAssignments":{}}
+               {"_id":"a8664d48-e0fb-4099-bac7-a27306f62e68","_rev":"3","mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Wed Oct 07 2015 12:48:00 GMT-0700 (PDT)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/c22316ba-2096-4272-af10-9b17c17e555b","_refProperties":{"_id":"e128cdbd-275c-4080-aed5-119cba03b689","_rev":"2"}}],"effectiveAssignments":[],"roles":[{"_ref":"managed/role/c22316ba-2096-4272-af10-9b17c17e555b","_refProperties":{"_id":"e128cdbd-275c-4080-aed5-119cba03b689","_rev":"2"}}],"authzRoles":null}
 
 Now let's try and delete the Contractor role:
 
@@ -317,7 +334,7 @@ Now let's try and delete the Contractor role:
 
                {"code":409,"reason":"Conflict","message":"Cannot delete a role that is currently assigned"}
 
-So, we cannot delete a role that has been assigned to one or more users. 
+So, we cannot delete a role that has been assigned to one or more users.
 We must first deallocate that role from the user entry:
 
 
@@ -330,12 +347,12 @@ We must first deallocate that role from the user entry:
                --data '[
                    {
                        "operation" : "remove",
-                       "field" : "/roles/1"
+                       "field" : "/roles/0"
                    }
                  ]' \
                'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
 
-               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":["openidm-authorized"],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"7","effectiveAssignments":{}}
+               {"mail":"fdoe@example.com","sn":"Doe","telephoneNumber":"555-1234","userName":"fdoe","givenName":"Felicitas","description":"Felicitas Doe","displayName":"fdoe","accountStatus":"active","roles":[],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Thu Apr 16 2015 02:45:17 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"_id":"be30da0b-4c84-42c9-81bd-348a7779e840","_rev":"7","effectiveAssignments":{},"authzRoles":null}
 
 Now let's try and delete the Contractor role again:
 
@@ -385,7 +402,7 @@ https://localhost:8443/admin
 
 If you are using the default credentials provided with the product for the
 Administrative User, you must use:
-username : openidm-admin 
+username : openidm-admin
 password : openidm-admin
 
 Once authenticated, on the Resources page you will scroll down until you see
@@ -425,10 +442,10 @@ In our case we want to select fdoe (Felicitas entry) and we need to click on
 
 You can also verify that Felicitas has the Contractor role by selecting
 the "Data Management View" from the top right corner menu. Click on the user tab
-to see the list of users present in the system. Select Felicitas' entry. 
+to see the list of users present in the system. Select Felicitas' entry.
 The profile should show the Contractor role with a checkmark.
 
-Another way to add the Contractor role to the user is simply to select the 
+Another way to add the Contractor role to the user is simply to select the
 required role from the user's profile page, and then click Update.
 
 For example, select the "Employee" role from Felicitas' profile page and click
@@ -456,4 +473,4 @@ Contractor role (checkmark, don't click on the role itself). Click on "Delete
 Selected" and the Contractor role will be deleted.
 
 
-See the other samples for more information on roles! 
+See the other samples for more information on roles!

@@ -37,10 +37,6 @@ define("org/forgerock/openidm/ui/common/util/AMLoginUtils", [
     obj.init = function(parent,adminContext) {
         var callback;
 
-        if(adminContext){
-            conf.globalData = _.omit(conf.globalData,"selfRegistration","securityQuestions","siteIdentification");
-        }
-
         if(conf.globalData.openamAuthEnabled && conf.globalData.openamLoginUrl && conf.globalData.openamLoginUrl.length){
             if(conf.globalData.openamUseExclusively){
                 obj.openamLogin();

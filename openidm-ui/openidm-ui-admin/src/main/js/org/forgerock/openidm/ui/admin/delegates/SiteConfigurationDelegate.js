@@ -27,22 +27,37 @@
 define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     "jquery",
     "underscore",
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/components/Navigation"
-], function($, _, conf, commonSiteConfigurationDelegate, eventManager, constants, Navigation) {
+], function($, _, AbstractDelegate, conf, commonSiteConfigurationDelegate, eventManager, Constants, Navigation) {
 
-    var obj = commonSiteConfigurationDelegate;
+    var SiteConfigurationDelegate = function (url) {
+        AbstractDelegate.call(this, url);
+        return this;
+    };
 
-    obj.checkForDifferences = function(){
+    SiteConfigurationDelegate.prototype = Object.create(commonSiteConfigurationDelegate);
+
+    SiteConfigurationDelegate.prototype.getConfiguration = function (successCallback) {
+        return commonSiteConfigurationDelegate.getConfiguration.call(this).then(function (config) {
+            // In the admin context, these are always false.
+            config.passwordReset = false;
+            config.selfRegistration = false;
+            successCallback(config);
+        });
+    };
+
+    SiteConfigurationDelegate.prototype.checkForDifferences = function(){
         var promise = $.Deferred();
 
         if (conf.loggedUser && _.contains(conf.loggedUser.get("roles"),"ui-admin") &&
             Navigation.configuration.links.admin.urls.managed.urls.length === 0) {
 
-            eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION,
+            eventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION,
                 {
                     callback: function () {
                         promise.resolve();
@@ -57,5 +72,5 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
         return promise;
     };
 
-    return obj;
+    return new SiteConfigurationDelegate(Constants.host + "/" + Constants.context + "/config/ui/configuration");
 });
