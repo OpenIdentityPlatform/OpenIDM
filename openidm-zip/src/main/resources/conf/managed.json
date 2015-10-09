@@ -463,7 +463,6 @@
                     }
                 },
                 "required" : [
-                    "_id",
                     "properties"
                 ],
                 "order" : [
