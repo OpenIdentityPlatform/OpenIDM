@@ -47,6 +47,7 @@ class ResourceQueryAuthenticator implements Authenticator {
     private final Provider<ConnectionFactory> connectionFactoryProvider;
     private final String queryOnResource;
     private final String queryId;
+    private final String userRolesProperty;
     private final String authenticationIdProperty;
     private final String userCredentialProperty;
 
@@ -58,9 +59,10 @@ class ResourceQueryAuthenticator implements Authenticator {
      * @param queryId The query id.
      * @param authenticationIdProperty The user id property.
      * @param userCredentialProperty The user credential property.
+     * @param userRolesProperty The property for reading authorization roles
      */
     public ResourceQueryAuthenticator(Provider<CryptoService> cryptoService, Provider<ConnectionFactory> connectionFactory,
-            String queryOnResource, String queryId,  String authenticationIdProperty, String userCredentialProperty) {
+            String queryOnResource, String queryId,  String authenticationIdProperty, String userCredentialProperty, String userRolesProperty) {
 
         Reject.ifNull(cryptoService, "CryptoService is null");
         Reject.ifNull(connectionFactory, "ConnectionFactory is null");
@@ -75,6 +77,7 @@ class ResourceQueryAuthenticator implements Authenticator {
         this.queryId = queryId;
         this.authenticationIdProperty = authenticationIdProperty;
         this.userCredentialProperty = userCredentialProperty;
+        this.userRolesProperty = userRolesProperty;
     }
 
     /**
@@ -123,7 +126,12 @@ class ResourceQueryAuthenticator implements Authenticator {
     private ResourceResponse getResource(String username, Context context) throws ResourceException {
         QueryRequest request = Requests.newQueryRequest(queryOnResource)
                 .setQueryId(queryId)
+                .addField("") // all default fields
                 .setAdditionalParameter(authenticationIdProperty, username);
+
+        if (this.userRolesProperty != null) {
+            request = request.addField(this.userRolesProperty);
+        }
 
         final ConnectionFactory connectionFactory = connectionFactoryProvider.get();
         if (connectionFactory == null) {
@@ -164,4 +172,3 @@ class ResourceQueryAuthenticator implements Authenticator {
         return new UserInfo(username, new Password(retrievedCred), null);
     }
 }
-
