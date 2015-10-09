@@ -13,11 +13,8 @@
  *
  * Copyright 2015 ForgeRock AS.
  */
-package org.forgerock.openidm.servlet;
+package org.forgerock.openidm.maintenance.impl;
 
-import org.apache.felix.scr.annotations.Component;
-import org.apache.felix.scr.annotations.ConfigurationPolicy;
-import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
@@ -36,78 +33,48 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
- * Wraps a MaintenanceFilter and a PassthroughFilter to allow swapping them at runtime in a FilterChain.
+ * Passthrough filter passes all requests through verbatim.
  */
-@Component(name = MaintenanceFilterWrapper.PID, policy = ConfigurationPolicy.IGNORE,
-        configurationFactory = false, immediate = true)
-@Service(value = { Filter.class, MaintenanceFilterWrapper.class })
-public class MaintenanceFilterWrapper implements Filter {
-    public static final String PID = "org.forgerock.openidm.maintenancemodefilter";
-
-    private Boolean enabled = false;
-    private final Filter passthroughFilter = new PassthroughFilter();
-    private final Filter maintenanceFilter = new MaintenanceFilter();
-
-    /**
-     * Used when entering maintenance mode, prevents write operations.
-     */
-    public void enable() {
-        enabled = true;
-    }
-
-    /**
-     * Used when exiting maintenance mode, passes through all requests.
-     */
-    public void disable() {
-        enabled = false;
-    }
-
-    private Filter getFilter() {
-        if (enabled) {
-            return maintenanceFilter;
-        }
-        return passthroughFilter;
-    }
-
+class PassthroughFilter implements Filter {
     @Override
     public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
             RequestHandler requestHandler) {
-        return getFilter().filterAction(context, actionRequest, requestHandler);
+        return requestHandler.handleAction(context, actionRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest createRequest,
             RequestHandler requestHandler) {
-        return getFilter().filterCreate(context, createRequest, requestHandler);
+        return requestHandler.handleCreate(context, createRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest deleteRequest,
             RequestHandler requestHandler) {
-        return getFilter().filterDelete(context, deleteRequest, requestHandler);
+        return requestHandler.handleDelete(context, deleteRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest patchRequest,
             RequestHandler requestHandler) {
-        return getFilter().filterPatch(context, patchRequest, requestHandler);
+        return requestHandler.handlePatch(context, patchRequest);
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest queryRequest,
             QueryResourceHandler queryResourceHandler, RequestHandler requestHandler) {
-        return getFilter().filterQuery(context, queryRequest, queryResourceHandler, requestHandler);
+        return requestHandler.handleQuery(context, queryRequest, queryResourceHandler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest readRequest,
             RequestHandler requestHandler) {
-        return getFilter().filterRead(context, readRequest, requestHandler);
+        return requestHandler.handleRead(context, readRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest updateRequest,
             RequestHandler requestHandler) {
-        return getFilter().filterUpdate(context, updateRequest, requestHandler);
+        return requestHandler.handleUpdate(context, updateRequest);
     }
 }

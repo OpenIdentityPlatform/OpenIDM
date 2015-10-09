@@ -46,7 +46,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.servlet.MaintenanceFilterWrapper;
 import org.forgerock.openidm.servlet.internal.ServletConnectionFactory;
 import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
@@ -79,18 +78,18 @@ public class MaintenanceServiceTest {
         JsonValue configuration =
                 new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
 
-        final Router requestHandler = new Router();
-        requestHandler.addRoute(uriTemplate("/audit/recon"), new MemoryBackend());
-        requestHandler.addRoute(uriTemplate("/managed/user"), new MemoryBackend());
-        requestHandler.addRoute(uriTemplate("/system/OpenDJ/account"), new MemoryBackend());
-        requestHandler.addRoute(uriTemplate("/system/AD/account"), new MemoryBackend());
-        requestHandler.addRoute(RoutingMode.EQUALS, uriTemplate("maintenance"), maintenanceService);
+        final Router router = new Router();
+        router.addRoute(uriTemplate("/audit/recon"), new MemoryBackend());
+        router.addRoute(uriTemplate("/managed/user"), new MemoryBackend());
+        router.addRoute(uriTemplate("/system/OpenDJ/account"), new MemoryBackend());
+        router.addRoute(uriTemplate("/system/AD/account"), new MemoryBackend());
+        router.addRoute(RoutingMode.EQUALS, uriTemplate("maintenance"), maintenanceService);
 
-        final ConnectionFactory connectionFactory = Resources.newInternalConnectionFactory(requestHandler);
+        final ConnectionFactory connectionFactory = Resources.newInternalConnectionFactory(router);
         Bindings globalScope = new SimpleBindings();
         globalScope.put("openidm", FunctionFactory.getResource(connectionFactory));
 
-        ScriptRegistryImpl sr =
+        final ScriptRegistryImpl sr =
                 new ScriptRegistryImpl(new HashMap<String, Object>(), ServiceLoader
                         .load(ScriptEngineFactory.class), globalScope);
 
@@ -99,16 +98,14 @@ public class MaintenanceServiceTest {
         when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class)))
                 .thenReturn("");
 
-        ServletConnectionFactory filterService = new ServletConnectionFactory();
-        filterService.bindRequestHandler(requestHandler);
-        filterService.bindScriptRegistry(sr);
-        filterService.bindEnhancedConfig(enhancedConfig);
-        MaintenanceFilterWrapper maintenanceFilterWrapper = new MaintenanceFilterWrapper();
-        filterService.bindMaintenanceFilterWrapper(maintenanceFilterWrapper);
-        filterService.testActivate(mock(ComponentContext.class));
+        ServletConnectionFactory filterService = new ServletConnectionFactory() {{
+            bindRequestHandler(router);
+            bindScriptRegistry(sr);
+            bindEnhancedConfig(enhancedConfig);
+            bindMaintenanceFilter(maintenanceService);
+            activate(mock(ComponentContext.class));
+        }};
         connection = filterService.getConnection();
-
-        maintenanceService.bindMaintenanceFilterWrapper(maintenanceFilterWrapper);
     }
 
     @Test(expectedExceptions = ServiceUnavailableException.class)
