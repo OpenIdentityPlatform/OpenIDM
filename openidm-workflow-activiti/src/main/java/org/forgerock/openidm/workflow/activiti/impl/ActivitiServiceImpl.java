@@ -121,6 +121,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     public static final String CONFIG_TABLE_PREFIX_IS_SCHEMA = "tablePrefixIsSchema";
     public static final String CONFIG_HISTORY = "history";
     public static final String CONFIG_WORKFLOWDIR = "workflowDirectory";
+    public static final String LOCALHOST = "localhost";
+    public static final int DEFAULT_MAIL_PORT = 25;
     private String jndiName;
     private boolean selfMadeProcessEngine = true;
 
@@ -173,8 +175,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     private String url;
     private String username;
     private String password;
-    private String mailhost = "localhost";
-    private int mailport = 25;
+    private String mailhost = LOCALHOST;
+    private int mailport = DEFAULT_MAIL_PORT;
     private String mailusername;
     private String mailpassword;
     private boolean starttls;
@@ -417,12 +419,12 @@ public class ActivitiServiceImpl implements RequestHandler {
             JsonValue connectionConfig = config.get(CONFIG_CONNECTION);
             jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
             JsonValue mailconfig = config.get(CONFIG_MAIL);
-            if (!mailconfig.isNull()) {
-                mailhost = mailconfig.get(new JsonPointer(CONFIG_MAIL_HOST)).asString();
-                mailport = mailconfig.get(new JsonPointer(CONFIG_MAIL_PORT)).asInteger();
-                mailusername = mailconfig.get(new JsonPointer(CONFIG_MAIL_USERNAME)).asString();
-                mailpassword = mailconfig.get(new JsonPointer(CONFIG_MAIL_PASSWORD)).asString();
-                starttls = mailconfig.get(new JsonPointer(CONFIG_MAIL_STARTTLS)).asBoolean();
+            if (mailconfig.isNotNull()) {
+                mailhost = mailconfig.get(CONFIG_MAIL_HOST).defaultTo(LOCALHOST).asString();
+                mailport = mailconfig.get(CONFIG_MAIL_PORT).defaultTo(DEFAULT_MAIL_PORT).asInteger();
+                mailusername = mailconfig.get(CONFIG_MAIL_USERNAME).asString();
+                mailpassword = mailconfig.get(CONFIG_MAIL_PASSWORD).asString();
+                starttls = mailconfig.get(CONFIG_MAIL_STARTTLS).defaultTo(false).asBoolean();
             }
             JsonValue engineConfig = config.get(CONFIG_ENGINE);
             if (!engineConfig.isNull()) {
