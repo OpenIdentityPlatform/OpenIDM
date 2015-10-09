@@ -23,8 +23,8 @@
  * {
  *     "_ref" : "system/ldap/accounts/uid=jdoe,ou=People,dc=example,dc=com"
  *     "_refProperties" : {
-           "_id": "b6580bf0-7ece-4856-b716-64f16f8cb6a7",
-           "_rev": "2",
+ *         "_id": "b6580bf0-7ece-4856-b716-64f16f8cb6a7",
+ *         "_rev": "2",
  *         "linkedDate" : "Sun Oct 04 2015 19:18:31 GMT-0700 (PDT)",
  *         "unlinkedDate" : "Sun Oct 04 2015 19:28:56 GMT-0700 (PDT)",
  *         "active" : false 
