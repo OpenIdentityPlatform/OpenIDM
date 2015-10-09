@@ -46,7 +46,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             "change :input[name=source]": "updateProperty",
             "change :input": "validateMapping",
             "onValidate": "onValidate",
-            "change .conditionalUpdateType": "conditionalUpdateType"
+            "click .toggle-view-btn": "conditionalUpdateType",
+            "shown.bs.tab #conditionalScript" : "conditionalTabChange"
         },
 
         updateProperty: function (e) {
@@ -55,9 +56,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             }
         },
 
-        conditionalUpdateType: function () {
-            var type = this.currentDialog.find(".conditionalUpdateType:checked").val(),
+        conditionalUpdateType: function (event) {
+            var type = $(event.target).attr("id"),
                 filter = "";
+
+            $(event.target).toggleClass("active", true);
+            this.$el.find(".toggle-view-btn").not(event.target).toggleClass("active", false);
 
             if (type === "conditionalFilter") {
                 if(this.conditionFilterEditor === null) {
@@ -78,16 +82,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                     });
                 }
 
-                this.currentDialog.find(".conditionalFilter").show();
-                this.currentDialog.find(".conditionalScript").hide();
-
-            } else if (type === "script") {
-                this.currentDialog.find(".conditionalFilter").hide();
-                this.currentDialog.find(".conditionalScript").show();
-
-            } else if (type === "none") {
-                this.currentDialog.find(".conditionalFilter").hide();
-                this.currentDialog.find(".conditionalScript").hide();
             }
         },
 
@@ -158,13 +152,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 delete propertyObj.transform;
             }
 
-            if (this.currentDialog.find("input[name=conditionalUpdate]:checked").val() === "script" && this.conditional_script_editor !== undefined) {
+            if (this.currentDialog.find(".toggle-view-btn.active").attr("id") === "conditionalScript" && this.conditional_script_editor !== undefined) {
                 propertyObj.condition = this.conditional_script_editor.generateScript();
 
                 if (propertyObj.condition === null) {
                     delete propertyObj.condition;
                 }
-            } else if (this.currentDialog.find("#Condition_Script input[name=conditionalUpdate]:checked").val() === "conditionalFilter") {
+            } else if (this.currentDialog.find(".toggle-view-btn.active").attr("id") === "conditionalFilter") {
                 propertyObj.condition = {};
                 propertyObj.condition = this.conditionFilterEditor.getFilterString();
                 // applies when the filter option selected is "No Filter"
@@ -191,6 +185,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
         close: function () {
             $("#dialogs").hide();
+        },
+
+        conditionalTabChange: function () {
+            this.conditional_script_editor.refresh();
         },
 
         render: function(params, callback) {
@@ -283,7 +281,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
         loadData: function() {
             var _this = this,
-                prop = this.data.property;
+                prop = this.data.property,
+                filter = "",
+                conditionData = null;
 
             if (prop) {
                 if (typeof(prop.transform) === "object" && prop.transform.type === "text/javascript" &&
@@ -299,18 +299,33 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 }
 
                 if (_.has(prop, "condition")) {
-                    this.$el.find("#conditionTabButtons label").toggleClass("active", false);
-
+                    this.$el.find("#conditionTabButtons").toggleClass("active", false);
                     if (_.has(prop.condition, "type")) {
-                        this.currentDialog.find("#conditionalScript").parent().toggleClass("active", true);
-                        this.currentDialog.find("#conditionalScript").prop("checked", true).change();
+                        this.currentDialog.find("#conditionalScript").toggleClass("active", true);
+                        this.currentDialog.find("#conditionScriptTab").toggleClass("active", true);
                     } else {
-                        this.currentDialog.find("#conditionalFilter").parent().toggleClass("active", true);
-                        this.currentDialog.find("#conditionalFilter").prop("checked", true).change();
+                        this.currentDialog.find("#conditionalFilter").toggleClass("active", true);
+                        this.currentDialog.find("#conditionFilterTab").toggleClass("active", true);
+
+                        this.conditionFilterEditor = new LinkQualifierFilterEditor();
+
+                        if (_.has(this.data.property, "condition")) {
+                            if (!_.has(this.data.property.condition, "type")) {
+                                filter = this.data.property.condition;
+                            }
+                        }
+
+                        this.conditionFilterEditor.render({
+                            "queryFilter": filter,
+                            "mappingName" : this.data.mappingName,
+                            "mapProps": this.data.availableSourceProps,
+                            "element": "#" + "conditionFilterHolder",
+                            "resource": ""
+                        });
                     }
                 } else {
-                    this.currentDialog.find("#conditionalNone").parent().toggleClass("active", true);
-                    this.currentDialog.find("#conditionalNone").prop("checked", true).change();
+                    this.currentDialog.find("#conditionalNone").toggleClass("active", true);
+                    this.currentDialog.find("#noneTab").toggleClass("active", true);
                 }
             }
 
@@ -323,15 +338,17 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 "placeHolder" : "source.givenName.toLowerCase() + \" .\" + source.sn.toLowerCase()"
             });
 
+            if(!_.isString(_this.data.property.condition)) {
+                conditionData = _this.data.property.condition;
+            }
+
             _this.conditional_script_editor = inlineScriptEditor.generateScriptEditor({
                 "element": _this.currentDialog.find("#conditionScriptHolder"),
                 "eventName": "conditional",
                 "noValidation": true,
-                "scriptData": _this.data.property.condition,
+                "scriptData": conditionData,
                 "disablePassedVariable": false
             });
-
-            _this.conditionalUpdateType();
 
             $('#mappingDialogTabs a', this.currentDialog).click(function (e) {
                 e.preventDefault();

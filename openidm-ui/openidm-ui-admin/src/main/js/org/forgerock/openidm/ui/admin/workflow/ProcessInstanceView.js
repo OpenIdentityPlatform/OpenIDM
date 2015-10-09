@@ -56,137 +56,137 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
             mode: "client"
         }),
         ProcessInstanceView = AbstractView.extend({
-        template: "templates/admin/workflow/ProcessInstanceViewTemplate.html",
+            template: "templates/admin/workflow/ProcessInstanceViewTemplate.html",
 
-        events: {
-            "click #cancelProcessBtn" : "cancelProcess"
-        },
-        cancelProcess: function(e) {
-            if (e) {
-                e.preventDefault();
-            }
-
-            UIUtils.confirmDialog($.t("templates.processInstance.cancelConfirmation"), "danger", _.bind(function() {
-                this.model.destroy({
-                    success: function() {
-                        messagesManager.messages.addMessage({"message": $.t("templates.processInstance.cancelProcessSuccess")});
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processListView"});
-                    }
-                });
-            }, this));
-        },
-        render: function(args, callback) {
-            var processDefinition = new ProcessDefinitionModel(),
-                startedBy = new UserModel(),
-                owner = new UserModel();
-
-            this.model = new ProcessInstanceModel();
-
-            this.model.id = args[0];
-
-            this.model.fetch().then(_.bind(function(){
-                var fetchArr = [];
-                this.data.processInstance = this.model.toJSON();
-
-                if (this.data.processInstance.startUserId) {
-                    startedBy.id = this.data.processInstance.startUserId;
-                    fetchArr.push(startedBy.fetch());
+            events: {
+                "click #cancelProcessBtn" : "cancelProcess"
+            },
+            cancelProcess: function(e) {
+                if (e) {
+                    e.preventDefault();
                 }
 
-                processDefinition.id = this.data.processInstance.processDefinitionId;
-                fetchArr.push(processDefinition.fetch());
-
-                $.when.apply($, fetchArr).done(_.bind(function(){
-
-                    this.data.processDefinition = processDefinition.toJSON();
-                    this.data.startedBy = startedBy.toJSON();
-
-                    if (this.data.processDefinition.processDiagramResourceName) {
-                        this.data.showDiagram = true;
-                        if (!this.model.get("endTime")) {
-                            this.data.diagramUrl = "/openidm/workflow/processinstance/" + this.model.id + "?_fields=/diagram&_mimeType=image/png";
-                        } else {
-                            this.data.diagramUrl = "/openidm/workflow/processdefinition/" + this.data.processDefinition._id + "?_fields=/diagram&_mimeType=image/png";
+                UIUtils.confirmDialog($.t("templates.processInstance.cancelConfirmation"), "danger", _.bind(function() {
+                    this.model.destroy({
+                        success: function() {
+                            messagesManager.messages.addMessage({"message": $.t("templates.processInstance.cancelProcessSuccess")});
+                            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "processListView"});
                         }
+                    });
+                }, this));
+            },
+            render: function(args, callback) {
+                var processDefinition = new ProcessDefinitionModel(),
+                    startedBy = new UserModel(),
+                    owner = new UserModel();
+
+                this.model = new ProcessInstanceModel();
+
+                this.model.id = args[0];
+
+                this.model.fetch().then(_.bind(function(){
+                    var fetchArr = [];
+                    this.data.processInstance = this.model.toJSON();
+
+                    if (this.data.processInstance.startUserId) {
+                        startedBy.id = this.data.processInstance.startUserId;
+                        fetchArr.push(startedBy.fetch());
                     }
 
-                    this.parentRender(_.bind(function(){
+                    processDefinition.id = this.data.processInstance.processDefinitionId;
+                    fetchArr.push(processDefinition.fetch());
 
-                        this.buildTasksGrid();
+                    $.when.apply($, fetchArr).done(_.bind(function(){
 
-                        if(callback) {
-                            callback();
+                        this.data.processDefinition = processDefinition.toJSON();
+                        this.data.startedBy = startedBy.toJSON();
+
+                        if (this.data.processDefinition.processDiagramResourceName) {
+                            this.data.showDiagram = true;
+                            if (!this.model.get("endTime")) {
+                                this.data.diagramUrl = "/openidm/workflow/processinstance/" + this.model.id + "?_fields=/diagram&_mimeType=image/png";
+                            } else {
+                                this.data.diagramUrl = "/openidm/workflow/processdefinition/" + this.data.processDefinition._id + "?_fields=/diagram&_mimeType=image/png";
+                            }
                         }
+
+                        this.parentRender(_.bind(function(){
+
+                            this.buildTasksGrid();
+
+                            if(callback) {
+                                callback();
+                            }
+                        },this));
+
                     },this));
 
                 },this));
+            },
+            buildTasksGrid: function () {
+                var processTasks = new TaskInstanceCollection(_.sortBy(this.model.attributes.tasks, "startTime").reverse()),
+                    cols = [
+                        {
+                            name: "name",
+                            label: "Task",
+                            editable: false,
+                            cell: "string",
+                            sortable: false
+                        },
+                        {
+                            name: "assignee",
+                            label: "Assignee",
+                            editable: false,
+                            cell: "string",
+                            sortable: false
+                        },
+                        {
+                            name: "dueDate",
+                            label: "Due",
+                            editable: false,
+                            cell: BackgridUtils.DateCell("dueDate"),
+                            sortable: false
+                        },
+                        {
+                            name: "startTime",
+                            label: "Created",
+                            editable: false,
+                            cell: BackgridUtils.DateCell("startTime"),
+                            sortable: false
+                        },
+                        {
+                            name: "endTime",
+                            label: "Completed",
+                            editable: false,
+                            cell: BackgridUtils.DateCell("endTime"),
+                            sortable: false
+                        },
+                        {
+                            name: "",
+                            cell: BackgridUtils.ButtonCell([{
+                                className: "fa fa-pencil grid-icon",
+                                callback: function() {
+                                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.taskInstanceView, args: [this.model.id]});
+                                }
+                            }], function() {
+                                if (this.model.attributes.endTime) {
+                                    this.$el.empty();
+                                }
+                            }),
+                            sortable: false,
+                            editable: false
+                        }
+                    ],
+                    tasksGrid = new Backgrid.Grid({
+                        columns: BackgridUtils.addSmallScreenCell(cols),
+                        collection: processTasks,
+                        className: "table backgrid"
+                    });
 
-            },this));
-        },
-        buildTasksGrid: function () {
-            var processTasks = new TaskInstanceCollection(_.sortBy(this.model.attributes.tasks, "startTime").reverse()),
-                cols = [
-                    {
-                        name: "name",
-                        label: "Task",
-                        editable: false,
-                        cell: "string",
-                        sortable: false
-                    },
-                    {
-                        name: "assignee",
-                        label: "Assignee",
-                        editable: false,
-                        cell: "string",
-                        sortable: false
-                    },
-                    {
-                        name: "dueDate",
-                        label: "Due",
-                        editable: false,
-                        cell: BackgridUtils.DateCell("dueDate"),
-                        sortable: false
-                    },
-                    {
-                        name: "startTime",
-                        label: "Created",
-                        editable: false,
-                        cell: BackgridUtils.DateCell("startTime"),
-                        sortable: false
-                    },
-                    {
-                        name: "endTime",
-                        label: "Completed",
-                        editable: false,
-                        cell: BackgridUtils.DateCell("endTime"),
-                        sortable: false
-                    },
-                    {
-                        name: "",
-                        cell: BackgridUtils.ButtonCell([{
-                            className: "fa fa-pencil grid-icon",
-                            callback: function() {
-                                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.taskInstanceView, args: [this.model.id]});
-                            }
-                        }], function() {
-                            if (this.model.attributes.endTime) {
-                                this.$el.empty();
-                            }
-                        }),
-                        sortable: false,
-                        editable: false
-                    }
-                ],
-                tasksGrid = new Backgrid.Grid({
-                    columns: BackgridUtils.addSmallScreenCell(cols),
-                    collection: processTasks,
-                    className: "table backgrid-table"
-                });
+                this.$el.find("#tasksGrid").append(tasksGrid.render().el);
 
-            this.$el.find("#tasksGrid").append(tasksGrid.render().el);
-
-        }
-    });
+            }
+        });
 
     return new ProcessInstanceView();
 });
