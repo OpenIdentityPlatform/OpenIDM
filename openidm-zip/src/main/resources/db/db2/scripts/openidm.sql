@@ -301,20 +301,21 @@ CREATE INDEX sopenidm.idx_auditrecon_status ON sopenidm.auditrecon (status ASC);
 
 CREATE TABLESPACE SOIDM13 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE sopenidm.auditsync (
-    objectid                   VARCHAR(38)    NOT NULL,
-    transactionid              VARCHAR(255),
-    activitydate               VARCHAR(29),
-    situation                  VARCHAR(24),
-    activity                   VARCHAR(24),
-    status                     VARCHAR(7),
-    message                    CLOB(2M),
-    actionid                   VARCHAR(255),
-    exceptiondetail            CLOB(2M),
-    mapping                    VARCHAR(511),
-    linkqualifier              VARCHAR(255),
-    sourceobjectid             VARCHAR(511),
-    targetobjectid             VARCHAR(511),
-    messagedetail              CLOB(2M),
+    objectid                VARCHAR(38) NOT NULL ,
+    transactionid           VARCHAR(56) NOT NULL ,
+    activitydate            VARCHAR(29) NOT NULL ,
+    eventname               VARCHAR(50) NULL ,
+    userid                  VARCHAR(255) NULL ,
+    activity                VARCHAR(24) NULL ,
+    exceptiondetail         CLOB(2M) NULL ,
+    linkqualifier           VARCHAR(255) NULL ,
+    mapping                 VARCHAR(511) NULL ,
+    message                 CLOB(2M) NULL ,
+    messagedetail           CLOB(2M) NULL ,
+    situation               VARCHAR(24) NULL ,
+    sourceobjectid          VARCHAR(511) NULL ,
+    status                  VARCHAR(20) NULL ,
+    targetobjectid          VARCHAR(511) NULL ,
     PRIMARY KEY (objectid) )
 IN DOPENIDM.SOIDM13;
 COMMENT ON TABLE SOPENIDM.AUDITSYNC IS 'OPENIDM - Sync Audit Log';
