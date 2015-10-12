@@ -42,6 +42,11 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-api-servlet</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>json-resource</artifactId>
         </dependency>
@@ -102,6 +107,11 @@
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>javax.servlet</groupId>
+            <artifactId>javax.servlet-api</artifactId>
             <scope>test</scope>
         </dependency>
     </dependencies>
