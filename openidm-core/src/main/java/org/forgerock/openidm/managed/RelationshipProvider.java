@@ -316,8 +316,8 @@ public abstract class RelationshipProvider {
             // Log an "update" for the managed object, even though this is a "create" request on relationship field.
             activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue.getContent(), 
                     afterValue.getContent(), Status.SUCCESS);
-            
-            // Do sync on the managed object
+
+            // Changes to the relationship will trigger sync on the managed object that this field belongs to.
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
                     SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
@@ -415,7 +415,7 @@ public abstract class RelationshipProvider {
             activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue.getContent(), 
                     afterValue.getContent(), Status.SUCCESS);
 
-            // Do sync on the managed object
+            // Changes to the relationship will trigger sync on the managed object that this field belongs to.
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
                     SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
 
@@ -456,13 +456,16 @@ public abstract class RelationshipProvider {
             // Perform the delete and wait for result
             result = deleteAsync(context, path, deleteRequest).getOrThrow();
             
+            // Get the after value of the managed object
+            final ResourceResponse afterValue = getManagedObject(context);
+            
             // Do activity logging.
             activityLogger.log(context, request, "delete", getManagedObjectPath(context), beforeValue.getContent(), 
                     null, Status.SUCCESS);
 
-            // Do sync on the managed object
+            // Changes to the relationship will trigger sync on the managed object that this field belongs to.
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
-                    SyncServiceAction.notifyDelete, beforeValue.getContent(), null);
+                    SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
             return expandFields(context, request, result);
         } catch (ResourceException e) {
@@ -589,7 +592,7 @@ public abstract class RelationshipProvider {
                 activityLogger.log(context, request, "update", getManagedObjectPath(context), 
                         managedObjectBefore.getContent(), managedObjectAfter.getContent(), Status.SUCCESS);
 
-                // Do sync on the managed object
+                // Changes to the relationship will trigger sync on the managed object that this field belongs to.
                 managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
                         SyncServiceAction.notifyUpdate, managedObjectBefore.getContent(), 
                         managedObjectAfter.getContent());
