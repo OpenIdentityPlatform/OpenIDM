@@ -25,7 +25,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.maintenance.impl.PassthroughFilter;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
