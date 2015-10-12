@@ -68,7 +68,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
              lastRecon - Widget to display the last recon per mapping
              barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
              resourceList - Displays the top 4 resources for connectors, mappings, and managed objects
-             quickStart - Widget displaying quick start cards to help users get start with core functionality
+             quickStart - Widget displaying quick start cards to help users get started with core functionality
              */
             render: function(args, callback) {
                 this.element = args.element;
