@@ -62,7 +62,7 @@ define("org/forgerock/openidm/ui/admin/mapping/scheduling/SchedulerView", [
 
                 SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
                     if (schedules.result.length > 0) {
-                        _(schedules.result).each(function (scheduleId) {
+                        _.each(schedules.result, function (scheduleId) {
                             tempPromises = SchedulerDelegate.specificSchedule(scheduleId._id);
 
                             promises.push(tempPromises);

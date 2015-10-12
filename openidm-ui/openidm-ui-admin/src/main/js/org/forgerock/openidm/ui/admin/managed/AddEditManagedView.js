@@ -58,7 +58,8 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             "onValidate": "onValidate",
             "click #addManagedProperties": "addProperty",
             "click .property-remove" : "removeProperty",
-            "click #deleteManaged": "deleteManaged"
+            "click #deleteManaged": "deleteManaged",
+            "customValidate": "customValidate"
         },
         eventHooks: [],
         propertyHooks: [],
@@ -149,7 +150,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
         loadSchema: function() {
             // Set JSONEditor defaults
-            _(JSONEditor.defaults.options).extend({
+            _.extend(JSONEditor.defaults.options, {
                 disable_edit_json: true,
                 disable_array_delete_all: true,
                 disable_array_reorder: false,
@@ -168,7 +169,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             // This function needs to be restored for other instances of JSONEditor after load.
 
-            this.data.setValue = _.clone(JSONEditor.defaults.editors.multiple.prototype.setValue);
+            this.data.jsonEditorProto = _.clone(JSONEditor.defaults.editors.multiple.prototype);
 
             JSONEditor.defaults.editors.multiple.prototype.setValue = function(val,initial) {
                 if (_.isObject(val) && !_.isNull(val)) {
@@ -356,7 +357,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             this.setDefaultData();
 
-            JSONEditor.defaults.editors.multiple.prototype.setValue = this.data.setValue;
+            JSONEditor.defaults.editors.multiple.prototype.setValue = this.data.jsonEditorProto.setValue;
         },
 
         setDefaultData: function() {
@@ -575,7 +576,8 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     addedEvents:this.data.addedEvents,
                     currentObject: this.data.currentManagedObject,
                     hasWorkflow: true,
-                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")                });
+                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")
+                });
 
                 _.each(this.$el.find("#managedPropertyWrapper .small-field-block:visible"), function(managedProperty, index) {
                     this.propertyHooks.push([]);
@@ -830,6 +832,14 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                         }
                     ]
                 };
+            }
+        },
+
+        customValidate: function() {
+            if(validatorsManager.formValidated(this.$el.find("#managedObjectForm"))) {
+                this.$el.find("#addEditManaged").attr("disabled", false);
+            } else {
+                this.$el.find("#addEditManaged").attr("disabled", true);
             }
         }
     });

@@ -46,7 +46,7 @@ define("org/forgerock/openidm/ui/admin/util/ScriptDialog", [
         render: function (args, callback) {
             var _this = this;
 
-            this.currentDialog = $('<form id="scriptManagerDialogForm"></form>');
+            this.currentDialog = $('<div id="scriptManagerDialogForm"></div>');
 
             $('#dialogs').append(this.currentDialog);
 

@@ -202,7 +202,7 @@ define("org/forgerock/openidm/ui/admin/util/Scheduler", [
                 var tabs = this.$el.find(".nav-tabs li"),
                     cronValue = this.cron.cron("value", this.cron.cron("convertCronVal", this.$el.find(".complexExpression").val()));
 
-                if (_(cronValue).isObject()) {
+                if (_.isObject(cronValue)) {
                     $(tabs[0]).find("a").attr("data-toggle", "tab");
                     $(tabs[0]).toggleClass("disabled", false);
                     this.$el.find(".complex").hide();

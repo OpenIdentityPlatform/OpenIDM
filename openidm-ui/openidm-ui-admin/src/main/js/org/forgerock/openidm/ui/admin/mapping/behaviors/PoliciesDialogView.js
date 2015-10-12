@@ -90,15 +90,15 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView", [
                 this.model.postAction = this.model.basePolicy.postAction;
             }
 
-            if (_(this.model.action).isObject() && _(this.model.action).has("file") && this.model.action.file === "workflow/triggerWorkflowFromSync.js") {
+            if (_.isObject(this.model.action) && _.has(this.model.action, "file") && this.model.action.file === "workflow/triggerWorkflowFromSync.js") {
                 this.data.defaultWorkflow = true;
-            } else if (_(this.model.action ).isObject() && _(this.model.action ).has("type")) {
+            } else if (_.isObject(this.model.action) && _.has(this.model.action, "type")) {
                 this.data.defaultScript = true;
             } else {
                 this.data.defaultAction = true;
             }
 
-            if (_(this.model.condition).isObject() && _(this.model.condition).has("type")) {
+            if (_.isObject(this.model.condition) && _.has(this.model.action, "type")) {
                 this.data.defaultConditionScript = true;
                 this.data.defaultConditionFilter = false;
             }
@@ -127,7 +127,7 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView", [
                             this.$el.find(".nav-tabs").tabdrop();
 
                             // Set viable options stars
-                            _(this.model.basePolicy.options).each(function(action) {
+                            _.each(this.model.basePolicy.options, function(action) {
                                 tempSelector = $("#defaultActionPane select option[value='"+action+"']");
                                 tempSelector.html(tempSelector.text() + " " + this.data.hollowStar);
                             }, this);
@@ -320,6 +320,8 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesDialogView", [
         sectionControl: function(event) {
             var selected = $(event.target);
             selected.parent().find('.active').removeClass('active');
+
+            selected.toggleClass("active", true);
         }
     });
 

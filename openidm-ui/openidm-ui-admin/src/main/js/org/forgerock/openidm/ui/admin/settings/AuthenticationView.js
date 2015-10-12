@@ -96,7 +96,7 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
 
         render: function (args, callback) {
             // Set JSONEditor defaults
-            _(JSONEditor.defaults.options).extend({
+            _.extend(JSONEditor.defaults.options, {
                 disable_edit_json: true,
                 disable_array_reorder: false,
                 disable_collapse: true,
@@ -221,7 +221,7 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
                 this.loadJWTTokenTimeSettings();
                 this.$el.find("#sessionOnly").val(auth.serverAuthContext.sessionModule.properties.sessionOnly.toString());
 
-                _(auth.serverAuthContext.authModules).each(function (module) {
+                _.each(auth.serverAuthContext.authModules, function (module) {
                     var jsonEditorBasicFormat,
                         jsonEditorAdvancedFormat,
                         tempVar,
@@ -239,9 +239,9 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
 
                     function addProperty(jsonEditor, value, property) {
                         if (property === "propertyMapping") {
-                            _(value).each(function(propertyMapValue, propertyMapKey) {
+                            _.each(value, function(propertyMapValue, propertyMapKey) {
                                 // Generic propertyMapping property: is truthy only if the property exists on the main object
-                                if (_(jsonEditor.propertyMapping).has(propertyMapKey)) {
+                                if (_.has(jsonEditor.propertyMapping, propertyMapKey)) {
                                     jsonEditor.propertyMapping[propertyMapKey] = propertyMapValue;
 
                                     // The following two cases would normally be found on the main object,
@@ -251,7 +251,7 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
 
                                 } else if (propertyMapKey ==="groupMembership") {
                                     tempVar = [];
-                                    _(module.properties.groupRoleMapping).map(function(map, key){
+                                    _.map(module.properties.groupRoleMapping, function(map, key){
                                         tempVar.push({
                                             roleName: key,
                                             groupMapping: map
@@ -278,11 +278,11 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
                     }
 
 
-                    _(module.properties).each(function(value, key) {
-                        if (_(jsonEditorBasicFormat).has(key)) {
+                    _.each(module.properties, function(value, key) {
+                        if (_.has(jsonEditorBasicFormat, key)) {
                             addProperty(jsonEditorBasicFormat, value, key);
 
-                        } else if (_(jsonEditorAdvancedFormat).has(key)) {
+                        } else if (_.has(jsonEditorAdvancedFormat, key)) {
                             addProperty(jsonEditorAdvancedFormat, value, key);
 
                         } else if (key !== "groupRoleMapping") {
@@ -456,11 +456,11 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
                     if (typeof userGroupEditorNode !== "undefined" && userGroupEditorNode !== null) {
                         userorgroup = userGroupEditorNode.value;
 
-                        if (_(userorgroup).isString() && userorgroup.length > 0) {
+                        if (_.isString(userorgroup) && userorgroup.length > 0) {
                             userGroupEditorNode.switchEditor(1);
                             this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.userRoles"));
 
-                        } else if (_(userorgroup).isObject()) {
+                        } else if (_.isObject(userorgroup)) {
                             userGroupEditorNode.switchEditor(2);
                             this.$el.find("#" + tempKey + " .container-userorgroup select").val($.t("templates.auth.groupMembership"));
 
@@ -551,7 +551,7 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
             $(e.target).prop("disabled",true);
 
             // Each Auth Module
-            _(allGroups).each(function(group) {
+            _.each(allGroups, function(group) {
                 tempID = $(group).attr("id");
 
                 if (this.model.modules[tempID].name.length > 0) {
@@ -575,12 +575,12 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
                     _.chain(tempEditor)
                         .omit(["authModule", "customProperties", "propertyMapping", "enabled", "augmentSecurityContext", "defaultUserRoles"])
                         .each(function (property, key) {
-                            if ((_(property).isString() && property.length > 0) || (!_(property).isString())) {
+                            if ((_.isString(property) && property.length > 0) || (!_.isString(property))) {
                                 tempModule.properties[key] = property;
                             }
                         });
 
-                    _(tempEditor.customProperties).each(function (customProperty) {
+                    _.each(tempEditor.customProperties, function (customProperty) {
                         tempModule.properties[customProperty.propertyName] = customProperty.propertyType;
                     });
 
@@ -614,7 +614,7 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
                             tempModule.properties.propertyMapping.groupMembership = tempEditor.propertyMapping.userorgroup.grpMembership;
                             tempModule.properties.groupRoleMapping = {};
 
-                            _(tempEditor.propertyMapping.userorgroup.groupRoleMapping).each(function (mapping) {
+                            _.each(tempEditor.propertyMapping.userorgroup.groupRoleMapping, function (mapping) {
                                 tempModule.properties.groupRoleMapping[mapping.roleName] = mapping.groupMapping;
                             });
                         }
@@ -629,11 +629,11 @@ define("org/forgerock/openidm/ui/admin/settings/AuthenticationView", [
             }
 
             amUISettingsProm.then(_.bind(function(){
-                newAuth = _(this.model.defaultAuth).clone();
+                newAuth = _.clone(this.model.defaultAuth);
                 newAuth.serverAuthContext.authModules = authModules;
 
                 // Set the session module properties and convert sessionOnly back to a boolean
-                _(newAuth.serverAuthContext.sessionModule.properties).extend(form2js("sessionModuleForm", ".", true));
+                _.extend(newAuth.serverAuthContext.sessionModule.properties, form2js("sessionModuleForm", ".", true));
                 newAuth.serverAuthContext.sessionModule.properties.maxTokenLifeMinutes = "";
                 newAuth.serverAuthContext.sessionModule.properties.tokenIdleTimeMinutes = "";
                 newAuth.serverAuthContext.sessionModule.properties.sessionOnly = newAuth.serverAuthContext.sessionModule.properties.sessionOnly === "true";

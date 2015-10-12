@@ -60,7 +60,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
         model: {},
 
         render: function(args, callback) {
-            _(JSONEditor.defaults.options).extend({
+            _.extend(JSONEditor.defaults.options, {
                 theme: "bootstrap3",
                 iconlib: "fontawesome4",
                 disable_edit_json: true,

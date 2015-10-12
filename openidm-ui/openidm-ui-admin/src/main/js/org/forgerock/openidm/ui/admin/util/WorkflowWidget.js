@@ -160,7 +160,7 @@ define("org/forgerock/openidm/ui/admin/util/WorkflowWidget", [
 
                 WorkflowDelegate.availableWorkflows().then(_.bind(function(workflowData) {
 
-                    _(workflowData.result).each(function (workflow) {
+                    _.each(workflowData.result, function(workflow) {
                         workflowList.push({
                             "key": workflow.key,
                             "name": workflow.name,
