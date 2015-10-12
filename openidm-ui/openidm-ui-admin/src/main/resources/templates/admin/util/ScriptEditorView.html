@@ -1,4 +1,5 @@
 <div class="row event-hook-inline event-hook-window">
+    <form class="script-form">
 
     {{#if hasWorkflow}}
     <div class="btn-group btn-group-tabs script-tabs col-md-12 form-group" data-toggle="btns">
@@ -31,7 +32,7 @@
                         {{#if scriptData.file}}
                         <textarea class="scriptSourceCode" placeholder="{{placeHolder}}"  name="sourceCode" disabled="true"></textarea>
                         {{else}}
-                        <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" {{#unless disableValidation}} data-validator-event="keyup blur check" data-validator="required" {{/unless}} name="sourceCode">{{scriptData.source}}</textarea>
+                        <textarea class="scriptSourceCode" placeholder="{{placeHolder}}" name="sourceCode">{{scriptData.source}}</textarea>
                         {{/if}}
 
                         {{#unless disableValidation}}
@@ -53,7 +54,7 @@
                 <div>
                     <div style="display:none;" class="panel-body">
                         <div class="form-group">
-                            <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#if scriptData.file}} value="{{scriptData.file}}" {{#unless disableValidation}} data-validator-event="keyup blur focus check" data-validator="required" {{/unless}} {{else}} value="" {{/if}}/>
+                            <input class="scriptFilePath form-control" autocomplete="off" type="text" name="fileName" {{#unless disableValidation}} data-validator-event="keyup blur focus check" data-validator="required" {{/unless}} {{#if scriptData.file}} value="{{scriptData.file}}" {{else}} value="" {{/if}}/>
                             {{#unless disableValidation}}
                             <span></span>
                             <div class="validation-message"></div>
@@ -118,6 +119,7 @@
         </div>
         {{/unless}}
     </div>
+    </form>
 </div>
 
 <div {{#if defaultToScript}} style="display:none" {{/if}} class="workflow-body"></div>

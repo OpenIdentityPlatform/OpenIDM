@@ -72,7 +72,7 @@ define("org/forgerock/openidm/ui/admin/mapping/scheduling/LiveSyncView", [
                 }
 
                 if (args.schedules.result.length > 0) {
-                    _(args.schedules.result).each(function (scheduleId) {
+                    _.each(args.schedules.result, function (scheduleId) {
                         tempPromises = SchedulerDelegate.specificSchedule(scheduleId._id);
 
                         promises.push(tempPromises);

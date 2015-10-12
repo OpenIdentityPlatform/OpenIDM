@@ -116,7 +116,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
 
 
             if (this.data.defaults.limitedEdits) {
-                _(JSONEditor.defaults.options).extend({
+                _.extend(JSONEditor.defaults.options, {
                     ajax: false,
                     disable_array_add: true,
                     disable_array_delete: true,
@@ -133,7 +133,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
                     theme: "bootstrap3"
                 });
             } else {
-                _(JSONEditor.defaults.options).extend({
+                _.extend(JSONEditor.defaults.options, {
                     ajax: false,
                     disable_array_add: false,
                     disable_array_delete: false,

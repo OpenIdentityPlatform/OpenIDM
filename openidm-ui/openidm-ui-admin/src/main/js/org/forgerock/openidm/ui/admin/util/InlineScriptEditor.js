@@ -74,7 +74,8 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 hasWorkflow: false,
                 workflowActive: false,
                 editors: [],
-                passedVariables: []
+                passedVariables: [],
+                codeMirrorValid: false
             },
 
             /*
@@ -179,7 +180,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     }
 
                     if (!this.data.disableValidation) {
-                        validatorsManager.bindValidators(this.$el);
+                        validatorsManager.bindValidators(this.$el.find("form"));
                         this.$el.find(":input").trigger("check");
                     }
 
@@ -191,7 +192,14 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                         this.saveEvent(this.model.onChange, cm, changeObject);
 
                         if (!this.data.disableValidation) {
-                            this.$el.find(".scriptSourceCode").trigger("blur");
+
+                            if(cm.getValue().length > 0) {
+                                this.model.codeMirrorValid = true;
+                            } else {
+                                this.model.codeMirrorValid = false;
+                            }
+
+                            this.customValidate();
                         }
                     }, this));
 
@@ -244,6 +252,12 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                         this.addPassedVariable(key, value);
                     }, this);
 
+                    if(this.cmBox.getValue().length > 0) {
+                        this.model.codeMirrorValid = true;
+                    }
+
+                    this.customValidate();
+
                     if (callback) {
                         callback();
                     }
@@ -272,8 +286,6 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     this.$el.find(".script-body").show();
                     this.$el.find(".workflow-body").hide();
                 }
-
-                this.customValidate();
             },
 
             previewScript : function() {
@@ -319,23 +331,22 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     }
 
                     if (currentSelection === "file-code") {
-                        this.$el.find(".scriptFilePath").attr("data-validator-event", "keyup blur focus check").attr("data-validator", "required");
+                        this.model.codeMirrorValid = false;
 
                         if (this.model.onBlur) {
                             this.$el.find(".scriptFilePath").bind("blur", _.bind(function () {
                                 this.model.onBlur();
                             }, this));
                         }
-
-                        this.$el.find(".scriptSourceCode").removeAttr("data-validation-status").removeAttr("data-validator-event").removeAttr("data-validator").unbind("blur").unbind("check");
                     } else {
-                        this.$el.find(".scriptSourceCode").attr("data-validator-event", "keyup blur focus check").attr("data-validator", "required");
-
-                        this.$el.find(".scriptFilePath").removeAttr("data-validator-event").removeAttr("data-validation-status").removeAttr("data-validator").unbind("blur").unbind("focus").unbind("check").unbind("keyup");
+                        if (this.cmBox.getValue().length > 0) {
+                            this.model.codeMirrorValid = true;
+                        } else {
+                            this.model.codeMirrorValid = false;
+                        }
                     }
 
-                    validatorsManager.bindValidators(this.$el);
-                    this.$el.find(":input").trigger("check");
+                    this.customValidate();
                 }
             },
 
@@ -416,8 +427,14 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     this.validationResult = this.workflow.isValid();
                 }
 
-                if (this.model.validationCallback) {
-                    this.model.validationCallback(this.validationResult);
+                if(this.model.validationCallback) {
+                    if (this.$el.find(".scriptFilePath:visible").length > 0 && this.validationResult) {
+                        this.model.validationCallback(true);
+                    } else if (this.model.codeMirrorValid) {
+                        this.model.validationCallback(true);
+                    } else {
+                        this.model.validationCallback(false);
+                    }
                 }
             },
 
@@ -467,12 +484,17 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
             },
 
             setSelectedScript: function(disabledScript, enabledScript) {
-                disabledScript.closest(".panel-body").slideToggle();
+                disabledScript.closest(".panel-body").hide();
                 disabledScript.prop("disabled", true);
                 disabledScript.toggleClass("invalid", false);
 
                 enabledScript.prop("disabled", false);
-                enabledScript.closest(".panel-body").slideToggle();
+                enabledScript.closest(".panel-body").show();
+
+
+                if (!this.data.disableValidation) {
+                    this.customValidate();
+                }
             },
 
             addEmptyPassedVariable: function(){

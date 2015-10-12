@@ -268,16 +268,25 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 url = this.getURL(),
                 pager_id = grid_id + '-paginator',
                 ResourceModel = AbstractModel.extend({ "url": url }),
-                ResourceCollection = AbstractCollection.extend({
-                    url: url,
-                    model: ResourceModel,
-                    state: BackgridUtils.getState(cols[1].name),
-                    queryParams: BackgridUtils.getQueryParams({
-                        _queryFilter: (!this.isSystemResource) ? 'true' : '/' + cols[2].name + ' sw ""'
-                    })
-                }),
+                ResourceCollection,
                 resourceGrid,
-                paginator;
+                paginator,
+                state;
+
+            if(cols.length !== 0) {
+                state = BackgridUtils.getState(cols[1].name);
+            } else {
+                state = null;
+            }
+
+            ResourceCollection = AbstractCollection.extend({
+                url: url,
+                model: ResourceModel,
+                state: state,
+                queryParams: BackgridUtils.getQueryParams({
+                    _queryFilter: (!this.isSystemResource) ? 'true' : '/' + cols[2].name + ' sw ""'
+                })
+            });
             
             this.model.resources = new ResourceCollection();
             

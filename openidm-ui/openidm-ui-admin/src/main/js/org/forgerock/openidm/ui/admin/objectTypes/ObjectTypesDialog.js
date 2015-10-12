@@ -128,7 +128,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
         saveObjectType: function() {
             var objectType = this.editor.getValue();
 
-            if (this.editor && !_(objectType.objectName).isEmpty()) {
+            if (this.editor && !_.isEmpty(objectType.objectName)) {
 
                 if(this.selectedObjectType !== null) {
                     delete this.objectTypes[this.selectedObjectType];
@@ -252,7 +252,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
 
             OT_value.properties = {};
 
-            _(objectType.properties).each(function(property){
+            _.each(objectType.properties, function(property){
                 OT_value.properties[property.propertyName] = {
                     type: property.propertyType,
                     nativeType: property.nativeType,
@@ -261,7 +261,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                 };
 
                 if (property.customProperties && property.customProperties.length > 0) {
-                    _(property.customProperties).each(function(customProperty){
+                    _.each(property.customProperties, function(customProperty){
                         OT_value.properties[property.propertyName][customProperty.propertyName] = customProperty.values;
                     });
                 }
@@ -289,7 +289,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                 jsonEditorFormat.nativeType = this.objectTypes[key].nativeType;
 
                 // Properties of Object Types
-                _(this.objectTypes[key].properties).each(function(property, key) {
+                _.each(this.objectTypes[key].properties, function(property, key) {
                     tempProperty = {};
                     tempProperty.propertyName = key;
                     tempProperty.propertyType = property.type;
@@ -299,7 +299,7 @@ define("org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog", [
                     tempProperty.customProperties = [];
 
                     // Any additional properties are added to the customProperties object
-                    _(_.omit(property,["type", "nativeName", "nativeType", "required"])).each(function(customProperty, key){
+                    _.each(_.omit(property,["type", "nativeName", "nativeType", "required"]), function(customProperty, key){
                         customProperties.push({
                             "propertyName": key,
                             "values": customProperty
