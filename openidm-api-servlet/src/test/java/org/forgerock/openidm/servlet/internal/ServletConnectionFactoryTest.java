@@ -41,21 +41,19 @@ import java.util.ServiceLoader;
 import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
+import org.forgerock.json.resource.*;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.MemoryBackend;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resources;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.json.resource.Router;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.source.DirectoryContainer;
+import org.forgerock.util.promise.Promise;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -102,12 +100,24 @@ public class ServletConnectionFactoryTest {
         when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class)))
                 .thenReturn("");
 
+        Filter maintenanceFilter =  mock(Filter.class);
+        when(maintenanceFilter.filterCreate(any(Context.class), any(CreateRequest.class), any(RequestHandler.class)))
+                .thenAnswer(new Answer<Promise<ResourceResponse, ResourceException>>() {
+                    public Promise<ResourceResponse, ResourceException> answer(InvocationOnMock invocation) {
+                        Object[] args = invocation.getArguments();
+                        Context context = (Context) args[0];
+                        CreateRequest request = (CreateRequest) args[1];
+                        RequestHandler handler = (RequestHandler) args[2];
+                        return handler.handleCreate(context, request);
+                    }
+                });
+
         ServletConnectionFactory filterService = new ServletConnectionFactory();
         filterService.bindRequestHandler(requestHandler);
         filterService.bindScriptRegistry(sr);
         filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.bindMaintenanceFilter(maintenanceFilter);
         filterService.activate(mock(ComponentContext.class));
-
         testable = filterService.getConnection();
     }
 
