@@ -105,6 +105,15 @@
                     }
                 ]
             },
+            "managed_assignment" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "managed_group" : {
                 "index" : [
                     {
