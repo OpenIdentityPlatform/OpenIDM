@@ -53,6 +53,7 @@ import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.shell.CustomCommandScope;
 import org.forgerock.openidm.shell.felixgogo.MetaVar;
+import org.forgerock.services.context.RootContext;
 
 /**
  * Command scope for remote operations.
@@ -187,9 +188,16 @@ public class RemoteCommandScope extends CustomCommandScope {
             String archive) {
 
         processOptions(userPass, idmUrl, idmPort);
-        new UpdateCommand(session, resource, archive, maxJobsFinishWaitTimeMs, maxUpdateWaitTimeMs, acceptLicense,
-                logFilePath, quietMode)
-                .execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive(archive)
+                .setLogFilePath(logFilePath)
+                .setQuietMode(quietMode)
+                .setAcceptedLicense(acceptLicense)
+                .setMaxJobsFinishWaitTimeMs(maxJobsFinishWaitTimeMs)
+                .setMaxUpdateWaitTimeMs(maxUpdateWaitTimeMs);
+
+        new UpdateCommand(session, resource, config)
+                .execute(new RootContext());
     }
 
     /**

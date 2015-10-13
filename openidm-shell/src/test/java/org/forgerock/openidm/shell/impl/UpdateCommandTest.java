@@ -33,7 +33,9 @@ import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_LOG_ROUTE;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_ROUTE;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_STATUS_COMPLETE;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_STATUS_FAILED;
+import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.ENABLE_SCHEDULER;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.ENTER_MAINTENANCE_MODE;
+import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.FORCE_RESTART;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.INSTALL_ARCHIVE;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.PAUSING_SCHEDULER;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.PREVIEW_ARCHIVE;
@@ -55,6 +57,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.mockito.ArgumentMatcher;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
@@ -93,12 +96,19 @@ public class UpdateCommandTest {
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, "test.zip", 1000L, 1000L, false, null,
-                false);
-        updateCommand.execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(1000L)
+                .setMaxUpdateWaitTimeMs(1000L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(updateCommand.getFailedStep(), PREVIEW_ARCHIVE);
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.FAILED);
+        assertEquals(executionState.getLastAttemptedStep(), PREVIEW_ARCHIVE);
+        assertNull(executionState.getCompletedInstallStatus());
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
 
     @Test
@@ -111,12 +121,19 @@ public class UpdateCommandTest {
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, "test.zip", 1000L, 1000L, true, null,
-                false);
-        updateCommand.execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(1000L)
+                .setMaxUpdateWaitTimeMs(1000L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(updateCommand.getFailedStep(), PAUSING_SCHEDULER);
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.FAILED);
+        assertEquals(executionState.getLastAttemptedStep(), PAUSING_SCHEDULER);
+        assertNull(executionState.getCompletedInstallStatus());
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
 
     @Test
@@ -129,21 +146,28 @@ public class UpdateCommandTest {
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object()))),
                 // mock the next step to fail.
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", false)))),
-                // mock the calls made on finally.
+                // mock the calls on recovery.
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
         // with the timeout set to 10 and the retry set to 20, it should timeout waiting for jobs to complete.
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, "test.zip", 10L, 1000L, true, null,
-                false);
-        updateCommand.setCheckJobsRunningFrequency(20L);
-        updateCommand.execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(10L)
+                .setCheckJobsRunningFrequency(20L)
+                .setMaxUpdateWaitTimeMs(1000L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        // assert that the cmd failed waiting for jobs to complete.
-        assertEquals(updateCommand.getFailedStep(), WAIT_FOR_JOBS_TO_COMPLETE);
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.FAILED);
+        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_JOBS_TO_COMPLETE);
+        assertNull(executionState.getCompletedInstallStatus());
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
 
+        //now that timeout testing worked, test that is can pass waiting for jobs to complete
         resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL, json(array(object(field("archive", "test.zip"))))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
@@ -154,25 +178,32 @@ public class UpdateCommandTest {
                         json(array(object())), json(array(object())), json(array(object())), json(array())),
                 // mock the next step to fail.
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", false)))),
-                // mock the calls made on finally.
+                // mock the calls on recovery.
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
-        updateCommand = new UpdateCommand(session, resource, "test.zip", 200L, 1000L, true, null, false);
-        updateCommand.setCheckJobsRunningFrequency(10L);
-        updateCommand.execute();
+        config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(200L)
+                .setCheckJobsRunningFrequency(10L)
+                .setMaxUpdateWaitTimeMs(1000L);
+        updateCommand = new UpdateCommand(session, resource, config);
+        executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(updateCommand.getFailedStep(), ENTER_MAINTENANCE_MODE);
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.FAILED);
-
+        assertEquals(executionState.getLastAttemptedStep(), ENTER_MAINTENANCE_MODE);
+        assertNull(executionState.getCompletedInstallStatus());
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
 
     @Test
     public void testEnterMaintenanceMode() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "true"))))),
+                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
@@ -181,27 +212,32 @@ public class UpdateCommandTest {
                 // mock with empty response to simulate early error
                 mc(UPDATE_ROUTE, UPDATE_ACTION_UPDATE, json(object())),
 
-                // mock the calls made on finally.
+                // mock the calls on recovery.
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, "test.zip", 50L, 1000L, true, null,
-                false);
-        updateCommand.setCheckJobsRunningFrequency(10L);
-        updateCommand.execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(50L)
+                .setCheckJobsRunningFrequency(10L)
+                .setMaxUpdateWaitTimeMs(1000L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        // assert that the cmd failed to invoke initial update request.
-        assertEquals(updateCommand.getFailedStep(), INSTALL_ARCHIVE);
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.FAILED);
-
+        assertEquals(executionState.getLastAttemptedStep(), INSTALL_ARCHIVE);
+        assertNull(executionState.getCompletedInstallStatus());
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
 
     @Test
     public void testTimeoutInstallUpdateArchive() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "true"))))),
+                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array())),
@@ -218,28 +254,33 @@ public class UpdateCommandTest {
                         ))
                 ),
 
-                // mock the calls made on finally.
+                // mock the calls on recovery.
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, "test.zip", 50L, 10L, true, null,
-                false);
-        updateCommand.setCheckJobsRunningFrequency(10L);
-        updateCommand.setCheckCompleteFrequency(20L);
-        updateCommand.execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(50L)
+                .setCheckJobsRunningFrequency(10L)
+                .setMaxUpdateWaitTimeMs(10L)
+                .setCheckCompleteFrequency(20L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        // assert that the cmd failed waiting for install to complete.
-        assertEquals(updateCommand.getFailedStep(), WAIT_FOR_INSTALL_DONE);
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.FAILED);
-
+        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
+        assertNull(executionState.getCompletedInstallStatus());
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
 
     @Test
     public void testFailedInstallUpdateArchive() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "true"))))),
+                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
@@ -260,24 +301,81 @@ public class UpdateCommandTest {
                                 field("status", UPDATE_STATUS_FAILED)
                         ))),
 
-                // mock the calls made on finally.
+                // mock the calls on recovery.
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, "test.zip", 50L, 100L, true, null,
-                false);
-        updateCommand.setCheckJobsRunningFrequency(10L);
-        updateCommand.setCheckCompleteFrequency(20L);
-        updateCommand.execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(50L)
+                .setCheckJobsRunningFrequency(10L)
+                .setMaxUpdateWaitTimeMs(100L)
+                .setCheckCompleteFrequency(10L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        // assert that the cmd succeeded to run, but failed to install
-        assertNull(updateCommand.getFailedStep());
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.FAILED);
+        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
+        assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_FAILED);
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
 
     @Test
     public void testSuccessfulInstall() throws Exception {
+
+        HttpRemoteJsonResource resource = mockResource(
+                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
+                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
+                mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
+                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
+                mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", true)))),
+                mc(UPDATE_ROUTE, UPDATE_ACTION_UPDATE,
+                        json(object(field("status", "IN_PROGRESS"), field(ResourceResponse.FIELD_CONTENT_ID, "1234")))),
+                mc(UPDATE_LOG_ROUTE, null,
+                        json(object(
+                                field(ResourceResponse.FIELD_CONTENT_ID, "1234"),
+                                field(ResourceResponse.FIELD_CONTENT_REVISION, "1"),
+                                field("status", "IN_PROGRESS")
+                        )),
+                        json(object(
+                                field(ResourceResponse.FIELD_CONTENT_ID, "1234"),
+                                field(ResourceResponse.FIELD_CONTENT_REVISION, "1"),
+                                field("status", "IN_PROGRESS")
+                        )),
+                        json(object(
+                                field(ResourceResponse.FIELD_CONTENT_ID, "1234"),
+                                field(ResourceResponse.FIELD_CONTENT_REVISION, "1"),
+                                field("status", UPDATE_STATUS_COMPLETE)
+                        ))),
+
+                // mock the calls on recovery.
+                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
+        );
+
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(50L)
+                .setCheckJobsRunningFrequency(10L)
+                .setMaxUpdateWaitTimeMs(200L)
+                .setCheckCompleteFrequency(10L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
+
+        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
+        assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_COMPLETE);
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+    }
+
+    @Test
+    public void testSuccessfulInstallWithRestart() throws Exception {
 
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
@@ -305,20 +403,26 @@ public class UpdateCommandTest {
                                 field("status", UPDATE_STATUS_COMPLETE)
                         ))),
 
-                // mock the calls made on finally.
+                // mock the calls on recovery.
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, "test.zip", 50L, 100L, true, null,
-                false);
-        updateCommand.setCheckJobsRunningFrequency(10L);
-        updateCommand.setCheckCompleteFrequency(20L);
-        updateCommand.execute();
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setMaxJobsFinishWaitTimeMs(50L)
+                .setCheckJobsRunningFrequency(10L)
+                .setMaxUpdateWaitTimeMs(200L)
+                .setCheckCompleteFrequency(10L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        // assert that the cmd succeeded to run, but failed to install
-        assertNull(updateCommand.getFailedStep());
-        assertEquals(updateCommand.getStatus(), UpdateCommand.Status.COMPLETE);
+        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
+        assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_COMPLETE);
+        assertEquals(executionState.getLastRecoveryStep(), FORCE_RESTART);
     }
 
     private HttpRemoteJsonResource mockResource(MockCriteria... mockCriterion) throws ResourceException {
@@ -402,9 +506,9 @@ public class UpdateCommandTest {
     }
 
     private abstract static class MockCriteria {
-        private String route;
-        private String action;
-        private JsonValue[] responseContent;
+        private final String route;
+        private final String action;
+        private final JsonValue[] responseContent;
 
         public MockCriteria(String route, String action, JsonValue... responseContent) {
             this.route = route;
@@ -449,7 +553,7 @@ public class UpdateCommandTest {
     }
 
     private static class IsRouteMatcher extends ArgumentMatcher<ReadRequest> {
-        private String route;
+        private final String route;
 
         public IsRouteMatcher(String route) {
             this.route = route;
