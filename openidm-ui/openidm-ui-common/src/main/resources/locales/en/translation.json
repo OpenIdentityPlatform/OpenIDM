@@ -1467,6 +1467,7 @@
                 "return": "Return to Login Page"
             },
             "kba" : {
+                "answerQuestions": "Answer security questions below to reset your password.",
                 "description": "The Security Question selected and corresponding answer provided by you will be used to help identify you in the event that you forget your password.",
                 "provideAnother": "Add another question",
                 "selectQuestion": "Select a security question",

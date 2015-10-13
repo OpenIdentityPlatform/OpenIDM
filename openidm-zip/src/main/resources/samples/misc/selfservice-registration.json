@@ -1,0 +1,39 @@
+{
+    "stageConfigs" : [
+        {
+            "name" : "emailValidation",
+            "email" : {
+                "from" : "info@admin.org",
+                "subject" : "Register new account",
+                "mimeType" : "text/html",
+                "message" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+                "verificationLinkToken" : "%link%",
+                "verificationLink" : "https://localhost:8443/#register/"
+            }
+        },
+        {
+            "name" : "userDetails",
+            "identityEmailField" : "mail"
+        },
+        {
+            "name" : "kbaSecurityAnswerDefinitionStage",
+            "kbaPropertyName" : "kbaInfo",
+            "kbaConfig" : null
+        },
+        {
+            "name" : "selfRegistration",
+            "identityServiceUrl" : "managed/user"
+        }
+    ],
+    "snapshotToken" : {
+        "type" : "jwt",
+        "sharedKey" : "!tHiSsOmEsHaReDkEy!",
+        "keyPairAlgorithm" : "RSA",
+        "keyPairSize" : 1024,
+        "jweAlgorithm" : "RSAES_PKCS1_V1_5",
+        "encryptionMethod" : "A128CBC_HS256",
+        "jwsAlgorithm" : "HS256",
+        "tokenExpiry" : 1800
+    },
+    "storage" : "stateless"
+}

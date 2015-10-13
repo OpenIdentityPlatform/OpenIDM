@@ -71,6 +71,13 @@ var httpAccessConfig =
            "methods"    : "read",
            "actions"    : "*"
         },
+        {
+           "pattern"    : "config/selfservice/kbaConfig",
+           "roles"      : "openidm-reg,openidm-authorized",
+           "methods"    : "read",
+           "actions"    : "*",
+           "customAuthz": "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('passwordReset')"
+        },
 
         // externally-visisble Self-Service endpoints
         {
