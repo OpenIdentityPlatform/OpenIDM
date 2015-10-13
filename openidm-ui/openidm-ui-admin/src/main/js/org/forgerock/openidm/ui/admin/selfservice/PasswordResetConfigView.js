@@ -68,6 +68,24 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                         }
                     },
                     {
+                      "name" : "kbaSecurityAnswerVerificationStage",
+                      "kbaPropertyName" : "kbaInfo",
+                      "identityServiceUrl" : "managed/user",
+                      "numberOfQuestionsUserMustAnswer" : "1",
+                      "kbaConfig": {
+                        "questions": {
+                          "1": {
+                            "en": "What's your favorite color?",
+                            "en_GB": "What's your favorite colour?",
+                            "fr": "Quelle est votre couleur préférée?"
+                          },
+                          "2": {
+                            "en": "Who was your first employer?"
+                          }
+                        }
+                      }
+                    },
+                    {
                         "name" : "resetStage",
                         "identityServiceUrl" : "managed/user",
                         "identityPasswordField" : "password"
@@ -92,6 +110,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 type: "userIdValidation",
                 title: $.t("templates.selfservice.emailValidation"),
                 help: $.t("templates.selfservice.emailValidationDescription")
+            },
+            {
+                type: "kbaSecurityAnswerVerificationStage",
+                title: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageForm"),
+                help: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageFormDescription")
             },
             {
                 type: "resetStage",

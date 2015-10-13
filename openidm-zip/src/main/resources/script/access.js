@@ -107,6 +107,13 @@ var httpAccessConfig =
         {
             "pattern"   : "managed/user/*",
             "roles"     : "openidm-reg",
+            "methods"   : "read",
+            "actions"   : "*",
+            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest()"
+        },
+        {
+            "pattern"   : "managed/user/*",
+            "roles"     : "openidm-reg",
             "methods"   : "patch",
             "actions"   : "*",
             "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user')"
