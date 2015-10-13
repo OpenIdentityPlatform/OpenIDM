@@ -78,6 +78,8 @@ public class RemoteCommandScope extends CustomCommandScope {
     private static final String REPLACE_ALL_DESC =
             "Replace the entire config set by deleting the additional configuration";
 
+    private static final String PAUSE_DESC = "Pause in milliseconds between each config change, defaults to 500ms.";
+
     private final HttpRemoteJsonResource resource = new HttpRemoteJsonResource();
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -208,6 +210,7 @@ public class RemoteCommandScope extends CustomCommandScope {
      * @param idmUrl the url of the OpenIDM instance
      * @param idmPort the OpenIDM instance's port
      * @param replaceall whether or not to replace the config
+     * @param pause time in milliseconds to pause between each config change
      */
     @Descriptor("Imports the configuration set from local 'conf' directory.")
     public void configimport(
@@ -230,8 +233,13 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(REPLACE_ALL_DESC)
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false")
-            final boolean replaceall) {
-        configimport(session, userPass, idmUrl, idmPort, replaceall, "conf");
+            final boolean replaceall,
+
+            @Descriptor(PAUSE_DESC)
+            @Parameter(names = {"--pause"}, absentValue = "500")
+            final long pause
+    ) {
+        configimport(session, userPass, idmUrl, idmPort, replaceall, pause, "conf");
     }
 
     /**
@@ -242,6 +250,7 @@ public class RemoteCommandScope extends CustomCommandScope {
      * @param idmUrl the url of the OpenIDM instance
      * @param idmPort the OpenIDM instance's port
      * @param replaceall whether or not to replace the config
+     * @param pause time in milliseconds to pause between each config change
      * @param source the source directory
      */
     @Descriptor("Imports the configuration set from local file/directory.")
@@ -266,6 +275,10 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Descriptor(REPLACE_ALL_DESC)
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true",  absentValue = "false")
             final boolean replaceall,
+
+            @Descriptor(PAUSE_DESC)
+            @Parameter(names = {"--pause"}, absentValue = "500")
+            final long pause,
 
             @Descriptor("source directory")
             final String source) {
@@ -344,6 +357,11 @@ public class RemoteCommandScope extends CustomCommandScope {
                 } catch (Exception e) {
                     prettyPrint(console, "ConfigImport", entry.getKey(), e.getMessage());
                 }
+                try {
+                    Thread.sleep(pause);
+                } catch (InterruptedException e) {
+                    //ignore and allow to proceed.
+                }
             }
 
             // Delete all additional config objects
@@ -358,10 +376,16 @@ public class RemoteCommandScope extends CustomCommandScope {
                     }
 
                     try {
-                        resource.delete(null, Requests.newDeleteRequest(configResource, configId));
+                        //configId is concatenated to avoid file paths from getting url encoded -> '/'-> '%2f'
+                        resource.delete(null, Requests.newDeleteRequest(configResource.concat(configId)));
                         prettyPrint(console, "ConfigDelete", configId, null);
                     } catch (Exception e) {
                         prettyPrint(console, "ConfigDelete", configId, e.getMessage());
+                    }
+                    try {
+                        Thread.sleep(pause);
+                    } catch (InterruptedException e) {
+                        //ignore and allow to proceed.
                     }
                 }
             }
