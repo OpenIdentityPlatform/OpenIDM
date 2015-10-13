@@ -40,7 +40,7 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
     obj.displayTextDelimiter = ", ";
 
     obj.getDisplayText = function(prop, item){
-        var pathToResource = (prop.items) ? prop.items.resourceCollection.path : prop.resourceCollection.path,
+        var pathToResource = (prop.items) ? prop.items.resourceCollection[0].path : prop.resourceCollection[0].path,
             resourceKey = pathToResource + "/" + item._id,
             validDisplayProps = _.reject(obj.autocompleteProps(prop),function(p){
                 return (p && !p.length) || !eval("item." + p);
@@ -57,7 +57,7 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
     };
 
     obj.autocompleteProps = function(prop, showRaw) {
-        var fields = (prop.items) ? prop.items.resourceCollection.query.fields : prop.resourceCollection.query.fields;
+        var fields = (prop.items) ? prop.items.resourceCollection[0].query.fields : prop.resourceCollection[0].query.fields;
 
         if(showRaw) {
             return fields;
@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
     };
 
     obj.setupAutocompleteField = function(autocompleteField, prop, opts) {
-        var pathToResource = (prop.items) ? prop.items.resourceCollection.path : prop.resourceCollection.path,
+        var pathToResource = (prop.items) ? prop.items.resourceCollection[0].path : prop.resourceCollection[0].path,
             defaultOpts = {
                 valueField: '_id',
                 searchField: obj.autocompleteProps(prop),
@@ -200,8 +200,10 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
             }
 
             if(prop.type === "relationship") {
-                if (prop.resourceCollection) {
-                    addFields(key, prop.resourceCollection.query.fields);
+                if (prop.resourceCollection[0] && prop.resourceCollection[0].length) {
+                    _.map(prop.resourceCollection[0], function (resourceCollection) {
+                        addFields(key, resourceCollection.query.fields);
+                    });
                 }
             }
         });

@@ -143,6 +143,7 @@ define("config/AppConfiguration", [
                     },
                     loader: [
                         {"messages":"config/messages/CommonMessages"},
+                        {"messages":"config/messages/CommonIDMMessages"},
                         {"messages":"config/messages/SelfServiceMessages"},
                         {"messages":"config/messages/UserMessages"}
                     ]

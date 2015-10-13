@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -39,6 +39,7 @@ define("config/main", [
     "./AppConfiguration",
 
     "./messages/CommonMessages",
+    "./messages/CommonIDMMessages",
     "./messages/AdminMessages",
     "./errorhandlers/CommonErrorHandlers"
 

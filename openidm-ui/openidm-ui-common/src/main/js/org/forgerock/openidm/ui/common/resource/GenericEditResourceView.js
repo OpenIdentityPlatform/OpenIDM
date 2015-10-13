@@ -41,6 +41,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
     "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
     "org/forgerock/openidm/ui/common/linkedView/LinkedView",
     "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "bootstrap"
 ], function($, _, JSONEditor,
         AbstractView,
@@ -55,7 +56,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
         ResourceCollectionRelationshipsView,
         resourceCollectionUtils,
         LinkedView,
-        router
+        router,
+        ValidatorsManager
     ) {
     var EditResourceView = AbstractView.extend({
         template: "templates/admin/resource/EditResourceViewTemplate.html",
@@ -64,25 +66,26 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             "click #saveBtn": "save",
             "click #backBtn": "backToList",
             "click #deleteBtn": "deleteObject",
-            "click #resetBtn": "reset"
+            "click #resetBtn": "reset",
+            "onValidate": "onValidate"
         },
         render: function(args, callback) {
             var resourceReadPromise,
                 objectId = (args[0] === "managed") ? args[2] : args[3],
                 displayField;
-                
+
 
             resourceDelegate.getSchema(args).then(_.bind(function (schema) {
                 this.data.args = args;
-                
+
                 this.data.objectType = args[0];
                 this.isSystemResource = false;
                 this.objectName = args[1];
                 this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
-    
+
                 if(objectId){
-                    resourceReadPromise = serviceInvoker.restCall({ 
-                        url: this.data.serviceUrl +"/" + objectId + "?_fields=" + resourceCollectionUtils.getFieldsToExpand(schema.properties) 
+                    resourceReadPromise = serviceInvoker.restCall({
+                        url: this.data.serviceUrl +"/" + objectId + "?_fields=" + resourceCollectionUtils.getFieldsToExpand(schema.properties)
                     });
                     this.objectId = objectId;
                     this.data.newObject = false;
@@ -90,55 +93,66 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                     resourceReadPromise = $.Deferred().resolve({});
                     this.data.newObject = true;
                 }
-    
+
                 if (this.data.objectType === "system") {
                     this.isSystemResource = true;
                     this.objectName += "/" + args[2];
                 }
-    
+
                 resourceReadPromise.then(_.bind(function(resource){
                     this.data.objectTitle = schema.title || this.objectName;
-    
+
                     this.data.schema = schema;
-    
+
                     if(this.isSystemResource) {
                         this.data.objectTitle = this.objectName;
                     }
-    
+
                     if(!this.data.newObject) {
                         if(this.isSystemResource) {
                             displayField = _.chain(schema.properties)
                                             .map(function(val, key) { val.name = key; return val; })
                                             .where({ nativeName: "__NAME__" })
                                             .value();
-    
+
                             if(displayField) {
                                 displayField = displayField[0].name;
                             } else {
                                 displayField = _.keys(schema.properties)[0];
                             }
                         } else {
-                            displayField = schema.order[0];
+                            _.map(schema.order, function (propName) {
+                                if(!displayField && schema.properties[propName].viewable) {
+                                    displayField = propName;
+                                }
+                            });
                         }
-    
+
                         this.data.objectDisplayText = resource[displayField];
                     }
-    
+
                     this.data.backBtnText = $.t("templates.admin.ResourceEdit.backToList",{ objectTitle: this.data.objectTitle });
-    
+
                     this.parentRender(function(){
                         this.setupEditor(resource, schema);
-    
-                        if(!this.data.newObject) {
-                            this.linkedView = new LinkedView();
-                            this.linkedView.element = "#linkedView";
-    
-                            this.linkedView.render({id: resource._id, resourcePath: this.data.objectType + "/" + this.objectName + "/" });
-                        }
-    
-                        if(callback) {
-                            callback();
-                        }
+
+
+                        ValidatorsManager.bindValidators(
+                            this.$el.find("#resource"),
+                            [this.data.objectType,this.objectName,this.objectId || "*"].join("/"),
+                            _.bind(function () {
+                                if(!this.data.newObject) {
+                                    this.linkedView = new LinkedView();
+                                    this.linkedView.element = "#linkedView";
+
+                                    this.linkedView.render({id: resource._id, resourcePath: this.data.objectType + "/" + this.objectName + "/" });
+                                }
+
+                                if(callback) {
+                                    callback();
+                                }
+                            }, this)
+                        );
                     });
                 },this));
             },this));
@@ -327,7 +341,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 if (!this.isSystemResource) {
                     _.each(this.$el.find(".resourceCollectionValue"), function(element) {
                         var val = $(element).val();
-                        
+
                         if (val.length) {
                             val = JSON.parse($(element).val());
                         }
@@ -444,7 +458,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                             autocompleteField[0].selectize.addOption(JSON.parse(el.val()));
                             autocompleteField[0].selectize.setValue(JSON.parse(el.val())._id);
                     }
-                        
+
                     return $.Deferred().resolve();
                 };
 

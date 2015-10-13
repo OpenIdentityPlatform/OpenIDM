@@ -75,6 +75,16 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
         }
     };
 
+    obj.serviceCall = function (callParams) {
+        callParams.errorsHandlers = callParams.errorsHandlers || {};
+        callParams.errorsHandlers.policy = {
+            status: 403,
+            event: constants.EVENT_POLICY_FAILURE
+        };
+
+        return AbstractDelegate.prototype.serviceCall.call(this, callParams);
+    };
+
     obj.createResource = function (serviceUrl) {
         return AbstractDelegate.prototype.createEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
     };
