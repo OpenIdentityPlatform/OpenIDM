@@ -63,6 +63,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.commons.launcher.OSGiFrameworkService;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -80,6 +81,7 @@ import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
+import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
@@ -544,8 +546,9 @@ public class UpdateManagerImpl implements UpdateManager {
     public String getLastUpdateId() {
         if (lastUpdateId == null) {
             final List<JsonValue> results = new ArrayList<>();
-            QueryRequest request = Requests.newQueryRequest("repo/updates")
-                    .setQueryId("query-all-ids")
+            final QueryRequest request = Requests.newQueryRequest("repo/updates")
+                    .addField("_id")
+                    .setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue())
                     .addSortKey(SortKey.descendingOrder("startDate"))
                     .setPageSize(1);
 
