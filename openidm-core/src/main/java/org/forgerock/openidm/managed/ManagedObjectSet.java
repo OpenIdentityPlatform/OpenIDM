@@ -716,7 +716,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
     @Override
     public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId, 
-    		DeleteRequest request) {
+    		final DeleteRequest request) {
         logger.debug("Delete {} ", "name=" + name + " id=" + resourceId + " rev="
                 + request.getRevision());
         try {
@@ -731,9 +731,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             // Delete the resource
             DeleteRequest deleteRequest = Requests.newDeleteRequest(repoId(resourceId));
-            if (deleteRequest.getRevision() == null) {
+
+            if (request.getRevision() != null) {
+                deleteRequest.setRevision(request.getRevision());
+            } else {
                 deleteRequest.setRevision(resource.getRevision());
             }
+
             connectionFactory.getConnection().delete(context, deleteRequest);
 
             // Delete any relationships associated with this resource
