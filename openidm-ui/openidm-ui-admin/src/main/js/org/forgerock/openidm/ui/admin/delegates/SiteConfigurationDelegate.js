@@ -55,6 +55,10 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
         var promise = $.Deferred();
 
         if (conf.loggedUser && _.contains(conf.loggedUser.uiroles,"ui-admin") &&
+            Navigation.configuration.links && Navigation.configuration.links.admin &&
+            Navigation.configuration.links.admin.urls &&
+            Navigation.configuration.links.admin.urls.managed &&
+            Navigation.configuration.links.admin.urls.managed.urls &&
             Navigation.configuration.links.admin.urls.managed.urls.length === 0) {
 
             eventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION,

@@ -68,5 +68,26 @@ define("org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate", [
         });
     };
 
+    obj.pauseJobs = function() {
+        return obj.serviceCall({
+            url: "?_action=pauseJobs",
+            type: "POST"
+        });
+    };
+
+    obj.resumeJobs = function() {
+        return obj.serviceCall({
+            url: "?_action=resumeJobs",
+            type: "POST"
+        });
+    };
+
+    obj.listCurrentlyExecutingJobs = function() {
+        return obj.serviceCall({
+            url: "?_action=listCurrentlyExecutingJobs",
+            type: "POST"
+        });
+    };
+
     return obj;
 });

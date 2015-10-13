@@ -1,0 +1,55 @@
+<div class="panel-body">
+    <div class="alert alert-success">
+        <i class="fa fa-check"></i> <strong>{{t "templates.update.review.successHeader"}}</strong> {{t "templates.update.review.successMsg"}} {{version}}.
+    </div>
+
+    <hr/>
+
+    <h3>{{t "templates.update.review.header"}}</h3>
+
+    <p class="panel-description">
+        {{t "templates.update.review.desc"}}
+    </p>
+
+    <div class="form-inline toolbar">
+        <div class="form-group expand-collapse-group pull-right">
+            <div class="btn-group">
+                <button type="button" class="btn toggle-view-btn fr-btn-secondary back"><i class="fa fa-th-list"></i> {{t "templates.update.review.back"}}</button>
+            </div>
+        </div>
+
+        <div class="form-group expand-collapse-group">
+            <div class="btn-group">
+                <button type="button" class="btn toggle-view-btn fr-btn-secondary expand-treegrid"><i class="fa fa-plus-circle"></i>{{t "templates.update.review.expand"}}</button>
+                <button type="button" class="btn toggle-view-btn fr-btn-secondary collapse-treegrid"><i class="fa fa-minus-circle"></i>{{t "templates.update.review.collapse"}}</button>
+            </div>
+        </div>
+
+        <div class="form-group expand-collapse-group">
+            <div class="btn-group">
+                <a class="btn fr-btn-secondary btn-block" href="data:application/octet-stream;charset=utf-16le;base64,{{responseB64}}">
+                    <i class="fa fa-download"></i> {{t "templates.update.review.download"}}
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="treegrid">
+        <div class="header clearfix">
+            <div class="col-sm-12 smallScreenCell">
+                {{t "templates.update.review.file"}}
+            </div>
+
+            <div class="col-sm-10 normalCells">
+                {{t "templates.update.review.file"}}
+            </div>
+
+            <div class="col-sm-2 normalCells">
+                {{t "templates.update.review.status"}}
+            </div>
+
+        </div>
+
+        {{> settings/_updateTreeGrid context=treeGrid depth=0}}
+    </div>
+</div>
