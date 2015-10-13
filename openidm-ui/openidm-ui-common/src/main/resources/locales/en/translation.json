@@ -807,6 +807,127 @@
             "changesPending": "Changes Pending",
             "undo": "Undo Changes"
         },
+        "update": {
+            "title": "Update",
+            "versions": {
+                "header": "Available Updates",
+                "noVersions": "To update OpenIDM, download the desired binary (in zip format), and copy it to the openidm/bin/update directory.",
+                "currentVersion": "Current Version",
+                "cli1": "You may update a clustered instance only via the CLI.  Read more",
+                "cli2": "here",
+                "description": "You can update OpenIDM with one of the binaries found in the openidm/bin/update/ directory.",
+                "refresh": "Refresh",
+                "error": "You can restart the update process here or via the CLI",
+                "failedClusterInfo": "Failed to retrieve cluster information.",
+                "noVersionsBG": "There are no versions available",
+                "file": "File",
+                "revision": "Revision",
+                "date": "Date",
+                "install": "Install",
+                "enableMaintenanceMode": "Enable Maintenance Mode",
+                "enableMaintenanceModeDesc": "When you confirm, OpenIDM allows running jobs to finish. Scheduled jobs are paused and OpenIDM goes into maintenance mode.",
+                "confirmAndInstall": "Confirm and Install"
+            },
+            "maintenanceMode": {
+                "shuttingDownScheduler": "Pausing scheduler...",
+                "numRemainingJobs": "Completing scheduled jobs.",
+                "remaining": "Remaining",
+                "noJobs": "All scheduled jobs complete, scheduler is shut down.",
+                "enterMaintenanceMode": "Successfully entered maintenance mode.",
+                "gettingInstallPreview": "Getting update preview...",
+                "exiting": "Exiting maintenance mode...",
+                "resumingSchedules": "Resuming scheduled jobs...",
+                "success": "Success",
+                "errorFailedToExit": "Failed to exit maintenance mode.",
+                "errorFailedToEnter": "Failed to enter maintenance mode."
+            },
+            "preview": {
+                "ready": "Ready to update",
+                "versionIsReady": "You're ready to update to",
+                "releaseNotes": "View release notes",
+                "header": "Installation Preview",
+                "description": "Review files to be replaced below. OpenIDM will save customized files for future access.",
+                "installUpdateBtn": "Install Update",
+                "view": "View",
+                "modified": "Modified",
+                "allFiles": "All Files",
+                "expand": "Expand All",
+                "collapse": "Collapse All",
+                "file": "File",
+                "status": "Status",
+                "noFiles": "There are no files to preview",
+                "licenseAgreement": "License Agreement",
+                "acceptLicense": "Accept License Agreement",
+                "errorInitiatingUpdate": "Update error: failed to start update",
+                "errorPreview": "Error retrieving update file preview",
+                "fileStates": {
+                    "UNEXPECTED": {
+                        "previewName": "Unexpected",
+                        "desc": "Existing file not from the original installation"
+                    },
+                    "NONEXISTENT": {
+                        "previewName": "Nonexistent",
+                        "desc": "The file does not exist on disk nor in the list of known files for the original distribution."
+                    },
+                    "DELETED": {
+                        "previewName": "Deleted",
+                        "desc": "OpenIDM reinstalls this file during the update"
+                    },
+                    "DIFFERS": {
+                        "previewName": "Changed",
+                        "desc": "OpenIDM backs up the modified file during the update."
+                    },
+                    "UNCHANGED": {
+                        "previewName": "Unchanged",
+                        "desc": "File unchanged."
+                    },
+                    "PRESERVED": {
+                        "previewName": "Preserved",
+                        "desc": "OpenIDM reinstalls this customized file during the update."
+                    }
+                }
+            },
+            "install": {
+                "installingUpdate": "Installing Update",
+                "successfulUpdate": "Successfully Installed",
+                "restartNow": "Restart Now.",
+                "download": "Download Update Report",
+                "restartIn": "OpenIDM will restart in",
+                "seconds": "seconds.",
+                "details": "When OpenIDM restarts, you'll see the full report.",
+                "restarting": "Restarting...",
+                "reverted": "There was an error updating, your copy of IDM has been reverted.",
+                "failedStatus": "Failed to get the status of the install with id: ",
+                "genericFail": "Failed to update."
+            },
+            "review": {
+                "noFilesError": "There are no files to report on.",
+                "successHeader": "Installation complete.",
+                "successMsg": "You have successfully update OpenIDM to version",
+                "header": "Installation Report",
+                "desc": "All files were successfully installed. Modified files were backed up to locations specified below.  You will need to refresh your browser to see any UI changes.",
+                "expand": "Expand All",
+                "collapse": "Collapse All",
+                "download": "Download Report",
+                "file": "File",
+                "status": "Status",
+                "back": "Back to Available Updates",
+                "actionTaken": {
+                  "REPLACED": {
+                    "reportName": "Replaced",
+                    "desc": "File updated/replaced for proper operation."
+                  },
+                  "PRESERVED": {
+                    "reportName": "Preserved",
+                    "desc": "Modified file saved; updated file available in same directory."
+                  },
+                  "APPLIED": {
+                    "reportName": "Applied",
+                    "desc": "Patch applied to configuration file. Backup not made."
+                  }
+                }
+            }
+        },
         "auth": {
             "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
             "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order specified.",

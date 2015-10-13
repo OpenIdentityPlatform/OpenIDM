@@ -81,10 +81,12 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: "authentication/"
         },
-        "settingsView" : {
+        "settingsView": {
             view: "org/forgerock/openidm/ui/admin/settings/SettingsView",
             role: "ui-admin",
-            url: "settings/"
+            url: /^settings\/(.*)$/,
+            pattern: "settings/?/",
+            defaults: ["authentication"]
         },
         "addMappingView" : {
             view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",

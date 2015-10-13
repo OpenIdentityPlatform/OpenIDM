@@ -21,6 +21,172 @@
  * your own identifying information:
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
+@media (max-width: @screen-sm) {
+  .treegrid .normalCells {
+    display: none !important;
+  }
+
+  .treegrid .smallScreenCell {
+    display: block !important;
+  }
+}
+@media (min-width: @screen-sm) {
+  .treegrid .normalCells {
+    display: block !important;
+  }
+}
+
+.scrollingLicenseAgreement .modal-body {
+  height: 500px;
+  overflow-y: scroll;
+}
+
+.treegrid-expander {
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  position: relative;
+  cursor: pointer;
+}
+
+#updateInstallerContainer {
+  margin-top: 150px;
+
+  .downloadBtn {
+    color: white;
+    &:hover, &:active {
+      text-decoration: none;
+    }
+  }
+
+  .progress {
+    margin-bottom: 10px;
+  }
+
+  .page-header {
+    margin: 30px 0 40px;
+  }
+}
+
+#updateView {
+
+  #versionsView {
+    .checkUpdatesAvailable {
+      cursor: pointer;
+    }
+    #versionGrid {
+      .version-icon {
+        display: inline-block;
+        margin: 0 10px 0 0;
+
+        & > div {
+          .icon-circle(25px);
+          color: white;
+          float: left;
+        }
+      }
+      .version-info {
+        display: inline-block;
+      }
+      .version-description {
+        display: block;
+        margin: 0 0 0 35px;
+      }
+    }
+  }
+
+  #install {
+    position: absolute;
+    width: 100%;
+    top: 0;
+    left: 0;
+  }
+
+  #installationPreviewView, #installationReportView {
+
+    .treegrid {
+      color: #777;
+      overflow: hidden;
+
+      span.tree-spacer {
+        display: inline-block;
+        width: 16px;
+        margin-right: 5px;
+      }
+
+      p {
+        display: inline-block
+      }
+
+      a[data-toggle='popover'] {
+        color: #777;
+      }
+
+      .fa-file {
+        width: 16px;
+      }
+
+      .header {
+        font-weight: bold;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 10px;
+
+        &>div {
+            text-transform: uppercase;
+        }
+      }
+
+      .smallScreenCell p {
+        display: block;
+      }
+
+      .node, .leaf {
+        border-top: 1px solid #eee;
+      }
+
+      .normalCells {
+        padding: 0;
+      }
+
+      .normalCells, .smallScreenCell {
+        display: none;
+      }
+
+      .node {
+        padding: 13px 0 0;
+
+        .col-sm-10.normalCells {
+          padding-left: 0;
+        }
+      }
+
+      .leaf {
+        padding: 13px 0;
+        p {
+          margin-bottom: 0;
+        }
+        &.changed {
+          background-color: #f7f7f7;
+        }
+      }
+    }
+
+    .toolbar {
+      border-top: 1px solid #ddd;
+      border-bottom: 1px solid #ddd;
+      padding: 15px 0;
+      margin-bottom: 15px;
+    }
+
+    @media (max-width: 768px) {
+      .expand-collapse-group {
+        margin-top: 15px;
+      }
+    }
+  }
+
+}
+
 #AuditEventsDialog .jsonEditorContainer > div > h3,
 #AuditEventHandlersDialog .jsonEditorContainer > div > h3 {
   display: none;

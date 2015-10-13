@@ -1,0 +1,47 @@
+{{#each context}}
+    <!--This is a leaf-->
+    {{#equals @key "___LEAF_NODE___"}}
+        {{#each this}}
+            <div class="leaf clearfix{{unchanged this.[1]}}">
+                <div class="col-sm-12 smallScreenCell">
+                    {{{addPadding ../../../depth}}}
+                    <i class="fa fa-file"></i>
+                    <span>{{this.[0]}}</span>
+                    <p>{{{addPadding ../../../depth}}}<span class="tree-spacer"></span>
+                        {{{this.[1]}}}
+                    </p>
+                </div>
+
+                <!--The file name-->
+                <div class="col-sm-10 normalCells">
+                    {{{addPadding ../../../depth}}}
+                    <i class="fa fa-file"></i>
+                    <p>{{this.[0]}}</p>
+                </div>
+
+                <!--The status + popover-->
+                <div class="col-sm-2 normalCells">
+                    <p>{{{this.[1]}}}</p>
+                </div>
+
+            </div>
+        {{/each}}
+    {{else}}
+
+        <div class="node">
+            {{{addPadding ../../depth}}}
+
+            <i class="treegrid-expander fa fa-caret-down"></i>
+            <i class="fa fa-folder"></i>
+            <p>
+                {{@key}}
+                <span class="badge">{{getBadge this}}</span>
+            </p>
+            <div class="node-container">
+                {{> settings/_updateTreeGrid context=this depth=(getDepth ../../depth)}}
+            </div>
+        </div>
+
+    {{/equals}}
+
+{{/each}}

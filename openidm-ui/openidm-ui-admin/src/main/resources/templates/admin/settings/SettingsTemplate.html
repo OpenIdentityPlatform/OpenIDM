@@ -1,25 +1,49 @@
-<div class="container">
-    <div class="page-header">
-        <h1>{{t "common.form.settings"}}</h1>
-    </div>
-</div>
+<div id="settingsBody">
 
-<div id="settingsTabs" class="tab-menu">
     <div class="container">
-        <ul class="nav nav-tabs">
-            <li class="active"><a data-toggle="tab" href="#authenticationContainer">{{t "config.AppConfiguration.Navigation.links.authentication"}}</a></li>
-            <li><a data-toggle="tab" href="#auditContainer">{{t "templates.audit.audit"}}</a></li>
-            <li><a data-toggle="tab" href="#selfServiceContainer">{{t "templates.selfService.title"}}</a></li>
-            <li><a data-toggle="tab" href="#emailConfigContainer">{{t "templates.emailConfig.title"}}</a></li>
-        </ul>
+        <div class="page-header">
+            <h1>{{t "common.form.settings"}}</h1>
+        </div>
     </div>
+
+    <div id="settingsTabs" class="tab-menu">
+        <div class="container">
+            <ul class="nav nav-tabs">
+
+                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "authentication"}}active{{/sw}}">
+                    <a data-toggle="tab" data-route="authentication" href="#authenticationContainer">{{t "config.AppConfiguration.Navigation.links.authentication"}}</a>
+                </li>
+
+                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "audit"}}active{{/sw}}">
+                    <a data-toggle="tab" data-route="audit" href="#auditContainer">{{t "templates.audit.audit"}}</a>
+                </li>
+
+                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "selfService"}}active{{/sw}}">
+                    <a data-toggle="tab" data-route="selfService" href="#selfServiceContainer">{{t "templates.selfService.title"}}</a>
+                </li>
+
+                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "email"}}active{{/sw}}">
+                    <a data-toggle="tab" data-route="email" href="#emailContainer">{{t "templates.emailConfig.title"}}</a>
+                </li>
+
+                <li {{#if maintenanceMode}}class="active"{{else}}{{#sw tabName "update"}}class="active"{{/sw}}{{/if}}>
+                    <a data-toggle="tab" data-route="update" href="#updateContainer">{{t "templates.update.title"}}</a>
+                </li>
+
+            </ul>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="tab-content" id="settings">
+            <div id="authenticationContainer" class="tab-pane{{#sw tabName "authentication"}} active{{/sw}}" role="tabpanel"></div>
+            <div id="auditContainer" class="tab-pane{{#sw tabName "audit"}} active{{/sw}}" role="tabpanel"></div>
+            <div id="selfServiceContainer" class="tab-pane{{#sw tabName "selfService"}} active{{/sw}}" role="tabpanel"></div>
+            <div id="emailContainer" class="tab-pane{{#sw tabName "email"}} active{{/sw}}" role="tabpanel"></div>
+            <div id="updateContainer" class="tab-pane {{#if maintenanceMode}} active{{else}}{{#sw tabName "update"}} active{{/sw}}{{/if}}" role="tabpanel"></div>
+        </div>
+    </div>
+
 </div>
 
-<div class="container">
-    <div class="tab-content" id="settings">
-        <div id="authenticationContainer" class="tab-pane active" role="tabpanel"></div>
-        <div id="auditContainer" class="tab-pane" role="tabpanel"></div>
-        <div id="selfServiceContainer" class="tab-pane" role="tabpanel"></div>
-        <div id="emailConfigContainer" class="tab-pane" role="tabpanel"></div>
-    </div>
-</div>
+<div id="install"></div>

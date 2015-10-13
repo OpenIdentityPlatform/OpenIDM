@@ -1,0 +1,190 @@
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
+/*global define, window*/
+
+define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", [
+    "jquery",
+    "underscore",
+    "handlebars",
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/openidm/ui/admin/util/TreeGridUtils",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/SpinnerManager"
+
+], function($, _, Handlebars,
+            AdminAbstractView,
+            TreeGridUtils,
+            UIUtils,
+            Constants,
+            SpinnerManager) {
+
+    var VersionsView = AdminAbstractView.extend({
+        template: "templates/admin/settings/update/InstallationReportTemplate.html",
+        element: "#installationReportView",
+        noBaseTemplate: true,
+        events: {
+            "click .treegrid-expander": "showHideNode",
+            "click .collapse-treegrid": "collapseTreegrid",
+            "click .expand-treegrid": "expandTreegrid",
+            "click .back": "back"
+        },
+        partials: [
+            "partials/settings/_updateTreeGrid.html"
+        ],
+        data: {
+            "treeGrid" : {},
+            "responseB64": "",
+            "version": ""
+        },
+        model: {},
+
+        /**
+         * @param configs
+         * @param configs.response {object}
+         * @param configs.version {string}
+         * @param configs.error {function}
+         * @param configs.back {function}
+         * @param [callback]
+         */
+        render: function(configs, callback) {
+            // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
+            SpinnerManager.showSpinner();
+
+            this.model = configs;
+            this.data = _.extend(this.data, _.pick(this.model, ["treeGrid", "responseB64", "version"]));
+
+            // The delay is to ensure that the spinner is rendered before any resource heavy rendering
+            // beings, otherwise the spinner may not show at all.
+            _.delay(_.bind(function() {
+                // This partial is used before the parent render where it would normally be loaded.
+                UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(_.bind(function() {
+                    this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(), ["filePath", "actionTaken"]);
+
+                    if (this.model.response) {
+                        this.data.responseB64 = window.btoa(JSON.stringify(this.model.response));
+                    }
+
+                    this.parentRender(_.bind(function() {
+                        SpinnerManager.hideSpinner();
+
+                        this.$el.find('[data-toggle="popover"]').popover({
+                            trigger:'hover click',
+                            placement:'top',
+                            container: 'body',
+                            title: ''
+                        });
+
+                        if (callback) {
+                            callback();
+                        }
+                    }, this));
+                }, this));
+            }, this), 1);
+        },
+
+        back: function(e) {
+            if (e) {
+                e.preventDefault();
+            }
+            this.model.back();
+        },
+
+        collapseTreegrid: function(e) {
+            if (e) {
+                e.preventDefault();
+            }
+
+            // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
+            SpinnerManager.showSpinner();
+
+            // The delay is to ensure that the spinner is rendered before any resource heavy rendering
+            // beings, otherwise the spinner may not show at all.
+            _.delay(_.bind(function() {
+                this.$el.find(".node-container").hide();
+                this.$el.find(".treegrid-expander").toggleClass("fa-caret-right", true);
+                this.$el.find(".treegrid-expander").toggleClass("fa-caret-down", false);
+                SpinnerManager.hideSpinner();
+            }, this), 1);
+        },
+
+        expandTreegrid: function(e) {
+            if (e) {
+                e.preventDefault();
+            }
+
+            // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
+            SpinnerManager.showSpinner();
+
+            // The delay is to ensure that the spinner is rendered before any resource heavy rendering
+            // beings, otherwise the spinner may not show at all.
+            _.delay(_.bind(function() {
+                this.$el.find(".node-container").show();
+                this.$el.find(".treegrid-expander").toggleClass("fa-caret-right", false);
+                this.$el.find(".treegrid-expander").toggleClass("fa-caret-down", true);
+                SpinnerManager.hideSpinner();
+            }, this), 1);
+        },
+
+        showHideNode: function(e) {
+            if (e) {
+                e.preventDefault();
+            }
+
+            $(e.currentTarget).siblings("div").toggle();
+            $(e.currentTarget).toggleClass("fa-caret-right");
+            $(e.currentTarget).toggleClass("fa-caret-down");
+        },
+
+        formatFiles: function() {
+            var formattedFileList,
+                files = _.clone(this.model.response.files, true);
+
+            formattedFileList = _.map(files, function (file) {
+                var temp = file.filePath.split("/");
+                file.actionTaken = Handlebars.compile("{{> settings/_updateStatePopover}}")({
+                    "desc": $.t("templates.update.review.actionTaken." + file.actionTaken + ".desc"),
+                    "name": $.t("templates.update.review.actionTaken." + file.actionTaken + ".reportName")
+                });
+                file.fileName = _.last(temp);
+                file.partialFilePath = _.take(temp, temp.length-1).join("");
+                return file;
+            });
+
+            return _.sortByAll(formattedFileList, [
+                function(i) {
+                    if (i.partialFilePath.length > 0) {
+                        return i.partialFilePath.toLowerCase();
+                    } else {
+                        return false;
+                    }
+                },
+                function(i) { return i.fileName.toLowerCase();}
+            ]);
+        }
+    });
+
+    return new VersionsView();
+});

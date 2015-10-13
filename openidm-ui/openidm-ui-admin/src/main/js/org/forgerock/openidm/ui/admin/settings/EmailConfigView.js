@@ -43,7 +43,7 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
 
     var EmailConfigView = AdminAbstractView.extend({
         template: "templates/admin/settings/EmailConfigTemplate.html",
-        element: "#emailConfigContainer",
+        element: "#emailContainer",
         noBaseTemplate: true,
         events: {
             "onValidate": "onValidate",

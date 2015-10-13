@@ -43,6 +43,61 @@ define("config/process/AdminIDMConfig", [
                 }
             },
             {
+                startEvent: constants.EVENT_AUTHENTICATED,
+                description: "",
+                override: true,
+                dependencies: [
+                    "org/forgerock/commons/ui/common/main/Router",
+                    "org/forgerock/commons/ui/common/main/EventManager",
+                    "org/forgerock/commons/ui/common/util/Constants",
+                    "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate",
+                    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
+                    "org/forgerock/commons/ui/common/components/Navigation",
+                    "config/routes/AdminRoutesConfig",
+                    "org/forgerock/commons/ui/common/util/URIUtils"
+                ],
+                processDescription: function(event,
+                                             Router,
+                                             EventManager,
+                                             Constants,
+                                             MaintenanceDelegate,
+                                             SchedulerDelegate,
+                                             Navigation,
+                                             AdminRoutesConfig,
+                                             URIUtils) {
+
+                    MaintenanceDelegate.getStatus().then(function (response) {
+                        if (response.maintenanceEnabled) {
+
+                            MaintenanceDelegate.getUpdateLogs().then(_.bind(function(updateLogData) {
+                                var runningUpdate = _.findWhere(updateLogData.result, {"status": "IN_PROGRESS"});
+
+                                //  In maintenance mode, but no install running
+                                if (_.isUndefined(runningUpdate)) {
+
+                                    MaintenanceDelegate.disable().then(_.bind(function() {
+                                        SchedulerDelegate.resumeJobs();
+
+                                    }, this));
+
+                                // An install is running, redirect to settings and disable everything
+                                } else {
+                                    if (!_.contains(URIUtils.getCurrentFragment(), "settings/update")) {
+                                        Navigation.configuration = {};
+                                        Router.configuration.routes["default"] = AdminRoutesConfig.settingsView;
+                                    }
+
+                                    if (!_.contains(URIUtils.getCurrentFragment(), "settings")) {
+                                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.settingsView});
+                                    }
+                                }
+                            }, this));
+                        }
+                    });
+                }
+
+            },
+            {
                 startEvent: constants.EVENT_UPDATE_NAVIGATION,
                 description: "Update Navigation Bar",
                 dependencies: [
