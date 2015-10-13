@@ -221,6 +221,7 @@
         <!-- Commons versions -->
         <commons.forgerock-script.version>2.0.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
+        <commons.json-patch.version>3.0.0-SNAPSHOT</commons.json-patch.version>
 
         <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -436,6 +437,11 @@
             </dependency>
 
             <!-- ForgeRock Commons -->
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>json-patch</artifactId>
+                <version>${commons.json-patch.version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>script-common</artifactId>
