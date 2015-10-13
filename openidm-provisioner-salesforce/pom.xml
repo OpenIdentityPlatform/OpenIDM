@@ -179,12 +179,6 @@
             <version>${restlet.version}</version>
             <scope>test</scope>
         </dependency>
-        <!--dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.4</version>
-            <scope>test</scope>
-        </dependency-->
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-osgi</artifactId>
@@ -228,10 +222,6 @@
                       <Bundle-Version>${provisioner.salesforcemodule.version}</Bundle-Version>
                         <Embed-Dependency>force-wsc,force-metadata-api</Embed-Dependency>
                         <Embed-Directory>lib</Embed-Directory>
-                        <!--Private-Package>org.forgerock.openidm.salesforce.internal*</Private-Package>
-                        <Export-Package>
-                            org.forgerock.openidm.salesforce;version=${project.parent.version},
-                        </Export-Package-->
                         <Import-Package>
                             com.google.appengine.api.urlfetch;resolution:=optional,
                             org.stringtemplate.v4;resolution:=optional,
