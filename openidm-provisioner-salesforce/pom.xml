@@ -10,9 +10,9 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>openidm-project</artifactId>
-        <groupId>org.forgerock.openidm</groupId>
-        <version>3.1.1</version>
+        <groupId>org.forgerock</groupId>
+        <artifactId>forgerock-parent</artifactId>
+        <version>1.2.6</version>
     </parent>
     <artifactId>openidm-salesforce</artifactId>
     <version>${provisioner.salesforcemodule.version}</version>
@@ -22,8 +22,11 @@
 
     <properties>
         <jetty-version>8.1.9.v20130131</jetty-version>
+        <openidm.version>3.1.0</openidm.version>
         <salesforce.api.version>29</salesforce.api.version>
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.1a</provisioner.salesforcemodule.version>
+	<restlet.version>2.1.2</restlet.version>
+        <commons.forgerock-util.version>1.3.3</commons.forgerock-util.version>
     </properties>
 
     <repositories>
@@ -43,6 +46,12 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
+        <!-- Restlet -->
+        <repository>
+            <id>maven-restlet</id>
+            <name>Public online Restlet repository</name>
+            <url>http://maven.restlet.org</url>
+        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -55,25 +64,32 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-router</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${openidm.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
-            <version>${project.parent.version}</version>
+            <version>${openidm.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-util</artifactId>
+            <version>${commons.forgerock-util.version}</version>
         </dependency>
         <dependency>
             <groupId>org.restlet.osgi</groupId>
             <artifactId>org.restlet.ext.jackson</artifactId>
+            <version>${restlet.version}</version>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
+            <version>2.4</version>
         </dependency>
         <dependency>
             <groupId>org.cometd.java</groupId>
@@ -100,24 +116,27 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
+            <version>4.3.1</version>
             <scope>provided</scope>
         </dependency>
         <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
+            <version>4.2.1</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.compendium</artifactId>
-            <scope>provided</scope>
+            <version>4.2.0</version>
         </dependency>
 
         <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
+            <version>1.9.6</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -149,6 +168,7 @@
         <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
+            <version>6.8.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -166,11 +186,13 @@
         <dependency>
             <groupId>org.easytesting</groupId>
             <artifactId>fest-assert-core</artifactId>
+            <version>2.0M10</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
+            <version>1.9.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -182,6 +204,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-osgi</artifactId>
+            <version>4.3.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
@@ -196,6 +219,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
+                <version>1.15.0</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
