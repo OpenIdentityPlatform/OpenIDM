@@ -138,10 +138,11 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
     // create/update relationship references. Update if we have UUIDs
     // delete all relationships not in this array
     @Override
-    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, JsonValue value) {
-        value.expect(List.class);
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, 
+            JsonValue relationships) {
+        relationships.expect(List.class);
 
-        // Set of relation ids for updating (don't delete)
+        // Set of relationship IDs for updating (don't delete)
         final Set<String> relationshipsToKeep = new HashSet<>();
 
         // Set of relationships to perform an update on (have an _id)
@@ -154,9 +155,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
         final JsonValue results = json(array());
 
         try {
-            if (value.isNotNull()) {
+            if (relationships.isNotNull() && !relationships.asList().isEmpty()) {
                 // Split relationships in to to-be-updated (_id present) and to-be-created
-                for (JsonValue relationship : value) {
+                for (JsonValue relationship : relationships) {
                     final JsonValue id =
                             relationship.get(FIELD_ID);
                     if (id != null && id.isNotNull()) { // need update
