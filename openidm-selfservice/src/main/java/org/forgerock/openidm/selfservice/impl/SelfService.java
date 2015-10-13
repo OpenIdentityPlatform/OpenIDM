@@ -36,8 +36,12 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStage;
@@ -89,6 +93,12 @@ public class SelfService {
     /** the registered parent router-path for self-service flows */
     private static final ResourcePath ROUTER_PATH = resourcePath("selfservice");
 
+    /** this config key is present if the config represents a self-service process */
+    private static final String STAGE_CONFIGS = "stageConfigs";
+
+    /** config key present if config requires KBA questions */
+    private static final String KBA_CONFIG = "kbaConfig";
+
     // ----- Declarative Service Implementation
 
     /**
@@ -111,8 +121,12 @@ public class SelfService {
     void activate(ComponentContext context) throws Exception {
         LOGGER.debug("Activating Service with configuration {}", context.getProperties());
         try {
-            // get and amend config
             config = enhancedConfig.getConfigurationAsJson(context);
+            // if no stage config is defined, this is not a self-service process config;
+            // finish activating without doing anything special
+            if (!config.isDefined(STAGE_CONFIGS)) {
+                return;
+            }
             amendConfig();
 
             // create self-service request handler
@@ -145,15 +159,28 @@ public class SelfService {
         LOGGER.info("Self-service started.");
     }
 
-    private void amendConfig() {
+    private void amendConfig() throws ResourceException {
         // set serviceUrl for stage configs to use external/email
-        for (JsonValue stageConfig : config.get("stageConfigs")) {
+        for (JsonValue stageConfig : config.get(STAGE_CONFIGS)) {
             if (stageConfig.isDefined("email")) {
                 stageConfig.get("email").put("serviceUrl", "external/email");
+            }
+            if (stageConfig.isDefined(KBA_CONFIG)) {
+                // overwrite kbaConfig with read from config-store
+                stageConfig.put(KBA_CONFIG, readKbaConfig().getObject());
             }
         }
         // force storage type to stateless
         config.put("storage", "stateless");
+    }
+
+    private JsonValue readKbaConfig() throws ResourceException {
+        // TODO yipes! assume config at specific URL; make configurable
+        JsonValue config = connectionFactory.getConnection().read(ContextUtil.createInternalContext(),
+                Requests.newReadRequest("config/selfservice/kbaConfig"))
+            .getContent();
+        config.remove(ResourceResponse.FIELD_CONTENT_ID);
+        return config;
     }
 
     private ProgressStageFactory newProgressStageFactory() {

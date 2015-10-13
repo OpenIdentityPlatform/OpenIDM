@@ -69,18 +69,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     {
                         "name" : "kbaSecurityAnswerDefinitionStage",
                         "kbaPropertyName" : "kbaInfo",
-                        "kbaConfig" : {
-                            "questions" : {
-                                "1" : {
-                                    "en" : "What's your favorite color?",
-                                    "en_GB" : "What's your favorite colour?",
-                                    "fr" : "Quelle est votre couleur préférée?"
-                                },
-                                "2" : {
-                                    "en" : "Who was your first employer?"
-                                }
-                            }
-                        }
+                        "kbaConfig" : null
                     },
                     {
                         "name" : "selfRegistration",
@@ -95,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     "jweAlgorithm" : "RSAES_PKCS1_V1_5",
                     "encryptionMethod" : "A128CBC_HS256",
                     "jwsAlgorithm" : "HS256",
-                    "tokenExpiry" : 180
+                    "tokenExpiry" : 1800
                 },
                 "storage" : "stateless"
             },
