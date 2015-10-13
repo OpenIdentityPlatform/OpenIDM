@@ -65,6 +65,7 @@ public class UpdateCommand {
     static final String UPDATE_ACTION_RESTART = "restart";
     static final String UPDATE_STATUS_FAILED = "FAILED";
     static final String UPDATE_STATUS_COMPLETE = "COMPLETE";
+    static final String UPDATE_STATUS_IN_PROGRESS = "IN_PROGRESS";
 
     private final CommandSession session;
     private final HttpRemoteJsonResource resource;
@@ -255,6 +256,19 @@ public class UpdateCommand {
     }
 
     /**
+     * Evaluates if the archive requires a restart.  As a default, if the archive data is null or if the setting
+     * "restartRequired" is missing from the archive data, then this will return false. The origin of the
+     * restartRequired field is a read from a properties file, therefore the value is treated as a String.
+     *
+     * @param state current state of the execution.
+     * @return true if the "restartRequired" is set to "true"
+     */
+    private static boolean isRestartRequired(UpdateExecutionState state) {
+        JsonValue archiveData = state.getArchiveData();
+        return (null != archiveData && "true".equals(archiveData.get("restartRequired").defaultTo("false").asString()));
+    }
+
+    /**
      * Defines the interface that each executor must implement.
      */
     private interface StepExecutor {
@@ -414,7 +428,7 @@ public class UpdateCommand {
                 ActionResponse response = resource.action(context,
                         Requests.newActionRequest(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE));
                 // Test if the pause request was successful.
-                if (response.getJsonContent().get("success").asBoolean()) {
+                if (response.getJsonContent().get("success").defaultTo(false).asBoolean()) {
                     log("Scheduler has been paused.");
                     return true;
                 } else {
@@ -540,8 +554,7 @@ public class UpdateCommand {
                 ActionResponse response = resource.action(context,
                         Requests.newActionRequest(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE));
                 // Test that we are now in maintenance mode.
-                boolean isEnabled = response.getJsonContent().get("maintenanceEnabled").asBoolean();
-                if (isEnabled) {
+                if (response.getJsonContent().get("maintenanceEnabled").defaultTo(false).asBoolean()) {
                     log("Now in maintenance mode.");
                     return true;
                 } else {
@@ -640,9 +653,8 @@ public class UpdateCommand {
                         "Install start time or Initial install status from install step is missing. Ensure the step " +
                                 INSTALL_ARCHIVE + " was completed");
             }
-            String status = installResponse.get("status").asString().toUpperCase();
+            String status = installResponse.get("status").defaultTo(UPDATE_STATUS_IN_PROGRESS).asString().toUpperCase();
             String updateId = installResponse.get(ResourceResponse.FIELD_CONTENT_ID).asString();
-
             try {
                 boolean timeout = false;
                 while (!timeout && !UPDATE_STATUS_COMPLETE.equals(status) && !UPDATE_STATUS_FAILED.equals(status)) {
@@ -657,7 +669,8 @@ public class UpdateCommand {
                     ResourceResponse response = resource.read(context,
                             Requests.newReadRequest(UPDATE_LOG_ROUTE, updateId));
                     timeout = (System.currentTimeMillis() - startTime > config.getMaxUpdateWaitTimeMs());
-                    status = response.getContent().get("status").asString().toUpperCase();
+                    status = response.getContent().get("status").defaultTo(UPDATE_STATUS_IN_PROGRESS)
+                            .asString().toUpperCase();
                 }
                 if (UPDATE_STATUS_COMPLETE.equals(status) || UPDATE_STATUS_FAILED.equals(status)) {
                     state.setCompletedInstallStatus(status);
@@ -706,8 +719,7 @@ public class UpdateCommand {
                 ActionResponse response = resource.action(context,
                         Requests.newActionRequest(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE));
                 // Test that we are no longer in maintenance mode.
-                boolean isEnabled = response.getJsonContent().get("maintenanceEnabled").asBoolean();
-                if (isEnabled) {
+                if (response.getJsonContent().get("maintenanceEnabled").defaultTo(false).asBoolean()) {
                     log("Failed to exit maintenance mode. Exiting update process.");
                     return false;
                 } else {
@@ -727,12 +739,7 @@ public class UpdateCommand {
          * should exit maintenance mode and if the archive data is null.
          */
         public boolean onCondition(UpdateExecutionState state) {
-            JsonValue archiveData = state.getArchiveData();
-            if (null == archiveData) {
-                return true;
-            }
-            String restartRequired = archiveData.get("restartRequired").asString();
-            return (restartRequired == null || "false".equals(restartRequired));
+            return !isRestartRequired(state);
         }
     }
 
@@ -758,7 +765,7 @@ public class UpdateCommand {
                 ActionResponse response = resource.action(context,
                         Requests.newActionRequest(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS));
                 // Pull the success value from the response.
-                if (response.getJsonContent().get("success").asBoolean()) {
+                if (response.getJsonContent().get("success").defaultTo(false).asBoolean()) {
                     log("Scheduler has been resumed.");
                     return true;
                 } else {
@@ -779,12 +786,7 @@ public class UpdateCommand {
          * should exit maintenance mode and if the archive data is null.
          */
         public boolean onCondition(UpdateExecutionState state) {
-            JsonValue archiveData = state.getArchiveData();
-            if (null == archiveData) {
-                return true;
-            }
-            String restartRequired = archiveData.get("restartRequired").asString();
-            return (restartRequired == null || "false".equals(restartRequired));
+            return !isRestartRequired(state);
         }
     }
 
@@ -826,12 +828,7 @@ public class UpdateCommand {
          */
         @Override
         public boolean onCondition(UpdateExecutionState state) {
-            JsonValue archiveData = state.getArchiveData();
-            if (null == archiveData) {
-                return false;
-            }
-            String restartRequired = archiveData.get("restartRequired").asString();
-            return (null != restartRequired && "true".equals(restartRequired));
+            return isRestartRequired(state);
         }
     }
 }
