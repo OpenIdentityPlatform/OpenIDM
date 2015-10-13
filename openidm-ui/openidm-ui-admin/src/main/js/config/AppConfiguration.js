@@ -47,7 +47,8 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
                 configuration: {
-                    "resource-assignment" : "org/forgerock/openidm/ui/admin/assignment/AssignmentView"
+                    "resource-assignment" : "org/forgerock/openidm/ui/admin/assignment/AssignmentView",
+                    "resource-user" : "org/forgerock/openidm/ui/admin/user/EditUserView"
                 }
             },
             {
@@ -57,6 +58,7 @@ define("config/AppConfiguration", [
                     },
                     loader: [
                         {"messages":"config/messages/CommonMessages"},
+                        {"messages":"config/messages/CommonIDMMessages"},
                         {"messages":"config/messages/AdminMessages"}
                     ]
                 }

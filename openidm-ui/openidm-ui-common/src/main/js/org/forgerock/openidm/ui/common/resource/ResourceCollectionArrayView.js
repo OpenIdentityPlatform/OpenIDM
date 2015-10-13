@@ -60,10 +60,10 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
 
                     this.onChange = args.onChange;
 
-                    resourceDelegate.getSchema(this.data.prop.items.resourceCollection.path.split("/")).then(_.bind(function(schema) {
+                    resourceDelegate.getSchema(this.data.prop.items.resourceCollection[0].path.split("/")).then(_.bind(function(schema) {
                         this.data.propTitle = schema.title || this.data.prop.title;
 
-                        this.data.headerValues = resourceCollectionUtils.getHeaderValues(this.data.prop.items.resourceCollection.query.fields, schema.properties);
+                        this.data.headerValues = resourceCollectionUtils.getHeaderValues(this.data.prop.items.resourceCollection[0].query.fields, schema.properties);
                         
                         resourceDelegate.searchResource("true", this.data.serviceUrl).then(_.bind(function(resource){
                             this.data.prop.value = resource.result;
@@ -89,7 +89,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                                 return '<div class="col-xs-2">' +  val + '</div>';
                             }).join("");
                         };
-                    if(path.indexOf(this.data.prop.items.resourceCollection.path) === 0) {
+                    if(path.indexOf(this.data.prop.items.resourceCollection[0].path) === 0) {
                         if(resourceCollectionUtils.resourceCollectionCache[path]) {
                             $(element).find(".deleteArrayItem").before(getRowContents(resourceCollectionUtils.resourceCollectionCache[path]));
                         } else {
@@ -111,7 +111,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView", [
                 var value = this.$el.parent().find("#autoCompleteResourceCollection_" + this.data.prop.propName).val();
 
                 if (value && value.length) {
-                    this.data.prop.value.push({ "_ref": this.data.prop.items.resourceCollection.path + "/" + value });
+                    this.data.prop.value.push({ "_ref": this.data.prop.items.resourceCollection[0].path + "/" + value });
                 } else {
                     return;
                 }

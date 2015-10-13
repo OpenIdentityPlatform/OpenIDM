@@ -36,7 +36,7 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
 
     commonConstants.DOC_URL = "http://openidm.forgerock.org/doc/";
 
-    commonConstants.EVENT_USER_UPDATE_POLICY_FAILURE = "EVENT_USER_UPDATE_POLICY_FAILURE";
+    commonConstants.EVENT_POLICY_FAILURE = "EVENT_POLICY_FAILURE";
 
     //Events
     commonConstants.EVENT_QUALIFIER_CHANGED = "mapping.properties.EVENT_QUALIFIER_CHANGED";

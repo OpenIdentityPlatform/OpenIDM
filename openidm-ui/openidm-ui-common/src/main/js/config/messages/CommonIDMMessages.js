@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,20 +24,15 @@
 
 /*global define*/
 
-define("config/main", [
-    "./routes/CommonRoutesConfig",
-    "./routes/SelfServiceRoutesConfig",
-    "./routes/UserRoutesConfig",
-    "./routes/CommonIDMRoutesConfig",
-    "./messages/CommonMessages",
-    "./messages/CommonIDMMessages",
-    "./messages/SelfServiceMessages",
-    "./messages/UserMessages",
-    "./validators/CommonValidators",
-    "./validators/SelfServiceValidators",
-    "./AppConfiguration",
-    "./process/CommonIDMConfig",
-    "./process/IDMConfig",
-    "./process/CommonConfig",
-    "./errorhandlers/CommonErrorHandlers"
-]);
+define("config/messages/CommonIDMMessages", [
+], function() {
+
+    var obj = {
+            "userValidationError" : {
+                msg: "config.messages.AdminMessages.userValidationError",
+                type: "error"
+            }
+    };
+
+    return obj;
+});

@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                     this.clear();
                     this.set(previous);
                     if (_.isObject(xhr.responseJSON) && _.has(xhr.responseJSON, "code") && xhr.responseJSON.code === 403) {
-                        EventManager.sendEvent(Constants.EVENT_USER_UPDATE_POLICY_FAILURE, {
+                        EventManager.sendEvent(Constants.EVENT_POLICY_FAILURE, {
                             error: {
                                 responseObj: xhr.responseJSON
                             }

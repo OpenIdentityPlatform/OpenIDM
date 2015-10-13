@@ -47,6 +47,7 @@
                     "password",
                     "kbaInfo",
                     "userName",
+                    "password",
                     "givenName",
                     "sn",
                     "mail",
@@ -81,6 +82,7 @@
                         ]
                     },
                     "password" : {
+                        "title" : "Password",
                         "type" : "string",
                         "viewable" : false,
                         "searchable" : false,
@@ -217,10 +219,10 @@
                                     "query" : {
                                         "queryFilter" : "true",
                                         "fields" : [
-                                            "properties/name"
+                                            "name"
                                         ],
                                         "sortKeys" : [
-                                            "properties/name"
+                                            "name"
                                         ]
                                     }
                                 }
