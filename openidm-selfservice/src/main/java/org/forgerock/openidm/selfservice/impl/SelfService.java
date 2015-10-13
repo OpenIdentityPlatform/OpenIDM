@@ -54,6 +54,8 @@ import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
 import org.forgerock.selfservice.stages.email.VerifyUserIdStage;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
 import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionStage;
+import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
+import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationStage;
 import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
 import org.forgerock.selfservice.stages.registration.UserRegistrationStage;
 import org.forgerock.selfservice.stages.reset.ResetStage;
@@ -163,6 +165,7 @@ public class SelfService {
         progressStages.put(UserRegistrationConfig.class, new UserRegistrationStage(connectionFactory));
         progressStages.put(UserDetailsConfig.class, new UserDetailsStage(connectionFactory));
         progressStages.put(SecurityAnswerDefinitionConfig.class, new SecurityAnswerDefinitionStage(connectionFactory));
+        progressStages.put(SecurityAnswerVerificationConfig.class, new SecurityAnswerVerificationStage(connectionFactory));
 
         return new ProgressStageFactory() {
             @Override

@@ -67,24 +67,20 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                         "identityEmailField" : "mail"
                     },
                     {
-                        "name" : "kbaStage",
+                        "name" : "kbaSecurityAnswerDefinitionStage",
                         "kbaPropertyName" : "kbaInfo",
-                        "questions" : [
-                            {
-                                "id" : "1",
-                                "question" : {
+                        "kbaConfig" : {
+                            "questions" : {
+                                "1" : {
                                     "en" : "What's your favorite color?",
                                     "en_GB" : "What's your favorite colour?",
                                     "fr" : "Quelle est votre couleur préférée?"
-                                }
-                            },
-                            {
-                                "id" : "2",
-                                "question" : {
+                                },
+                                "2" : {
                                     "en" : "Who was your first employer?"
                                 }
                             }
-                        ]
+                        }
                     },
                     {
                         "name" : "selfRegistration",
@@ -117,9 +113,9 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 help: $.t("templates.selfservice.userDetailsHelp")
             },
             {
-                type: "kbaStage",
-                title: $.t("templates.selfservice.kbaTitle"),
-                help: $.t("templates.selfservice.kbaHelp")
+                type: "kbaSecurityAnswerDefinitionStage",
+                title: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageTitle"),
+                help: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageHelp")
             },
             {
                 type: "selfRegistration",
