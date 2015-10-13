@@ -613,7 +613,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             content.asMap().putAll(strippedRelationshipFields.asMap());
             
             // Persists all relationship fields that are present in the created object and updates their values.
-            content.asMap().putAll(persistRelationships(context, resourceId, value).asMap());
+            content.asMap().putAll(persistRelationships(context, resourceId, content).asMap());
 
             // Execute the postCreate script if configured
             execScript(context, ScriptHook.postCreate, content,
