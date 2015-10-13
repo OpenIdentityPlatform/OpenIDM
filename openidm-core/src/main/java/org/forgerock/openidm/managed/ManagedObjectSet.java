@@ -69,6 +69,7 @@ import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
@@ -923,6 +924,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             		new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
+                    ResourceResponse resourceResponse = null;
                     // Check if the onRetrieve script should be run
                     if (onRetrieve) {
                         try {
@@ -932,19 +934,25 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                             return false;
                         }
                     }
-                    // Populate the relationship fields
-                    try {
-                        JsonValue relationships = fetchRelationshipFields(context, resource.getId());
-                        resource.getContent().asMap().putAll(relationships.asMap());
-                    } catch (ResourceException e) {
-                        ex[0] = e;
-                        return false;
-                    } catch (Exception e) {
-                        ex[0] = new InternalServerErrorException(e.getMessage(), e);
-                        return false;
+                    if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
+                        // Don't populate relationships if this is a query-all-ids query.
+                        resourceResponse = resource;    
+                    } else {
+                        // Populate the relationship fields
+                        try {
+                            JsonValue relationships = fetchRelationshipFields(context, resource.getId());
+                            resource.getContent().asMap().putAll(relationships.asMap());
+                            resourceResponse = prepareResponse(context, resource, request.getFields());
+                        } catch (ResourceException e) {
+                            ex[0] = e;
+                            return false;
+                        } catch (Exception e) {
+                            ex[0] = new InternalServerErrorException(e.getMessage(), e);
+                            return false;
+                        }
                     }
-                    results.add(resource.getContent().asMap());
-                    return handler.handleResource(prepareResponse(context, resource, request.getFields()));
+                    results.add(resourceResponse.getContent().asMap());
+                    return handler.handleResource(prepareResponse(context, resourceResponse, request.getFields()));
                 }
             });
         	
