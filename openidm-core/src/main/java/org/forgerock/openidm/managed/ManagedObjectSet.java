@@ -458,7 +458,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, newValue);
 
-        // Remove relationships so they don't get persisted
+        // Remove relationships so they don't get persisted in the repository with the managed object details.
         JsonValue strippedRelationshipFields = stripRelationshipFields(newValue);
 
         // Perform pre-property encryption
@@ -578,7 +578,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         String resourceId = request.getNewResourceId();
         JsonValue content = request.getContent();
 
-        // Check if the new id is specified in content, and use it if it is
+        // Check if the new id is specified in content, and use it if it is.
         if (!content.get(FIELD_CONTENT_ID).isNull()) {
             resourceId = content.get(FIELD_CONTENT_ID).asString();
         }
@@ -587,39 +587,41 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         try {
             // decrypt any incoming encrypted properties
             JsonValue value = decrypt(content);
-            
-            // Persists all relationship fields that are present in the new value and updates their values.
-            value.asMap().putAll(persistRelationships(context, resourceId, value).asMap());
 
+            // Execute onCreate script
             execScript(context, ScriptHook.onCreate, value, null);
+            
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(context, value);
 
-            // Remove relationships so they don't get persisted
+            // Remove relationships so they don't get persisted in the repository with the managed object details.
             JsonValue strippedRelationshipFields = stripRelationshipFields(value);
 
             // includes per-property encryption
             onStore(context, value);
 
+            // Persist the managed object in the repository
             CreateRequest createRequest = Requests.newCreateRequest(repoId(null), resourceId, value);
-
             ResourceResponse createResponse = connectionFactory.getConnection().create(context, createRequest);
+            content = createResponse.getContent();
+            resourceId = createResponse.getId();
 
-            activityLogger.log(context, request, "create", managedId(createResponse.getId()).toString(),
-                    null, createResponse.getContent(), Status.SUCCESS);
-
-            // Place persisted relationships in content before sending to the handler
-            createResponse.getContent().asMap().putAll(strippedRelationshipFields.asMap());
+            activityLogger.log(context, request, "create", managedId(resourceId).toString(), null, content, 
+                    Status.SUCCESS);
+            
+            // Place stripped relationships back in content
+            content.asMap().putAll(strippedRelationshipFields.asMap());
+            
+            // Persists all relationship fields that are present in the created object and updates their values.
+            content.asMap().putAll(persistRelationships(context, resourceId, content).asMap());
 
             // Execute the postCreate script if configured
-            execScript(context, ScriptHook.postCreate, createResponse.getContent(),
-                    prepareScriptBindings(context, request, resourceId, new JsonValue(null),
-                    		createResponse.getContent()));
+            execScript(context, ScriptHook.postCreate, content,
+                    prepareScriptBindings(context, request, resourceId, new JsonValue(null), content));
 
             // Sync any targets after managed object is created
-            performSyncAction(context, request, createResponse.getId(),
-            		SynchronizationService.SyncServiceAction.notifyCreate,
-                    new JsonValue(null), createResponse.getContent());
+            performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyCreate,
+                    new JsonValue(null), content);
             
             return prepareResponse(context, createResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {

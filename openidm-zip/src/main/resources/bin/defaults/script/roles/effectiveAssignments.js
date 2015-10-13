@@ -40,37 +40,22 @@ var effectiveAssignments = [];
 var effectiveRoles = object[effectiveRolesPropName];
 
 if (effectiveRoles != null)  {
+    var assignmentMap = {};
     for (var i = 0; i < effectiveRoles.length; i++) {
         var roleId = effectiveRoles[i];
 
         // Only try to retrieve role details for role ids in URL format
         if (roleId !== null && roleId._ref !== null && roleId._ref.indexOf("managed/role") != -1) {
-            var roleInfo =  openidm.read(roleId._ref);
-            logger.debug("Role info read: {}", roleInfo);
+            var roleRelationship =  openidm.read(roleId._ref);
+            logger.debug("Role relationship read: {}", roleRelationship);
 
-            if (roleInfo != null) {
-                for (var assignmentName in roleInfo.assignments) {
-                    var assignment = roleInfo.assignments[assignmentName];
-                    var onAssignment = assignment.onAssignment;
-                    var onUnassignment = assignment.onUnassignment;
-                    var linkQualifers = assignment.linkQualifiers;
-                    var effectiveAssignment = {
-                        "name" : assignmentName,
-                        "attributes" : assignment.attributes
-                    };
-                    effectiveAssignment["assignedThrough"] = roleId._ref;
-                    if (typeof onAssignment !== "undefined" && onAssignment !== null) {
-                        effectiveAssignment["onAssignment"] = onAssignment;
+            if (roleRelationship != null) {
+                for (var assignmentName in roleRelationship.assignments) {
+                    var assignmentRelationship = roleRelationship.assignments[assignmentName];
+                    var assignment = openidm.read(assignmentRelationship._ref);
+                    if (assignment !== null) {
+                        assignmentMap[assignmentRelationship._ref] = assignment;
                     }
-                    if (typeof onUnassignment !== "undefined" && onUnassignment !== null) {
-                        effectiveAssignment["onUnassignment"] = onUnassignment;
-                    }
-                    if (typeof linkQualifers !== "undefined" && linkQualifers !== null) {
-                        effectiveAssignment["linkQualifiers"] = linkQualifers;
-                    }
-                    logger.trace("assignmentName: {} value : {}", assignmentName, assignment);
-                    effectiveAssignments.push(effectiveAssignment);
-                    logger.trace("effectiveAssignment: {}", effectiveAssignment);
                 }
             } else {
                 logger.debug("No role details could be read from: {}", roleId._ref);
@@ -80,6 +65,13 @@ if (effectiveRoles != null)  {
         }
     }
 }
+
+// Add all assignments to the effectiveAssignments array
+for (var assignment in assignmentMap) {
+    effectiveAssignments.push(assignmentMap[assignment]);
+    logger.trace("effectiveAssignment: {}", assignmentMap[assignment]);
+}
+
 logger.debug("Calculated effectiveAssignments: {}", effectiveAssignments);
 
 effectiveAssignments;
