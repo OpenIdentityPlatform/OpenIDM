@@ -54,12 +54,12 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.AuditException;
+import org.forgerock.audit.AuditServiceBuilder;
 import org.forgerock.audit.AuditServiceConfiguration;
+import org.forgerock.audit.AuditServiceProxy;
 import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.events.handlers.AuditEventHandler;
 import org.forgerock.audit.json.AuditJsonConfig;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -76,6 +76,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.AuditService;
 import org.forgerock.openidm.audit.impl.AuditLogFilters.JsonValueObjectConverter;
@@ -88,6 +89,8 @@ import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -126,7 +129,7 @@ public class AuditServiceImpl implements AuditService {
     @Reference(policy = ReferencePolicy.STATIC)
     private ScriptRegistry scriptRegistry;
 
-    private org.forgerock.audit.AuditService auditService;
+    private AuditServiceProxy auditService;
     private JsonValue config; // Existing active configuration
 
     /** Enhanced configuration service. */
@@ -269,29 +272,29 @@ public class AuditServiceImpl implements AuditService {
             config = enhancedConfig.getConfigurationAsJson(compContext);
             auditFilter = auditLogFilterBuilder.build(config);
 
-            //create Audit Service
-            auditService =
-                    new org.forgerock.audit.AuditService(
-                            config.get(EXTENDED_EVENT_TYPES), config.get(CUSTOM_EVENT_TYPES));
             AuditServiceConfiguration serviceConfig =
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
-            auditService.configure(serviceConfig);
-            auditService.registerDependencyProvider(new DependencyProviderBase() {
-                @SuppressWarnings("unchecked")
-                @Override
-                public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
-                    if (ConnectionFactory.class.isAssignableFrom(clazz)) {
-                        return (T) connectionFactory;
-                    } else {
-                        return super.getDependency(clazz);
-                    }
-                }
-            });
+            final AuditServiceBuilder auditServiceBuilder = AuditServiceBuilder.newAuditService()
+                    .withConfiguration(serviceConfig)
+                    .withCoreTopicSchemaExtensions(config.get(EXTENDED_EVENT_TYPES))
+                    .withAdditionalTopicSchemas(config.get(CUSTOM_EVENT_TYPES))
+                    .withDependencyProvider(new DependencyProviderBase() {
+                        @SuppressWarnings("unchecked")
+                        @Override
+                        public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
+                            if (ConnectionFactory.class.isAssignableFrom(clazz)) {
+                                return (T) connectionFactory;
+                            } else {
+                                return super.getDependency(clazz);
+                            }
+                        }
+                    });
 
             //register Event Handlers
             final JsonValue eventHandlers = config.get(EVENT_HANDLERS);
             for (final JsonValue handlerConfig : eventHandlers) {
-                AuditJsonConfig.registerHandlerToService(handlerConfig, auditService, this.getClass().getClassLoader());
+                AuditJsonConfig.registerHandlerToService(
+                        handlerConfig, auditServiceBuilder, this.getClass().getClassLoader());
             }
 
             if (!config.get(EXCEPTION_FORMATTER).isNull()) {
@@ -306,6 +309,16 @@ public class AuditServiceImpl implements AuditService {
             JsonValue passwordFieldsValue = config.get(WATCHED_PASSWORDS_CONFIG_POINTER);
             if (null != passwordFieldsValue) {
                 passwordFieldFilters = getJsonPointers(passwordFieldsValue.asList(String.class));
+            }
+
+            // create the audit service
+            if (auditService == null) {
+                // first time initialize the audit service proxy
+                auditService = new AuditServiceProxy(auditServiceBuilder.build());
+                auditService.startup();
+            } else {
+                // all times after the first reset the delegate.
+                auditService.setDelegate(auditServiceBuilder.build());
             }
 
         } catch (Exception ex) {
@@ -356,7 +369,6 @@ public class AuditServiceImpl implements AuditService {
     @Deactivate
     void deactivate(ComponentContext compContext) {
         LOGGER.debug("Deactivating Service {}", compContext.getProperties());
-        auditService = null;
         config = null;
         auditFilter = NEVER_FILTER;
         watchFieldFilters.clear();
@@ -655,7 +667,7 @@ public class AuditServiceImpl implements AuditService {
                 }
             }
             return newActionResponse(result).asPromise();
-        } catch (AuditException e) {
+        } catch (AuditException | ServiceUnavailableException e) {
             return new InternalServerErrorException(
                     "Unable to get available audit event handlers and their config schema", e)
                     .asPromise();

@@ -5,26 +5,22 @@
     "message": {
       "type": "string"
     },
-    "bufferingConfig": {
+    "buffering": {
       "type": "object",
       "id": "urn:jsonschema:org:forgerock:audit:events:handlers:EventHandlerConfiguration:EventBufferingConfiguration",
-      "description": "The configuration for optional buffering of events.",
+      "description": "audit.handlers.all.buffering",
       "properties": {
+        "autoFlush" : {
+          "type": "boolean",
+          "description": "audit.handlers.all.buffering.autoFlush"
+        },
         "enabled": {
           "type": "boolean",
-          "description": "Indicates if buffering of events is enabled."
-        },
-        "maxTime": {
-          "type": "integer",
-          "description": "The maximum time before the buffer is automatically flushed."
-        },
-        "forceFlushBeforeRead": {
-          "type": "boolean",
-          "description": "Indicates if buffer must be flushed before a read operation is done, in order to ensure the latest events are available."
+          "description": "audit.handlers.all.buffering.enabled"
         },
         "maxSize": {
           "type": "integer",
-          "description": "The maximum size of buffer before the buffer is automatically flushed."
+          "description": "audit.handlers.all.buffering.maxSize"
         }
       }
     }
