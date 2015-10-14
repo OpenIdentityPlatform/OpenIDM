@@ -8,12 +8,6 @@
             "openidm-authorized": "ui-user",
             "openidm-admin": "ui-admin"
         },
-        "siteImages" : [
-            "images/passphrase/mail.png",
-            "images/passphrase/user.png",
-            "images/passphrase/report.png",
-            "images/passphrase/twitter.png"
-        ],
         "notificationTypes" : {
             "info" : {
                 "name" : "common.notification.types.info",

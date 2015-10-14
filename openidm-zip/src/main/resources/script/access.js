@@ -143,6 +143,13 @@ var httpAccessConfig =
             "actions"   : "",
             "customAuthz" : "disallowQueryExpression()"
         },
+        // Allow access to custom scripted endpoints
+        {
+            "pattern"   : "system/*",
+            "roles"     : "openidm-admin",
+            "methods"   : "script",
+            "actions"   : "*"
+        },
         // Note that these actions are available directly on system as well
         {
             "pattern"   : "system/*",

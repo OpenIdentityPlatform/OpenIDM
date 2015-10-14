@@ -23,18 +23,14 @@
  */
 
 /**
- * @author jdabrowski
- *
  * This script sets default fields.
  * It forces that user role is openidm-authorized and account status
  * is active.
  *
- * It is run every time new user is created.
+ * It is expected to be called as the managed/user onCreate script.
  */
 
 /*global object */
-
-var uiConfig =  openidm.read("config/ui/configuration");
 
 if (!object.accountStatus) {
     object.accountStatus = 'active';
@@ -46,89 +42,4 @@ if(!object.authzRoles) {
             "_ref" : "repo/internal/role/openidm-authorized"
         }
     ];
-}
-
-if(!object.roles) {
-    object.roles = [ ];
-}
-
-if (!object.lastPasswordSet) {
-    object.lastPasswordSet = "";
-}
-
-if (!object.postalCode) {
-    object.postalCode = "";
-}
-
-if (!object.stateProvince) {
-    object.stateProvince = "";
-}
-
-if (!object.passwordAttempts) {
-    object.passwordAttempts = "0";
-}
-
-if (!object.lastPasswordAttempt) {
-    object.lastPasswordAttempt = (new Date()).toString();
-}
-
-if (!object.postalAddress) {
-    object.postalAddress = "";
-}
-
-if (!object.address2) {
-    object.address2 = "";
-}
-
-if (!object.country) {
-    object.country = "";
-}
-
-if (!object.city) {
-    object.city = "";
-}
-if (!object.givenName) {
-    object.givenName = "";
-}
-
-if (!object.sn) {
-    object.sn = "";
-}
-
-if (!object.telephoneNumber) {
-    object.telephoneNumber = "";
-}
-
-if (!object.mail) {
-    object.mail = "";
-}
-
-if (uiConfig.configuration.siteIdentification) {
-
-    if (!object.siteImage) {
-        object.siteImage = "user.png";
-    }
-
-    if (!object.passPhrase) {
-        object.passPhrase = "Welcome new user";
-    }
-
-}
-
-if (uiConfig.configuration.securityQuestions) {
-    if (!object.securityAnswer) {
-        object.securityAnswer = java.util.UUID.randomUUID().toString();
-    }
-
-    if (!object.securityQuestion) {
-        object.securityQuestion = "1";
-    }
-
-    if (!object.securityAnswerAttempts) {
-        object.securityAnswerAttempts = "0";
-    }
-
-    if (!object.lastSecurityAnswerAttempt) {
-        object.lastSecurityAnswerAttempt = (new Date()).toString();
-    }
 }
