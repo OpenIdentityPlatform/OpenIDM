@@ -54,20 +54,22 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
         routerAuditEventHandler.configure(routerConfig);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public void setDependencyProvider(DependencyProvider provider) {
-        routerAuditEventHandler.setDependencyProvider(provider);
+    public void startup() throws ResourceException {
+        // do nothing
+    }
+
+    @Override
+    public void shutdown() throws ResourceException {
+        routerAuditEventHandler.shutdown();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void close() throws ResourceException {
-        routerAuditEventHandler.close();
+    public void setDependencyProvider(DependencyProvider provider) {
+        routerAuditEventHandler.setDependencyProvider(provider);
     }
 
     /**

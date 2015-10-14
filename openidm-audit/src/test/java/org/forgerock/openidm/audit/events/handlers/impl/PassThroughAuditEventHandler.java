@@ -47,10 +47,14 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
         this.message = config.getMessage();
     }
 
-    /** {@inheritDoc} */
     @Override
-    public void close() throws ResourceException {
-        // nothing to do
+    public void startup() throws ResourceException {
+        // do nothing
+    }
+
+    @Override
+    public void shutdown() throws ResourceException {
+        // do nothing
     }
 
     /**

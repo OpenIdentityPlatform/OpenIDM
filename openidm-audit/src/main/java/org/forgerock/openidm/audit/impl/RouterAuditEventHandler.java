@@ -66,6 +66,16 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         logger.info("Audit logging to: {}", resourcePath.toString());
     }
 
+    @Override
+    public void startup() throws ResourceException {
+        // do nothing
+    }
+
+    @Override
+    public void shutdown() throws ResourceException {
+        // do nothing
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -76,13 +86,6 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
 
     private ConnectionFactory getConnectionFactory() throws ClassNotFoundException {
         return dependencyProvider.getDependency(ConnectionFactory.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void close() throws ResourceException {
     }
 
     /**
