@@ -42,25 +42,19 @@ import org.osgi.framework.Constants;
 /**
  * Config object patching utility.
  */
-@Component(name = UpdateConfig.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
+@Component(name = ConfigUpdater.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
         description = "OpenIDM Config Update", immediate = true)
 @org.apache.felix.scr.annotations.Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Config Update")
 })
-public class UpdateConfig {
+public class ConfigUpdater {
     /** The PID for this component. */
     public static final String PID = "org.forgerock.openidm.maintenance.update.config";
 
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
     protected ConnectionFactory connectionFactory;
-
-    private static UpdateConfig updateConfig = new UpdateConfig();
-
-    public static UpdateConfig getUpdateConfig() {
-        return updateConfig;
-    }
 
     /**
      * Apply a JsonPatch to a config object on the router.

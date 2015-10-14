@@ -133,6 +133,11 @@ public class UpdateLogEntry {
         return this;
     }
 
+    /**
+     * Return a json representation of this object
+     *
+     * @return this object in json form
+     */
     public JsonValue toJson() {
         JsonValue ret = json(object(
                 field("_id", getId()),
