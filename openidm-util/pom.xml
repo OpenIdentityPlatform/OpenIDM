@@ -59,7 +59,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-crypto</artifactId>
+            <artifactId>json-crypto-core</artifactId>
         </dependency>
 
         <dependency>
