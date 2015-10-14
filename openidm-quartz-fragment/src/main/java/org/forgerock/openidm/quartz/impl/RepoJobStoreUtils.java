@@ -31,7 +31,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 
-import org.apache.commons.codec.binary.Base64;
+import org.forgerock.util.encode.Base64;
 import org.quartz.JobPersistenceException;
 
 public class RepoJobStoreUtils {
@@ -50,8 +50,7 @@ public class RepoJobStoreUtils {
             oos.writeObject(object);
             oos.flush();
             oos.close();
-            //return new String(Base64Coder.encode(baos.toByteArray()));
-            return new String(Base64.encodeBase64(baos.toByteArray()));
+            return Base64.encode(baos.toByteArray());
         } catch (Exception e) {
             e.printStackTrace();
             throw new JobPersistenceException(e.getMessage());
@@ -69,7 +68,7 @@ public class RepoJobStoreUtils {
     public static Object deserialize(String str) throws JobPersistenceException {
         try {
             //byte [] bytes = Base64Coder.decode(str.toCharArray());
-            byte [] bytes = Base64.decodeBase64(str);
+            byte [] bytes = Base64.decode(str);
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
             Object o  = ois.readObject();
             ois.close();

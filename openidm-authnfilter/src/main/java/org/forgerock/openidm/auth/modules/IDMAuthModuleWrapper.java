@@ -36,7 +36,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
@@ -57,6 +56,7 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.util.Function;
+import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
@@ -546,7 +546,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
             if (authHeader != null) {
                 final String[] authValue = authHeader.split("\\s", 2);
                 if (AUTHORIZATION_HEADER_BASIC.equalsIgnoreCase(authValue[0]) && authValue[1] != null) {
-                    final String[] creds = new String(Base64.decodeBase64(authValue[1].getBytes())).split(":");
+                    final String[] creds = new String(Base64.decode(authValue[1].getBytes())).split(":");
                     if (creds.length == 2) {
                         return new Credential(creds[0], creds[1]);
                     }
