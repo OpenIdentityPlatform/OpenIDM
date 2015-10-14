@@ -1,0 +1,127 @@
+<div class="back-bar">
+    <div class="container">
+        <a href="#resource/managed/assignment/list/" class="backToList">{{t "templates.admin.AssignmentTemplate.backToAssignments"}}</a>
+    </div>
+</div>
+<div class="container">
+    <div class="page-header clearfix">
+        <span class="header-icon pull-left"><i class="fa fa-key"></i></span>
+        <h4 class="page-type">{{t "templates.admin.AssignmentTemplate.assignment"}}</h4>
+        <div class="page-header-button-group">
+            <a href="#mapping/add/connector/xmlfile">
+                <button id="deleteAssignment" type="button" class="btn btn-default btn-actions">
+                    <i class="fa fa-times"></i> {{t "common.form.delete"}}
+                </button>
+            </a>
+        </div>
+        <h1 id="assignmentHeaderName">{{resource.name}}</h1>
+    </div>
+</div>
+<div class="container">
+    <div class=" tab-menu">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="dropdown pull-right tabdrop hide">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <i class="fa fa-ellipsis-v"></i></a>
+                <ul class="dropdown-menu"></ul>
+            </li>
+            <li class="active"><a href="#assignmentDetails" role="tab" data-toggle="tab" aria-expanded="true">{{t "templates.admin.AssignmentTemplate.details"}}</a></li>
+            <li class=""><a href="#assignmentAttributes" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.admin.AssignmentTemplate.attributes"}}</a></li>
+            <li class=""><a id="assignmentEventsTab" href="#assignmentEvents" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.admin.AssignmentTemplate.events"}}</a></li>
+            <!-- <li class=""><a href="#assignmentRoles" role="tab" data-toggle="tab" aria-expanded="false">Roles</a></li> -->
+        </ul>
+    </div>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="assignmentDetails">
+            <div class="panel no-margin-bottom">
+                <form id="assignmentDetailsForm" class="form-horizontal">
+                    <div class="panel-body">
+                        <div class="form-group has-feedback">
+                            <label for="assignmentName" class="col-sm-3 control-label">{{t "templates.admin.AssignmentTemplate.assignmentName"}}</label>
+                            <div class="col-sm-8">
+                                <input name="name" id="assignmentName" data-validator="required" data-validator-event="keyup blur" type="text" class="form-control" placeholder="e.g. Create Sales Report" value="{{resource.name}}">
+                                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+                            </div>
+                        </div>
+                        <div class="form-group has-feedback">
+                            <label for="assignmentDescription" class="col-sm-3 control-label">{{t "templates.admin.AssignmentTemplate.description"}}</label>
+                            <div class="col-sm-8">
+                                <textarea name="description" id="assignmentDescription" data-validator="required" data-validator-event="keyup blur" class="form-control" rows="3" placeholder="e.g. Allow user to create a sales report.">{{resource.description}}</textarea>
+                                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-sm-3 control-label">{{t "templates.admin.AssignmentTemplate.mapping"}}</label>
+                            <div class="col-sm-8">
+                                <i class="fr-small-circle bg-primary fa fa-map-marker"></i><a class="fr-small-circle-text" href="#properties/{{resource.mapping}}/">{{resource.mapping}}</a>
+                            </div>
+                        </div>
+                        {{#if showLinkQualifier}}
+                            <div class="form-group">
+                                <label class="col-sm-3 control-label">{{t "templates.admin.AssignmentTemplate.linkQualifiers"}}</label>
+                                <div class="col-sm-8">
+                                    <select id="linkQualifiers" name="linkQualifiers[]">
+                                        {{#each mapping.linkQualifiers}}
+                                            <option value="{{this}}">{{this}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
+                            </div>
+                        {{/if}}
+                    </div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <a href="#resource/managed/assignment/list/" class="btn btn-default">Cancel</a>
+                            <input type="submit" id="saveAssignmentsDetails" name="saveAssignmentsDetails" value='{{t "common.form.save"}}' class="btn btn-primary" disabled="true">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="assignmentAttributes">
+            <div class="panel no-margin-bottom">
+                <div class="panel-body">
+                    <ul class="list-group" id="assignmentAttributesList">
+
+                    </ul>
+                    <button class="btn btn-default" id="addAttribute"><i class="fa fa-plus"></i> {{t "templates.admin.AssignmentTemplate.addAttribute"}}</button>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <a href="#resource/managed/assignment/list/" class="btn btn-default">{{t "common.form.cancel"}}</a>
+                        <input type="submit" id="saveAssignmentAttributes" name="saveAssignmentAttributes" value='{{t "common.form.save"}}' class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="assignmentEvents">
+            <div class="panel no-margin-bottom">
+                <div class="panel-body">
+                    <div id="onAssignmentHolder">
+
+                    </div>
+                    <div id="onUnassignmentHolder">
+
+                    </div>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <a href="#resource/managed/assignment/list/" class="btn btn-default">Cancel</a>
+                        <input type="submit" id="saveAssignmentScripts" name="saveAssignmentsScripts" value='{{t "common.form.save"}}' class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!--
+        <div role="tabpanel" class="tab-pane" id="assignmentRoles">
+            <div class="panel no-margin-bottom">
+                <div class="panel-body">
+
+                </div>
+                <div class="panel-footer">
+
+                </div>
+            </div>
+        </div>
+        -->
+    </div>
+</div>

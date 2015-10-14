@@ -66,7 +66,6 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
         });
     };
 
-
     obj.currentConnectors = function() {
         var deferred = $.Deferred(),
             promise = deferred.promise();
@@ -85,6 +84,13 @@ define("org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate", [
         }
 
         return promise;
+    };
+
+    obj.queryConnector = function (name) {
+        return obj.serviceCall({
+            url: "/" + name + "?_queryId=query-all-ids",
+            type: "GET"
+        });
     };
 
     obj.deleteCurrentConnectorsCache = function() {
