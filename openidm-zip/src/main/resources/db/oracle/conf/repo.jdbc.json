@@ -35,9 +35,11 @@
             "get-notifications-for-user" : "SELECT * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
             "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
             "credential-internaluser-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
-            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND firstid = ${firstId}",
-            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier} AND secondid = ${secondId}",
-            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND linkQualifier = ${linkQualifier}",
+
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
+
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}"
         }
