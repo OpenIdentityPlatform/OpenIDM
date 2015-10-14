@@ -78,8 +78,6 @@ public class RemoteCommandScope extends CustomCommandScope {
     private static final String REPLACE_ALL_DESC =
             "Replace the entire config set by deleting the additional configuration";
 
-    private static final String PAUSE_DESC = "Pause in milliseconds between each config change, defaults to 500ms.";
-
     private final HttpRemoteJsonResource resource = new HttpRemoteJsonResource();
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -210,7 +208,6 @@ public class RemoteCommandScope extends CustomCommandScope {
      * @param idmUrl the url of the OpenIDM instance
      * @param idmPort the OpenIDM instance's port
      * @param replaceall whether or not to replace the config
-     * @param pause time in milliseconds to pause between each config change
      */
     @Descriptor("Imports the configuration set from local 'conf' directory.")
     public void configimport(
@@ -233,13 +230,8 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(REPLACE_ALL_DESC)
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false")
-            final boolean replaceall,
-
-            @Descriptor(PAUSE_DESC)
-            @Parameter(names = {"--pause"}, absentValue = "500")
-            final long pause
-    ) {
-        configimport(session, userPass, idmUrl, idmPort, replaceall, pause, "conf");
+            final boolean replaceall) {
+        configimport(session, userPass, idmUrl, idmPort, replaceall, "conf");
     }
 
     /**
@@ -250,7 +242,6 @@ public class RemoteCommandScope extends CustomCommandScope {
      * @param idmUrl the url of the OpenIDM instance
      * @param idmPort the OpenIDM instance's port
      * @param replaceall whether or not to replace the config
-     * @param pause time in milliseconds to pause between each config change
      * @param source the source directory
      */
     @Descriptor("Imports the configuration set from local file/directory.")
@@ -276,10 +267,6 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true",  absentValue = "false")
             final boolean replaceall,
 
-            @Descriptor(PAUSE_DESC)
-            @Parameter(names = {"--pause"}, absentValue = "500")
-            final long pause,
-
             @Descriptor("source directory")
             final String source) {
         processOptions(userPass, idmUrl, idmPort);
@@ -297,6 +284,7 @@ public class RemoteCommandScope extends CustomCommandScope {
                 }
             };
 
+            // Read the files from the provided source directory.
             File[] files = file.listFiles(filter);
             Map<String, File> localConfigSet = new HashMap<String, File>(files.length);
             for (File subFile : files) {
@@ -313,6 +301,7 @@ public class RemoteCommandScope extends CustomCommandScope {
                 localConfigSet.put(configName, subFile);
             }
 
+            // Read the remote configs that are currently active.
             Map<String, JsonValue> remoteConfigSet = new HashMap<String, JsonValue>();
             try {
                 ResourceResponse responseValue = resource.read(null, Requests.newReadRequest("config"));
@@ -336,56 +325,52 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             final ResourcePath configResource = ResourcePath.valueOf("config");
             for (Map.Entry<String, File> entry : localConfigSet.entrySet()) {
+                String sourceConfigId = entry.getKey();
+                if (isProtectedConfigId(sourceConfigId)) {
+                    prettyPrint(console, "ConfigImport", sourceConfigId, "Protected configuration can not be updated" +
+                            " while the system is running.");
+                    // Remove the config from the set so that it won't be touched.
+                    remoteConfigSet.remove(sourceConfigId);
+                    continue;
+                }
+
                 try {
-                    if (remoteConfigSet.containsKey(entry.getKey())) {
+                    if (remoteConfigSet.containsKey(sourceConfigId)) {
                         // Update
-                        UpdateRequest updateRequest = Requests.newUpdateRequest(configResource.concat(entry.getKey()),
+                        UpdateRequest updateRequest = Requests.newUpdateRequest(configResource.concat(sourceConfigId),
                                 new JsonValue(mapper.readValue(entry.getValue(), Map.class)));
 
                         resource.update(null, updateRequest);
                         // If the update succeeded, remove the entry from 'remoteConfigSet' - this prevents it
                         // from being deleted below.  If this update fails, the entry will remain in remoteConfigSet
                         // and will be deleted from the remote IDM instance.
-                        remoteConfigSet.remove(entry.getKey());
+                        remoteConfigSet.remove(sourceConfigId);
                     } else {
                         // Create
-                        CreateRequest createRequest = Requests.newCreateRequest(configResource.concat(entry.getKey()),
+                        CreateRequest createRequest = Requests.newCreateRequest(configResource.concat(sourceConfigId),
                                 new JsonValue(mapper.readValue(entry.getValue(), Map.class)));
                         resource.create(null, createRequest);
                     }
-                    prettyPrint(console, "ConfigImport", entry.getKey(), null);
+                    prettyPrint(console, "ConfigImport", sourceConfigId, null);
                 } catch (Exception e) {
-                    prettyPrint(console, "ConfigImport", entry.getKey(), e.getMessage());
-                }
-                try {
-                    Thread.sleep(pause);
-                } catch (InterruptedException e) {
-                    //ignore and allow to proceed.
+                    prettyPrint(console, "ConfigImport", sourceConfigId, e.getMessage());
                 }
             }
 
             // Delete all additional config objects
             if (replaceall) {
                 for (String configId : remoteConfigSet.keySet()) {
-                    if ("authentication".equals(configId)
-                            || "router".equals(configId)
-                            || "audit".equals(configId)
-                            || configId.startsWith("repo")) {
+                    if (isProtectedConfigId(configId)) {
                         prettyPrint(console, "ConfigDelete", configId, "Protected configuration can not be deleted");
                         continue;
                     }
 
                     try {
-                        //configId is concatenated to avoid file paths from getting url encoded -> '/'-> '%2f'
+                        // configId is concatenated to avoid file paths from getting url encoded -> '/'-> '%2f'
                         resource.delete(null, Requests.newDeleteRequest(configResource.concat(configId)));
                         prettyPrint(console, "ConfigDelete", configId, null);
                     } catch (Exception e) {
                         prettyPrint(console, "ConfigDelete", configId, e.getMessage());
-                    }
-                    try {
-                        Thread.sleep(pause);
-                    } catch (InterruptedException e) {
-                        //ignore and allow to proceed.
                     }
                 }
             }
@@ -397,6 +382,13 @@ public class RemoteCommandScope extends CustomCommandScope {
             console.append("[ConfigImport] Configuration directory not found at: ");
             console.println(file.getAbsolutePath());
         }
+    }
+
+    private boolean isProtectedConfigId(String configId) {
+        return "authentication".equals(configId)
+                || "router".equals(configId)
+                || "audit".equals(configId)
+                || configId.startsWith("repo");
     }
 
     /**
