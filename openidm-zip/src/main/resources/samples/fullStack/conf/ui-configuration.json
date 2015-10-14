@@ -1,21 +1,13 @@
 {
     "configuration" : {
         "selfRegistration" : false,
-        "securityQuestions" : false,
-        "siteIdentification" : false,
+        "passwordReset" : false,
         "lang" : "en",
         "passwordResetLink" : "",
         "roles" : {
-            "openidm-admin" : "Administrator",
-            "openidm-authorized" : "User",
-            "openidm-tasks-manager" : "Tasks Manager"
+            "openidm-authorized": "ui-user",
+            "openidm-admin": "ui-admin"
         },
-        "siteImages" : [
-            "images/passphrase/mail.png",
-            "images/passphrase/user.png",
-            "images/passphrase/report.png",
-            "images/passphrase/twitter.png"
-        ],
         "notificationTypes" : {
             "info" : {
                 "name" : "common.notification.types.info",
@@ -34,6 +26,92 @@
         "openamLoginUrl" : "http://example.com:8081/openam/XUI/#login/",
         "openamUseExclusively" : false,
         "openamAuthEnabled" : false,
-        "openamLoginLinkText" : "Login with OpenAM"
+        "openamLoginLinkText" : "Login with OpenAM",
+        "dashboard" : {
+            "widgets" : [
+                {
+                    "type" : "workflow"
+                },
+                {
+                    "type" : "quickStart",
+                    "size" : "large",
+                    "cards" : [
+                        {
+                            "name" : "dashboard.quickStart.viewProfile",
+                            "icon" : "fa-user",
+                            "href" : "#profile/details"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.changePassword",
+                            "icon" : "fa-lock",
+                            "href" : "#profile/password"
+                        }
+                    ]
+                }
+            ]
+        },
+        "adminDashboard" : {
+            "widgets" : [
+                {
+                    "type" : "quickStart",
+                    "size" : "large",
+                    "cards" : [
+                        {
+                            "name" : "dashboard.quickStart.addANewConnector",
+                            "icon" : "fa-database",
+                            "href" : "#connectors/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.createANewMapping",
+                            "icon" : "fa-map-marker",
+                            "href" : "#mapping/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.createANewRole",
+                            "icon" : "fa-check-square-o",
+                            "href" : "#resource/managed/role/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.addANewDevice",
+                            "icon" : "fa-tablet",
+                            "href" : "#managed/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.setupRegistration",
+                            "icon" : "fa-gear",
+                            "href" : "#selfservice/userregistration/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.setupPasswordReset",
+                            "icon" : "fa-gear",
+                            "href" : "#selfservice/passwordreset/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.createAUser",
+                            "icon" : "fa-user",
+                            "href" : "#resource/managed/user/add/"
+                        },
+                        {
+                            "name" : "dashboard.quickStart.setupAuthentication",
+                            "icon" : "fa-user",
+                            "href" : "#settings/"
+                        }
+                    ]
+                },
+                {
+                    "type" : "lastRecon",
+                    "size" : "large",
+                    "barchart" : false
+                },
+                {
+                    "type" : "systemHealthFull",
+                    "size" : "large"
+                },
+                {
+                    "type" : "resourceList",
+                    "size" : "large"
+                }
+            ]
+        }
     }
 }
