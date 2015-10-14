@@ -66,6 +66,11 @@ public class UpdateFileLogEntry {
         return this;
     }
 
+    /**
+     * Return a json representation of this object
+     *
+     * @return this object in json form
+     */
     public JsonValue toJson() {
         JsonValue ret = json(object(
                 field("filePath", getFilePath()),

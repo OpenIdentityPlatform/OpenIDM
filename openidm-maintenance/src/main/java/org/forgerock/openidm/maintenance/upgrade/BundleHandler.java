@@ -42,6 +42,13 @@ public class BundleHandler {
     private final LogHandler updateLogger;
     private BundleContext systemBundleContext;
 
+    /**
+     * Construct a BundleHandler
+     *
+     * @param systemBundleContext the {@link BundleContext} of the system bundle
+     * @param archiveExtension the extension used with backing up existing files
+     * @param updateLogger the logger used to record bundle changes
+     */
     public BundleHandler(BundleContext systemBundleContext, final String archiveExtension,
         final LogHandler updateLogger) {
         this.systemBundleContext = systemBundleContext;
