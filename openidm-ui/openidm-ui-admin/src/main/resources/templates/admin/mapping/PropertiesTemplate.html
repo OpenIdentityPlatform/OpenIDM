@@ -3,7 +3,7 @@
     <div id="linkQualifierPanel" class="panel panel-default panel-collapse">
         <div class="panel-heading" role="tab" id="linkQualifierHeading">
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#linkQualifierBody" {{#if hasLinkQualifiers}} aria-expanded="true" {{else}} aria-expanded="false" {{/if}} aria-controls="linkQualifierHeading">Link Qualifiers</a>
+                <a data-toggle="collapse" href="#linkQualifierBody" {{#if hasLinkQualifiers}} aria-expanded="true" {{else}} aria-expanded="false" {{/if}} aria-controls="linkQualifierHeading">{{t "templates.mapping.linkQualifier"}}</a>
             </h4>
         </div>
         <div id="linkQualifierBody" class="collapse {{#if hasLinkQualifiers}} in {{/if}}" role="tabpanel" aria-labelledby="linkQualifierHeading">
@@ -14,7 +14,7 @@
     <div id="attributesGridPanel" class="panel panel-connector panel-default panel-collapse">
         <div class="panel-heading" role="tab" id="attributesHeading">
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#attributesBody" aria-expanded="true" aria-controls="attributesHeading" class="">Attributes Grid</a>
+                <a data-toggle="collapse" href="#attributesBody" aria-expanded="true" aria-controls="attributesHeading" class="">{{t "templates.mapping.attributesGrid"}}</a>
             </h4>
         </div>
         <div id="attributesBody" class="collapse in" role="tabpanel" aria-labelledby="attributesHeading" aria-expanded="true" style="">
@@ -22,15 +22,14 @@
         </div>
     </div>
 
-    <div id="roleEntitlementsPanel" class="panel panel-default panel-collapse">
-        <div class="panel-heading" role="tab" id="roleEntitlementsHeading">
+    <div id="assignmentsPanel" class="panel panel-default panel-collapse">
+        <div class="panel-heading" role="tab" id="assignmentsHeading">
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#roleEntitlementsBody" aria-expanded="false" aria-controls="roleEntitlementsHeading">{{t "templates.mapping.roleEntitlements"}}</a>
-                <!--<span class="help-text">{{t "templates.mapping.roleEntitlementsDescription"}}</span></a>-->
+                <a data-toggle="collapse" href="#assignmentsBody" aria-expanded="false" aria-controls="roleEntitlementsHeading">{{t "templates.admin.AssignmentTemplate.assignment"}}</a>
             </h4>
         </div>
-        <div id="roleEntitlementsBody" class="collapse" role="tabpanel" aria-labelledby="roleEntitlementsHeading">
-            <div id="mappingRoleEntitlements"></div>
+        <div id="assignmentsBody" class="collapse" role="tabpanel" aria-labelledby="assignmentsHeading">
+            <div id="mappingAssignments"></div>
         </div>
     </div>
 </div>

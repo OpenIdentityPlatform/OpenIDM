@@ -47,7 +47,7 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
                 configuration: {
-                    "resource-role" : "org/forgerock/openidm/ui/admin/role/EditRoleView"
+                    "resource-assignment" : "org/forgerock/openidm/ui/admin/assignment/AssignmentView"
                 }
             },
             {

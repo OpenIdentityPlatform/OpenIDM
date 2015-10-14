@@ -22,45 +22,47 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
-/*jslint evil: true */
+/*global define, JSON */
 
-define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
+define("org/forgerock/openidm/ui/admin/mapping/properties/MappingAssignmentsView", [
+    "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/MappingAssignmentsView",
-    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView"
-], function(_,
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
+], function($, _,
             MappingAdminAbstractView,
-            LinkQualifiersView,
-            MappingAssignmentsView,
-            AttributesGridView) {
+            ResourceDelegate) {
 
-    var PropertiesView = MappingAdminAbstractView.extend({
-        template: "templates/admin/mapping/PropertiesTemplate.html",
-        element: "#mappingContent",
+    var MappingAssignmentsView = MappingAdminAbstractView.extend({
+        template: "templates/admin/mapping/properties/MappingAssignmentsViewTemplate.html",
+        element: "#mappingAssignments",
         noBaseTemplate: true,
+        events: {},
+        model: {},
         data: {},
 
         render: function (args, callback) {
-            this.data.hasLinkQualifiers = this.getCurrentMapping().linkQualifiers === true;
+            this.model.mappingName = this.getMappingName();
+            this.model.mapping = this.getCurrentMapping();
 
-            this.parentRender(_.bind(function () {
+            ResourceDelegate.searchResource("/mapping eq '" +this.model.mappingName +"'", "managed/assignment").then(_.bind(function(assignments){
 
-                LinkQualifiersView.render();
+                this.data.assignments = assignments.result;
 
-                AttributesGridView.render({}, _.bind(function() {
+                this.parentRender(_.bind(function () {
+                    if(this.data.assignments.length > 0) {
+                        //Needs to be above the view scope to open the parent panel
+                        $("a[href='#assignmentsBody']").collapse("show");
+                        $("#assignmentsBody").toggleClass("in", true);
+                    }
+
                     if (callback) {
                         callback();
                     }
                 }, this));
-
-                MappingAssignmentsView.render();
-
             }, this));
         }
     });
 
-    return new PropertiesView();
+    return new MappingAssignmentsView();
 });

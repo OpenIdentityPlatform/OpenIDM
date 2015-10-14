@@ -191,6 +191,18 @@ define("config/messages/AdminMessages", [
         "selfServicePasswordDelete": {
             msg: "config.messages.selfService.passwordDelete",
             type: "error"
+        },
+        "assignmentSaveSuccess": {
+            msg: "config.messages.assignmentMessages.saveSuccess",
+            type: "info"
+        },
+        "deleteAssignmentSuccess": {
+            msg: "config.messages.assignmentMessages.deleteAssignmentSuccess",
+            type: "info"
+        },
+        "deleteAssignmentFail": {
+            msg: "config.messages.assignmentMessages.deleteAssignmentFail",
+            type: "error"
         }
     };
 

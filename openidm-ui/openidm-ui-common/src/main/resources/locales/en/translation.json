@@ -168,6 +168,11 @@
                 "userRegistrationDelete" : "User registration configuration deleted",
                 "passwordSave" : "Password configuration saved",
                 "passwordDelete" : "Password configuration deleted"
+            },
+            "assignmentMessages" : {
+                "saveSuccess" : "Assignment successfully saved.",
+                "deleteAssignmentSuccess" : "Assignment has been deleted.",
+                "deleteAssignmentFail" : "Failed to delete assignment."
             }
         },
         "AppConfiguration" : {
@@ -347,36 +352,31 @@
                 "noData": "No Data",
                 "invalidObject": "Invalid Object"
             },
-            "RoleUsersTemplate":
-            {
-                "addSelectedSuccess": "Successfully added users to __roleId__",
-                "removeSelectedSuccess": "Successfully removed users from __roleId__",
-                "details": "Details",
-                "users": "Users",
-                "removeUsers": "Remove Users",
-                "addUsers": "Add Users",
-                "details": "Details",
-                "description": "Description",
-                "roleName": "Role Name",
-                "backToRoles": "Back to Roles",
-                "role": "Role",
-                "newRole": "New Role"
-            },
-            "RoleEntitlementsTemplate":
-            {
-                "entitlements": "Entitlements",
-                "description": "Define provisioning for users with this role.",
-                "addEntitlement": "Add an Entitlement",
-                "editEntitlement": "Edit Entitlement: __entitlementName__",
-                "assignmentSaveSuccess": "Successfully saved __assignment__",
-                "assignmentAddSuccess": "Successfully added __assignment__",
-                "assignmentDeleteSuccess": "Successfully deleted __assignment__",
-                "deleteEntitlementConfirm" : "Are you sure you want to delete this entitlement (__assignment__)?",
-                "nameOfEntitlement": "Name of your entitlement",
-                "attributes": "Attributes",
-                "events": "Events",
-                "attributesDescription": "Add attributes to map to this resource.",
-                "value": "Value",
+            "AssignmentTemplate" : {
+                "deleteMessage" : "Are you sure you want to delete this assignment?",
+                "mappingHelp" : "Mapping to which this assignment applies",
+                "newAssignment" : "New Assignment",
+                "addAssignment" : "Add Assignment",
+                "addNewAssignment" : "Add New Assignment",
+                "noMappingAssignments" : "No assignments attached to this mapping",
+                "mapping" : "Mapping",
+                "value" : "Value",
+                "operations" : "Operations",
+                "onAssignment" : "On assignment",
+                "unAssignment" : "On unassignment",
+                "assignmentOperation": "Assignment Operation",
+                "unassignmentOperation": "Unassignment Operation",
+                "mappingAssignmentHelp" : "View target resource properties defined by assignments.",
+                "addAttribute": "Add an attribute",
+                "linkQualifiers" : "Link Qualifiers",
+                "description" : "Description",
+                "mapping" : "Mapping",
+                "assignmentName" : "Assignment Name",
+                "events" : "Events",
+                "attributes" : "Attributes",
+                "details" : "Details",
+                "backToAssignments" : "Back to Assignments",
+                "assignment" : "Assignment",
                 "operations": "Operations",
                 "assignmentOperation": "Assignment Operation",
                 "unassignmentOperation": "Unassignment Operation",
@@ -384,19 +384,7 @@
                 "removeFromTarget": "Remove from Target",
                 "replaceTarget": "Replace Target",
                 "noOp": "No Operation",
-                "addAttribute": "Add an attribute",
-                "entitlementDuplicationError": "Cannot have two entitlements of the same name.",
-                "addEntitlementToMapping": "Add this entitlement to one or more mappings.",
-                "mappings": "Mappings",
-                "mapping": "Mapping",
-                "addToMapping": "Add to a Mapping",
-                "noEntitlements": "No entitlements attached to this mapping",
-                "selectMapping": "Select a mapping...",
-                "noMappings": "No mappings attached to this entitlement",
-                "addMappingSuccess": "Successfully added &quot;__assignmentName__&quot; entitlement to &quot;__mappingName__&quot;.",
-                "removeMappingSuccess": "Successfully removed &quot;__assignmentName__&quot; entitlement from &quot;__mappingName__&quot;.",
-                "condition": "Condition",
-                "linkQualifiers": "Link Qualifiers"
+                "assignment" : "Assignment"
             }
         },
         "taskInstance": {
@@ -1205,6 +1193,7 @@
             }
         },
         "mapping": {
+            "attributesGrid" : "Attributes Grid",
             "backToMapping" : "Back to Mappings",
             "conditionalUpon" : "Conditional Upon:",
             "validLinkQualifierScript" : "Requires a valid Link Qualifier script.",

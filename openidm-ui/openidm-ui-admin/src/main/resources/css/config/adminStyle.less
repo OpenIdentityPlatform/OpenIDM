@@ -147,6 +147,21 @@ h3.block-header {
 }
 
 /*
+  Small circle with font awesome icon
+*/
+.fr-small-circle {
+  .icon-circle(28px);
+  float: left;
+  margin-right: 10px;
+}
+
+.fr-small-circle-text {
+  position:relative;
+  top:3px;
+}
+
+
+/*
   Selectize styles
 */
 .selectize-holder .selectize-control {
@@ -813,7 +828,9 @@ Dialog Catch
     }
 
     h3 {
-      display: none;
+      span {
+        display: none;
+      }
     }
 
     div[data-schematype="object"]>h3 {
