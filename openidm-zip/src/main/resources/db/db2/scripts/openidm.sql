@@ -335,8 +335,8 @@ CREATE  TABLE sopenidm.auditconfig (
   resource_protocol VARCHAR(10) NULL ,
   resource_method VARCHAR(10) NULL ,
   resource_detail VARCHAR(255) NULL ,
-  before CLOB(2M) NULL ,
-  after CLOB(2M) NULL ,
+  beforeObject CLOB(2M) NULL ,
+  afterObject CLOB(2M) NULL ,
   changedfields VARCHAR(255) NULL ,
   rev VARCHAR(255) NULL,
   PRIMARY KEY (objectid)

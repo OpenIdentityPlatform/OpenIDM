@@ -162,8 +162,8 @@ CREATE TABLE auditconfig (
   resource_protocol VARCHAR2(10 CHAR),
   resource_method VARCHAR2(10 CHAR),
   resource_detail VARCHAR2(255 CHAR),
-  before CLOB,
-  after CLOB,
+  beforeObject CLOB,
+  afterObject CLOB,
   changedfields VARCHAR2(255 CHAR),
   rev VARCHAR2(255 CHAR)
 );

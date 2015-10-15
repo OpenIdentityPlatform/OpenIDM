@@ -249,8 +249,8 @@ CREATE TABLE openidm.auditconfig (
   resource_protocol VARCHAR(10) DEFAULT NULL,
   resource_method VARCHAR(10) DEFAULT NULL,
   resource_detail VARCHAR(255) DEFAULT NULL,
-  before TEXT,
-  after TEXT,
+  beforeObject TEXT,
+  afterObject TEXT,
   changedfields VARCHAR(255) DEFAULT NULL,
   rev VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (objectid)
