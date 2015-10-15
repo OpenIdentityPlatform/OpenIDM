@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -49,7 +49,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboard
             if (args && args[0] && args[0] !== '') {
                 processId = args[0];
             }
-            workflowManager.getAllUniqueProcessDefinitions(conf.loggedUser.id, _.bind(function(processDefinitions) {
+            workflowManager.getAllUniqueProcessDefinitions(_.bind(function(processDefinitions) {
                 var i;
                 this.data.processDefinitions = processDefinitions;
 

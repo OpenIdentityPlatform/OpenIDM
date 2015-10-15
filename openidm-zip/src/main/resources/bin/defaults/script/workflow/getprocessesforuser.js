@@ -1,7 +1,7 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,71 +22,38 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-if (request.method !== "query") {
-    throw { 
+if (request.method !== "read") {
+    throw {
         "code" : 403,
         "message" : "Access denied"
     };
 }
-if (!request.additionalParameters || (!request.additionalParameters.userId && !request.additionalParameters.userName)) {
-    throw "Required params: userId or userName";
-}
 
 (function () {
-    var users = {},
-    
-    getUser = function(userId) {
-        var user,
-            params,
-            result;
-        
-        if (!users[userId]) {
-            user = openidm.read("managed/user/"+userId);
-            if (!user) {
-                params = {
-                    "_queryId": "for-userName",
-                    "uid": userId
-                };
-                result = openidm.query("managed/user", params);
-                if (result.result && result.result.length === 1) {
-                    user = result.result[0];
-                }
-                if (!user) {
-                    user = openidm.read("repo/internal/user/"+userId);
-                }
-                
-                if(!user) {
-                    throw "Bad userId"; 
-                }
-            }
-            users[userId] = user;
-        }
-        return users[userId];
-    },
-    
+    var
     containsRole = function(object, items) {
         var i;
         for (i = 0; i < items.length; i++) {
-            if (items[i]._ref !== null && object._ref !== null && items[i]._ref === object._ref) {
+            if (items[i] !== null && object !== null && items[i] === object) {
                 return true;
             }
         }
         return false;
     },
-    
+
     isProcessAvailableForUser = function(processAccessPolicies, processDefinition, userRoles) {
         var i,
             props,
             property,
             matches,
             requiresRole;
-        
+
         for (i = 0; i < processAccessPolicies.length; i++) {
             props =  processAccessPolicies[i].propertiesCheck;
             property = props.property;
             matches = props.matches;
             requiresRole = props.requiresRole;
-            
+
             if (processDefinition[property].match(matches)) {
                 if (containsRole(requiresRole, userRoles)) {
                     return true;
@@ -95,45 +62,25 @@ if (!request.additionalParameters || (!request.additionalParameters.userId && !r
         }
         return false;
     },
-    
+
     getProcessesAvailableForUser = function(processDefinitions, userRoles) {
         var processesAvailableToUser = [],
             processAccessPolicies = openidm.read("config/process/access").workflowAccess,
             processDefinition,
             i;
-        
+
         for (i = 0; i < processDefinitions.length; i++) {
             processDefinition = processDefinitions[i];
             if (isProcessAvailableForUser(processAccessPolicies, processDefinition, userRoles)) {
                 processesAvailableToUser.push(processDefinition);
             }
         }
-        return processesAvailableToUser;
+        return { "processes": processesAvailableToUser };
     },
-    processDefinitions = {},
-    user = {},
-    roles,
-    processesForUser = [],
-    processDefinitionsQueryParams = {
+    processDefinitions = openidm.query("workflow/processdefinition", {
         "_queryId": "query-all-ids"
-    };
-    
-    
-    //code:
-    
-    if (request.additionalParameters.userId) {
-        user = getUser(request.additionalParameters.userId);
-        roles = user.effectiveRoles || user.roles;
-    } else {
-        user = getUser(request.additionalParameters.userName);
-        roles = user.effectiveRoles || user.roles;
-    }
-    
-    processDefinitions = openidm.query("workflow/processdefinition", processDefinitionsQueryParams).result;
-    
-    processesForUser = getProcessesAvailableForUser(processDefinitions, roles);
-    
-    //return value
-    return processesForUser;
-    
+    }).result;
+
+    return getProcessesAvailableForUser(processDefinitions, context.security.authorization.roles);
+
 } ());

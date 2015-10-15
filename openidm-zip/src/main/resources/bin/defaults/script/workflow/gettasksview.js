@@ -1,7 +1,7 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,7 +23,7 @@
  */
 
 if (request.method !== "query") {
-    throw { 
+    throw {
         "code" : 403,
         "message" : "Access denied"
     };
@@ -42,7 +42,7 @@ if (request.method !== "query") {
             }
             return processInstances[processInstanceId];
         },
-    
+
         getTaskDefinition = function(processDefinitionId, taskDefinitionKey) {
             var taskDefinitionQueryParams,taskDefinition;
             if (!taskDefinitions[processDefinitionId+"|"+taskDefinitionKey]) {
@@ -59,73 +59,33 @@ if (request.method !== "query") {
                 isTaskManager = false,
                 i,
                 usersWhoCanBeAssignedToTaskResult = { users : [] };
-            
+
             if (!usersWhoCanBeAssignedToTask[taskId]) {
-                
+
                 for(i = 0; i < context.security.authorization.roles.length; i++) {
                     if(context.security.authorization.roles[i] === 'openidm-tasks-manager') {
                         isTaskManager = true;
                         break;
                     }
                 }
-                
-                if(isTaskManager) {        
+
+                if(isTaskManager) {
                     usersWhoCanBeAssignedToTaskResult = openidm.query("endpoint/getavailableuserstoassign", usersWhoCanBeAssignedToTaskQueryParams);
                 }
                 usersWhoCanBeAssignedToTask[taskId] = usersWhoCanBeAssignedToTaskResult;
             }
             return usersWhoCanBeAssignedToTask[taskId];
         },
-        
-        getUser = function(userId) {
-            var user = openidm.read("managed/user/"+userId),
-                params = {
-                    "_queryId": "for-userName",
-                    "uid": userId
-                },
-                result;
-            if (!users[userId]) {
-                if (!user) {
-                    result = openidm.query("managed/user", params);
-                    if (result.result && result.result.length === 1) {
-                        user = result.result[0];
-                    }
-                    if (!user) {
-                        user = openidm.read("repo/internal/user/"+userId);
-                    }
-                    
-                    if(!user) {
-                        return userId; 
-                    }
-                }
-                users[userId] = user;
-            }
-            return users[userId];
-        },
-        
-        getDisplayableOf = function(user) {
-            if (typeof user === "object") {
-                if (user.givenName || user.sn) {
-                    return user.givenName + " " + user.sn;
-                } else {
-                    return user.userName ? user.userName : user._id;
-                }
-            } else {
-                return user;
-            }
-        },
-        
+
         join = function (arr, delim) {
             var returnStr = "",i=0;
             for (i=0; i<arr.length; i++) {
                 returnStr = returnStr + arr[i] + delim;
             }
             return returnStr.replace(new RegExp(delim + "$"), '');
-        },        
-        userId, 
-        roles, 
-        userName,
-        user,
+        },
+        roles = context.security.authorization.roles.join(","),
+        userName = context.security.authenticationId,
         tasks,
         taskId,
         task,
@@ -140,25 +100,7 @@ if (request.method !== "query") {
         processInstance,
         i,
         view = {};
-    
-    //code:
-    
-    if (!request.additionalParameters || (!request.additionalParameters.userId && !request.additionalParameters.userName)) {
-        throw "Required params: userId or userName";
-    } else {
-        if (request.additionalParameters.userId) {
-            user = getUser(request.additionalParameters.userId);
-            userId = user._id; 
-            roles = user.effectiveRoles || user.roles;
-            userName = user.userName ? user.userName : user._id;
-        } else {
-            user = getUser(request.additionalParameters.userName);
-            userId = user._id; 
-            roles = user.effectiveRoles || user.roles;
-            userName = user.userName ? user.userName : user._id;
-        }
-    }
-    
+
     if (request.additionalParameters.viewType === 'assignee') {
         userAssignedTasksQueryParams = {
             "_queryId": "filtered-query",
@@ -167,7 +109,7 @@ if (request.method !== "query") {
         tasks = openidm.query("workflow/taskinstance", userAssignedTasksQueryParams).result;
     } else {
         tasksUniqueMap = {};
-        
+
         userCandidateTasksQueryParams = {
           "_queryId": "filtered-query",
           "taskCandidateUser": userName
@@ -177,29 +119,15 @@ if (request.method !== "query") {
             tasksUniqueMap[userCandidateTasks[i]._id] = userCandidateTasks[i];
         }
 
-        var roleRefs = "";
-        if (typeof roles === "string") {
-            roleRefs = roles;
-        } else {
-            var roleRefArray = [];
-            for (var i = 0; i < roles.length; i++) {
-                if (roles[i]._ref !== null) {
-                    roleRefArray.push(roles[i]._ref);
-                }
-            }
-            if (roleRefArray.length > 0) {
-                roleRefs = join(roleRefArray, ",");
-            }
-        }
         userGroupCandidateTasksQueryParams = {
           "_queryId": "filtered-query",
-          "taskCandidateGroup": roleRefs
+          "taskCandidateGroup": roles
         };
         userGroupCandidateTasks = openidm.query("workflow/taskinstance", userGroupCandidateTasksQueryParams).result;
         for (i = 0; i < userGroupCandidateTasks.length; i++) {
             tasksUniqueMap[userGroupCandidateTasks[i]._id] = userGroupCandidateTasks[i];
         }
-        
+
         tasks = [];
         for (taskId in tasksUniqueMap) {
             if (tasksUniqueMap.hasOwnProperty(taskId)) {
@@ -207,20 +135,19 @@ if (request.method !== "query") {
             }
         }
     }
-    
-    
+
     //building view
-    
+
     for (i = 0; i < tasks.length; i++) {
         taskId = tasks[i]._id;
         task = openidm.read("workflow/taskinstance/"+taskId);
-        
+
         if (!view[task.processDefinitionId+"|"+task.taskDefinitionKey]) {
             view[task.processDefinitionId+"|"+task.taskDefinitionKey] = {name : task.name, tasks : []};
         }
         view[task.processDefinitionId+"|"+task.taskDefinitionKey].tasks.push(task);
     }
-    
+
     for (taskDefinition in view) {
         if (view.hasOwnProperty(taskDefinition)) {
             for (i = 0; i < view[taskDefinition].tasks.length; i++) {
@@ -229,14 +156,14 @@ if (request.method !== "query") {
                 view[taskDefinition].tasks[i].businessKey = processInstance.businessKey;
                 view[taskDefinition].tasks[i].startTime = processInstance.startTime;
                 view[taskDefinition].tasks[i].startUserId = processInstance.startUserId;
-                view[taskDefinition].tasks[i].startUserDisplayable = getDisplayableOf(getUser(processInstance.startUserId));
+                view[taskDefinition].tasks[i].startUserDisplayable = userName;
                 view[taskDefinition].tasks[i].processDefinitionId = processInstance.processDefinitionId;
                 view[taskDefinition].tasks[i].taskDefinition = getTaskDefinition(taskInstance.processDefinitionId, taskInstance.taskDefinitionKey);
                 view[taskDefinition].tasks[i].usersToAssign = getUsersWhoCanBeAssignedToTask(taskInstance._id);
             }
         }
     }
-    
+
     //return value
     return [view];
 
