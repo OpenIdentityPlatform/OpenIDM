@@ -170,8 +170,8 @@
                     "resourceOperation/protocol": "resource_protocol",
                     "resourceOperation/operation/method": "resource_method",
                     "resourceOperation/operation/detail": "resource_detail",
-                    "before": "before",
-                    "after": "after",
+                    "before": "beforeObject",
+                    "after": "afterObject",
                     "changedFields": {
                         "column": "changedfields",
                         "type": "JSON_LIST"

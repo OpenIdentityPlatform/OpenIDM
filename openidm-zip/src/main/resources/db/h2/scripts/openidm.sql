@@ -238,8 +238,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditconfig` (
   `resource_protocol` VARCHAR(10) NULL ,
   `resource_method` VARCHAR(10) NULL ,
   `resource_detail` VARCHAR(255) NULL ,
-  `before` MEDIUMTEXT NULL ,
-  `after` MEDIUMTEXT NULL ,
+  `beforeObject` MEDIUMTEXT NULL ,
+  `afterObject` MEDIUMTEXT NULL ,
   `changedfields` VARCHAR(255) NULL ,
   `rev` VARCHAR(255) NULL ,
   PRIMARY KEY (`objectid`));
