@@ -67,8 +67,10 @@ public class RepoJobStoreUtils {
      */
     public static Object deserialize(String str) throws JobPersistenceException {
         try {
-            //byte [] bytes = Base64Coder.decode(str.toCharArray());
-            byte [] bytes = Base64.decode(str);
+            byte[] bytes = Base64.decode(str);
+            if (bytes == null) {
+                bytes = new byte[0];
+            }
             ObjectInputStream ois = new ObjectInputStream(new ByteArrayInputStream(bytes));
             Object o  = ois.readObject();
             ois.close();
