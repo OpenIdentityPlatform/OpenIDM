@@ -74,9 +74,6 @@
             "source" : "managed/user",
             "target" : "system/ldap/account",
             "links" : "systemLdapAccounts_managedUser",
-            "assignmentsToMap" : [
-                "ldap"
-            ],
             "onCreate" : {
                 "type" : "text/javascript",
                 "source" : "target.dn = 'uid=' + source.userName + ',ou=People,dc=example,dc=com';"

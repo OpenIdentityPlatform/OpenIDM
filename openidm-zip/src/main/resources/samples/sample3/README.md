@@ -278,7 +278,7 @@ Run the Sample
         "accountStatus" : "active",
         "telephoneNumber" : "",
         "roles" : [ "openidm-authorized" ],
-        "effectiveAssignments" : null,
+        "effectiveAssignments" : [ ],
         "postalAddress" : "",
         "userName" : "rowley",
         "stateProvince" : ""

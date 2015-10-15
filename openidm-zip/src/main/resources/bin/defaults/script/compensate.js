@@ -79,11 +79,11 @@
  *     "_id": "efb53d24-599d-4d43-9e56-12f2e13dc91c",
  *     "description": "Created By XML1",
  *     "accountStatus": "active",
- *     "roles": {},
- *     "effectiveAssignments": {},
+ *     "roles": [],
+ *     "effectiveAssignments": [],
  *     "userName": "DDOE1",
  *     "givenName": "Darth",
- *     "effectiveRoles": {}
+ *     "effectiveRoles": []
  * }
  *
  * resourceName: an object representing the resource name URI full path

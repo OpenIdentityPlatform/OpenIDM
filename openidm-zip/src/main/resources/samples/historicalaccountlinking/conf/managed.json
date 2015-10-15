@@ -67,54 +67,138 @@
                     "authzRoles"
                 ],
                 "properties" : {
+                    "_id" : {
+                        "type" : "string",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "userEditable" : false,
+                        "policies" : [
+                            {
+                                "policyId" : "cannot-contain-characters",
+                                "params" : {
+                                    "forbiddenChars" : ["/"]
+                                }
+                            }
+                        ]
+                    },
+                    "password" : {
+                        "type" : "string",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "minLength" : 8,
+                        "userEditable" : true,
+                        "policies" : [
+                            {
+                                "policyId" : "at-least-X-capitals",
+                                "params" : {
+                                    "numCaps" : 1
+                                }
+                            },
+                            {
+                                "policyId" : "at-least-X-numbers",
+                                "params" : {
+                                    "numNums" : 1
+                                }
+                            },
+                            {
+                                "policyId" : "cannot-contain-others",
+                                "params" : {
+                                    "disallowedFields" : [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ]
+                                }
+                            },
+                            {
+                                "policyId" : "re-auth-required",
+                                "params" : {
+                                    "exceptRoles" : [
+                                        "system",
+                                        "openidm-admin",
+                                        "openidm-reg",
+                                        "openidm-cert"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "kbaInfo" : {
+                        "type" : "array",
+                        "userEditable" : true,
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "answer" : {
+                                    "type" : "string"
+                                },
+                                "customQuestion" : {
+                                    "type" : "string"
+                                },
+                                "questionId" : {
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    },
                     "mail" : {
                         "title" : "Email Address",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true,
+                        "pattern" : ".+@.+"
                     },
                     "sn" : {
                         "title" : "Last Name",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true
                     },
                     "address2" : {
                         "type" : "string",
                         "title" : "Address 2",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "givenName" : {
                         "title" : "First Name",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true
                     },
                     "city" : {
                         "type" : "string",
                         "title" : "City",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "country" : {
                         "type" : "string",
                         "title" : "Country",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "postalCode" : {
                         "type" : "string",
                         "title" : "Postal Code",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "accountStatus" : {
                         "title" : "Status",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : false
                     },
                     "roles" : {
                         "description" : "",
                         "title" : "Managed Roles",
                         "viewable" : true,
+                        "userEditable" : false,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
@@ -132,8 +216,8 @@
                                 "path" : "managed/role",
                                 "query" : {
                                     "queryFilter" : "true",
-                                    "fields" : ["properties/name"],
-                                    "sortKeys" : ["properties/name"]
+                                    "fields" : ["name"],
+                                    "sortKeys" : ["name"]
                                 }
                             }
                         }
@@ -143,14 +227,34 @@
                         "title" : "OpenIDM Roles",
                         "viewable" : true,
                         "type" : "array",
+                        "userEditable" : false,
                         "items" : {
-                            "type" : "string",
+                            "type" : "relationship",
+                            "returnByDefault" : false,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
+                                    }
+                                }
+                            },
                             "resourceCollection" : {
                                 "path" : "repo/internal/role",
                                 "query" : {
                                     "queryFilter" : "true",
-                                    "fields" : [ "_id", "description"],
-                                    "sortKeys" : [ "_id" ]
+                                    "fields" : [
+                                        "_id",
+                                        "description"
+                                    ],
+                                    "sortKeys" : [
+                                        "_id"
+                                    ]
                                 }
                             }
                         }
@@ -160,7 +264,7 @@
                         "title" : "Effective Roles",
                         "viewable" : false,
                         "items" : {
-                            "type" : "string",
+                            "type" : "object",
                             "returnByDefault" : true,
                             "isVirtual" : true
                         }
@@ -170,7 +274,7 @@
                         "title" : "Effective Assignments",
                         "viewable" : false,
                         "items" : {
-                            "type" : "string",
+                            "type" : "object",
                             "returnByDefault" : true,
                             "isVirtual" : true
                         }
@@ -178,23 +282,43 @@
                     "telephoneNumber" : {
                         "type" : "string",
                         "title" : "Mobile Phone",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true,
+                        "pattern" : "^\\+?([0-9\\- \\(\\)])*$"
                     },
                     "stateProvince" : {
                         "type" : "string",
                         "title" : "State/Province",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "postalAddress" : {
                         "type" : "string",
                         "title" : "Address 1",
-                        "viewable" : true
+                        "viewable" : true,
+                        "userEditable" : true
                     },
                     "userName" : {
                         "title" : "Username",
                         "viewable" : true,
                         "type" : "string",
-                        "searchable" : true
+                        "searchable" : true,
+                        "userEditable" : true,
+                        "minLength" : 1,
+                        "policies" : [
+                            {
+                                "policyId" : "unique"
+                            },
+                            {
+                                "policyId" : "no-internal-user-conflict"
+                            },
+                            {
+                                "policyId" : "cannot-contain-characters",
+                                "params" : {
+                                    "forbiddenChars" : ["/"]
+                                }
+                            }
+                        ]
                     },
                     "manager" : {
                         "type" : "relationship",
@@ -226,7 +350,8 @@
                                     "userName"
                                 ]
                             }
-                        }
+                        },
+                        "userEditable" : false
                     },
                     "historicalAccounts" : {
                         "description" : "Historical array of accounts",
@@ -287,36 +412,19 @@
                         "searchable" : false,
                         "type" : "string"
                     },
-                    "properties" : {
-                        "description" : "",
-                        "title" : "Properties",
+                    "name" : {
+                        "description" : "The role name, used for display purposes.",
+                        "title" : "Name",
                         "viewable" : true,
-                        "searchable" : false,
-                        "type" : "object",
-                        "properties" : {
-                            "name" : {
-                                "description" : "The role name, used for display purposes.",
-                                "title" : "Name",
-                                "viewable" : true,
-                                "searchable" : true,
-                                "type" : "string"
-                            },
-                            "description" : {
-                                "description" : "",
-                                "title" : "Description",
-                                "viewable" : true,
-                                "searchable" : true,
-                                "type" : "string"
-                            }
-                        },
-                        "required" : [
-                            "name",
-                            "description"
-                        ],
-                        "order" : [
-                            "name",
-                            "description"
-                        ]
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "description" : {
+                        "description" : "The role description, used for display purposes.",
+                        "title" : "Description",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
                     },
                     "members" : {
                         "description" : "",
@@ -356,20 +464,154 @@
                     },
                     "assignments" : {
                         "description" : "",
-                        "title" : "Assignments",
+                        "title" : "Managed Assignments",
                         "viewable" : true,
-                        "searchable" : false,
-                        "type" : "string"
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "returnByDefault" : true,
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : {
+                                "path" : "managed/assignment",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : ["name"],
+                                    "sortKeys" : ["name"]
+                                }
+                            }
+                        }
                     }
                 },
                 "required" : [
-                    "_id",
-                    "properties"
+                    "name",
+                    "description"
                 ],
                 "order" : [
                     "_id",
-                    "properties",
+                    "name",
+                    "description",
                     "assignments"
+                ]
+            }
+        },
+        {
+            "name" : "assignment",
+            "schema" : {
+                "$schema" : "http://forgerock.org/json-schema#",
+                "type" : "object",
+                "title" : "Assignment",
+                "description" : "A role assignment",
+                "properties" : {
+                    "_id" : {
+                        "description" : "The assignment ID",
+                        "title" : "Name",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "type" : "string"
+                    },
+                    "name" : {
+                        "description" : "The assignment name, used for display purposes.",
+                        "title" : "Name",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "mapping" : {
+                        "description" : "The name of the mapping this assignment applies to",
+                        "title" : "Mapping",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "description" : {
+                        "description" : "The assignment description, used for display purposes.",
+                        "title" : "Description",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "attributes" : {
+                        "description" : "The attributes operated on by this assignment.",
+                        "title" : "Assignment Attributes",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "assignmentOperation" : {
+                                    "type" : "string"
+                                },
+                                "unassignmentOperation" : {
+                                    "type" : "string"
+                                },
+                                "name" : {
+                                    "type" : "string"
+                                },
+                                "value" : {
+                                    "type" : "string"
+                                }
+                            }
+                        }
+                    },
+                    "linkQualifiers" : {
+                        "description" : "Conditional link qualifiers to restrict this assignment to.",
+                        "title" : "Link Qualifiers",
+                        "viewable" : true,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "string"
+                        }
+                    },
+                    "roles" : {
+                        "description" : "",
+                        "title" : "Managed Roles",
+                        "viewable" : true,
+                        "userEditable" : false,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship": true,
+                            "reversePropertyName": "assignments",
+                            "returnByDefault" : false,
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : {
+                                "path" : "managed/role",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : ["name"],
+                                    "sortKeys" : ["name"]
+                                }
+                            }
+                        }
+                    }
+                },
+                "required" : [
+                    "name",
+                    "description",
+                    "mapping"
+                ],
+                "order" : [
+                    "_id",
+                    "name",
+                    "description",
+                    "attributes",
+                    "linkQualifiers"
                 ]
             }
         }

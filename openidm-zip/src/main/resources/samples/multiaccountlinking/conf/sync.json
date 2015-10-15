@@ -35,11 +35,8 @@
       "validSource" : {
         "type" : "text/javascript",
         "globals" : { },
-        "source" : "var res = false;\nvar i=0;\n\nwhile (!res && i < source.effectiveRoles.length) {\n    var roleId = source.effectiveRoles[i];\n    if (roleId != null && roleId.indexOf(\"/\") != -1) {\n        var roleInfo = openidm.read(roleId);\n        res = (((roleInfo.properties.name === 'Agent')\n                &&(linkQualifier ==='agent'))\n              || ((roleInfo.properties.name === 'Insured')\n                &&(linkQualifier ==='insured')));\n    }\n    i++;\n}\n\nres"
+        "source" : "var res = false;\nvar i=0;\n\nwhile (!res && i < source.effectiveRoles.length) {\n    var roleId = source.effectiveRoles[i]._ref;\n    if (roleId != null && roleId.indexOf(\"/\") != -1) {\n        var roleInfo = openidm.read(roleId);\n        res = (((roleInfo.name === 'Agent')\n                &&(linkQualifier ==='agent'))\n              || ((roleInfo.name === 'Insured')\n                &&(linkQualifier ==='insured')));\n    }\n    i++;\n}\n\nres"
       },
-      "assignmentsToMap" : [
-        "ldap"
-      ],
       "properties" : [
         {
           "source" : "givenName",

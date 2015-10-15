@@ -70,11 +70,11 @@
                 },
                 {
                     "source" : "roles",
-                    "transform": {
-                        "type": "text/javascript",
-                        "source": "source.split(',')"
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "var _ = require('lib/lodash'); _.map(source.split(','), function(role) { return {'_ref': 'repo/internal/role/' + role} });"
                     },
-                    "target" : "roles"
+                    "target" : "authzRoles"
                 }
             ],
             "policies" : [

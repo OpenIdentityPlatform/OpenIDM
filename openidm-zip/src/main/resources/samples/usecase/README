@@ -327,17 +327,93 @@ Usecase5 - Certification workflows
     $ cd /path/to/openidm
     $ ./startup.sh -p samples/usecase/usecase5
 
-    2. Add the following four roles to OpenIDM by running these curl commands:
+    2. Add the following four assignments and four roles to OpenIDM by running these curl commands:
+    
         $ curl \
         --header "X-OpenIDM-Username: openidm-admin" \
         --header "X-OpenIDM-Password: openidm-admin" \
         --header "Content-Type: application/json" \
         --header "If-None-Match: *" \
         --request PUT \
-        --data '{"properties":{"description":"Role for Human Resources department"},
-           "assignments":{"ad1":{"attributes":[{"value":
-           ["CN=cisco_vpn,DC=example,DC=com"],
-           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Human Resources"}' \
+        --data '{
+          "name":"human-resources-assignment",
+          "description":"Assignment for Human Resources department",
+          "attributes":[ { 
+            "name": "memberOf",
+            "value": ["CN=cisco_vpn,DC=example,DC=com"],
+            "assignmentOperation": "mergeWithTarget",
+            "unassignmentOperation": "removeFromTarget"
+          } ] 
+        }' \
+        "http://localhost:8080/openidm/managed/assignment/human-resources-assignment"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{
+          "name":"production-planning-assignment",
+          "description":"Assignment for Production Planning department"},
+          "attributes":[ {
+            "name": "memberOf",
+            "value": ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com","CN=radius_dialin,DC=example,DC=com"],
+            "assignmentOperation": "mergeWithTarget",
+            "unassignmentOperation": "removeFromTarget"
+          } ] 
+        }' \
+        "http://localhost:8080/openidm/managed/assignment/production-planning-assignment"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{
+          "name":"sales-distribution",
+          "description":"Assignment for Sales and Distribution department"},
+          "attributes":[ { 
+            "name": "memberOf",
+            "value": ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com"],
+            "assignmentOperation": "mergeWithTarget",
+            "unassignmentOperation": "removeFromTarget"
+          } ] 
+        }' \
+        "http://localhost:8080/openidm/managed/assignment/sales-distribution-assignment"
+
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{
+          "name":"treasury-payments",
+          "description":"Assignment for for Treasury and Payments department"},
+          "attributes":[ { 
+            "name": "memberOf",
+            "value": ["CN=intranet,DC=example,DC=com"],
+            "assignmentOperation": "mergeWithTarget",
+            "unassignmentOperation": "removeFromTarget"
+          } ] 
+        }' \
+        "http://localhost:8080/openidm/managed/assignment/treasury-payments-assignment"
+    
+        $ curl \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-Type: application/json" \
+        --header "If-None-Match: *" \
+        --request PUT \
+        --data '{
+          "name": "Human Resources",
+          "description":"Role for Human Resources department",
+          "assignments":[ {
+            "_ref" : "managed/assignment/human-resources-assignment"
+          } ]
+        }' \
         "http://localhost:8080/openidm/managed/role/human-resources"
 
         $ curl \
@@ -346,10 +422,13 @@ Usecase5 - Certification workflows
         --header "Content-Type: application/json" \
         --header "If-None-Match: *" \
         --request PUT \
-        --data '{"properties":{"description":"Role for Production Planning department"},
-           "assignments":{"ad1":{"attributes":[{"value":
-           ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com","CN=radius_dialin,DC=example,DC=com"],
-           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Production Planning"}' \
+        --data '{
+          "name": "Production Planning",
+          "description":"Role for Production Planning department",
+          "assignments":[ {
+            "_ref" : "managed/assignment/production-planning-assignment"
+          } ]
+        }' \
         "http://localhost:8080/openidm/managed/role/production-planning"
 
         $ curl \
@@ -358,10 +437,13 @@ Usecase5 - Certification workflows
         --header "Content-Type: application/json" \
         --header "If-None-Match: *" \
         --request PUT \
-        --data '{"properties":{"description":"Role for Sales and Distribution department"},
-           "assignments":{"ad1":{"attributes":[{"value":
-           ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com"],
-           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Sales and Distribution"}' \
+        --data '{
+          "name": "Sales and Distribution",
+          "description":"Role for Sales and Distribution department",
+          "assignments":[ {
+            "_ref" : "managed/assignment/sales-distribution-assignment"
+          } ]
+        }' \
         "http://localhost:8080/openidm/managed/role/sales-distribution"
 
         $ curl \
@@ -370,10 +452,13 @@ Usecase5 - Certification workflows
         --header "Content-Type: application/json" \
         --header "If-None-Match: *" \
         --request PUT \
-        --data '{"properties":{"description":"Role for Treasury and Payments department"},
-           "assignments":{"ad1":{"attributes":[{"value":
-           ["CN=intranet,DC=example,DC=com"],
-           "assignmentOperation": "mergeWithTarget","unassignmentOperation": "removeFromTarget","name": "memberOf"}]}},"name": "Treasury and Payments"}' \
+        --data '{
+          "name": "Treasury and Payments",
+          "description":"Role for Treasury and Payments department",
+          "assignments":[ {
+            "_ref" : "managed/assignment/treasury-payments-assignment"
+          } ]
+        }' \
         "http://localhost:8080/openidm/managed/role/treasury-payments"
 
     3. The scheduled user certification can be triggered by enabling the scheduled task in the 
