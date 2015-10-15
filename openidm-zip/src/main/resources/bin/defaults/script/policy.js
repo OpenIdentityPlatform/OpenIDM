@@ -449,7 +449,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.reauthRequired = function(fullObject, value, params, propName) {
-        if (checkExceptRoles(params.exceptRoles)) {
+        if (checkExceptRoles(params.exceptRoles) || context.selfservice !== undefined) {
             return [];
         }
 

@@ -18,16 +18,16 @@
                 <xsd:element name="email" type="xsd:string" />
                 <xsd:element name="startDate" type="xsd:string" minOccurs="0"/> <!--YYYY-MM-DD-->
                 <xsd:element name="endDate" type="xsd:string" minOccurs="0"/> <!--YYYY-MM-DD-->
-                <xsd:element name="__PASSWORD__" type="xsd:string">
-        <xsd:annotation>
-            <xsd:documentation>
-                __PASSWORD__ attribute
-            </xsd:documentation>
-            <xsd:appinfo>
-                <tns:javaclass>org.identityconnectors.common.security.GuardedString</tns:javaclass>
-            </xsd:appinfo>
-        </xsd:annotation>
-    </xsd:element>
+                <xsd:element name="__PASSWORD__" type="xsd:string" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:documentation>
+                            __PASSWORD__ attribute
+                        </xsd:documentation>
+                        <xsd:appinfo>
+                            <tns:javaclass>org.identityconnectors.common.security.GuardedString</tns:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
                 <xsd:element name="roles" type="xsd:string" minOccurs="0"/>
                 <xsd:element ref="icf:__DESCRIPTION__" minOccurs="0"/>
             </xsd:sequence>

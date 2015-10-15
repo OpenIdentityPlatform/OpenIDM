@@ -67,13 +67,13 @@ var httpAccessConfig =
         },
         {
            "pattern"    : "config/ui/configuration",
-           "roles"      : "openidm-reg,openidm-authorized",
+           "roles"      : "*",
            "methods"    : "read",
            "actions"    : "*"
         },
         {
            "pattern"    : "config/selfservice/kbaConfig",
-           "roles"      : "openidm-reg,openidm-authorized",
+           "roles"      : "*",
            "methods"    : "read",
            "actions"    : "*",
            "customAuthz": "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('passwordReset')"
@@ -82,7 +82,7 @@ var httpAccessConfig =
         // externally-visisble Self-Service endpoints
         {
            "pattern"    : "selfservice/registration",
-           "roles"      : "openidm-reg,openidm-authorized",
+           "roles"      : "*",
            "methods"    : "read,action",
            "actions"    : "submitRequirements",
            "customAuthz" : "checkIfUIIsEnabled('selfRegistration')"
@@ -90,7 +90,7 @@ var httpAccessConfig =
 
         {
            "pattern"    : "selfservice/reset",
-           "roles"      : "openidm-reg,openidm-authorized",
+           "roles"      : "*",
            "methods"    : "read,action",
            "actions"    : "submitRequirements",
            "customAuthz" : "checkIfUIIsEnabled('passwordReset')"
@@ -106,28 +106,28 @@ var httpAccessConfig =
         },
         {
             "pattern"   : "managed/user",
-            "roles"     : "openidm-reg",
+            "roles"     : "*",
             "methods"   : "query",
             "actions"   : "*",
             "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest()"
         },
         {
             "pattern"   : "managed/user/*",
-            "roles"     : "openidm-reg",
+            "roles"     : "*",
             "methods"   : "read",
             "actions"   : "*",
             "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest()"
         },
         {
             "pattern"   : "managed/user/*",
-            "roles"     : "openidm-reg",
+            "roles"     : "*",
             "methods"   : "patch",
             "actions"   : "*",
             "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user')"
         },
         {
             "pattern"   : "external/email",
-            "roles"     : "openidm-reg",
+            "roles"     : "*",
             "methods"   : "action",
             "actions"   : "send",
             "customAuthz" : "(checkIfUIIsEnabled('passwordReset') || checkIfUIIsEnabled('selfRegistration')) && isSelfServiceRequest()"
