@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -52,7 +52,6 @@ define("org/forgerock/openidm/ui/common/workflow/WorkflowDelegate", [
     };
 
     obj.completeTask = function(id, params, successCallback, errorCallback) {
-        console.debug("complete task");
         this.serviceCall({url: taskManagementUrl + "/" + id + "?_action=complete", type: "POST", success: successCallback, error: errorCallback, data: JSON.stringify(params)});
     };
 
@@ -60,23 +59,21 @@ define("org/forgerock/openidm/ui/common/workflow/WorkflowDelegate", [
         this.serviceCall({url: processDefinitionUrl + "/" + id, type: "GET", success: successCallback, error: errorCallback});
     };
 
-    obj.getAllProcessDefinitions = function(userId, successCallback, errorCallback) {
-        console.info("getting all process definitions");
-
+    obj.getAllProcessDefinitions = function(successCallback, errorCallback) {
         obj.serviceCall({
-            url: processDefinitionsEndpointUrl + "?_queryId=getprocessesforuser&userId=" + userId,
+            url: processDefinitionsEndpointUrl,
             type: "GET",
             success: function(data) {
                 if(successCallback) {
-                    successCallback(data.result);
+                    successCallback(data.processes);
                 }
             },
             error: errorCallback
         });
     };
 
-    obj.getAllUniqueProcessDefinitions = function(userId, successCallback, errorCallback) {
-        obj.getAllProcessDefinitions(userId, function(processDefinitions) {
+    obj.getAllUniqueProcessDefinitions = function(successCallback, errorCallback) {
+        obj.getAllProcessDefinitions(function(processDefinitions) {
 
             var result = {}, ret = [], i, processDefinition, splittedProcessDefinition, processName, currentProcessVersion, newProcesVersion, r;
             for (i=0; i < processDefinitions.length; i++) {

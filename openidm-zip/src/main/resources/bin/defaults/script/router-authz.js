@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2012 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -170,17 +170,13 @@ function canUpdateTask() {
 }
 
 function isProcessOnUsersList(processFilter) {
-    var processesForUserQueryParams = {
-            "_queryId": "query-processes-for-user",
-            "userId": context.security.authorization.id
-        },
-        processesForUser = openidm.query("endpoint/getprocessesforuser", processesForUserQueryParams),
+    var processesForUser = openidm.read("endpoint/getprocessesforuser").processes,
         isProcessOneOfUserProcesses = false,
         processForUser,
         i;
 
-    for (i = 0; i < processesForUser.result.length; i++) {
-        processForUser = processesForUser.result[i];
+    for (i = 0; i < processesForUser.length; i++) {
+        processForUser = processesForUser[i];
         if (processFilter(processForUser)) {
             isProcessOneOfUserProcesses = true;
         }

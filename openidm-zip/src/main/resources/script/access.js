@@ -1,7 +1,7 @@
 /**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -238,16 +238,14 @@ var httpAccessConfig =
         {
             "pattern"   : "endpoint/getprocessesforuser",
             "roles"     : "openidm-authorized",
-            "methods"   : "query",
-            "actions"   : "*",
-            "customAuthz" : "request.additionalParameters.userId === context.security.authorization.id"
+            "methods"   : "read",
+            "actions"   : "*"
         },
         {
             "pattern"   : "endpoint/gettasksview",
             "roles"     : "openidm-authorized",
             "methods"   : "query",
-            "actions"   : "*",
-            "customAuthz" : "request.additionalParameters.userId === context.security.authorization.id"
+            "actions"   : "*"
         },
         {
             "pattern"   : "workflow/taskinstance/*",
