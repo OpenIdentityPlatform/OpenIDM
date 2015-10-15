@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright (c) 2011-2014 ForgeRock AS. All rights reserved.
+  Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
@@ -56,7 +56,7 @@
                 <exclude>**/usecase/workflow/manualMatch*</exclude>
                 <exclude>**/usecase/workflow/newUserCreate.bpmn20.xml</exclude>
                 <exclude>**/usecase/workflow/nUC*.xhtml</exclude>
-                <exclude>**/workflow/workflow/chess*</exclude>
+                <exclude>**/workflow/workflow/*</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -462,6 +462,13 @@
                 <exclude>ui-configuration.json</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/workflow</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/misc</directory>
+            <includes>
+                <include>external.email.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/workflow/conf</outputDirectory>
         </fileSet>
         <!-- Setup audit sample  -->
         <fileSet>

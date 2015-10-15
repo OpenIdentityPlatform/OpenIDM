@@ -703,6 +703,8 @@
 
                                 <zip basedir="${basedir}/src/main/resources/samples/workflow/workflow" destfile="${project.build.directory}/bar-files/samples/workflow/workflow/chess.bar" includes="chess*" />
 
+                                <zip basedir="${basedir}/src/main/resources/samples/workflow/workflow" destfile="${project.build.directory}/bar-files/samples/workflow/workflow/contractorOnboarding.bar" includes="contractor*" />
+
                             </tasks>
                         </configuration>
                         <goals>

@@ -1,9 +1,32 @@
 {
     "mappings" : [
         {
+            "name" : "systemRolesFileRole_managedRole",
+            "source" : "system/rolesFile/role",
+            "target" : "managed/role",
+            "properties" : [
+                {
+                    "source" : "_id",
+                    "target" : "_id"
+                },
+                {
+                    "source" : "_id",
+                    "target" : "name"
+                },
+                {
+                    "source" : "name",
+                    "target" : "description"
+                }
+            ]
+        },
+        {
             "name" : "systemXmlfileAccounts_managedUser",
             "source" : "system/xmlfile/account",
             "target" : "managed/user",
+            "validSource" : {
+                "type" : "text/javascript",
+                "source" : "!source.manager || openidm.query('managed/user', {'_queryFilter': '/userName eq \"'+source.manager+'\"'}).result.length === 1;"
+            },
             "correlationQuery" : {
                 "type" : "text/javascript",
                 "source" : "var query = {'_queryId' : 'for-userName', 'uid' : source.name};query;"
@@ -27,6 +50,11 @@
                 },
                 {
                     "source" : "manager",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "({'_ref': 'managed/user/' + openidm.query('managed/user', {'_queryFilter': '/userName eq \"'+source+'\"'}).result[0]._id})"
+                    },
+                    "condition" : "/object/manager pr",
                     "target" : "manager"
                 },
                 {
@@ -59,11 +87,11 @@
                 },
                 {
                     "source" : "roles",
-                    "transform": {
-                        "type": "text/javascript",
-                        "source": "source.split(',')"
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.split(',').map(function (r) { return {'_ref' : (r.indexOf('openidm-') === 0 ? 'repo/internal/role/' : 'managed/role/') + r }; })"
                     },
-                    "target" : "roles"
+                    "target" : "authzRoles"
                 },
                 {
                     "source" : "description",
@@ -136,6 +164,11 @@
                 },
                 {
                     "source" : "manager",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "openidm.read(source._ref).userName"
+                    },
+                    "condition" : "/object/manager pr",
                     "target" : "manager",
                     "default" : "No Manager"
                 },
@@ -180,10 +213,10 @@
                     "target" : "password"
                 },
                 {
-                    "source" : "roles",
+                    "source" : "authzRoles",
                     "transform" : {
                         "type" : "text/javascript",
-                        "source" : "source.join(',')"
+                        "source" : "source.map(function (r) { return r._ref.split('/').pop(); } ).join(',')"
                     },
                     "target" : "roles"
                 },

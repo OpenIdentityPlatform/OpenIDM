@@ -454,7 +454,7 @@ function allow() {
     }
 
     // We only need to block non-AJAX requests when the action is not "read"
-    if (request.method !== "read" && !isAJAXRequest()) {
+    if (context.http !== undefined && request.method !== "read" && !isAJAXRequest()) {
         return false;
     }
 

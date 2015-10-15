@@ -1,23 +1,105 @@
+/**
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ *
+ * Copyright (c) 2015 ForgeRock AS. All rights reserved.
+ *
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
+ *
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
+ */
+
 Workflow Sample
 ===============
 
-This sample demonstrates a typical use case of a workflow for provisioning.  After starting this sample, the first
-step is to load users from the XML file into your managed/user store, like so:
+This sample demonstrates a typical use case of a workflow for provisioning new users and the self-service UI to finalize
+their account. It is designed to simulate an employee requesting an outside contractor be granted access to the system
+(in this case, the system is OpenIDM's repository and a "remote" datasource represented by an xml file).
 
-curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemXmlfileAccounts_managedUser"
+Here is the walk-through to demonstrate the sample:
 
-This will create two users: user1 and manager1.  Both have the same password, "Welcome1".
+After starting this sample, open the OpenIDM Admin UI in your browser: https://localhost:8443/admin
 
-This sample also adds two new business roles to the configuration : "manager" and "employee".  User1 is an employee and manager1 is 
-a manager.
+Login with the default credentials : openidm-admin / openidm-admin
+ - You will be prompted to change your password upon login. It is a good idea to do so, but not required.
 
-Employees have access to initiate a "Contract Onboarding" process.  This is a request to add a contractor to the system, with an 
-option to include them in the xml file.  Once the form is completed, the request is sent for manager approval.  Any user with the 
-"manager" role can claim this task.  Manager1 is our only manager, so login with that user and claim the task.  You may then
-either approve or deny the request.  If approved, the user will be created in the managed/user store.  If it was requested that
-the user be provisioned into the XML file, then that will also be done.  You can now login as the new user and see the notification
-display informing the user of the dates they have been granted.  Also, user1 will be notified of the result of the manager's decision.
+There are several actions to take in the Admin UI:
+1) Configure the connection to your email server. This is used to send the password-reset email at the end of the exercise.
+   - Navigate to "Configure->System Preferences->Email"
+   - Provide connection information for your preferred email host. GMail is preconfigured by default
+       (credentials must still be supplied to use GMail)
 
+2) Run reconciliation for roles and users
+   - Navigate to Configure->Mappings
+   - Select the first mapping, "systemRolesFileRole_managedRole"
+   - Click "Reconcile Now"; This creates two new managed/role entries
+   - Click "Back to Mappings" to return to the mapping list
+   - Select the second mapping, "systemXmlfileAccounts_managedUser"
+   - Click "Reconcile Now"; this will create the top-level managers (those without any "manager" record of their own)
+   - Click "Reconcile Now" again; this will create the employees of the managers previously created.
 
-This workflow uses embedded templates to build a more sophisticated input form.  This is how the form is being validated with the
-server-side policy rules.
+3) View the newly-created data
+   - Navigate to Manage->Role. Note that there should be two records created - "employee" and "manager"
+   - Navigate to Manage->User. Note that there should be two records created - "manager1" and "user1"
+   - Click on "user1". Note that the "Manager" field shows "manager1" for this user
+   - Click on the "OpenIDM Roles" tab. Note that user1 has two roles - "managed/role/employee" and "openidm-authorized"
+   - Click on "Back to User List"
+   - Click on "manager1". Note that the "Manager" field is empty
+   - Click on the "OpenIDM Roles" tab. Note that manager1 has two roles - "managed/role/manager" and "openidm-authorized"
+
+4) Note the workflows available to initiate
+   - Navigate to Manage->Processes->Definitions
+   - Select the "Contractor onboarding process" definition
+   - See the sequence diagram for this workflow
+
+5) Log out of Admin UI
+   - Click upper-right corner silhouette, choose "Log Out"
+
+Now the system has been prepped to walk through the workflow exercise.
+
+Open the Self-Service UI in your browser - https://localhost:8443/
+    Login as user1 / Welcome1
+
+6) Initiate workflow process
+   - Click the "Details" link for the "Contractor onboarding process" option under "Processes"
+   - Fill in the form for the sample user you will be creating. Be sure to use an email address which you have access to
+   - Note that user1 does not provide the password for this user. This is to ensure that only the actual contractor can login with this account
+   - Click "Start" to initiate the process
+
+Log out of the Self-Service UI as user1
+Log in again, now using manager1 / Welcome1
+
+7) Approve workflow task
+   - Under "My Group's Tasks", find the "Approve Contractor" task and choose "Assign to Me"
+   - "Approve Contractor" is now listed under "My Tasks"; click the "Details" link for it
+   - Notice the same form content that was provided by user1, along with "Decision": "Accept".
+   - Click "Complete" to finish the task.
+
+Log out of the Self-Service UI.
+
+Open samples/workflow/data/xmlConnectorData.xml and note the addition of the new contractor entry.
+Note that there is no value for <icf:__PASSWORD__/>. Note that user1 is the contractor's manager.
+
+Check the inbox for the email address provided in step 6; there should be a "Reset password email" sent to it.
+Open the "Reset password email" and click the "Email verification link". This should take you back to the
+Self-Service UI, with the option to "Reset Your Password".
+
+8) Reset your password and login
+   - Enter a new password and confirmation password, submit the form.
+   - Return to the login page, and login with the username provided in step 6 and the password just entered.
+   - Notice the "Welcome" message available under "Notifications".
+
+Open samples/workflow/data/xmlConnectorData.xml and note that the password for the contractor is now saved.
