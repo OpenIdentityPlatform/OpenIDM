@@ -59,7 +59,7 @@
                 },
                 {
                     "source" : "title",
-                    "target" : "roles",
+                    "target" : "authzRoles",
                     "transform" : {
                         "type" : "text/javascript",
                         "file" : "script/defineRoles.js"

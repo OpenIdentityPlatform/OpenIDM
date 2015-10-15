@@ -388,14 +388,14 @@
                         "type" : "string"
                     },
                     "name" : {
-                        "description" : "The assignment name, used for display purposes.",
+                        "description" : "The role name, used for display purposes.",
                         "title" : "Name",
                         "viewable" : true,
                         "searchable" : true,
                         "type" : "string"
                     },
                     "description" : {
-                        "description" : "The assignment description, used for display purposes.",
+                        "description" : "The role description, used for display purposes.",
                         "title" : "Description",
                         "viewable" : true,
                         "searchable" : true,
@@ -502,6 +502,13 @@
                     "description" : {
                         "description" : "The assignment description, used for display purposes.",
                         "title" : "Description",
+                        "viewable" : true,
+                        "searchable" : true,
+                        "type" : "string"
+                    },
+                    "mapping" : {
+                        "description" : "The name of the mapping this assignment applies to",
+                        "title" : "Mapping",
                         "viewable" : true,
                         "searchable" : true,
                         "type" : "string"

@@ -103,7 +103,7 @@ Run The Sample In OpenIDM
           "accountStatus" : "active",
           "telephoneNumber" : "1-360-229-7105",
           "roles" : [ "openidm-authorized" ],
-          "effectiveAssignments" : { },
+          "effectiveAssignments" : [],
           "ldapGroups" : [ "cn=openidm2,ou=Groups,dc=example,dc=com" ],
           "postalAddress" : "",
           "stateProvince" : "",
