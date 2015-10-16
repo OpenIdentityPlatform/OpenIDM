@@ -507,41 +507,6 @@
             </includes>
             <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
         </fileSet>
-        <!-- Setup openam sample  -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>data/*.xsd</exclude>
-                <exclude>data/*.xml</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/openam</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/openam/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/sample2c</directory>
-            <includes>
-                <include>conf/sync.json</include>
-                <include>script/ldapBackCorrelationQuery.js</include>
-            </includes>
-            <outputDirectory>/openidm/samples/openam</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <outputDirectory>/openidm/samples/openam</outputDirectory>
-        </fileSet>
         <!-- Setup fullStack  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
@@ -1068,22 +1033,6 @@
             <includes>
                 <include>org.forgerock.openidm:openidm-ui-admin</include>
             </includes>
-        </dependencySet>
-        <dependencySet>
-            <unpack>true</unpack>
-            <fileMode>644</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/samples/openam/ui/openam</outputDirectory>
-            <includes>
-                <include>org.forgerock.openidm:openidm-ui-enduser</include>
-            </includes>
-            <unpackOptions>
-                <excludes>
-                    <!-- Conflicts between the core UI files and the ones specific to this sample UI -->
-                    <exclude>default/config/AppConfiguration.js</exclude>
-                    <exclude>default/main.js</exclude>
-                </excludes>
-            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
