@@ -17,8 +17,14 @@
 package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Requests.newQueryRequest;
+import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.json.resource.ResourcePath.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import java.util.ArrayList;
@@ -37,8 +43,13 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -59,7 +70,10 @@ import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.Promises;
+import org.forgerock.util.query.QueryFilter;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
@@ -85,7 +99,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     /** Actions supported by this service. */
     public enum SyncServiceAction {
-        notifyCreate, notifyUpdate, notifyDelete, recon, performAction
+        notifyCreate, notifyUpdate, notifyDelete, recon, performAction, getLinkedResources
     }
 
     /** Logger */
@@ -95,16 +109,18 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     public static final String ACTION_PARAM_RESOURCE_CONTAINER = "resourceContainer";
     /** The resource id action parameter. */
     public static final String ACTION_PARAM_RESOURCE_ID = "resourceId";
+    /** The resource name action parameter. */
+    public static final String ACTION_PARAM_RESOURCE_NAME = "resourceName";
 
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
     private volatile ArrayList<ObjectMapping> mappings = null;
 
     /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    protected IDMConnectionFactory connectionFactory;
 
     /** Binds the Connection Factory */
-    protected void bindConnectionFactory(ConnectionFactory connectionFactory) {
+    protected void bindConnectionFactory(IDMConnectionFactory connectionFactory) {
     	this.connectionFactory = connectionFactory;
     }
     
@@ -420,7 +436,9 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     ObjectMapping objectMapping = getMapping(_params.get("mapping").required().asString());
                     objectMapping.performAction(_params);
                     //result.put("status", performAction(_params));
-                    return newActionResponse(new JsonValue(new HashMap<String, Object>())).asPromise();
+                    return newActionResponse(json(object())).asPromise();
+                case getLinkedResources:
+                    return getLinkedResources(context, resourcePath(request.getAdditionalParameter(ACTION_PARAM_RESOURCE_NAME)));
                 default:
                     throw new BadRequestException("Action" + request.getAction() + " is not supported.");
             }
@@ -432,6 +450,128 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
         } finally {
             ObjectSetContext.pop();
         }
+    }
+
+    /**
+     * Provide a list of linked resources for the given resourceName.
+     * See openidm-zip/src/main/resources/bin/defaults/script/linkedView.js for the format.
+     *
+     * @param context the request context
+     * @param resourceName the full resource name
+     * @return an ActionResponse including, as JSON content, the list of linked resources and associated mapping details
+     * @throws ResourceException
+     */
+    private Promise<ActionResponse, ResourceException> getLinkedResources(
+            final Context context, ResourcePath resourceName) throws ResourceException {
+
+        // IMPORTANT - Use external connection as this is called externally and we want to read the linked
+        // resources with the same permissions / business-logic as if they were done externally as well.
+        final Connection connection = connectionFactory.getExternalConnection();
+        final String resourceContainer = resourceName.parent().toString();
+        final String resourceId = resourceName.leaf();
+
+        final Map<String, ObjectMapping> relatedMappings = new HashMap<>();
+        for (ObjectMapping mapping : mappings) {
+            // we only care about those mappings which aren't using another mapping's links entry
+            // we also only care about those which involve the given component in some way
+            if ((mapping.getLinkTypeName() == null
+                    || mapping.getLinkTypeName().equals(mapping.getName()))
+                    && (mapping.getTargetObjectSet().equals(resourceContainer)
+                    || mapping.getSourceObjectSet().equals(resourceContainer))) {
+                relatedMappings.put(mapping.getName(), mapping);
+            }
+        }
+
+        // all links found referring to this resourceId
+        final JsonValue allLinks = json(array());
+        connection.query(context,
+                newQueryRequest("repo/link").setQueryFilter(
+                        QueryFilter.or(
+                                QueryFilter.equalTo(new JsonPointer("/firstId"), resourceId),
+                                QueryFilter.equalTo(new JsonPointer("/secondId"), resourceId))),
+                new QueryResourceHandler() {
+                    @Override
+                    public boolean handleResource(ResourceResponse resourceResponse) {
+                        allLinks.add(resourceResponse.getContent().getObject());
+                        return true;
+                    }
+                });
+
+        final List<ResourceResponse> linkedResources = Promises.when(
+                // create a batch of Promises from the list of links
+                FluentIterable.from(allLinks)
+                        .filter(new Predicate<JsonValue>() {
+                            // Need to verify that these links we are processing are one of those we know relates to
+                            // the given resourceName. It's possible that the link queries above found results for id
+                            // values which happen to match the one provided, but are in fact unrelated to the given
+                            // resource. This filter guards against that possibility.
+                            @Override
+                            public boolean apply(JsonValue link) {
+                                return relatedMappings.containsKey(link.get("linkType").asString());
+                            }
+                        })
+                        .transform(new Function<JsonValue, Promise<ResourceResponse, ResourceException>>() {
+                            // For each of the found links, determine the full linked resourceName and
+                            // return some useful information about it by reading it on the router.
+                            @Override
+                            public Promise<ResourceResponse, ResourceException> apply(final JsonValue link) {
+                                final String linkType = link.get("linkType").asString();
+                                final String source = relatedMappings.get(linkType).getSourceObjectSet();
+                                final String target = relatedMappings.get(linkType).getTargetObjectSet();
+
+                                final ResourcePath linkedResourcePath = (source.equals(resourceContainer))
+                                        ? resourcePath(target).child(link.get("secondId").asString())
+                                        : resourcePath(source).child(link.get("firstId").asString());
+
+                                // Read the linked resource asynchronously so Promises can be executed in parallel.
+                                return connection.readAsync(context, newReadRequest(linkedResourcePath))
+                                        // transform the ResourceResponse into the format this endpoint desires
+                                        .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                                            @Override
+                                            public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse)
+                                                    throws ResourceException {
+                                                JsonValue linkedResource = resourceResponse.getContent();
+
+                                                return newResourceResponse(
+                                                        resourceResponse.getId(),
+                                                        resourceResponse.getRevision(),
+                                                        json(object(
+                                                                field("resourceName", linkedResourcePath.toString()),
+                                                                field("content", linkedResource.getObject()),
+                                                                field("linkQualifier", link.get("linkQualifier").asString()),
+                                                                field("linkType", linkType),
+                                                                field("mappings", FluentIterable.from(mappings)
+                                                                        .filter(new Predicate<ObjectMapping>() {
+                                                                            @Override
+                                                                            public boolean apply(ObjectMapping mapping) {
+                                                                                return mapping.getName().equals(linkType)
+                                                                                        || mapping.getLinkTypeName().equals(linkType);
+                                                                            }
+                                                                        })
+                                                                        .transform(new Function<ObjectMapping, Object>() {
+                                                                            @Override
+                                                                            public Object apply(ObjectMapping mapping) {
+                                                                                return object(
+                                                                                        field("name", mapping.getName()),
+                                                                                        // the type is how the linkedResourceName relates to the main
+                                                                                        // resourceName in the context of a particular mapping.
+                                                                                        field("type", mapping.isSourceObject(resourceContainer, resourceId)? "target" : "source"));
+                                                                            }
+                                                                        })
+                                                                        .toList()))))
+                                                        .asPromise();
+                                            }
+                                        });
+                            }
+                        })
+                        .toList())
+                .getOrThrowUninterruptibly(); // wait for promises
+
+        JsonValue response = json(array());
+        for (ResourceResponse linked : linkedResources) {
+            response.add(linked.getContent().getObject());
+        }
+        return newActionResponse(response).asPromise();
     }
 
     @Override

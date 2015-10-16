@@ -1,25 +1,17 @@
 /**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2014-2015 ForgeRock AS.
  */
 
 /*global exports, openidm, require */
@@ -64,93 +56,25 @@ exports.fetch = function (resourceName) {
                 return e;
             }
         },
-        syncConfig = openidm.read("config/sync") || {},
         currentResource = {},
-        resourceParts = resourceName.match(/(.*)\/(.*?)$/), // ["component/id", "component", "id"]
-
-        component = resourceParts[1],
-        id = resourceParts[2],
-
-        // uses the sync config to build a map of linkTypes to resource containers
-        resourceMap = _(syncConfig.mappings)
-                        .filter(function (m) {
-                            // we only care about those mappings which aren't using another mapping's links entry
-                            // we also only care about those which involve the given component in some way
-                            return  (m.links === undefined || m.links === m.name) &&
-                                    (m.target === component || m.source === component);
-                        })
-                        .map(function (m) {
-                            return [m.name, {
-                                "firstContainer": m.source,
-                                "secondContainer": m.target
-                            }];
-                        })
-                        .object()
-                        .value(),
-
-        // all links found referring to this id
-        allLinks = openidm.query("repo/link", {
-            "_queryFilter": 'firstId eq "'+id+'" or secondId eq "'+id+'"'
-        });
+        linkedResources = {};
 
         try {
-            // TODO-crest3: restore the below commented-out line when forgerock-script supports passing along crest3 contexts
-            // https://bugster.forgerock.org/jira/browse/OPENIDM-3857 filed to track this regression
-            //currentResource = openidm.read(resourceName, null, context.current);
+            // read the resource
             currentResource = openidm.read(resourceName);
         } catch (e) {
             currentResource["error"] = getException(e);
         }
 
+        try {
+            // read the linked resources
+            linkedResources = openidm.action("sync", "getLinkedResources", {}, { "resourceName" : resourceName });
+        } catch (e) {
+            currentResource["error"] = getException(e);
+        }
+
+        // augment the resource with the resources that link to the main object
         return _.extend(currentResource, {
-            "linkedTo": _(allLinks.result)
-
-                // Need to verify that these links we are processing are one of those we know relates to the given resourceName
-                // it's possible that the link queries above found results for id values which happen to match the one provided, but
-                // are in fact unrelated to the given resource. This filter guards against that possibility.
-                .filter(function (l) {
-                    return _.has(resourceMap, l.linkType);
-                })
-
-                // For each of the found links, determine the full linked resourceName and return some useful
-                // information about it.
-                .map(function (l) {
-                    var linkedResourceName,
-                        linkedResource = {};
-
-                    if (resourceMap[l.linkType].firstContainer === component) {
-                        linkedResourceName = resourceMap[l.linkType].secondContainer + '/' + l.secondId;
-                    } else {
-                        linkedResourceName = resourceMap[l.linkType].firstContainer + '/' + l.firstId;
-                    }
-
-                    try {
-                        linkedResource = openidm.read(linkedResourceName, null, context.current);
-                    } catch (e) {
-                        linkedResource["error"] = getException(e);
-                    }
-
-                    return {
-                        "resourceName": linkedResourceName,
-                        "content": linkedResource,
-                        "linkQualifier" : l.linkQualifier,
-                        "linkType": l.linkType,
-                        "mappings": _(syncConfig.mappings)
-                                    .filter(function (m) {
-                                        return m.name === l.linkType || m.links === l.linkType;
-                                    })
-                                    .map(function (m) {
-                                        return {
-                                            "name": m.name,
-                                            // the type is how the linkedResourceName relates to the main
-                                            // resourceName in the context of a particular mapping.
-                                            "type": (component === m.source) ? "target" : "source"
-                                        }
-                                    })
-                                    .value()
-                    };
-                })
-                .value()
-
-            });
+            "linkedTo": linkedResources
+        });
 };
