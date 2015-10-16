@@ -27,6 +27,7 @@ import org.forgerock.json.JsonValue;
 public class UpdateFileLogEntry {
     private String filePath;
     private String fileState;
+    private String actionTaken;
     private String backupFile;
     private String stockFile;
 
@@ -45,6 +46,15 @@ public class UpdateFileLogEntry {
 
     public UpdateFileLogEntry setFileState(String fileState) {
         this.fileState = fileState;
+        return this;
+    }
+
+    public String getActionTaken() {
+        return actionTaken;
+    }
+
+    public UpdateFileLogEntry setActionTaken(String actionTaken) {
+        this.actionTaken = actionTaken;
         return this;
     }
 
@@ -74,7 +84,8 @@ public class UpdateFileLogEntry {
     public JsonValue toJson() {
         JsonValue ret = json(object(
                 field("filePath", getFilePath()),
-                field("fileState", getFileState())
+                field("fileState", getFileState()),
+                field("actionTaken", getActionTaken())
         ));
         if (getBackupFile() != null) {
             ret.put("backupFile", getBackupFile());

@@ -571,6 +571,12 @@ public class UpdateManagerImpl implements UpdateManager {
         return lastUpdateId;
     }
 
+    private enum UpdateAction {
+        REPLACED,
+        PRESERVED,
+        APPLIED
+    }
+
     private class UpdateThread extends Thread {
         private final UpdateLogEntry updateEntry;
         private final Archive archive;
@@ -621,7 +627,8 @@ public class UpdateManagerImpl implements UpdateManager {
                                             tempDirectory.toString().length() + "/openidm/".length()));
                                     UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                                             .setFilePath(newPath.toString())
-                                            .setFileState(fileStateChecker.getCurrentFileState(newPath).name());
+                                            .setFileState(fileStateChecker.getCurrentFileState(newPath).name())
+                                            .setActionTaken(UpdateAction.REPLACED.toString());
                                     fileEntry.setBackupFile(backupPath.toString().substring(installDir.length() + 1));
                                     logUpdate(updateEntry.addFile(fileEntry.toJson()));
                                 } catch (Exception e) {
@@ -646,7 +653,8 @@ public class UpdateManagerImpl implements UpdateManager {
                             if (backupFile != null) {
                                 UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                                         .setFilePath(path.toString())
-                                        .setFileState(fileStateChecker.getCurrentFileState(path).name());
+                                        .setFileState(fileStateChecker.getCurrentFileState(path).name())
+                                        .setActionTaken(UpdateAction.REPLACED.toString());
                                 fileEntry.setBackupFile(backupFile.toString());
                                 logUpdate(updateEntry.addFile(fileEntry.toJson()));
                             }
@@ -666,6 +674,11 @@ public class UpdateManagerImpl implements UpdateManager {
                         // a patch file for a config in the repo
                         patchConfig(ContextUtil.createInternalContext(),
                                 "repo/config", json(FileUtil.readFile(path.toFile())));
+                        UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                                .setFilePath(path.toString())
+                                .setFileState(fileStateChecker.getCurrentFileState(path).name())
+                                .setActionTaken(UpdateAction.APPLIED.toString());
+                        logUpdate(updateEntry.addFile(fileEntry.toJson()));
                     } else {
                         // normal static file; update it
                         UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
@@ -674,11 +687,13 @@ public class UpdateManagerImpl implements UpdateManager {
 
                         if (!isReadOnly(path)) {
                             Path stockFile = staticFileUpdate.keep(path);
+                            fileEntry.setActionTaken(UpdateAction.PRESERVED.toString());
                             if (stockFile != null) {
                                 fileEntry.setStockFile(stockFile.toString());
                             }
                         } else {
                             Path backupFile = staticFileUpdate.replace(path);
+                            fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
                             if (backupFile != null) {
                                 fileEntry.setBackupFile(backupFile.toString());
                             }
