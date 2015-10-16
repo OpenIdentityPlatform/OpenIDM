@@ -35,6 +35,7 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.Connection;
@@ -50,16 +51,31 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides internal routing for a top-level object set.
- *
+ * <p>
+ * Provides access to both internal and external Connections to suit the business-logic needs
+ * of the consumer.
+ * <p>
+ * As a traditional {@link ConnectionFactory}, the {@link ConnectionFactory#getConnection()}
+ * and {@link ConnectionFactory#getConnectionAsync()} methods retrieve a <strong>internal</strong>
+ * connection to the underlying ResourceProvider (generally the {@link org.forgerock.json.resource.Router}),
+ * which decorates the context chain with an internal {@link org.forgerock.services.context.ClientContext}
+ * to indicate to routed ResourceProviders that the request was made internally.
+ * <p>
+ * When used as a {@link IDMConnectionFactory}, the {@link IDMConnectionFactory#getExternalConnection()}
+ * and {@link IDMConnectionFactory#getExternalConnectionAsync()} methods retrieve a <strong>external</strong>
+ * connection to the underlying ResourceProvider.  This allows an internal call to propagate a request as
+ * being external without the {@link Context} chain being decorated.  This may be useful when providing
+ * endpoints to authenticated users that relay (or proxy) requests to other parts of the system where
+ * we want to apply the same business logic as if these requests had been directly over HTTP.
  */
 @Component(name = JsonResourceRouterService.PID, policy = ConfigurationPolicy.OPTIONAL,
         metatype = true, configurationFactory = false, immediate = true)
-@Service
+@Service(value = { ConnectionFactory.class, IDMConnectionFactory.class })
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM internal JSON resource router"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/") })
-public class JsonResourceRouterService implements ConnectionFactory {
+public class JsonResourceRouterService implements IDMConnectionFactory {
 
     // Public Constants
     public static final String PID = "org.forgerock.openidm.internal";
@@ -93,8 +109,8 @@ public class JsonResourceRouterService implements ConnectionFactory {
         logger.info("Reconciliation service deactivated.");
     }
 
-    // ----- Implementation of ConnectionFactory - delegate to this object's internal ConnectionFactory
-    // which decorates the router ConnectionFactory
+    // ----- Implementation of ConnectionFactory -----
+    // delegate to this object's internal ConnectionFactory which decorates the router ConnectionFactory
 
     @Override
     public Connection getConnection() throws ResourceException {
@@ -105,6 +121,7 @@ public class JsonResourceRouterService implements ConnectionFactory {
     public Promise<Connection, ResourceException> getConnectionAsync() {
         return internal.getConnectionAsync();
     }
+
     @Override
     public void close() {
         internal.close();
@@ -138,5 +155,17 @@ public class JsonResourceRouterService implements ConnectionFactory {
         };
     }
 
+    // ----- IDMConnectionFactory implementation -----
+    // delegate to the object's *external* ConnectionFactory that comes from the router
+
+    @Override
+    public Connection getExternalConnection() throws ResourceException {
+        return connectionFactory.getConnection();
+    }
+
+    @Override
+    public Promise<Connection, ResourceException> getExternalConnectionAsync() {
+        return connectionFactory.getConnectionAsync();
+    }
 
 }
