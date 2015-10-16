@@ -571,6 +571,9 @@ public class UpdateManagerImpl implements UpdateManager {
         return lastUpdateId;
     }
 
+    /**
+     * Actions taken during the update of a file
+     */
     private enum UpdateAction {
         REPLACED,
         PRESERVED,
