@@ -95,7 +95,10 @@ import org.slf4j.LoggerFactory;
     @Reference(name = "ScriptRegistryService", referenceInterface = ScriptRegistry.class,
     bind = "bindScriptRegistry", unbind = "unbindScriptRegistry",
     cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
-    target = "(service.pid=org.forgerock.openidm.script)")
+    target = "(service.pid=org.forgerock.openidm.script)"),
+    @Reference(name = "ConfigurationAdmin", referenceInterface = ConfigurationAdmin.class,
+    cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+    bind = "bindConfigAdmin", unbind = "unbindConfigAdmin")
 })
 public class ActivitiServiceImpl implements RequestHandler {
 
@@ -133,8 +136,6 @@ public class ActivitiServiceImpl implements RequestHandler {
     )
     private ProcessEngine processEngine;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-    bind = "bindConfigAdmin", unbind = "unbindConfigAdmin")
     private ConfigurationAdmin configurationAdmin = null;
 
     /**
