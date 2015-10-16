@@ -604,19 +604,67 @@ policyProcessor = (function (policyConfig,policyImpl){
         }
         return reqs;
     },
+    
+    getAppliedConditionalPolicies = function (conditionalPolicies, fallbackPolicies, fullObject) {
+        var policies = [],
+            i, j, condition, dependencies, failedCondition, passes;
+        if (conditionalPolicies !== undefined && conditionalPolicies !== null) {
+            // Check if any conditional policies apply
+            for (i = 0; i < conditionalPolicies.length; i++) {
+                failedCondition = false;
+                condition = conditionalPolicies[i].condition;
+                dependencies = conditionalPolicies[i].dependencies;
+                // Check dependencies
+                if (dependencies !== undefined && dependencies !== null) {
+                    for (j = 0; j < dependencies.length; j++) {
+                        if (!fullObject.hasOwnProperty(dependencies[j])) {
+                            // Failed dependency, so mark condition as failed.
+                            failedCondition = true;
+                            break;
+                        }
+                    }
+                    if (failedCondition) {
+                        // Continue to next condition
+                        continue;
+                    }
+                }
+                // Evaluate the condition
+                condition.fullObject = fullObject;
+                if (openidm.action("script", "eval", condition, {})) {
+                    // Condition passed, so add the conditional policies
+                    for (var p in conditionalPolicies[i].policies) {
+                       policies.push(conditionalPolicies[i].policies[p]);
+                    }
+                }
+            }
+        }
+        if (fallbackPolicies !== undefined && fallbackPolicies !== null && policies.length == 0) {
+            for (var p in fallbackPolicies) {
+               policies.push(fallbackPolicies[p]);
+            }
+        }
+        return policies
+    }
 
-    validate = function(policies, fullObject, propName, propValue, retArray) {
+    validate = function(policies, conditionalPolicies, fallbackPolicies, fullObject, propName, propValue, retArray) {
         var retObj = {},
+            allPolicies = policies.slice(),
             policyRequirements = [],
-            allPolicyRequirements = getAllPolicyRequirements(policies),
             propValueContainer = [],
-            i,j,params,policy,validationFunc,failed,y;
+            allPolicyRequirements,i,j,params,policy,validationFunc,failed,y,appliedConditionalPolicies;
 
-        for (i = 0; i < policies.length; i++) {
-            params = policies[i].params;
-            policy = getPolicy(policies[i].policyId);
+        appliedConditionalPolicies = getAppliedConditionalPolicies(conditionalPolicies, fallbackPolicies, fullObject);
+        for (i = 0; i < appliedConditionalPolicies.length; i++) {
+            allPolicies.push(appliedConditionalPolicies[i]);   
+        }
+        
+        allPolicyRequirements = getAllPolicyRequirements(allPolicies);
+        
+        for (i = 0; i < allPolicies.length; i++) {
+            params = allPolicies[i].params;
+            policy = getPolicy(allPolicies[i].policyId);
             if (policy === null) {
-                throw "Unknown policy " + policies[i].policyId;
+                throw "Unknown policy " + allPolicies[i].policyId;
             }
             // validate this property every time unless the property has been marked as "validateOnlyIfPresent" and it isn't present
             if (!(typeof(policy.validateOnlyIfPresent) !== 'undefined' && policy.validateOnlyIfPresent && typeof(propValue) === 'undefined')) {
@@ -711,6 +759,8 @@ policyProcessor = (function (policyConfig,policyImpl){
                     .pairs()
                     .map(function (pair) {
                         var customPolicies = _.map(pair[1].policies), // will always result in a standard array
+                            conditionalPoliciesx = pair[1].conditionalPolicies,
+                            fallbackPoliciesx = pair[1].fallbackPolicies,
                             standardPolicies = [];
 
                         if (_.contains(obj.schema.required, pair[0])) {
@@ -750,7 +800,9 @@ policyProcessor = (function (policyConfig,policyImpl){
 
                         return {
                             name: pair[0],
-                            policies: standardPolicies.concat(customPolicies)
+                            policies: standardPolicies.concat(customPolicies),
+                            conditionalPolicies: conditionalPoliciesx,
+                            fallbackPolicies: fallbackPoliciesx
                         };
                     })
                     .filter(function (property) {
@@ -769,7 +821,6 @@ policyProcessor = (function (policyConfig,policyImpl){
             found,
             newProp,
             prop;
-
         for (i = 0; i < newProps.length; i++) {
             found = false;
             newProp = newProps[i];
@@ -777,10 +828,23 @@ policyProcessor = (function (policyConfig,policyImpl){
                 prop = props[j];
                 if (newProp.name === prop.name) {
                     found = true;
-                    if (prop.policies.length > 0) {
+                    if (prop.policies !== undefined && prop.policies.length > 0) {
                         prop.policies = mergePolicies(prop.policies, newProp.policies);
                     } else {
                         prop.policies = newProp.policies;
+                    }
+                    // Check if there are conditional policies in the existing resource config
+                    if ((prop.conditionalPolicies !== null) && (prop.conditionalPolicies !== undefined) 
+                            && (prop.conditionalPolicies.length > 0)) {
+                        // check if there are additional conditional policies
+                        if ((newProp.conditionalPolicies !== null) && (newProp.conditionalPolicies !== undefined) 
+                                && (newProp.conditionalPolicies.length > 0)) {
+                            // Merge the the conditional policies
+                            prop.conditionalPolicies = prop.conditionalPolicies.concat(newProp.conditionalPolicies);
+                        }
+                    } else {
+                        // No existing conditional policies, overwrite with new ones (if any)
+                        prop.conditionalPolicies = newProp.conditionalPolicies;
                     }
                 }
             }
@@ -806,7 +870,9 @@ policyProcessor = (function (policyConfig,policyImpl){
             policies,
             policyRequirements,
             props,
-            prop;
+            prop,
+            conditionalPolicies,
+            fallbackPolicies;
 
         if (request.resourcePath !== null && request.resourcePath !== undefined) {
             // Get the policy configuration for the specified resource
@@ -849,9 +915,11 @@ policyProcessor = (function (policyConfig,policyImpl){
                     for (i = 0; i < resource.properties.length; i++) {
                         propName = resource.properties[i].name;
                         policies = resource.properties[i].policies;
+                        conditionalPolicies = resource.properties[i].conditionalPolicies;
+                        fallbackPolicies = resource.properties[i].fallbackPolicies;
                         // Validate
-                        policyRequirements = validate(policies, fullObject, propName,
-                                getPropertyValue(fullObject, propName), failedPolicyRequirements);
+                        policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject, 
+                                propName, getPropertyValue(fullObject, propName), failedPolicyRequirements);
                     }
                 } else if (action === "validateProperty") {
                     props = request.content;
@@ -859,9 +927,11 @@ policyProcessor = (function (policyConfig,policyImpl){
                         prop = getPropertyConfig(resource, propName);
                         if (prop !== null) {
                             policies = prop.policies;
+                            conditionalPolicies = prop.conditionalPolicies;
+                            fallbackPolicies = prop.fallbackPolicies;
                             // Validate
-                            policyRequirements = validate(policies, fullObject, propName,
-                                    props[propName], failedPolicyRequirements);
+                            policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject, 
+                                    propName, props[propName], failedPolicyRequirements);
                         }
                     }
                 } else {
@@ -881,7 +951,6 @@ policyProcessor = (function (policyConfig,policyImpl){
     return {processRequest:processRequest};
 
 }(policyConfig,policyImpl)),
-
 additionalPolicyLoader = (function (config,impl) {
 
     var obj = {},
@@ -906,7 +975,6 @@ additionalPolicyLoader = (function (config,impl) {
     return obj;
 
 }(policyConfig,policyImpl));
-
 
 if (typeof additionalPolicies !== 'undefined') {
     additionalPolicyLoader.load(additionalPolicies);
