@@ -1855,8 +1855,8 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             }
             return new AcquiredTriggers(acquiredTriggers, revision);
         } catch (ResourceException e) {
-            logger.warn("Error intializing waiting triggers", e);
-            throw new JobPersistenceException("Error intializing waiting triggers", e);
+            logger.warn("Error initializing waiting triggers", e);
+            throw new JobPersistenceException("Error initializing waiting triggers", e);
         }
     }
 
@@ -1910,8 +1910,8 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
             }
             return new WaitingTriggers(waitingTriggers, revision);
         } catch (ResourceException e) {
-            logger.warn("Error intializing waiting triggers", e);
-            throw new JobPersistenceException("Error intializing waiting triggers", e);
+            logger.warn("Error initializing waiting triggers", e);
+            throw new JobPersistenceException("Error initializing waiting triggers", e);
         }
     }
 
