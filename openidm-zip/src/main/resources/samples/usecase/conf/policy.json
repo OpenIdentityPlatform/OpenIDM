@@ -249,28 +249,6 @@
                             "policyId" : "valid-date"
                         }
                     ]
-                },
-                {
-                    "name" : "passPhrase",
-                    "policies" : [
-                        {
-                            "policyId" : "minimum-length",
-                            "params" : {
-                                "minLength" : 4
-                            }
-                        },
-                        {
-                            "policyId" : "required-if-configured",
-                            "params" : {
-                                "configBase" : "ui/configuration",
-                                "baseKey" : "configuration.siteIdentification",
-                                "exceptRoles" : [
-                                    "system",
-                                    "openidm-admin"
-                                ]
-                            }
-                        }
-                    ]
                 }
             ]
         },
