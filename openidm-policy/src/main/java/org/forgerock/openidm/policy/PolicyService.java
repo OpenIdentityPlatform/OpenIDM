@@ -171,7 +171,7 @@ public class PolicyService extends AbstractScriptedService {
         }
 
         handler.put("request", request);
-        handler.put("resources", configuration.get("resources").getObject());
+        handler.put("resources", configuration.get("resources").copy().getObject());
     }
     
     @Override
@@ -180,6 +180,6 @@ public class PolicyService extends AbstractScriptedService {
         super.handleRead(context, request, handler);
 
         handler.put("request", request);
-        handler.put("resources", configuration.get("resources").getObject());
+        handler.put("resources", configuration.get("resources").copy().getObject());
     }
 }
