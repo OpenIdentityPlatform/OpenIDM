@@ -222,7 +222,7 @@
         <commons.forgerock-script.version>2.0.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
         <commons.forgerock-audit.version>0.6.0-SNAPSHOT</commons.forgerock-audit.version>
-        <commons.forgerock-selfservice.version>0.2.0-SNAPSHOT</commons.forgerock-selfservice.version>
+        <commons.forgerock-selfservice.version>0.3.0-SNAPSHOT</commons.forgerock-selfservice.version>
 
         <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -294,7 +294,6 @@
         <module>openidm-enhanced-config</module>
         <module>openidm-external-email</module>
         <module>openidm-external-rest</module>
-        <module>openidm-httpclient-fragment</module>
         <module>openidm-httpcontext</module>
         <module>openidm-infoservice</module>
         <module>openidm-customendpoint</module>
@@ -577,12 +576,17 @@
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpclient-osgi</artifactId>
-                <version>4.3.5</version>
+                <version>4.4.1</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.httpcomponents</groupId>
                 <artifactId>httpcore-osgi</artifactId>
-                <version>4.3.2</version>
+                <version>4.4.1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.httpcomponents</groupId>
+                <artifactId>httpasyncclient-osgi</artifactId>
+                <version>4.1</version>
             </dependency>
 
             <!-- Core OSGi -->

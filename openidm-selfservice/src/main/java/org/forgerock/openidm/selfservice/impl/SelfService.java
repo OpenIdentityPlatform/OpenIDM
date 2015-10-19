@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.selfservice.impl;
 
+import static org.forgerock.http.handler.HttpClientHandler.*;
 import static org.forgerock.json.resource.ResourcePath.*;
 
 import java.security.KeyPairGenerator;
@@ -33,6 +34,11 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.http.Client;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.apache.sync.SyncHttpClientProvider;
+import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.spi.Loader;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.resource.RequestHandler;
@@ -44,14 +50,16 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.ProcessStore;
-import org.forgerock.selfservice.core.ProgressStage;
-import org.forgerock.selfservice.core.ProgressStageFactory;
+import org.forgerock.selfservice.core.ProgressStageBinder;
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.exceptions.StageConfigException;
+import org.forgerock.selfservice.core.config.StageConfigVisitor;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
 import org.forgerock.selfservice.json.JsonConfig;
+import org.forgerock.selfservice.stages.CommonConfigVisitor;
+import org.forgerock.selfservice.stages.captcha.CaptchaStage;
+import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
 import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
 import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
@@ -71,6 +79,7 @@ import org.forgerock.selfservice.stages.user.UserDetailsStage;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.util.Options;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -114,7 +123,7 @@ public class SelfService {
 
     private Dictionary<String, Object> properties = null;
     private JsonValue config;
-    private AnonymousProcessService processService;
+    private RequestHandler processService;
     private ServiceRegistration<RequestHandler> serviceRegistration = null;
 
     @Activate
@@ -130,11 +139,11 @@ public class SelfService {
             amendConfig();
 
             // create self-service request handler
-            processService =
-                    new AnonymousProcessService(JsonConfig.buildProcessInstanceConfig(config),
-                            newProgressStageFactory(),
-                            newTokenHandlerFactory(),
-                            newProcessStore());
+            processService = new AnonymousProcessService<>(
+                    JsonConfig.buildProcessInstanceConfig(config),
+                    newStageConfigVisitor(newHttpClient()),
+                    newTokenHandlerFactory(),
+                    newProcessStore());
 
             // begin service registration prep
             properties = context.getProperties();
@@ -183,29 +192,64 @@ public class SelfService {
         return config;
     }
 
-    private ProgressStageFactory newProgressStageFactory() {
-        final Map<Class<? extends StageConfig>, ProgressStage<?>> progressStages = new HashMap<>();
+    private Client newHttpClient() throws HttpApplicationException {
+        return new Client(
+                new HttpClientHandler(
+                        Options.defaultOptions()
+                                .set(OPTION_LOADER, new Loader() {
+                                    @Override
+                                    public <S> S load(Class<S> service, Options options) {
+                                        return service.cast(new SyncHttpClientProvider());
+                                    }
+                                })));
+    }
 
-        progressStages.put(VerifyEmailAccountConfig.class, new VerifyEmailAccountStage(connectionFactory));
-        progressStages.put(VerifyUserIdConfig.class, new VerifyUserIdStage(connectionFactory));
-        progressStages.put(ResetStageConfig.class, new ResetStage(connectionFactory));
-        progressStages.put(UserRegistrationConfig.class, new UserRegistrationStage(connectionFactory));
-        progressStages.put(UserDetailsConfig.class, new UserDetailsStage(connectionFactory));
-        progressStages.put(SecurityAnswerDefinitionConfig.class, new SecurityAnswerDefinitionStage(connectionFactory));
-        progressStages.put(SecurityAnswerVerificationConfig.class, new SecurityAnswerVerificationStage(connectionFactory));
+    private StageConfigVisitor newStageConfigVisitor(final Client httpClient) {
+        return new CommonConfigVisitor() {
 
-        return new ProgressStageFactory() {
             @Override
-            public <C extends StageConfig> ProgressStage<C> get(C config) {
-                ProgressStage<?> untypedStage = progressStages.get(config.getClass());
+            public ProgressStageBinder<?> build(ResetStageConfig config) {
+                return ProgressStageBinder.bind(new ResetStage(connectionFactory), config);
+            }
 
-                if (untypedStage == null) {
-                    throw new StageConfigException("Unable to find matching stage for config " + config.getName());
-                }
+            @Override
+            public ProgressStageBinder<?> build(SecurityAnswerDefinitionConfig config) {
+                return ProgressStageBinder.bind(new SecurityAnswerDefinitionStage(connectionFactory), config);
+            }
 
-                @SuppressWarnings("unchecked")
-                ProgressStage<C> typedStage = (ProgressStage<C>) untypedStage;
-                return typedStage;
+            @Override
+            public ProgressStageBinder<?> build(SecurityAnswerVerificationConfig config) {
+                return ProgressStageBinder.bind(new SecurityAnswerVerificationStage(connectionFactory), config);
+            }
+
+            @Override
+            public ProgressStageBinder<?> build(UserDetailsConfig config) {
+                return ProgressStageBinder.bind(new UserDetailsStage(), config);
+            }
+
+            @Override
+            public ProgressStageBinder<?> build(UserRegistrationConfig config) {
+                return ProgressStageBinder.bind(new UserRegistrationStage(connectionFactory), config);
+            }
+
+            @Override
+            public ProgressStageBinder<?> build(VerifyEmailAccountConfig config) {
+                return ProgressStageBinder.bind(new VerifyEmailAccountStage(connectionFactory), config);
+            }
+
+            @Override
+            public ProgressStageBinder<?> build(VerifyUserIdConfig config) {
+                return ProgressStageBinder.bind(new VerifyUserIdStage(connectionFactory), config);
+            }
+
+            @Override
+            public ProgressStageBinder<?> build(CaptchaStageConfig config) {
+                return ProgressStageBinder.bind(new CaptchaStage(httpClient), config);
+            }
+
+            @Override
+            public ProgressStageBinder<?> build(StageConfig<?> config) {
+                throw new UnsupportedOperationException("Unknown config type " + config.getName());
             }
         };
     }
