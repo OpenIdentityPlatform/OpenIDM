@@ -588,7 +588,6 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient-osgi</artifactId>
-            <version>4.0.2</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.apache.httpcomponents</groupId>

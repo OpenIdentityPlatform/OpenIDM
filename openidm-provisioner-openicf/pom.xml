@@ -144,19 +144,16 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpasyncclient-osgi</artifactId>
-            <version>4.0.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient-osgi</artifactId>
-            <version>4.3.5</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore-osgi</artifactId>
-            <version>4.3.2</version>
             <scope>test</scope>
         </dependency>
         <dependency>
