@@ -43,6 +43,9 @@
                 "viewable" : true,
                 "$schema" : "http://json-schema.org/draft-03/schema",
                 "order" : [
+                    "_id",
+                    "password",
+                    "kbaInfo",
                     "userName",
                     "givenName",
                     "sn",
@@ -57,7 +60,10 @@
                     "stateProvince",
                     "roles",
                     "manager",
-                    "authzRoles"
+                    "authzRoles",
+                    "reports",
+                    "effectiveRoles",
+                    "effectiveAssignments"
                 ],
                 "properties" : {
                     "_id" : {
@@ -193,9 +199,9 @@
                         "viewable" : true,
                         "userEditable" : false,
                         "type" : "array",
+                        "returnByDefault" : true,
                         "items" : {
                             "type" : "relationship",
-                            "returnByDefault" : true,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -205,14 +211,20 @@
                                     }
                                 }
                             },
-                            "resourceCollection" : {
-                                "path" : "managed/role",
-                                "query" : {
-                                    "queryFilter" : "true",
-                                    "fields" : ["name"],
-                                    "sortKeys" : ["name"]
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/role",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "properties/name"
+                                        ],
+                                        "sortKeys" : [
+                                            "properties/name"
+                                        ]
+                                    }
                                 }
-                            }
+                            ]
                         }
                     },
                     "authzRoles" : {
@@ -221,9 +233,9 @@
                         "viewable" : true,
                         "type" : "array",
                         "userEditable" : false,
+                        "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
-                            "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -237,39 +249,91 @@
                                     }
                                 }
                             },
-                            "resourceCollection" : {
-                                "path" : "repo/internal/role",
-                                "query" : {
-                                    "queryFilter" : "true",
-                                    "fields" : [
-                                        "_id",
-                                        "description"
-                                    ],
-                                    "sortKeys" : [
-                                        "_id"
-                                    ]
+                            "resourceCollection" : [
+                                {
+                                    "path" : "repo/internal/role",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "_id",
+                                            "description"
+                                        ],
+                                        "sortKeys" : [
+                                            "_id"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "path" : "managed/role",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "name"
+                                        ],
+                                        "sortKeys" : [
+                                            "name"
+                                        ]
+                                    }
                                 }
-                            }
+                            ]
+                        }
+                    },
+                    "reports" : {
+                        "description" : "",
+                        "title" : "Reports",
+                        "viewable" : true,
+                        "userEditable" : false,
+                        "type" : "array",
+                        "returnByDefault" : false,
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship": true,
+                            "reversePropertyName": "manager",
+                            "properties" : {
+                                "_ref" : { "type" : "string" },
+                                "_refProperties": {
+                                    "type": "object",
+                                    "properties": {
+                                        "_id": { "type": "string" }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/user",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "userName",
+                                            "givenName",
+                                            "sn"
+                                        ],
+                                        "sortKeys" : [
+                                            "userName"
+                                        ]
+                                    }
+                                }
+                            ]
                         }
                     },
                     "effectiveRoles" : {
                         "type" : "array",
                         "title" : "Effective Roles",
                         "viewable" : false,
+                        "returnByDefault" : true,
+                        "isVirtual" : true,
                         "items" : {
-                            "type" : "object",
-                            "returnByDefault" : true,
-                            "isVirtual" : true
+                            "type" : "object"
                         }
                     },
                     "effectiveAssignments" : {
                         "type" : "array",
                         "title" : "Effective Assignments",
                         "viewable" : false,
+                        "returnByDefault" : true,
+                        "isVirtual" : true,
                         "items" : {
-                            "type" : "object",
-                            "returnByDefault" : true,
-                            "isVirtual" : true
+                            "type" : "object"
                         }
                     },
                     "telephoneNumber" : {
@@ -329,21 +393,22 @@
                                 }
                             }
                         },
-                        "resourceCollection" : {
-                            "path" : "managed/user",
-                            "label" : "Reports",
-                            "query" : {
-                                "queryFilter" : "true",
-                                "fields" : [
-                                    "userName",
-                                    "givenName",
-                                    "sn"
-                                ],
-                                "sortKeys" : [
-                                    "userName"
-                                ]
+                        "resourceCollection" : [
+                            {
+                                "path" : "managed/user",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ],
+                                    "sortKeys" : [
+                                        "userName"
+                                    ]
+                                }
                             }
-                        },
+                        ],
                         "userEditable" : false
                     }
                 },
@@ -406,11 +471,11 @@
                         "title" : "Role Members",
                         "viewable" : true,
                         "type" : "array",
+                        "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship": true,
                             "reversePropertyName": "roles",
-                            "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -420,21 +485,23 @@
                                     }
                                 }
                             },
-                            "resourceCollection" : {
-                                "path" : "managed/user",
-                                "label" : "User",
-                                "query" : {
-                                    "queryFilter" : "true",
-                                    "fields" : [
-                                        "userName",
-                                        "givenName",
-                                        "sn"
-                                    ],
-                                    "sortKeys" : [
-                                        "userName"
-                                    ]
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/user",
+                                    "label" : "User",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "userName",
+                                            "givenName",
+                                            "sn"
+                                        ],
+                                        "sortKeys" : [
+                                            "userName"
+                                        ]
+                                    }
                                 }
-                            }
+                            ]
                         }
                     },
                     "assignments" : {
@@ -442,9 +509,9 @@
                         "title" : "Managed Assignments",
                         "viewable" : true,
                         "type" : "array",
+                        "returnByDefault" : true,
                         "items" : {
                             "type" : "relationship",
-                            "returnByDefault" : true,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -454,14 +521,16 @@
                                     }
                                 }
                             },
-                            "resourceCollection" : {
-                                "path" : "managed/assignment",
-                                "query" : {
-                                    "queryFilter" : "true",
-                                    "fields" : ["name"],
-                                    "sortKeys" : ["name"]
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/assignment",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : ["name"],
+                                        "sortKeys" : ["name"]
+                                    }
                                 }
-                            }
+                            ]
                         }
                     }
                 },
@@ -551,11 +620,11 @@
                         "viewable" : true,
                         "userEditable" : false,
                         "type" : "array",
+                        "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship": true,
                             "reversePropertyName": "assignments",
-                            "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -565,14 +634,16 @@
                                     }
                                 }
                             },
-                            "resourceCollection" : {
-                                "path" : "managed/role",
-                                "query" : {
-                                    "queryFilter" : "true",
-                                    "fields" : ["name"],
-                                    "sortKeys" : ["name"]
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/role",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : ["name"],
+                                        "sortKeys" : ["name"]
+                                    }
                                 }
-                            }
+                            ]
                         }
                     }
                 },

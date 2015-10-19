@@ -185,7 +185,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 schema: {
                     "title": "Managed Object",
                     "type": "object",
-                    "headerTemplate": "{{self.objTitle}}",
+                    "headerTemplate": "{{self.title}}",
                     "definitions": {
                         "oneOfTypes": {
                             "oneOf": [
@@ -218,48 +218,10 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                                 },{
                                     "title": "Object",
                                     "$ref": "#/definitions/managedObject"
-                                }, {
-                                    "title": "Resource Collection",
-                                    "type": "object",
-                                    "properties": {
-                                        "path": {
-                                            "type": "string",
-                                            "title": "Path"
-                                        },
-                                        "label": {
-                                            "type": "string",
-                                            "title": "Label",
-                                            "description": $.t("templates.managed.resourceCollectionRelationshipDescription")
-                                        },
-                                        "query": {
-                                            "type": "object",
-                                            "title": "Query",
-                                            "properties": {
-                                                "queryFilter": {
-                                                    "title": "Query Filter",
-                                                    "type": "string"
-                                                },
-                                                "fields": {
-                                                    "title": "Fields",
-                                                    "type": "array",
-                                                    "format": "table",
-                                                    "items": {
-                                                        "title": "Field",
-                                                        "type": "string"
-                                                    }
-                                                },
-                                                "sortKeys": {
-                                                    "title": "Sort Keys",
-                                                    "type": "array",
-                                                    "format": "table",
-                                                    "items": {
-                                                        "title": "Sort Key",
-                                                        "type": "string"
-                                                    }
-                                                }
-                                            }
-                                        }
-                                    }
+                                },
+                                {
+                                    "title": "Relationship",
+                                    "$ref": "#/definitions/relationship"
                                 }
                             ]
                         },
@@ -273,45 +235,55 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                                 "properties": {
                                     "propertyName": {
                                         "title": "Property Name",
-                                        "type": "string"
+                                        "type": "string",
+                                        "propertyOrder": 1
                                     },
                                     "title": {
                                         "title": "Readable Title",
-                                        "type": "string"
+                                        "type": "string",
+                                        "propertyOrder": 2
                                     },
                                     "description": {
                                         "title": "Description",
                                         "type": "string",
-                                        "format": "textarea"
+                                        "format": "textarea",
+                                        "propertyOrder": 3
                                     },
                                     "viewable": {
                                         "title": "Viewable",
                                         "type": "boolean",
                                         "required": true,
-                                        "default": true
+                                        "default": true,
+                                        "propertyOrder": 4
                                     },
                                     "searchable": {
                                         "title": "Searchable",
                                         "type": "boolean",
                                         "required": true,
-                                        "default": false
-                                    },
-                                    "required": {
-                                        "title": "Required",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false
+                                        "default": false,
+                                        "propertyOrder": 5
                                     },
                                     "userEditable": {
                                         "title": "End users allowed to edit?",
                                         "type": "boolean",
-                                        "required": false,
-                                        "default": false
+                                        "required": true,
+                                        "default": false,
+                                        "propertyOrder": 6
+                                    },
+                                    "minLength": {
+                                        "title": "Minimum Length",
+                                        "type": "string",
+                                        "propertyOrder": 7
+                                    },
+                                    "pattern": {
+                                        "title": "Pattern",
+                                        "type": "string",
+                                        "propertyOrder": 8
                                     },
                                     "policies": {
                                         "title": "Validation policies",
                                         "type": "array",
-                                        "required": false,
+                                        "required": true,
                                         "items": {
                                             "type": "object",
                                             "properties": {
@@ -320,14 +292,169 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                                                     "title": "Policy"
                                                 },
                                                 "params": {
-                                                    "type": "object"
+                                                    "$ref": "#/definitions/policyParams"
                                                 }
                                             }
-                                        }
+                                        },
+                                        "default": [],
+                                        "propertyOrder": 9
+                                    },
+                                    "required": {
+                                        "title": "Required",
+                                        "type": "boolean",
+                                        "required": true,
+                                        "default": false,
+                                        "propertyOrder": 10
+                                    },
+                                    "returnByDefault": {
+                                        "title": "Return by Default",
+                                        "type": "boolean",
+                                        "required": true,
+                                        "default": false,
+                                        "propertyOrder": 11
+                                    },
+                                    "isVirtual": {
+                                        "title": "Is Virtual?",
+                                        "type": "boolean",
+                                        "required": true,
+                                        "default": false,
+                                        "propertyOrder": 12
                                     },
                                     "type": {
                                         "title": "Type",
-                                        "$ref": "#/definitions/oneOfTypes"
+                                        "$ref": "#/definitions/oneOfTypes",
+                                        "propertyOrder": 13
+                                    }
+                                }
+                            }
+                        },
+                        "relationship": {
+                            "type": "object",
+                            "properties": {
+                                "reverseRelationship": {
+                                    "title": "Reverse Relationship",
+                                    "type": "boolean",
+                                    "default": false
+                                },
+                                "reversePropertyName": {
+                                    "title": "Reverse Property Name",
+                                    "type": "string",
+                                    "required": true
+                                },
+                                "properties": {
+                                    "title": "Properties",
+                                    "type": "object",
+                                    "properties": {
+                                        "_ref": {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "default": "string"
+                                                }
+                                            }
+                                        },
+                                        "_refProperties": {
+                                            "type": "object",
+                                            "properties": {
+                                                "type": {
+                                                    "type": "string",
+                                                    "default": "object"
+                                                },
+                                                "properties": {
+                                                    "$ref": "#/definitions/_refProperties"
+                                                }
+                                            }
+                                        }
+                                        
+                                    }
+                                },
+                                "resourceCollection": {
+                                    "title": "Resource Collection",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/definitions/resourceCollection"
+                                    }
+                                }
+                            }
+                        },
+                        "_refProperties": {
+                            "title": "Properties",
+                            "type": "array",
+                            "format": "tabs",
+                            "items": {
+                                "type": "object",
+                                "headerTemplate": "{{self.propertyName}}",
+                                "properties": {
+                                    "propertyName": {
+                                        "title": "Property Name",
+                                        "type": "string"
+                                    },
+                                    "type": {
+                                        "title": "Type",
+                                        "type": "string",
+                                        "default": "string"
+                                    },
+                                    "label": {
+                                        "title": "Label",
+                                        "type": "string",
+                                        "default": ""
+                                    }
+                                }
+                            }
+                        },
+                        "policyParams": {
+                            "title": "Params",
+                            "type": "array",
+                            "format": "tabs",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "paramName": {
+                                        "title": "Param Name",
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "title": "Value",
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        },
+                        "resourceCollection": {
+                            "title": "Resource Collection",
+                            "type": "object",
+                            "properties": {
+                                "path": {
+                                    "type": "string",
+                                    "title": "Path"
+                                },
+                                "query": {
+                                    "type": "object",
+                                    "title": "Query",
+                                    "properties": {
+                                        "queryFilter": {
+                                            "title": "Query Filter",
+                                            "type": "string"
+                                        },
+                                        "fields": {
+                                            "title": "Fields",
+                                            "type": "array",
+                                            "format": "table",
+                                            "items": {
+                                                "title": "Field",
+                                                "type": "string"
+                                            }
+                                        },
+                                        "sortKeys": {
+                                            "title": "Sort Keys",
+                                            "type": "array",
+                                            "format": "table",
+                                            "items": {
+                                                "title": "Sort Key",
+                                                "type": "string"
+                                            }
+                                        }
                                     }
                                 }
                             }
@@ -416,24 +543,10 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     break;
 
                 case "string":
-                    if (_.has(property, "resourceCollection")) {
-                        if (forArray) {
-                            tempProperty.itemType = {
-                                "display": "Resource Collection",
-                                "val": property.resourceCollection
-                            };
-                        } else {
-                            tempProperty.type = {
-                                "display": "Resource Collection",
-                                "val": property.resourceCollection
-                            };
-                        }
-                    } else {
-                        tempProperty.type = {
-                            "val": property.type,
-                            "display": this.toProperCase(property.type)
-                        };
-                    }
+                    tempProperty.type = {
+                        "val": property.type,
+                        "display": this.toProperCase(property.type)
+                    };
                     break;
 
                 case "array":
@@ -469,9 +582,59 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                         };
                     }
                     break;
+
+                case "relationship":
+                    if (forArray) {
+                        tempProperty.itemType = {
+                            "val": this.translateRelationship(property),
+                            "display": this.toProperCase(property.type)
+                        };
+
+                        forArray = false;
+                    } else {
+                        tempProperty.type = {
+                            "val": this.translateRelationship(property),
+                            "display": this.toProperCase(property.type)
+                        };
+                    }
+                    break;
             }
 
-            return tempProperty;
+            return this.translatePolicies(tempProperty);
+        },
+        
+        translateRelationship: function (property) {
+            var refProps = [];
+            
+            _.map(property.properties._refProperties.properties, function (val,key) {
+                refProps.push({
+                    "propertyName": key,
+                    "type": val.type,
+                    "label": val.label
+                });
+            });
+            
+            property.properties._refProperties.properties = refProps;
+            
+            return property;
+        },
+        
+        translatePolicies: function (property) {
+            if (property.policies) {
+                _.map(property.policies, function (policy) {
+                    var policyParams = [];
+                    _.each(policy.params, function (val,key) {
+                        policyParams.push({
+                            "paramName": key,
+                            "value": val
+                        });
+                    });
+                    
+                    policy.params = policyParams;
+                });
+            }
+            
+            return property;
         },
 
         toProperCase: function(toConvert) {
@@ -509,11 +672,26 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     _.extend(property, this.getObjectProperties(value, node));
                     break;
 
-                case "Resource Collection":
-                    property.resourceCollection = value;
-                    property.type = "string";
+                case "Relationship":
+                    property.type = "relationship";
+                    _.extend(property, this.getRelationshipProperties(value));
                     break;
             }
+        },
+
+        getRelationshipProperties: function(props) {
+            var refProps = {};
+            
+            _.each(props.properties._refProperties.properties, function (prop) {
+                refProps[prop.propertyName] = {
+                    "type": prop.type,
+                    "label": prop.label
+                };
+            });
+            
+            props.properties._refProperties.properties = refProps;
+            
+            return props;
         },
 
         getObjectProperties: function(props, node) {
@@ -523,11 +701,35 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 "order": []
             };
             _.each(props, function(property, index) {
+                var convertPolicyParams = function (policies) {
+                        _.each(policies, function (policy) {
+                            var policyParams = {};
+                            _.each(policy.params, function (param) {
+                                var val;
+                                try {
+                                    val = $.parseJSON(param.value);
+                                } catch (e) {
+                                    val = param.value;
+                                }
+                                policyParams[param.paramName] = val;
+                            });
+                            policy.params = policyParams;
+                        });
+                        
+                        return policies;
+                    };
+                    
                 data.properties[property.propertyName] = {
                     "description": property.description,
                     "title": property.title,
                     "viewable": property.viewable,
-                    "searchable": property.searchable
+                    "searchable": property.searchable,
+                    "userEditable": property.userEditable,
+                    "policies": convertPolicyParams(property.policies),
+                    "returnByDefault": property.returnByDefault,
+                    "minLength": property.minLength,
+                    "pattern": property.pattern,
+                    "isVirtual": property.isVirtual
                 };
 
                 if (!node) {
@@ -576,7 +778,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     addedEvents:this.data.addedEvents,
                     currentObject: this.data.currentManagedObject,
                     hasWorkflow: true,
-                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")
+                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")                
                 });
 
                 _.each(this.$el.find("#managedPropertyWrapper .small-field-block:visible"), function(managedProperty, index) {
@@ -593,6 +795,19 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     }));
 
                 }, this);
+
+                //hide or show the correct fields for Relationship types
+                _.each(this.$el.find("select:not([name])"), function (select) {
+                    var arrayItemProps = $(select).parent().closest(".row").find(".well:first").find(".row:lt(2)");
+                    
+                    if ($(select).val() === "Relationship") {
+                        //if this relationship is not an array of relationships
+                        //hide "Return by Default" (under relationship type), "Reverse Relationship", and "Reverse Property Name" 
+                        if (arrayItemProps.has("[data-schemapath*='itemType']").length === 0) {
+                            arrayItemProps.hide();
+                        }
+                    }
+                });
 
                 if (callback) {
                     callback();
