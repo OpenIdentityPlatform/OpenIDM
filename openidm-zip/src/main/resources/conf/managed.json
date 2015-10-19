@@ -200,6 +200,7 @@
                         "title" : "Provisioning Roles",
                         "viewable" : true,
                         "userEditable" : false,
+                        "returnByDefault" : true,
                         "type" : "array",
                         "returnByDefault" : true,
                         "items" : {
@@ -381,7 +382,6 @@
                     },
                     "manager" : {
                         "type" : "relationship",
-                        "returnByDefault" : false,
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
@@ -510,6 +510,7 @@
                         "description" : "",
                         "title" : "Managed Assignments",
                         "viewable" : true,
+                        "returnByDefault" : true,
                         "type" : "array",
                         "returnByDefault" : true,
                         "items" : {
