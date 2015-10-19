@@ -133,14 +133,14 @@ var httpAccessConfig =
             "customAuthz" : "(checkIfUIIsEnabled('passwordReset') || checkIfUIIsEnabled('selfRegistration')) && isSelfServiceRequest()"
         },
 
-        // openidm-admin can request nearly anything (some exceptions being a few system and repo endpoints)
+        // openidm-admin can request nearly anything (except query expressions on repo endpoints)
         {
             "pattern"   : "*",
             "roles"     : "openidm-admin",
             "methods"   : "*", // default to all methods allowed
             "actions"   : "*", // default to all actions allowed
             "customAuthz" : "disallowQueryExpression()",
-            "excludePatterns": "system/*,repo,repo/*"
+            "excludePatterns": "repo,repo/*"
         },
         // additional rules for openidm-admin that selectively enable certain parts of system/
         {
