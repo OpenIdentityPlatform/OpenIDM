@@ -33,6 +33,7 @@ import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import org.activiti.engine.ProcessEngine;
+import org.activiti.engine.RepositoryService;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.ProcessEngineImpl;
 import org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration;
@@ -95,10 +96,7 @@ import org.slf4j.LoggerFactory;
     @Reference(name = "ScriptRegistryService", referenceInterface = ScriptRegistry.class,
     bind = "bindScriptRegistry", unbind = "unbindScriptRegistry",
     cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC,
-    target = "(service.pid=org.forgerock.openidm.script)"),
-    @Reference(name = "ConfigurationAdmin", referenceInterface = ConfigurationAdmin.class,
-    cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-    bind = "bindConfigAdmin", unbind = "unbindConfigAdmin")
+    target = "(service.pid=org.forgerock.openidm.script)")
 })
 public class ActivitiServiceImpl implements RequestHandler {
 
@@ -136,6 +134,16 @@ public class ActivitiServiceImpl implements RequestHandler {
     )
     private ProcessEngine processEngine;
 
+    /**
+     * RepositoryService is a dependency of ConfigurationAdmin. Referencing the service here ensures the
+     * availability of this service during activation and deactivation to support the persistence of
+     * barInstallerConfiguration.
+     */
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
+    private RepositoryService repositoryService = null;
+
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
+            bind = "bindConfigAdmin", unbind = "unbindConfigAdmin")
     private ConfigurationAdmin configurationAdmin = null;
 
     /**
