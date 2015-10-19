@@ -207,10 +207,10 @@
                         "title" : "Managed Roles",
                         "viewable" : true,
                         "userEditable" : false,
+                        "returnByDefault" : true,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
-                            "returnByDefault" : true,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -238,7 +238,6 @@
                         "userEditable" : false,
                         "items" : {
                             "type" : "relationship",
-                            "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -271,20 +270,20 @@
                         "type" : "array",
                         "title" : "Effective Roles",
                         "viewable" : false,
+                        "returnByDefault" : true,
+                        "isVirtual" : true,
                         "items" : {
-                            "type" : "object",
-                            "returnByDefault" : true,
-                            "isVirtual" : true
+                            "type" : "object"
                         }
                     },
                     "effectiveAssignments" : {
                         "type" : "array",
                         "title" : "Effective Assignments",
                         "viewable" : false,
+                        "returnByDefault" : true,
+                        "isVirtual" : true,
                         "items" : {
-                            "type" : "object",
-                            "returnByDefault" : true,
-                            "isVirtual" : true
+                            "type" : "object"
                         }
                     },
                     "telephoneNumber" : {
@@ -330,7 +329,6 @@
                     },
                     "manager" : {
                         "type" : "relationship",
-                        "returnByDefault" : false,
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
@@ -428,7 +426,6 @@
                             "type" : "relationship",
                             "reverseRelationship": true,
                             "reversePropertyName": "roles",
-                            "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -459,10 +456,10 @@
                         "description" : "",
                         "title" : "Managed Assignments",
                         "viewable" : true,
+                        "returnByDefault" : true,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
-                            "returnByDefault" : true,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -573,7 +570,6 @@
                             "type" : "relationship",
                             "reverseRelationship": true,
                             "reversePropertyName": "assignments",
-                            "returnByDefault" : false,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {

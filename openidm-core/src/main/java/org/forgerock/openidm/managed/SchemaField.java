@@ -101,13 +101,6 @@ public class SchemaField {
             } else {
                 throw new JsonValueException(type, "Schema field 'type' must be a String or List");
             }
-            
-            // Check if the field is a virtual field
-            this.virtual = schema.get("isVirtual").defaultTo(false).asBoolean();
-            // Set the returnByDefault value for non-core fields
-            if (isRelationship() || isVirtual()) {
-                this.returnByDefault = schema.get("returnByDefault").defaultTo(false).asBoolean();
-            }
 
             if (isRelationship()) {
                 this.isReverseRelationship = schema.get("reverseRelationship").defaultTo(false).asBoolean();
@@ -116,6 +109,13 @@ public class SchemaField {
                     this.reversePropertyName = schema.get("reversePropertyName").required().asString();
                 }
             }
+        }
+
+        // Check if the field is a virtual field
+        this.virtual = schema.get("isVirtual").defaultTo(false).asBoolean();
+        // Set the returnByDefault value for non-core fields
+        if (isRelationship() || isVirtual()) {
+            this.returnByDefault = schema.get("returnByDefault").defaultTo(false).asBoolean();
         }
     }
     

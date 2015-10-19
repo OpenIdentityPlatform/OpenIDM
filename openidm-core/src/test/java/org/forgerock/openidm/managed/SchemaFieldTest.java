@@ -45,9 +45,9 @@ public class SchemaFieldTest {
 
     private static SchemaField virtualArrayField = new SchemaField("field6", json(object(
             field("type", "array"),
+            field("isVirtual", true),
             field("items", object(
-                    field("type", "string"),
-                    field("isVirtual", true))))));
+                    field("type", "string"))))));
 
     private static SchemaField coreField = new SchemaField("field7", json(object(
             field("type", "string"))));
