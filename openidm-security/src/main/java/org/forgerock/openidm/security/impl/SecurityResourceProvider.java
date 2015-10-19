@@ -586,6 +586,8 @@ public class SecurityResourceProvider {
             }
             store.setStore(keystore);
         } catch (Exception e) {
+            // Note this may catch NPE from Base64.decode returning null if keyStoreString
+            // is null or not a base64-encoded string
             throw new InternalServerErrorException("Error creating keystore from store bytes", e);
         }
     }

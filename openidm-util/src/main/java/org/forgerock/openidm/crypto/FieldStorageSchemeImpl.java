@@ -141,6 +141,7 @@ public class FieldStorageSchemeImpl implements FieldStorageScheme {
             System.arraycopy(decodedBytes, 0, digestBytes, 0, digestSize);
             System.arraycopy(decodedBytes, digestSize, saltBytes, 0, saltLength);
         } catch (Exception e) {
+            // May catch NPE if Base64.decode returns null on bad (non-base64) input
             logger.error("Cannot decode stored field", storedField, e);
             return false;
         }
