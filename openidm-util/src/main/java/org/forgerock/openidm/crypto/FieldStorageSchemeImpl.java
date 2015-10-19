@@ -29,7 +29,6 @@ package org.forgerock.openidm.crypto;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
 import java.util.Arrays;
-import java.util.Random;
 
 import org.forgerock.util.encode.Base64;
 import org.slf4j.Logger;
