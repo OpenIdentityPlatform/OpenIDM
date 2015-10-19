@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.script;
@@ -28,14 +20,12 @@ import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import javax.script.Bindings;
+import javax.script.ScriptException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import javax.script.Bindings;
-import javax.script.ScriptException;
-
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -50,8 +40,9 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.script.Scope;
@@ -61,6 +52,7 @@ import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.script.scope.Function;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.scope.Parameter;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -423,14 +415,18 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
     private Promise<ResourceResponse, ResourceException> evaluate(final Request request, final Script script)
             throws ScriptException {
         Object result = script.eval();
+        ResourcePath resourcePath = request.getResourcePathObject();
         if (null == result) {
-            return newResourceResponse(request.getResourcePath(), null, new JsonValue(null)).asPromise();
-        } else if (result instanceof JsonValue) {
-            return newResourceResponse(request.getResourcePath(), null, (JsonValue) result).asPromise();
-        } else if (result instanceof Map) {
-            return newResourceResponse(request.getResourcePath(), null, new JsonValue(result)).asPromise();
-        } else {
-            return newResourceResponse(request.getResourcePath(), null, new JsonValue(result)).asPromise();
+            return newResourceResponse(resourcePath.toString(), null, new JsonValue(null)).asPromise();
         }
+        JsonValue resultJson = (result instanceof JsonValue)
+                ? (JsonValue) result
+                : new JsonValue(result);
+        // If the resultJson isn't able to provide an ID, then we default to the resourcePath.
+        String id = resultJson.get(ResourceResponse.FIELD_CONTENT_ID).defaultTo("").asString();
+        if (id.isEmpty() && resourcePath.size() > 0) {
+            id = resourcePath.leaf();
+        }
+        return newResourceResponse(id, null, resultJson).asPromise();
     }
 }
