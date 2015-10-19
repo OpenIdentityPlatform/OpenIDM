@@ -353,7 +353,9 @@ public class AuditServiceImpl implements AuditService {
         try {
             JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
             if (hasConfigChanged(config, newConfig)) {
-                deactivate(compContext);
+                // don't call deactivate since the AuditServiceProxy in the activate will call shutdown on the old audit
+                // service
+                cleanup();
                 activate(compContext);
                 LOGGER.info("Reconfigured audit service {}", compContext.getProperties());
             }
@@ -370,11 +372,16 @@ public class AuditServiceImpl implements AuditService {
     @Deactivate
     void deactivate(ComponentContext compContext) {
         LOGGER.debug("Deactivating Service {}", compContext.getProperties());
+        cleanup();
+        auditService.shutdown();
+        LOGGER.info("Audit service stopped.");
+    }
+
+    private void cleanup() {
         config = null;
         auditFilter = NEVER_FILTER;
         watchFieldFilters.clear();
         passwordFieldFilters.clear();
-        LOGGER.info("Audit service stopped.");
     }
 
     /**
