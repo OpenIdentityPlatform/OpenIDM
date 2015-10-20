@@ -195,7 +195,7 @@
                     },
                     "roles" : {
                         "description" : "",
-                        "title" : "Managed Roles",
+                        "title" : "Provisioning Roles",
                         "viewable" : true,
                         "userEditable" : false,
                         "type" : "array",
@@ -229,7 +229,7 @@
                     },
                     "authzRoles" : {
                         "description" : "",
-                        "title" : "OpenIDM Roles",
+                        "title" : "Authorization Roles",
                         "viewable" : true,
                         "type" : "array",
                         "userEditable" : false,
