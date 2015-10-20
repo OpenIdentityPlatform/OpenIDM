@@ -326,14 +326,6 @@ public class RemoteCommandScope extends CustomCommandScope {
             final ResourcePath configResource = ResourcePath.valueOf("config");
             for (Map.Entry<String, File> entry : localConfigSet.entrySet()) {
                 String sourceConfigId = entry.getKey();
-                if (isProtectedConfigId(sourceConfigId)) {
-                    prettyPrint(console, "ConfigImport", sourceConfigId, "Protected configuration can not be updated" +
-                            " while the system is running.");
-                    // Remove the config from the set so that it won't be touched.
-                    remoteConfigSet.remove(sourceConfigId);
-                    continue;
-                }
-
                 try {
                     if (remoteConfigSet.containsKey(sourceConfigId)) {
                         // Update
