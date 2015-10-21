@@ -33,6 +33,7 @@ import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -417,7 +418,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         Object result = script.eval();
         ResourcePath resourcePath = request.getResourcePathObject();
         if (null == result) {
-            return newResourceResponse(resourcePath.toString(), null, new JsonValue(null)).asPromise();
+            return new NotFoundException("script returned null").asPromise();
         }
         JsonValue resultJson = (result instanceof JsonValue)
                 ? (JsonValue) result
