@@ -34,6 +34,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
             "partials/selfservice/user/_kbaStage.html",
             "partials/selfservice/user/_selfRegistration.html",
             "partials/selfservice/user/_userDetails.html",
+            "partials/selfservice/user/_captcha.html",
             "partials/selfservice/_advancedoptions.html",
             "partials/selfservice/_selfserviceblock.html",
             "partials/form/_basicInput.html"
@@ -51,6 +52,12 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
             msgType: "selfServiceUserRegistration",
             "configDefault": {
                 "stageConfigs" : [
+                    {
+                        "name" : "captcha",
+                        "recaptchaSiteKey": "",
+                        "recaptchaSecretKey": "",
+                        "recaptchaUri" : "https://www.google.com/recaptcha/api/siteverify"
+                    },
                     {
                         "name" : "emailValidation",
                         "email" : {
@@ -92,6 +99,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
         },
         render: function(args, callback) {
             this.data.configList = [{
+                type: "captcha",
+                title: $.t("templates.selfservice.user.captchaTitle"),
+                help: $.t("templates.selfservice.captcha.description")
+            },
+            {
                 type: "emailValidation",
                 title: $.t("templates.selfservice.emailValidation"),
                 help: $.t("templates.selfservice.emailValidationDescription")

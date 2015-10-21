@@ -460,7 +460,8 @@
                 "selfRegistrationTitle" : "Configure Registration Form",
                 "emailValidationTitle" : "Configure Validation Email",
                 "kbaStageTitle" : "Configure KBA Stage",
-                "userDetailsTitle" : "Configure User Details"
+                "userDetailsTitle" : "Configure User Details",
+                "captchaTitle" : "reCAPTCHA"
             },
             "userRegistrationForm" : {
                 "identityServiceUrl" : "Identity Service URL",
@@ -469,6 +470,13 @@
                 "identityUsernameFieldHelp" : "Account Property",
                 "identityEmailField" : "Identity Email Field",
                 "identityEmailFieldHelp" : "Email property"
+            },
+            "captcha" : {
+                "description" : "Use Google reCAPTCHA to stop bots.",
+                "siteKey" : "Site key",
+                "secretKey" : "Secret key",
+                "aboutLink" : "Learn about reCAPTCHA",
+                "siteKeysLink" : "Get your reCAPTCHA keys"
             },
             "kbaStage" : {
                 "kbaProperty" : "KBA Property Name",

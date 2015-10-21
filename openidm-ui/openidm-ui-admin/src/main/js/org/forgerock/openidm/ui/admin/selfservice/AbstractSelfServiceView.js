@@ -100,14 +100,17 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             var check = $(event.target),
                 card = check.parents(".wide-card"),
                 type = card.attr("data-type"),
-                removeConfig = false;
+                removeConfig = false,
+                defaultPosition = _.findIndex(this.model.configDefault.stageConfigs, function (defaultStage) {
+                    return defaultStage.name === type;
+                });
 
             if(check.is(':checked')) {
                 card.toggleClass("disabled", false);
                 card.toggleClass("active", true);
 
                 if(_.findWhere(this.model.saveConfig.stageConfigs, {"name" : type}) === undefined) {
-                    this.model.saveConfig.stageConfigs.push(_.clone(_.findWhere(this.model.configDefault.stageConfigs, {"name" : type})));
+                    this.model.saveConfig.stageConfigs.splice(defaultPosition, 0, _.clone(this.model.configDefault.stageConfigs[defaultPosition]));
                 }
             } else {
                 card.toggleClass("active", false);
