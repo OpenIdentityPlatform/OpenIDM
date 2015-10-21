@@ -7,6 +7,7 @@ import static org.forgerock.json.JsonValue.object;
 import java.io.IOException;
 
 import org.assertj.core.api.Assertions;
+import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
@@ -41,7 +42,7 @@ public class ClusterManagerTest {
     	final ClusterManager clusterManager = new ClusterManager();
     	final MockRepositoryService mockRepoService = new MockRepositoryService();
     	clusterManager.repoService = mockRepoService;
-    	clusterManager.connectionFactory = Resources.newInternalConnectionFactory(mockRepoService);
+        clusterManager.connectionFactory = new IDMConnectionFactoryWrapper(Resources.newInternalConnectionFactory(mockRepoService));
     	clusterManager.init(config);
     	clusterHandler = clusterManager;
     	clusterService = clusterManager;

@@ -43,12 +43,12 @@ import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
 import org.activiti.osgi.OsgiScriptingEngines;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.apache.felix.scr.annotations.*;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.PatchRequest;
@@ -165,8 +165,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     )
     CryptoService cryptoService;
 
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    IDMConnectionFactory connectionFactory;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -515,12 +515,12 @@ public class ActivitiServiceImpl implements RequestHandler {
         identityService.setCryptoService(null);
     }
 
-    protected void bindConnectionFactory(ConnectionFactory factory) {
+    protected void bindConnectionFactory(IDMConnectionFactory factory) {
         connectionFactory = factory;
         this.identityService.setConnectionFactory(factory);
     }
 
-    protected void unbindConnectionFactory(ConnectionFactory factory) {
+    protected void unbindConnectionFactory(IDMConnectionFactory factory) {
         connectionFactory = null;
         this.identityService.setConnectionFactory(null);
     }

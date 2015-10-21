@@ -29,7 +29,6 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;

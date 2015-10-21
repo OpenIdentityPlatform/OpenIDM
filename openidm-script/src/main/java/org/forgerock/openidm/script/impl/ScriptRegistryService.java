@@ -59,6 +59,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -125,9 +126,8 @@ import org.slf4j.LoggerFactory;
     @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
             bind = "bindCryptoService", unbind = "unbindCryptoService",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "ConnectionFactoryReference", referenceInterface = ConnectionFactory.class,
+    @Reference(name = "IDMConnectionFactoryReference", referenceInterface = IDMConnectionFactory.class,
             bind = "setConnectionFactory", unbind = "unsetConnectionFactory",
-            target = "(service.pid=org.forgerock.openidm.internal)",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "ScriptEngineFactoryReference",
             referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",
@@ -321,7 +321,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         logger.info("OpenIDM Script Service component is deactivated.");
     }
 
-    public void setConnectionFactory(ConnectionFactory connectionFactory) {
+    public void setConnectionFactory(IDMConnectionFactory connectionFactory) {
         openidm.put("create", ResourceFunctions.newCreateFunction(connectionFactory));
         openidm.put("read", ResourceFunctions.newReadFunction(connectionFactory));
         openidm.put("update", ResourceFunctions.newUpdateFunction(connectionFactory));
@@ -333,7 +333,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         logger.info("Resource functions are enabled");
     }
 
-    public void unsetConnectionFactory(ConnectionFactory connectionFactory) {
+    public void unsetConnectionFactory(IDMConnectionFactory connectionFactory) {
         openidm.remove("create");
         openidm.remove("read");
         openidm.remove("update");

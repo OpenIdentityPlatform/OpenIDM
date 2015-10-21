@@ -49,7 +49,6 @@ import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
@@ -69,6 +68,7 @@ import org.forgerock.openidm.provisioner.ProvisionerService;
 import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.slf4j.Logger;
@@ -194,8 +194,12 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     }
 
     /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    protected IDMConnectionFactory connectionFactory;
+
+    protected void bindConnectionFactory(IDMConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
+    }
 
     @Reference(referenceInterface = ConnectorConfigurationHelper.class,
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
@@ -210,10 +214,6 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
 
     protected void unbindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) {
         connectorConfigurationHelpers.remove(helper.getProvisionerType());
-    }
-
-    protected void bindConnectionFactory(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
     }
 
     @Override

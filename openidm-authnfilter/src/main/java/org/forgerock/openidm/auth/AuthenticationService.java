@@ -56,6 +56,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.services.context.Context;
@@ -149,8 +150,8 @@ public class AuthenticationService implements SingletonResourceProvider {
     CryptoService cryptoService;
 
     /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    protected IDMConnectionFactory connectionFactory;
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)

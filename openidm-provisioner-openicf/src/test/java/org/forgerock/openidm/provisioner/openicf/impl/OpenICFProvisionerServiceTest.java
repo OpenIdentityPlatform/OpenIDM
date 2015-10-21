@@ -45,6 +45,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.routing.RouteMatcher;
@@ -286,7 +287,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
 
         assertThat(configJsons).isNotNull().overridingErrorMessage("You must copy the configurations first");
 
-        for (File configJson : configJsons) {
+        for (final File configJson : configJsons) {
             // Start OpenICFProvisionerService Service
             properties = new Hashtable<String, Object>(3);
             // properties.put(ComponentConstants.COMPONENT_ID, 42);
@@ -304,7 +305,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
             service.bindRouterRegistry(this);
             service.bindSyncFailureHandlerFactory(this);
             service.bindEnhancedConfig(new JSONEnhancedConfig());
-            service.bindConnectionFactory(Resources.newInternalConnectionFactory(router));
+            service.bindConnectionFactory(new IDMConnectionFactoryWrapper(Resources.newInternalConnectionFactory(router)));
 
             //set as NullActivityLogger to be the mock logger.
             service.setActivityLogger(NullActivityLogger.INSTANCE);
@@ -333,7 +334,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         // are protected
         SystemObjectSetService systemObjectSetService =
                 new SystemObjectSetService() {{
-                    bindConnectionFactory(Resources.newInternalConnectionFactory(router));
+                    bindConnectionFactory(new IDMConnectionFactoryWrapper(Resources.newInternalConnectionFactory(router)));
                     for (Pair<OpenICFProvisionerService, ComponentContext> pair : systems) {
                         bindProvisionerService(pair.getLeft(),(Map) null);
                     }

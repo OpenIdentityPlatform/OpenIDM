@@ -86,6 +86,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -115,8 +116,8 @@ public class AuditServiceImpl implements AuditService {
     // ----- Declarative Service Implementation
 
     /** The connection factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    private ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    private IDMConnectionFactory connectionFactory;
 
     /** Although we may not need the router here,
      https://issues.apache.org/jira/browse/FELIX-3790
