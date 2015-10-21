@@ -56,14 +56,12 @@ exports.fetch = function (resourceName) {
                 return e;
             }
         },
-        currentResource = {},
         linkedResources = {};
 
-        try {
-            // read the resource
-            currentResource = openidm.read(resourceName);
-        } catch (e) {
-            currentResource["error"] = getException(e);
+        // read the resource; if the read throws an exception, let the backend handle it
+        var currentResource = openidm.read(resourceName);
+        if (currentResource === null) {
+            return currentResource;
         }
 
         try {
