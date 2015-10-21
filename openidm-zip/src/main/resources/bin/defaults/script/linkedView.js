@@ -58,21 +58,21 @@ exports.fetch = function (resourceName) {
         },
         linkedResources = {};
 
-        // read the resource; if the read throws an exception, let the backend handle it
-        var currentResource = openidm.read(resourceName);
-        if (currentResource === null) {
-            return currentResource;
-        }
+    // read the resource; if the read throws an exception, let the backend handle it
+    var currentResource = openidm.read(resourceName);
+    if (currentResource === null) {
+        return currentResource;
+    }
 
-        try {
-            // read the linked resources
-            linkedResources = openidm.action("sync", "getLinkedResources", {}, { "resourceName" : resourceName });
-        } catch (e) {
-            currentResource["error"] = getException(e);
-        }
+    try {
+        // read the linked resources
+        linkedResources = openidm.action("sync", "getLinkedResources", {}, { "resourceName" : resourceName });
+    } catch (e) {
+        currentResource["error"] = getException(e);
+    }
 
-        // augment the resource with the resources that link to the main object
-        return _.extend(currentResource, {
-            "linkedTo": linkedResources
-        });
+    // augment the resource with the resources that link to the main object
+    return _.extend(currentResource, {
+        "linkedTo": linkedResources
+    });
 };
