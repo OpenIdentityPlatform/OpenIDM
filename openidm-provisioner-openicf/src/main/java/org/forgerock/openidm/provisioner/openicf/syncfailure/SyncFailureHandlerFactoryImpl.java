@@ -20,11 +20,8 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.services.context.Context;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.script.ScriptRegistry;
 
 /**
@@ -61,8 +58,8 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
     }
 
     /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    protected IDMConnectionFactory connectionFactory;
 
     /**
      * Create a <em>SyncFailureHandler</em> from the config.  The config should optionally

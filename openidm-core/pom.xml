@@ -115,6 +115,13 @@
 
         <!-- Test Dependencies -->
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-router</artifactId>
+            <version>${project.version}</version>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-test-utils</artifactId>
             <scope>test</scope>

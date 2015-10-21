@@ -77,7 +77,6 @@ import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -121,6 +120,7 @@ import org.forgerock.openidm.provisioner.openicf.internal.SystemAction;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandler;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncFailureHandlerFactory;
 import org.forgerock.openidm.provisioner.openicf.syncfailure.SyncHandlerException;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistry;
@@ -263,16 +263,16 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     private Map<Class<? extends APIOperation>, OperationOptionInfoHelper> systemOperations = null;
 
     /** The Connection Factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    protected IDMConnectionFactory connectionFactory;
 
-    void bindConnectionFactory(final ConnectionFactory connectionFactory) {
+    void bindConnectionFactory(final IDMConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
         // update activityLogger to use the "real" activity logger on the router
         this.activityLogger = new RouterActivityLogger(connectionFactory);
     }
 
-    void unbindConnectionFactory(final ConnectionFactory connectionFactory) {
+    void unbindConnectionFactory(final IDMConnectionFactory connectionFactory) {
         this.connectionFactory = null;
         // ConnectionFactory has gone away, use null activity logger
         this.activityLogger = NullActivityLogger.INSTANCE;

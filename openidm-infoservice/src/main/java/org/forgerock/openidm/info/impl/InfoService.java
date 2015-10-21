@@ -41,12 +41,12 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.AbstractScriptedService;
 import org.forgerock.services.context.Context;
 import org.osgi.framework.BundleContext;
@@ -82,8 +82,8 @@ public class InfoService extends AbstractScriptedService {
     private EnhancedConfig enhancedConfig;
 
     /** The connection factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    private ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    private IDMConnectionFactory connectionFactory;
 
     private ComponentContext context;
 

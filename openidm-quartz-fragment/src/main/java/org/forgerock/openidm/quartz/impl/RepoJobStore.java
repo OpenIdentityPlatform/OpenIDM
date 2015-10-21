@@ -37,6 +37,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.concurrent.atomic.AtomicLong;
 
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -203,14 +204,15 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
      */
     public ConnectionFactory getConnectionFactory() throws JobPersistenceException {
         if (connectionFactory == null) {
-            BundleContext ctx = FrameworkUtil.getBundle(ConnectionFactory.class).getBundleContext();
+            BundleContext ctx = FrameworkUtil.getBundle(IDMConnectionFactory.class).getBundleContext();
             ServiceReference serviceReference = null;
             try {
-                serviceReference = ctx.getServiceReferences(ConnectionFactory.class, "(openidm.router.prefix=/)").iterator().next();
+                serviceReference = ctx.getServiceReferences(IDMConnectionFactory.class,
+                        "(openidm.router.prefix=/)").iterator().next();
             } catch (InvalidSyntaxException e) {
                 /* ignore the filter is correct */
             }
-            connectionFactory = ConnectionFactory.class.cast(ctx.getService(serviceReference));
+            connectionFactory = IDMConnectionFactory.class.cast(ctx.getService(serviceReference));
             if (connectionFactory == null) {
                 throw new JobPersistenceException("Connection factory is null");
             }

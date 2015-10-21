@@ -25,9 +25,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.Test;
@@ -38,7 +38,7 @@ public class TaskScannerServiceTest {
     public void testAuditScheduledService() throws Exception {
         //given
         final TaskScannerService taskScannerService = new TaskScannerService();
-        final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        final IDMConnectionFactory connectionFactory = mock(IDMConnectionFactory.class);
         final Connection connection = mock(Connection.class);
         final Context context = mock(Context.class);
         final AuditEvent auditEvent = mock(AuditEvent.class);

@@ -46,13 +46,13 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilters;
@@ -122,7 +122,7 @@ public class ConfigObjectServiceTest {
         // Init the ConfigCrypto instance used by ConfigObjectService
         ConfigCrypto.getInstance(bundleContext, mock(ProviderListener.class));
 
-        ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
+        IDMConnectionFactory connectionFactory = mock(IDMConnectionFactory.class);
         when(connectionFactory.getConnection()).thenReturn(mock(Connection.class));
 
         enhancedConfig = mock(EnhancedConfig.class);

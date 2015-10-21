@@ -27,7 +27,6 @@ import static org.mockito.Mockito.when;
 import java.util.Collection;
 
 import org.assertj.core.data.MapEntry;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
@@ -39,6 +38,8 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.invocation.InvocationOnMock;
@@ -103,7 +104,7 @@ public class ReconciliationServiceTest {
 
     private ReconciliationService createReconciliationService(final ConnectionFactory connectionFactory) {
         final ReconciliationService reconciliationService = new ReconciliationService();
-        reconciliationService.bindConnectionFactory(connectionFactory);
+        reconciliationService.bindConnectionFactory(new IDMConnectionFactoryWrapper(connectionFactory));
         return reconciliationService;
     }
 }

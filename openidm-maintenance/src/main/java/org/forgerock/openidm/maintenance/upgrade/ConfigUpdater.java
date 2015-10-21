@@ -26,13 +26,14 @@ package org.forgerock.openidm.maintenance.upgrade;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Requests;
@@ -44,7 +45,7 @@ import org.osgi.framework.Constants;
  */
 @Component(name = ConfigUpdater.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
         description = "OpenIDM Config Update", immediate = true)
-@org.apache.felix.scr.annotations.Properties({
+@Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Config Update")
 })
@@ -53,8 +54,8 @@ public class ConfigUpdater {
     public static final String PID = "org.forgerock.openidm.maintenance.update.config";
 
     /** The connection factory */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.internal)")
-    protected ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.STATIC)
+    protected IDMConnectionFactory connectionFactory;
 
     /**
      * Apply a JsonPatch to a config object on the router.
