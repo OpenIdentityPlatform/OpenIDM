@@ -216,7 +216,7 @@
 
     <properties>
         <!-- Version management -->
-        <commons.forgerock-bom.version>1.0.0-SNAPSHOT</commons.forgerock-bom.version>
+        <commons.forgerock-bom.version>1.0.0</commons.forgerock-bom.version>
 
         <!-- Commons versions -->
         <commons.forgerock-script.version>2.0.0-SNAPSHOT</commons.forgerock-script.version>
