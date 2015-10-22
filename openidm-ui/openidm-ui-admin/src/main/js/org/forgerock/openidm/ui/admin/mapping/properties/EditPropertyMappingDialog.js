@@ -18,7 +18,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
-    "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
@@ -34,7 +33,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             eventManager,
             constants,
             spinner,
-            autoCompleteUtils,
             inlineScriptEditor,
             LinkQualifierFilterEditor,
             AdminUtils,
@@ -197,8 +195,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
         render: function(params, callback) {
             var currentProperties,
-                sourceType,
-                connectorUrl;
+                sourceType;
 
             this.data.mappingName = this.getMappingName();
             this.property = params.id;
@@ -230,8 +227,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
         renderEditProperty: function(callback) {
             var _this = this,
-                settings,
-                sourceSearch = false;
+                settings;
 
             settings = {
                 "title": $.t("templates.mapping.propertyEdit.title", {"property": this.data.property.target}),
@@ -387,10 +383,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             $('#mappingDialogTabs a:first', this.currentDialog).tab('show');
 
             $('#mappingDialogTabs .active :input:first', this.currentDialog).focus();
-
-            if (this.data.availableSourceProps) {
-                autoCompleteUtils.selectionSetup($("input[name='source']:last", this.currentDialog), _.sortBy(this.data.availableSourceProps,function(s){ return s; }));
-            }
 
             $("input[name='source']", this.currentDialog).on('change autocompleteclose', function (e, initialRender) {
                 var val = $(this).val(),

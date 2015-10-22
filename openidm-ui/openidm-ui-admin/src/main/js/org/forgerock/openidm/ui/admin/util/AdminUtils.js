@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global */
+/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
     "jquery",
@@ -35,9 +35,7 @@ define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
              ConfigDelegate,
              ConnectorDelegate) {
 
-    var obj = new AbstractConfigurationAware();
-
-    obj.templates = {};
+    var obj = {};
 
     obj.findPropertiesList = function(type) {
         var connectorUrl,
@@ -50,13 +48,17 @@ define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
                     return connector.name === type[1];
                 }, this);
 
-                connectorUrl = connectorUrl.config.split("/");
+                if(connectorUrl && connectorUrl.config && connectorUrl.config.length > 0) {
+                    connectorUrl = connectorUrl.config.split("/");
 
-                ConfigDelegate.readEntity(connectorUrl[1] +"/" +connectorUrl[2]).then(_.bind(function(config) {
-                    properties = config.objectTypes[type[2]].properties;
+                    ConfigDelegate.readEntity(connectorUrl[1] +"/" +connectorUrl[2]).then(_.bind(function(config) {
+                        properties = config.objectTypes[type[2]].properties;
 
-                    propertiesPromise.resolve(properties, config);
-                }, this));
+                        propertiesPromise.resolve(properties, config);
+                    }, this));
+                } else {
+                    propertiesPromise.resolve([]);
+                }
             }, this));
         } else {
             ConfigDelegate.readEntity("managed").then(_.bind(function(managed) {
@@ -64,7 +66,11 @@ define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
                     return managedObject.name === type[1];
                 }, this);
 
-                propertiesPromise.resolve(properties.schema.properties);
+                if(properties.schema && properties.schema.properties) {
+                    propertiesPromise.resolve(properties.schema.properties);
+                } else {
+                    propertiesPromise.resolve([]);
+                }
             }, this));
         }
 

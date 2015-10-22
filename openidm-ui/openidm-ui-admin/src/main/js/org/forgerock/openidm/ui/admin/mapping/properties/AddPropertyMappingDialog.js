@@ -14,7 +14,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "bootstrap-dialog",
@@ -25,7 +24,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
             uiUtils,
             eventManager,
             constants,
-            autoCompleteUtils,
             EditPropertyMappingDialog,
             AdminUtils,
             BootstrapDialog,
@@ -127,7 +125,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                         function () {
                             settings.postRender();
 
-                            _this.$el.find("#addPropertySelect")
+                            _this.$el.find("#addPropertySelect");
 
                             _this.$el.find("#addPropertySelect").focus();
 
