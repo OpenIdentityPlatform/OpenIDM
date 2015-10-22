@@ -1,66 +1,84 @@
-.wide-card {
-  &.disabled {
-    cursor:default;
+.selfservice-holder {
+  position:relative;
 
-    &:hover {
-      border-color:#ddd;
+  .wide-card {
+    height:125px;
+
+    .panel-heading {
+      padding: 5px 15px 0 0;
     }
 
-    h3 {
-      color:#777;
+    .panel-body {
+      padding-left:90px;
+      padding-top:5px;
     }
 
-    .btn-link {
+    .panel-footer {
+      position: absolute;
+      right: 10px;
+      top: 1px;
+      border:0;
+      padding:0;
+
+      .btn-link:hover {
+        background-color:inherit;
+      }
+    }
+
+    &.disabled {
       cursor:default;
+
+      &:hover {
+        border-color:#ddd;
+      }
+
+      h3 {
+        color:#777;
+      }
+
+      .btn-link {
+        cursor:default;
 
         &:hover {
           color:#777;
         }
-    }
+      }
 
-    label {
-      span {
-        cursor: default;
+      label {
+        span {
+          cursor: default;
+        }
       }
     }
-  }
 
-  .switch-holder {
-    display: inline-block;
-    width: 90px;
+    .switch-holder {
+      position:absolute;
 
-    .checkbox-slider {
-      position: relative;
-      top: 5px;
-      left: 15px;
+      .checkbox-slider {
+        position: relative;
+        top: 5px;
+        left: 15px;
+      }
+    }
+
+    .details {
+      h3 {
+        font-size: 18px;
+        text-align: left;
+        margin-bottom: 5px;
+      }
+    }
+
+    .btn-link {
+      padding: 0px;
+      margin-top: 10px;
+    }
+
+    .fa {
+      text-align: right;
+      margin-right: 10px;
     }
   }
-
-  .details {
-    display: inline-block;
-    margin-top:5px;
-    margin-bottom:5px;
-
-    h3 {
-      font-size: 18px;
-      text-align: left;
-      margin-bottom: 5px;
-    }
-  }
-
-  .btn-link {
-    padding: 0px;
-    margin-top: 10px;
-  }
-
-  .fa {
-    text-align: right;
-    margin-right: 10px;
-  }
-}
-
-.selfservice-holder {
-  position:relative;
 
   .shim {
     height:100%;
@@ -89,6 +107,14 @@
     &:focus {
       cursor:not-allowed;
       color:#a1a1a1;
+    }
+  }
+}
+
+@media (min-width: 768px) {
+  .selfservice-holder {
+    .wide-card {
+      height: 75px;
     }
   }
 }
