@@ -436,7 +436,7 @@
             "registrationSteps" : "Registration Steps",
             "passwordSteps" : "Password Reset Steps",
             "emailValidation" : "Email Validation",
-            "emailValidationDescription" : "Configure email sent during user registration process",
+            "emailValidationDescription" : "Verify that the user has access to the email account",
             "kbaSecurityAnswerDefinitionStageTitle" : "KBA Stage",
             "kbaSecurityAnswerDefinitionStageHelp" : "Configure questions used during user registration",
             "userDetailsTitle" : "User Details",
@@ -454,14 +454,15 @@
             "tokenExpire" : "Token LifeTime (seconds)",
             "password" : {
                 "resetStageTitle" : "Configure Password Reset Form",
-                "userIdValidationTitle" : "Configure Validation Email"
+                "userIdValidationTitle" : "Configure Validation Email",
+                "captchaTitle" : "reCAPTCHA for Password Reset"
             },
             "user" : {
                 "selfRegistrationTitle" : "Configure Registration Form",
                 "emailValidationTitle" : "Configure Validation Email",
                 "kbaStageTitle" : "Configure KBA Stage",
                 "userDetailsTitle" : "Configure User Details",
-                "captchaTitle" : "reCAPTCHA"
+                "captchaTitle" : "reCAPTCHA for Registration"
             },
             "userRegistrationForm" : {
                 "identityServiceUrl" : "Identity Service URL",

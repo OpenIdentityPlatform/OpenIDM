@@ -30,11 +30,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
             "click li.disabled a" : "preventTab"
         },
         partials: [
-            "partials/selfservice/user/_emailValidation.html",
-            "partials/selfservice/user/_kbaStage.html",
-            "partials/selfservice/user/_selfRegistration.html",
-            "partials/selfservice/user/_userDetails.html",
-            "partials/selfservice/user/_captcha.html",
+            "partials/selfservice/_emailValidation.html",
+            "partials/selfservice/_kbaStage.html",
+            "partials/selfservice/_selfRegistration.html",
+            "partials/selfservice/_userDetails.html",
+            "partials/selfservice/_captcha.html",
             "partials/selfservice/_advancedoptions.html",
             "partials/selfservice/_selfserviceblock.html",
             "partials/form/_basicInput.html"

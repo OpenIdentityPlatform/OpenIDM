@@ -30,9 +30,9 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
             "click li.disabled a" : "preventTab"
         },
         partials: [
-            "partials/selfservice/password/_userIdValidation.html",
-            "partials/selfservice/password/_resetStage.html",
-            "partials/selfservice/user/_captcha.html",
+            "partials/selfservice/_userIdValidation.html",
+            "partials/selfservice/_resetStage.html",
+            "partials/selfservice/_captcha.html",
             "partials/selfservice/_advancedoptions.html",
             "partials/selfservice/_selfserviceblock.html",
             "partials/form/_basicInput.html"
@@ -104,7 +104,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
         render: function(args, callback) {
             this.data.configList = [{
                 type: "captcha",
-                title: $.t("templates.selfservice.user.captchaTitle"),
+                title: $.t("templates.selfservice.password.captchaTitle"),
                 help: $.t("templates.selfservice.captcha.description")
             },
             {
