@@ -140,7 +140,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                     title: $.t("templates.selfservice." + this.model.serviceType + "." + type + "Title"),
                     type: BootstrapDialog.TYPE_DEFAULT,
                     size: BootstrapDialog.SIZE_WIDE,
-                    message: $(handlebars.compile("{{> selfservice/" + this.model.serviceType + "/_" + type + "}}")(currentData)),
+                    message: $(handlebars.compile("{{> selfservice/_" + type + "}}")(currentData)),
                     onshown: function (dialogRef) {
                         dialogRef.$modalBody.find('.array-selection').selectize({
                             delimiter: ',',
