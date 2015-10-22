@@ -40,6 +40,7 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "selectize"
 ], function($, _, handlebars,
             form2js,
@@ -53,6 +54,7 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
             Constants,
             InlineScriptEditor,
             UIUtils,
+            AdminUtils,
             selectize) {
     var EditAssignmentView = AdminAbstractView.extend({
         template: "templates/admin/assignment/EditAssignmentViewTemplate.html",
@@ -107,34 +109,16 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
 
                 systemType = this.data.mapping.target.split("/");
 
-                if(systemType[0] === "system") {
-                    ConnectorDelegate.currentConnectors().then(_.bind(function(connectors) {
-                        connectorUrl = _.find(connectors, function(connector) {
-                            return connector.name === systemType[1];
-                        }, this);
 
-                        connectorUrl = connectorUrl.config.split("/");
+                AdminUtils.findPropertiesList(systemType).then(_.bind(function(properties, connector){
+                    this.data.resourceSchema = properties;
 
-                        ConfigDelegate.readEntity(connectorUrl[1] +"/" +connectorUrl[2]).then(_.bind(function(config) {
-                            this.model.connector = config;
+                    if(connector) {
+                        this.model.connector = connector;
+                    }
 
-                            this.data.resourceSchema = config.objectTypes[systemType[2]].properties;
-
-                            this.attributeRender(callback);
-                        }, this));
-
-                    }, this));
-                } else {
-                    ConfigDelegate.readEntity("managed").then(_.bind(function(managed) {
-                        this.data.resourceSchema = _.find(managed.objects, function(managedObject) {
-                            return managedObject.name === systemType[1];
-                        }, this);
-
-                        this.data.resourceSchema = this.data.resourceSchema.schema.properties;
-
-                        this.attributeRender(callback);
-                    }, this));
-                }
+                    this.attributeRender(callback);
+                }, this));
             }, this));
         },
 

@@ -3,11 +3,14 @@
     <div id="Property_List">
        <div class="row">
            <div class="col-sm-11">
-               <label for="propertyList">{{t "templates.mapping.propertyAdd.listLabel"}}</label>
+               <label for="addPropertySelect">{{t "templates.mapping.propertyAdd.listLabel"}}</label>
            </div>
            <div class="col-sm-5">
-               <input name="propertyList" value="" class="form-control" autocomplete="off"/>
-               <div class="validation-message"></div>
+               <select id="addPropertySelect" name="addPropertySelect" class="form-control">
+               {{#each resourceSchema}}
+                   <option value="{{@key}}">{{@key}}</option>
+               {{/each}}
+               </select>
            </div>
        </div>
     </div>
