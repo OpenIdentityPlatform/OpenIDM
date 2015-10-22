@@ -221,7 +221,8 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                     "value": ""
                 },
                 currentAttribute,
-                ldapGroup;
+                ldapGroup,
+                tempIndex;
 
 
             if(attribute) {
@@ -243,21 +244,25 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 });
 
                 if(ldapGroup) {
+                    tempIndex = this.model.schemaEditors.length;
+
+                    this.model.schemaEditors.push({});
+
                     ConnectorDelegate.queryConnector(this.model.connector.name +"/" +ldapGroup).then(_.bind(function(groups){
                         newAttr.find(".attribute-value").empty();
                         newAttr.find(".attribute-value").append($(handlebars.compile("{{> assignment/_LDAPGroup}}")(groups)));
 
-                        this.model.schemaEditors.push(newAttr.find(".ldap-group-select").selectize({
+                        this.model.schemaEditors[tempIndex] = newAttr.find(".ldap-group-select").selectize({
                             persist: false,
                             create: false,
                             maxItems: null
-                        }));
+                        });
 
                         newAttr.find(".ldap-group-select")[0].selectize.clear();
                         newAttr.find(".ldap-group-select")[0].selectize.setValue(currentAttribute);
                     }, this));
                 } else {
-                    this.createJSONEditor($(event.target));
+                    this.model.schemaEditors.push(this.createJSONEditor(newAttr.find(".select-attribute"), currentAttribute));
                 }
             } else {
                 this.model.schemaEditors.push(this.createJSONEditor(newAttr.find(".select-attribute"), currentAttribute));
@@ -327,7 +332,10 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
         deleteAttribute: function(event) {
             event.preventDefault();
 
-            var editorIndex = this.$el.find(".assignment-attributes .list-group-item").find(event.target).closest(".list-group-item").index();
+            console.log(($(event.target).parents(".list-group-item")));
+            console.log(this.$el.find("#assignmentAttributesList .list-group-item"));
+
+            var editorIndex = this.$el.find("#assignmentAttributesList .list-group-item").index($(event.target).parents(".list-group-item"));
 
             this.model.schemaEditors.splice(editorIndex, 1);
             this.model.assignmentAttributes.splice(editorIndex, 1);

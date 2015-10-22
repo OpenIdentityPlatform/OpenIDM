@@ -63,9 +63,9 @@
                             "href" : "#mapping/add/"
                         },
                         {
-                            "name" : "dashboard.quickStart.createANewRole",
+                            "name" : "dashboard.quickStart.manageRole",
                             "icon" : "fa-check-square-o",
-                            "href" : "#resource/managed/role/add/"
+                            "href" : "#resource/managed/role/list/"
                         },
                         {
                             "name" : "dashboard.quickStart.addANewDevice",
@@ -83,12 +83,12 @@
                             "href" : "#selfservice/passwordreset/"
                         },
                         {
-                            "name" : "dashboard.quickStart.createAUser",
+                            "name" : "dashboard.quickStart.manageUser",
                             "icon" : "fa-user",
-                            "href" : "#resource/managed/user/add/"
+                            "href" : "#resource/managed/user/list/"
                         },
                         {
-                            "name" : "dashboard.quickStart.setupAuthentication",
+                            "name" : "dashboard.quickStart.setupSystem",
                             "icon" : "fa-user",
                             "href" : "#settings/"
                         }
