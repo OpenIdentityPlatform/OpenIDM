@@ -13,7 +13,11 @@
                         <label>{{t "templates.mapping.propertyEdit.propertyListLabel"}}</label>
                     </div>
                     <div class="col-sm-5">
-                        <input autocomplete="off" class="form-control" name="source" value="{{property.source}}"/>
+                        <select id="sourcePropertySelect" name="source" class="form-control">
+                            {{#each resourceSchema}}
+                                <option value="{{@key}}">{{@key}}</option>
+                            {{/each}}
+                        </select>
 
                         <div class="validation-message"></div>
                     </div>

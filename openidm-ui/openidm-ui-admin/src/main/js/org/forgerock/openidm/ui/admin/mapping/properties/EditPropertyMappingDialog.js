@@ -21,8 +21,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor",
+    "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "bootstrap-dialog",
-    "bootstrap-tabdrop"
+    "bootstrap-tabdrop",
+    "selectize"
 ], function($, _, form2js,
             MappingAdminAbstractView,
             syncDelegate,
@@ -35,8 +37,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
             autoCompleteUtils,
             inlineScriptEditor,
             LinkQualifierFilterEditor,
+            AdminUtils,
             BootstrapDialog,
-            tabdrop) {
+            tabdrop,
+            selectize) {
 
     var EditPropertyMappingDialog = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/EditPropertyMappingDialogTemplate.html",
@@ -192,9 +196,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
         },
 
         render: function(params, callback) {
-            var _this = this,
-                currentProperties,
-                settings;
+            var currentProperties,
+                sourceType,
+                connectorUrl;
 
             this.data.mappingName = this.getMappingName();
             this.property = params.id;
@@ -213,13 +217,27 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                 this.data.sampleSourceTooltip = null;
             }
 
+            this.data.currentMappingDetails = this.getCurrentMapping();
+
+            sourceType = this.data.currentMappingDetails.source.split("/");
+
+            AdminUtils.findPropertiesList(sourceType).then(_.bind(function(properties){
+                this.data.resourceSchema = properties;
+
+                this.renderEditProperty(callback);
+            }, this));
+        },
+
+        renderEditProperty: function(callback) {
+            var _this = this,
+                settings,
+                sourceSearch = false;
+
             settings = {
                 "title": $.t("templates.mapping.propertyEdit.title", {"property": this.data.property.target}),
                 "template": this.template,
                 "postRender": _.bind(this.loadData, this)
             };
-
-            this.data.currentMappingDetails = this.getCurrentMapping();
 
             this.currentDialog = $('<form id="propertyMappingDialogForm"></form>');
 
@@ -236,6 +254,16 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
                         _.extend(conf.globalData, _this.data),
                         function () {
                             settings.postRender();
+
+                            _this.$el.find("#sourcePropertySelect").selectize({
+                                persist: false,
+                                create: false
+                            });
+
+                            if(_this.data.property.source) {
+                                _this.$el.find("#sourcePropertySelect")[0].selectize.setValue(_this.data.property.source);
+                            }
+
                             _this.currentDialog.find(".nav-tabs").tabdrop();
 
                             _this.currentDialog.find(".nav-tabs").on("shown.bs.tab", function (e) {

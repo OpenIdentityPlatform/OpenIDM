@@ -16,7 +16,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/AutoCompleteUtils",
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
-    "bootstrap-dialog"
+    "org/forgerock/openidm/ui/admin/util/AdminUtils",
+    "bootstrap-dialog",
+    "selectize"
 ], function($, _,
             MappingAdminAbstractView,
             conf,
@@ -25,7 +27,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
             constants,
             autoCompleteUtils,
             EditPropertyMappingDialog,
-            BootstrapDialog) {
+            AdminUtils,
+            BootstrapDialog,
+            selectize) {
 
     var AddPropertyMappingDialog = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/AddPropertyMappingDialogTemplate.html",
@@ -35,13 +39,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
         },
         el: "#dialogs",
         events: {
-            "click input[type=submit]": "formSubmit",
-            "change :input": "validateMapping"
+            "click input[type=submit]": "formSubmit"
         },
         model: {},
 
         formSubmit: function (event) {
-            var property = $(":input[name=propertyList]",this.$el).val(),
+            var property = $("#addPropertySelect" ,this.$el).val(),
                 mappingProperties = this.data.currentProperties;
 
             if (event) {
@@ -59,31 +62,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                 EditPropertyMappingDialog.render({
                     id: mappingProperties.length.toString(),
                     mappingProperties: mappingProperties,
-                    availProperties: this.data.availableTargetProps,
                     saveCallback: this.model.saveCallback
                 });
-            }
-        },
-
-        validateMapping: function () {
-            var propList = $("input[name='propertyList']", this.$el).val(),
-                validationMessage = $("#Property_List .validation-message", this.$el),
-                hasAvailableProps = this.data.availableTargetProps  && this.data.availableTargetProps.length,
-                hasPropListValue = propList && propList.length,
-                invalidProp = hasAvailableProps && hasPropListValue && !_.contains(this.data.availableTargetProps, propList),
-                disableSave = function(message) {
-                    $("#scriptDialogUpdate").prop("disabled", true);
-                    validationMessage.text(message);
-                };
-
-            if (invalidProp) {
-                disableSave($.t("templates.mapping.validPropertyRequired"));
-                return false;
-
-            } else {
-                $("#scriptDialogUpdate").prop("disabled", false);
-                validationMessage.text("");
-                return true;
             }
         },
 
@@ -92,22 +72,42 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
         },
 
         render: function(params, callback) {
-            var _this = this,
-                settings;
+            var targetType;
 
             this.data.mappingName = this.getMappingName();
             this.property = "_new";
             this.data.currentProperties = params.mappingProperties || this.getCurrentMapping().properties;
-            this.data.availableTargetProps = params.availProperties;
             this.model.saveCallback = params.saveCallback;
+            this.model.mapping = this.getCurrentMapping();
+
+            targetType = this.model.mapping.target.split("/");
+
+            AdminUtils.findPropertiesList(targetType).then(_.bind(function(properties){
+                this.data.resourceSchema = properties;
+
+                this.renderAddProperty(callback);
+            }, this));
+        },
+
+        renderAddProperty: function(callback) {
+            var _this = this,
+                settings;
 
             settings = {
                 "title": $.t("templates.mapping.propertyAdd.title"),
                 "template": this.template,
                 "postRender": _.bind(function() {
-                    if(this.data.availableTargetProps){
-                        autoCompleteUtils.selectionSetup($("input[name='propertyList']", this.$el),_.sortBy(this.data.availableTargetProps,function(s){ return s; }));
-                    }
+                    _this.$el.find("#addPropertySelect").selectize({
+                        persist: false,
+                        create: false,
+                        onChange: _.bind(function(value) {
+                            if(value.length > 0) {
+                                this.model.dialog.$modalFooter.find("#scriptDialogUpdate").prop("disabled", false);
+                            } else {
+                                this.model.dialog.$modalFooter.find("#scriptDialogUpdate").prop("disabled", true);
+                            }
+                        }, this)
+                    });
                 },this)
             };
 
@@ -116,7 +116,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
             $('#dialogs').append(this.currentDialog);
             this.setElement(this.currentDialog);
 
-            BootstrapDialog.show({
+            this.model.dialog = BootstrapDialog.show({
                 title: settings.title,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
@@ -126,7 +126,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                         _.extend(conf.globalData, _this.data),
                         function () {
                             settings.postRender();
-                            $(':input:first', _this.currentDialog).focus();
+
+                            _this.$el.find("#addPropertySelect")
+
+                            _this.$el.find("#addPropertySelect").focus();
+
                             if (callback) {
                                 callback();
                             }
