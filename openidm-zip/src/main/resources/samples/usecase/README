@@ -338,6 +338,7 @@ Usecase5 - Certification workflows
         --data '{
           "name":"human-resources-assignment",
           "description":"Assignment for Human Resources department",
+          "mapping": "managedUser_systemBusiness",
           "attributes":[ { 
             "name": "memberOf",
             "value": ["CN=cisco_vpn,DC=example,DC=com"],
@@ -356,6 +357,7 @@ Usecase5 - Certification workflows
         --data '{
           "name":"production-planning-assignment",
           "description":"Assignment for Production Planning department"},
+          "mapping": "managedUser_systemBusiness",
           "attributes":[ {
             "name": "memberOf",
             "value": ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com","CN=radius_dialin,DC=example,DC=com"],
@@ -374,6 +376,7 @@ Usecase5 - Certification workflows
         --data '{
           "name":"sales-distribution",
           "description":"Assignment for Sales and Distribution department"},
+          "mapping": "managedUser_systemBusiness",
           "attributes":[ { 
             "name": "memberOf",
             "value": ["CN=intranet,DC=example,DC=com","CN=email,DC=example,DC=com"],
@@ -392,6 +395,7 @@ Usecase5 - Certification workflows
         --data '{
           "name":"treasury-payments",
           "description":"Assignment for for Treasury and Payments department"},
+          "mapping": "managedUser_systemBusiness",
           "attributes":[ { 
             "name": "memberOf",
             "value": ["CN=intranet,DC=example,DC=com"],

@@ -390,6 +390,7 @@ First create the Contractor assignment:
                --data '{
                  "name" : "Contractor",
                  "description": "Contractor assignment for contract workers.",
+                 "mapping": "managedUser_systemLdapAccounts",
                  "attributes": [
                    {
                      "name": "ldapGroups",

@@ -230,7 +230,7 @@ To confirm, you should see output that includes two roles for user `jdoe`. The f
 `_id` number; the number that you see will be different.
 
 ++++
-<screen>"roles":["openidm-authorized","managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34"],</screen>
+<screen>"roles":[ { "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34" } ],</screen>
 ++++
 
 And this next command adds the `Customer` role to user `bjensen`:
@@ -258,7 +258,7 @@ And this next command adds the `Customer` role to user `bjensen`:
 To confirm, you should see output that includes two roles for user `bjensen`, in this case:
 
 ++++
-<screen>"roles":["openidm-authorized","managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b"],</screen>
+<screen>"roles":[ { "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b" } ],</screen>
 ++++
 
 Now assign the `customer` role to user `jdoe`, as that user is a customer and an agent:
@@ -266,11 +266,11 @@ Now assign the `customer` role to user `jdoe`, as that user is a customer and an
 ++++
 ++++
 
-Now user `jdoe` should have three roles:
+Now user `jdoe` should have two roles:
 
 ++++
-<screen>"roles":["openidm-authorized", "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34", 
-"managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b" ],</screen>
+<screen>"roles":[ { "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34" }, 
+{ "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b" } ],</screen>
 ++++
 
 [[multiaccount-background]]
