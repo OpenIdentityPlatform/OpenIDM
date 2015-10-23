@@ -25,6 +25,7 @@ import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 
+import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -33,8 +34,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.script.ScriptException;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
@@ -449,12 +448,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             return newResourceResponse(resourceId, rev, null);
         }
 
-        // Persists all relationship fields that are present in the new value and updates their values.
-        newValue.asMap().putAll(persistRelationships(context, resourceId, newValue).asMap());
-
         // Execute the onUpdate script if configured
         execScript(context, ScriptHook.onUpdate, newValue,
                 prepareScriptBindings(context, request, resourceId, oldValue, newValue));
+
+        // Validate relationships before persisting
+        validateRelationshipFields(newValue, context);
 
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, newValue);
@@ -469,16 +468,20 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         UpdateRequest updateRequest = Requests.newUpdateRequest(repoId(resourceId), newValue);
         updateRequest.setRevision(rev);
         ResourceResponse response = connectionFactory.getConnection().update(context, updateRequest);
-        
+        JsonValue responseContent = response.getContent();
+
         // Put relationships back in before we respond
-        response.getContent().asMap().putAll(strippedRelationshipFields.asMap());
+        responseContent.asMap().putAll(strippedRelationshipFields.asMap());
+
+        // Persists all relationship fields that are present in the new value and updates their values.
+        responseContent.asMap().putAll(persistRelationships(context, resourceId, responseContent).asMap());
 
         // Execute the postUpdate script if configured
-        execScript(context, ScriptHook.postUpdate, response.getContent(),
-                prepareScriptBindings(context, request, resourceId, oldValue, response.getContent()));
+        execScript(context, ScriptHook.postUpdate, responseContent,
+                prepareScriptBindings(context, request, resourceId, oldValue, responseContent));
 
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
-                oldValue, response.getContent());
+                oldValue, responseContent);
 
         return response;
     }
@@ -591,7 +594,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             // Execute onCreate script
             execScript(context, ScriptHook.onCreate, value, null);
-            
+
+            // Validate relationships before persisting
+            validateRelationshipFields(value, context);
+
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(context, value);
 
@@ -681,6 +687,23 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
 
         return joined;
+    }
+
+    /**
+     * This will traverse the jsonValue and validate that all relationship references are valid.
+     *
+     * @param value json object that will get its relationship fields validated.
+     * @param context context of the request that is in progress.
+     * @throws ResourceException BadRequestException when the first invalid relationship reference is discovered,
+     * otherwise for other issues.
+     */
+    private void validateRelationshipFields(JsonValue value, Context context) throws ResourceException {
+        for (JsonPointer field : schema.getRelationshipFields()) {
+            JsonValue fieldValue = value.get(field);
+            if (schema.getField(field).isValidateRelationship() && fieldValue != null && fieldValue.isNotNull()) {
+                relationshipProviders.get(field).validateRelationshipField(fieldValue, context);
+            }
+        }
     }
 
     @Override
@@ -868,7 +891,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     }
                 }
 
-                ResourceResponse patchedResource = update(context, request, resource.getId(), rev, resource.getContent(), newValue);
+                ResourceResponse patchedResource = update(context, request, resource.getId(), rev, decrypted, newValue);
 
                 activityLogger.log(context, request, "",
                         managedId(patchedResource.getId()).toString(), resource.getContent(), patchedResource.getContent(),

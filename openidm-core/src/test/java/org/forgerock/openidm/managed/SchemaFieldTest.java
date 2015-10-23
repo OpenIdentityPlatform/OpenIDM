@@ -4,6 +4,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
@@ -130,5 +131,17 @@ public class SchemaFieldTest {
         assertTrue(!coreField.isArray());
         assertTrue(coreArrayField.isArray());
     }
-    
+
+    @Test
+    public void testValidatedRelationship() {
+        assertFalse(relationshipField.isValidateRelationship());
+        SchemaField relationshipField = new SchemaField("fieldX", json(object(
+                field("type", "relationship"),
+                field("validate", true),
+                field("properties", object(
+                        field("_ref", object(
+                                field("type", "string"))))))));
+        assertTrue(relationshipField.isValidateRelationship());
+    }
+
 }

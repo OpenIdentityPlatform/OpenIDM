@@ -41,6 +41,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
@@ -282,6 +283,34 @@ public abstract class RelationshipProvider {
      *
      */
     public abstract Promise<JsonValue, ResourceException> clear(Context context, String resourceId);
+
+    /**
+     * Tests that all references in the relationship field exist.
+     *
+     * @param relationshipField field to validate
+     * @param context context of the request working with the relationship.
+     * @throws ResourceException BadRequestException if the relationship is found to be not valid, otherwise for other
+     * issues.
+     */
+    public abstract void validateRelationshipField(JsonValue relationshipField, Context context)
+            throws ResourceException;
+
+    /**
+     * Does a read on the relationshipField.  If found not to exist then the relationshipField is invalid.
+     *
+     * @param relationshipField the field to be validated.
+     * @param context context of the request working with the relationship.
+     * @throws ResourceException BadRequestException when the relationship does not exist, otherwise for other issues.
+     */
+    protected void validateRelationshipExists(JsonValue relationshipField, Context context) throws ResourceException {
+        String ref = relationshipField.get(RelationshipUtil.REFERENCE_ID).asString();
+        try {
+            connectionFactory.getConnection().read(context, Requests.newReadRequest(ref));
+        } catch (NotFoundException e) {
+            throw new BadRequestException("The referenced relationship '" + ref + "' on '" +
+                    relationshipField.getPointer() + "' does not exist", e);
+        }
+    }
 
     /**
      * Creates a relationship object.

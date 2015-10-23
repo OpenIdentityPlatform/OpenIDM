@@ -202,9 +202,9 @@
                         "userEditable" : false,
                         "returnByDefault" : true,
                         "type" : "array",
-                        "returnByDefault" : true,
                         "items" : {
                             "type" : "relationship",
+                            "validate": false,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -386,6 +386,7 @@
                         "title" : "Manager",
                         "viewable" : true,
                         "searchable" : false,
+                        "validate": false,
                         "properties" : {
                         	"_ref" : { "type" : "string" },
                             "_refProperties": {
@@ -512,7 +513,6 @@
                         "viewable" : true,
                         "returnByDefault" : true,
                         "type" : "array",
-                        "returnByDefault" : true,
                         "items" : {
                             "type" : "relationship",
                             "properties" : {
