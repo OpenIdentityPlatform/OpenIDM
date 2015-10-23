@@ -503,4 +503,19 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             return field;
         }
     }
+
+    /**
+     * Implemented to iterate through the collection calling validateRelationshipExists for each relationship within the
+     * relationshipField.
+     *
+     * @param relationshipField field to iterate over.
+     * @param context context of the original request.
+     * @throws ResourceException Bad
+     * @see #validateRelationshipExists(JsonValue, Context)
+     */
+    public void validateRelationshipField(JsonValue relationshipField, Context context) throws ResourceException {
+        for (JsonValue collectionValue : relationshipField) {
+            validateRelationshipExists(collectionValue, context);
+        }
+    }
 }

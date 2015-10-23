@@ -24,8 +24,6 @@
 
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
-
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -69,7 +67,10 @@ public class SchemaField {
 
     /** Matches against firstPropertyName if this is an inverse relationship */
     private String reversePropertyName;
-    
+
+    /** Indicates if the relationship will be validated before saving or updating the object */
+    private boolean validateRelationship = false;
+
     /**
      * Constructor
      */
@@ -108,6 +109,7 @@ public class SchemaField {
                 if (this.isReverseRelationship) {
                     this.reversePropertyName = schema.get("reversePropertyName").required().asString();
                 }
+                this.validateRelationship = schema.get("validate").defaultTo(false).asBoolean();
             }
         }
 
@@ -205,5 +207,14 @@ public class SchemaField {
      */
     public String getName() {
         return name;
+    }
+
+    /**
+     * Returns true if the relationship should be validated before any action is taken on the managed object.
+     *
+     * @return True if the relationship should be validated before any action is taken on the managed object.
+     */
+    public boolean isValidateRelationship() {
+        return validateRelationship;
     }
 }
