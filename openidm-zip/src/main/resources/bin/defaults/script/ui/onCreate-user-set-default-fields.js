@@ -36,10 +36,24 @@ if (!object.accountStatus) {
     object.accountStatus = 'active';
 }
 
-if(!object.authzRoles) {
+if (!object.authzRoles) {
     object.authzRoles = [
         {
             "_ref" : "repo/internal/role/openidm-authorized"
         }
     ];
 }
+
+/* uncomment to randomly generate passwords for new users
+if (!object.password) {
+
+    // generate random password that aligns with policy requirements
+    object.password = require("crypto").generateRandomString([
+        { "rule": "UPPERCASE", "minimum": 1 },
+        { "rule": "LOWERCASE", "minimum": 1 },
+        { "rule": "INTEGERS", "minimum": 1 },
+        { "rule": "SPECIAL", "minimum": 1 }
+    ], 16);
+
+}
+*/
