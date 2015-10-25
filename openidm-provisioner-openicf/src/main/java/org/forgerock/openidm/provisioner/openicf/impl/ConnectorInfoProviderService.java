@@ -99,6 +99,7 @@ import org.identityconnectors.framework.api.operations.SchemaApiOp;
 import org.identityconnectors.framework.api.operations.TestApiOp;
 import org.identityconnectors.framework.common.FrameworkUtil;
 import org.identityconnectors.framework.common.exceptions.ConfigurationException;
+import org.identityconnectors.framework.common.exceptions.InvalidCredentialException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
@@ -632,13 +633,21 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             if (validate && facade.getSupportedOperations().contains(TestApiOp.class)) {
                 facade.test();
             }
+            setSchema(facade, jsonConfiguration);
+            return jsonConfiguration;
+        }
+        throw new UnsupportedOperationException("ConnectorFacade can not be initialised");
+    }
+
+    private void setSchema(ConnectorFacade facade, JsonValue jsonConfiguration) {
+        try {
             if (facade.getSupportedOperations().contains(SchemaApiOp.class)) {
                 ConnectorUtil
                         .setObjectAndOperationConfiguration(facade.schema(), jsonConfiguration);
             }
-            return jsonConfiguration;
+        } catch (InvalidCredentialException e) {
+            logger.debug("Could not connect to retrieve resource schema. Provisioner creation is incomplete.", e);
         }
-        throw new UnsupportedOperationException("ConnectorFacade can not be initialised");
     }
 
     /**

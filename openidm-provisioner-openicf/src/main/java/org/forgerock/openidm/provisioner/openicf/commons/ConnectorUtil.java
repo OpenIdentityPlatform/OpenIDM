@@ -25,6 +25,7 @@
 package org.forgerock.openidm.provisioner.openicf.commons;
 
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.schema.validator.Constants.*;
 
 import org.forgerock.json.crypto.JsonCryptoException;
@@ -593,7 +594,7 @@ public class ConnectorUtil {
 
 
     public static Map<String, ObjectClassInfoHelper> getObjectTypes(JsonValue configuration) throws JsonValueException {
-        JsonValue objectTypes = configuration.get(OPENICF_OBJECT_TYPES);
+        JsonValue objectTypes = configuration.get(OPENICF_OBJECT_TYPES).defaultTo(json(object()));
         Map<String, ObjectClassInfoHelper> result = new HashMap<String, ObjectClassInfoHelper>(objectTypes.expect(Map.class).asMap().size());
         boolean allObjectClassFound = false;
         for (String objectType : objectTypes.keys()) {
