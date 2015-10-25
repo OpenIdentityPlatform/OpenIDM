@@ -385,6 +385,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                 facade.test();
                                                 logger.debug("OpenICF connector test of {} succeeded!", systemIdentifier);
                                                 serviceAvailable = true;
+                                            } catch (InvalidCredentialException e) {
+                                                logger.error("Connection error for {} ", systemIdentifier, e);
                                             } catch (Exception e) {
                                                 logger.error("OpenICF connector test of {} failed!", systemIdentifier, e);
                                             }
@@ -2005,6 +2007,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             }
         } catch (UnsupportedOperationException e) {
             jv.put("error", "TEST UnsupportedOperation");
+        } catch (InvalidCredentialException e) {
+            jv.put("error", "Connection Error");
         } catch (Exception e) {
             jv.put("error", e.getMessage());
         }
@@ -2045,6 +2049,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     facade.test();
                 } catch (UnsupportedOperationException e) {
                     jv.put("reason", "TEST UnsupportedOperation");
+                } catch (InvalidCredentialException e) {
+                    jv.put("error", "Connection Error");
                 } catch (Throwable e) {
                     jv.put("error", e.getMessage());
                     return jv.asMap();
