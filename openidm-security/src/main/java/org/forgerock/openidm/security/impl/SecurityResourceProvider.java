@@ -259,7 +259,7 @@ public class SecurityResourceProvider {
      * Returns a JsonValue map representing a CSR
      * 
      * @param alias  the certificate alias
-     * @param csr  The CSR
+     * @param key The key
      * @return a JsonValue map representing the CSR
      * @throws Exception
      */
@@ -338,7 +338,7 @@ public class SecurityResourceProvider {
      * @param organizationUnit the subject's organization unit name
      * @param stateOrProvince the subject's state or province
      * @param country the subject's country code
-     * @param locatity the subject's locality
+     * @param locality the subject's locality
      * @param algorithm the algorithm to use
      * @param keySize the keysize to use
      * @param signatureAlgorithm the signature algorithm to use
@@ -349,7 +349,7 @@ public class SecurityResourceProvider {
      */
     protected Pair<X509Certificate, PrivateKey> generateCertificate(String commonName, 
             String organization, String organizationUnit, String stateOrProvince, 
-            String country, String locatity, String algorithm, int keySize, 
+            String country, String locality, String algorithm, int keySize,
             String signatureAlgorithm, String validFrom, String validTo) throws Exception {
         
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm); // "RSA","BC"
@@ -360,7 +360,7 @@ public class SecurityResourceProvider {
         X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
         builder.addRDN(BCStyle.C, country);
         builder.addRDN(BCStyle.ST, stateOrProvince);
-        builder.addRDN(BCStyle.L, locatity);
+        builder.addRDN(BCStyle.L, locality);
         builder.addRDN(BCStyle.OU, organizationUnit);
         builder.addRDN(BCStyle.O, organization);
         builder.addRDN(BCStyle.CN, commonName);
@@ -531,7 +531,7 @@ public class SecurityResourceProvider {
      * Verifies that the supplied private key and signed certificate match by signing/verifying some test data.
      * 
      * @param privateKey A private key
-     * @param publicKey A public key
+     * @param cert the certificate
      * @throws ResourceException if the verification fails, or an error is encountered.
      */
     protected void verify(PrivateKey privateKey, Certificate cert) throws ResourceException {

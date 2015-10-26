@@ -1,17 +1,7 @@
 {
-    "connection" : {
-        "dbType" : "MYSQL",
-        "jndiName" : "",
-        "driverClass" : "com.mysql.jdbc.Driver",
-        "jdbcUrl" : "jdbc:mysql://localhost:3306/openidm?allowMultiQueries=true&characterEncoding=utf8",
-        "username" : "openidm",
-        "password" : "openidm",
-        "defaultCatalog" : "openidm",
-        "maxBatchSize" : 100,
-        "maxTxRetry" : 5,
-        "enableConnectionPool" : true,
-        "connectionTimeoutInMs" : 30000
-    },
+  "dbType" : "MYSQL",
+  "maxBatchSize" : 100,
+  "maxTxRetry" : 5,
     "queries" : {
         "genericTables" : {
             "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
