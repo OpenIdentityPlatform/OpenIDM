@@ -45,7 +45,8 @@
             "nativeType" : "__ACCOUNT__",
             "properties" : {
                 "_id" : {
-                    "type" : "string"
+                    "type" : "string",
+                    "nativeName" : "__UID__"
                 },
                 "name" : {
                     "type" : "string",
