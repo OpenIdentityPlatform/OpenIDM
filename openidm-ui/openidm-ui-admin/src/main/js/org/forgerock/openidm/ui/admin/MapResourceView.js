@@ -388,7 +388,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
                 this.$el.find("#"+id +" .resource-object-type-select").hide();
             }
 
-            this.$el.find("#"+id +" .mapping-resource-details").show();
+            this.$el.find("#"+id +" .mapping-resource").show();
             this.$el.find("#"+id +" .mapping-resource-empty").hide();
             this.$el.find("#"+id +" .select-resource").prop("disabled", false);
         },
@@ -399,7 +399,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
         },
         setEmpty: function(id) {
             this.$el.find("#" +id +" .mapping-resource-empty").show();
-            this.$el.find("#" +id +" .mapping-resource-details").hide();
+            this.$el.find("#" +id +" .mapping-resource").hide();
             this.$el.find("#" +id +" .select-resource").prop("disabled", true);
             this.$el.find("#createMapping").prop("disabled", true);
 

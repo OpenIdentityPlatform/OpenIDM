@@ -27,6 +27,7 @@
 define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
     "jquery",
     "underscore",
+    "bootstrap",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -37,7 +38,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/MapResourceView"
 
-], function($, _,
+], function($, _, bootstrap,
             AdminAbstractView,
             eventManager,
             constants,
@@ -51,7 +52,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
     var MappingAddView = AdminAbstractView.extend({
         template: "templates/admin/mapping/AddMappingTemplate.html",
         events: {
-            "click .add-resource-button" : "addResourceMapping"
+            "click .card" : "addResourceMapping"
         },
         addMappingView: false,
         render: function(args, callback) {
@@ -113,10 +114,11 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                 }, this));
 
                 this.parentRender(_.bind(function(){
-                    $("#submenu").hide();
-
-                    this.scrollHeaderPos = this.$el.find("#resourceMappingBody").offset().top;
-                    this.scrollInit = false;
+                    this.$el.find('#resourceMappingBody').affix({
+                        offset: {
+                            top: 240
+                        }
+                    });
 
                     MapResourceView.render({
                             "removeCallback": _.bind(function(){
@@ -184,35 +186,6 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
             }
 
             MapResourceView.addMapping(resourceData);
-        },
-
-        /*
-         No longer in use but code could be useful if this feature is desired later in different context
-         */
-        mappingDetail: function(event){
-            var clickedEle = $(event.target),
-                index,
-                details;
-
-            if(!clickedEle.closest("button").hasClass("add-resource-button")) {
-                event.preventDefault();
-
-                if (!clickedEle.hasClass(".resource-body")) {
-                    clickedEle = $(event.target).parents(".resource-body");
-                }
-
-                if (clickedEle.attr("data-resource-type") === "managed") {
-                    index = $("#resourceManagedContainer .resource-body").index(clickedEle);
-                    details = this.data.currentManagedObjects[index];
-
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editManagedView", args: [details.name]});
-                } else {
-                    index = $("#resourceConnectorContainer .resource-body").index(clickedEle);
-                    details = this.data.currentConnectors[index];
-
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "editConnectorView", args: [details.cleanUrlName]});
-                }
-            }
         }
     });
 
