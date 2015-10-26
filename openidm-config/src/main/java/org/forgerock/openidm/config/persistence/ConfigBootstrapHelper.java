@@ -56,7 +56,8 @@ import org.slf4j.LoggerFactory;
 public class ConfigBootstrapHelper {
 
     // Properties to set bootstrapping behavior
-    public static final String PREFIX_OPENIDM_REPO = "openidm.repo.";
+    public static final String OPENIDM_DATASOURCE_PREFIX = "openidm.datasource.";
+    public static final String OPENIDM_REPO_PREFIX = "openidm.repo.";
     public static final String OPENIDM_REPO_TYPE = "openidm.repo.type";
     
     // Properties to set configuration file handling behavior
@@ -78,6 +79,7 @@ public class ConfigBootstrapHelper {
 
     // Filename prefix for repository configuration
     public static final String REPO_FILE_PREFIX = "repo.";
+    public static final String DATASOURCE_FILE_PREFIX = "datasource.";
     public static final String JSON_CONFIG_FILE_EXT = ".json";
     
     // Default prefix for OpenIDM OSGi services
@@ -86,32 +88,33 @@ public class ConfigBootstrapHelper {
     final static Logger logger = LoggerFactory.getLogger(ConfigBootstrapHelper.class);
 
     static boolean warnMissingConfig = true;
-    
+
     /**
-     * Get the configured bootstrap information for a repository
-     * 
+     * Get the configured bootstrap information for the particular config/file prefix.
+     *
      * Currently only one bootstrap repository is selected.
-     * 
+     *
      * Bootstrap information in system properties takes precedence over configuration files
-     * 
+     *
      * Configuration keys returned are lower case, whether they originate from system properties or
      * configuration files.
-     * 
-     * @param repoType the type of the bootstrap repository, 
-     * equivalent to the last part of its PID 
+     *
+     * @param repoType the type of the bootstrap repository, equivalent to the last part of its PID
+     * @param bundleContext the BundleContext
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
-    public static JsonValue getRepoBootConfig(String repoType, BundleContext bundleContext) {
-        JsonValue result = new JsonValue(new TreeMap<String, Object>(String.CASE_INSENSITIVE_ORDER));
+    public static JsonValue getBootConfig(String propertyPrefix, String filePrefix, String repoType,
+            BundleContext bundleContext) {
+        JsonValue result = new JsonValue(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
         result.put(OPENIDM_REPO_TYPE, repoType);
-        
+
         // System properties take precedence over configuration files
         String sysPropType = System.getProperty(OPENIDM_REPO_TYPE);
         if (sysPropType != null && sysPropType.toLowerCase().equals(repoType)) {
             for (Object entry : System.getProperties().keySet()) {
                 String key = (String) entry;
-                if (key.startsWith(PREFIX_OPENIDM_REPO)) {
-                    result.put(key.substring(PREFIX_OPENIDM_REPO.length()).toLowerCase(), System.getProperty(key));
+                if (key.startsWith(propertyPrefix)) {
+                    result.put(key.substring(propertyPrefix.length()).toLowerCase(), System.getProperty(key));
                 }
             }
             logger.info("Bootstrapping with settings from system properties {}", result);
@@ -120,10 +123,10 @@ public class ConfigBootstrapHelper {
 
         // If bootstrap info not found in system properties, check for configuration files
         String confDir = getConfigFileInstallDir();
-        File unqualified = new File(confDir, REPO_FILE_PREFIX + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
-        File qualified = new File(confDir, ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX + REPO_FILE_PREFIX 
-                + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
-        
+        File unqualified = new File(confDir, filePrefix + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
+        File qualified = new File(confDir, ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX
+                + filePrefix + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
+
         File loadedFile = null;
         try {
             Dictionary rawConfig = null;
@@ -135,14 +138,14 @@ public class ConfigBootstrapHelper {
                 loadedFile = qualified;
             } else {
                 logger.debug("No configuration to bootstrap {}", repoType);
-                
+
                 // Check at least one configuration exists
-                String[] repoConfigFiles = getRepoConfigFiles(confDir);
-                if (warnMissingConfig && (repoConfigFiles == null || repoConfigFiles.length == 0)) {
-                    logger.error("No configuration to bootstrap the repository found.");
+                String[] configFiles = getRepoConfigFiles(confDir);
+                if (warnMissingConfig && (configFiles == null || configFiles.length == 0)) {
+                    logger.error("No configuration to bootstrap {} found.", repoType);
                     warnMissingConfig = false;
                 }
-                
+
                 return null;
             }
             JsonValue jsonCfg = new JSONEnhancedConfig().getConfiguration(rawConfig, bundleContext, repoType);
@@ -150,16 +153,51 @@ public class ConfigBootstrapHelper {
             for (Entry<String, Object> entry : cfg.entrySet()) {
                 result.put(entry.getKey(), entry.getValue());
             }
-        } catch (Exception ex) {
-            logger.warn("Failed to load configuration file to bootstrap repository " + ex.getMessage(), ex);
-            throw new RuntimeException("Failed to load configuration file to bootstrap repository " 
-                    + ex.getMessage(), ex);
+        } catch (Exception e) {
+            logger.warn("Failed to load configuration file to bootstrap {}", repoType, e);
+            throw new RuntimeException("Failed to load configuration file to bootstrap " + repoType, e);
         }
         logger.info("Bootstrapping with settings from configuration file {}", loadedFile);
-        
+
         return result;
     }
-    
+
+    /**
+     * Get the configured bootstrap information for a repository.
+     *
+     * Currently only one bootstrap repository is selected.
+     * 
+     * Bootstrap information in system properties takes precedence over configuration files
+     * 
+     * Configuration keys returned are lower case, whether they originate from system properties or
+     * configuration files.
+     * 
+     * @param repoType the type of the bootstrap repository, equivalent to the last part of its PID
+     * @param bundleContext the BundleContext
+     * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
+     */
+    public static JsonValue getRepoBootConfig(String repoType, BundleContext bundleContext) {
+        return getBootConfig(OPENIDM_REPO_PREFIX, REPO_FILE_PREFIX, repoType, bundleContext);
+    }
+
+    /**
+     * Get the configured bootstrap information for the datasource.
+     *
+     * Currently only one bootstrap datasource is selected.
+     *
+     * Bootstrap information in system properties takes precedence over configuration files
+     *
+     * Configuration keys returned are lower case, whether they originate from system properties or
+     * configuration files.
+     *
+     * @param repoType the type of the bootstrap repository, equivalent to the last part of its PID
+     * @param bundleContext the BundleContext
+     * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
+     */
+    public static JsonValue getDataSourceBootConfig(String repoType, BundleContext bundleContext) {
+        return getBootConfig(OPENIDM_DATASOURCE_PREFIX, DATASOURCE_FILE_PREFIX, repoType, bundleContext);
+    }
+
     // A list of repository configuration files 
     static String[] getRepoConfigFiles(final String confDir) {
         FilenameFilter repoConfFilter = new FilenameFilter() {

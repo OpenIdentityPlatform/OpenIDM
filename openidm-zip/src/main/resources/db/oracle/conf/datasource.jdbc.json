@@ -1,0 +1,11 @@
+{
+    "driverClass" : "oracle.jdbc.OracleDriver",
+    "jdbcUrl" : "jdbc:oracle:thin:@//HOSTNAME:PORT/DEFAULTCATALOG",
+    "databaseName" : "openidm",
+    "username" : "openidm",
+    "password" : "openidm",
+    "connectionTimeout" : 30000,
+    "connectionPool" : {
+        "type" : "bonecp"
+    }
+}

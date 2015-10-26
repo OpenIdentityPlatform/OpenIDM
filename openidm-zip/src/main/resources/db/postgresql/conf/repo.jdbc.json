@@ -1,17 +1,7 @@
 {
-    "connection" : {
-        "dbType" : "POSTGRESQL",
-        "jndiName" : "",
-        "driverClass" : "org.postgresql.Driver",
-        "jdbcUrl" : "jdbc:postgresql://localhost:5432/openidm",
-        "username" : "openidm",
-        "password" : "openidm",
-        "defaultCatalog" : "openidm",
-        "maxBatchSize" : 100,
-        "maxTxRetry" : 5,
-        "enableConnectionPool" : true,
-        "connectionTimeoutInMs" : 30000
-    },
+    "dbType" : "POSTGRESQL",
+    "maxBatchSize" : 100,
+    "maxTxRetry" : 5,
     "queries" : {
         "genericTables" : {
             "credential-query" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE json_extract_path_text(fullobject, 'userName') = ${username} AND json_extract_path_text(fullobject, 'accountStatus') = 'active' AND objtype.objecttype = ${_resource}",

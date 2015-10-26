@@ -27,6 +27,8 @@ import java.util.Hashtable;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
+import org.forgerock.openidm.datasource.DataSourceService;
+import org.forgerock.openidm.datasource.jdbc.impl.JDBCDataSourceService;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
@@ -43,25 +45,16 @@ public class Activator implements BundleActivator {
      public void start(BundleContext context) {
          logger.debug("JDBC bundle starting", context);
 
+         JsonValue dataSourceConfig = ConfigBootstrapHelper.getDataSourceBootConfig("jdbc", context);
          JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
 
-         if (repoConfig != null) {
+         if (dataSourceConfig != null && repoConfig != null) {
              logger.info("Bootstrapping JDBC repository");
-             // Only take the configuration strictly needed for bootstrapping the repository
-             // Also, bootstrap property keys are lower case, Repo expects camel case
-             /*Map<String,Object> bootConfig = new HashMap<String,Object>();
 
-           bootConfig.put(JDBCRepoService.CONFIG_JNDI_NAME, repoConfig.get(JDBCRepoService.CONFIG_JNDI_NAME.toLowerCase()));
-           bootConfig.put(JDBCRepoService.CONFIG_JTA_NAME, repoConfig.get(JDBCRepoService.CONFIG_JTA_NAME.toLowerCase()));
-            bootConfig.put(JDBCRepoService.CONFIG_DB_TYPE, repoConfig.get(JDBCRepoService.CONFIG_DB_TYPE.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_DB_DRIVER, repoConfig.get(JDBCRepoService.CONFIG_DB_DRIVER.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_DB_URL, repoConfig.get(JDBCRepoService.CONFIG_DB_URL.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_USER, repoConfig.get(JDBCRepoService.CONFIG_USER.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_PASSWORD, repoConfig.get(JDBCRepoService.CONFIG_PASSWORD.toLowerCase()));
-             bootConfig.put(JDBCRepoService.CONFIG_DB_SCHEMA, repoConfig.get(JDBCRepoService.CONFIG_DB_SCHEMA.toLowerCase()));*/
-
+             // Init the bootstrap connection manager
+             DataSourceService dataSourceService = JDBCDataSourceService.getBootService(dataSourceConfig, context);
              // Init the bootstrap repo
-             RepoBootService bootSvc = JDBCRepoService.getRepoBootService(repoConfig, context);
+             RepoBootService bootSvc = JDBCRepoService.getRepoBootService(context, dataSourceService, repoConfig);
 
              // Register bootstrap repo
              Hashtable<String, String> prop = new Hashtable<String, String>();

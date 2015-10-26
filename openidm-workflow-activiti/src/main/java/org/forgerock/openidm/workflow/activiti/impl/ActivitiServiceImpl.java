@@ -28,8 +28,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import javax.sql.DataSource;
 import javax.transaction.TransactionManager;
 import org.activiti.engine.ProcessEngine;
@@ -43,6 +41,7 @@ import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
 import org.activiti.osgi.OsgiScriptingEngines;
 import org.activiti.osgi.blueprint.ProcessEngineFactory;
 import org.apache.felix.scr.annotations.*;
+import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
@@ -116,22 +115,18 @@ public class ActivitiServiceImpl implements RequestHandler {
     public static final String CONFIG_MAIL_USERNAME = "username";
     public static final String CONFIG_MAIL_PASSWORD = "password";
     public static final String CONFIG_MAIL_STARTTLS = "starttls";
-    public static final String CONFIG_CONNECTION = "connection";
-    public static final String CONFIG_JNDI_NAME = "jndiName";
     public static final String CONFIG_TABLE_PREFIX = "tablePrefix";
     public static final String CONFIG_TABLE_PREFIX_IS_SCHEMA = "tablePrefixIsSchema";
     public static final String CONFIG_HISTORY = "history";
     public static final String CONFIG_WORKFLOWDIR = "workflowDirectory";
     public static final String LOCALHOST = "localhost";
     public static final int DEFAULT_MAIL_PORT = 25;
-    private String jndiName;
     private boolean selfMadeProcessEngine = true;
 
     @Reference(name = "processEngine", referenceInterface = ProcessEngine.class,
-    bind = "bindProcessEngine", unbind = "unbindProcessEngine",
-    cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC,
-    target = "(!openidm.activiti.engine=true)" //avoid register the self made service
-    )
+            bind = "bindProcessEngine", unbind = "unbindProcessEngine",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC,
+            target = "(!openidm.activiti.engine=true)") //avoid registering the self made service
     private ProcessEngine processEngine;
 
     /**
@@ -153,16 +148,14 @@ public class ActivitiServiceImpl implements RequestHandler {
     private TransactionManager transactionManager;
 
     @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-    bind = "bindDataSource", unbind = "unbindDataSource",
-    target = "(osgi.jndi.service.name=jdbc/openidm)")
-    private DataSource dataSource;
+            bind = "bindDataSourceService", unbind = "unbindDataSourceService")
+    private DataSourceService dataSourceService;
 
     @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)")
     private RouteService routeService;
 
     @Reference(policy = ReferencePolicy.DYNAMIC,
-            bind = "bindCryptoService", unbind = "unbindCryptoService"
-    )
+            bind = "bindCryptoService", unbind = "unbindCryptoService")
     CryptoService cryptoService;
 
     @Reference(policy = ReferencePolicy.STATIC)
@@ -230,8 +223,7 @@ public class ActivitiServiceImpl implements RequestHandler {
         return activitiResource.handleUpdate(context, request);
     }
 
-    public enum EngineLocation {
-
+    private enum EngineLocation {
         embedded, local, remote
     }
 
@@ -243,43 +235,23 @@ public class ActivitiServiceImpl implements RequestHandler {
             if (enabled) {
                 switch (location) {
                     case embedded: //start our embedded ProcessEngine
-                        try {
-                            // Data Source configuration
-                            if (jndiName != null && jndiName.trim().length() > 0) {
-                                // Get DB connection via JNDI
-                                logger.info("Using DB connection configured via Driver Manager");
-                                InitialContext ctx = null;
-                                try {
-                                    ctx = new InitialContext();
-                                } catch (NamingException ex) {
-                                    logger.warn("Getting JNDI initial context failed: " + ex.getMessage(), ex);
-                                }
-                                if (ctx == null) {
-                                    throw new InvalidException("Current platform context does not support lookup of repository DB via JNDI. "
-                                            + " Use embedded OpenIDM repository instead.");
-                                }
-                                dataSource = (DataSource) ctx.lookup(jndiName);
-                            }
-                        } catch (RuntimeException ex) {
-                            logger.warn("Configuration invalid, can not start JDBC repository.", ex);
-                            throw new InvalidException("Configuration invalid, can not start JDBC repository.", ex);
-                        } catch (NamingException ex) {
-                            throw new InvalidException("Could not find configured jndiName " + jndiName + " to start repository ", ex);
-                        }
 
                         //we need a TransactionManager to use this
                         JtaProcessEngineConfiguration configuration = new JtaProcessEngineConfiguration();
 
-                        if (null == dataSource) {
+                        if (null == dataSourceService) {
                             //initialise the default h2 DataSource
-                            JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource(); //Implement it here. There are examples in the JDBCRepoService
+                            //Implement it here. There are examples in the JDBCRepoService
+                            JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource();
                             File root = IdentityServer.getFileForWorkingPath("db/activiti/database");
-                            jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8") + ";DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=1000");
+                            jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8")
+                                    + ";DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=1000");
                             jdbcDataSource.setUser("sa");
                             configuration.setDatabaseType("h2");
                             configuration.setDataSource(jdbcDataSource);
                         } else {
-                            configuration.setDataSource(dataSource);
+                            // use DataSourceService as source of DataSource
+                            configuration.setDataSource(dataSourceService.getDataSource());
                         }
                         configuration.setIdentityService(identityService);
 
@@ -425,8 +397,6 @@ public class ActivitiServiceImpl implements RequestHandler {
         if (!config.isNull()) {
             enabled = config.get(CONFIG_ENABLED).defaultTo(true).asBoolean();
             location = config.get(CONFIG_LOCATION).defaultTo(EngineLocation.embedded.name()).asEnum(EngineLocation.class);
-            JsonValue connectionConfig = config.get(CONFIG_CONNECTION);
-            jndiName = connectionConfig.get(CONFIG_JNDI_NAME).asString();
             JsonValue mailconfig = config.get(CONFIG_MAIL);
             if (mailconfig.isNotNull()) {
                 mailhost = mailconfig.get(CONFIG_MAIL_HOST).defaultTo(LOCALHOST).asString();
@@ -497,12 +467,12 @@ public class ActivitiServiceImpl implements RequestHandler {
         this.configurationAdmin = null;
     }
 
-    public void bindDataSource(DataSource dataSource) {
-        this.dataSource = dataSource;
+    public void bindDataSourceService(DataSourceService dataSourceService) {
+        this.dataSourceService = dataSourceService;
     }
 
-    public void unbindDataSource(DataSource dataSource) {
-        this.dataSource = null;
+    public void unbindDataSourceService(DataSourceService dataSourceService) {
+        this.dataSourceService = null;
     }
 
     public void bindCryptoService(final CryptoService service) {

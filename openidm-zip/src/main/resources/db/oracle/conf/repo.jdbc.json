@@ -1,17 +1,7 @@
 {
-    "connection" : {
-        "dbType" : "ORACLE",
-        "jndiName" : "",
-        "driverClass" : "oracle.jdbc.OracleDriver",
-        "jdbcUrl" : "jdbc:oracle:thin:@//HOSTNAME:PORT/DEFAULTCATALOG",
-        "username" : "openidm",
-        "password" : "password",
-        "defaultCatalog" : "openidm",
-        "maxBatchSize" : 100,
-        "maxTxRetry" : 5,
-        "enableConnectionPool" : true,
-        "connectionTimeoutInMs" : 30000
-    },
+    "dbType" : "ORACLE",
+    "maxBatchSize" : 100,
+    "maxTxRetry" : 5,
     "queries" : {
         "genericTables" : {
             "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",

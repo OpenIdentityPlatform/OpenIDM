@@ -60,6 +60,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-router</artifactId>
             <version>${project.version}</version>
         </dependency>

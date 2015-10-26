@@ -1,0 +1,11 @@
+{
+    "driverClass" : "com.ibm.db2.jcc.DB2Driver",
+    "jdbcUrl" : "jdbc:db2://HOSTNAME:PORT/dopenidm:retrieveMessagesFromServerOnGetMessage=true;",
+    "databaseName" : "sopenidm",
+    "username" : "openidm",
+    "password" : "openidm",
+    "connectionTimeout" : 30000,
+    "connectionPool" : {
+        "type" : "bonecp"
+    }
+}

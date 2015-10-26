@@ -1,16 +1,7 @@
 {
-    "connection" : {
-        "dbType" : "H2",
-        "jndiName" : "",
-        "driverClass" : "org.h2.Driver",
-        "jdbcUrl" : "jdbc:h2:&{launcher.working.location}/db/openidm;MODE=MySQL;INIT=RUNSCRIPT FROM '&{launcher.working.location}/db/scripts/h2/openidm.sql'",
-        "username" : "sa",
-        "password" :  "",
-        "maxBatchSize" : 100,
-        "maxTxRetry" : 5,
-        "defaultCatalog" : "openidm",
-        "connectionTimeoutInMs" : 30000
-    },
+    "dbType" : "H2",
+    "maxBatchSize" : 100,
+    "maxTxRetry" : 5,
     "queries" : {
         "genericTables" : {
             "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
