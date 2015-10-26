@@ -1,32 +1,22 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Version 1.0
- * Author ForgeRock
+ * Copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openicf.connectors.hrdb
 
 import groovy.sql.Sql
+import org.forgerock.json.resource.BadRequestException
 import org.forgerock.openicf.connectors.hrdb.HRDBConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
@@ -49,7 +39,7 @@ def configuration = configuration as HRDBConfiguration
 def log = log as Log
 
 // The Uid of the object to be deleted
-def uid = id as Uid
+def uid = uid as Uid
 
 // The objectClass of the object to be deleted, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass
@@ -71,7 +61,9 @@ def ORG = new ObjectClass("organization")
 log.info("Delete script, operation = " + operation.toString());
 def sql = new Sql(connection);
 
-assert uid != null
+if (uid == null) {
+    throw new BadRequestException("Uid is null");
+}
 
 switch (objectClass) {
     case ObjectClass.ACCOUNT:

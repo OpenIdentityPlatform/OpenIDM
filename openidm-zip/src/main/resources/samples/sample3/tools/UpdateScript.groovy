@@ -1,28 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Version 1.0
- * Author ForgeRock
+ * Copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openicf.connectors.hrdb
 
@@ -57,7 +46,7 @@ def log = log as Log
 def updateAttributes = new AttributesAccessor(attributes as Set<Attribute>)
 
 // The Uid of the object to be updated
-def uid = id as Uid
+def uid = id as String
 
 // The objectClass of the object to be updated, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass
@@ -94,7 +83,7 @@ switch (operation) {
                             password = coalesce(sha1(?), password),
                             timestamp = now()
                         WHERE
-                            id = ?
+                            uid = ?
                         """,
                         [
                                 updateAttributes.findString("fullname"),
@@ -103,19 +92,19 @@ switch (operation) {
                                 updateAttributes.findString("email"),
                                 updateAttributes.findString("organization"),
                                 updateAttributes.findString("password"),
-                                uid.uidValue
+                                uid
                         ]
                 );
                 sql.executeUpdate("DELETE FROM car WHERE users_id=?",
                         [
-                                uid.uidValue
+                                uid
                         ]
                 );
                 updateAttributes.findMap("cars").each {
                     sql.executeInsert(
                             "INSERT INTO car (users_id,year,make,model) VALUES (?,?,?,?)",
                             [
-                                    uid.uidValue,
+                                    uid,
                                     it.year,
                                     it.make,
                                     it.model
@@ -141,12 +130,12 @@ switch (operation) {
                                 updateAttributes.findString("description"),
                                 updateAttributes.findString("name"),
                                 updateAttributes.findString("gid"),
-                                uid.uidValue
+                                uid
                         ]
                 );
                 sql.executeUpdate("DELETE FROM groups_users WHERE groups_id=?",
                         [
-                                uid.uidValue
+                                uid
                         ]
                 );
                 updateAttributes.findMap("users").each {
@@ -154,7 +143,7 @@ switch (operation) {
                             "INSERT INTO groups_users (users_id,groups_id) SELECT id,? FROM users WHERE uid=?",
                             [
                                     it.uid,
-                                    uid.uidValue
+                                    uid
                             ]
                     )
                 }
@@ -173,7 +162,8 @@ switch (operation) {
                         """,
                         [
                                 updateAttributes.findString("description"),
-                                uid.uidValue
+                                uid
+
                         ]
                 );
                 break

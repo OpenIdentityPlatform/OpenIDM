@@ -1,35 +1,26 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
- * Version 1.0
- * Author ForgeRock
+ * Copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openicf.connectors.hrdb
 
 import groovy.sql.Sql
+import org.forgerock.json.resource.BadRequestException
 import org.forgerock.openicf.connectors.hrdb.HRDBConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.exceptions.ConnectorException
 import org.identityconnectors.framework.common.objects.Uid
 import org.forgerock.openicf.misc.scriptedcommon.MapFilterVisitor
 import org.identityconnectors.framework.common.objects.AttributeBuilder
@@ -77,7 +68,9 @@ def whereParams = []
 // Set where and whereParams if they have been passed in the request for paging
 if (options.pagedResultsCookie != null) {
     def cookieProps = options.pagedResultsCookie.split(",");
-    assert cookieProps.size() == 2
+    if (cookieProps.size() != 2) {
+        throw new BadRequestException("Expecting the size of pagedResultsCookie to be 2");
+    }
     // The timestamp and id are for this example only.
     // The user can use their own properties to sort on.
     // For paging it is important that the properties that you use must identify
