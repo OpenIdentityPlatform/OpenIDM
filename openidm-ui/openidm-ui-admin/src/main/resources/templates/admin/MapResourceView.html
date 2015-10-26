@@ -1,78 +1,67 @@
-<section>
+<div class="container">
     <div class="mapping-body row clearfix">
-
         <div class="col-md-5 column mapping-resource-body" id="mappingSource">
-            <div class="mapping-resource card">
-                <div class="mapping-resource-empty text-center card-body">
-                    <div class="mapping-resource-empty-details">
-                        <i class="fa fa-question-circle fa-3x"></i>
-                        <div>{{t "templates.mapping.selectSourceResource"}}</div>
-                    </div>
+            <div class="mapping-resource-empty text-center well">
+                <div class="mapping-resource-empty-details">
+                    <i class="fa fa-question-circle text-muted"></i>
+                    <div>{{t "templates.mapping.selectSourceResource"}}</div>
                 </div>
-                <div style="display:none;" class="mapping-resource-details">
-
-                    <div class="card-body">
-                        <i class="fa fa-times select-resource pull-right"></i>
-
-                        <div class="image circle pull-left">
-                            <i class="resource-small-icon"></i>
-                        </div>
-                        <div class="content">
-                            <div class="main resource-info">
-                                <p class="resource-given-name"></p>
-                                <p class="resource-type-name"></p>
+            </div>
+            <div class="panel panel-default mapping-resource card" style="display:none;">
+                <div class="panel-heading">
+                    <div class="media">
+                        <button type="button" class="close select-resource" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <div class="media-left">
+                            <div class="image circle">
+                                <i class="resource-small-icon"></i>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="card-footer">
-                        <div class="resource-status-body">
-                            <p class="resource-object-type">
-                            <p class="object-type-name">{{t "templates.mapping.noObjectType"}}</p>
-                            <select style="display:none;" class="resource-object-type-select btn-block"></select>
-                            </p>
+                        <div class="media-body">
+                            <h4 class="media-heading resource-given-name"></h4>
+                            <span class="resource-type-name text-muted"></span>
                         </div>
                     </div>
+                </div>
+                <div class="panel-body">
+                    <div class="object-type-name text-muted text-center">{{t "templates.mapping.noObjectType"}}</div>
+                    <select style="display:none;" class="resource-object-type-select form-control"></select>
                 </div>
             </div>
         </div>
 
         <div class="col-md-2 column mapping-swap-holder">
-            <button type="button" class="mapping-swap btn btn-primary center-block"><i class="fa fa-lg fa-exchange"></i></button>
-            <p class="text-center">Swap</p>
+            <button type="button" class="mapping-swap btn btn-default center-block"><i class="fa fa-lg fa-exchange"></i></button>
         </div>
 
-        <div id="mappingTarget" class="mapping-resource-body col-md-5 column">
-            <div class="mapping-resource card">
-                <div class="mapping-resource-empty text-center card-body">
-                    <div class="mapping-resource-empty-details">
-                        <i class="fa fa-question-circle fa-3x"></i>
-                        <div>{{t "templates.mapping.selectTargetResource"}}</div>
-                    </div>
+        <div class="col-md-5 column mapping-resource-body" id="mappingTarget">
+            <div class="mapping-resource-empty text-center well">
+                <div class="mapping-resource-empty-details">
+                    <i class="fa fa-question-circle text-muted"></i>
+                    <div>{{t "templates.mapping.selectSourceResource"}}</div>
                 </div>
-                <div style="display:none;" class="mapping-resource-details">
-                    <div class="card-body">
-                        <i class="fa fa-times select-resource pull-right"></i>
-
-                        <div class="image circle pull-left">
-                            <i class="resource-small-icon"></i>
-                        </div>
-                        <div class="content">
-                            <div class="main resource-info">
-                                <p class="resource-given-name"></p>
-                                <p class="resource-type-name"></p>
+            </div>
+            <div class="panel panel-default mapping-resource card" style="display:none;">
+                <div class="panel-heading">
+                    <div class="media">
+                        <button type="button" class="close select-resource" aria-label="Close">
+                            <span aria-hidden="true">×</span>
+                        </button>
+                        <div class="media-left">
+                            <div class="image circle">
+                                <i class="resource-small-icon"></i>
                             </div>
                         </div>
-                    </div>
-
-                    <div class="card-footer">
-                        <div class="resource-status-body">
-                            <p class="resource-object-type">
-                            <p class="object-type-name">{{t "templates.mapping.noObjectType"}}</p>
-                            <select style="display:none;" class="resource-object-type-select btn-block"></select>
-                            </p>
+                        <div class="media-body">
+                            <h4 class="media-heading resource-given-name"></h4>
+                            <span class="resource-type-name text-muted"></span>
                         </div>
                     </div>
+                </div>
+                <div class="panel-body">
+                    <div class="object-type-name text-muted text-center">{{t "templates.mapping.noObjectType"}}</div>
+                    <select style="display:none;" class="resource-object-type-select form-control"></select>
                 </div>
             </div>
         </div>
@@ -105,4 +94,4 @@
             </div>
         </div>
     </div>
-</section>
+</div>

@@ -47,8 +47,37 @@
     margin-bottom: 10px;
   }
 
+  #resourceMappingWrapper {
+    min-height: 450px;
+  }
+
   #resourceMappingBody {
     clear: both;
+
+    &.affix {
+      z-index: 1000;
+      width: 100%;
+      left: 0;
+      top: 0;
+      padding: 15px 0 0px;
+      background-color: @background-color;
+      border-bottom: 1px solid #ccc;
+      -webkit-box-shadow: 0 1px 8px 0px rgba(0,0,0,.2);
+      box-shadow: 0 1px 8px 0px rgba(0,0,0,.2);
+    }
+
+    .mapping-resource-empty {
+      background-color:#eee;
+      padding: 31px 19px;
+
+      .mapping-resource-empty-details {
+        .fa-question-circle {
+          font-size: 54px;
+          color: #ccc;
+          margin-bottom: 3px;
+        }
+      }
+    }
 
     .card-body {
       padding: 20px;
@@ -66,16 +95,18 @@
       }
     }
 
-    .circle{
-      height:80px;
-      width: 80px;
+    .circle {
+      width: 44px;
+      height: 44px;
+
       i {
-        font-size: 50px;
+        font-size: 21px;
       }
     }
 
     .mapping-create-body {
       margin-top: 20px;
+      margin-bottom:20px;
 
       button {
         width: 100%;
@@ -114,7 +145,7 @@
     }
 
     .mapping-resource {
-      height: 190px;
+      height: auto;
       border: 1px solid #eee;
       box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.14);
       background-color: #fff;
@@ -129,14 +160,6 @@
         -ms-transition: border-color 0.3s ease-in-out;
         transition: border-color 0.3s ease-in-out;
         text-decoration: none;
-      }
-
-      .mapping-resource-empty {
-        position: relative;
-        top: 50%;
-        -webkit-transform: translateY(-50%);
-        -ms-transform: translateY(-50%);
-        transform: translateY(-50%);
       }
     }
   }
@@ -809,25 +832,38 @@
   Media Queries
 */
 @media (min-width: 993px) {
-  .addMapping #resourceMappingBody {
-    .mapping-swap-holder {
-      height: 140px;
+  .addMapping {
 
-      .mapping-swap {
-        transform: rotate(0deg);
-        -webkit-transform: rotate(0deg);
-        -moz-transform: rotate(0deg);
-        -ms-transform: rotate(0deg);
-        -o-transform: rotate(0deg);
-      }
-      p {
-        margin-top: 10px;
-      }
+    #resourceMappingWrapper {
+      min-height: 224px;
     }
 
-    .mapping-create-body {
-      button {
-        width: auto;
+    #resourceMappingBody {
+
+      .object-type-name {
+        padding-top:7px;
+        padding-bottom:7px;
+      }
+
+      .mapping-swap-holder {
+        height: 140px;
+
+        .mapping-swap {
+          transform: rotate(0deg);
+          -webkit-transform: rotate(0deg);
+          -moz-transform: rotate(0deg);
+          -ms-transform: rotate(0deg);
+          -o-transform: rotate(0deg);
+        }
+        p {
+          margin-top: 10px;
+        }
+      }
+
+      .mapping-create-body {
+        button {
+          width: auto;
+        }
       }
     }
   }
