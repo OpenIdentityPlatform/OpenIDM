@@ -1,0 +1,325 @@
+{
+    "dbType" : "DB2",
+    "maxBatchSize" : 100,
+    "maxTxRetry" : 5,
+    "queries" : {
+        "genericTables" : {
+            "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "find-by-id" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
+            "get-by-field-value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey=CONCAT('/', ${field}) AND prop.propvalue = ${value} AND objtype.objecttype = ${_resource}",
+            "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource} LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
+            "query-all-ids-count" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource} LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
+            "query-all-count" : "SELECT COUNT(obj.fullobject) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
+            "credential-internaluser-query" : "SELECT credprop.${_mainTable}_id, credprop.propkey, credprop.propvalue FROM ${_dbSchema}.${_propTable} credprop INNER JOIN ${_dbSchema}.${_mainTable} obj ON obj.id = credprop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} conditionprop ON obj.id = conditionprop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE credprop.propkey='/userPassword' AND conditionprop.propkey='/_id' AND conditionprop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
+            "scan-tasks" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id LEFT OUTER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id AND complete.propkey=${taskState.completed} INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propvalue is NULL )",
+
+            "query-cluster-failed-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))",
+            "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id WHERE (prop.propkey = '/type' AND prop.propvalue = 'state')",
+            "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})"
+        },
+        "explicitTables" : {
+            "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
+            "query-all-ids-count" : "SELECT COUNT(objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "for-internalcredentials" : "select * FROM ${_dbSchema}.${_table} WHERE objectid = ${uid}",
+            "get-notifications-for-user" : "select * FROM ${_dbSchema}.${_table} WHERE receiverId = ${userId} order by createDate desc",
+            "for-userName" : "SELECT * FROM ${_dbSchema}.${_table} WHERE userName = ${uid}",
+
+            "credential-query" : "SELECT * FROM ${_dbSchema}.${_table} WHERE objectid = ${username} and accountStatus = 'active'",
+            "credential-internaluser-query" : "SELECT objectid, pwd, roles FROM ${_dbSchema}.${_table} WHERE objectid = ${username}",
+
+            "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
+            "links-for-secondId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND secondid = ${secondId}",
+            "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
+
+            "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
+
+            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}"
+        }
+    },
+    "commands" : {
+        "genericTables" : { },
+        "explicitTables" : {
+            "purge-by-recon-expired" : "DELETE r FROM ${_dbSchema}.${_table} r INNER JOIN (SELECT reconId FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp} AND entryType = 'summary') AS x ON x.reconId = r.reconId",
+            "purge-by-recon-number-of" : "set @num := 0, @mapping := ''; DELETE r FROM ${_dbSchema}.${_table} r INNER JOIN ( SELECT reconId, mapping, activitydate, @num := if(@mapping = mapping, @num + 1, 1) AS row_number, @mapping := mapping as m FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY mapping, activitydate desc ) AS x ON r.reconId = x.reconId WHERE x.row_number > ${numberOf}"
+        }
+    },
+    "resourceMapping" : {
+        "default" : {
+            "mainTable" : "genericobjects",
+            "propertiesTable" : "genericobjectproperties",
+            "searchableDefault" : true
+        },
+        "genericMapping" : {
+            "managed/*" : {
+                "mainTable" : "managedobjects",
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : true
+            },
+            "managed/user" : {
+                "mainTable" : "managedobjects",
+                "propertiesTable" : "managedobjectproperties",
+                "searchableDefault" : false,
+                "properties" : {
+                    "/userName" : {
+                        "searchable" : true
+                    },
+                    "/givenName" : {
+                        "searchable" : true
+                    },
+                    "/sn" : {
+                        "searchable" : true
+                    },
+                    "/mail" : {
+                        "searchable" : true
+                    },
+                    "/accountStatus" : {
+                        "searchable" : true
+                    },
+                    "/roles" : {
+                        "searchable" : true
+                    },
+                    "/sunset" : {
+                        "searchable" : true
+                    },
+                    "/title" : {
+                        "searchable" : true
+                    },
+                    "/department" : {
+                        "searchable" : true
+                    },
+                    "/sunrise" : {
+                        "searchable" : true
+                    },
+                    "/lastPasswordSet" : {
+                        "searchable" : true
+                    }
+                }
+            },
+            "scheduler" : {
+                "mainTable" : "schedulerobjects",
+                "propertiesTable" : "schedulerobjectproperties",
+                "searchableDefault" : true
+            },
+            "cluster" : {
+                "mainTable" : "clusterobjects",
+                "propertiesTable" : "clusterobjectproperties",
+                "searchableDefault" : true
+            },
+            "relationship" : {
+                "mainTable" : "relationships",
+                "propertiesTable" : "relationshipproperties",
+                "searchableDefault" : true
+            },
+            "updates" : {
+                "mainTable" : "updateobjects",
+                "propertiesTable" : "updateobjectproperties",
+                "searchableDefault" : true
+            }
+        },
+        "explicitMapping" : {
+            "link" : {
+                "table" : "links",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "linkType" : "linktype",
+                    "firstId" : "firstid",
+                    "secondId" : "secondid",
+                    "linkQualifier" : "linkqualifier"
+                }
+            },
+            "ui/notification" : {
+                "table" : "uinotification",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "requester" : "requester",
+                    "requesterId" : "requesterId",
+                    "receiverId" : "receiverId",
+                    "createDate" : "createDate",
+                    "notificationType" : "notificationType",
+                    "notificationSubtype" : "notificationSubtype",
+                    "message" : "message"
+                }
+            },
+            "internal/user" : {
+                "table" : "internaluser",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "password" : "pwd",
+                    "roles" : { "column" : "roles", "type" : "JSON_LIST" }
+                }
+            },
+            "internal/role" : {
+                "table" : "internalrole",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "description" : "description"
+                }
+            },
+            "audit/authentication" : {
+                "table" : "auditauthentication",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "transactionId" : "transactionid",
+                    "timestamp" : "activitydate",
+                    "authentication/id" : "userid",
+                    "eventName" : "eventname",
+                    "result" : "result",
+                    "principal" : {"column" : "principals", "type" : "JSON_LIST"},
+                    "context" : {"column" : "context", "type" : "JSON_MAP"},
+                    "sessionId" : "sessionid",
+                    "entries" : {"column" : "entries", "type" : "JSON_LIST"}
+                }
+            },
+            "audit/config" : {
+                "table" : "auditconfig",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "transactionId" : "transactionid",
+                    "timestamp" : "activitydate",
+                    "eventName" : "eventname",
+                    "authentication/id" : "userid",
+                    "runas" : "runas",
+                    "resourceOperation/uri" : "resource_uri",
+                    "resourceOperation/protocol" : "resource_protocol",
+                    "resourceOperation/operation/method" : "resource_method",
+                    "resourceOperation/operation/detail" : "resource_detail",
+                    "before" : "beforeObject",
+                    "after" : "afterObject",
+                    "changedFields": {
+                        "column": "changedfields",
+                        "type": "JSON_LIST"
+                    }
+                }
+            },
+            "internal/role" : {
+                "table" : "internalrole",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "description" : "description"
+                }
+            },
+            "audit/activity" : {
+                "table" : "auditactivity",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "action" : "activity",
+                    "timestamp" : "activitydate",
+                    "transactionId" : "transactionid",
+                    "eventName" : "eventname",
+                    "authentication/id" : "userid",
+                    "runAs" : "runas",
+                    "resourceOperation/uri" : "resource_uri",
+                    "resourceOperation/protocol" : "resource_protocol",
+                    "resourceOperation/operation/method" : "resource_method",
+                    "resourceOperation/operation/detail" : "resource_detail",
+                    "before" : "subjectbefore",
+                    "after" : "subjectafter",
+                    "changedFields" : {"column" : "changedfields", "type" : "JSON_LIST"},
+                    "passwordChanged" : "passwordchanged",
+                    "revision" : "subjectrev",
+                    "message" : "message",
+                    "objectId" : "activityobjectid",
+                    "status" : "status"
+                }
+            },
+            "audit/recon" : {
+                "table" : "auditrecon",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "transactionId" : "transactionid",
+                    "timestamp" : "activitydate",
+                    "eventName" : "eventname",
+                    "authentication/id" : "userid",
+                    "action" : "activity",
+                    "exception" : "exceptiondetail",
+                    "linkQualifier": "linkqualifier",
+                    "mapping" : "mapping",
+                    "message" : "message",
+                    "messageDetail" : {"column" : "messagedetail", "type" : "JSON_MAP"},
+                    "situation" : "situation",
+                    "sourceObjectId" : "sourceobjectid",
+                    "status" : "status",
+                    "targetObjectId" : "targetobjectid",
+                    "reconciling" : "reconciling",
+                    "ambiguousTargetObjectIds" : "ambiguoustargetobjectids",
+                    "reconAction" : "reconaction",
+                    "entryType" : "entrytype",
+                    "reconId" : "reconid"
+                }
+            },
+            "audit/sync" : {
+                "table" : "auditsync",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "transactionId" : "transactionid",
+                    "timestamp" : "activitydate",
+                    "eventName" : "eventname",
+                    "authentication/id" : "userid",
+                    "action" : "activity",
+                    "exception" : "exceptiondetail",
+                    "linkQualifier": "linkqualifier",
+                    "mapping" : "mapping",
+                    "message" : "message",
+                    "messageDetail" : {"column" : "messagedetail", "type" : "JSON_MAP"},
+                    "situation" : "situation",
+                    "sourceObjectId" : "sourceobjectid",
+                    "status" : "status",
+                    "targetObjectId" : "targetobjectid"
+                }
+            },
+            "audit/access" : {
+                "table" : "auditaccess",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "action" : "activity",
+                    "timestamp" : "activitydate",
+                    "transactionId" : "transactionid",
+                    "eventName" : "eventname",
+                    "server/ip" : "server_ip",
+                    "server/port" : "server_port",
+                    "client/host" : "client_host",
+                    "client/ip" : "client_ip",
+                    "client/port" : "client_port",
+                    "authentication/id" : "userid",
+                    "authorizationId/id" : "principal",
+                    "authorizationId/roles" : {"column" : "roles", "type" : "JSON_LIST"},
+                    "authorizationId/component" : "auth_component",
+                    "resourceOperation/uri" : "resource_uri",
+                    "resourceOperation/protocol" : "resource_protocol",
+                    "resourceOperation/operation/method" : "resource_method",
+                    "resourceOperation/operation/detail" : "resource_detail",
+                    "http/method" : "http_method",
+                    "http/path" : "http_path",
+                    "http/queryString" : "http_querystring",
+                    "http/headers" : {"column" : "http_headers", "type" : "JSON_MAP"},
+                    "response/status" : "status",
+                    "response/elapsedTime" : "elapsedtime"
+                }
+            },
+            "security" : {
+                "table" : "security",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "storeString" : "storestring"
+                }
+            },
+            "security/keys" : {
+                "table" : "securitykeys",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "keyPair" : "keypair"
+                }
+            }
+        }
+    }
+}
