@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import static org.forgerock.json.resource.CountPolicy.EXACT;
+import static org.forgerock.json.resource.CountPolicy.NONE;
 import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
@@ -54,7 +56,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -573,32 +574,41 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             // The number of results (if known)
             final int resultCount;
 
-            // FIXME-crest3 add support for NONE CountPolicy
             if (pagedResultsRequested) {
-                // Get total if -count query is available
-                final String countQueryId = request.getQueryId() + "-count";
-                if (queries.queryIdExists(countQueryId)) {
-                    QueryRequest countRequest = Requests.copyOfQueryRequest(request);
-                    countRequest.setQueryId(countQueryId);
+                // count if requested
+                switch (request.getTotalPagedResultsPolicy()) {
+                    case ESTIMATE:
+                    case EXACT:
+                        // Get total if -count query is available
+                        final String countQueryId = request.getQueryId() + "-count";
+                        if (queries.queryIdExists(countQueryId)) {
+                            QueryRequest countRequest = Requests.copyOfQueryRequest(request);
+                            countRequest.setQueryId(countQueryId);
 
-                    // Strip pagination parameters
-                    countRequest.setPageSize(0);
-                    countRequest.setPagedResultsOffset(0);
-                    countRequest.setPagedResultsCookie(null);
+                            // Strip pagination parameters
+                            countRequest.setPageSize(0);
+                            countRequest.setPagedResultsOffset(0);
+                            countRequest.setPagedResultsCookie(null);
 
-                    List<ResourceResponse> countResult = query(countRequest);
+                            List<ResourceResponse> countResult = query(countRequest);
 
-                    if (countResult != null && !countResult.isEmpty()) {
-                        resultCount = countResult.get(0).getContent().get("total").asInteger();
-                    } else {
-                        logger.warn("Count query {} failed.", countQueryId);
+                            if (countResult != null && !countResult.isEmpty()) {
+                                resultCount = countResult.get(0).getContent().get("total").asInteger();
+                            } else {
+                                logger.warn("Count query {} failed.", countQueryId);
+                                resultCount = NO_COUNT;
+                            }
+                        } else {
+                            logger.warn("No count query found with id {}", countQueryId);
+                            resultCount = NO_COUNT;
+                        }
+                        break;
+                    case NONE:
+                    default:
                         resultCount = NO_COUNT;
-                    }
-                } else {
-                    // TODO - log this when we implement CountPolicy handling
-                    //logger.warn("No count query found with id {}", countQueryId);
-                    resultCount = NO_COUNT;
+                        break;
                 }
+
 
                 if (results.size() < requestPageSize) {
                     nextCookie = null;
@@ -618,7 +628,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             if (resultCount == NO_COUNT) {
                 return newQueryResponse(nextCookie).asPromise();
             } else {
-                return newQueryResponse(nextCookie, CountPolicy.EXACT, resultCount).asPromise();
+                return newQueryResponse(nextCookie, EXACT, resultCount).asPromise();
             }
         } catch (ResourceException e) {
             return e.asPromise();

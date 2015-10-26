@@ -589,29 +589,38 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             if (pagedResultsRequested) {
                 TableHandler tableHandler = getTableHandler(trimStartingSlash(request.getResourcePath()));
 
-                // Get total if -count query is available
-                final String countQueryId = request.getQueryId() + "-count";
-                if (tableHandler.queryIdExists(countQueryId)) {
-                    QueryRequest countRequest = Requests.copyOfQueryRequest(request);
-                    countRequest.setQueryId(countQueryId);
+                // count if requested
+                switch (request.getTotalPagedResultsPolicy()) {
+                    case ESTIMATE:
+                    case EXACT:
+                        // Get total if -count query is available
+                        final String countQueryId = request.getQueryId() + "-count";
+                        if (tableHandler.queryIdExists(countQueryId)) {
+                            QueryRequest countRequest = Requests.copyOfQueryRequest(request);
+                            countRequest.setQueryId(countQueryId);
 
-                    // Strip pagination parameters
-                    countRequest.setPageSize(0);
-                    countRequest.setPagedResultsOffset(0);
-                    countRequest.setPagedResultsCookie(null);
+                            // Strip pagination parameters
+                            countRequest.setPageSize(0);
+                            countRequest.setPagedResultsOffset(0);
+                            countRequest.setPagedResultsCookie(null);
 
-                    List<ResourceResponse> countResult = query(countRequest);
+                            List<ResourceResponse> countResult = query(countRequest);
 
-                    if (countResult != null && !countResult.isEmpty()) {
-                        resultCount = countResult.get(0).getContent().get("total").asInteger();
-                    } else {
-                        logger.warn("Count query {} failed", countQueryId);
+                            if (countResult != null && !countResult.isEmpty()) {
+                                resultCount = countResult.get(0).getContent().get("total").asInteger();
+                            } else {
+                                logger.warn("Count query {} failed", countQueryId);
+                                resultCount = NO_COUNT;
+                            }
+                        } else {
+                            logger.warn("Count query with id {} not found", countQueryId);
+                            resultCount = NO_COUNT;
+                        }
+                        break;
+                    case NONE:
+                    default:
                         resultCount = NO_COUNT;
-                    }
-                } else {
-                    // TODO - log this when we implement CountPolicy handling
-                    //logger.warn("Count query with id {} not found", countQueryId);
-                    resultCount = NO_COUNT;
+                        break;
                 }
 
                 if (results.size() < requestPageSize) {
@@ -629,7 +638,6 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 resultCount = NO_COUNT;
             }
 
-            // TODO-crest3 Check for count policy in the request
             if (resultCount == NO_COUNT) {
                 return newQueryResponse(nextCookie).asPromise();
             } else {
