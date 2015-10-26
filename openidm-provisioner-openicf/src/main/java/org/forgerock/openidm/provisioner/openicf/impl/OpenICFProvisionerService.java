@@ -182,6 +182,7 @@ import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
+import org.identityconnectors.framework.impl.api.local.LocalConnectorFacadeImpl;
 import org.identityconnectors.framework.impl.api.remote.RemoteWrappedException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -429,6 +430,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         if (null != routeEntry) {
             routeEntry.removeRoute();
             routeEntry = null;
+        }
+        if (connectorFacade.get() instanceof LocalConnectorFacadeImpl) {
+            ((LocalConnectorFacadeImpl) connectorFacade.get()).dispose();
         }
         connectorFacade.set(null);
         logger.info("OpenICF Provisioner Service component {} is deactivated.", systemIdentifier.getName());
