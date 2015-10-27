@@ -41,20 +41,20 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "backgrid-paginator",
     "backgrid-selectall"
-], function($, 
-        _, 
-        Handlebars, 
-        AbstractView, 
-        eventManager, 
-        constants, 
-        cookieHelper, 
-        uiUtils, 
-        Backgrid, 
-        BackgridUtils, 
-        resourceDelegate, 
-        messagesManager,
-        AbstractModel,
-        AbstractCollection) {
+], function($,
+            _,
+            Handlebars,
+            AbstractView,
+            eventManager,
+            constants,
+            cookieHelper,
+            uiUtils,
+            Backgrid,
+            BackgridUtils,
+            resourceDelegate,
+            messagesManager,
+            AbstractModel,
+            AbstractCollection) {
     var ListResourceView = AbstractView.extend({
         template: "templates/admin/resource/ListResourceViewTemplate.html",
         model: {},
@@ -101,6 +101,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 var cols = [],
                     unorderedCols = [];
 
+                this.schema = schema;
+
                 if(schema !== "invalidObject"){
                     this.data.validObject = true;
                     if(schema){
@@ -119,31 +121,31 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                         if(colName === "_id") {
 
                                             unorderedCols.push(
-                                                    {
-                                                        "name":"_id",
-                                                        "key": true,
-                                                        "label": col.title || colName,
-                                                        "headerCell": BackgridUtils.FilterHeaderCell,
-                                                        "cell": "string",
-                                                        "sortable": true,
-                                                        "editable": false,
-                                                        "sortType": "toggle"
-                                                    }
+                                                {
+                                                    "name":"_id",
+                                                    "key": true,
+                                                    "label": col.title || colName,
+                                                    "headerCell": BackgridUtils.FilterHeaderCell,
+                                                    "cell": "string",
+                                                    "sortable": true,
+                                                    "editable": false,
+                                                    "sortType": "toggle"
+                                                }
                                             );
                                         } else {
                                             if(parentProp) {
                                                 colName = parentProp + "/" + colName;
                                             }
                                             unorderedCols.push(
-                                                    {
-                                                        "name": colName,
-                                                        "label": col.title || colName,
-                                                        "headerCell": BackgridUtils.FilterHeaderCell,
-                                                        "cell": "string",
-                                                        "sortable": true,
-                                                        "editable": false,
-                                                        "sortType": "toggle"
-                                                    }
+                                                {
+                                                    "name": colName,
+                                                    "label": col.title || colName,
+                                                    "headerCell": BackgridUtils.FilterHeaderCell,
+                                                    "cell": "string",
+                                                    "sortable": true,
+                                                    "editable": false,
+                                                    "sortType": "toggle"
+                                                }
                                             );
                                         }
                                     }
@@ -166,7 +168,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         });
 
                         cols.unshift(selectCol);
-                        
+
                         if (cols.length === 1) {
                             prom.resolve(unorderedCols);
                         } else {
@@ -179,22 +181,22 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                 _.each(_.keys(qry.result[0]),function(col){
                                     if(col !== "_id"){
                                         cols.push(
-                                                {
-                                                    "name": col,
-                                                    "label": col,
-                                                    "headerCell": BackgridUtils.FilterHeaderCell,
-                                                    "cell": "string",
-                                                    "sortable": true,
-                                                    "editable": false,
-                                                    "sortType": "toggle"
-                                                }
+                                            {
+                                                "name": col,
+                                                "label": col,
+                                                "headerCell": BackgridUtils.FilterHeaderCell,
+                                                "cell": "string",
+                                                "sortable": true,
+                                                "editable": false,
+                                                "sortType": "toggle"
+                                            }
                                         );
                                     }
                                 });
                             }
-                            
+
                             cols.unshift(selectCol);
-                            
+
                             prom.resolve(cols);
                         });
                     }
@@ -253,7 +255,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
 
             this.getCols().then(_.bind(function(cols){
                 this.parentRender(function() {
-                    
+
                     this.buildResourceListGrid(cols);
 
                     if(callback) {
@@ -271,10 +273,27 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 ResourceCollection,
                 resourceGrid,
                 paginator,
-                state;
+                state,
+                defaultSystemResourceSortKey;
+
+            if (this.isSystemResource) {
+                _.map(this.schema.properties, function (val,key) {
+                    if (!defaultSystemResourceSortKey && val.type === "string") {
+                        defaultSystemResourceSortKey = key;
+                    }
+                });
+
+                if (!defaultSystemResourceSortKey) {
+                    defaultSystemResourceSortKey = cols[2].name;
+                }
+            }
 
             if(cols.length !== 0) {
-                state = BackgridUtils.getState(cols[1].name);
+                if (defaultSystemResourceSortKey) {
+                    state = BackgridUtils.getState(defaultSystemResourceSortKey);
+                } else {
+                    state = BackgridUtils.getState(cols[1].name);
+                }
             } else {
                 state = null;
             }
@@ -284,12 +303,12 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 model: ResourceModel,
                 state: state,
                 queryParams: BackgridUtils.getQueryParams({
-                    _queryFilter: (!this.isSystemResource) ? 'true' : '/' + cols[2].name + ' sw ""'
+                    _queryFilter: 'true'
                 })
             });
-            
+
             this.model.resources = new ResourceCollection();
-            
+
             resourceGrid = new Backgrid.Grid({
                 className: "backgrid table table-hover",
                 emptyText: $.t("templates.admin.ResourceList.noData"),
@@ -306,12 +325,12 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         }
                         routeName = (!_this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
 
-                    args.push(this.model.id);
+                        args.push(this.model.id);
 
-                    if(this.model.id) {
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
+                        if(this.model.id) {
+                            eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
+                        }
                     }
-                }
                 })
             });
 
@@ -336,18 +355,18 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 this.data.selectedItems = _.without(this.data.selectedItems, model.id);
             }
             this.toggleDeleteSelected();
-            
+
         },
 
         bindDefaultHandlers: function () {
             var _this = this;
-            
+
             this.model.resources.on("backgrid:selected", _.bind(function (model, selected) {
                 this.onRowSelect(model, selected);
             }, this));
 
             this.model.resources.on("backgrid:sort", BackgridUtils.doubleSortFix);
-            
+
             this.model.resources.on("sync", function (collection) {
                 var hasFilters = false;
                 _.each(collection.state.filters, function (filter) {
@@ -355,7 +374,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         hasFilters = true;
                     }
                 });
-                
+
                 if (hasFilters) {
                     _this.$el.find('#clearFiltersBtn').prop('disabled', false);
                 } else {

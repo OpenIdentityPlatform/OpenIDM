@@ -44,9 +44,11 @@
                                             <i class="fa fa-ellipsis-v"></i>
                                         </button>
                                         <ul class="dropdown-menu pull-right" role="menu">
-                                            {{#each objectTypes}}
-                                            <li><a href="#resource/system/{{../name}}/{{this}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{this}})</a></li>
-                                            {{/each}}
+                                            {{#if displayData}}
+                                                {{#each objectTypes}}
+                                                <li><a href="#resource/system/{{../name}}/{{this}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{this}})</a></li>
+                                                {{/each}}
+                                            {{/if}}
                                             <li><a href="#connectors/edit/{{cleanUrlName}}/"><i class="fa fa-pencil"></i>{{t "common.form.edit"}}</a></li>
                                             <li class="connector-delete"><span><i class="fa fa-times"></i>{{t "common.form.delete"}}</span></li>
                                             <li class="divider"></li>

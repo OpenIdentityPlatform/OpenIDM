@@ -65,7 +65,6 @@ define("org/forgerock/openidm/ui/admin/connector/AbstractConnectorView", [
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorBadMainVersion");
                 return "0.0";
             }
-
         },
 
         //Finds the minor version.

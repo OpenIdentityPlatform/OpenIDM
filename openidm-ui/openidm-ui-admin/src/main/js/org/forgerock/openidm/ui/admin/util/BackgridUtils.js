@@ -39,8 +39,8 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
             additionalFilters = data._queryFilter || [],
             getFilter = (function () {
                 return function (filterName, filterQuery) {
-                        return filterName + "+sw+" + encodeURIComponent('"' + filterQuery + '"');
-                    };
+                    return filterName + " sw " + '"' + filterQuery + '"';
+                };
             }());
 
         _.each(this.state.filters, function (filter) {
@@ -48,7 +48,7 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
                 params.push(getFilter(filter.name, filter.query()));
             }
         });
-        params = params.concat(additionalFilters);
+        params = _.filter( params.concat(additionalFilters), function (p) { return p !== "true"; } );
 
         return params.length === 0 ? true : params.join("+AND+");
     };
