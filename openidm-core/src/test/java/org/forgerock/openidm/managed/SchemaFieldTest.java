@@ -4,9 +4,16 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
+import javax.script.ScriptException;
+
+import org.forgerock.json.JsonValueException;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.script.ScriptRegistry;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -14,68 +21,120 @@ import org.testng.annotations.Test;
  */
 public class SchemaFieldTest {
 
-    private static SchemaField relationshipField = new SchemaField("field1", json(object(
-            field("type", "relationship"),
-            field("properties", object(
-                    field("_ref", object(
-                            field("type", "string"))))))));
+    private static SchemaField relationshipField;
+    private static SchemaField relationshipFieldValidate;
+    private static SchemaField relationshipReturnByDefaultField;
+    private static SchemaField relationshipArrayField;
+    private static SchemaField virtualField;
+    private static SchemaField virtualReturnByDefaultField;
+    private static SchemaField virtualArrayField;
+    private static SchemaField coreField;
+    private static SchemaField coreArrayField;
+    private static SchemaField relationshipNullableField;
+    private static SchemaField virtualNullableField;
+    private static SchemaField coreNullableField;
+    private static SchemaField coreArrayNullableField;
+
+    @BeforeTest
+    public void setup() throws JsonValueException, ScriptException {
+        ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
+        CryptoService cryptoService = mock(CryptoService.class);
+        relationshipField = new SchemaField("field1", 
+                json(object(
+                        field("type", "relationship"),
+                        field("properties", object(
+                                field("_ref", object(
+                                        field("type", "string"))))))), 
+                scriptRegistry,
+                cryptoService);
+        relationshipFieldValidate = new SchemaField("fieldX", json(object(
+                field("type", "relationship"),
+                field("validate", true),
+                field("properties", object(
+                        field("_ref", object(
+                                field("type", "string"))))))),
+                scriptRegistry,
+                cryptoService);
+        relationshipReturnByDefaultField = new SchemaField("field2", 
+                json(object(
+                        field("type", "relationship"),
+                        field("returnByDefault", true),
+                        field("properties", object(
+                                field("_ref", object(
+                                        field("type", "string"))))))),
+                scriptRegistry,
+                cryptoService);
+        relationshipArrayField = new SchemaField("field3", 
+                json(object(
+                        field("type", "array"),
+                        field("items", object(
+                                field("type", "relationship"),
+                                field("properties", object(
+                                        field("_ref", object(
+                                                field("type", "string"))))))))),
+                scriptRegistry,
+                cryptoService);
+        virtualField = new SchemaField("field4", 
+                json(object(
+                        field("type", "string"),
+                        field("isVirtual", true))),
+                scriptRegistry,
+                cryptoService);
+        virtualReturnByDefaultField = new SchemaField("field5", 
+                json(object(
+                        field("type", "string"),
+                        field("returnByDefault", true),
+                        field("isVirtual", true))),
+                scriptRegistry,
+                cryptoService);
+        virtualArrayField = new SchemaField("field6", 
+                json(object(
+                        field("type", "array"),
+                        field("isVirtual", true),
+                        field("items", object(
+                                field("type", "string"))))),
+                scriptRegistry,
+                cryptoService);
+        coreField = new SchemaField( "field7", 
+                json(object(
+                        field("type", "string"))),
+                scriptRegistry,
+                cryptoService);
+        coreArrayField = new SchemaField( "field8", 
+                json(object(
+                        field("type", "array"),
+                        field("items", object(
+                                field("type", "string"))))),
+                scriptRegistry,
+                cryptoService);
+        relationshipNullableField = new SchemaField("field1", 
+                json(object(
+                        field("type", array("relationship", "null")),
+                        field("properties", object(
+                                field("_ref", object(
+                                        field("type", "string"))))))),
+                scriptRegistry,
+                cryptoService);
+        virtualNullableField = new SchemaField("field4", 
+                json(object(
+                        field("type", array("string", "null")),
+                        field("isVirtual", true))),
+                scriptRegistry,
+                cryptoService);
+        coreNullableField = new SchemaField("field7", 
+                json(object(
+                        field("type", array("string", "null")))),
+                scriptRegistry,
+                cryptoService);
+        coreArrayNullableField = new SchemaField("field8", 
+                json(object(
+                        field("type", "array"),
+                        field("items", object(
+                                field("type", array("string", "null")))))),
+                scriptRegistry,
+                cryptoService);
+    }
     
-    private static SchemaField relationshipReturnByDefaultField = new SchemaField("field2", json(object(
-            field("type", "relationship"),
-            field("returnByDefault", true),
-            field("properties", object(
-                    field("_ref", object(
-                            field("type", "string"))))))));
-
-    private static SchemaField relationshipArrayField = new SchemaField("field3", json(object(
-            field("type", "array"),
-            field("items", object(
-                    field("type", "relationship"),
-                    field("properties", object(
-                            field("_ref", object(
-                                    field("type", "string"))))))))));
-
-    private static SchemaField virtualField = new SchemaField("field4", json(object(
-            field("type", "string"),
-            field("isVirtual", true))));
-
-    private static SchemaField virtualReturnByDefaultField = new SchemaField("field5", json(object(
-            field("type", "string"),
-            field("returnByDefault", true),
-            field("isVirtual", true))));
-
-    private static SchemaField virtualArrayField = new SchemaField("field6", json(object(
-            field("type", "array"),
-            field("isVirtual", true),
-            field("items", object(
-                    field("type", "string"))))));
-
-    private static SchemaField coreField = new SchemaField("field7", json(object(
-            field("type", "string"))));
-
-    private static SchemaField coreArrayField = new SchemaField("field8", json(object(
-            field("type", "array"),
-            field("items", object(
-                    field("type", "string"))))));
-    
-    private static SchemaField relationshipNullableField = new SchemaField("field1", json(object(
-            field("type", array("relationship", "null")),
-            field("properties", object(
-                    field("_ref", object(
-                            field("type", "string"))))))));
-
-    private static SchemaField virtualNullableField = new SchemaField("field4", json(object(
-            field("type", array("string", "null")),
-            field("isVirtual", true))));
-
-    private static SchemaField coreNullableField = new SchemaField("field7", json(object(
-            field("type", array("string", "null")))));
-
-    private static SchemaField coreArrayNullableField = new SchemaField("field8", json(object(
-            field("type", "array"),
-            field("items", object(
-                    field("type", array("string", "null")))))));
-
     @Test
     public void testRelationshipField() {
         assertTrue(relationshipField.isRelationship());
@@ -135,13 +194,7 @@ public class SchemaFieldTest {
     @Test
     public void testValidatedRelationship() {
         assertFalse(relationshipField.isValidateRelationship());
-        SchemaField relationshipField = new SchemaField("fieldX", json(object(
-                field("type", "relationship"),
-                field("validate", true),
-                field("properties", object(
-                        field("_ref", object(
-                                field("type", "string"))))))));
-        assertTrue(relationshipField.isValidateRelationship());
+        assertTrue(relationshipFieldValidate.isValidateRelationship());
     }
 
 }
