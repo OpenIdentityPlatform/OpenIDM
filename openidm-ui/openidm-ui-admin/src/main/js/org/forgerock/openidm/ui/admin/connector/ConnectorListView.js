@@ -104,6 +104,8 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                     //remove the __ALL__ objectType
                     connector.objectTypes = _.reject(connector.objectTypes, function(ot) { return ot === "__ALL__"; });
 
+                    connector.displayData = this.versionCheck(connector.connectorRef.bundleVersion);
+
                     this.model.connectorCollection.add(connector);
                 }, this));
 
@@ -194,6 +196,29 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
 
                 }, this));
             }, this));
+        },
+
+        /**
+         * Checks the current version to ensure proper ICF support exists for resource view to properly work.
+         *
+         * @param {string} version - Takes both a range and normal version string to be checked
+         */
+        versionCheck: function(version) {
+            if(version.indexOf("(") !== -1 || version.indexOf(")") !== -1 || version.indexOf("[") !== -1 || version.indexOf("]") !== -1) {
+                version = version.replace(/\[|\)|\(|\]/g,'');
+                version = version.split(",");
+                version = version[0].split(".");
+                version = version[0] +"." +version[1];
+            } else {
+                version = version[0].split(".");
+                version = version[0] +"." +version[1];
+            }
+
+            if(version >= 1.4) {
+                return true;
+            } else {
+                return false;
+            }
         },
 
         deleteConnections: function(event) {
