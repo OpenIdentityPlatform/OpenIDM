@@ -69,7 +69,7 @@ def whereParams = []
 if (options.pagedResultsCookie != null) {
     def cookieProps = options.pagedResultsCookie.split(",");
     if (cookieProps.size() != 2) {
-        throw new BadRequestException("Expecting the size of pagedResultsCookie to be 2");
+        throw new BadRequestException("Expecting pagedResultsCookie to contain timestamp and id.");
     }
     // The timestamp and id are for this example only.
     // The user can use their own properties to sort on.
