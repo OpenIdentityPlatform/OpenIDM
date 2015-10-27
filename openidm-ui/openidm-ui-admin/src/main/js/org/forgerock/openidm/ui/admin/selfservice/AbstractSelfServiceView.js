@@ -83,6 +83,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             this.$el.find("#advancedTab").toggleClass("disabled", true);
             this.$el.find("#advancedTab a").removeAttr("data-toggle");
 
+            this.$el.find("#optionTab a").trigger("click");
+
             this.$el.find("#optionTab").toggleClass("disabled", true);
             this.$el.find("#optionTab a").removeAttr("data-toggle");
         },
