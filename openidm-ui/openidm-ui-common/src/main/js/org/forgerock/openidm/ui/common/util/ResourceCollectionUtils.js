@@ -39,10 +39,10 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
 
     obj.displayTextDelimiter = ", ";
 
-    obj.getDisplayText = function(prop, item){
-        var pathToResource = (prop.items) ? prop.items.resourceCollection[0].path : prop.resourceCollection[0].path,
-            resourceKey = pathToResource + "/" + item._id,
-            validDisplayProps = _.reject(obj.autocompleteProps(prop),function(p){
+    obj.getDisplayText = function(prop, item, resourceCollectionIndex){
+        var pathToResource = (prop.items) ? prop.items.resourceCollection[resourceCollectionIndex].path : prop.resourceCollection[resourceCollectionIndex].path,
+            resourceKey = (prop.items) ? item._ref : pathToResource + "/" + item._id,
+            validDisplayProps = _.reject(obj.autocompleteProps(prop, resourceCollectionIndex),function(p){
                 return (p && !p.length) || !eval("item." + p);
             }),
             txt = _.map(validDisplayProps, function(p){
@@ -56,8 +56,8 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
         return txt;
     };
 
-    obj.autocompleteProps = function(prop, showRaw) {
-        var fields = (prop.items) ? prop.items.resourceCollection[0].query.fields : prop.resourceCollection[0].query.fields;
+    obj.autocompleteProps = function(prop, resourceCollectionIndex, showRaw) {
+        var fields = (prop.items) ? prop.items.resourceCollection[resourceCollectionIndex].query.fields : prop.resourceCollection[resourceCollectionIndex].query.fields;
 
         if(showRaw) {
             return fields;
@@ -68,28 +68,30 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
         }
     };
 
-    obj.setupAutocompleteField = function(autocompleteField, prop, opts) {
-        var pathToResource = (prop.items) ? prop.items.resourceCollection[0].path : prop.resourceCollection[0].path,
+    obj.setupAutocompleteField = function(autocompleteField, prop, opts, resourceCollectionIndex, propertyValue) {
+        obj.resourceCollectionIndex = resourceCollectionIndex;
+        var pathToResource = (prop.items) ? prop.items.resourceCollection[resourceCollectionIndex].path : prop.resourceCollection[resourceCollectionIndex].path,
+            initialLoad = true,
             defaultOpts = {
                 valueField: '_id',
-                searchField: obj.autocompleteProps(prop),
+                searchField: obj.autocompleteProps(prop, resourceCollectionIndex),
                 create: false,
                 preload: true,
                 placeholder: $.t("templates.admin.ResourceEdit.search",{ objectTitle: prop.title || prop.name }),
                 render: {
                     item: function(item, escape) {
-                        var txt = obj.getDisplayText(prop, item);
+                        var txt = obj.getDisplayText(prop, item, resourceCollectionIndex);
                         return "<div>" + txt + "</div>";
                     },
                     option: function(item, escape) {
-                        var txt = obj.getDisplayText(prop, item);
+                        var txt = obj.getDisplayText(prop, item, resourceCollectionIndex);
                         return "<div>" + txt + "</div>";
                     }
                 },
-                load: _.bind(function(query, callback) {
-                    searchDelegate.searchResults(pathToResource, obj.autocompleteProps(prop, true), query).then(function(result) {
+                load: function(query, callback) {
+                    searchDelegate.searchResults(pathToResource, obj.autocompleteProps(prop, resourceCollectionIndex, true), query).then(function(result) {
                             var convertNestedProps = function(item) {
-                                    _.each(obj.autocompleteProps(prop), function(propName) {
+                                    _.each(obj.autocompleteProps(prop, resourceCollectionIndex), function(propName) {
                                         if(propName.indexOf(".") > -1) {
                                             item[propName] = eval("item." + propName);
                                         }
@@ -106,9 +108,21 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                             callback();
                         }
                     );
-                }, this)
+                },
+                onLoad: function(data) {
+                    if(initialLoad && propertyValue && !_.isEmpty(propertyValue)){
+                        this.addOption(propertyValue);
+                        this.setValue(propertyValue._id);
+                        initialLoad = false;
+                    }
+                }
             };
-
+        
+        if(autocompleteField[0].selectize) {
+            autocompleteField[0].selectize = null;
+            autocompleteField.next().remove();
+        }
+        
         autocompleteField.selectize(_.extend({}, defaultOpts, opts || {}));
     };
 
@@ -200,8 +214,8 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
             }
 
             if(prop.type === "relationship") {
-                if (prop.resourceCollection[0] && prop.resourceCollection[0].length) {
-                    _.map(prop.resourceCollection[0], function (resourceCollection) {
+                if (prop.resourceCollection && prop.resourceCollection.length) {
+                    _.map(prop.resourceCollection, function (resourceCollection) {
                         addFields(key, resourceCollection.query.fields);
                     });
                 }
@@ -209,6 +223,55 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
         });
         
         return fieldsArray.join(",");
+    };
+    /**
+     * takes in a relationship object, turns the _ref property into an array,
+     * drops off the last array item (the _id of the object), and returns
+     * just the path to the resource collection it comes from
+     * 
+     * example: passing in "managed/user/88b0a909-9b19-4bc0-bd83-902ad1d20439"
+     *          returns "managed/user"
+     *  
+     *
+     * @param {Object} propertyValue
+     * @returns {string}
+     */
+    obj.getPropertyValuePath = function (propertyValue) {
+        var propertyValuePathArr = propertyValue._ref.split("/");
+        
+        propertyValuePathArr.pop();
+        
+        return propertyValuePathArr.join("/");
+    };
+    
+
+    /**
+     * finds the index of the resource collection in a relationship property's schema definition
+     * based on the resource collection's path
+     *
+     * @param {Object} schema
+     * @param {Object} propertyValue
+     * @param {string} propName
+     * @returns {int}
+     */
+    
+    obj.getResourceCollectionIndex = function (schema, propertyValuePath, propName) {
+        var resourceCollections = schema.properties[propName].resourceCollection,
+            resourceCollectionIndex;
+        
+        if (schema.properties[propName].items) {
+            resourceCollections = schema.properties[propName].items.resourceCollection;
+        }
+        
+        resourceCollectionIndex = _.findIndex(resourceCollections, _.bind(function (resourceCollection) { 
+            return resourceCollection.path === propertyValuePath; 
+        }, this));
+        
+        if (resourceCollectionIndex === -1) {
+            resourceCollectionIndex = 0;
+        }
+        
+        return resourceCollectionIndex;
     };
 
     Handlebars.registerHelper('nestedLookup', function(property,key) {
