@@ -162,7 +162,7 @@ ScriptedSQL connector that will be used in the rest of this sample.
    the file that you found in the preceding step into that directory.
         
         $ mkdir -p ui/extension/templates/admin/connector
-        $ jar -xvf connectors/hrdb-connector-1.4.1.0.jar ui/extension/templates/admin/connector/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
+        $ jar -xvf connectors/hrdb-connector-1.4.1.0.jar ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
 
 
 Starting up the sample
