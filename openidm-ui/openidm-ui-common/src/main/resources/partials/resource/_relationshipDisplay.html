@@ -1,0 +1,17 @@
+{{#if newRelationship}}
+<button id="{{buttonId}}" class="btn btn-default">
+    <i class="fa fa-plus"></i>
+    {{displayText}}
+</button>
+{{else}}
+<div class="media">
+    <div class="media-left">
+        <div class="circle-icon circle-icon-xs">
+            <i class="fa {{iconClass}}"></i>
+        </div>
+    </div>
+    <div class="media-body media-middle">
+        <a id="relationshipLink-{{propName}}" href="#">{{displayText}}</a>
+    </div>
+</div>
+{{/if}}

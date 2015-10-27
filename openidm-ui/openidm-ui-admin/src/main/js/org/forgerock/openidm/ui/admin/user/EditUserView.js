@@ -35,9 +35,7 @@ function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsMan
         "keyup #password :input": "showPendingChanges"
     }, GenericEditResourceView.events);
 
-    EditUserView.prototype.partials = [
-        "partials/resource/_passwordTab.html"
-    ];
+    EditUserView.prototype.partials = GenericEditResourceView.partials.concat(["partials/resource/_passwordTab.html"]);
 
     EditUserView.prototype.render = function (args, callback) {
         GenericEditResourceView.render.call(this, args, _.bind(function () {

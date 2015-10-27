@@ -345,7 +345,13 @@
                 "search": "Enter search terms to find __objectTitle__ ...",
                 "noPendingChanges": "No pending changes",
                 "new": "New",
-                "linkedSystems": "Linked Systems"
+                "linkedSystems": "Linked Systems",
+                "addResource": "Add __resource__",
+                "createNewResource": "Create New __resource__",
+                "updateResource": "Update __resource__",
+                "removeSelectedResource": "Remove Selected __resource__",
+                "details": "Details",
+                "type": "Type"
             },
             "ResourceList":
             {
@@ -384,7 +390,8 @@
                 "removeFromTarget": "Remove from Target",
                 "replaceTarget": "Replace Target",
                 "noOp": "No Operation",
-                "assignment" : "Assignment"
+                "assignment" : "Assignment",
+                "roles" : "Roles"
             }
         },
         "taskInstance": {

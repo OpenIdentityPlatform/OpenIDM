@@ -8,7 +8,7 @@
         <div class="page-header no-border profile-header">
             <div class="media ">
                 <div class="media-left media-top">
-                    <span class="resource-avatar"><i class="fa {{#if newObject}}fa-plus{{else}}fa-cube{{/if}}"></i></span>
+                    <span class="resource-avatar"><i class="fa {{#if newObject}}fa-plus{{else}}{{#if schema.icon}}{{schema.icon}}{{else}}fa-cube{{/if}}{{/if}}"></i></span>
                 </div>
                 <div class="media-body  media-top">
                     <h4 class="page-type">{{objectTitle}}</h4>
@@ -49,11 +49,7 @@
             <div role="tabpanel" class="tab-pane" id="tabContentTemplate">
                 <div class="tab-pane-body">
                     <div class="panel-body">
-                        <div class="panel panel-default panel-collapse">
-                            <div class="panel-body">
-                                <div class="resourceCollectionArray"></div>
-                            </div>
-                        </div>
+                        <div class="resourceCollectionArray"></div>
                     </div>
                 </div>
             </div>
@@ -71,11 +67,7 @@
             <div role="tabpanel" class="tab-pane" id="resource-linkedSystems">
                 <div class="tab-pane-body">
                     <div class="panel-body">
-                        <div class="panel panel-default panel-collapse">
-                            <div class="panel-body">
-                                <div id="linkedView"></div>
-                            </div>
-                        </div>
+                        <div id="linkedView"></div>
                     </div>
                 </div>
             </div>

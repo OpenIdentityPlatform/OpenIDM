@@ -202,6 +202,7 @@
                             "resourceCollection" : [
                                 {
                                     "path" : "managed/role",
+                                    "label": "Role",
                                     "query" : {
                                         "queryFilter" : "true",
                                         "fields" : [
@@ -240,6 +241,7 @@
                             "resourceCollection" : [
                                 {
                                     "path" : "repo/internal/role",
+                                    "label": "Internal Role",
                                     "query" : {
                                         "queryFilter" : "true",
                                         "fields" : [
@@ -253,6 +255,7 @@
                                 },
                                 {
                                     "path" : "managed/role",
+                                    "label": "Role",
                                     "query" : {
                                         "queryFilter" : "true",
                                         "fields" : [
@@ -293,6 +296,7 @@
                             "resourceCollection" : [
                                 {
                                     "path" : "managed/user",
+                                    "label" : "User",
                                     "query" : {
                                         "queryFilter" : "true",
                                         "fields" : [
@@ -406,6 +410,7 @@
                         "resourceCollection" : [
                             {
                                 "path" : "managed/user",
+                                "label" : "User",
                                 "query" : {
                                     "queryFilter" : "true",
                                     "fields" : [
@@ -510,7 +515,7 @@
                         "description" : "",
                         "title" : "Managed Assignments",
                         "viewable" : true,
-                        "returnByDefault" : true,
+                        "returnByDefault" : false,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
@@ -532,6 +537,7 @@
                             "resourceCollection" : [
                                 {
                                     "path" : "managed/assignment",
+                                    "label" : "Assignment",
                                     "query" : {
                                         "queryFilter" : "true",
                                         "fields" : [
@@ -554,7 +560,8 @@
                     "_id",
                     "name",
                     "description",
-                    "assignments"
+                    "assignments",
+                    "members"
                 ]
             }
         },
@@ -653,6 +660,7 @@
                             "resourceCollection" : [
                                 {
                                     "path" : "managed/role",
+                                    "label" : "Role",
                                     "query" : {
                                         "queryFilter" : "true",
                                         "fields" : [

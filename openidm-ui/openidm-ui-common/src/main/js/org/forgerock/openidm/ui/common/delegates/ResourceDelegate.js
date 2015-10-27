@@ -46,6 +46,7 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
 
                 if(managedObject){
                     if(managedObject.schema){
+                        managedObject.schema.allSchemas = managed.objects;
                         return managedObject.schema;
                     } else {
                         return false;

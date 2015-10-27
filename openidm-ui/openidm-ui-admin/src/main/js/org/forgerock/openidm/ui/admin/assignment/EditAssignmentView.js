@@ -41,6 +41,8 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/openidm/ui/common/resource/RelationshipArrayView",
     "selectize"
 ], function($, _, handlebars,
             form2js,
@@ -55,6 +57,8 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
             InlineScriptEditor,
             UIUtils,
             AdminUtils,
+            resourceDelegate,
+            RelationshipArrayView,
             selectize) {
     var EditAssignmentView = AdminAbstractView.extend({
         template: "templates/admin/assignment/EditAssignmentViewTemplate.html",
@@ -165,6 +169,8 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 _.each(this.data.resource.attributes, _.bind(function(attribute) {
                     this.addAttribute(attribute);
                 }, this));
+                
+                this.showRolesTab();
 
                 if(callback) {
                     callback();
@@ -420,6 +426,25 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 function(){
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteAssignmentFail");
                 });
+            }, this));
+        },
+        
+        showRolesTab: function () {
+            var tabView = new RelationshipArrayView();
+            
+            resourceDelegate.getSchema(this.model.args).then(_.bind(function (schema) {
+                var opts = { 
+                        element: ".assignmentRoles", 
+                        prop: schema.properties.roles, 
+                        schema: schema
+                    };
+                
+                opts.prop.propName = "roles";
+                opts.prop.selector = "\\.roles";
+                opts.prop.relationshipUrl = "managed/assignment/" + this.data.resource._id + "/roles";
+                
+                tabView.render(opts);
+                
             }, this));
         }
     });

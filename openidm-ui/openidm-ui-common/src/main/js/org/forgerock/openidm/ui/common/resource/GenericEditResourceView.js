@@ -27,6 +27,7 @@
 define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
     "jquery",
     "underscore",
+    "handlebars",
     "jsonEditor",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -34,25 +35,25 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
-    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
-    "org/forgerock/openidm/ui/common/resource/ResourceCollectionArrayView",
+    "org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog",
+    "org/forgerock/openidm/ui/common/resource/RelationshipArrayView",
     "org/forgerock/openidm/ui/common/resource/ResourceCollectionRelationshipsView",
     "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
     "org/forgerock/openidm/ui/common/linkedView/LinkedView",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "bootstrap"
-], function($, _, JSONEditor,
+], function($, _, handlebars,JSONEditor,
         AbstractView,
         eventManager,
         constants,
         uiUtils,
         serviceInvoker,
         resourceDelegate,
-        searchDelegate,
         messagesManager,
-        ResourceCollectionArrayView,
+        ResourceCollectionSearchDialog,
+        RelationshipArrayView,
         ResourceCollectionRelationshipsView,
         resourceCollectionUtils,
         LinkedView,
@@ -69,6 +70,9 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             "click #resetBtn": "reset",
             "onValidate": "onValidate"
         },
+        partials: [
+            "partials/resource/_relationshipDisplay.html"
+        ],
         render: function(args, callback) {
             var resourceReadPromise,
                 objectId = (args[0] === "managed") ? args[2] : args[3],
@@ -199,7 +203,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 }
             }
 
-            this.editor = new JSONEditor(document.getElementById("resource"), { schema: schema });
+            this.editor = new JSONEditor(document.getElementById("resource"), { schema: _.omit(schema, "allSchemas") });
             this.editor.setValue(filteredObject);
             this.addTooltips();
 
@@ -221,8 +225,13 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             } else {
                 if(!this.data.newObject) {
                     _.each(newValue, _.bind(function(val,key) {
-                        var relationshipType = this.data.schema.properties[key] && this.data.schema.properties[key].typeRelationship;
-                        if((!this.oldObject[key] && val && val.length) || (!relationshipType && (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) || (relationshipType && val.length && JSON.parse(val)._ref !== this.oldObject[key]._ref)) {
+                        var relationshipType = this.data.schema.properties[key] && this.data.schema.properties[key].typeRelationship,
+                            hasVal = val && val.length;
+                        if(
+                                (!this.oldObject[key] && hasVal) || 
+                                (!relationshipType && (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) || 
+                                (relationshipType && hasVal && !_.isEqual(JSON.parse(val), this.oldObject[key]))
+                          ) {
                             if(this.data.schema.properties && this.data.schema.properties[key] && this.data.schema.properties[key].title && this.data.schema.properties[key].title.length) {
                                 changedFields.push(this.data.schema.properties[key].title);
                             } else {
@@ -363,7 +372,9 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: this.data.args});
         },
         reset: function(e){
-            e.preventDefault();
+            if (e) {
+                e.preventDefault();
+            }
 
             this.render(this.data.args);
         },
@@ -382,6 +393,16 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 }, this));
             }, this));
         },
+        /**
+         * looks through the resource's schema, finds all relationship fields, and either converts
+         * the JSONEditor representation of the field to a relationship UI in the case of singleton relationships
+         * or in the case of arrays of relationships it converts that into its own tab with it's own grid of data
+         * and actions
+         * 
+         * @param {Object} filteredObject
+         * @param {Object} schema
+         * @returns {promise}
+         */
         convertResourceCollectionFields: function(filteredObject,schema){
                 var _this = this,
                     getFields,
@@ -413,6 +434,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                         if (prop.type === "array") {
                             if(prop.items.resourceCollection && _.has(filteredObject,key)) {
                                 prop.relationshipUrl = _this.data.objectType + "/" + _this.objectName + "/" + _this.objectId + "/" + prop.propName;
+                                prop.typeRelationship = true;
                                 return convertArrayField(prop);
                             }
                         }
@@ -423,6 +445,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                                 if (_this.data.objectType + "/" + _this.objectName === prop.resourceCollection.path && prop.resourceCollection.label && prop.resourceCollection.label.length) {
                                     prop.parentId = prop.resourceCollection.path + "/" + _this.objectId;
                                     prop.parentValue = _this.oldObject;
+                                    prop.typeRelationship = true;
                                     return showRelationships(prop);
                                 } else {
                                     return resp;
@@ -437,28 +460,61 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                     return $.when.apply($, promises);
                 };
-
-                convertField = function(field){
-                    var el = $("#0\\.root" + field.selector),
-                        autocompleteID = "JSONEditorAutocomplete_" + field.selector.replace("\\",""),
-                        autocompleteField = $('<select class="form-control selectize" type="text" style="display:none !important;" id="' + autocompleteID + '"></select>'),
-                        onChange = function (value) {
-                            var readPath = field.resourceCollection.path + "/" + value;
-                            _this.editor.getEditor("root" + field.selector.replace("\\","")).setValue(JSON.stringify({ "_ref": readPath }));
-                        };
-
-                    el.attr("style","display: none !important");
-                    el.attr("propname",field.propName);
-                    el.addClass("resourceCollectionValue");
-                    el.after(autocompleteField);
-
-                    resourceCollectionUtils.setupAutocompleteField(autocompleteField, field, { onChange: onChange });
-
-                    if(!_this.data.newObject && el.val() && el.val().length){
-                            autocompleteField[0].selectize.addOption(JSON.parse(el.val()));
-                            autocompleteField[0].selectize.setValue(JSON.parse(el.val())._id);
+                
+                /**
+                 * converts a singleton relationship field into a button that opens an instance of ResourceCollectionSearchDialog
+                 * if the property has no value the button will be a create button
+                 * if the property has a value the button will be a link button with the related resource's display text and the resource's icon
+                 */
+                convertField = function (prop) {
+                    var el = _this.$el.find("#0-root" + prop.selector.replace(/\./g, "-")),//this is the JSONEditor field to be hidden and changed by the button/dialog
+                        buttonId = "JSONEditorAutocomplete_" + prop.selector.replace("\\",""),
+                        button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({ 
+                                "newRelationship": true, 
+                                "displayText" : $.t("templates.admin.ResourceEdit.addResource",{ resource: prop.title }),
+                                "buttonId" : buttonId
+                             })),
+                        propertyValuePath,
+                        iconClass,
+                        resourceCollectionSchema;
+                    
+                    if (el.val().length) {
+                        propertyValuePath = resourceCollectionUtils.getPropertyValuePath(JSON.parse(el.val()));
+                        resourceCollectionSchema = _.findWhere(_this.data.schema.allSchemas, { name : propertyValuePath.split("/")[propertyValuePath.split("/").length - 1] });
+                        
+                        if (resourceCollectionSchema) {
+                            iconClass = resourceCollectionSchema.schema.icon;
+                        }
+                        
+                        button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({ 
+                            "iconClass": iconClass || "fa-cube", 
+                            "displayText": resourceCollectionUtils.getDisplayText(prop, JSON.parse(el.val()), resourceCollectionUtils.getResourceCollectionIndex(_this.data.schema,propertyValuePath, prop.propName)),
+                            "propName": prop.propName
+                         }));
+                       
                     }
-
+                    
+                    button.click(function (e) {
+                        var opts = {
+                                property: prop,
+                                propertyValue: el.val(),
+                                schema: _this.data.schema,
+                                onChange: function (value, newText) {
+                                    _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue(JSON.stringify(value));
+                                    button.remove();
+                                    convertField(prop);
+                                    _this.$el.find("#relationshipLink-" + prop.propName).text(newText);
+                                }
+                        };
+                        e.preventDefault();
+                        ResourceCollectionSearchDialog.render(opts);
+                    });
+    
+                    el.attr("style","display: none !important");
+                    el.attr("propname",prop.propName);
+                    el.addClass("resourceCollectionValue");
+                    el.after(button);
+    
                     return $.Deferred().resolve();
                 };
 
@@ -466,12 +522,11 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                     _this.editor.getEditor('root' + prop.selector.replace("\\","")).destroy();
                     return addTab(prop, {
                         templateId : "tabContentTemplate",
-                        tabView: new ResourceCollectionArrayView(),
-                        viewId: "resourceCollectionArray-" + prop.propName,
+                        tabView: new RelationshipArrayView(),
+                        viewId: "relationshipArray-" + prop.propName,
                         contentId: "resource-" + prop.propName,
                         contentClass: "resourceCollectionArray",
-                        headerText: prop.title,
-                        onChange: _.bind(_this.showPendingChanges, _this)
+                        headerText: prop.title
                     });
                 };
 
