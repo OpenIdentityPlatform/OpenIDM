@@ -27,6 +27,7 @@ import static org.forgerock.util.promise.Promises.when;
 
 import javax.script.ScriptException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -162,9 +163,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     /** Map of scripts to execute on specific {@link ScriptHook}s. */
     private final Map<ScriptHook, ScriptEntry> scriptHooks = new EnumMap<ScriptHook, ScriptEntry>(ScriptHook.class);
 
-    /** Properties for which triggers are executed during object set operations. */
-    private final ArrayList<ManagedObjectProperty> properties = new ArrayList<ManagedObjectProperty>();
-
     /** reference to the sync service route; used to decided whether or not to perform a sync action */
     private final AtomicReference<RouteService> syncRoute;
 
@@ -206,7 +204,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
         this.managedObjectPath = new ResourcePath("managed").child(name);
 
-        schema = new ManagedObjectSchema(config.get("schema").expect(Map.class));
+        this.schema = new ManagedObjectSchema(config.get("schema").expect(Map.class), scriptRegistry, cryptoService);
 
         for (JsonPointer relationship : schema.getRelationshipFields()) {
             final SchemaField field = schema.getField(relationship);
@@ -219,9 +217,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 scriptHooks.put(hook, scriptRegistry.takeScript(config.get(hook.name())));
             }
         }
-        for (JsonValue property : config.get("properties").expect(List.class)) {
-            properties.add(new ManagedObjectProperty(scriptRegistry, cryptoService, property));
-        }
+        
         enforcePolicies = Boolean.parseBoolean(IdentityServer.getInstance()
                 .getProperty("openidm.policy.enforcement.enabled", "true"));
         logger.debug("Instantiated managed object set: {}", name);
@@ -328,16 +324,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private void onRetrieve(Context context, Request request, String resourceId, ResourceResponse value) throws ResourceException {
         execScript(context, ScriptHook.onRetrieve, value.getContent(),
                 prepareScriptBindings(context, request, resourceId, new JsonValue(null), new JsonValue(null)));
-        for (ManagedObjectProperty property : properties) {
-            property.onRetrieve(context, value.getContent());
+        for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
+            getSchema().getField(key).onRetrieve(context, value.getContent());
         }
     }
 
     private void populateVirtualProperties(Context context, JsonValue content) throws ForbiddenException,
             InternalServerErrorException {
-        for (ManagedObjectProperty property : properties) {
-            if (property.isVirtual()) {
-                property.onRetrieve(context, content);
+        for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
+            SchemaField field = getSchema().getField(key);
+            if (field.isVirtual()) {
+                field.onRetrieve(context, content);
             }
         }
     }
@@ -353,14 +350,20 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *             if any other exception occurs.
      */
     private void onStore(Context context, JsonValue value) throws ResourceException  {
-        for (ManagedObjectProperty property : properties) {
-            property.onValidate(context, value);
+        // Execute all individual onValidate scripts
+        for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
+            getSchema().getField(key).onValidate(context, value);
         }
+        
+        // Execute the root onValidate script
         execScript(context, ScriptHook.onValidate, value, null);
-        // TODO: schema validation here (w. optimizations)
-        for (ManagedObjectProperty property : properties) {
-            property.onStore(context, value); // includes per-property encryption
+
+        // Execute all individual onStore scripts
+        for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
+            getSchema().getField(key).onStore(context, value); // includes per-property encryption
         }
+        
+        // Execute the root onStore script
         execScript(context, ScriptHook.onStore, value, null);
     }
 
@@ -593,7 +596,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             JsonValue value = decrypt(content);
 
             // Execute onCreate script
-            execScript(context, ScriptHook.onCreate, value, null);
+            execScript(context, ScriptHook.onCreate, value, 
+                    prepareScriptBindings(context, request, resourceId, new JsonValue(null), content));
 
             // Validate relationships before persisting
             validateRelationshipFields(value, context);
@@ -1177,9 +1181,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         
         // only cull private properties if this is an external call
         if (ContextUtil.isExternal(context)) {
-            for (ManagedObjectProperty property : properties) {
-                if (property.isPrivate()) {
-                    resource.getContent().remove(property.getName());
+            for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
+                SchemaField field = getSchema().getField(key);
+                if (field.isPrivate()) {
+                    resource.getContent().remove(field.getName());
                 }
             }
         }

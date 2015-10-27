@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.managed;
 
+import static org.mockito.Mockito.mock;
+
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -33,7 +35,13 @@ import static org.testng.Assert.assertTrue;
 import java.util.List;
 import java.util.Set;
 
+import javax.script.ScriptException;
+
 import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.script.ScriptRegistry;
+import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -41,32 +49,41 @@ import org.testng.annotations.Test;
  */
 public class ManagedObjectSchemaTest {
 
-    private static ManagedObjectSchema schema = new ManagedObjectSchema(json(object(
-            field("properties", object(
-                    field("field1", object(
-                            field("type", "string"))),
-                    field("field2", object(
-                            field("type", "boolean"))),
-                    field("field3", object(
-                            field("type", "string"),
-                            field("isVirtual", true))),
-                    field("field4", object(
-                            field("type", "string"),
-                            field("isVirtual", true),
-                            field("returnByDefault", true))),
-                    field("field5", object(
-                    		field("type", "array"),
-                    		field("items", object(
-                    				field("type", "relationship"),
-                    				field("properties", object(
-                    						field("_ref", object(
-                    								field("type", "string"))))))))),
-                    field("field6", object(
-                            field("type", "relationship"),
-                            field("returnByDefault", true),
-                            field("properties", object(
-                                    field("_ref", object(
-                                            field("type", "string"))))))))))));
+    private ManagedObjectSchema schema;
+    
+    @BeforeTest
+    public void setup() throws JsonValueException, ScriptException {
+        ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
+        CryptoService cryptoService = mock(CryptoService.class);
+        schema = new ManagedObjectSchema(
+                json(object(field("properties", object(
+                        field("field1", object(
+                                field("type", "string"))),
+                        field("field2", object(
+                                field("type", "boolean"))),
+                        field("field3", object(
+                                field("type", "string"),
+                                field("isVirtual", true))),
+                        field("field4", object(
+                                field("type", "string"),
+                                field("isVirtual", true),
+                                field("returnByDefault", true))),
+                        field("field5", object(
+                                field("type", "array"),
+                                field("items", object(
+                                        field("type", "relationship"),
+                                        field("properties", object(
+                                                field("_ref", object(
+                                                        field("type", "string"))))))))),
+                        field("field6", object(
+                                field("type", "relationship"),
+                                field("returnByDefault", true),
+                                field("properties", object(
+                                        field("_ref", object(
+                                                field("type", "string")))))))))))
+                , scriptRegistry
+                , cryptoService);
+    }
     
     @Test
     public void testSchemaFields() {

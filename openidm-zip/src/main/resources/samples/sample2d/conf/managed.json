@@ -10,40 +10,6 @@
                 "type" : "text/javascript",
                 "file" : "ui/onDelete-user-cleanup.js"
             },
-            "properties" : [
-                {
-                    "name" : "securityAnswer",
-                    "encryption" : {
-                        "key" : "openidm-sym-default"
-                    },
-                    "scope" : "private"
-                },
-                {
-                    "name" : "password",
-                    "encryption" : {
-                        "key" : "openidm-sym-default"
-                    },
-                    "scope" : "private"
-                },
-                {
-                    "name" : "effectiveRoles",
-                    "type" : "virtual",
-                    "onRetrieve" : {
-                        "type" : "text/javascript",
-                        "file" : "roles/effectiveRoles.js",
-                        "rolesPropName" : "roles"
-                    }
-                },
-                {
-                    "name" : "effectiveAssignments",
-                    "type" : "virtual",
-                    "onRetrieve" : {
-                        "type" : "text/javascript",
-                        "file" : "roles/effectiveAssignments.js",
-                        "effectiveRolesPropName" : "effectiveRoles"
-                    }
-                }
-            ],
             "schema" : {
                 "id" : "http://jsonschema.net",
                 "title" : "User",
@@ -87,6 +53,10 @@
                         "searchable" : false,
                         "minLength" : 8,
                         "userEditable" : true,
+                        "encryption" : {
+                            "key" : "openidm-sym-default"
+                        },
+                        "scope" : "private",
                         "policies" : [
                             {
                                 "policyId" : "at-least-X-capitals",
@@ -122,6 +92,16 @@
                                 }
                             }
                         ]
+                    },
+                    "securityAnswer" : {
+                        "type" : "string",
+                        "viewable" : false,
+                        "searchable" : false,
+                        "userEditable" : true,
+                        "encryption" : {
+                            "key" : "openidm-sym-default"
+                        },
+                        "scope" : "private"
                     },
                     "kbaInfo" : {
                         "type" : "array",
@@ -264,6 +244,11 @@
                         "viewable" : false,
                         "returnByDefault" : true,
                         "isVirtual" : true,
+                        "onRetrieve" : {
+                            "type" : "text/javascript",
+                            "file" : "roles/effectiveRoles.js",
+                            "rolesPropName" : "roles"
+                        },
                         "items" : {
                             "type" : "object"
                         }
@@ -274,6 +259,11 @@
                         "viewable" : false,
                         "returnByDefault" : true,
                         "isVirtual" : true,
+                        "onRetrieve" : {
+                            "type" : "text/javascript",
+                            "file" : "roles/effectiveAssignments.js",
+                            "effectiveRolesPropName" : "effectiveRoles"
+                        },
                         "items" : {
                             "type" : "object"
                         }

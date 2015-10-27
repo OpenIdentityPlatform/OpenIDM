@@ -28,8 +28,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.script.ScriptException;
+
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,14 +64,16 @@ public class ManagedObjectSchema {
      */
     private final Map<JsonPointer, SchemaField> hiddenByDefaultFields;
     
-    public ManagedObjectSchema(JsonValue schema) {
+    public ManagedObjectSchema(JsonValue schema, ScriptRegistry scriptRegistry, CryptoService cryptoService) 
+            throws JsonValueException, ScriptException {
         JsonValue schemaProperties = schema.get("properties").expect(Map.class);
         fields = new HashMap<JsonPointer, SchemaField>();
         relationshipFields = new ArrayList<JsonPointer>();
         hiddenByDefaultFields = new HashMap<JsonPointer, SchemaField>();
         if (!schemaProperties.isNull()) {
             for (String propertyKey : schemaProperties.keys()) {
-                SchemaField schemaField = new SchemaField(propertyKey, schemaProperties.get(propertyKey));
+                SchemaField schemaField = new SchemaField(propertyKey, schemaProperties.get(propertyKey), 
+                        scriptRegistry, cryptoService);
                 fields.put(new JsonPointer(propertyKey), schemaField);
                 if (!schemaField.isReturnedByDefault()) {
                     logger.debug("Field {} is not returned by default", propertyKey);
