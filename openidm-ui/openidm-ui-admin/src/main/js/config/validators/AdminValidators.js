@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2015 ForgeRock AS.
+ * Copyright 2015 ForgeRock AS.
  */
 
 /*global define */
