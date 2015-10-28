@@ -44,6 +44,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceResponse;
@@ -316,7 +317,13 @@ public class ObjectClassInfoHelper {
     	if (patchOperation.isAdd()) {
     		value = patchOperation.getValue().getObject();
     	} else if (patchOperation.isRemove()) {
-    		value = before.get(field).getObject();
+            if (patchOperation.getValue().isNull()) {
+                if (before.get(field) != null) {
+                    value = before.get(field).getObject();
+                }
+            } else {
+                value = patchOperation.getValue().getObject();
+            }
     	} else {
         	// If the patch operation is replace or increment, update the value
         	JsonValue beforeValue = before.get(field);
@@ -327,10 +334,10 @@ public class ObjectClassInfoHelper {
         	ResourceUtil.applyPatchOperation(patchOperation, patchedContent);
     		value = patchedContent.get(field).getObject();
         }
-        
+
     	// The String representation of the field, with the leading slash trimmed
-    	String fieldName = field.toString().substring(1);
-    	
+    	String fieldName = patchOperation.getField().get(0);
+
         // Build up the map of patched Attributes
         for (AttributeInfoHelper attributeInfo : attributes) {
             // Get the attribute's nativeName and check if it is on of the attributes to patch
