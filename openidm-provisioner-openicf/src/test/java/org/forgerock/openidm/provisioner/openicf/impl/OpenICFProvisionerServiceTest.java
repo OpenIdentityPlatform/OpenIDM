@@ -22,7 +22,6 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Router.uriTemplate;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -103,9 +102,14 @@ import org.forgerock.util.query.QueryFilter;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.logging.impl.NoOpLogger;
 import org.identityconnectors.framework.common.objects.Name;
+import org.identityconnectors.framework.common.objects.ObjectClass;
+import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.SyncToken;
+import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.server.ConnectorServer;
 import org.identityconnectors.framework.server.impl.ConnectorServerImpl;
+import org.identityconnectors.framework.spi.operations.UpdateAttributeValuesOp;
+import org.identityconnectors.framework.spi.operations.UpdateOp;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -373,6 +377,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
                 field("__PASSWORD__", "password"),
                 field("lastname", "Doe"),
                 field("email", name + "@example.com"),
+                field("address", "1234 NE 56th AVE"),
                 field("age", 30)));
 
         CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
@@ -391,17 +396,196 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         patchResult = connection.patch(new RootContext(), patchRequest).getContent();
         assertThat(patchResult.get("age").asInteger()).isEqualTo(40);
 
-        // Test remove operation
+        // Test remove operation with no value provided
         operation = PatchOperation.remove("age");
         patchRequest = Requests.newPatchRequest(resourceName, operation);
         patchResult = connection.patch(new RootContext(), patchRequest).getContent();
         assertThat(patchResult.get("age").isNull()).isEqualTo(true);
+
+        // Test remove operation with value provided that is wrong
+        operation = PatchOperation.remove("address", "1234");
+        patchRequest = Requests.newPatchRequest(resourceName, operation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get("address").get(0).getObject()).isEqualTo("1234 NE 56th AVE");
+
+        // Test remove operation with value provided
+        operation = PatchOperation.remove("address", "1234 NE 56th AVE");
+        patchRequest = Requests.newPatchRequest(resourceName, operation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get("address").isNull()).isEqualTo(true);
 
         // Test add operation
         operation = PatchOperation.add("gender", "m");
         patchRequest = Requests.newPatchRequest(resourceName, operation);
         patchResult = connection.patch(new RootContext(), patchRequest).getContent();
         assertThat(patchResult.get("gender").asString()).isEqualTo("m");
+
+        // clean up by deleting this user
+        connection.delete(new SecurityContext(new RootContext(), "system", null),
+                Requests.newDeleteRequest(resourceContainer, patchResult.get("__UID__").asString()));
+    }
+
+    @Test
+    public void testPatchAddOnArray() throws Exception {
+        String name = "jane";
+        String resourceContainer = "/system/XML/account/";
+        JsonValue object = json(object(
+                field("name", name),
+                field("__PASSWORD__", "password"),
+                field("lastname", "smith"),
+                field("email", name + "@example.com"),
+                field("age", 29)));
+
+        CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
+        JsonValue createdObject = connection.create(
+                new SecurityContext(new RootContext(), "system", null), createRequest).getContent();
+        String resourceName = resourceContainer + createdObject.get("_id").asString();
+
+        // Add another email into the array
+        PatchOperation operation = PatchOperation.add("/email/-", name + "@example2.com");
+        PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+        JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get(new JsonPointer("/email")).asList().size()).isEqualTo(2);
+        assertThat(patchResult.get(new JsonPointer("/email/1")).asString()).isEqualTo(name + "@example2.com");
+
+        // clean up by deleting this user
+        connection.delete(new SecurityContext(new RootContext(), "system", null),
+                Requests.newDeleteRequest(resourceContainer, patchResult.get("__UID__").asString()));
+    }
+
+    @Test
+    public void testPatchRemoveOnArray() throws Exception {
+        String name = "jane";
+        String resourceContainer = "/system/XML/account/";
+        JsonValue object = json(object(
+                field("name", name),
+                field("__PASSWORD__", "password"),
+                field("lastname", "smith"),
+                field("email", name + "@example.com"),
+                field("age", 29)));
+
+        CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
+        JsonValue createdObject = connection.create(
+                new SecurityContext(new RootContext(), "system", null), createRequest).getContent();
+        String resourceName = resourceContainer + createdObject.get("_id").asString();
+
+        // Add another email into the array
+        PatchOperation addOperation = PatchOperation.add("/email/-",
+                Arrays.asList(name + "@example2.com", name +"@example3.com"));
+        PatchRequest patchRequest = Requests.newPatchRequest(resourceName, addOperation);
+        JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get(new JsonPointer("/email")).asList().size()).isEqualTo(3);
+        assertThat(patchResult.get(new JsonPointer("/email/1")).asString()).isEqualTo(name + "@example2.com");
+
+        // remove a value that doesn't exist in existing value from the array
+        PatchOperation removeOperation = PatchOperation.remove("/email", name + "@example4.com");
+        patchRequest = Requests.newPatchRequest(resourceName, removeOperation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        // assert that the value was not changed
+        assertThat(patchResult.get(new JsonPointer("/email")).asList().size()).isEqualTo(3);
+
+        // removing from array giving explicit value,
+        removeOperation = PatchOperation.remove("/email", name + "@example2.com");
+        patchRequest = Requests.newPatchRequest(resourceName, removeOperation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get(new JsonPointer("/email")).asList().size()).isEqualTo(2);
+
+        // remove using json pointer with no value
+        removeOperation = PatchOperation.remove("/email/1");
+        patchRequest = Requests.newPatchRequest(resourceName, removeOperation);
+        patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+        assertThat(patchResult.get(new JsonPointer("/email")).asList().size()).isEqualTo(1);
+
+        // clean up by deleting this user
+        connection.delete(new SecurityContext(new RootContext(), "system", null),
+                Requests.newDeleteRequest(resourceContainer, patchResult.get("__UID__").asString()));
+    }
+
+    // Test remove attribute that doesn't exist in the target system
+    @Test(expectedExceptions = BadRequestException.class)
+    public void testRemoveUnsupportedAttribute() throws Exception {
+        String name = "jane";
+        String resourceContainer = "/system/XML/account/";
+        JsonValue object = json(object(
+                field("name", name),
+                field("__PASSWORD__", "password"),
+                field("lastname", "smith"),
+                field("email", name + "@example.com"),
+                field("age", 29)));
+
+        CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
+        JsonValue createdObject = connection.create(
+                new SecurityContext(new RootContext(), "system", null), createRequest).getContent();
+        String resourceName = resourceContainer + createdObject.get("_id").asString();
+
+        PatchOperation removeOperation = PatchOperation.remove("/unsupportedAttribute");
+        PatchRequest patchRequest = Requests.newPatchRequest(resourceName, removeOperation);
+
+        try {
+            connection.patch(new RootContext(), patchRequest).getContent();
+        } finally {
+            // clean up by deleting this user
+            connection.delete(new SecurityContext(new RootContext(), "system", null),
+                    Requests.newDeleteRequest(resourceContainer, createdObject.get("__UID__").asString()));
+        }
+    }
+
+    // Test to make sure that value types can't mismatch
+    @Test(expectedExceptions = InternalServerErrorException.class)
+    public void testAttributeTypeValueMismatch() throws Exception {
+        String name = "jane";
+        String resourceContainer = "/system/XML/account/";
+        JsonValue object = json(object(
+                field("name", name),
+                field("__PASSWORD__", "password"),
+                field("lastname", "smith"),
+                field("email", name + "@example.com"),
+                field("age", 29)));
+
+        CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
+        JsonValue createdObject = connection.create(
+                new SecurityContext(new RootContext(), "system", null), createRequest).getContent();
+        String resourceName = resourceContainer + createdObject.get("_id").asString();
+
+        PatchOperation removeOperation = PatchOperation.replace("age", "twenty-nine");
+        PatchRequest patchRequest = Requests.newPatchRequest(resourceName, removeOperation);
+
+        try {
+            connection.patch(new RootContext(), patchRequest).getContent();
+        } finally {
+            // clean up by deleting this user
+            connection.delete(new SecurityContext(new RootContext(), "system", null),
+                    Requests.newDeleteRequest(resourceContainer, createdObject.get("__UID__").asString()));
+        }
+    }
+
+    @Test(expectedExceptions = InternalServerErrorException.class)
+    public void testRemoveRequiredAttribute() throws Exception {
+        String name = "jane";
+        String resourceContainer = "/system/XML/account/";
+        JsonValue object = json(object(
+                field("name", name),
+                field("__PASSWORD__", "password"),
+                field("lastname", "smith"),
+                field("email", name + "@example.com"),
+                field("age", 29)));
+
+        CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
+        JsonValue createdObject = connection.create(
+                new SecurityContext(new RootContext(), "system", null), createRequest).getContent();
+        String resourceName = resourceContainer + createdObject.get("_id").asString();
+
+        // Try to remove the lastname that is required
+        PatchOperation operation = PatchOperation.remove("lastname", "smith");
+        PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+
+        try {
+            connection.patch(new RootContext(), patchRequest).getContent();
+        } finally {
+            // clean up by deleting this user
+            connection.delete(new SecurityContext(new RootContext(), "system", null),
+                    Requests.newDeleteRequest(resourceContainer, createdObject.get("__UID__").asString()));
+        }
     }
 
     @Test(dataProvider = "dp")
