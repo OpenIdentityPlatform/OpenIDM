@@ -29,37 +29,12 @@
     <groupId>org.forgerock.openidm</groupId>
     <version>4.0.0-SNAPSHOT</version>
   </parent>
-  <groupId>org.forgerock.openidm</groupId>
   <artifactId>openidm-servlet</artifactId>
   <name>OpenIDM Web Servlet</name>
   <packaging>bundle</packaging>
   <description>Bundle containing a servlet which allows exposing web content provided by optional bundles using OSGI.</description>
 
   <dependencies>
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.scr.annotations</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-    </dependency>
-    <dependency>
-      <groupId>org.apache.felix</groupId>
-      <artifactId>org.apache.felix.framework</artifactId>
-      <scope>provided</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.osgi</groupId>
-      <artifactId>org.osgi.compendium</artifactId>
-      <scope>provided</scope>
-    </dependency>
     <dependency>
       <groupId>org.forgerock.openidm</groupId>
       <artifactId>openidm-system</artifactId>
@@ -75,8 +50,27 @@
       <artifactId>forgerock-util</artifactId>
     </dependency>
     <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>javax.servlet-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+    </dependency>
+    <dependency>
+      <groupId>org.osgi</groupId>
+      <artifactId>org.osgi.compendium</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.ops4j.pax.web</groupId>
       <artifactId>pax-web-api</artifactId>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.felix</groupId>
+      <artifactId>org.apache.felix.framework</artifactId>
       <scope>provided</scope>
     </dependency>
     <dependency>
