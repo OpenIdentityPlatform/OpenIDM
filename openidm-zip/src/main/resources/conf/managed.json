@@ -426,18 +426,6 @@
         },
         {
             "name" : "role",
-            "postCreate" : {
-                "type" : "text/javascript",
-                "file" : "roles/update-users-of-role.js"
-            },
-            "postUpdate" : {
-                "type" : "text/javascript",
-                "file" : "roles/update-users-of-role.js"
-            },
-            "postDelete" : {
-                "type" : "text/javascript",
-                "file" : "roles/update-users-of-role.js"
-            },
             "onDelete" : {
                 "type" : "text/javascript",
                 "file" : "roles/onDelete-roles.js"
