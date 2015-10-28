@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction.notifyUpdate;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -60,8 +61,10 @@ import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.RuntimeExceptionHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -135,10 +138,10 @@ public abstract class RelationshipProvider {
 
     /**
      * Returns a Function to format a resource from the repository to that expected by the provider consumer. This is 
-     * simply a wrapper of {@link #FORMAT_RESPONSE_NO_EXCEPTION} with a {@link ResourceException} in the signature to 
+     * simply a wrapper of {@link #formatResponseNoException} with a {@link ResourceException} in the signature to
      * allow for use against {@code Promise<ResourceResponse, ResourceException>}
      *
-     * @see #getFormatResponseNoException()
+     * @see #formatResponseNoException(Context, Request)
      */
     protected Function<ResourceResponse, ResourceResponse, ResourceException> formatResponse(
             final Context context, final Request request) {
@@ -191,7 +194,7 @@ public abstract class RelationshipProvider {
                     final Map<String, Object> properties = new LinkedHashMap<>();
                     final Map<String, Object> repoProperties = raw.getContent().get(REPO_FIELD_PROPERTIES).asMap();
                     final String ref;
-                    
+
                     // set the field reference
                     if (isReverseRelationship 
                             && !raw.getContent().get(REPO_FIELD_FIRST_ID).asString().equals(resourceFullPath)) {
@@ -203,7 +206,6 @@ public abstract class RelationshipProvider {
                     if (repoProperties != null) {
                         properties.putAll(repoProperties);
                     }
-                    
 
                     properties.put(FIELD_CONTENT_ID, raw.getId());
                     properties.put(FIELD_CONTENT_REVISION, raw.getRevision());
@@ -216,6 +218,42 @@ public abstract class RelationshipProvider {
                 }
             };
     }
+
+    /**
+     * On a create of a relationship, this will sync the referenced object after the update is completed.
+     */
+    private final SyncReferencedObjectRequestHandler<CreateRequest> SYNC_REFERENCED_OBJECT_CREATE_HANDLER =
+            new SyncReferencedObjectRequestHandler<CreateRequest>() {
+                @Override
+                protected Promise<ResourceResponse, ResourceException> makeRequest(Context context,
+                        CreateRequest request) throws ResourceException {
+                    return getConnection().createAsync(context, request);
+                }
+            };
+
+    /**
+     * On a update of a relationship, this will sync the referenced object after the update is completed.
+     */
+    private final SyncReferencedObjectRequestHandler<UpdateRequest> SYNC_REFERENCED_OBJECT_UPDATE_HANDLER =
+            new SyncReferencedObjectRequestHandler<UpdateRequest>() {
+                @Override
+                protected Promise<ResourceResponse, ResourceException> makeRequest(Context context,
+                        UpdateRequest request) throws ResourceException {
+                    return getConnection().updateAsync(context, request);
+                }
+            };
+
+    /**
+     * On a delete of a relationship, this will sync the referenced object after the delete is completed.
+     */
+    private final SyncReferencedObjectRequestHandler<DeleteRequest> SYNC_REFERENCED_OBJECT_DELETE_HANDLER =
+            new SyncReferencedObjectRequestHandler<DeleteRequest>() {
+                @Override
+                protected Promise<ResourceResponse, ResourceException> makeRequest(Context context,
+                        DeleteRequest request) throws ResourceException {
+                    return getConnection().deleteAsync(context, request);
+                }
+            };
 
     /**
      * Get a new {@link RelationshipProvider} instance associated with the given resource path and field
@@ -265,7 +303,7 @@ public abstract class RelationshipProvider {
 
     /**
      * Return a {@link RequestHandler} instance representing this provider
-     * @return
+     * @return a {@link RequestHandler} instance representing this provider
      */
     public abstract RequestHandler asRequestHandler();
 
@@ -351,16 +389,19 @@ public abstract class RelationshipProvider {
             
             // If the request is from ManagedObjectSet then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectContext.class)) {
-                return getConnection().createAsync(context, createRequest).then(formatResponse(context, request));
+                return SYNC_REFERENCED_OBJECT_CREATE_HANDLER.performRequest(
+                        request.getContent().get(RelationshipUtil.REFERENCE_ID).asString(), createRequest, context)
+                        .then(formatResponse(context, request));
             }
             
             // Get the before value of the managed object
             final ResourceResponse beforeValue = getManagedObject(context);
             
             // Create the relationship
-            final ResourceResponse response = 
-                    getConnection().createAsync(context, createRequest).then(formatResponse(context, request)).getOrThrow();
-         
+            ResourceResponse response = SYNC_REFERENCED_OBJECT_CREATE_HANDLER.performRequest(
+                    request.getContent().get(RelationshipUtil.REFERENCE_ID).asString(), createRequest, context)
+                    .then(formatResponse(context, request)).getOrThrow();
+
             // Get the before value of the managed object
             final ResourceResponse afterValue = getManagedObject(context);
             
@@ -526,39 +567,44 @@ public abstract class RelationshipProvider {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
-    
+
     /**
      * Performs the deletion of a relationship object.
-     * 
+     *
      * @param context the current context
      * @param path the path to the relationship field
      * @param deleteRequest the current delete request
      * @return a Promise representing the result of the delete operation
      */
-    private Promise<ResourceResponse, ResourceException> deleteAsync(final Context context, final ResourcePath path, 
+    private Promise<ResourceResponse, ResourceException> deleteAsync(final Context context, final ResourcePath path,
             final DeleteRequest deleteRequest) {
         try {
-            if (deleteRequest.getRevision() == null) {
-                // If no revision was supplied we must perform a read to get the latest revision
-                final ReadRequest readRequest = Requests.newReadRequest(path);
-
-                return getConnection().readAsync(context, readRequest)
-                        .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                    @Override
-                    public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse) 
-                            throws ResourceException {
-                        deleteRequest.setRevision(resourceResponse.getRevision());
-                        return getConnection().deleteAsync(context, deleteRequest).then(formatResponse(context, deleteRequest));
-                    }
-                });
-            } else {
-                return getConnection().deleteAsync(context, deleteRequest).then(formatResponse(context, deleteRequest));
-            }
+            // Read the relationship that needs to be deleted.
+            return getConnection().readAsync(context, Requests.newReadRequest(path))
+                    .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                        /**
+                         * Sets the revision on the request if needed, and then performs the delete via the
+                         * SYNC_REFERENCED_OBJECT_DELETE_HANDLER.
+                         *
+                         * @param readResponse the response from reading the relationship.
+                         * @return the promise of the delete request.
+                         * @throws ResourceException
+                         * @see SyncReferencedObjectRequestHandler
+                         */
+                        public Promise<ResourceResponse, ResourceException> apply(final ResourceResponse readResponse)
+                                throws ResourceException {
+                            if (deleteRequest.getRevision() == null) {
+                                deleteRequest.setRevision(readResponse.getRevision());
+                            }
+                            return SYNC_REFERENCED_OBJECT_DELETE_HANDLER.performRequest(readResponse.getContent(),
+                                    deleteRequest, context);
+                        }
+                    }).then(formatResponse(context, deleteRequest));
         } catch (ResourceException e) {
             return e.asPromise();
         }
     }
-    
+
     /**
      * Updates the relationship object if the value has changed and returns a formatted result.
      * 
@@ -573,14 +619,24 @@ public abstract class RelationshipProvider {
      */
     private Promise<ResourceResponse, ResourceException> updateIfChanged(final Context context, Request request,
             String id, String rev, ResourceResponse oldResource, JsonValue newValue) throws ResourceException {
-        if (newValue.asMap().equals(oldResource.getContent().asMap())) { 
+        // Save the old ID and revision before removing to do diff compare.
+        String oldResourceId = oldResource.getId();
+        String oldResourceRevision = oldResource.getRevision();
+        // Remove the revision and id from the oldResource to match the newValue.
+        Map<String, Object> oldValue = oldResource.getContent().asMap();
+        oldValue.remove(ResourceResponse.FIELD_CONTENT_ID);
+        oldValue.remove(ResourceResponse.FIELD_CONTENT_REVISION);
+        // Test if the new and old are different.
+        if (newValue.asMap().equals(oldValue)) {
             // resource has not changed, return the old resource
-            return newResourceResponse(oldResource.getId(), oldResource.getRevision(), null).asPromise();
+            return newResourceResponse(oldResourceId, oldResourceRevision, oldResource.getContent()).asPromise()
+                    .then(formatResponse(context, request));
         } else {
             // resource has changed, update the relationship
-            final UpdateRequest updateRequest = 
-                    Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(id), newValue).setRevision(rev);
-            return getConnection().updateAsync(context, updateRequest).then(formatResponse(context, request));
+            return SYNC_REFERENCED_OBJECT_UPDATE_HANDLER
+                    .performRequest(newValue,
+                            Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(id), newValue).setRevision(rev), context)
+                    .then(formatResponse(context, request));
         }
     }
 
@@ -740,7 +796,7 @@ public abstract class RelationshipProvider {
      *               storage in the repo
      *
      * @return A new JsonValue containing the converted object in a format accepted by the repo
-     * @see #getFormatResponseNoException()
+     * @see #formatResponseNoException(Context, Request)
      */
     protected JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
         final JsonValue properties = object.get(FIELD_PROPERTIES);
@@ -866,6 +922,174 @@ public abstract class RelationshipProvider {
                 }
             }
         }
-        return newResultPromise(response);  
+        return newResultPromise(response);
+    }
+
+    /**
+     * When modifying bidirectional relationships, the objects that refer to the relationship should
+     * be sync'd when the request is made.  The direct object will already be sync'd.  Using this class will also sync
+     * the referenced object.
+     * <p/>
+     * For example: removing a role from a user via the following command will need to also sync the user linked
+     * by the member id.
+     * <pre>
+     * curl -X DELETE -H "X-OpenIDM-Password: openidm-admin" -H "X-OpenIDM-Username: openidm-admin"
+     * -H "Content-Type: application/json" -H "Cache-Control: no-cache"
+     * 'http://localhost:8080/openidm/managed/role/sample-role-1/members/4dc21ceb-ef4c-4006-9188-06236f11c0b1'
+     * </pre>
+     * <p/>
+     * The steps to perform the request and sync the referenced object is:
+     * <ol>
+     * <li>Determine the ID of the referenced object on the opposite side of 'this' relationship.</li>
+     * <li>Read the referenced object before the request is made, to save the 'before'.</li>
+     * <li>invoke the request. makeRequest()</li>
+     * <li>Read the referenced object to retrieve the 'after'.</li>
+     * <li>Perform sync on the referenced object.</li>
+     * <li>Return the results of makeRequest()</li>
+     * </ol>
+     *
+     * @param <T> The Type of Request that will be made.
+     */
+    private abstract class SyncReferencedObjectRequestHandler<T extends Request> {
+
+        /**
+         * Determines the reverse property ID using the reversePropertyName for the relationship being supported,
+         * Then calls #performRequest(String, Request, Context) with the id.
+         *
+         * @param relationshipJson the relationship json to determine the referenceToSync.
+         * @param request the request to make on the relationship.
+         * @param context context of the call.
+         * @return the results of the makeRequest once the sync is promised.
+         * @throws ResourceException
+         * @see #performRequest(String, Request, Context)
+         */
+        public final Promise<ResourceResponse, ResourceException> performRequest(final JsonValue relationshipJson,
+                final T request, final Context context) throws ResourceException {
+
+            // If not in a bidirectional (aka reverse) relationship, then referenced object doesn't need to sync.
+            if (!isReverseRelationship) {
+                return makeRequest(context, request);
+            }
+            return performRequest(
+                    (relationshipJson.get(REPO_FIELD_FIRST_PROPERTY_NAME).asString()
+                            .equals(RelationshipProvider.this.reversePropertyName.toString()))
+                            ? relationshipJson.get(REPO_FIELD_FIRST_ID).asString()
+                            : relationshipJson.get(REPO_FIELD_SECOND_ID).asString(), request, context);
+        }
+
+        /**
+         * Performs the request once it has gathered the before state of the referenced object and then
+         * will execute a sync on the referenced object.
+         *
+         * @param referenceToSync the relationship that the request will be applied to.
+         * @param request the request to make on the relationship.
+         * @param context context of the call.
+         * @return the results of the makeRequest once the sync is promised.
+         * @throws ResourceException
+         */
+        public final Promise<ResourceResponse, ResourceException> performRequest(final String referenceToSync,
+                final T request, final Context context) throws ResourceException {
+
+            // If not in a bidirectional (aka reverse) relationship, then referenced object doesn't need to sync.
+            if (!isReverseRelationship) {
+                return makeRequest(context, request);
+            }
+
+            // First read the state of the referenced object to save the before.
+            return getConnection().readAsync(context, Requests.newReadRequest(referenceToSync))
+                    .thenAsync(
+                            //make the request
+                            new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                                @Override
+                                public Promise<ResourceResponse, ResourceException> apply(final ResourceResponse before)
+                                        throws ResourceException {
+                                    return makeRequest(context, request)
+                                            // Perform the sync after reading the new state of the referenced obj.
+                                            .thenAsync(new PerformSyncFunction(context, request, before,
+                                                    referenceToSync));
+                                }
+                            });
+        }
+
+        /**
+         * Implementers should invoke the call that actually performs the request on the relationship that affects
+         * the referenced side of this relationship.
+         *
+         * @param context context of the request.
+         * @param request the request to be made.
+         * @return the promise of the request execution.
+         * @throws ResourceException
+         */
+        protected abstract Promise<ResourceResponse, ResourceException> makeRequest(Context context, T request)
+                throws ResourceException;
+
+        /**
+         * After the makeRequest is made this function will when lookup the referenced object to collect the 'after'
+         * state; then this will call a sync on the referenced object.
+         */
+        private class PerformSyncFunction
+                implements AsyncFunction<ResourceResponse, ResourceResponse, ResourceException> {
+            private final Context context;
+            private final T request;
+            private final ResourceResponse before;
+            private final String referenceToSync;
+
+            /**
+             * Constructs the Sync function with state needed to call sync on the referenced object.
+             *
+             * @param context context of the request made on the relationship.
+             * @param request the original request made on the relationship to be sent to the sync call.
+             * @param before the state of the referenced object before the request on the relationship is made.
+             * @param referenceToSync the resource path the the object that needs to get synced.
+             */
+            public PerformSyncFunction(Context context, T request, ResourceResponse before, String referenceToSync) {
+                this.context = context;
+                this.request = request;
+                this.before = before;
+                this.referenceToSync = referenceToSync;
+            }
+
+            /**
+             * Returns the promise returned by makeRequest() after looking up the changes made to the referencedObj and
+             * performs the sync on the referencedObj.
+             *
+             * @param handleResponse the response from makeRequest().
+             * @return the handleResponse as a promise.
+             * @throws ResourceException
+             */
+            public Promise<ResourceResponse, ResourceException> apply(ResourceResponse handleResponse)
+                    throws ResourceException {
+                // now re-read the referenced object to see the aftermath of the request
+                getConnection().readAsync(context, Requests.newReadRequest(referenceToSync))
+                        .thenAsync(
+                                new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                                    @Override
+                                    public Promise<ResourceResponse, ResourceException> apply(
+                                            ResourceResponse afterResponse)
+                                            throws ResourceException {
+                                        // now perform the sync
+                                        logger.warn("after relationship change, calling sync on " + referenceToSync);
+                                        managedObjectSyncService.performSyncAction(context, request, referenceToSync,
+                                                notifyUpdate, before.getContent(), afterResponse.getContent());
+                                        return afterResponse.asPromise();
+                                    }
+                                })
+                        .thenOnException(new ExceptionHandler<ResourceException>() {
+                            @Override
+                            public void handleException(ResourceException e) {
+                                logger.warn("request on relationship was successful, however the referenced object " +
+                                        referenceToSync + " failed to sync.", e);
+                            }
+                        })
+                        .thenOnRuntimeException(new RuntimeExceptionHandler() {
+                            @Override
+                            public void handleRuntimeException(RuntimeException e) {
+                                logger.warn("request on relationship was successful, however the referenced object " +
+                                        referenceToSync + " failed to sync.", e);
+                            }
+                        });
+                return handleResponse.asPromise();
+            }
+        }
     }
 }
