@@ -190,7 +190,9 @@ public class ObjectClassInfoHelper {
                     newResourceId = o.asString();
                 }
             }
-            fullId = fullId.concat(newResourceId);
+            if (newResourceId != null) {
+                fullId = fullId.concat(newResourceId);
+            }
         }
         return urlDecode(fullId.toString());
     }
