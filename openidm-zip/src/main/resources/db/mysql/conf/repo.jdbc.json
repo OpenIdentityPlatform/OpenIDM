@@ -151,6 +151,14 @@
                     "roles" : { "column" : "roles", "type" : "JSON_LIST" }
                 }
             },
+            "internal/role" : {
+                "table" : "internalrole",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "description" : "description"
+                }
+            },
             "audit/authentication" : {
                 "table" : "auditauthentication",
                 "objectToColumn" : {
