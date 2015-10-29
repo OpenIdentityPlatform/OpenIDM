@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2012 ForgeRock AS
+  !      Copyright 2011-2015 ForgeRock AS
   !    
 -->
 <document
@@ -33,6 +33,26 @@
  </properties>
  <body>
   <section name="New Releases">
+
+   <p>Jan 29, 2015. OpenIDM 2.1.2 sustaining release is available. See the
+    <a href="https://backstage.forgerock.com/#!/docs/openidm/2.1.2/release-notes">release
+    notes</a> for more information.</p>
+
+   <p>JDec 4, 2014. OpenIDM 3.1.0 is available. See the
+    <a href="https://backstage.forgerock.com/#!/docs/openidm/3.1.0/release-notes">release
+    notes</a> for more information.</p>
+
+   <p>Aug 11, 2014. OpenIDM 3.0.0 is now available. See the
+    <a href="https://backstage.forgerock.com/#!/docs/openidm/3.0.0/release-notes">release
+    notes</a> for more information.</p>
+
+   <p>December 20, 2013. OpenIDM 2.1.1 is now available. See the
+    <a href="https://backstage.forgerock.com/#!/docs/openidm/2.1.1/release-notes">release
+    notes</a> for more information.</p>
+
+   <p>February 20, 2013. OpenIDM 2.1.0 is now available. Read the corresponding
+    documentation <a href="https://backstage.forgerock.com/#!/docs/openidm/2.1.0">here</a>.</p>
+
    <p>March 30, 2012. OpenIDM 2.0.3 is now available. This is the latest update
    on the 2.0.x branch. You can download OpenIDM 2.0.3 from the
    <a href="http://www.forgerock.org/openidm.html">download page</a>.
