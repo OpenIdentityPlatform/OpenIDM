@@ -46,7 +46,7 @@ def log = log as Log
 def updateAttributes = new AttributesAccessor(attributes as Set<Attribute>)
 
 // The Uid of the object to be updated
-def uid = id as String
+def uid = uid as Uid
 
 // The objectClass of the object to be updated, e.g. ACCOUNT or GROUP
 def objectClass = objectClass as ObjectClass
@@ -83,7 +83,7 @@ switch (operation) {
                             password = coalesce(sha1(?), password),
                             timestamp = now()
                         WHERE
-                            uid = ?
+                            id = ?
                         """,
                         [
                                 updateAttributes.findString("fullname"),
@@ -92,26 +92,25 @@ switch (operation) {
                                 updateAttributes.findString("email"),
                                 updateAttributes.findString("organization"),
                                 updateAttributes.findString("password"),
-                                uid
+                                uid.uidValue
                         ]
                 );
                 sql.executeUpdate("DELETE FROM car WHERE users_id=?",
                         [
-                                uid
+                                uid.uidValue
                         ]
                 );
-                updateAttributes.findMap("cars").each {
+                updateAttributes.findList("cars").each {
                     sql.executeInsert(
                             "INSERT INTO car (users_id,year,make,model) VALUES (?,?,?,?)",
                             [
-                                    uid,
+                                    uid.uidValue,
                                     it.year,
                                     it.make,
                                     it.model
                             ]
                     )
-                };
-
+                }
                 break
 
             case ObjectClass.GROUP:
@@ -120,7 +119,6 @@ switch (operation) {
                             groups
                         SET
                             description = ?,
-                            name = ?,
                             gid = ?,
                             timestamp = now()
                         WHERE
@@ -128,22 +126,21 @@ switch (operation) {
                         """,
                         [
                                 updateAttributes.findString("description"),
-                                updateAttributes.findString("name"),
                                 updateAttributes.findString("gid"),
-                                uid
+                                uid.uidValue
                         ]
                 );
                 sql.executeUpdate("DELETE FROM groups_users WHERE groups_id=?",
                         [
-                                uid
+                                uid.uidValue
                         ]
                 );
-                updateAttributes.findMap("users").each {
+                updateAttributes.findList("users").each {
                     sql.executeInsert(
                             "INSERT INTO groups_users (users_id,groups_id) SELECT id,? FROM users WHERE uid=?",
                             [
-                                    it.uid,
-                                    uid
+                                    uid.uidValue,
+                                    it.uid
                             ]
                     )
                 }
@@ -162,16 +159,16 @@ switch (operation) {
                         """,
                         [
                                 updateAttributes.findString("description"),
-                                uid
+                                uid.uidValue
 
                         ]
                 );
                 break
 
             default:
-                uid
+                uid.uidValue
         }
-        return uid
+        return uid.uidValue
     case OperationType.ADD_ATTRIBUTE_VALUES:
         throw new UnsupportedOperationException(operation.name() + " operation of type:" +
                 objectClass.objectClassValue + " is not supported.")
