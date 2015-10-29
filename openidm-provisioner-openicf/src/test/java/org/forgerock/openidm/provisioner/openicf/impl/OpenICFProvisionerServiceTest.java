@@ -624,8 +624,8 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         }
     }
 
-    // AlreadyExistsException -> ConflictException
-    @Test(dataProvider = "groovy-only", expectedExceptions = ConflictException.class, enabled = true)
+    // AlreadyExistsException -> PreconditionFailedException
+    @Test(dataProvider = "groovy-only", expectedExceptions = PreconditionFailedException.class, enabled = true)
     public void testConflictException(String systemName) throws Exception {
         CreateRequest createRequest = Requests.newCreateRequest("system/" + systemName + "/__TEST__", getTestConnectorObject("TEST1"));
         connection.create(new SecurityContext(new RootContext(), "system", null ), createRequest);
