@@ -257,31 +257,8 @@
         <salesforce.api.version>29</salesforce.api.version>
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.2-SNAPSHOT</provisioner.salesforcemodule.version>
 
-        <!-- START Documentation properties -->
+        <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-        <docTargetVersion>${project.version}</docTargetVersion>
-        <frDocPluginVersion>3.1.0-SNAPSHOT</frDocPluginVersion>
-        <opendjPasswordPluginVersion>1.0.3</opendjPasswordPluginVersion>
-        <adPasswordPluginVersion>1.0.3</adPasswordPluginVersion>
-        <openicfBundleVersion>${openicf.framework.version}</openicfBundleVersion>
-        <connectorServerVersion>${openicf.remoteconnectorserver.version}</connectorServerVersion>
-        <orientdbVersion>${orientdb.version}</orientdbVersion>
-        <gaId>UA-23412190-9</gaId>
-
-        <!-- Release date and publication date are set at release build time.
-        -D"releaseDate=Software release date: January 1, 1970"
-        -D"pubDate=Publication date: December 31, 1969"
-        At all other times, the dates should be empty. -->
-        <releaseDate />
-        <softwareReleaseDate>${releaseDate}</softwareReleaseDate>
-        <pubDate />
-        <publicationDate>${pubDate}</publicationDate>
-
-
-	       <!-- Doc Branding -->
-	       <brandingGroupId>org.forgerock.commons</brandingGroupId>
-        <brandingArtifactId>forgerock-doc-default-branding</brandingArtifactId>
-        <brandingVersion>3.1.0-SNAPSHOT</brandingVersion>
 
     </properties>
 
@@ -981,50 +958,6 @@
                 </plugin>
             </plugins>
         </pluginManagement>
-        <plugins>
-            <plugin>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-doc-maven-plugin</artifactId>
-                <version>${frDocPluginVersion}</version>
-                <inherited>false</inherited>
-                <configuration>
-                    <projectName>OpenIDM</projectName>
-                    <projectVersion>${docTargetVersion}</projectVersion>
-                    <releaseVersion>${docTargetVersion}</releaseVersion>
-                    <googleAnalyticsId>${gaId}</googleAnalyticsId>
-                </configuration>
-                <executions>
-                       <execution>
-                           <id>pre-process-doc</id>
-                           <phase>pre-site</phase>
-                           <goals>
-                               <goal>process</goal>
-                           </goals>
-                       </execution>
-                       <execution>
-                           <id>build-doc</id>
-                           <phase>pre-site</phase>
-                           <goals>
-                               <goal>build</goal>
-                           </goals>
-                       </execution>
-                       <execution>
-                           <id>layout-site</id>
-                           <phase>site</phase>
-                           <goals>
-                               <goal>site</goal>
-                           </goals>
-                       </execution>
-                       <execution>
-                           <id>layout-release</id>
-                           <phase>site</phase>
-                           <goals>
-                               <goal>release</goal>
-                           </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
     </build>
     <reporting>
         <plugins>
