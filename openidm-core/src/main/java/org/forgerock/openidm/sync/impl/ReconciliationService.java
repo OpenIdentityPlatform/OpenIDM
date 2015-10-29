@@ -47,6 +47,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
@@ -203,6 +204,8 @@ public class ReconciliationService
             }
         } catch (ResourceException e) {
         	return e.asPromise();
+        } catch (JsonValueException e) {
+            return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
         	return new InternalServerErrorException(e).asPromise();
         }
@@ -303,6 +306,10 @@ public class ReconciliationService
             return newActionResponse(new JsonValue(result)).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
+        } catch (JsonValueException e) {
+            return new BadRequestException(e.getMessage(), e).asPromise();
+        } catch (Exception e) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } finally {
             ObjectSetContext.pop();
         }

@@ -47,6 +47,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
@@ -491,6 +492,8 @@ public class SchedulerService implements RequestHandler {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (JsonException e) {
         	return new BadRequestException("Error creating schedule", e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
         	return new InternalServerErrorException(e).asPromise();
         }
@@ -508,6 +511,10 @@ public class SchedulerService implements RequestHandler {
             return newResourceResponse(request.getResourcePath(), null, schedule).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } catch (JsonValueException e) {
+            return new BadRequestException(e.getMessage(), e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -546,6 +553,8 @@ public class SchedulerService implements RequestHandler {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (JsonException e) {
         	return new BadRequestException("Error updating schedule", e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -570,6 +579,8 @@ public class SchedulerService implements RequestHandler {
         	return new BadRequestException("Error deleting schedule", e).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -623,6 +634,8 @@ public class SchedulerService implements RequestHandler {
         	return new BadRequestException("Error performing query", e).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
@@ -672,6 +685,8 @@ public class SchedulerService implements RequestHandler {
         	return new BadRequestException("Error performing action " + request.getAction(), e).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
