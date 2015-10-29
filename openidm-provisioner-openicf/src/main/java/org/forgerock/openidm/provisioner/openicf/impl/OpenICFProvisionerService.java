@@ -481,7 +481,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         } catch (AlreadyExistsException e) {
             message = MessageFormat.format("System object {0} already exists", resourceId);
             // TODO-crest3
-            return new ConflictException(message, exception);
+            return new org.forgerock.json.resource.PreconditionFailedException(message, exception);
         } catch (ConfigurationException e) {
             message = MessageFormat.format("Operation {0} failed with ConfigurationException on system object: {1}",
                     request.getRequestType().toString(), resourceId);
