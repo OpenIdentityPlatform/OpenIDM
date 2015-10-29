@@ -36,7 +36,7 @@ This example requires a fresh installation of OpenIDM. It also requires that you
 have Maven installed. 
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/bootstrap/install-guide/index.html#more-sample3
+http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample3
 
 This sample also demonstrates the use of complex data types. Complex types can
 be stored, retrieved and synced like any other property of an object. These

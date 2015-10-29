@@ -29,7 +29,7 @@ This sample demonstrates using scripting to expose users according to a
 SCIM-like schema.
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/install-guide/index.html#more-sample7
+http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample-7
 
 Note that this sample does not work with the OpenIDM UI, due to the fact
 that the managed/user schema does not match the default.

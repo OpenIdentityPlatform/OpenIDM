@@ -24,7 +24,7 @@
 
 # Sample 1 - One-Way XML -> Internal Repository
 
-The documentation at http://openidm.forgerock.org/doc/install-guide/index.html#chap-sample
+The documentation at http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample-1
 describes how to get started with this sample.
 
 The sample demonstrates reconciliation between an external XML file and the

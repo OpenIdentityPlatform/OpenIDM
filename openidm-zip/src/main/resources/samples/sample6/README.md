@@ -31,8 +31,7 @@ for working with Microsoft Active Directory and ForgeRock OpenDJ, however
 they could be easily changed to work with any standard LDAP servers.
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/install-guide/index.html#more-sample6
-
+http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample-6
 
 Setup OpenDJ
 ------------
