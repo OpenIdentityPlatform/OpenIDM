@@ -995,6 +995,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
         } catch (ResourceException e) {
         	return e.asPromise();
+        } catch (Exception e) {
+            return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
     }
 
