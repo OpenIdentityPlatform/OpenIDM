@@ -91,9 +91,10 @@ Description: In this section, you generate the classes and files necessary to
 build a custom connector. Using these generated files, you build the custom
 ScriptedSQL connector that will be used in the rest of this sample.
 
-1. From the sample3/create-connector directory, run the following command, using
-   the custom config provided in the sample3/data directory.
+1. Create a sample3/create-connector directory, and run the following command from
+   that directory, using  the custom config provided in sample3/data:
 
+   $ mkdir path/to/openidm/samples/sample3/create-connector
    $ cd path/to/openidm/samples/sample3/create-connector
    $ java -jar ../../../tools/custom-scripted-connector-bundler-4.0.0-SNAPSHOT.jar -c ../data/scriptedsql.json
 
