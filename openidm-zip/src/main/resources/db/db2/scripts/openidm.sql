@@ -15,7 +15,7 @@ CREATE DATABASE   DOPENIDM
 --       BUFFERPOOL BP2
     -- Increase default page size for Activiti
     PAGESIZE 32 K
-; 
+;
 CONNECT TO DOPENIDM;
 
 -- http://db2-vignettes.blogspot.com/2013/07/a-temporary-table-could-not-be-created.html
@@ -388,6 +388,18 @@ CREATE TABLE SOPENIDM.INTERNALUSER (
 ) IN DOPENIDM.SOIDM14;
 COMMENT ON TABLE SOPENIDM.INTERNALUSER IS 'OPENIDM - Internal User';
 
+-- -----------------------------------------------------
+-- Table openidm.internaluser
+-- -----------------------------------------------------
+
+CREATE TABLESPACE SOIDM14 MANAGED BY AUTOMATIC STORAGE;
+CREATE TABLE SOPENIDM.INTERNALROLE (
+    objectid                   VARCHAR(254)    NOT NULL,
+    rev                        VARCHAR(38),
+    description                VARCHAR(1024),
+    PRIMARY KEY (objectid)
+) IN DOPENIDM.SOIDM14;
+COMMENT ON TABLE SOPENIDM.INTERNALROLE IS 'OPENIDM - Internal Role';
 
 -- -----------------------------------------------------
 -- Table openidm.auditaccess
@@ -532,5 +544,13 @@ CREATE INDEX SOPENIDM.IDX_CLUSTEROBJECTPROPERTIES_CLUSTEROBJECTS ON SOPENIDM.CLU
 INSERT INTO sopenidm.internaluser (objectid, rev, pwd, roles) VALUES ('openidm-admin', '0', 'openidm-admin', '["openidm-admin","openidm-authorized"]');
 INSERT INTO sopenidm.internaluser (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', '["openidm-reg"]');
 
-COMMIT;
+INSERT INTO sopenidm.internalrole (objectid, rev, description)
+VALUES
+('openidm-authorized', '0', 'Basic minimum user') UNION ALL
+('openidm-admin', '0', 'Administrative access') UNION ALL
+('openidm-cert', '0', 'Authenticated via certificate') UNION ALL
+('openidm-tasks-manager', '0', 'Allowed to reassign workflow tasks') UNION ALL
+('openidm-reg', '0', 'Anonymous access');
 
+
+COMMIT;
