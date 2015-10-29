@@ -57,6 +57,12 @@
      <a href="./doc/OpenIDM-Install-Guide.pdf">PDF</a>
     </dd>
 
+    <dt>Samples Guide</dt>
+    <dd>
+     <a href="./doc/bootstrap/samples-guide/index.html">HTML</a>,
+     <a href="./doc/OpenIDM-Samples-Guide.pdf">PDF</a>
+    </dd>
+
     <dt>Integrator's Guide</dt>
     <dd>
      <a href="./doc/bootstrap/integrators-guide/index.html">HTML</a>,
