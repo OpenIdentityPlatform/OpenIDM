@@ -55,7 +55,7 @@ Sample 5b includes a script that demonstrates compensating for a synchronization
 failure.
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/install-guide/index.html#more-sample5b
+http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample-5b
 
 To try the sample, follow these steps.
 

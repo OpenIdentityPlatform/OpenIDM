@@ -29,7 +29,7 @@ This sample demonstrates logging capabilities available to OpenIDM scripts,
 providing you an alternative method for debugging your scripts.
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/install-guide/index.html#more-sample8
+http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample-8
 
 To try the sample, follow these steps.
 
