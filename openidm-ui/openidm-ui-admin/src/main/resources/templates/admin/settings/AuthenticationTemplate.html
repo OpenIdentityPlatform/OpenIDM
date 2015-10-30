@@ -1,139 +1,50 @@
-<div class="authentication-input-body">
-    <form id="authenticationForm" class="form clearfix panel-collapse-group" autocomplete="off">
+<div id="AuthenticationContainer" class="form clearfix panel-collapse-group">
 
-        <div class="panel panel-default panel-collapse" id="sessionModuleForm">
-            <div class="panel-heading" role="tab" id="sessionHeader">
-                <div class="row">
-                    <div class="col-xs-10">
-                        <h4 class="panel-title">
-                            <a data-toggle="collapse" href="#sessionBody" aria-expanded="false" aria-controls="sessionBody" class="collapsed">
-                                {{t "templates.auth.sessionFieldsetName"}}
-                            </a>
-                        </h4>
-                    </div>
-                    <div class="col-xs-2">
-                        <a href="{{docHelpUrl}}integrators-guide/index.html#supported-auth-modules" target="_blank" class="pull-right"><span class="hidden-xs">Help</span> <i class="fa fa-question-circle"></i></a>
-                    </div>
-                </div>
-            </div>
+    <!--Session Module-->
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading" role="tab" id="SessionModuleHeader">
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#supported-session-modules" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
 
-            <div id="sessionBody" class="panel-collapse collapse" role="tabpanel" aria-labelledby="sessionHeader" aria-expanded="false" style="height: 0;">
-                <div class="panel-body">
-                    <p class="panel-description">
-                        {{t "templates.auth.sessionInfo"}}
-                    </p>
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#SessionModuleBody" aria-expanded="true" aria-controls="SessionModuleHeader">
+                    {{t "templates.auth.sessionFieldsetName"}}
+                </a>
+            </h4>
+        </div>
 
-                    <div class="form-horizontal">
-                        <div class="form-group">
-                            <label for="maxTokenLifeSeconds" class="col-sm-3 control-label">{{t "templates.auth.maxLifeTitle"}}</label>
-                            <div class="col-sm-6">
-                                <input id="maxTokenLifeSeconds" type="text" class="form-control" name="maxTokenLifeSeconds" value="" />
-                                <div class="validation-message help-block"></div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="tokenIdleTimeSeconds" class="col-sm-3 control-label">{{t "templates.auth.idleTimeTitle"}}</label>
-                            <div class="col-sm-6">
-                                <input type="text" class="form-control" id="tokenIdleTimeSeconds" name="tokenIdleTimeSeconds" value="">
-                                <div class="validation-message help-block"></div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="sessionOnly" class="col-sm-3 control-label">{{t "templates.auth.sessionOnlyTitle"}}</label>
-                            <div class="col-sm-6">
-                                <select id="sessionOnly" name="sessionOnly" class="form-control">
-                                    <option value="true">{{t "common.form.true"}}</option>
-                                    <option value="false">{{t "common.form.false"}}</option>
-                                </select>
-                                <div class="validation-message help-block"></div>
-                            </div>
-                        </div>
-                    </div>
+        <div id="SessionModuleBody" class="collapse in" role="tabpanel" aria-labelledby="SessionModuleHeader" aria-expanded="true">
+            <div class="panel-body">
+                <div class="group-body">
+                    <p class="panel-description">{{t "templates.auth.sessionInfo"}}</p>
+                    <div id="sessionModuleView"></div>
                 </div>
             </div>
         </div>
-
-        <div class="panel panel-default panel-collapse authenticationModules">
-            <div class="panel-heading" role="tab" id="authHeader">
-                <div class="row">
-                    <div class="col-xs-10">
-                        <h4 class="panel-title">
-                            <a data-toggle="collapse" href="#authBody" aria-expanded="false" aria-controls="authBody" class="collapsed">
-                                {{t "templates.auth.authFieldsetName"}}
-                            </a>
-                        </h4>
-                    </div>
-                    <div class="col-xs-2">
-                        <a href="{{docHelpUrl}}integrators-guide/index.html#supported-auth-modules" target="_blank" class="pull-right"><span class="hidden-xs">Help</span> <i class="fa fa-question-circle"></i></a>
-                    </div>
-                </div>
-            </div>
-
-            <div id="authBody" class="panel-collapse collapse" role="tabpanel" aria-labelledby="authHeader" aria-expanded="false" style="height: 0;">
-                <div class="panel-body">
-                    <p class="panel-description">
-                        {{t "templates.auth.authInfo"}}
-                    </p>
+    </div>
 
 
-                    <div class="sortable-list">
-                        <ul class="sortableGroups sortable ui-sortable group-body">
+    <!--Authentication Module-->
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading" role="tab" id="AuthenticationModuleHeader">
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#supported-auth-modules" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
 
-                            <li class="ui-state-group group" id="group-copy">
-                                <div class="list-header ui-state-header">
-                                    <div class="arrows">
-                                        <div class="btn-toolbar" role="toolbar" aria-label="...">
-                                            <div class="btn-group">
-                                                <button type="button" class="btn btn-link up">
-                                                    <i class="fa fa-arrow-up"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-link down">
-                                                    <i class="fa fa-arrow-down"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#AuthenticationModuleBody" aria-expanded="true" aria-controls="AuthenticationModuleHeader">
+                    {{t "templates.auth.authFieldsetName"}}
+                </a>
+            </h4>
+        </div>
 
-                                    <div class="authModuleTitle">
-                                        <span class="authModuleName">{{t "templates.auth.defaultTitle"}}</span>
-                                        <span class="authModuleResource text-muted"></span>
-                                        <span class="authModuleDisabled noteHidden"> ({{t "templates.auth.disabled"}})</span>
-                                    </div>
-
-                                    <div class="btn-toolbar" role="toolbar" aria-label="...">
-                                        <div class="btn-group">
-                                            <button type="button" class="btn btn-link edit">
-                                                <i class="fa fa-pencil"></i>
-                                            </button>
-                                            <button type="button" class="btn btn-link trash">
-                                                <i class="fa fa-times"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="content collapse">
-                                    <label for="moduleType"">{{t "templates.auth.moduleType"}}</label>
-                                    <select id="moduleType" class="moduleType form-control" name="moduleType">
-                                        <option value="choose">{{t "templates.auth.select"}}</option>
-                                    </select>
-                                    <div class="basicForm"></div>
-                                    <div class="advancedForm"></div>
-                                </div>
-                            </li>
-
-                        </ul>
-
-                        <div class="add-item" id="addNew">
-                            <div class="form-group">
-                                <button type="submit" class="btn btn-primary" id="btn-add-property"><i class="fa fa-plus"></i><span>{{t "templates.auth.addNew"}}</span></button>
-                            </div>
-                        </div>
-                    </div>
+        <div id="AuthenticationModuleBody" class="collapse in" role="tabpanel" aria-labelledby="AuthenticationModuleHeader" aria-expanded="true">
+            <div class="panel-body">
+                <div class="group-body">
+                    <p class="panel-description">{{t "templates.auth.authInfo"}}</p>
+                    <div id="authenticationModuleView"></div>
                 </div>
             </div>
         </div>
-    </form>
+    </div>
+
 </div>
 
 <div class="panel-footer">
@@ -145,3 +56,4 @@
         <input type="button" name="submit" value={{t "common.form.save"}} class="btn btn-primary pull-right" id="submitAuth">
     </div>
 </div>
+

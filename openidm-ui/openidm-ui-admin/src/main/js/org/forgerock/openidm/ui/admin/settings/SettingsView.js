@@ -29,7 +29,7 @@ define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
     "jquery",
     "handlebars",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/openidm/ui/admin/settings/AuthenticationView",
+    "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationView",
     "org/forgerock/openidm/ui/admin/settings/audit/AuditView",
     "org/forgerock/openidm/ui/admin/settings/SelfServiceView",
     "org/forgerock/openidm/ui/admin/settings/EmailConfigView",
@@ -38,7 +38,6 @@ define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils",
     "bootstrap-tabdrop"
 ], function(_,
             $,
@@ -52,9 +51,7 @@ define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
             Router,
             Constants,
             EventManager,
-            AbstractDelegate,
-            UIUtils,
-            tabdrop) {
+            AbstractDelegate) {
 
     var SettingsView = AdminAbstractView.extend({
         template: "templates/admin/settings/SettingsTemplate.html",
@@ -97,6 +94,9 @@ define("org/forgerock/openidm/ui/admin/settings/SettingsView", [
                     this.$el.find(".nav-tabs").tabdrop();
                 }, this));
 
+                if (callback) {
+                    callback();
+                }
             }, this));
         },
 

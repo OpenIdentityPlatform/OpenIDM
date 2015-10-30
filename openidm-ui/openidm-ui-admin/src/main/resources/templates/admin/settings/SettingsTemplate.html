@@ -2,7 +2,7 @@
 
     <div class="container">
         <div class="page-header">
-            <h1>{{t "common.form.settings"}}</h1>
+            <h1>{{t "config.AppConfiguration.Navigation.links.systemPref"}}</h1>
         </div>
     </div>
 
@@ -11,23 +11,23 @@
             <ul class="nav nav-tabs">
 
                 <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "authentication"}}active{{/sw}}">
-                    <a data-toggle="tab" data-route="authentication" href="#authenticationContainer">{{t "config.AppConfiguration.Navigation.links.authentication"}}</a>
+                <a data-toggle="tab" data-route="authentication" href="#authenticationContainer">{{t "config.AppConfiguration.Navigation.links.authentication"}}</a>
                 </li>
 
                 <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "audit"}}active{{/sw}}">
-                    <a data-toggle="tab" data-route="audit" href="#auditContainer">{{t "templates.audit.audit"}}</a>
+                <a data-toggle="tab" data-route="audit" href="#auditContainer">{{t "templates.audit.audit"}}</a>
                 </li>
 
                 <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "selfService"}}active{{/sw}}">
-                    <a data-toggle="tab" data-route="selfService" href="#selfServiceContainer">{{t "templates.selfService.title"}}</a>
+                <a data-toggle="tab" data-route="selfService" href="#selfServiceContainer">{{t "templates.selfService.title"}}</a>
                 </li>
 
                 <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "email"}}active{{/sw}}">
-                    <a data-toggle="tab" data-route="email" href="#emailContainer">{{t "templates.emailConfig.title"}}</a>
+                <a data-toggle="tab" data-route="email" href="#emailContainer">{{t "templates.emailConfig.title"}}</a>
                 </li>
 
                 <li {{#if maintenanceMode}}class="active"{{else}}{{#sw tabName "update"}}class="active"{{/sw}}{{/if}}>
-                    <a data-toggle="tab" data-route="update" href="#updateContainer">{{t "templates.update.title"}}</a>
+                <a data-toggle="tab" data-route="update" href="#updateContainer">{{t "templates.update.title"}}</a>
                 </li>
 
             </ul>
