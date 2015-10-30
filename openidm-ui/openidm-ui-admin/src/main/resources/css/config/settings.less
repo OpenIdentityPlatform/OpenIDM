@@ -196,6 +196,60 @@
   margin-top:10px;
 }
 
+#AuthenticationModuleDialog {
+  margin-top: -15px;
+
+  .basicForm, .advancedForm {
+    h3 {
+      font-size: 14px;
+      text-transform: capitalize;
+      i {
+        margin-right: 5px;
+        cursor: pointer;
+        & + span {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .btn {
+      font-size: 13px;
+      border-radius: 5px;
+      margin-right: 5px;
+      i {
+        margin: 0;
+      }
+    }
+
+    .btn:last-child {
+      margin-right: 0;
+    }
+  }
+
+  .advancedForm {
+    margin-bottom: 15px;
+
+    & > div > .well {
+      display: none;
+
+      .container-augmentSecurityContext>.well {
+        background-color: white;
+        padding: 9px !important;
+      }
+    }
+
+    .container-augmentSecurityContext > .well {
+      background-color: white;
+
+      button {
+        i {
+          margin: 0 0 0 10px;
+        }
+      }
+    }
+  }
+}
+
 #AuditEventsDialog {
   #filterFieldsPane {
     .well {
@@ -228,19 +282,23 @@
     margin-bottom: 0;
   }
 
-  #authenticationForm {
-    #group-copy {
-      display: none;
-    }
 
-    .btn-group {
-      margin: 0;
 
-      button i {
-        font-size: 14px;
+  #AuthenticationContainer {
+
+    #authModuleGrid {
+      th {
+        display: none;
+      }
+
+      .dragToSort {
+        cursor: move !important;
       }
     }
 
+    .module-select{
+      width: 400px;
+    }
     .authModuleDisabled {
       color: #999;
     }
@@ -249,86 +307,8 @@
       color: #cd0a0a;
     }
 
-    .content {
-      padding: 0 20px 0 60px;
-    }
-
-    .basicForm, .advancedForm {
-      h3 {
-        font-size: 14px;
-        text-transform: capitalize;
-        i {
-          margin-right: 5px;
-          cursor: pointer;
-          & + span {
-            cursor: pointer;
-          }
-        }
-      }
-
-      .btn {
-        font-size: 13px;
-        border-radius: 5px;
-        margin-right: 5px;
-        i {
-          margin: 0;
-        }
-      }
-
-      .btn:last-child {
-        margin-right: 0;
-      }
-    }
-
-    .advancedForm {
-      margin-bottom: 15px;
-
-      & > div > .well {
-        display: none;
-      }
-
-      .container-augmentSecurityContext > .well {
-        background-color: white;
-
-        button {
-          i {
-            margin: 0 0 0 10px;
-          }
-        }
-      }
-    }
-
     .noteHidden {
       display: none;
-    }
-    @media (max-width: 767px) {
-      .sortable-list ul li .ui-state-header {
-        padding-left: 40px;
-      }
-
-      .sortable-list > ul > li .list-header .btn-toolbar {
-        right: 0;
-      }
-
-      .authModuleResource {
-        display: none;
-      }
-
-      .content {
-        padding: 0;
-      }
-
-      .btn-toolbar .btn-group button {
-        display: inline;
-        width: initial;
-        margin-top: 0;
-        padding: 0 0 0 2px;
-        i {
-          margin: 0;
-
-        }
-      }
-
     }
   }
 }

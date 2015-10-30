@@ -930,21 +930,57 @@
             }
         },
         "auth": {
+            "modules": {
+                "STATIC_USER": {
+                  "name": "Static User",
+                  "msg": "Anonymous authentication"
+                },
+                "CLIENT_CERT": {
+                  "name": "Client Cert",
+                  "msg": "Enables authentication with a certificate"
+                },
+                "IWA": {
+                  "name": "IWA",
+                  "msg": "Passthrough authentication via LDAP connector to Active Directory"
+                },
+                "MANAGED_USER": {
+                  "name": "Managed User",
+                  "msg": "Queries the OpenIDM repository for external users"
+                },
+                "OPENAM_SESSION": {
+                  "name": "OpenAM Session",
+                  "msg": "Uses OpenAM for authentication"
+                },
+                "INTERNAL_USER": {
+                  "name": "Internal User",
+                  "msg": "Queries the internal OpenIDM repository"
+                },
+                "OPENID_CONNECT": {
+                  "name": "OpenID Connect",
+                  "msg": "Supports OpenID Connect 1.0"
+                },
+                "PASSTHROUGH": {
+                  "name": "Passthrough",
+                  "msg": "Queries an external system for authentication"
+                }
+            },
+
+            "disabled": "Disabled",
+            "edit": "Edit",
+            "new": "New",
+            "authFieldsetName": "Authentication Module",
             "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
             "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order specified.",
             "errorsmsg": "Please address the errors in the Authentication modules before saving.",
-            "addNew": "Add New Authentication Module",
+            "addNew": "Add",
             "errors": "Errors",
-            "disabled": "Disabled",
             "defaultTitle": "Select an Authentication Module Type",
-            "authFieldsetName": "Authentication Module",
             "authTitle": "Configure Authentication",
             "sessionFieldsetName": "Session Module",
             "sessionOnlyTitle": "Session Only",
             "idleTimeTitle": "Token Idle Time (in seconds)",
             "maxLifeTitle": "Max Token Life (in seconds)",
             "type": "Type",
-            "clientCertMessage": "Enables authentication with a certificate",
             "moduleEnabled": "Module Enabled",
             "queryOnResource": "Query on Resource",
             "queryId": "Use Query ID",
@@ -957,9 +993,6 @@
                 "password" : "Static user password",
                 "userRole" : "Static user role"
             },
-            "internalUserMessage" : "Queries the internal OpenIDM repository",
-            "managedUserMessage" : "Queries the OpenIDM repository for external users",
-            "passthroughMessage" : "Queries an external system for authentication",
             "authId": "Authentication ID",
             "userCred": "User Credential",
             "userOrGroup": "User Roles or Group Membership",
@@ -982,7 +1015,6 @@
             "advancedProperties": "ADVANCED PROPERTIES",
             "allowedAuthIdPatterns": "Allowed Authentication ID Patterns",
             "pattern": "Pattern",
-            "iwaMessage" : "Passthrough authentication via LDAP connector to Active Directory",
             "servicePrincipal": "Kerberos Service Principal",
             "keytabFileName": "Keytab File Name",
             "kerberosRealm": "Kerberos Realm",
@@ -992,7 +1024,6 @@
             "truststorePassword": "Truststore Password",
             "truststoreFile": "Truststore File",
             "truststoreType": "Truststore Type",
-            "openamSessionMessage" : "Uses OpenAM for authentication",
             "openamUserAttribute": "OpenAM User Attribute",
             "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
             "openamDeploymentUrl": "OpenAM Deployment URL",
@@ -1002,7 +1033,6 @@
             "openamUseExclusively": "Require OpenAM Authentication",
             "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
             "openamUserDatastoreMappingName": "OpenAM User Datastore Mapping Name",
-            "openIdConnectMessage" : "Supports OpenID Connect 1.0",
             "openIdConnectHeader": "OpenID Connect Header",
             "resolvers": "Resolvers",
             "resolver": "Resolver",
@@ -1016,7 +1046,7 @@
             "wellKnown": "Well Known",
             "managedUserLink": "Managed User Link",
             "moduleType": "Module Type",
-            "select": "Make a Selection"
+            "select": "Select a Module"
         },
         "selfService": {
             "title": "Self-Service UI",
