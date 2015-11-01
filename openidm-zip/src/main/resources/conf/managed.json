@@ -76,7 +76,9 @@
                             {
                                 "policyId" : "cannot-contain-characters",
                                 "params" : {
-                                    "forbiddenChars" : ["/"]
+                                    "forbiddenChars" : [
+                                        "/"
+                                    ]
                                 }
                             }
                         ]
@@ -205,12 +207,18 @@
                         "items" : {
                             "type" : "relationship",
                             "validate": false,
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "members",
                             "properties" : {
-                                "_ref" : { "type" : "string" },
-                                "_refProperties": {
-                                    "type": "object",
-                                    "properties": {
-                                        "_id": { "type": "string" }
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
                                     }
                                 }
                             },
@@ -290,14 +298,18 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
-                            "reverseRelationship": true,
-                            "reversePropertyName": "manager",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "manager",
                             "properties" : {
-                                "_ref" : { "type" : "string" },
-                                "_refProperties": {
-                                    "type": "object",
-                                    "properties": {
-                                        "_id": { "type": "string" }
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
                                     }
                                 }
                             },
@@ -375,24 +387,32 @@
                             {
                                 "policyId" : "cannot-contain-characters",
                                 "params" : {
-                                    "forbiddenChars" : ["/"]
+                                    "forbiddenChars" : [
+                                        "/"
+                                    ]
                                 }
                             }
                         ]
                     },
                     "manager" : {
                         "type" : "relationship",
+                        "reverseRelationship" : true,
+                        "reversePropertyName" : "reports",
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
                         "searchable" : false,
                         "validate": false,
                         "properties" : {
-                        	"_ref" : { "type" : "string" },
-                            "_refProperties": {
-                                "type": "object",
-                                "properties": {
-                                    "_id": { "type": "string" }
+                            "_ref" : {
+                                "type" : "string"
+                            },
+                            "_refProperties" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "_id" : {
+                                        "type" : "string"
+                                    }
                                 }
                             }
                         },
@@ -465,14 +485,18 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
-                            "reverseRelationship": true,
-                            "reversePropertyName": "roles",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "roles",
                             "properties" : {
-                                "_ref" : { "type" : "string" },
-                                "_refProperties": {
-                                    "type": "object",
-                                    "properties": {
-                                        "_id": { "type": "string" }
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
                                     }
                                 }
                             },
@@ -503,12 +527,18 @@
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "roles",
                             "properties" : {
-                                "_ref" : { "type" : "string" },
-                                "_refProperties": {
-                                    "type": "object",
-                                    "properties": {
-                                        "_id": { "type": "string" }
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
                                     }
                                 }
                             },
@@ -517,8 +547,12 @@
                                     "path" : "managed/assignment",
                                     "query" : {
                                         "queryFilter" : "true",
-                                        "fields" : ["name"],
-                                        "sortKeys" : ["name"]
+                                        "fields" : [
+                                            "name"
+                                        ],
+                                        "sortKeys" : [
+                                            "name"
+                                        ]
                                     }
                                 }
                             ]
@@ -614,14 +648,18 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
-                            "reverseRelationship": true,
-                            "reversePropertyName": "assignments",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "assignments",
                             "properties" : {
-                                "_ref" : { "type" : "string" },
-                                "_refProperties": {
-                                    "type": "object",
-                                    "properties": {
-                                        "_id": { "type": "string" }
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
                                     }
                                 }
                             },
@@ -630,8 +668,12 @@
                                     "path" : "managed/role",
                                     "query" : {
                                         "queryFilter" : "true",
-                                        "fields" : ["name"],
-                                        "sortKeys" : ["name"]
+                                        "fields" : [
+                                            "name"
+                                        ],
+                                        "sortKeys" : [
+                                            "name"
+                                        ]
                                     }
                                 }
                             ]

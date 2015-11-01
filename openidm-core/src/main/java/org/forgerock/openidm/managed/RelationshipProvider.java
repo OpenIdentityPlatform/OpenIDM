@@ -72,21 +72,6 @@ public abstract class RelationshipProvider {
      */
     private static final Logger logger = LoggerFactory.getLogger(RelationshipProvider.class);
     
-    /** Used for accessing the repo */
-    protected final ConnectionFactory connectionFactory;
-
-    /** Path to this resource in the repo */
-    protected static final ResourcePath REPO_RESOURCE_PATH = new ResourcePath("repo", "relationships");
-
-    /** Name of the source resource these relationships are "edges" of */
-    protected final ResourcePath resourcePath;
-
-    /** The property representing this relationship */
-    protected final JsonPointer propertyName;
-
-    /** If this is a reverse relationship */
-    protected final boolean isReverse;
-    
     /**
      * The activity logger.
      */
@@ -96,49 +81,78 @@ public abstract class RelationshipProvider {
      * A service for sending sync events on managed objects
      */
     protected final ManagedObjectSyncService managedObjectSyncService;
+    
+    /** Used for accessing the repo */
+    protected final ConnectionFactory connectionFactory;
+
+    /** Path to this resource in the repo */
+    protected static final ResourcePath REPO_RESOURCE_PATH = new ResourcePath("repo", "relationships");
+
+    /** Name of the source resource these relationships are "edges" of */
+    protected final ResourcePath resourcePath;
+
+    /** The name of the property on this managed object that this relationship represents. */
+    protected final JsonPointer propertyName;
+
+    /** The name of the property on the managed object at the other end of relationship that this relationship
+     * represents */
+    protected final JsonPointer reversePropertyName;
+
+    /** A boolean indicating if this is a reverse relationship, meaning that there are managed objects with properties 
+     * representing this relationship on both ends */
+    protected final boolean isRevereseRelationship;
 
     /** The name of the firstId field in the repo */
     protected static final String REPO_FIELD_FIRST_ID = "firstId";
-    /** The name of the firstPropertyName field in the repo */
-    protected static final String REPO_FIELD_FIRST_PROPERTY_NAME = "firstPropertyName";
-    /** The name of the properties field coming out of the repo service */
-    protected static final String REPO_FIELD_PROPERTIES = "properties";
+
     /** The name of the secondId field in the repo */
     protected static final String REPO_FIELD_SECOND_ID = "secondId";
+    
+    /** The name of the firstPropertyName field in the repo */
+    protected static final String REPO_FIELD_FIRST_PROPERTY_NAME = "firstPropertyName";
+    
+    /** The name of the secondPropertyName field in the repo */
+    protected static final String REPO_FIELD_SECOND_PROPERTY_NAME = "secondPropertyName";
 
-    /** The name of the firstId parameter to be used in the uri template */
-    public static final String URI_PARAM_FIRST_ID = REPO_FIELD_FIRST_ID;
+    /** The name of the properties field coming out of the repo service */
+    protected static final String REPO_FIELD_PROPERTIES = "properties";
 
-    /** The name of the firstId parameter to be used in request parameters */
-    public static final String PARAM_FIRST_ID = REPO_FIELD_FIRST_ID;
+    /** The name of the parameter to be used carry the managed object's ID in the Request and/or Context */
+    public static final String PARAM_MANAGED_OBJECT_ID = "managedObjectId";
 
     /** The name of the properties field in resource response */
     public static final JsonPointer FIELD_PROPERTIES = SchemaField.FIELD_PROPERTIES;
+    
     /** The name of the secondId field in resource response */
     public static final JsonPointer FIELD_REFERENCE = SchemaField.FIELD_REFERENCE;
+    
     /** The name of the field containing the id */
     public static final JsonPointer FIELD_ID = FIELD_PROPERTIES.child(FIELD_CONTENT_ID);
+    
     /** The name of the field containing the revision */
     public static final JsonPointer FIELD_REV = FIELD_PROPERTIES.child(FIELD_CONTENT_REVISION);
 
     /**
-     * Function to format a resource from the repository to that expected by the provider consumer. This is simply a 
-     * wrapper of {@link #FORMAT_RESPONSE_NO_EXCEPTION} with a {@link ResourceException} in the signature to allow for 
-     * use against {@code Promise<ResourceResponse, ResourceException>}
+     * Returns a Function to format a resource from the repository to that expected by the provider consumer. This is 
+     * simply a wrapper of {@link #FORMAT_RESPONSE_NO_EXCEPTION} with a {@link ResourceException} in the signature to 
+     * allow for use against {@code Promise<ResourceResponse, ResourceException>}
      *
-     * @see #FORMAT_RESPONSE_NO_EXCEPTION
+     * @see #getFormatResponseNoException()
      */
-    protected final Function<ResourceResponse, ResourceResponse, ResourceException> FORMAT_RESPONSE =
-            new Function<ResourceResponse, ResourceResponse, ResourceException>() {
+    protected Function<ResourceResponse, ResourceResponse, ResourceException> formatResponse(
+            final Context context, final Request request) {
+        return new Function<ResourceResponse, ResourceResponse, ResourceException>() {
                 @Override
                 public ResourceResponse apply(ResourceResponse resourceResponse) throws ResourceException {
-                    return FORMAT_RESPONSE_NO_EXCEPTION.apply(resourceResponse);
+                    return formatResponseNoException(context, request).apply(resourceResponse);
                 }
             };
-
+    }
+            
      /**
-     * Function to format a resource from the repository to that expected by the provider consumer. First object
-     * properties are removed and {@code secondId} (or {@code firstId} if {@link #isReverse}) will be converted to {@code _ref}
+     * Returns a Function to format a resource from the repository to that expected by the provider consumer. First 
+     * object properties are removed and {@code secondId} (or {@code firstId} if {@link #isRevereseRelationship}) will be converted 
+     * to {@code _ref}
      *
      * This will convert repo resources in the format of:
      * <pre>
@@ -164,29 +178,42 @@ public abstract class RelationshipProvider {
      *     }
      * </pre>
      */
-    protected final Function<ResourceResponse, ResourceResponse, NeverThrowsException> FORMAT_RESPONSE_NO_EXCEPTION =
-            new Function<ResourceResponse, ResourceResponse, NeverThrowsException>() {
+    protected Function<ResourceResponse, ResourceResponse, NeverThrowsException> formatResponseNoException(
+            final Context context, final Request request) {
+        return new Function<ResourceResponse, ResourceResponse, NeverThrowsException>() {
+            
+                public String resourcePath = getResourcePath(context, request).toString();
+                
                 @Override
                 public ResourceResponse apply(final ResourceResponse raw) {
                     final JsonValue formatted = json(object());
                     final Map<String, Object> properties = new LinkedHashMap<>();
                     final Map<String, Object> repoProperties = raw.getContent().get(REPO_FIELD_PROPERTIES).asMap();
+                    final String ref;
+                    
+                    // set the field reference
+                    if (isRevereseRelationship && raw.getContent().get(REPO_FIELD_FIRST_ID).asString().equals(resourcePath)) {
+                        ref = raw.getContent().get(REPO_FIELD_SECOND_ID).asString();
+                    } else {
+                        ref = raw.getContent().get(REPO_FIELD_FIRST_ID).asString();
+                    }
 
                     if (repoProperties != null) {
                         properties.putAll(repoProperties);
                     }
+                    
 
                     properties.put(FIELD_CONTENT_ID, raw.getId());
                     properties.put(FIELD_CONTENT_REVISION, raw.getRevision());
 
-                    formatted.put(SchemaField.FIELD_REFERENCE, raw.getContent().get(
-                            isReverse ? REPO_FIELD_FIRST_ID : REPO_FIELD_SECOND_ID).asString());
+                    formatted.put(SchemaField.FIELD_REFERENCE, ref);
                     formatted.put(SchemaField.FIELD_PROPERTIES, properties);
 
                     // Return the resource without _id or _rev
                     return newResourceResponse(null, null, formatted);
                 }
             };
+    }
 
     /**
      * Get a new {@link RelationshipProvider} instance associated with the given resource path and field
@@ -199,25 +226,18 @@ public abstract class RelationshipProvider {
     public static RelationshipProvider newProvider(final ConnectionFactory connectionFactory,
             final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        final String propertyName;
-        final boolean reverse;
-
-        if (relationshipField.isReverseRelationship()) {
-            propertyName = relationshipField.getReversePropertyName();
-            reverse = true;
-        } else {
-            propertyName = relationshipField.getName();
-            reverse = false;
-        }
+        final JsonPointer propName = new JsonPointer(relationshipField.getName());
+        final boolean isReverseRelationship = relationshipField.isReverseRelationship();
+        final JsonPointer reversePropName = isReverseRelationship
+                ? new JsonPointer(relationshipField.getReversePropertyName())
+                : null;
 
         if (relationshipField.isArray()) {
-            return new CollectionRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(propertyName), relationshipField.getName(), reverse,
-                    activityLogger, managedObjectSyncService);
+            return new CollectionRelationshipProvider(connectionFactory, resourcePath, propName, reversePropName, 
+                    relationshipField.getName(), isReverseRelationship, activityLogger, managedObjectSyncService);
         } else {
-            return new SingletonRelationshipProvider(connectionFactory, resourcePath, 
-                    new JsonPointer(propertyName), relationshipField.getName(), reverse,
-                    activityLogger, managedObjectSyncService);
+            return new SingletonRelationshipProvider(connectionFactory, resourcePath, propName, reversePropName, 
+                    relationshipField.getName(), isReverseRelationship, activityLogger, managedObjectSyncService);
         }
     }
 
@@ -227,15 +247,16 @@ public abstract class RelationshipProvider {
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
      * @param propertyName Name of property on first object represents the relationship
-     * @param isReverse Wether or not this relationship is isReverse (matching on secondId instead of first)
+     * @param isReverse Whether or not this relationship is isReverse
      */
     protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, final boolean isReverse, ActivityLogger activityLogger,
-            final ManagedObjectSyncService managedObjectSyncService) {
+            final JsonPointer propertyName, final JsonPointer reversePropertyName, final boolean isReverse, 
+            ActivityLogger activityLogger, final ManagedObjectSyncService managedObjectSyncService) {
         this.connectionFactory = connectionFactory;
         this.resourcePath = resourcePath;
         this.propertyName = propertyName;
-        this.isReverse = isReverse;
+        this.reversePropertyName = reversePropertyName;
+        this.isRevereseRelationship = isReverse;
         this.activityLogger = activityLogger;
         this.managedObjectSyncService = managedObjectSyncService;
     }
@@ -328,7 +349,7 @@ public abstract class RelationshipProvider {
             
             // If the request is from ManagedObjectSet then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectSetContext.class)) {
-                return getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE);
+                return getConnection().createAsync(context, createRequest).then(formatResponse(context, request));
             }
             
             // Get the before value of the managed object
@@ -336,7 +357,7 @@ public abstract class RelationshipProvider {
             
             // Create the relationship
             final ResourceResponse response = 
-                    getConnection().createAsync(context, createRequest).then(FORMAT_RESPONSE).getOrThrow();
+                    getConnection().createAsync(context, createRequest).then(formatResponse(context, request)).getOrThrow();
          
             // Get the before value of the managed object
             final ResourceResponse afterValue = getManagedObject(context);
@@ -372,7 +393,7 @@ public abstract class RelationshipProvider {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
             
             Promise<ResourceResponse, ResourceException> promise = 
-                    getConnection().readAsync(context, readRequest).then(FORMAT_RESPONSE);
+                    getConnection().readAsync(context, readRequest).then(formatResponse(context, request));
             
             // If the request is from ManagedObjectSet then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectSetContext.class)) {
@@ -422,7 +443,7 @@ public abstract class RelationshipProvider {
                             @Override
                             public Promise<ResourceResponse, ResourceException> apply(ResourceResponse oldResource)
                                     throws ResourceException {
-                                return updateIfChanged(context, relationshipId, rev, oldResource, newValue);
+                                return updateIfChanged(context, request, relationshipId, rev, oldResource, newValue);
                             }
                         });
             }
@@ -435,7 +456,7 @@ public abstract class RelationshipProvider {
             final ResourceResponse oldResource = getConnection().readAsync(context, readRequest).getOrThrow();
             
             // Perform update
-            result = updateIfChanged(context, relationshipId, rev, oldResource, newValue).getOrThrow();
+            result = updateIfChanged(context, request, relationshipId, rev, oldResource, newValue).getOrThrow();
             
             // Get the after value of the managed object
             final ResourceResponse afterValue = getManagedObject(context);
@@ -519,16 +540,17 @@ public abstract class RelationshipProvider {
                 // If no revision was supplied we must perform a read to get the latest revision
                 final ReadRequest readRequest = Requests.newReadRequest(path);
 
-                return getConnection().readAsync(context, readRequest).thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
+                return getConnection().readAsync(context, readRequest)
+                        .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
                     @Override
                     public Promise<ResourceResponse, ResourceException> apply(ResourceResponse resourceResponse) 
                             throws ResourceException {
                         deleteRequest.setRevision(resourceResponse.getRevision());
-                        return getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
+                        return getConnection().deleteAsync(context, deleteRequest).then(formatResponse(context, deleteRequest));
                     }
                 });
             } else {
-                return getConnection().deleteAsync(context, deleteRequest).then(FORMAT_RESPONSE);
+                return getConnection().deleteAsync(context, deleteRequest).then(formatResponse(context, deleteRequest));
             }
         } catch (ResourceException e) {
             return e.asPromise();
@@ -539,6 +561,7 @@ public abstract class RelationshipProvider {
      * Updates the relationship object if the value has changed and returns a formatted result.
      * 
      * @param context the current context
+     * @param request The current request.
      * @param id the id of the relationship object
      * @param rev the revision of the relationship object
      * @param oldResource the old value of the relationship object
@@ -546,8 +569,8 @@ public abstract class RelationshipProvider {
      * @return the updated, formatted relationship object
      * @throws ResourceException
      */
-    private Promise<ResourceResponse, ResourceException> updateIfChanged(final Context context, String id, String rev,
-            ResourceResponse oldResource, JsonValue newValue) throws ResourceException {
+    private Promise<ResourceResponse, ResourceException> updateIfChanged(final Context context, Request request,
+            String id, String rev, ResourceResponse oldResource, JsonValue newValue) throws ResourceException {
         if (newValue.asMap().equals(oldResource.getContent().asMap())) { 
             // resource has not changed, return the old resource
             return newResourceResponse(oldResource.getId(), oldResource.getRevision(), null).asPromise();
@@ -555,7 +578,7 @@ public abstract class RelationshipProvider {
             // resource has changed, update the relationship
             final UpdateRequest updateRequest = 
                     Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(id), newValue).setRevision(rev);
-            return getConnection().updateAsync(context, updateRequest).then(FORMAT_RESPONSE);
+            return getConnection().updateAsync(context, updateRequest).then(formatResponse(context, request));
         }
     }
 
@@ -582,7 +605,7 @@ public abstract class RelationshipProvider {
                 // Read in object
                 ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
                 ResourceResponse oldResource = connectionFactory.getConnection().readAsync(context, readRequest)
-                        .then(FORMAT_RESPONSE).getOrThrow();
+                        .then(formatResponse(context, request)).getOrThrow();
                 
                 // If we haven't defined a revision, we need to get the current revision
                 if (revision == null) {
@@ -604,7 +627,7 @@ public abstract class RelationshipProvider {
                 }
                 
                 // Update (if changed) and format
-                promise = updateIfChanged(context, relationshipId, revision, 
+                promise = updateIfChanged(context, request, relationshipId, revision, 
                         newResourceResponse(oldResource.getId(), oldResource.getRevision(), 
                         convertToRepoObject(firstResourcePath(context, request), oldResource.getContent())), 
                         convertToRepoObject(firstResourcePath(context, request), newValue));
@@ -674,15 +697,35 @@ public abstract class RelationshipProvider {
     protected final ResourcePath firstResourcePath(final Context context, final Request request)
             throws BadRequestException {
         final String uriFirstId =
-                context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
-        final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(PARAM_FIRST_ID);
+                context.asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
+        final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(PARAM_MANAGED_OBJECT_ID);
 
         if (StringUtils.isNotBlank(firstId)) {
             return resourcePath.child(firstId);
         } else {
-            throw new BadRequestException("Required either URI parameter " + URI_PARAM_FIRST_ID +
-                    " or request paremeter " + PARAM_FIRST_ID + " but none were found.");
+            throw new BadRequestException("Required either URI parameter " + PARAM_MANAGED_OBJECT_ID +
+                    " or request paremeter " + PARAM_MANAGED_OBJECT_ID + " but none were found.");
         }
+    }
+
+    /**
+     * Returns the path of the first resource in this relationship using the firstId parameter from either the URI or 
+     * the Request. If firstId is not found in the URI context then the request parameter is used.
+     *
+     * @param context Context containing a {@link UriRouterContext} to check for template variables
+     * @param request Request containing a fall-back firstId parameter
+     *
+     * @see #resourcePath
+     *
+     * @return The resource path of the first resource as a child of resourcePath
+     */
+    protected final ResourcePath getResourcePath(final Context context, final Request request) {
+        try {
+            return firstResourcePath(context, request);
+        } catch (BadRequestException e) {
+            logger.error("Error getting resource path", e);
+        }
+        return null;
     }
 
     /**
@@ -695,7 +738,7 @@ public abstract class RelationshipProvider {
      *               storage in the repo
      *
      * @return A new JsonValue containing the converted object in a format accepted by the repo
-     * @see #FORMAT_RESPONSE_NO_EXCEPTION
+     * @see #getFormatResponseNoException()
      */
     protected JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
         final JsonValue properties = object.get(FIELD_PROPERTIES);
@@ -706,18 +749,34 @@ public abstract class RelationshipProvider {
             properties.remove(FIELD_CONTENT_REVISION);
         }
 
-        if (isReverse) {
-            return json(object(
-                    field(REPO_FIELD_FIRST_ID, object.get(FIELD_REFERENCE).asString()),
-                    field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
-                    field(REPO_FIELD_SECOND_ID, firstResourcePath.toString()),
-                    field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
-            ));
+        if (isRevereseRelationship) {
+            // Compare the resource paths and set firstId/secondId and firstPropertyName/secondPropertyName based on
+            // lexicographic ordering to ensure consistency for reverse (bidirectional) relationships.
+            // We want to prevent the case where a bidirectional relationship may be updated from a operation on either
+            // end resulting in the firstId/firstPropName and secondId/secondPropName getting swapped.
+            if (firstResourcePath.toString().compareTo(object.get(FIELD_REFERENCE).asString()) < 0) {
+                return json(object(
+                        field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
+                        field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
+                        field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE).asString()),
+                        field(REPO_FIELD_SECOND_PROPERTY_NAME, reversePropertyName.toString()),
+                        field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
+                ));
+            } else {
+                return json(object(
+                        field(REPO_FIELD_FIRST_ID, object.get(FIELD_REFERENCE).asString()),
+                        field(REPO_FIELD_FIRST_PROPERTY_NAME, reversePropertyName.toString()),
+                        field(REPO_FIELD_SECOND_ID, firstResourcePath.toString()),
+                        field(REPO_FIELD_SECOND_PROPERTY_NAME, propertyName.toString()),
+                        field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
+                ));
+            }
         } else {
             return json(object(
                     field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
                     field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
                     field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE).asString()),
+                    field(REPO_FIELD_SECOND_PROPERTY_NAME, null),
                     field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
             ));
         }
@@ -730,7 +789,7 @@ public abstract class RelationshipProvider {
      * @return a String representing the managed object's ID.
      */
     protected String getManagedObjectId(Context context) {
-        return context.asContext(UriRouterContext.class).getUriTemplateVariables().get(URI_PARAM_FIRST_ID);
+        return context.asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
     }
     
     /**
