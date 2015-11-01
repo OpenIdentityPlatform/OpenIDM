@@ -68,13 +68,15 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param managedObjectSyncService Service to send sync events to
      */
     public SingletonRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath,
-            final JsonPointer propertyName, final String uriPropertyName, final boolean isReverse, final ActivityLogger activityLogger,
+            final JsonPointer propertyName, final JsonPointer reversePropertyName, final String uriPropertyName, 
+            final boolean isReverse, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, isReverse, activityLogger, managedObjectSyncService);
+        super(connectionFactory, resourcePath, propertyName, reversePropertyName, isReverse, activityLogger,
+                managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,
-                uriTemplate(String.format("{%s}/%s", URI_PARAM_FIRST_ID, uriPropertyName)),
+                uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, uriPropertyName)),
                 Resources.newSingleton(this));
         this.requestHandler = router;
     }
@@ -111,7 +113,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(isReverse ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
+                    QueryFilter.equalTo(new JsonPointer(isRevereseRelationship ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
             ));
 
@@ -121,7 +123,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 return new NotFoundException().asPromise();
             } else {
                 // TODO OPENIDM-4094 - check size and throw illegal state if more than one?
-                return newResultPromise(FORMAT_RESPONSE.apply(relationships.get(0)));
+                return newResultPromise(formatResponse(context, null).apply(relationships.get(0)));
             }
         } catch (ResourceException e) {
             return e.asPromise();
@@ -150,7 +152,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 // Update if we got an id, otherwise replace
                 if (id != null && id.isNotNull()) {
                     final UpdateRequest updateRequest = Requests.newUpdateRequest("", value);
-                    updateRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+                    updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                     return updateInstance(context, value.get(FIELD_ID).asString(), updateRequest)
                             .then(new Function<ResourceResponse, JsonValue, ResourceException>() {
                                 @Override
@@ -162,7 +164,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                     clear(context, resourceId);
 
                     final CreateRequest createRequest = Requests.newCreateRequest("", value);
-                    createRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+                    createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                     return createInstance(context, createRequest).then(new Function<ResourceResponse, JsonValue, ResourceException>() {
                         @Override
                         public JsonValue apply(ResourceResponse resourceResponse) throws ResourceException {

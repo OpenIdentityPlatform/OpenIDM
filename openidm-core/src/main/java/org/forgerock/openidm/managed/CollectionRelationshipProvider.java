@@ -24,6 +24,7 @@ import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
+import static org.forgerock.util.query.QueryFilter.*;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -91,12 +92,16 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param managedObjectSyncService Service to send sync events to
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, final String uriPropertyName, final boolean isReverse, final ActivityLogger activityLogger,
+            final JsonPointer propertyName, final JsonPointer reversePropertyName, final String uriPropertyName, 
+            final boolean isReverse, final ActivityLogger activityLogger, 
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, isReverse, activityLogger,managedObjectSyncService);
+        super(connectionFactory, resourcePath, propertyName, reversePropertyName, isReverse, activityLogger,
+                managedObjectSyncService);
 
         final Router router = new Router();
-        router.addRoute(RoutingMode.STARTS_WITH, uriTemplate("{firstId}/" + uriPropertyName), Resources.newCollection(this));
+        router.addRoute(RoutingMode.STARTS_WITH, 
+                uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, uriPropertyName)), 
+                Resources.newCollection(this));
         this.requestHandler = router;
     }
 
@@ -111,7 +116,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(final Context context, final String resourceId) {
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest("");
-            queryRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+            queryRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryCollection(new ManagedObjectSetContext(context), queryRequest, new QueryResourceHandler() {
@@ -185,13 +190,13 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
             for (JsonValue toUpdate : relationshipsToUpdate) {
                 final UpdateRequest updateRequest = Requests.newUpdateRequest("", toUpdate);
-                updateRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+                updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                 promises.add(updateInstance(context, toUpdate.get(FIELD_ID).asString(), updateRequest));
             }
 
             for (JsonValue toCreate : relationshipsToCreate) {
                 final CreateRequest createRequest = Requests.newCreateRequest("", toCreate);
-                createRequest.setAdditionalParameter(PARAM_FIRST_ID, resourceId);
+                createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                 promises.add(createInstance(context, createRequest));
             }
 
@@ -321,13 +326,32 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             for (String key : request.getAdditionalParameters().keySet()) {
                 queryRequest.setAdditionalParameter(key, request.getAdditionalParameter(key));
             }
-
-            QueryFilter<JsonPointer> filter = QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(isReverse ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), firstResourcePath(context, request)),
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
-
-            if (request.getQueryFilter() != null) {
-                filter = QueryFilter.and(filter, asRelationshipQueryFilter(isReverse, request.getQueryFilter()));
+            
+            QueryFilter<JsonPointer> filter;
+            ResourcePath resourcePath = firstResourcePath(context, request);
+            if (isRevereseRelationship) {
+                QueryFilter<JsonPointer> firstFilter = and(
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
+                QueryFilter<JsonPointer> secondFilter = and(
+                        equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourcePath),
+                        equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), propertyName));
+                if (request.getQueryFilter() != null) {
+                    filter = or(
+                            and(firstFilter, 
+                                   and(firstFilter, asRelationshipQueryFilter(false, request.getQueryFilter()))),
+                            and(secondFilter, 
+                                   and(secondFilter, asRelationshipQueryFilter(true, request.getQueryFilter()))));
+                } else {
+                    filter = or(firstFilter, secondFilter);
+                }       
+            } else {    
+                filter = and(
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
+                if (request.getQueryFilter() != null) {
+                    filter = and(filter, asRelationshipQueryFilter(isRevereseRelationship, request.getQueryFilter()));
+                }
             }
 
             queryRequest.setQueryFilter(filter);
@@ -336,7 +360,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
-                    ResourceResponse filteredResourceResponse = FORMAT_RESPONSE_NO_EXCEPTION.apply(resource);
+                    ResourceResponse filteredResourceResponse = 
+                            formatResponseNoException(context, request).apply(resource);
                     if (queryAllIds) {
                         // Special case, return just the ids, no expansion
                         filteredResourceResponse.addField(FIELD_ID);
@@ -385,7 +410,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
         @Override
         public QueryFilter<JsonPointer> visitAndFilter(Boolean isReverse, List<QueryFilter<JsonPointer>> subFilters) {
-            return QueryFilter.and(visitQueryFilters(isReverse, subFilters));
+            return and(visitQueryFilters(isReverse, subFilters));
         }
 
         @Override
@@ -395,57 +420,57 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
         @Override
         public QueryFilter<JsonPointer> visitContainsFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.contains(getRelationshipPointer(isReverse, field), valueAssertion);
+            return contains(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
         public QueryFilter<JsonPointer> visitEqualsFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.equalTo(getRelationshipPointer(isReverse, field), valueAssertion);
+            return equalTo(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
         public QueryFilter<JsonPointer> visitExtendedMatchFilter(Boolean isReverse, JsonPointer field, String operator, Object valueAssertion) {
-            return QueryFilter.comparisonFilter(getRelationshipPointer(isReverse, field), operator, valueAssertion);
+            return comparisonFilter(getRelationshipPointer(isReverse, field), operator, valueAssertion);
         }
 
         @Override
         public QueryFilter<JsonPointer> visitGreaterThanFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.greaterThan(getRelationshipPointer(isReverse, field), valueAssertion);
+            return greaterThan(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
         public QueryFilter<JsonPointer> visitGreaterThanOrEqualToFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.greaterThanOrEqualTo(getRelationshipPointer(isReverse, field), valueAssertion);
+            return greaterThanOrEqualTo(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
         public QueryFilter<JsonPointer> visitLessThanFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.lessThan(getRelationshipPointer(isReverse, field), valueAssertion);
+            return lessThan(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
         public QueryFilter<JsonPointer> visitLessThanOrEqualToFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.lessThanOrEqualTo(getRelationshipPointer(isReverse, field), valueAssertion);
+            return lessThanOrEqualTo(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         @Override
         public QueryFilter<JsonPointer> visitNotFilter(Boolean isReverse, QueryFilter<JsonPointer> subFilter) {
-            return QueryFilter.not(subFilter.accept(new RelationshipQueryFilterVisitor(), null));
+            return not(subFilter.accept(new RelationshipQueryFilterVisitor(), null));
         }
 
         @Override
         public QueryFilter<JsonPointer> visitOrFilter(Boolean isReverse, List<QueryFilter<JsonPointer>> subFilters) {
-            return QueryFilter.or(visitQueryFilters(isReverse, subFilters));
+            return or(visitQueryFilters(isReverse, subFilters));
         }
 
         @Override
         public QueryFilter<JsonPointer> visitPresentFilter(Boolean isReverse, JsonPointer field) {
-            return QueryFilter.present(getRelationshipPointer(isReverse, field));
+            return present(getRelationshipPointer(isReverse, field));
         }
 
         @Override
         public QueryFilter<JsonPointer> visitStartsWithFilter(Boolean isReverse, JsonPointer field, Object valueAssertion) {
-            return QueryFilter.startsWith(getRelationshipPointer(isReverse, field), valueAssertion);
+            return startsWith(getRelationshipPointer(isReverse, field), valueAssertion);
         }
 
         /**
