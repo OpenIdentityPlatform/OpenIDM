@@ -37,7 +37,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * OSGi bundle activator
+ * OSGi bundle activator for JDBCRepoService.
  */
 public class Activator implements BundleActivator {
     final static Logger logger = LoggerFactory.getLogger(Activator.class);
@@ -48,24 +48,33 @@ public class Activator implements BundleActivator {
          JsonValue dataSourceConfig = ConfigBootstrapHelper.getDataSourceBootConfig("jdbc", context);
          JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
 
-         if (dataSourceConfig != null && repoConfig != null) {
-             logger.info("Bootstrapping JDBC repository");
-
-             // Init the bootstrap connection manager
-             DataSourceService dataSourceService = JDBCDataSourceService.getBootService(dataSourceConfig, context);
-             // Init the bootstrap repo
-             RepoBootService bootSvc = JDBCRepoService.getRepoBootService(context, dataSourceService, repoConfig);
-
-             // Register bootstrap repo
-             Hashtable<String, String> prop = new Hashtable<String, String>();
-             prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.jdbc");
-             prop.put("openidm.router.prefix", "bootrepo");
-             prop.put("db.type", "JDBC");
-             context.registerService(RepoBootService.class.getName(), bootSvc, prop);
-             logger.info("Registered bootstrap repository service");
-         } else {
+         if (repoConfig == null) {
              logger.debug("No JDBC configuration detected");
+             logger.debug("JDBC bundle started", context);
+             return;
          }
+
+         if (dataSourceConfig == null) {
+             logger.error("JDBC repository configured, but no datasource - "
+                     +" must configure datasource for JDBC repository to connect.");
+             logger.debug("JDBC bundle started", context);
+             return;
+         }
+
+         logger.info("Bootstrapping JDBC repository");
+
+         // Init the bootstrap connection manager
+         DataSourceService dataSourceService = JDBCDataSourceService.getBootService(dataSourceConfig, context);
+         // Init the bootstrap repo
+         RepoBootService bootSvc = JDBCRepoService.getRepoBootService(context, dataSourceService, repoConfig);
+
+         // Register bootstrap repo
+         Hashtable<String, String> prop = new Hashtable<String, String>();
+         prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.jdbc");
+         prop.put("openidm.router.prefix", "bootrepo");
+         prop.put("db.type", "JDBC");
+         context.registerService(RepoBootService.class.getName(), bootSvc, prop);
+         logger.info("Registered bootstrap repository service");
          logger.debug("JDBC bundle started", context);
      }
 
