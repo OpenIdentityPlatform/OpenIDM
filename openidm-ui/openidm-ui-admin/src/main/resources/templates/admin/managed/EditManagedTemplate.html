@@ -1,0 +1,132 @@
+<div class="back-bar">
+    <div class="container">
+        <a href="#managed/">{{t "templates.managed.backToManaged"}}</a>
+    </div>
+</div>
+<div class="container">
+    <div class="page-header clearfix">
+        <span class="header-icon pull-left"><i class="fa {{#if currentManagedObject.schema.icon}}{{currentManagedObject.schema.icon}}{{else}}fa-database{{/if}}"></i></span>
+        <h4 class="page-type">{{t "templates.managed.managedObject"}}</h4>
+        <div class="page-header-button-group">
+            <a href="#mapping/add/managed/{{currentManagedObject.name}}">
+                <button type="button" class="btn btn-primary btn-actions">
+                    <i class="fa fa-plus"></i> {{t "templates.connector.addMapping"}}
+                </button>
+            </a>
+            <div class="btn-group">
+                <button type="button" class="btn btn-default btn-secondary dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-ellipsis-v fa-lg"></i>
+                </button>
+                <ul class="dropdown-menu pull-right" role="menu">
+                    <li class="data-link"><a href="#resource/managed/{{currentManagedObject.name}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{currentManagedObject.name}})</a></li>
+                    <li class="divider"></li>
+                    <li id="deleteManaged"><a href="#"><i class="fa fa-times"></i>{{t "common.form.delete"}}</a></li>
+                </ul>
+            </div>
+        </div>
+        <h1 id="managedObjectDisplayName">{{currentManagedObject.name}}</h1>
+    </div>
+</div>
+<div class="container">
+    <div class=" tab-menu">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="dropdown pull-right tabdrop hide">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <i class="fa fa-ellipsis-v"></i></a>
+                <ul class="dropdown-menu"></ul>
+            </li>
+            <li class="active"><a href="#managedDetailsContainer" role="tab" data-toggle="tab" aria-expanded="true">{{t "templates.managed.details"}}</a></li>
+            <li class=""><a href="#managedScriptsContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.scripts"}}</a></li>
+            <li class=""><a href="#managedPropertiesContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.properties"}}</a></li>
+            <li class=""><a href="#managedSchemaContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.schema"}}</a></li>
+        </ul>
+    </div>
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="managedDetailsContainer">
+            <div class="panel no-margin-bottom">
+                <form id="managedObjectForm" class="form-horizontal" role="form" autocomplete="off">
+                    <div id="managedForm2JS" class="panel-body">
+                        <div id="generalDetails" aria-labelledby="generalDetails">
+                            <div class="panel-body">
+                                <div class="form-group has-feedback">
+                                    <label for="managedObjectName" class="col-sm-3 control-label">{{t "templates.managed.managedObjectName"}}</label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" type="text" id="managedObjectName" name="name" value="{{currentManagedObject.name}}" data-validator="whitespace" data-validator-event="keyup blur" required autofocus/>
+                                        <div class="validation-message"></div>
+                                        <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="managedObjectIcon" class="col-sm-3 control-label">{{t "templates.managed.managedObjectIcon"}}</label>
+                                    <div class="col-sm-8">
+                                        <input class="form-control" type="text" id="managedObjectIcon" value="{{currentManagedObject.schema.icon}}" required autofocus/>
+                                    </div>
+                                </div>
+                                <div style="display:none;" role="alert" id="managedErrorMessage" class="changesPending alert alert-warning" style="">
+                                    <i class="fa fa-exclamation-circle"></i><strong>{{t "common.form.warning" }}!</strong>
+                                    <span class="message"></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                            <input type="submit" id="saveManagedDetails" value="{{t 'common.form.save'}}" class="btn btn-primary" disabled="true">
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="managedScriptsContainer">
+            <div class="panel no-margin-bottom">
+                <div id="managedScripts" class="panel-body"></div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                        <input type="submit" id="saveManagedScripts" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="managedPropertiesContainer">
+            <div class="panel no-margin-bottom">
+                <div id="managedProperties" class="panel-body">
+                    <div class=" col-sm-11">
+                        <label>{{t "templates.managed.managedPropertyMessage"}}</label>
+                    </div>
+                    <div class="col-sm-3">
+                        <button type="button" id="addManagedProperties" name="addManagedProperties" class="btn btn-primary btn-block"><i class="fa fa-lg fa-plus"></i> <span>{{t "templates.managed.addProperty"}}</span></button>
+                    </div>
+                    <div class="panel-body">
+                        <div id="managedPropertyWrapper">
+                            {{#if currentManagedObject.properties.length}}
+                                {{#each_with_index currentManagedObject.properties}}
+                                    {{> managed/_property}}
+                                {{/each_with_index}}
+                            {{/if}}
+                        </div>
+                    </div>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                        <input type="submit" id="saveManagedProperties" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="managedSchemaContainer">
+            <div class="panel no-margin-bottom">
+                <div id="managedSchema" class="panel-body">
+                    <div class="schemaEditor jsonEditor"></div>
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right">
+                        <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                        <input type="submit" id="saveManagedSchema" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

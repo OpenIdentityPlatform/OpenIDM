@@ -24,12 +24,13 @@
 
 /*global define */
 
-define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
+define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
     "jquery",
     "underscore",
+    "handlebars",
     "form2js",
     "jsonEditor",
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
+    "org/forgerock/openidm/ui/admin/managed/AbstractManagedView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -37,49 +38,57 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptList",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
-    "org/forgerock/commons/ui/common/util/UIUtils"
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "faiconpicker"
 ], function($, _,
+            handlebars,
             form2js,
             JSONEditor,
-            AdminAbstractView,
-            eventManager,
+            AbstractManagedView,
+            EventManager,
             validatorsManager,
-            constants,
-            router,
+            Constants,
+            Router,
             ConfigDelegate,
             ScriptList,
             ModuleLoader,
-            UIUtils) {
+            UIUtils,
+            faiconpicker) {
 
-    var AddEditManagedView = AdminAbstractView.extend({
-        template: "templates/admin/managed/AddEditManagedTemplate.html",
+    var EditManagedView = AbstractManagedView.extend({
+        template: "templates/admin/managed/EditManagedTemplate.html",
         events: {
-            "click input[type=submit]": "formSubmit",
+            "click #saveManagedDetails" : "saveManagedDetails",
+            "click #saveManagedProperties" : "saveManagedProperties",
+            "click #saveManagedScripts" : "saveManagedScripts",
+            "click #saveManagedSchema" : "saveManagedSchema",
             "onValidate": "onValidate",
             "click #addManagedProperties": "addProperty",
             "click .property-remove" : "removeProperty",
-            "click #deleteManaged": "deleteManaged",
-            "customValidate": "customValidate"
+            "click #deleteManaged": "deleteManaged"
         },
         eventHooks: [],
         propertyHooks: [],
         propertiesCounter: 0,
+        partials: [
+            "partials/managed/_property.html"
+        ],
         model: {
-            propertyScripts: []
+            propertyScripts: [],
+            eventList : ["onCreate", "postCreate", "onRead", "onUpdate", "postUpdate", "onDelete", "postDelete", "onValidate", "onRetrieve", "onStore", "onSync"]
         },
 
         render: function(args, callback) {
             var managedPromise,
                 repoCheckPromise,
                 eventKeys,
-                eventList = ["onCreate", "postCreate", "onRead", "onUpdate", "postUpdate", "onDelete", "postDelete", "onValidate", "onRetrieve", "onStore", "onSync"],
                 propertiesEventList = ["onValidate", "onRetrieve", "onStore"];
 
             this.data = {
                 selectEvents: [],
                 addedEvents: [],
                 propertiesEventList: propertiesEventList,
-                docHelpUrl : constants.DOC_URL
+                docHelpUrl : Constants.DOC_URL
             };
 
             this.eventHooks = [];
@@ -89,27 +98,15 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             managedPromise = ConfigDelegate.readEntity("managed");
             repoCheckPromise = ConfigDelegate.getConfigList();
 
-            $.when(managedPromise, repoCheckPromise, ModuleLoader.load("faiconpicker")).then(_.bind(function(managedObjects, configFiles, faiconpicker){
+            $.when(managedPromise, repoCheckPromise).then(_.bind(function(managedObjects, configFiles){
                 this.data.managedObjects = managedObjects;
 
-                if(args.length === 0 || args[0] === null) {
-                    this.data.addEditSubmitTitle = $.t("common.form.add");
-                    this.data.addEditTitle = $.t("templates.managed.addManagedTitle");
-                    this.data.currentManagedObject = {};
-                    this.data.addState = true;
-
-                } else {
-                    this.data.addEditTitle = $.t("templates.managed.editTitle");
-                    this.data.addEditSubmitTitle = $.t("common.form.update");
-                    this.data.addState = false;
-
-                    _.each(managedObjects.objects, _.bind(function(managedObject, iterator) {
-                        if(managedObject.name === args[0]) {
-                            this.data.currentManagedObject = managedObject;
-                            this.data.currentManagedObjectIndex = iterator;
-                        }
-                    }, this));
-                }
+                _.each(managedObjects.objects, _.bind(function(managedObject, iterator) {
+                    if(managedObject.name === args[0]) {
+                        this.data.currentManagedObject = managedObject;
+                        this.data.currentManagedObjectIndex = iterator;
+                    }
+                }, this));
 
                 eventKeys =
                     _.chain(this.data.currentManagedObject)
@@ -118,33 +115,26 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                         .value();
 
                 //Added events are used for the events that are currently set by the managed object
-                this.data.addedEvents = _.intersection(eventKeys, eventList);
+                this.data.addedEvents = _.intersection(eventKeys, this.model.eventList);
 
                 //Select events are the events currently available for the select
-                this.data.selectEvents = _.difference(eventList, eventKeys);
+                this.data.selectEvents = _.difference(this.model.eventList, eventKeys);
 
-                _.each(this.data.currentManagedObject.properties, function(property){
-                    eventKeys = _.chain(property)
-                        .keys()
-                        .without("name", "encryption", "scope", "type")
-                        .value();
+                if(this.data.currentManagedObject.properties) {
+                    _.each(this.data.currentManagedObject.properties, function (property) {
+                        eventKeys = _.chain(property)
+                            .keys()
+                            .without("name", "encryption", "scope", "type")
+                            .value();
 
-                    property.addedEvents = _.intersection(eventKeys, propertiesEventList);
-                    property.selectEvents = _.difference(propertiesEventList, eventKeys);
-                }, this);
-
-                this.data.currentRepo = _.find(configFiles[0].configurations, function(file){
-                    return file.pid.search("repo.") !== -1;
-                }, this).pid;
-
-                if(this.data.currentRepo === "repo.orientdb") {
-                    ConfigDelegate.readEntity(this.data.currentRepo).then(_.bind(function (repo) {
-                        this.data.repoObject = repo;
-                        this.managedRender(callback);
-                    }, this));
-                } else {
-                    this.managedRender(callback);
+                        property.addedEvents = _.intersection(eventKeys, propertiesEventList);
+                        property.selectEvents = _.difference(propertiesEventList, eventKeys);
+                    }, this);
                 }
+
+                this.checkRepo(configFiles[0], _.bind(function(){
+                    this.managedRender(callback);
+                }, this));
             }, this));
         },
 
@@ -781,7 +771,7 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                     workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")                
                 });
 
-                _.each(this.$el.find("#managedPropertyWrapper .small-field-block:visible"), function(managedProperty, index) {
+                _.each(this.$el.find("#managedPropertyWrapper .small-field-block"), function(managedProperty, index) {
                     this.propertyHooks.push([]);
 
                     this.model.propertyScripts.push(ScriptList.generateScriptList({
@@ -816,84 +806,63 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             }, this));
         },
 
-        formSubmit: function(event) {
+        saveManagedDetails: function(event) {
             event.preventDefault();
 
-            var managedObject = this.setManagedObject(form2js('managedForm2JS', '.', true)),
+            var data = form2js('managedForm2JS', '.', true),
                 nameCheck;
 
-            managedObject.schema = this.getManagedSchema();
+            nameCheck = this.checkManagedName(data.name, this.data.managedObjects.objects);
 
-            managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
+            if(!nameCheck || data.name === this.data.currentManagedObject.name) {
+                this.data.currentManagedObject.name = data.name;
+                this.data.currentManagedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
+                this.$el.find("#managedErrorMessage").hide();
 
-            if(this.data.addState) {
-                nameCheck = this.checkManagedName(managedObject.name);
+                this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.bind(function() {
+                    this.$el.find("#managedObjectDisplayName").html(this.data.currentManagedObject.name);
 
-                if(!nameCheck) {
-                    this.data.managedObjects.objects.push(managedObject);
-
-                    this.saveManagedObject(managedObject);
-                } else {
-                    this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
-                    this.$el.find("#managedErrorMessage").show();
-                    this.$el.find("#addEditManaged").prop("disabled", true);
-                }
-            } else {
-                if (managedObject.name === this.data.managedObjects.objects[this.data.currentManagedObjectIndex].name) {
-                    this.data.managedObjects.objects[this.data.currentManagedObjectIndex] = managedObject;
-
-                    this.saveManagedObject(managedObject);
-                } else {
-                    nameCheck = this.checkManagedName(managedObject.name);
-
-                    if(!nameCheck) {
-                        this.data.managedObjects.objects[this.data.currentManagedObjectIndex] = managedObject;
-
-                        this.saveManagedObject(managedObject);
+                    if(this.data.currentManagedObject.schema.icon) {
+                        this.$el.find(".header-icon i").prop("class", "fa " +this.data.currentManagedObject.schema.icon);
                     } else {
-                        this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
-                        this.$el.find("#managedErrorMessage").show();
-                        this.$el.find("#addEditManaged").prop("disabled", true);
+                        this.$el.find(".header-icon i").prop("class", "fa fa-cube");
                     }
-                }
+                }, this));
+            } else {
+                this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
+                this.$el.find("#managedErrorMessage").show();
+                this.$el.find("#saveManagedDetails").prop("disabled", true);
             }
         },
 
-        checkManagedName: function(name) {
-            var currentObjects = this.data.managedObjects.objects,
-                found = false;
+        saveManagedProperties: function(event) {
+            event.preventDefault();
 
-            _.each(currentObjects, function(managedObject){
-                if(managedObject.name === name){
-                    found = true;
+            //TODO Add in properties functionality from Schema
+        },
+
+        saveManagedScripts: function(event) {
+            event.preventDefault();
+
+            var scriptList = this.model.managedScripts.getScripts();
+
+            _.each(this.model.eventList, function(val) {
+                if(scriptList[val]) {
+                    this.data.currentManagedObject[val] = scriptList[val];
+                } else {
+                    delete this.data.currentManagedObject[val];
                 }
             }, this);
 
-            return found;
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
         },
 
-        saveManagedObject: function(managedObject) {
-            var promises = [];
+        saveManagedSchema: function(event) {
+            event.preventDefault();
 
-            if(managedObject.properties.length === 0) {
-                delete managedObject.properties;
-            }
+            this.data.currentManagedObject.schema = this.getManagedSchema();
 
-            promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.managedObjects.objects}));
-
-            if(this.data.currentRepo === "repo.orientdb") {
-                this.orientRepoChange(managedObject);
-                promises.push(ConfigDelegate.updateEntity(this.data.currentRepo, this.data.repoObject));
-            }
-
-            $.when.apply($, promises).then(function() {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "managedObjectSaveSuccess");
-
-                _.delay(function () {
-                    eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.managedListView});
-                }, 1500);
-            });
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
         },
 
         deleteManaged: function(event) {
@@ -919,50 +888,15 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.managedObjects.objects}));
 
                 $.when.apply($, promises).then(function(){
-                        eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
-
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.managedListView});
+                        EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                        EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
+                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.managedListView});
                     },
                     function(){
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
+                        EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
                     });
 
             },this));
-        },
-
-        setManagedObject: function(managedObject) {
-            _.extend(managedObject, this.model.managedScripts.getScripts());
-
-            if(managedObject.properties !== undefined) {
-                _.each(managedObject.properties, function (prop, index) {
-                    if (prop.encryption) {
-                        prop.encryption = {
-                            key: "openidm-sym-default"
-                        };
-                    } else {
-                        delete prop.encryption;
-                    }
-
-                    if (prop.scope) {
-                        prop.scope = "private";
-                    } else {
-                        delete prop.scope;
-                    }
-
-                    if (prop.type) {
-                        prop.type = "virtual";
-                    } else {
-                        delete prop.type;
-                    }
-
-                    _.extend(prop, this.model.propertyScripts[index].getScripts());
-                }, this);
-            } else {
-                managedObject.properties = [];
-            }
-
-            return managedObject;
         },
 
         addProperty: function(event) {
@@ -970,10 +904,9 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             var checkboxes,
                 field,
-                input,
-                propIndex;
+                input;
 
-            field = this.$el.find("#managed-object-hidden-property").clone();
+            field = $(handlebars.compile("{{> managed/_property}}")());
             field.removeAttr("id");
             input = field.find('input[type=text]');
             input.val("");
@@ -993,8 +926,6 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
 
             this.propertyHooks.push([]);
 
-            propIndex = this.propertyHooks.length - 1;
-
             if(!this.data.currentManagedObject.properties) {
                 this.data.currentManagedObject.properties = [];
             }
@@ -1009,15 +940,12 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
             }));
 
             this.$el.find('#managedPropertyWrapper').append(field);
-
-            validatorsManager.bindValidators(this.$el.find('#managedPropertyWrapper'));
-            validatorsManager.validateAllFields(this.$el.find('#managedPropertyWrapper'));
         },
 
         removeProperty: function(event) {
             event.preventDefault();
 
-            UIUtils.confirmDialog($.t("templates.managed.propertyDelete"), "error", _.bind(function() {
+            UIUtils.confirmDialog($.t("templates.managed.propertyDelete"), "danger", _.bind(function() {
                 var clickedEle = event.target,
                     targetIndex;
 
@@ -1032,32 +960,8 @@ define("org/forgerock/openidm/ui/admin/managed/AddEditManagedView", [
                 validatorsManager.bindValidators(this.$el.find('#managedPropertyWrapper'));
                 validatorsManager.validateAllFields(this.$el);
             },this));
-        },
-
-        orientRepoChange: function(managedObject) {
-            var orientClasses = this.data.repoObject.dbStructure.orientdbClass;
-
-            if(orientClasses["managed_" +managedObject.name] === undefined) {
-                orientClasses["managed_" +managedObject.name] = {
-                    "index" : [
-                        {
-                            "propertyName" : "_openidm_id",
-                            "propertyType" : "string",
-                            "indexType" : "unique"
-                        }
-                    ]
-                };
-            }
-        },
-
-        customValidate: function() {
-            if(validatorsManager.formValidated(this.$el.find("#managedObjectForm"))) {
-                this.$el.find("#addEditManaged").attr("disabled", false);
-            } else {
-                this.$el.find("#addEditManaged").attr("disabled", true);
-            }
         }
     });
 
-    return new AddEditManagedView();
+    return new EditManagedView();
 });
