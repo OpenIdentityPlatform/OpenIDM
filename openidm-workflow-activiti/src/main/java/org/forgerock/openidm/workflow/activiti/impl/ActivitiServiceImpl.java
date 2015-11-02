@@ -24,6 +24,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Dictionary;
+import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
@@ -118,6 +119,7 @@ public class ActivitiServiceImpl implements RequestHandler {
     public static final String CONFIG_TABLE_PREFIX = "tablePrefix";
     public static final String CONFIG_TABLE_PREFIX_IS_SCHEMA = "tablePrefixIsSchema";
     public static final String CONFIG_HISTORY = "history";
+    public static final String CONFIG_USE_DATASOURCE = "useDataSource";
     public static final String CONFIG_WORKFLOWDIR = "workflowDirectory";
     public static final String LOCALHOST = "localhost";
     public static final int DEFAULT_MAIL_PORT = 25;
@@ -147,9 +149,26 @@ public class ActivitiServiceImpl implements RequestHandler {
     @Reference(bind = "bindTransactionManager", unbind = "unbindTransactionManager")
     private TransactionManager transactionManager;
 
-    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY,
-            bind = "bindDataSourceService", unbind = "unbindDataSourceService")
-    private DataSourceService dataSourceService;
+    @Reference(referenceInterface = DataSourceService.class,
+            cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
+            bind = "bindDataSourceService",
+            unbind = "unbindDataSourceService",
+            policy = ReferencePolicy.DYNAMIC,
+            strategy = ReferenceStrategy.EVENT)
+    private Map<String, DataSourceService> dataSourceServices = new HashMap<>();
+
+    protected void bindDataSourceService(DataSourceService service, Map properties) {
+        dataSourceServices.put(properties.get(ServerConstants.CONFIG_FACTORY_PID).toString(), service);
+    }
+
+    protected void unbindDataSourceService(DataSourceService service, Map properties) {
+        for (Map.Entry<String, DataSourceService> entry : dataSourceServices.entrySet()) {
+            if (service.equals(entry.getValue())) {
+                dataSourceServices.remove(entry.getKey());
+                break;
+            }
+        }
+    }
 
     @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)")
     private RouteService routeService;
@@ -185,6 +204,7 @@ public class ActivitiServiceImpl implements RequestHandler {
     private String tablePrefix;
     private boolean tablePrefixIsSchema;
     private String historyLevel;
+    private String useDataSource;
     private String workflowDir;
     
     @Override
@@ -235,6 +255,9 @@ public class ActivitiServiceImpl implements RequestHandler {
             if (enabled) {
                 switch (location) {
                     case embedded: //start our embedded ProcessEngine
+
+                        // see if we have the DataSourceService bound
+                        final DataSourceService dataSourceService = dataSourceServices.get(useDataSource);
 
                         //we need a TransactionManager to use this
                         JtaProcessEngineConfiguration configuration = new JtaProcessEngineConfiguration();
@@ -397,6 +420,7 @@ public class ActivitiServiceImpl implements RequestHandler {
         if (!config.isNull()) {
             enabled = config.get(CONFIG_ENABLED).defaultTo(true).asBoolean();
             location = config.get(CONFIG_LOCATION).defaultTo(EngineLocation.embedded.name()).asEnum(EngineLocation.class);
+            useDataSource = config.get(CONFIG_USE_DATASOURCE).asString();
             JsonValue mailconfig = config.get(CONFIG_MAIL);
             if (mailconfig.isNotNull()) {
                 mailhost = mailconfig.get(CONFIG_MAIL_HOST).defaultTo(LOCALHOST).asString();
@@ -465,14 +489,6 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     public void unbindConfigAdmin(ConfigurationAdmin configAdmin) {
         this.configurationAdmin = null;
-    }
-
-    public void bindDataSourceService(DataSourceService dataSourceService) {
-        this.dataSourceService = dataSourceService;
-    }
-
-    public void unbindDataSourceService(DataSourceService dataSourceService) {
-        this.dataSourceService = null;
     }
 
     public void bindCryptoService(final CryptoService service) {

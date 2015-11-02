@@ -57,10 +57,11 @@ import org.slf4j.LoggerFactory;
  * This service exposes a DataSourceService for based on JDBC DataSource configuration.  DataSources through
  * JDNI, OSGi service-registration, non-pooled connections, and BoneCP are supported.
  */
-@Component(name = JDBCDataSourceService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE, enabled = true)
+@Component(name = JDBCDataSourceService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE,
+        configurationFactory = true, enabled = true)
 @Service
 @Properties({
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "ConnectionManager Service using JDBC"),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "DataSource Service using JDBC"),
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
 })
 public class JDBCDataSourceService implements DataSourceService {

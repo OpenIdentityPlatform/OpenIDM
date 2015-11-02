@@ -1,0 +1,33 @@
+The subdirectories in this directory have samples for each supported backend RDMS for each of the following:
+
+ * DDL for creating the tables in the database
+ * repo.jdbc.json - query and table definition configuration for the repository service
+ * datasource.jdbc-default.json - default, pooled datasource configuration
+
+In repo.jdbc.json, set the "useDataSource" parameter to the same configuration suffix as the database.jdbc-<suffix>.json
+file.  For example, to create a new datasource named "mypool", create the file database.jdbc-mypool.json and set
+
+    "useDataSource" : "mypool"
+
+in repo.jdbc.json.
+
+Multiple datasource configurations are used, but the repository will only use one of them.
+
+Additionally, if you wish to configure a DataSource via JNDI, use this configuration:
+
+    {
+        "jndiName" : "java:comp/env/jdbc/MySQLDB",
+        "databaseName" : "openidm"
+    }
+
+and change the jndiName to the appropriate JNDI name for your installation.
+
+To use a custom OSGi bundle to provide the DataSource, use this configuration:
+
+    {
+        "osgiName" : "osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)",
+        "databaseName" : "openidm"
+    }
+
+and change the osgiName to the appropriate OsgiName string for your installation.
+

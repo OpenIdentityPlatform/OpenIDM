@@ -1,4 +1,5 @@
 {
     "enabled" : true,
+    "useDataSource" : "default",
     "workflowDirectory" : "&{launcher.project.location}/workflow"
 }

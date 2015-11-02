@@ -49,7 +49,9 @@ import org.apache.felix.scr.annotations.Modified;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.services.context.Context;
@@ -111,6 +113,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     private static final String ACTION_COMMAND = "command";
 
     // Keys in the JSON configuration
+    public static final String CONFIG_USE_DATASOURCE = "useDataSource";
     public static final String CONFIG_DB_TYPE = "dbType";
     public static final String CONFIG_MAX_TX_RETRY = "maxTxRetry";
     public static final String CONFIG_MAX_BATCH_SIZE = "maxBatchSize";
@@ -131,8 +134,28 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC)
     private DataSourceService dataSourceService;
+
+    @Reference(referenceInterface = DataSourceService.class,
+            cardinality = ReferenceCardinality.MANDATORY_MULTIPLE,
+            bind = "bindDataSourceService",
+            unbind = "unbindDataSourceService",
+            policy = ReferencePolicy.DYNAMIC,
+            strategy = ReferenceStrategy.EVENT)
+    private Map<String, DataSourceService> dataSourceServices = new HashMap<>();
+
+    protected void bindDataSourceService(DataSourceService service, Map properties) {
+        dataSourceServices.put(properties.get(ServerConstants.CONFIG_FACTORY_PID).toString(), service);
+    }
+
+    protected void unbindDataSourceService(DataSourceService service, Map properties) {
+        for (Map.Entry<String, DataSourceService> entry : dataSourceServices.entrySet()) {
+            if (service.equals(entry.getValue())) {
+                dataSourceServices.remove(entry.getKey());
+                break;
+            }
+        }
+    }
 
     /**
      * Populate and return a repository service that knows how to query and
@@ -163,6 +186,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
+            dataSourceService = dataSourceServices.get(config.get(CONFIG_USE_DATASOURCE).required().asString());
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: "
                     + ex.getMessage(), ex);
