@@ -33,15 +33,15 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ServiceLoader;
 
-import javax.script.Bindings;
 import javax.script.SimpleBindings;
 
 import org.forgerock.json.resource.*;
+import org.forgerock.script.groovy.GroovyScriptEngineFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.RootContext;
@@ -49,7 +49,6 @@ import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.script.engine.ScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
-import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.source.DirectoryContainer;
 import org.forgerock.util.promise.Promise;
 import org.mockito.invocation.InvocationOnMock;
@@ -83,13 +82,8 @@ public class ServletConnectionFactoryTest {
         requestHandler.addRoute(uriTemplate("/system/OpenDJ/account"), new MemoryBackend());
         requestHandler.addRoute(uriTemplate("/system/AD/account"), new MemoryBackend());
 
-        final ConnectionFactory connectionFactory = Resources.newInternalConnectionFactory(requestHandler);
-        Bindings globalScope = new SimpleBindings();
-        globalScope.put("openidm", FunctionFactory.getResource(connectionFactory));
-
-        ScriptRegistryImpl sr =
-                new ScriptRegistryImpl(new HashMap<String, Object>(), ServiceLoader
-                        .load(ScriptEngineFactory.class), globalScope);
+        ScriptRegistryImpl sr = new ScriptRegistryImpl(new HashMap<String, Object>(),
+                Collections.<ScriptEngineFactory>singleton(new GroovyScriptEngineFactory()), new SimpleBindings());
 
         URL script = ServletConnectionFactoryTest.class.getResource("/script/");
         assertThat(script).isNotNull().overridingErrorMessage("Failed to find /recon/script folder in test");

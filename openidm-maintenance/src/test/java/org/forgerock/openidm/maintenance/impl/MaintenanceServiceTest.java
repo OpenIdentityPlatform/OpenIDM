@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import java.io.File;
 import java.net.URL;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ServiceLoader;
@@ -48,6 +49,7 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.servlet.internal.ServletConnectionFactory;
 import org.forgerock.script.engine.ScriptEngineFactory;
+import org.forgerock.script.groovy.GroovyScriptEngineFactory;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.services.context.RootContext;
@@ -85,13 +87,8 @@ public class MaintenanceServiceTest {
         router.addRoute(uriTemplate("/system/AD/account"), new MemoryBackend());
         router.addRoute(RoutingMode.EQUALS, uriTemplate("maintenance"), maintenanceService);
 
-        final ConnectionFactory connectionFactory = Resources.newInternalConnectionFactory(router);
-        Bindings globalScope = new SimpleBindings();
-        globalScope.put("openidm", FunctionFactory.getResource(connectionFactory));
-
-        final ScriptRegistryImpl sr =
-                new ScriptRegistryImpl(new HashMap<String, Object>(), ServiceLoader
-                        .load(ScriptEngineFactory.class), globalScope);
+        final ScriptRegistryImpl sr = new ScriptRegistryImpl(new HashMap<String, Object>(),
+                Collections.<ScriptEngineFactory>singleton(new GroovyScriptEngineFactory()), new SimpleBindings());
 
         final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
         when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(configuration);
