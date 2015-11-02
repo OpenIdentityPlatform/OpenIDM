@@ -95,6 +95,11 @@
 
         <!-- Test Dependencies -->
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-groovy</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.testng</groupId>
             <artifactId>testng</artifactId>
             <scope>test</scope>

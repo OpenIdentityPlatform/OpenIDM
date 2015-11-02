@@ -53,6 +53,14 @@
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-common</artifactId>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-groovy</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-javascript</artifactId>
+        </dependency>
 
         <!-- Provided OSGi Dependencies -->
         <dependency>
