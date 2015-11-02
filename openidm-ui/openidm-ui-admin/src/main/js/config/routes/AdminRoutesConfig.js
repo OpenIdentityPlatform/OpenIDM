@@ -66,13 +66,13 @@ define("config/routes/AdminRoutesConfig", [
             url: "managed/"
         },
         "editManagedView" : {
-            view: "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
+            view: "org/forgerock/openidm/ui/admin/managed/EditManagedView",
             role: "ui-admin",
             url: /^managed\/edit\/(.+)\/$/,
             pattern: "managed/edit/?/"
         },
         "addManagedView" : {
-            view: "org/forgerock/openidm/ui/admin/managed/AddEditManagedView",
+            view: "org/forgerock/openidm/ui/admin/managed/AddManagedView",
             role: "ui-admin",
             url: "managed/add/"
         },
