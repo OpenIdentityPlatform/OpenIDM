@@ -372,7 +372,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 e.preventDefault();
             }
 
-            uiUtils.jqConfirm($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.objectTitle }), _.bind(function(){
+            uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.objectTitle }), "danger", _.bind(function(){
                 resourceDelegate.deleteResource(this.data.serviceUrl, this.objectId, _.bind(function(){
                     messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.objectTitle })});
                     this.backToList();
