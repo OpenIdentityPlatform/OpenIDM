@@ -891,7 +891,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     }
                 }
 
-                ResourceResponse patchedResource = update(context, request, resource.getId(), rev, decrypted, newValue);
+                ResourceResponse patchedResource =
+                        update(context, request, resource.getId(), rev, resource.getContent(), newValue);
 
                 activityLogger.log(context, request, "",
                         managedId(patchedResource.getId()).toString(), resource.getContent(), patchedResource.getContent(),
