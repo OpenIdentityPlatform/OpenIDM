@@ -39,7 +39,8 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
     "org/forgerock/openidm/ui/admin/util/ScriptList",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "faiconpicker"
+    "faiconpicker",
+    "bootstrap-tabdrop"
 ], function($, _,
             handlebars,
             form2js,
@@ -53,15 +54,16 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
             ScriptList,
             ModuleLoader,
             UIUtils,
-            faiconpicker) {
+            faiconpicker,
+            tabdrop) {
 
     var EditManagedView = AbstractManagedView.extend({
         template: "templates/admin/managed/EditManagedTemplate.html",
         events: {
-            "click #saveManagedDetails" : "saveManagedDetails",
-            "click #saveManagedProperties" : "saveManagedProperties",
-            "click #saveManagedScripts" : "saveManagedScripts",
-            "click #saveManagedSchema" : "saveManagedSchema",
+            "submit #managedObjectDetailsForm" : "saveManagedDetails",
+            "submit #managedObjectScriptsForm" : "saveManagedScripts",
+            "submit #managedObjectPropertiesForm" : "saveManagedProperties",
+            "submit #managedObjectSchemaForm" : "saveManagedSchema",
             "onValidate": "onValidate",
             "click #addManagedProperties": "addProperty",
             "click .property-remove" : "removeProperty",
@@ -139,20 +141,6 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
         },
 
         loadSchema: function() {
-            // Set JSONEditor defaults
-            _.extend(JSONEditor.defaults.options, {
-                disable_edit_json: true,
-                disable_array_delete_all: true,
-                disable_array_reorder: false,
-                disable_collapse: true,
-                disable_properties: true,
-                show_errors: 'always',
-                template: 'handlebars',
-                no_additional_properties: true,
-                additionalItems: false,
-                required_by_default: true
-            });
-
             // This function needs to be re-written for the ability to set the value of oneOf type
             // enumerations.  Before "type" would take a value and never set the title(dropdown)
             // Now the setValue val is an object containing a value and a title.
@@ -172,6 +160,18 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
             };
 
             this.data.managedObjectSchema = new JSONEditor(this.$el.find(".schemaEditor")[0], {
+                options: {
+                    disable_edit_json: true,
+                    disable_array_delete_all: true,
+                    disable_array_reorder: false,
+                    disable_collapse: true,
+                    disable_properties: true,
+                    show_errors: 'always',
+                    template: 'handlebars',
+                    no_additional_properties: true,
+                    additionalItems: false,
+                    required_by_default: true
+                },
                 schema: {
                     "title": "Managed Object",
                     "type": "object",
@@ -465,7 +465,6 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                         }
                     }
                 }
-
             });
 
             this.data.managedObjectSchema.on("change", _.bind(function () {
@@ -799,10 +798,11 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                     }
                 });
 
+                this.$el.find(".nav-tabs").tabdrop();
+
                 if (callback) {
                     callback();
                 }
-
             }, this));
         },
 
@@ -823,7 +823,7 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                     this.$el.find("#managedObjectDisplayName").html(this.data.currentManagedObject.name);
 
                     if(this.data.currentManagedObject.schema.icon) {
-                        this.$el.find(".header-icon i").prop("class", "fa " +this.data.currentManagedObject.schema.icon);
+                        this.$el.find(".header-icon i").prop("class", "fa " + this.data.currentManagedObject.schema.icon);
                     } else {
                         this.$el.find(".header-icon i").prop("class", "fa fa-cube");
                     }
@@ -878,8 +878,8 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 }, this);
 
                 if(this.data.currentRepo === "repo.orientdb") {
-                    if(this.data.repoObject.dbStructure.orientdbClass["managed_"+this.data.currentManagedObject.name] !== undefined){
-                        delete this.data.repoObject.dbStructure.orientdbClass["managed_"+this.data.currentManagedObject.name];
+                    if(this.data.repoObject.dbStructure.orientdbClass["managed_" + this.data.currentManagedObject.name] !== undefined){
+                        delete this.data.repoObject.dbStructure.orientdbClass["managed_" + this.data.currentManagedObject.name];
                     }
 
                     promises.push(ConfigDelegate.updateEntity(this.data.currentRepo, this.data.repoObject));
@@ -956,9 +956,6 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 this.model.propertyScripts.splice(targetIndex, 1);
 
                 clickedEle.remove();
-
-                validatorsManager.bindValidators(this.$el.find('#managedPropertyWrapper'));
-                validatorsManager.validateAllFields(this.$el);
             },this));
         }
     });

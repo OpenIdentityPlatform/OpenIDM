@@ -40,15 +40,13 @@ define("org/forgerock/openidm/ui/admin/managed/AbstractManagedView", [
             Router) {
 
     var AbstractManagedView = AdminAbstractView.extend({
-        data: {
-
-        },
+        data: {},
 
         orientRepoChange: function(managedObject) {
             var orientClasses = this.data.repoObject.dbStructure.orientdbClass;
 
-            if(orientClasses["managed_" +managedObject.name] === undefined) {
-                orientClasses["managed_" +managedObject.name] = {
+            if(_.isUndefined(orientClasses["managed_" +managedObject.name])) {
+                orientClasses["managed_" + managedObject.name] = {
                     "index" : [
                         {
                             "propertyName" : "_openidm_id",
