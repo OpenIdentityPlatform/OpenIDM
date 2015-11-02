@@ -1,4 +1,0 @@
-{
-    "jndiName" : "java:comp/env/jdbc/MySQLDB",
-    "databaseName" : "openidm"
-}

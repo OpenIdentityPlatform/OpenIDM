@@ -23,7 +23,7 @@ import javax.sql.DataSource;
  */
 public interface DataSourceService {
     /**
-     * Get the name of the database.
+     * Get the name of the database, or schema, within the database.
      *
      * @return the database name
      */

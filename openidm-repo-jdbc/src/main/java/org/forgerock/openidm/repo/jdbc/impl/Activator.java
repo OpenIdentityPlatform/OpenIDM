@@ -45,18 +45,25 @@ public class Activator implements BundleActivator {
      public void start(BundleContext context) {
          logger.debug("JDBC bundle starting", context);
 
-         JsonValue dataSourceConfig = ConfigBootstrapHelper.getDataSourceBootConfig("jdbc", context);
          JsonValue repoConfig = ConfigBootstrapHelper.getRepoBootConfig("jdbc", context);
-
          if (repoConfig == null) {
              logger.debug("No JDBC configuration detected");
              logger.debug("JDBC bundle started", context);
              return;
          }
+         String dataSourcePid = repoConfig.get(JDBCRepoService.CONFIG_USE_DATASOURCE).asString();
+         if (dataSourcePid == null) {
+             logger.error("JDBC repository configured, but does not specify a datasource to use - "
+                     + "the \"" + JDBCRepoService.CONFIG_USE_DATASOURCE + "\" config property is required "
+                     + "and must be the <name> of a datasource.jdbc-<name>.json configuration.");
+             logger.debug("JDBC bundle started", context);
+             return;
+         }
 
+         JsonValue dataSourceConfig = ConfigBootstrapHelper.getDataSourceBootConfig("jdbc-" + dataSourcePid, context);
          if (dataSourceConfig == null) {
-             logger.error("JDBC repository configured, but no datasource - "
-                     +" must configure datasource for JDBC repository to connect.");
+             logger.error("JDBC repository configured, but datasource \"" + dataSourcePid + "\" was not found - "
+                     + " must specify or configure a valid datasource for JDBC repository to use.");
              logger.debug("JDBC bundle started", context);
              return;
          }

@@ -1,4 +1,0 @@
-{
-    "osgiName" : "osgi:service/javax.sql.DataSource/(osgi.jndi.service.name=jdbc/openidm)",
-    "databaseName" : "openidm"
-}

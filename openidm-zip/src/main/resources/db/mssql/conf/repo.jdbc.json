@@ -1,5 +1,6 @@
 {
     "dbType" : "SQLSERVER",
+    "useDataSource" : "default",
     "maxBatchSize" : 100,
     "maxTxRetry" : 5,
     "queries" : {
