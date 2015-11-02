@@ -43,7 +43,7 @@
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane active" id="managedDetailsContainer">
             <div class="panel no-margin-bottom">
-                <form id="managedObjectForm" class="form-horizontal" role="form" autocomplete="off">
+                <form id="managedObjectDetailsForm" class="form-horizontal" role="form" autocomplete="off">
                     <div id="managedForm2JS" class="panel-body">
                         <div id="generalDetails" aria-labelledby="generalDetails">
                             <div class="panel-body">
@@ -79,53 +79,59 @@
         </div>
         <div role="tabpanel" class="tab-pane" id="managedScriptsContainer">
             <div class="panel no-margin-bottom">
-                <div id="managedScripts" class="panel-body"></div>
-                <div class="panel-footer clearfix">
-                    <div class="pull-right">
-                        <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
-                        <input type="submit" id="saveManagedScripts" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                <form id="managedObjectScriptsForm" role="form">
+                    <div id="managedScripts" class="panel-body"></div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                            <input type="submit" id="saveManagedScripts" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
         <div role="tabpanel" class="tab-pane" id="managedPropertiesContainer">
             <div class="panel no-margin-bottom">
-                <div id="managedProperties" class="panel-body">
-                    <div class=" col-sm-11">
-                        <label>{{t "templates.managed.managedPropertyMessage"}}</label>
-                    </div>
-                    <div class="col-sm-3">
-                        <button type="button" id="addManagedProperties" name="addManagedProperties" class="btn btn-primary btn-block"><i class="fa fa-lg fa-plus"></i> <span>{{t "templates.managed.addProperty"}}</span></button>
-                    </div>
-                    <div class="panel-body">
-                        <div id="managedPropertyWrapper">
-                            {{#if currentManagedObject.properties.length}}
-                                {{#each_with_index currentManagedObject.properties}}
-                                    {{> managed/_property}}
-                                {{/each_with_index}}
-                            {{/if}}
+                <form id="managedObjectPropertiesForm" role="form">
+                    <div id="managedProperties" class="panel-body">
+                        <div class=" col-sm-11">
+                            <label>{{t "templates.managed.managedPropertyMessage"}}</label>
+                        </div>
+                        <div class="col-sm-3">
+                            <button type="button" id="addManagedProperties" name="addManagedProperties" class="btn btn-primary btn-block"><i class="fa fa-lg fa-plus"></i> <span>{{t "templates.managed.addProperty"}}</span></button>
+                        </div>
+                        <div class="panel-body">
+                            <div id="managedPropertyWrapper">
+                                {{#if currentManagedObject.properties.length}}
+                                    {{#each_with_index currentManagedObject.properties}}
+                                        {{> managed/_property}}
+                                    {{/each_with_index}}
+                                {{/if}}
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="panel-footer clearfix">
-                    <div class="pull-right">
-                        <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
-                        <input type="submit" id="saveManagedProperties" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                            <input type="submit" id="saveManagedProperties" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                        </div>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
         <div role="tabpanel" class="tab-pane" id="managedSchemaContainer">
             <div class="panel no-margin-bottom">
-                <div id="managedSchema" class="panel-body">
-                    <div class="schemaEditor jsonEditor"></div>
-                </div>
-                <div class="panel-footer clearfix">
-                    <div class="pull-right">
-                        <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
-                        <input type="submit" id="saveManagedSchema" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                <form id="managedObjectSchemaForm" role="form">
+                    <div id="managedSchema" class="panel-body">
+                        <div class="schemaEditor jsonEditor"></div>
                     </div>
-                </div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                            <input type="submit" id="saveManagedSchema" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                        </div>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

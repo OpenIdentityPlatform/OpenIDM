@@ -48,15 +48,11 @@ define("org/forgerock/openidm/ui/admin/managed/AddManagedView", [
     var AddManagedView = AbstractManagedView.extend({
         template: "templates/admin/managed/AddManagedTemplate.html",
         events: {
-            "click #addManagedObject" : "createManagedObject",
+            "submit #addManagedObjectForm" : "createManagedObject",
             "onValidate": "onValidate"
         },
-        data: {
-
-        },
-        model: {
-
-        },
+        data: {},
+        model: {},
 
         render: function(args, callback) {
             var managedPromise = ConfigDelegate.readEntity("managed"),

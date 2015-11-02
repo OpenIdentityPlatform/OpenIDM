@@ -526,7 +526,6 @@
         "managed" : {
             "addManagedTitle" : "Add Managed Object",
             "backToManaged" : "Back to Managed Objects",
-            "newManagedObject" : "New Managed Object",
             "managedTitle" : "Managed Objects",
             "managedObject" : "Managed Object",
             "details" : "Details",

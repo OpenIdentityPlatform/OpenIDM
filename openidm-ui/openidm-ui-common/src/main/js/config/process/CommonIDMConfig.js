@@ -43,7 +43,8 @@ define("config/process/CommonIDMConfig", [
                     "org/forgerock/commons/ui/common/SiteConfigurator"
                 ],
                 processDescription: function(event, router, conf, ModuleLoader, SiteConfigurator) {
-                    if (conf.loggedUser.has("needsResetPassword") && !ignorePassword) {
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
+                    /* if (conf.loggedUser.has("needsResetPassword") && !ignorePassword) {
                         ModuleLoader.load(SiteConfigurator.configuration.delegate).then(function (configurationDelegate) {
                             if (typeof configurationDelegate.checkForDifferences === "function") {
                                 configurationDelegate.checkForDifferences();
@@ -52,11 +53,13 @@ define("config/process/CommonIDMConfig", [
                             eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
                             ignorePassword = true;
                         });
+
                     } else {
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
-                    }
+                    }*/
                 }
             },
+
             {
                 startEvent: constants.EVENT_POLICY_FAILURE,
                 description: "Failure to save record due to policy validation",
