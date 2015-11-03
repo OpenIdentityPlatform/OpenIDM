@@ -113,7 +113,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(isRevereseRelationship ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourcePath.child(managedObjectId)),
+                    QueryFilter.equalTo(new JsonPointer(isReverseRelationship ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourceContainer.child(managedObjectId)),
                     QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
             ));
 
