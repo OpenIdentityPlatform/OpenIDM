@@ -352,7 +352,7 @@
                         <execution>
                           <id>aggregate-add-third-party</id>
                           <goals>
-                            <goal>aggregate-add-third-party</goal> 
+                            <goal>aggregate-add-third-party</goal>
                           </goals>
                           <configuration>
                             <useMissingFile>true</useMissingFile>
@@ -632,7 +632,7 @@
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.webconsole</artifactId>
-                <version>4.0.0</version>
+                <version>4.2.12</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
@@ -675,7 +675,6 @@
                 <artifactId>org.apache.felix.fileinstall</artifactId>
                 <version>3.2.6</version>
             </dependency>
-
 
             <!-- Declarative Services support -->
             <dependency>
