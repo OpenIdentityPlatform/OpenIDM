@@ -88,19 +88,20 @@ public abstract class RelationshipProvider {
     /** Path to this resource in the repo */
     protected static final ResourcePath REPO_RESOURCE_PATH = new ResourcePath("repo", "relationships");
 
-    /** Name of the source resource these relationships are "edges" of */
-    protected final ResourcePath resourcePath;
+    /** The resource container that property associated with this provider is a field of.  This will typically be a 
+     *  managed object path such as: "managed/user" or "managed/role". */
+    protected final ResourcePath resourceContainer;
 
     /** The name of the property on this managed object that this relationship represents. */
     protected final JsonPointer propertyName;
 
     /** The name of the property on the managed object at the other end of relationship that this relationship
-     * represents */
+     *  represents */
     protected final JsonPointer reversePropertyName;
 
     /** A boolean indicating if this is a reverse relationship, meaning that there are managed objects with properties 
-     * representing this relationship on both ends */
-    protected final boolean isRevereseRelationship;
+     *  representing this relationship on both ends */
+    protected final boolean isReverseRelationship;
 
     /** The name of the firstId field in the repo */
     protected static final String REPO_FIELD_FIRST_ID = "firstId";
@@ -151,7 +152,7 @@ public abstract class RelationshipProvider {
             
      /**
      * Returns a Function to format a resource from the repository to that expected by the provider consumer. First 
-     * object properties are removed and {@code secondId} (or {@code firstId} if {@link #isRevereseRelationship}) will be converted 
+     * object properties are removed and {@code secondId} (or {@code firstId} if {@link #isReverseRelationship}) will be converted 
      * to {@code _ref}
      *
      * This will convert repo resources in the format of:
@@ -182,7 +183,7 @@ public abstract class RelationshipProvider {
             final Context context, final Request request) {
         return new Function<ResourceResponse, ResourceResponse, NeverThrowsException>() {
             
-                public String resourcePath = getResourcePath(context, request).toString();
+                public String resourceFullPath = getResourceFullPath(context, request).toString();
                 
                 @Override
                 public ResourceResponse apply(final ResourceResponse raw) {
@@ -192,10 +193,11 @@ public abstract class RelationshipProvider {
                     final String ref;
                     
                     // set the field reference
-                    if (isRevereseRelationship && raw.getContent().get(REPO_FIELD_FIRST_ID).asString().equals(resourcePath)) {
-                        ref = raw.getContent().get(REPO_FIELD_SECOND_ID).asString();
-                    } else {
+                    if (isReverseRelationship 
+                            && !raw.getContent().get(REPO_FIELD_FIRST_ID).asString().equals(resourceFullPath)) {
                         ref = raw.getContent().get(REPO_FIELD_FIRST_ID).asString();
+                    } else {
+                        ref = raw.getContent().get(REPO_FIELD_SECOND_ID).asString();
                     }
 
                     if (repoProperties != null) {
@@ -253,10 +255,10 @@ public abstract class RelationshipProvider {
             final JsonPointer propertyName, final JsonPointer reversePropertyName, final boolean isReverse, 
             ActivityLogger activityLogger, final ManagedObjectSyncService managedObjectSyncService) {
         this.connectionFactory = connectionFactory;
-        this.resourcePath = resourcePath;
+        this.resourceContainer = resourcePath;
         this.propertyName = propertyName;
         this.reversePropertyName = reversePropertyName;
-        this.isRevereseRelationship = isReverse;
+        this.isReverseRelationship = isReverse;
         this.activityLogger = activityLogger;
         this.managedObjectSyncService = managedObjectSyncService;
     }
@@ -690,7 +692,7 @@ public abstract class RelationshipProvider {
      * @param context Context containing a {@link UriRouterContext} to check for template variables
      * @param request Request containing a fall-back firstId parameter
      *
-     * @see #resourcePath
+     * @see #resourceContainer
      *
      * @return The resource path of the first resource as a child of resourcePath
      */
@@ -701,7 +703,7 @@ public abstract class RelationshipProvider {
         final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(PARAM_MANAGED_OBJECT_ID);
 
         if (StringUtils.isNotBlank(firstId)) {
-            return resourcePath.child(firstId);
+            return resourceContainer.child(firstId);
         } else {
             throw new BadRequestException("Required either URI parameter " + PARAM_MANAGED_OBJECT_ID +
                     " or request paremeter " + PARAM_MANAGED_OBJECT_ID + " but none were found.");
@@ -709,17 +711,17 @@ public abstract class RelationshipProvider {
     }
 
     /**
-     * Returns the path of the first resource in this relationship using the firstId parameter from either the URI or 
-     * the Request. If firstId is not found in the URI context then the request parameter is used.
+     * Returns the full path of the resource in this relationship using the managedObjectId parameter from either the 
+     * URI or the Request. If managedObejctId is not found in the URI context then the request parameter is used.
      *
      * @param context Context containing a {@link UriRouterContext} to check for template variables
      * @param request Request containing a fall-back firstId parameter
      *
-     * @see #resourcePath
+     * @see #resourceContainer
      *
      * @return The resource path of the first resource as a child of resourcePath
      */
-    protected final ResourcePath getResourcePath(final Context context, final Request request) {
+    protected final ResourcePath getResourceFullPath(final Context context, final Request request) {
         try {
             return firstResourcePath(context, request);
         } catch (BadRequestException e) {
@@ -749,7 +751,7 @@ public abstract class RelationshipProvider {
             properties.remove(FIELD_CONTENT_REVISION);
         }
 
-        if (isRevereseRelationship) {
+        if (isReverseRelationship) {
             // Compare the resource paths and set firstId/secondId and firstPropertyName/secondPropertyName based on
             // lexicographic ordering to ensure consistency for reverse (bidirectional) relationships.
             // We want to prevent the case where a bidirectional relationship may be updated from a operation on either
@@ -799,7 +801,7 @@ public abstract class RelationshipProvider {
      * @return a String representing the managed object's ID.
      */
     protected String getManagedObjectPath(Context context) {
-        return resourcePath.child(getManagedObjectId(context)).toString();
+        return resourceContainer.child(getManagedObjectId(context)).toString();
     }
     
     /**
@@ -810,7 +812,7 @@ public abstract class RelationshipProvider {
      * @throws ResourceException if an error was encountered while reading the managed object.
      */
     protected ResourceResponse getManagedObject(Context context) throws ResourceException {
-        String managedObjectPath = resourcePath.child(getManagedObjectId(context)).toString();
+        String managedObjectPath = resourceContainer.child(getManagedObjectId(context)).toString();
         return getConnection().read(context, Requests.newReadRequest(managedObjectPath));
     }
     

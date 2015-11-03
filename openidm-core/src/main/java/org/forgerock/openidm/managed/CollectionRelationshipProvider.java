@@ -236,6 +236,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     // Delete if we're not told to keep this id
                     if (!relationshipsToKeep.contains(id)) {
                         final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
+                        deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                         promises.add(deleteInstance(context, id, deleteRequest));
                     }
                 }
@@ -268,7 +269,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
                 for (JsonValue relationship : existing) {
                     final String id = relationship.get(FIELD_ID).asString();
-                    deleted.add(deleteInstance(context, id, Requests.newDeleteRequest("")));
+                    DeleteRequest deleteRequest = Requests.newDeleteRequest("");
+                    deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                    deleted.add(deleteInstance(context, id, deleteRequest));
                 }
 
                 return when(deleted).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
@@ -329,7 +332,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             
             QueryFilter<JsonPointer> filter;
             ResourcePath resourcePath = firstResourcePath(context, request);
-            if (isRevereseRelationship) {
+            if (isReverseRelationship) {
                 QueryFilter<JsonPointer> firstFilter = and(
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
@@ -350,7 +353,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
                 if (request.getQueryFilter() != null) {
-                    filter = and(filter, asRelationshipQueryFilter(isRevereseRelationship, request.getQueryFilter()));
+                    filter = and(filter, asRelationshipQueryFilter(isReverseRelationship, request.getQueryFilter()));
                 }
             }
 
