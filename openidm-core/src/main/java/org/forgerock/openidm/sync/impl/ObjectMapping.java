@@ -480,6 +480,7 @@ class ObjectMapping {
         for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), oldValue, false)) {
             // TODO: one day bifurcate this for synchronous and asynchronous source operation
             SourceSyncOperation op = new SourceSyncOperation();
+            op.context = context;
             op.oldValue = oldValue;
             op.setLinkQualifier(linkQualifier);
             op.sourceObjectAccessor = sourceObjectAccessor;
@@ -798,6 +799,7 @@ class ObjectMapping {
             try {
                 if (params.get("target").isNull()) {
                     SourceSyncOperation sop = new SourceSyncOperation();
+                    sop.context = context;
                     op = sop;
                     sop.fromJsonValue(params);
 
@@ -819,6 +821,7 @@ class ObjectMapping {
                     sop.assessSituation();
                 } else {
                     TargetSyncOperation top = new TargetSyncOperation();
+                    top.context = context;
                     op = top;
                     top.fromJsonValue(params);
                     String targetId = params.get("targetId").required().asString();
@@ -1126,6 +1129,7 @@ class ObjectMapping {
 
             for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), null, false)) {
                 SourceSyncOperation op = new SourceSyncOperation();
+                op.context = context;
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
 
@@ -1193,6 +1197,7 @@ class ObjectMapping {
             reconContext.checkCanceled();
             for (String linkQualifier : getAllLinkQualifiers()) {
                 TargetSyncOperation op = new TargetSyncOperation();
+                op.context = context;
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
 
@@ -1427,6 +1432,11 @@ class ObjectMapping {
          * A reconciliation ID 
          */
         public String reconId;
+        
+        /**
+         * The request context of this sync operation
+         */
+        public Context context;
         
         /** 
          * An optional reconciliation context 
@@ -1992,6 +2002,7 @@ class ObjectMapping {
         private void execScript(String type, Script script, JsonValue oldTarget) throws SynchronizationException {
             if (script != null) {
                 Map<String, Object> scope = new HashMap<String, Object>();
+                scope.put("context", context);
                 scope.put("linkQualifier", getLinkQualifier());
                 scope.put("mappingConfig", config);
                 String sourceId = getSourceObjectId();

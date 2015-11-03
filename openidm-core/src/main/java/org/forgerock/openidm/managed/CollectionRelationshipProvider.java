@@ -119,7 +119,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             queryRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
-            queryCollection(new ManagedObjectSetContext(context), queryRequest, new QueryResourceHandler() {
+            queryCollection(new ManagedObjectContext(context), queryRequest, new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resourceResponse) {
                     relationships.add(resourceResponse);
@@ -377,7 +377,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 }
             });
             
-            if (context.containsContext(ManagedObjectSetContext.class)) {
+            if (context.containsContext(ManagedObjectContext.class)) {
                 return response;   
             }
             

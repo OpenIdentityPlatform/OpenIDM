@@ -15,22 +15,37 @@
  */
 package org.forgerock.openidm.managed;
 
+import java.util.HashMap;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.services.context.AbstractContext;
 import org.forgerock.services.context.Context;
 
 /**
- * A {@link Context} which represents a request coming from (or through) a {@link ManagedObjectSet}.
+ * A {@link Context} which represents a request coming from (or through) the Managed Object Service.
+ * Additionally this context maintains a map of fields which can be used by scripts or components to communicate
+ * information about the fields/properties of a managed object.
  */
-public class ManagedObjectSetContext extends AbstractContext {
+public class ManagedObjectContext extends AbstractContext {
     
-    public ManagedObjectSetContext(final Context parent) {
-        super(parent, "managedObjectSet");
+    private static final String ATTR_FIELDS = "fields";
+    
+    public ManagedObjectContext(final Context parent) {
+        super(parent, "managedObject");
+        this.data.put(ATTR_FIELDS, new HashMap<String, Object>());
     }
 
-    public ManagedObjectSetContext(final JsonValue savedContext, final ClassLoader classLoader) 
+    public ManagedObjectContext(final JsonValue savedContext, final ClassLoader classLoader) 
             throws ResourceException {
         super(savedContext, classLoader);
+    }
+    
+    public void setField(String key, String value) {
+        this.data.get(ATTR_FIELDS).put(key, value);
+    }
+    
+    public Object getField(String key) {
+        return this.data.get(ATTR_FIELDS).get(key);
     }
 }
