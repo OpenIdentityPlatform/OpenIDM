@@ -350,13 +350,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *             if any other exception occurs.
      */
     private void onStore(Context context, JsonValue value) throws ResourceException  {
+        JsonValue scriptBindings = json(object());
+        scriptBindings.put("context", context);
+        scriptBindings.put("value", value.getObject());
+
         // Execute all individual onValidate scripts
         for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
             getSchema().getField(key).onValidate(context, value);
         }
         
         // Execute the root onValidate script
-        execScript(context, ScriptHook.onValidate, value, null);
+        execScript(context, ScriptHook.onValidate, value, scriptBindings);
 
         // Execute all individual onStore scripts
         for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
@@ -364,7 +368,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
         
         // Execute the root onStore script
-        execScript(context, ScriptHook.onStore, value, null);
+        execScript(context, ScriptHook.onStore, value, scriptBindings);
     }
 
     /**
@@ -507,7 +511,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             if (relationshipValue != null) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
-                persisted.add(provider.setRelationshipValueForResource(new ManagedObjectSetContext(context), resourceId, 
+                persisted.add(provider.setRelationshipValueForResource(context, resourceId, 
                         relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
                             @Override
                             public JsonValue apply(JsonValue jsonValue) throws ResourceException {
@@ -584,6 +588,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public Promise<ResourceResponse, ResourceException>  createInstance(Context context, CreateRequest request) {
         String resourceId = request.getNewResourceId();
         JsonValue content = request.getContent();
+        Context managedContext = new ManagedObjectContext(context);
 
         // Check if the new id is specified in content, and use it if it is.
         if (!content.get(FIELD_CONTENT_ID).isNull()) {
@@ -596,45 +601,45 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             JsonValue value = decrypt(content);
 
             // Execute onCreate script
-            execScript(context, ScriptHook.onCreate, value, 
-                    prepareScriptBindings(context, request, resourceId, new JsonValue(null), content));
+            execScript(managedContext, ScriptHook.onCreate, value, 
+                    prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Validate relationships before persisting
-            validateRelationshipFields(value, context);
+            validateRelationshipFields(value, managedContext);
 
             // Populate the virtual properties (so they are available for sync-ing)
-            populateVirtualProperties(context, value);
+            populateVirtualProperties(managedContext, value);
 
             // Remove relationships so they don't get persisted in the repository with the managed object details.
             JsonValue strippedRelationshipFields = stripRelationshipFields(value);
 
             // includes per-property encryption
-            onStore(context, value);
+            onStore(managedContext, value);
 
             // Persist the managed object in the repository
             CreateRequest createRequest = Requests.newCreateRequest(repoId(null), resourceId, value);
-            ResourceResponse createResponse = connectionFactory.getConnection().create(context, createRequest);
+            ResourceResponse createResponse = connectionFactory.getConnection().create(managedContext, createRequest);
             content = createResponse.getContent();
             resourceId = createResponse.getId();
 
-            activityLogger.log(context, request, "create", managedId(resourceId).toString(), null, content, 
+            activityLogger.log(managedContext, request, "create", managedId(resourceId).toString(), null, content, 
                     Status.SUCCESS);
             
             // Place stripped relationships back in content
             content.asMap().putAll(strippedRelationshipFields.asMap());
             
             // Persists all relationship fields that are present in the created object and updates their values.
-            content.asMap().putAll(persistRelationships(context, resourceId, content).asMap());
+            content.asMap().putAll(persistRelationships(managedContext, resourceId, content).asMap());
 
             // Execute the postCreate script if configured
-            execScript(context, ScriptHook.postCreate, content,
-                    prepareScriptBindings(context, request, resourceId, new JsonValue(null), content));
+            execScript(managedContext, ScriptHook.postCreate, content,
+                    prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Sync any targets after managed object is created
-            performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyCreate,
+            performSyncAction(managedContext, request, resourceId, SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), content);
             
-            return prepareResponse(context, createResponse, request.getFields()).asPromise();
+            return prepareResponse(managedContext, createResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -645,20 +650,21 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public Promise<ResourceResponse, ResourceException> readInstance(final Context context, String resourceId, 
     		ReadRequest request) {
         logger.debug("Read name={} id={}", name, resourceId);
+        Context managedContext = new ManagedObjectContext(context);
         try {
 
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-            ResourceResponse readResponse = connectionFactory.getConnection().read(context, readRequest);
+            ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
 
-            final JsonValue relationships = fetchRelationshipFields(context, resourceId);
+            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId);
             readResponse.getContent().asMap().putAll(relationships.asMap());
 
-            onRetrieve(context, request, resourceId, readResponse);
-            execScript(context, onRead, readResponse.getContent(), null);
-            activityLogger.log(context, request, "read", managedId(readResponse.getId()).toString(),
+            onRetrieve(managedContext, request, resourceId, readResponse);
+            execScript(managedContext, onRead, readResponse.getContent(), null);
+            activityLogger.log(managedContext, request, "read", managedId(readResponse.getId()).toString(),
                     null, readResponse.getContent(), Status.SUCCESS);
             
-            return prepareResponse(context, readResponse, request.getFields()).asPromise();
+            return prepareResponse(managedContext, readResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -683,7 +689,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             final RelationshipProvider provider = entry.getValue();
             
             try {
-                joined.put(field, provider.getRelationshipValueForResource(new ManagedObjectSetContext(context), 
+                joined.put(field, provider.getRelationshipValueForResource(context, 
                         resourceId).getOrThrow().getObject());
             } catch (NotFoundException e) {
                 joined.put(field, null);
@@ -713,8 +719,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     @Override
     public Promise<ResourceResponse, ResourceException>  updateInstance(final Context context, final String resourceId, 
     		final UpdateRequest request) {
-        logger.debug("update {} ", "name=" + name + " id=" + resourceId + " rev="
-                + request.getRevision());
+        logger.debug("update {} ", "name=" + name + " id=" + resourceId + " rev=" + request.getRevision());
+        Context managedContext = new ManagedObjectContext(context);
 
         try {
             // decrypt any incoming encrypted properties
@@ -724,16 +730,16 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             for (JsonPointer pointer : request.getFields()) {
                 readRequest.addField(pointer);
             }
-            ResourceResponse readResponse = connectionFactory.getConnection().read(context, readRequest);
+            ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
             ResourceResponse decryptedResponse = decrypt(readResponse);
 
-            ResourceResponse updatedResponse = update(context, request, resourceId, request.getRevision(),
+            ResourceResponse updatedResponse = update(managedContext, request, resourceId, request.getRevision(),
             		decryptedResponse.getContent(), _new);
             
-            activityLogger.log(context, request, "update", managedId(readResponse.getId()).toString(),
+            activityLogger.log(managedContext, request, "update", managedId(readResponse.getId()).toString(),
                     readResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
 
-            return prepareResponse(context, updatedResponse, request.getFields()).asPromise();
+            return prepareResponse(managedContext, updatedResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -744,17 +750,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     @Override
     public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId, 
     		final DeleteRequest request) {
-        logger.debug("Delete {} ", "name=" + name + " id=" + resourceId + " rev="
-                + request.getRevision());
+        logger.debug("Delete {} ", "name=" + name + " id=" + resourceId + " rev=" + request.getRevision());
+        Context managedContext = new ManagedObjectContext(context);
         try {
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-            ResourceResponse resource = connectionFactory.getConnection().read(context, readRequest);
+            ResourceResponse resource = connectionFactory.getConnection().read(managedContext, readRequest);
             
             // Populate the relationship fields in the read resource
-            final JsonValue relationships = fetchRelationshipFields(context, resourceId);
+            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId);
             resource.getContent().asMap().putAll(relationships.asMap());
             
-            execScript(context, ScriptHook.onDelete, decrypt(resource.getContent()), null);
+            execScript(managedContext, ScriptHook.onDelete, decrypt(resource.getContent()), null);
 
             // Delete the resource
             DeleteRequest deleteRequest = Requests.newDeleteRequest(repoId(resourceId));
@@ -765,28 +771,28 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 deleteRequest.setRevision(resource.getRevision());
             }
 
-            connectionFactory.getConnection().delete(context, deleteRequest);
+            connectionFactory.getConnection().delete(managedContext, deleteRequest);
 
             // Delete any relationships associated with this resource
             final List<Promise<JsonValue, ResourceException>> deleted = new ArrayList<>();
             for (RelationshipProvider relationshipProvider : relationshipProviders.values()) {
-                deleted.add(relationshipProvider.clear(new ManagedObjectSetContext(context), resourceId));
+                deleted.add(relationshipProvider.clear(managedContext, resourceId));
             }
             // Wait for deletions to complete before continuing
             when(deleted).getOrThrowUninterruptibly();
 
-            activityLogger.log(context, request, "delete", managedId(resource.getId()).toString(),
+            activityLogger.log(managedContext, request, "delete", managedId(resource.getId()).toString(),
                     resource.getContent(), null, Status.SUCCESS);
 
             // Execute the postDelete script if configured
-            execScript(context, ScriptHook.postDelete, null, prepareScriptBindings(context, request, resourceId,
+            execScript(managedContext, ScriptHook.postDelete, null, prepareScriptBindings(managedContext, request, resourceId,
                     resource.getContent(), new JsonValue(null)));
 
             // Perform notifyDelete synchronization
-            performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
+            performSyncAction(managedContext, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
 
-            return prepareResponse(context, resource, request.getFields()).asPromise();
+            return prepareResponse(managedContext, resource, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -798,8 +804,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, 
     		PatchRequest request) {
         try {
-        	return newResultPromise(patchResourceById(context, request, resourceId, request.getRevision(),
-                    request.getPatchOperations()));
+        	return newResultPromise(patchResourceById(new ManagedObjectContext(context), request, resourceId, 
+        	        request.getRevision(), request.getPatchOperations()));
         } catch (ResourceException e) {
         	return e.asPromise();
         }
@@ -925,6 +931,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) {
         logger.debug("query name={} id={}", name, request.getResourcePath());
+        final Context managedContext = new ManagedObjectContext(context);
         
         // The "executeOnRetrieve" parameter is used to indicate if is returning a full managed object
         String executeOnRetrieve = request.getAdditionalParameter("executeOnRetrieve");
@@ -952,7 +959,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 repoRequest.setAdditionalParameter(key, request.getAdditionalParameter(key));
             }
         	
-        	QueryResponse queryResponse = connectionFactory.getConnection().query(context, repoRequest,
+        	QueryResponse queryResponse = connectionFactory.getConnection().query(managedContext, repoRequest,
             		new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resource) {
@@ -960,7 +967,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     // Check if the onRetrieve script should be run
                     if (onRetrieve) {
                         try {
-                            onRetrieve(context, request, resource.getId(), resource);
+                            onRetrieve(managedContext, request, resource.getId(), resource);
                         } catch (ResourceException e) {
                         	ex[0] = e;
                             return false;
@@ -972,9 +979,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     } else {
                         // Populate the relationship fields
                         try {
-                            JsonValue relationships = fetchRelationshipFields(context, resource.getId());
+                            JsonValue relationships = fetchRelationshipFields(managedContext, resource.getId());
                             resource.getContent().asMap().putAll(relationships.asMap());
-                            resourceResponse = prepareResponse(context, resource, request.getFields());
+                            resourceResponse = prepareResponse(managedContext, resource, request.getFields());
                         } catch (ResourceException e) {
                             ex[0] = e;
                             return false;
@@ -984,7 +991,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         }
                     }
                     results.add(resourceResponse.getContent().asMap());
-                    return handler.handleResource(prepareResponse(context, resourceResponse, request.getFields()));
+                    return handler.handleResource(prepareResponse(managedContext, resourceResponse, request.getFields()));
                 }
             });
         	
@@ -992,7 +999,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             	return ex[0].asPromise();
         	}
         	
-            activityLogger.log(context, request, 
+            activityLogger.log(managedContext, request, 
             		"query: " + request.getQueryId() + ", parameters: " + request.getAdditionalParameters(), 
             		request.getQueryId(), null, new JsonValue(results), Status.SUCCESS);
             
@@ -1008,23 +1015,24 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, 
     		ActionRequest request) {
+        final Context managedContext = new ManagedObjectContext(context);
 
         try {
-            activityLogger.log(context, request, "Action: " + request.getAction(),
+            activityLogger.log(managedContext, request, "Action: " + request.getAction(),
                     managedId(resourceId).toString(), null, null, Status.SUCCESS);
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
                     final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
-                    ResourceResponse patchResponse = patchResourceById(context, request, resourceId, null, operations);
+                    ResourceResponse patchResponse = patchResourceById(managedContext, request, resourceId, null, operations);
                     return newActionResponse(patchResponse.getContent()).asPromise();
                 case triggerSyncCheck:
                     // Sync changes if required, in particular virtual/calculated attribute changes
                     final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId).toString());
                     logger.debug("Attempt sync of {}", readRequest.getResourcePath());
-                    ResourceResponse currentResource = connectionFactory.getConnection().read(context, readRequest);
+                    ResourceResponse currentResource = connectionFactory.getConnection().read(managedContext, readRequest);
                     UpdateRequest updateRequest = Requests.newUpdateRequest(readRequest.getResourcePath(),
                     		currentResource.getContent());
-                    ResourceResponse updateResponse = updateInstance(context, resourceId, updateRequest).get();
+                    ResourceResponse updateResponse = updateInstance(managedContext, resourceId, updateRequest).get();
                     logger.debug("Sync of {} complete", readRequest.getResourcePath());
                     return Responses.newActionResponse(updateResponse.getContent()).asPromise();
                 default:
@@ -1051,13 +1059,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
         logger.debug("action name={} id={}", name, request.getResourcePath());
+        final Context managedContext = new ManagedObjectContext(context);
 
         try {
-            activityLogger.log(context, request, "Action: " + request.getAction(),
+            activityLogger.log(managedContext, request, "Action: " + request.getAction(),
                     request.getResourcePath(), null, null, Status.SUCCESS);
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
-                    return newActionResponse(patchAction(context, request).getContent()).asPromise();
+                    return newActionResponse(patchAction(managedContext, request).getContent()).asPromise();
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }

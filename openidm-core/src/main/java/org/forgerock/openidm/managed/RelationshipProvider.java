@@ -348,7 +348,7 @@ public abstract class RelationshipProvider {
             createRequest.setContent(convertToRepoObject(firstResourcePath(context, request), request.getContent()));
             
             // If the request is from ManagedObjectSet then create and return the promise after formatting.
-            if (context.containsContext(ManagedObjectSetContext.class)) {
+            if (context.containsContext(ManagedObjectContext.class)) {
                 return getConnection().createAsync(context, createRequest).then(formatResponse(context, request));
             }
             
@@ -396,7 +396,7 @@ public abstract class RelationshipProvider {
                     getConnection().readAsync(context, readRequest).then(formatResponse(context, request));
             
             // If the request is from ManagedObjectSet then create and return the promise after formatting.
-            if (context.containsContext(ManagedObjectSetContext.class)) {
+            if (context.containsContext(ManagedObjectContext.class)) {
                 return promise;
             }
             
@@ -434,7 +434,7 @@ public abstract class RelationshipProvider {
             final JsonValue newValue = convertToRepoObject(firstResourcePath(context, request), request.getContent());
 
             // If the request is from ManagedObjectSet then update (if changed) and return the promise after formatting.
-            if (context.containsContext(ManagedObjectSetContext.class)) {
+            if (context.containsContext(ManagedObjectContext.class)) {
                 return getConnection()
                         // current resource in the db
                         .readAsync(context, readRequest)
@@ -493,7 +493,7 @@ public abstract class RelationshipProvider {
 
         try {
             // If the request is from ManagedObjectSet then delete and return the promise after formatting.
-            if (context.containsContext(ManagedObjectSetContext.class)) {
+            if (context.containsContext(ManagedObjectContext.class)) {
                 return deleteAsync(context, path, deleteRequest);
             }
 
@@ -596,7 +596,7 @@ public abstract class RelationshipProvider {
         String revision = request.getRevision();
         boolean forceUpdate = (revision == null);
         boolean retry = forceUpdate;
-        boolean fromManagedObjectSet = context.containsContext(ManagedObjectSetContext.class);
+        boolean fromManagedObjectSet = context.containsContext(ManagedObjectContext.class);
 
         do {
             logger.debug("Attempting to patch relationship {}", request.getResourcePath());
