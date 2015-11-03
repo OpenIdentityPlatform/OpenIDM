@@ -247,14 +247,8 @@
             <artifactId>org.apache.felix.webconsole</artifactId>
         </dependency>
         <dependency>
-            <groupId>org.apache.geronimo.bundles</groupId>
-            <artifactId>json</artifactId>
-            <version>20090211_1</version>
-        </dependency>
-        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole.plugins.ds</artifactId>
-            <version>1.0.0</version>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -271,6 +265,11 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.webconsole.plugins.packageadmin</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.geronimo.bundles</groupId>
+            <artifactId>json</artifactId>
+            <version>20090211_1</version>
         </dependency>
         <dependency>
             <groupId>commons-fileupload</groupId>
