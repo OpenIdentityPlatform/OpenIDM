@@ -1361,8 +1361,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 }
                 if (removedAttributes.size() > 0) {
                 	// Perform any remove operations
-                	uid = facade.removeAttributeValues(objectClassInfoHelper.getObjectClass(), uid, 
-                			AttributeUtil.filterUid(removedAttributes), operationOptions);
+                    try {
+                        uid = facade.removeAttributeValues(objectClassInfoHelper.getObjectClass(), uid,
+                                AttributeUtil.filterUid(removedAttributes), operationOptions);
+                    } catch (ConnectorException e) {
+                        logger.debug("Error removing attribute values for object {}", uid, e);
+                    }
                 }
                 if (updatedAttributes.size() > 0) {
                 	// Perform any increment or replace operations
