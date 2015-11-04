@@ -219,7 +219,7 @@
         <commons.forgerock-bom.version>1.0.0</commons.forgerock-bom.version>
 
         <!-- Commons versions -->
-        <commons.forgerock-script.version>2.0.0-SNAPSHOT</commons.forgerock-script.version>
+        <commons.forgerock-script.version>2.0.0</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
         <commons.forgerock-audit.version>0.6.0</commons.forgerock-audit.version>
         <commons.forgerock-selfservice.version>0.3.0</commons.forgerock-selfservice.version>
