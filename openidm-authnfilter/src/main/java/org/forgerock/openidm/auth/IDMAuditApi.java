@@ -16,21 +16,29 @@
 
 package org.forgerock.openidm.auth;
 
+import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.CONTEXT;
+import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.ENTRIES;
+import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.PRINCIPAL;
+import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.RESULT;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
+import org.forgerock.audit.events.AuthenticationAuditEventBuilder.Status;
 import org.forgerock.caf.authentication.framework.AuditApi;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.services.context.Context;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.services.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.List;
-import java.util.UUID;
 
 /**
  * Creates audit entries for each authentication attempt.
@@ -38,6 +46,8 @@ import java.util.UUID;
 public class IDMAuditApi implements AuditApi {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(IDMAuditApi.class);
+    public static final String SESSION_ID = "sessionId";
+    public static final String REQUEST_ID = "requestId";
 
     private final ConnectionFactory connectionFactory;
 
@@ -50,21 +60,28 @@ public class IDMAuditApi implements AuditApi {
      */
     @Override
     public void audit(JsonValue auditMessage) {
-        List<String> principals = auditMessage.get(AuthenticationAuditEventBuilder.PRINCIPAL).asList(String.class);
+        List<String> principals = auditMessage.get(PRINCIPAL).asList(String.class);
         String username = "";
         if (principals != null && !principals.isEmpty()) {
             username = principals.get(0);
         }
 
+        final Set<String> trackingIds = new HashSet<>();
+        if (auditMessage.isDefined(REQUEST_ID)) {
+            trackingIds.add(auditMessage.get(REQUEST_ID).asString());
+        }
+        if (auditMessage.isDefined(SESSION_ID)) {
+            trackingIds.add(auditMessage.get(SESSION_ID).asString());
+        }
+
         AuditEvent auditEvent = new AuthenticationAuditEventBuilder()
-                .context(auditMessage.get(AuthenticationAuditEventBuilder.CONTEXT).asMap())
-                .entries(auditMessage.get(AuthenticationAuditEventBuilder.ENTRIES).asList())
+                .context(auditMessage.get(CONTEXT).asMap())
+                .entries(auditMessage.get(ENTRIES).asList())
                 .principal(principals)
-                .sessionId(auditMessage.get(AuthenticationAuditEventBuilder.SESSION_ID).asString())
-                .result(auditMessage.get(
-                        AuthenticationAuditEventBuilder.RESULT).asEnum(AuthenticationAuditEventBuilder.Status.class))
-                .authentication(username)
-                .transactionId(UUID.randomUUID().toString()) //CAUDTODO Support transactionId OPENIDM-3427
+                .result(auditMessage.get(RESULT).asEnum(Status.class))
+                .userId(username)
+                .trackingIds(trackingIds)
+                .transactionId(UUID.randomUUID().toString())
                 .timestamp(System.currentTimeMillis())
                 .eventName("authentication")
                 .toEvent();

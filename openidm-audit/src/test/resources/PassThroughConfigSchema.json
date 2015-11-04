@@ -1,27 +1,27 @@
 {
-  "type": "object",
-  "id": "/",
-  "properties": {
-    "message": {
-      "type": "string"
-    },
-    "buffering": {
-      "type": "object",
-      "id": "urn:jsonschema:org:forgerock:audit:events:handlers:EventHandlerConfiguration:EventBufferingConfiguration",
-      "description": "audit.handlers.all.buffering",
-      "properties": {
-        "autoFlush" : {
-          "type": "boolean",
-          "description": "audit.handlers.all.buffering.autoFlush"
-        },
-        "enabled": {
-          "type": "boolean",
-          "description": "audit.handlers.all.buffering.enabled"
-        },
-        "maxSize": {
-          "type": "integer",
-          "description": "audit.handlers.all.buffering.maxSize"
+  "class": "org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler",
+  "config":
+  {
+    "type": "object",
+    "id": "urn:jsonschema:org:forgerock:openidm:audit:events:handlers:impl:PassThroughAuditEventHandlerConfiguration",
+    "properties": {
+      "message": {
+        "type": "string"
+      },
+      "enabled": {
+        "type": "boolean",
+        "description": "audit.handlers.all.enabled"
+      },
+      "topics": {
+        "type": "array",
+        "description": "audit.handlers.all.topics",
+        "items": {
+          "type": "string"
         }
+      },
+      "name": {
+        "type": "string",
+        "description": "audit.handlers.all.name"
       }
     }
   }

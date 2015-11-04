@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.object;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.ConfigAuditEventBuilder;
 import org.forgerock.services.context.Context;
@@ -45,6 +46,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ConfigAuditEventLogger {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigAuditEventLogger.class);
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static final String CONFIG_AUDIT_EVENT_NAME = "CONFIG";
     public static final String AUDIT_CONFIG_REST_PATH = "audit/config";
@@ -68,15 +70,16 @@ public class ConfigAuditEventLogger {
 
             // Build the event utilizing the config builder.
             AuditEvent auditEvent = ConfigAuditEventBuilder.configEvent()
-                    .resourceOperationFromRequest(request)
-                    .authenticationFromSecurityContext(context)
+                    .operationFromRequest(request)
+                    .userId(authenticationId)
                     .runAs(authenticationId)
                     .transactionIdFromRootContext(context)
                     .revision(configAuditState.getRevision())
                     .timestamp(System.currentTimeMillis())
+                    .objectId(configAuditState.getId())
                     .eventName(CONFIG_AUDIT_EVENT_NAME)
-                    .before(null != before ? before.toString() : "")
-                    .after(null != after ? after.toString() : "")
+                    .before(null != before ? mapper.writeValueAsString(before.getObject()) : "")
+                    .after(null != after ? mapper.writeValueAsString(after.getObject()) : "")
                     .changedFields(getChangedFields(before, after))
                     .toEvent();
 

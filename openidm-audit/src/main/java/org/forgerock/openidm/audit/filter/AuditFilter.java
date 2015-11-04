@@ -24,13 +24,14 @@
 
 package org.forgerock.openidm.audit.filter;
 
-import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILURE;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILED;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESSFUL;
 import static org.forgerock.services.context.ClientContext.newInternalClientContext;
 
+import java.util.List;
+
 import org.forgerock.audit.events.AccessAuditEventBuilder;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -50,6 +51,9 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.SecurityContext;
+import org.forgerock.util.Reject;
 import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -188,15 +192,17 @@ public class AuditFilter implements Filter {
         }
 
 
-        final AccessAuditEventBuilder accessAuditEventBuilder = new AccessAuditEventBuilder();
-        accessAuditEventBuilder.forHttpCrestRequest(context, state.request)
-                .authorizationIdFromSecurityContext(context)
+        final OpenIDMAccessAuditEventBuilder accessAuditEventBuilder = new OpenIDMAccessAuditEventBuilder();
+        accessAuditEventBuilder
+                .rolesFromCrestContext(context)
+                .forHttpCrestRequest(context, state.request)
                 // TODO CAUD-114 .serverFromHttpContext(context)
-                .resourceOperationFromRequest(state.request)
+                .requestFromCrestRequest(state.request)
                 .clientFromHttpContext(context)
+                .httpFromHttpContext(context)
                 .transactionIdFromRootContext(context)
-                .authenticationFromSecurityContext(context)
-                .eventName("access");
+                .eventName("access")
+                .userId(getUserId(context));
 
         promise.thenOnResultOrException(
                 new ResultHandler<Response>() {
@@ -204,7 +210,7 @@ public class AuditFilter implements Filter {
                     public void handleResult(Response result) {
                         long now = System.currentTimeMillis();
                         final long elapsedTime = now - state.actionTime;
-                        accessAuditEventBuilder.response(SUCCESS, null, elapsedTime, MILLISECONDS).timestamp(now);
+                        accessAuditEventBuilder.response(SUCCESSFUL, null, elapsedTime, MILLISECONDS).timestamp(now);
                     }
                 },
                 new ExceptionHandler<ResourceException>() {
@@ -212,8 +218,8 @@ public class AuditFilter implements Filter {
                     public void handleException(ResourceException resourceException) {
                         long now = System.currentTimeMillis();
                         final long elapsedTime = now - state.actionTime;
-                        accessAuditEventBuilder.responseWithDetail(FAILURE, String.valueOf(resourceException.getCode()),
-                                elapsedTime, MILLISECONDS, resourceException.getReason()).timestamp(now);
+                        accessAuditEventBuilder.responseWithDetail(FAILED, String.valueOf(resourceException.getCode()),
+                                elapsedTime, MILLISECONDS, resourceException.toJsonValue()).timestamp(now);
                     }
                 })
                 .thenAlways(new Runnable() {
@@ -236,5 +242,36 @@ public class AuditFilter implements Filter {
 
     public void setConnectionFactory(ConnectionFactory connectionFactory) {
         this.connectionFactory = connectionFactory;
+    }
+
+    private String getUserId(Context context) {
+        if (context.containsContext(SecurityContext.class)) {
+            return context.asContext(SecurityContext.class).getAuthenticationId();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Extended Commons Audit Event Builder that handles the extended attributes of OpenIdm.
+     */
+    @SuppressWarnings("unchecked")
+    private class OpenIDMAccessAuditEventBuilder<T extends OpenIDMAccessAuditEventBuilder<T>>
+            extends AccessAuditEventBuilder<T> {
+
+        public static final String ROLES = "roles";
+
+        public T rolesFromCrestContext(final Context context) {
+            if (context.containsContext(SecurityContext.class)) {
+                return roles((List<String>) context.asContext(SecurityContext.class).getAuthorization().get("roles"));
+            }
+            return self();
+        }
+
+        public T roles(List<String> roles) {
+            Reject.ifNull(roles);
+            jsonValue.put(ROLES, roles);
+            return self();
+        }
     }
 }

@@ -105,7 +105,7 @@ public class AuditServiceImplTest {
                 .transactionId("transactionId")
                 .eventName("eventName")
                 .timestamp(System.currentTimeMillis())
-                .authentication("testuser@forgerock.com")
+                .userId("testuser@forgerock.com")
                 .toEvent();
 
         final CreateRequest createRequest = Requests.newCreateRequest(TEST_AUDIT_TOPIC, auditEvent.getValue());
@@ -303,7 +303,7 @@ public class AuditServiceImplTest {
                 .transactionId("transactionId")
                 .eventName("eventName")
                 .timestamp(System.currentTimeMillis())
-                .authentication("testuser@forgerock.com")
+                .userId("testuser@forgerock.com")
                 .exception(new Exception("Test Exception"))
                 .toEvent();
 
@@ -337,15 +337,12 @@ public class AuditServiceImplTest {
         ActionResponse actionResponse = promise.get();
         final JsonValue result = actionResponse.getJsonContent();
         assertThat(result.keys().size()).isEqualTo(1);
-        assertThat(result.get(0).get("class").asString())
-                .isEqualTo(PassThroughAuditEventHandler.class.getName());
-
-        // { "type": "object", "properties": { "message": { "type": "string" } } }
+        
         final JsonValue expectedConfig;
         try (InputStream in = getClass().getResourceAsStream(PASS_THROUGH_CONFIG_SCHEMA_JSON_FILE)) {
             expectedConfig = json(Json.readJson(new InputStreamReader(in)));
         }
-        assertThat(result.get(0).get("config").asMap()).isEqualTo(expectedConfig.asMap());
+        assertThat(result.get(0).asMap()).isEqualTo(expectedConfig.asMap());
     }
 
     private InputStream getResource(final String resourceName) {

@@ -24,8 +24,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import org.forgerock.audit.DependencyProviderBase;
-import org.forgerock.services.context.RootContext;
+import java.util.Collections;
+
+import org.forgerock.audit.events.EventTopicsMetaDataBuilder;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -43,6 +44,7 @@ import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.Router;
 import org.forgerock.openidm.audit.mocks.MockRequestHandler;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.mockito.ArgumentCaptor;
@@ -64,21 +66,13 @@ public class RouterAuditEventHandlerTest {
         router.addRoute(RoutingMode.STARTS_WITH, Router.uriTemplate("audit/db"), requestHandler);
         connectionFactory = Resources.newInternalConnectionFactory(router);
 
-        routerAuditEventHandler = new RouterAuditEventHandler();
-        RouterAuditEventHandlerConfiguration config = new RouterAuditEventHandlerConfiguration();
+        final RouterAuditEventHandlerConfiguration config = new RouterAuditEventHandlerConfiguration();
         config.setResourcePath("audit/db");
-        routerAuditEventHandler.configure(config);
-        routerAuditEventHandler.setDependencyProvider(new DependencyProviderBase() {
-            @SuppressWarnings("unchecked")
-            @Override
-            public <T> T getDependency(Class<T> aClass) throws ClassNotFoundException {
-                if (ConnectionFactory.class.isAssignableFrom(aClass)) {
-                    return (T) connectionFactory;
-                } else {
-                    return super.getDependency(aClass);
-                }
-            }
-        });
+        config.setName("router");
+        config.setTopics(Collections.singleton("access"));
+        routerAuditEventHandler =
+                new RouterAuditEventHandler(
+                        config, EventTopicsMetaDataBuilder.coreTopicSchemas().build(), connectionFactory);
     }
 
     @AfterMethod

@@ -26,6 +26,9 @@ import static org.mockito.Mockito.when;
 
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import java.util.Collections;
+
+import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
@@ -62,7 +65,7 @@ public class IDMAuditApiTest {
                                 field("entryKey", "entryValue")
                         )
                 )),
-                field(AuthenticationAuditEventBuilder.SESSION_ID, "sessionId")
+                field(IDMAuditApi.SESSION_ID, "sessionId")
         ));
 
         //when
@@ -78,7 +81,7 @@ public class IDMAuditApiTest {
                 .isEqualTo(jsonValue.get(AuthenticationAuditEventBuilder.CONTEXT).asMap());
         assertThat(createRequestContent.get(AuthenticationAuditEventBuilder.ENTRIES).asList())
                 .isEqualTo(jsonValue.get(AuthenticationAuditEventBuilder.ENTRIES).asList());
-        assertThat(createRequestContent.get(AuthenticationAuditEventBuilder.SESSION_ID).asString())
-                .isEqualTo(jsonValue.get(AuthenticationAuditEventBuilder.SESSION_ID).asString());
+        assertThat(createRequestContent.get(AuditEventBuilder.TRACKING_IDS).asList(String.class))
+                .isEqualTo(Collections.singletonList(jsonValue.get(IDMAuditApi.SESSION_ID).asString()));
     }
 }

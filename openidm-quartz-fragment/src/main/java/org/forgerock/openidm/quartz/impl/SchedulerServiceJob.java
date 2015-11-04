@@ -25,23 +25,27 @@
 
 package org.forgerock.openidm.quartz.impl;
 
-import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILURE;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESS;
-import static org.forgerock.audit.events.AccessAuditEventBuilder.TimeUnit.MILLISECONDS;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILED;
+import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESSFUL;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
-import org.forgerock.services.context.SecurityContext;
+import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.SecurityContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -164,25 +168,32 @@ public class SchedulerServiceJob implements Job {
             final JobExecutionContext jobContext) {
         final long elapsedTime = System.currentTimeMillis() - startTime;
         return newBaseAccessAuditEventBuilder(context ,jobContext)
-                .response(SUCCESS, null, elapsedTime, MILLISECONDS).toEvent();
+                .response(SUCCESSFUL, null, elapsedTime, TimeUnit.MILLISECONDS).toEvent();
     }
 
     private AuditEvent createFailedScheduledAuditEvent(final Context context, final long startTime,
             final JobExecutionContext jobContext, final Exception e) {
         final long elapsedTime = System.currentTimeMillis() - startTime;
         return newBaseAccessAuditEventBuilder(context, jobContext)
-                .responseWithDetail(FAILURE, null, elapsedTime, MILLISECONDS, e.getMessage()).toEvent();
+                .responseWithDetail(
+                        FAILED,
+                        null,
+                        elapsedTime,
+                        TimeUnit.MILLISECONDS,
+                        ResourceExceptionsUtil.adapt(e).toJsonValue()).toEvent();
     }
 
     private AccessAuditEventBuilder newBaseAccessAuditEventBuilder(final Context context,
             final JobExecutionContext jobContext) {
         final AccessAuditEventBuilder auditEventBuilder = new AccessAuditEventBuilder();
         auditEventBuilder
-                .authorizationIdFromSecurityContext(context)
-                .resourceOperation("scheduler", "CREST", "ScheduledTask", jobContext.getJobDetail().getFullName())
+                .request(
+                        "CREST",
+                        "ScheduledTask",
+                        json(object(field("taskName", jobContext.getJobDetail().getFullName()))))
                 .transactionIdFromRootContext(context)
+                .userId(context.asContext(SecurityContext.class).getAuthenticationId())
                 .timestamp(System.currentTimeMillis())
-                .authenticationFromSecurityContext(context)
                 .eventName("access");
         return auditEventBuilder;
     }

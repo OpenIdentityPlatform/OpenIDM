@@ -48,50 +48,6 @@ PROMPT Creating Sequence objecttypes_id_SEQ ...
 CREATE SEQUENCE  objecttypes_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
--- DROP TABLE auditaccess CASCADE CONSTRAINTS;
-
-
-PROMPT Creating Table auditaccess ...
-CREATE TABLE auditaccess (
-  objectid VARCHAR2(38 CHAR) NOT NULL,
-  activity VARCHAR2(24 CHAR),
-  activitydate VARCHAR2(29 CHAR) NOT NULL,
-  transactionid VARCHAR2(56 CHAR) NOT NULL,
-  eventname VARCHAR2(255 CHAR),
-  server_ip VARCHAR2(40 CHAR),
-  server_port VARCHAR2(5 CHAR),
-  client_host VARCHAR2(255 CHAR),
-  client_ip VARCHAR2(40 CHAR),
-  client_port VARCHAR2(5 CHAR),
-  userid VARCHAR2(255 CHAR),
-  principal CLOB,
-  roles VARCHAR2(1024 CHAR),
-  auth_component VARCHAR2(255 CHAR),
-  resource_uri VARCHAR2(255 CHAR),
-  resource_protocol VARCHAR2(10 CHAR),
-  resource_method VARCHAR2(10 CHAR),
-  resource_detail VARCHAR2(255 CHAR),
-  http_method VARCHAR2(14 CHAR),
-  http_path VARCHAR2(255 CHAR),
-  http_querystring CLOB,
-  http_headers CLOB,
-  status VARCHAR2(20 CHAR),
-  elapsedtime VARCHAR2(13 CHAR),
-);
-
-
-COMMENT ON COLUMN auditaccess.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
-;
-
-PROMPT Creating Primary Key Constraint PRIMARY on table auditaccess ...
-ALTER TABLE auditaccess
-ADD CONSTRAINT PRIMARY_OBJECTID PRIMARY KEY
-(
-  objectid
-)
-ENABLE
-;
-
 -- DROP TABLE uinotification CASCADE CONSTRAINTS;
 
 
@@ -117,6 +73,53 @@ ADD CONSTRAINT PRIMARY_0 PRIMARY KEY
 ENABLE
 ;
 
+-- DROP TABLE auditaccess CASCADE CONSTRAINTS;
+
+-- -----------------------------------------------------
+-- Table openidm.auditaccess
+-- -----------------------------------------------------
+PROMPT Creating Table auditaccess ...
+CREATE TABLE auditaccess (
+  objectid VARCHAR2(38 CHAR) NOT NULL,
+  activitydate VARCHAR2(29 CHAR) NOT NULL,
+  eventname VARCHAR2(255 CHAR),
+  transactionid VARCHAR2(56 CHAR) NOT NULL,
+  userid VARCHAR2(255 CHAR),
+  trackingids CLOB,
+  server_ip VARCHAR2(40 CHAR),
+  server_port VARCHAR2(5 CHAR),
+  client_host VARCHAR2(255 CHAR),
+  client_ip VARCHAR2(40 CHAR),
+  client_port VARCHAR2(5 CHAR),
+  request_protocol VARCHAR2(255 CHAR) NULL ,
+  request_operation VARCHAR2(255 CHAR) NULL ,
+  request_detail CLOB NULL ,
+  http_request_secure VARCHAR2(255 CHAR) NULL ,
+  http_request_method VARCHAR2(255 CHAR) NULL ,
+  http_request_path VARCHAR2(255 CHAR) NULL ,
+  http_request_queryparameters CLOB(2M) NULL ,
+  http_request_headers CLOB NULL ,
+  http_request_cookies CLOB NULL ,
+  http_response_headers CLOB NULL ,
+  response_status VARCHAR2(255 CHAR) NULL ,
+  response_statuscode VARCHAR2(255 CHAR) NULL ,
+  response_elapsedtime VARCHAR2(255 CHAR) NULL ,
+  response_elapsedtimeunits VARCHAR2(255 CHAR) NULL ,
+  roles CLOB NULL
+);
+
+
+COMMENT ON COLUMN auditaccess.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
+;
+
+PROMPT Creating Primary Key Constraint PRIMARY on table auditaccess ...
+ALTER TABLE auditaccess
+ADD CONSTRAINT PRIMARY_OBJECTID PRIMARY KEY
+(
+  objectid
+)
+ENABLE
+;
 
 -- -----------------------------------------------------
 -- Table openidm.auditauthentication
@@ -128,11 +131,11 @@ CREATE TABLE auditauthentication (
   activitydate VARCHAR2(29 CHAR) NOT NULL,
   userid VARCHAR2(255 CHAR),
   eventname VARCHAR2(50 CHAR),
-  RESULT VARCHAR2(255 CHAR),
+  result VARCHAR2(255 CHAR),
   principals CLOB,
-  CONTEXT CLOB,
-  sessionid VARCHAR2(255 CHAR),
-  entries CLOB
+  context CLOB,
+  entries CLOB,
+  trackingids CLOB
 );
 
 COMMENT ON COLUMN auditauthentication.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
@@ -150,18 +153,20 @@ ENABLE
 
 -- DROP TABLE auditconfig CASCADE CONSTRAINTS;
 
+-- -----------------------------------------------------
+-- Table openidm.auditconfig
+-- -----------------------------------------------------
 PROMPT Creating Table auditconfig ...
 CREATE TABLE auditconfig (
   objectid VARCHAR2(38 CHAR) NOT NULL,
   activitydate VARCHAR2(29 CHAR) NOT NULL,
-  transactionid VARCHAR2(56 CHAR) NOT NULL,
   eventname VARCHAR2(255 CHAR),
+  transactionid VARCHAR2(56 CHAR) NOT NULL,
   userid VARCHAR2(255 CHAR),
+  trackingids CLOB,
   runas VARCHAR2(255 CHAR),
-  resource_uri VARCHAR2(255 CHAR),
-  resource_protocol VARCHAR2(10 CHAR),
-  resource_method VARCHAR2(10 CHAR),
-  resource_detail VARCHAR2(255 CHAR),
+  configobjectid VARCHAR2(255 CHAR) NULL ,
+  operation VARCHAR2(255 CHAR) NULL ,
   beforeObject CLOB,
   afterObject CLOB,
   changedfields VARCHAR2(255 CHAR),
@@ -191,28 +196,27 @@ CREATE INDEX idx_auditconfig_transactionid ON auditconfig
 
 --  DROP TABLE auditactivity CASCADE CONSTRAINTS;
 
-
+-- -----------------------------------------------------
+-- Table openidm.auditactivity
+-- -----------------------------------------------------
 PROMPT Creating Table auditactivity ...
 CREATE TABLE auditactivity (
-  objectid VARCHAR2(38 CHAR) NOT NULL, 
-  activity VARCHAR2(24 CHAR),  
+  objectid VARCHAR2(38 CHAR) NOT NULL,
   activitydate VARCHAR2(29 CHAR) NOT NULL,
+  eventname VARCHAR2(255 CHAR),
   transactionid VARCHAR2(56 CHAR) NOT NULL,
-  eventname VARCHAR2(255 CHAR),  
-  userid VARCHAR2(255 CHAR),  
+  userid VARCHAR2(255 CHAR),
+  trackingids CLOB,
   runas VARCHAR2(255 CHAR),  
-  resource_uri VARCHAR2(255 CHAR),  
-  resource_protocol VARCHAR2(10 CHAR),  
-  resource_method VARCHAR2(10 CHAR),  
-  resource_detail VARCHAR2(255 CHAR),  
+  activityobjectid VARCHAR2(255 CHAR) NULL ,
+  operation VARCHAR2(255 CHAR) NULL ,
   subjectbefore CLOB, 
   subjectafter CLOB, 
-  changedfields VARCHAR2(255 CHAR),  
-  passwordchanged VARCHAR2(5 CHAR),  
-  subjectrev VARCHAR2(255 CHAR),  
+  changedfields VARCHAR2(255 CHAR),
+  subjectrev VARCHAR2(255 CHAR),
+  passwordchanged VARCHAR2(5 CHAR),
   message CLOB,
-  activityobjectid VARCHAR2(255 CHAR), 
-  status VARCHAR2(20 CHAR), 
+  status VARCHAR2(20 CHAR)
 );
 
 
@@ -236,7 +240,9 @@ CREATE INDEX idx_auditactivity_transactionid ON auditactivity
 
 -- DROP TABLE auditrecon CASCADE CONSTRAINTS;
 
-
+-- -----------------------------------------------------
+-- Table openidm.auditrecon
+-- -----------------------------------------------------
 PROMPT Creating Table auditrecon ...
 CREATE TABLE auditrecon (
   objectid VARCHAR2(38) NOT NULL,
@@ -258,7 +264,7 @@ CREATE TABLE auditrecon (
   ambiguoustargetobjectids CLOB,
   reconaction VARCHAR2(36 CHAR),
   entrytype VARCHAR2(7 CHAR),
-  reconid VARCHAR2(56 CHAR),
+  reconid VARCHAR2(56 CHAR)
 );
 
 
@@ -276,7 +282,9 @@ ENABLE
 
 -- DROP TABLE auditsync CASCADE CONSTRAINTS;
 
-
+-- -----------------------------------------------------
+-- Table openidm.auditsync
+-- -----------------------------------------------------
 PROMPT Creating Table auditsync ...
 CREATE TABLE auditsync (
   objectid VARCHAR2(38) NOT NULL,
@@ -293,7 +301,7 @@ CREATE TABLE auditsync (
   situation VARCHAR2(24 CHAR),
   sourceobjectid VARCHAR2(511 CHAR),
   status VARCHAR2(20 CHAR),
-  targetobjectid VARCHAR2(511 CHAR),
+  targetobjectid VARCHAR2(511 CHAR)
 );
 
 

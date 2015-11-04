@@ -16,14 +16,13 @@
 
 package org.forgerock.openidm.audit.impl;
 
-import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import javax.script.ScriptException;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -33,6 +32,7 @@ import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.TriggerContext;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -145,13 +145,12 @@ public class AuditLogFilters {
      *
      * @param <A> the action enum type
      */
-    private static class ResourceOperationFilter<A extends Enum<A>> extends FieldValueFilter<A> {
+    private static class OperationFilter<A extends Enum<A>> extends FieldValueFilter<A> {
 
-        private static final JsonPointer RESOURCE_OPERATION_METHOD =
-                new JsonPointer("resourceOperation/operation/method");
+        private static final JsonPointer OPERATION = new JsonPointer("operation");
 
-        private ResourceOperationFilter(final Class<A> clazz, final Set<A> actionsToLog) {
-            super(RESOURCE_OPERATION_METHOD, actionsToLog, new JsonValueObjectConverter<A>() {
+        private OperationFilter(final Class<A> clazz, final Set<A> actionsToLog) {
+            super(OPERATION, actionsToLog, new JsonValueObjectConverter<A>() {
                 public A apply(JsonValue value) throws JsonValueException {
                     return value.asEnum(clazz);
                 }
@@ -161,7 +160,7 @@ public class AuditLogFilters {
         @Override
         public boolean isFiltered(Context context, CreateRequest request) {
             // don't filter requests that do not specify an action
-            if (request.getContent().get(field).isNull()) {
+            if (request.getContent().get(field) == null || request.getContent().get(field).isNull()) {
                 return false;
             }
             try {
@@ -368,7 +367,7 @@ public class AuditLogFilters {
      */
     static AuditLogFilter newActionFilter(String eventType, JsonValue actions) {
         return newEventTypeFilter(eventType,
-                new ResourceOperationFilter<>(RequestType.class, getActions(RequestType.class, actions)));
+                new OperationFilter<>(RequestType.class, getActions(RequestType.class, actions)));
     }
 
     /**
@@ -384,7 +383,7 @@ public class AuditLogFilters {
     static AuditLogFilter newActionFilter(String eventType, JsonValue actions, String trigger) {
         return newEventTypeFilter(eventType,
                 new TriggerFilter(trigger,
-                        new ResourceOperationFilter<>(RequestType.class, getActions(RequestType.class, actions))));
+                        new OperationFilter<>(RequestType.class, getActions(RequestType.class, actions))));
     }
 
     /**
