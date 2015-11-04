@@ -19,6 +19,9 @@ import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.util.promise.Promises.newResultPromise;
+import static org.forgerock.util.query.QueryFilter.and;
+import static org.forgerock.util.query.QueryFilter.equalTo;
+import static org.forgerock.util.query.QueryFilter.or;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -107,23 +110,37 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param managedObjectId The id of the managed object to find relationships associated with
      * @return
      */
-    private Promise<ResourceResponse, ResourceException> queryRelationship(final Context context, final String managedObjectId) {
+    private Promise<ResourceResponse, ResourceException> queryRelationship(final Context context, 
+            final String managedObjectId) {
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
             final List<ResourceResponse> relationships = new ArrayList<>();
+            final String resourceFullPath = resourceContainer.child(managedObjectId).toString();
+            queryRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, managedObjectId);
 
-            queryRequest.setQueryFilter(QueryFilter.and(
-                    QueryFilter.equalTo(new JsonPointer(isReverseRelationship ? REPO_FIELD_SECOND_ID : REPO_FIELD_FIRST_ID), resourceContainer.child(managedObjectId)),
-                    QueryFilter.equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)
-            ));
-
+            final QueryFilter<JsonPointer> filter;
+            if (isReverseRelationship) {
+                filter = or(
+                        and(
+                                equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
+                                equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)),
+                        and(
+                                equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourceFullPath),
+                                equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), propertyName)));      
+            } else {    
+                filter = and(
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
+            }
+            
+            queryRequest.setQueryFilter(filter);
             connectionFactory.getConnection().query(context, queryRequest, relationships);
 
             if (relationships.isEmpty()) {
                 return new NotFoundException().asPromise();
             } else {
                 // TODO OPENIDM-4094 - check size and throw illegal state if more than one?
-                return newResultPromise(formatResponse(context, null).apply(relationships.get(0)));
+                return newResultPromise(formatResponse(context, queryRequest).apply(relationships.get(0)));
             }
         } catch (ResourceException e) {
             return e.asPromise();
