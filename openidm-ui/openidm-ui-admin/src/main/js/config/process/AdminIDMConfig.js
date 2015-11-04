@@ -168,21 +168,6 @@ define("config/process/AdminIDMConfig", [
                 }
             },
             {
-                startEvent: constants.EVENT_CHANGE_BASE_VIEW,
-                description: "",
-                override: true,
-                dependencies: [
-                    "org/forgerock/commons/ui/common/components/Navigation",
-                    "org/forgerock/commons/ui/common/main/Configuration",
-                    "org/forgerock/openidm/ui/common/components/Footer"
-                ],
-                processDescription: function(event, navigation, conf,footer) {
-                    navigation.init();
-
-                    footer.render();
-                }
-            },
-            {
                 startEvent: constants.EVENT_SELF_SERVICE_CONTEXT,
                 description: "",
                 override: true,

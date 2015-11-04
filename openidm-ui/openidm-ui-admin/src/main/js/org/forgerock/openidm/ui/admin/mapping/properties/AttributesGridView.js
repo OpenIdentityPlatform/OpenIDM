@@ -89,6 +89,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             this.mapping = this.getCurrentMapping();
             this.data.requiredProperties = [];
             this.data.missingRequiredProperties = [];
+            this.model.mappingProperties = null;
 
             this.data.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
             this.currentLinkQualifier = this.data.linkQualifiers[0];
@@ -253,6 +254,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             attributesGrid = new Backgrid.Grid({
                 className: "table backgrid",
+                emptyText: $.t("templates.mapping.noMappingAttributes"),
                 row: ClickableRow,
                 columns: BackgridUtils.addSmallScreenCell([
                     {

@@ -15,7 +15,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="list-table">
                 <ul class="list-group">
                     <li class="list-group-header">
@@ -31,29 +30,32 @@
                             </div>
                         </div>
                     </li>
-                    {{#each attributes}}
-                    <li class="list-group-item">
-                        <div class="list-group-item-content">
-                            <div class="row">
-                                <div class="col-md-3">
-                                    {{name}}
-                                </div>
-                                <div class="col-md-5">
-                                    <pre>{{{stringify value}}}</pre>
-                                </div>
-                                <div class="col-md-4">
-                                    <span class="text-muted">{{t "templates.admin.AssignmentTemplate.onAssignment"}}:</span> {{assignmentOperation}}<br>
-                                    <span class="text-muted">{{t "templates.admin.AssignmentTemplate.unAssignment"}}:</span> {{unassignmentOperation}}
+                    {{#if attributes}}
+                        {{#each attributes}}
+                        <li class="list-group-item">
+                            <div class="list-group-item-content">
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        {{name}}
+                                    </div>
+                                    <div class="col-md-5">
+                                        <pre>{{{stringify value}}}</pre>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <span class="text-muted">{{t "templates.admin.AssignmentTemplate.onAssignment"}}:</span> {{assignmentOperation}}<br>
+                                        <span class="text-muted">{{t "templates.admin.AssignmentTemplate.unAssignment"}}:</span> {{unassignmentOperation}}
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </li>
-                    {{/each}}
+                        </li>
+                        {{/each}}
+                    {{else}}
+                        <div class="text-center no-data">{{t "templates.admin.AssignmentTemplate.noAssignmentProperties"}}</div>
+                    {{/if}}
                 </ul>
             </div>
         </div>
         {{/each}}
-
         <a href="#resource/managed/assignment/add/"><button type="button" class="btn btn-default"><i class="fa fa-plus"></i>{{t "templates.admin.AssignmentTemplate.addNewAssignment"}}</button></a>
     {{else}}
         <h4 class="text-center">{{t "templates.admin.AssignmentTemplate.noMappingAssignments"}}</h4>
