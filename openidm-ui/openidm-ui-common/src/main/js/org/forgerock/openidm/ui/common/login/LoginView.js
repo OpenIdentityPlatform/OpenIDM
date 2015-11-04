@@ -27,8 +27,12 @@
 define("org/forgerock/openidm/ui/common/login/LoginView", [
     "underscore",
     "org/forgerock/commons/ui/common/LoginView",
-    "org/forgerock/openidm/ui/common/util/AMLoginUtils"
-], function(_, commonLoginView, amLoginUtils) {
+    "org/forgerock/openidm/ui/common/util/AMLoginUtils",
+    "org/forgerock/commons/ui/common/components/LoginHeader"
+], function(_,
+            commonLoginView,
+            amLoginUtils,
+            LoginHeader) {
 
     var LoginView = function () {},
         obj;
@@ -41,6 +45,7 @@ define("org/forgerock/openidm/ui/common/login/LoginView", [
         var amCallback = amLoginUtils.init(this,true);
 
         commonLoginView.render.call(this, args, _.bind(function () {
+            LoginHeader.render();
 
             if (callback) {
                 callback();
