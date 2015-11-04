@@ -5,13 +5,12 @@
   },
   "eventHandlers" : [
     {
-      "name" : "passthrough",
       "class" : "org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler",
       "config" : {
-        "message" : "added an event"
-      },
-      "events" : [ "access", "activity" ],
-      "ignoreLoggingFailures" : false
+        "message" : "added an event",
+        "name" : "passthrough",
+        "topics" : [ "access", "activity", "test" ]
+      }
     }
   ],
   "extendedEventTypes" : {

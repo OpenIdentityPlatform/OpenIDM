@@ -59,7 +59,8 @@ import org.forgerock.audit.AuditServiceConfiguration;
 import org.forgerock.audit.AuditServiceProxy;
 import org.forgerock.audit.AuditingContext;
 import org.forgerock.audit.DependencyProviderBase;
-import org.forgerock.audit.events.handlers.AuditEventHandler;
+import org.forgerock.audit.events.EventTopicsMetaData;
+import org.forgerock.audit.events.EventTopicsMetaDataBuilder;
 import org.forgerock.audit.json.AuditJsonConfig;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -276,10 +277,13 @@ public class AuditServiceImpl implements AuditService {
 
             AuditServiceConfiguration serviceConfig =
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
+            final EventTopicsMetaData eventTopicsMetaData = EventTopicsMetaDataBuilder
+                    .coreTopicSchemas()
+                    .withCoreTopicSchemaExtensions(config.get(EXTENDED_EVENT_TYPES))
+                    .withAdditionalTopicSchemas(config.get(CUSTOM_EVENT_TYPES)).build();
             final AuditServiceBuilder auditServiceBuilder = AuditServiceBuilder.newAuditService()
                     .withConfiguration(serviceConfig)
-                    .withCoreTopicSchemaExtensions(config.get(EXTENDED_EVENT_TYPES))
-                    .withAdditionalTopicSchemas(config.get(CUSTOM_EVENT_TYPES))
+                    .withEventTopicsMetaData(eventTopicsMetaData)
                     .withDependencyProvider(new DependencyProviderBase() {
                         @SuppressWarnings("unchecked")
                         @Override
@@ -661,19 +665,13 @@ public class AuditServiceImpl implements AuditService {
             final JsonValue result = new JsonValue(new LinkedList<>());
 
             for (final String auditEventHandler : availableAuditEventHandlers) {
-                try {
-                    AuditEventHandler eventHandler =
-                            (AuditEventHandler) Class.forName(auditEventHandler).newInstance();
-                    final JsonValue entry = json(object(
-                            field("class", auditEventHandler),
-                            field("config", AuditJsonConfig.getAuditEventHandlerConfigurationSchema(eventHandler).getObject())
-                    ));
-                    result.add(entry.getObject());
-                } catch (ClassNotFoundException | InstantiationException | IllegalAccessException e) {
-                    return new InternalServerErrorException(String.format("An error occurred while trying to instantiate class "
-                            + "for the handler '%s' or its configuration", auditEventHandler), e)
-                            .asPromise();
-                }
+                final JsonValue entry = json(object(
+                        field("class", auditEventHandler),
+                        field("config",
+                                AuditJsonConfig.getAuditEventHandlerConfigurationSchema(
+                                        auditEventHandler, getClass().getClassLoader()).getObject())
+                ));
+                result.add(entry.getObject());
             }
             return newActionResponse(result).asPromise();
         } catch (AuditException | ServiceUnavailableException e) {

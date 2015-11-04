@@ -16,15 +16,19 @@
 
 package org.forgerock.openidm.audit.impl;
 
-import org.forgerock.audit.DependencyProvider;
+import javax.inject.Inject;
+
+import org.forgerock.audit.Audit;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
@@ -33,25 +37,26 @@ import org.forgerock.util.promise.Promise;
  *
  * @see RouterAuditEventHandler
  */
-public class RepositoryAuditEventHandler extends AuditEventHandlerBase<RepositoryAuditEventHandlerConfiguration> {
+public class RepositoryAuditEventHandler extends AuditEventHandlerBase {
 
     private RouterAuditEventHandler routerAuditEventHandler;
 
     /**
      * Constructs the decorated RouterAuditEventHandler.
      */
-    public RepositoryAuditEventHandler() {
-        this.routerAuditEventHandler = new RouterAuditEventHandler();
-    }
-
-    /**
-     * Configures the decorated RouterAuditEventHandler with a fixed path of "repo/audit"
-     */
-    @Override
-    public void configure(RepositoryAuditEventHandlerConfiguration config) throws ResourceException {
+    @Inject
+    public RepositoryAuditEventHandler(
+            final RepositoryAuditEventHandlerConfiguration configuration,
+            final EventTopicsMetaData eventTopicsMetaData,
+            @Audit final ConnectionFactory connectionFactory) {
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
         RouterAuditEventHandlerConfiguration routerConfig = new RouterAuditEventHandlerConfiguration();
-        routerConfig.setResourcePath(config.getResourcePath());
-        routerAuditEventHandler.configure(routerConfig);
+        routerConfig.setResourcePath(configuration.getResourcePath());
+        routerConfig.setTopics(configuration.getTopics());
+        routerConfig.setName(configuration.getName());
+        routerConfig.setEnabled(configuration.isEnabled());
+        this.routerAuditEventHandler =
+                new RouterAuditEventHandler(routerConfig, eventTopicsMetaData, connectionFactory);
     }
 
     @Override
@@ -62,22 +67,6 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase<Repositor
     @Override
     public void shutdown() throws ResourceException {
         routerAuditEventHandler.shutdown();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setDependencyProvider(DependencyProvider provider) {
-        routerAuditEventHandler.setDependencyProvider(provider);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<RepositoryAuditEventHandlerConfiguration> getConfigurationClass() {
-        return RepositoryAuditEventHandlerConfiguration.class;
     }
 
     @Override

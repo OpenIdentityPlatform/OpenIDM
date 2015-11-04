@@ -28,19 +28,21 @@ import static org.forgerock.json.resource.Requests.newCreateRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
+import javax.inject.Inject;
+
+import org.forgerock.audit.Audit;
 import org.forgerock.audit.AuditingContext;
-import org.forgerock.audit.DependencyProvider;
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,22 +50,24 @@ import org.slf4j.LoggerFactory;
 /**
  * Audit event handler that logs to a router target.
  */
-public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEventHandlerConfiguration> {
+public class RouterAuditEventHandler extends AuditEventHandlerBase {
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(RouterAuditEventHandler.class);
 
     /** router target resource path */
-    private ResourcePath resourcePath;
+    private final ResourcePath resourcePath;
 
     /** the DependencyProvider to provide access to the ConnectionFactory */
-    private DependencyProvider dependencyProvider;
+    private final ConnectionFactory connectionFactory;
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void configure(RouterAuditEventHandlerConfiguration config) throws ResourceException {
-        resourcePath = ResourcePath.valueOf(config.getResourcePath());
+    @Inject
+    public RouterAuditEventHandler(
+            final RouterAuditEventHandlerConfiguration configuration,
+            final EventTopicsMetaData eventTopicsMetaData,
+            @Audit final ConnectionFactory connectionFactory) {
+        super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
+        this.resourcePath = ResourcePath.valueOf(configuration.getResourcePath());
+        this.connectionFactory = connectionFactory;
         logger.info("Audit logging to: {}", resourcePath.toString());
     }
 
@@ -77,38 +81,16 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
         // do nothing
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public void setDependencyProvider(DependencyProvider provider) {
-        this.dependencyProvider = provider;
-    }
-
-    private ConnectionFactory getConnectionFactory() throws ClassNotFoundException {
-        return dependencyProvider.getDependency(ConnectionFactory.class);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<RouterAuditEventHandlerConfiguration> getConfigurationClass() {
-        return RouterAuditEventHandlerConfiguration.class;
-    }
-
     @Override
     public Promise<ResourceResponse, ResourceException> publishEvent(final Context context, final String auditEventTopic,
             final JsonValue auditEventContent) {
         try {
             final String auditEventId = auditEventContent.get(ResourceResponse.FIELD_CONTENT_ID).asString();
-            return newResultPromise(getConnectionFactory().getConnection().create(new AuditingContext(context),
+            return newResultPromise(connectionFactory.getConnection().create(new AuditingContext(context),
                     newCreateRequest(
                             resourcePath.concat(auditEventTopic),
                             auditEventId,
                             auditEventContent)));
-        } catch (ClassNotFoundException e) {
-            return new InternalServerErrorException(e).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }
@@ -118,10 +100,8 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
     public Promise<ResourceResponse, ResourceException> readEvent(final Context context, final String auditEventTopic,
             final String auditEventId) {
         try {
-            return newResultPromise(getConnectionFactory().getConnection().read(new AuditingContext(context),
+            return newResultPromise(connectionFactory.getConnection().read(new AuditingContext(context),
                     newReadRequest(resourcePath.concat(auditEventTopic), auditEventId)));
-        } catch (ClassNotFoundException e) {
-            return new InternalServerErrorException(e).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }
@@ -131,7 +111,6 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
     public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String auditEventTopic,
             final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
         try {
-            final ConnectionFactory connectionFactory = getConnectionFactory();
             final QueryRequest newRequest = copyOfQueryRequest(queryRequest);
             newRequest.setResourcePath(resourcePath.concat(queryRequest.getResourcePathObject()));
 
@@ -143,8 +122,6 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase<RouterAuditEv
                                     return queryResourceHandler.handleResource(resourceResponse);
                                 }
                             }));
-        } catch (ClassNotFoundException e) {
-            return new InternalServerErrorException(e).asPromise();
         } catch (ResourceException e) {
             return e.asPromise();
         }

@@ -43,11 +43,6 @@ public class OpenIDMActivityAuditEventBuilder<T extends OpenIDMActivityAuditEven
         return self();
     }
 
-    public T objectId(String objectId) {
-        jsonValue.put(OBJECT_ID, objectId);
-        return self();
-    }
-
     public T passwordChanged(boolean passwordChanged) {
         jsonValue.put(PASSWORD_CHANGED, passwordChanged);
         return self();

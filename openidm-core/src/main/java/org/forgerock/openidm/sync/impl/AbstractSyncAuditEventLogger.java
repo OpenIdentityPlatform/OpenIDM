@@ -186,7 +186,7 @@ public abstract class AbstractSyncAuditEventLogger<T extends AbstractSyncAuditEv
                     .transactionIdFromRootContext(context)
                     .timestamp(System.currentTimeMillis())
                     .eventName(getEventName())
-                    .authenticationFromSecurityContext(context)
+                    .userId(context.asContext(SecurityContext.class).getAuthenticationId())
                     .action(null != syncOperation ? syncOperation.action : null)
                     .exception(exception)
                     .linkQualifier(linkQualifier)

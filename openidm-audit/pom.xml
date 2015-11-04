@@ -76,6 +76,11 @@
             <version>${project.version}</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.servicemix.bundles</groupId>
+            <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+        </dependency>
+
         <!-- Provided OSGi Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>

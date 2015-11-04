@@ -18,8 +18,8 @@ package org.forgerock.openidm.audit.events.handlers.impl;
 
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.QueryRequest;
@@ -27,6 +27,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,17 +35,18 @@ import org.slf4j.LoggerFactory;
 /**
  * Handles AuditEvents by just calling the result Handler.
  */
-public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThroughAuditEventHandlerConfiguration> {
+public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
 
     private static final Logger logger = LoggerFactory.getLogger(PassThroughAuditEventHandlerConfiguration.class);
 
     /** A message logged when a new entry is added. */
-    private String message;
+    private final String message;
 
-    /** {@inheritDoc} */
-    @Override
-    public void configure(PassThroughAuditEventHandlerConfiguration config) throws ResourceException {
-        this.message = config.getMessage();
+    public PassThroughAuditEventHandler(
+            final PassThroughAuditEventHandlerConfiguration configuration,
+            final EventTopicsMetaData eventTopicsMetaData) {
+        super(configuration.getName(), eventTopicsMetaData , configuration.getTopics(), configuration.isEnabled());
+        this.message = configuration.getMessage();
     }
 
     @Override
@@ -55,14 +57,6 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase<PassThro
     @Override
     public void shutdown() throws ResourceException {
         // do nothing
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Class<PassThroughAuditEventHandlerConfiguration> getConfigurationClass() {
-        return PassThroughAuditEventHandlerConfiguration.class;
     }
 
     @Override

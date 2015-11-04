@@ -250,8 +250,8 @@ CREATE TABLE sopenidm.auditauthentication (
   result VARCHAR(255) NULL,
   principals CLOB(2M),
   context CLOB(2M),
-  sessionid VARCHAR(255),
   entries CLOB(2M),
+  trackingids CLOB(2M),
   PRIMARY KEY (objectid)
 ) IN DOPENIDM.SOIDM20;
 
@@ -327,14 +327,13 @@ CREATE TABLESPACE SOIDM21 MANAGED BY AUTOMATIC STORAGE;
 CREATE  TABLE sopenidm.auditconfig (
   objectid VARCHAR(38) NOT NULL ,
   activitydate VARCHAR(29) NOT NULL,
-  transactionid VARCHAR(56) NOT NULL ,
   eventname VARCHAR(255) NULL ,
+  transactionid VARCHAR(56) NOT NULL ,
   userid VARCHAR(255) NULL ,
+  trackingids CLOB(2M),
   runas VARCHAR(255) NULL ,
-  resource_uri VARCHAR(255) NULL ,
-  resource_protocol VARCHAR(10) NULL ,
-  resource_method VARCHAR(10) NULL ,
-  resource_detail VARCHAR(255) NULL ,
+  configobjectid VARCHAR(255) NULL ,
+  operation VARCHAR(255) NULL ,
   beforeObject CLOB(2M) NULL ,
   afterObject CLOB(2M) NULL ,
   changedfields VARCHAR(255) NULL ,
@@ -351,28 +350,63 @@ CREATE INDEX sopenidm.idx_auditconfig_transactionid ON sopenidm.auditconfig (tra
 CREATE TABLESPACE SOIDM09 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE SOPENIDM.AUDITACTIVITY (
     objectid VARCHAR(38) NOT NULL ,
-    activity VARCHAR(24) NULL ,
     activitydate VARCHAR(29) NOT NULL,
-    transactionid VARCHAR(56) NOT NULL ,
     eventname VARCHAR(255) NULL ,
+    transactionid VARCHAR(56) NOT NULL ,
     userid VARCHAR(255) NULL ,
+    trackingids CLOB(2M),
     runas VARCHAR(255) NULL ,
-    resource_uri VARCHAR(255) NULL ,
-    resource_protocol VARCHAR(10) NULL ,
-    resource_method VARCHAR(10) NULL ,
-    resource_detail VARCHAR(255) NULL ,
+    activityobjectid VARCHAR(255) NULL ,
+    operation VARCHAR(255) NULL ,
     subjectbefore CLOB(2M) NULL ,
     subjectafter CLOB(2M) NULL ,
     changedfields VARCHAR(255) NULL ,
-    passwordchanged VARCHAR(5) NULL ,
     subjectrev VARCHAR(255) NULL ,
+    passwordchanged VARCHAR(5) NULL ,
     message CLOB(2M) NULL,
-    activityobjectid VARCHAR(255) ,
     status VARCHAR(20) ,
     PRIMARY KEY (objectid)
 ) IN DOPENIDM.SOIDM09;
 COMMENT ON TABLE SOPENIDM.AUDITACTIVITY IS 'OPENIDM - Activity Audit Logs';
 CREATE INDEX SOPENIDM.idx_auditactivity_transactionid ON SOPENIDM.AUDITACTIVITY (transactionid ASC);
+
+-- -----------------------------------------------------
+-- Table openidm.auditaccess
+-- -----------------------------------------------------
+
+CREATE TABLESPACE SOIDM10 MANAGED BY AUTOMATIC STORAGE;
+CREATE TABLE SOPENIDM.AUDITACCESS (
+    objectid VARCHAR(38) NOT NULL ,
+    activitydate VARCHAR(29) NOT NULL,
+    eventname VARCHAR(255) ,
+    transactionid VARCHAR(56) NOT NULL ,
+    userid VARCHAR(255) ,
+    trackingids CLOB(2M),
+    server_ip VARCHAR(40) ,
+    server_port VARCHAR(5) ,
+    client_host VARCHAR(255) ,
+    client_ip VARCHAR(40) ,
+    client_port VARCHAR(5) ,
+    request_protocol VARCHAR(255) NULL ,
+    request_operation VARCHAR(255) NULL ,
+    request_detail CLOB(2M) NULL ,
+    http_request_secure VARCHAR(255) NULL ,
+    http_request_method VARCHAR(255) NULL ,
+    http_request_path VARCHAR(255) NULL ,
+    http_request_queryparameters CLOB(2M) NULL ,
+    http_request_headers CLOB(2M) NULL ,
+    http_request_cookies CLOB(2M) NULL ,
+    http_response_headers CLOB(2M) NULL ,
+    response_status VARCHAR(255) NULL ,
+    response_statuscode VARCHAR(255) NULL ,
+    response_elapsedtime VARCHAR(255) NULL ,
+    response_elapsedtimeunits VARCHAR(255) NULL ,
+    roles CLOB(2M) NULL ,
+    PRIMARY KEY (OBJECTID)
+) IN DOPENIDM.SOIDM10;
+COMMENT ON TABLE SOPENIDM.AUDITACCESS IS 'OPENIDM - Audit Access';
+CREATE INDEX SOPENIDM.idx_auditaccess_status ON SOPENIDM.AUDITACCESS (status ASC);
+--CREATE INDEX SOPENIDM.idx_auditaccess_principal ON SOPENIDM.AUDITACCESS (principal(28) ASC);
 
 -- -----------------------------------------------------
 -- Table openidm.internaluser
@@ -400,42 +434,6 @@ CREATE TABLE SOPENIDM.INTERNALROLE (
     PRIMARY KEY (objectid)
 ) IN DOPENIDM.SOIDM14;
 COMMENT ON TABLE SOPENIDM.INTERNALROLE IS 'OPENIDM - Internal Role';
-
--- -----------------------------------------------------
--- Table openidm.auditaccess
--- -----------------------------------------------------
-
-CREATE TABLESPACE SOIDM10 MANAGED BY AUTOMATIC STORAGE;
-CREATE TABLE SOPENIDM.AUDITACCESS (
-    objectid VARCHAR(38) NOT NULL ,
-    activity VARCHAR(24) NULL ,
-    activitydate VARCHAR(29) NOT NULL,
-    transactionid VARCHAR(56) NOT NULL ,
-    eventname VARCHAR(255) ,
-    server_ip VARCHAR(40) ,
-    server_port VARCHAR(5) ,
-    client_host VARCHAR(255) ,
-    client_ip VARCHAR(40) ,
-    client_port VARCHAR(5) ,
-    userid VARCHAR(255) NULL ,
-    principal CLOB(2M) NULL ,
-    roles VARCHAR(1024) NULL ,
-    auth_component VARCHAR(255) NULL ,
-    resource_uri VARCHAR(255) NULL ,
-    resource_protocol VARCHAR(10) NULL ,
-    resource_method VARCHAR(14) NULL ,
-    resource_detail VARCHAR(255) NULL ,
-    http_method VARCHAR(10) NULL ,
-    http_path VARCHAR(255) NULL ,
-    http_querystring CLOB(2M) NULL ,
-    http_headers CLOB(2M) ,
-    status VARCHAR(20) NULL ,
-    elapsedtime VARCHAR(13) NULL ,
-    PRIMARY KEY (OBJECTID)
-) IN DOPENIDM.SOIDM10;
-COMMENT ON TABLE SOPENIDM.AUDITACCESS IS 'OPENIDM - Audit Access';
-CREATE INDEX SOPENIDM.idx_auditaccess_status ON SOPENIDM.AUDITACCESS (status ASC);
---CREATE INDEX SOPENIDM.idx_auditaccess_principal ON SOPENIDM.AUDITACCESS (principal(28) ASC);
 
 -- -----------------------------------------------------
 -- Table openidm.schedulerobjects

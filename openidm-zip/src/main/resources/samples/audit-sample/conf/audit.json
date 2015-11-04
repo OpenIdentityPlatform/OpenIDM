@@ -2,22 +2,33 @@
     "auditServiceConfig" : {
         "handlerForQueries" : "router",
         "availableAuditEventHandlers" : [
-            "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+            "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
         ]
     },
     "eventHandlers" : [
         {
-            "name": "router",
             "class": "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",
             "config": {
+                "name": "router",
+                "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ],
                 "resourcePath" : "system/auditdb"
-            },
-            "events": [ "access", "activity", "recon", "sync", "authentication" ]
+            }
         }
     ],
     "extendedEventTypes" : {
+        "config": {
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
+            }
+        },
         "activity": {
             "schema": {
                 "$schema": "http://json-schema.org/draft-04/schema#",
@@ -49,6 +60,22 @@
             },
             "watchedFields" : [ ],
             "passwordFields" : [ "password" ]
+        },
+        "access" : {
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "/",
+                "type": "object",
+                "properties": {
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "id": "0",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "customEventTypes" : {

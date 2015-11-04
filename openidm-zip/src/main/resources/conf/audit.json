@@ -2,25 +2,26 @@
     "auditServiceConfig" : {
         "handlerForQueries" : "repo",
         "availableAuditEventHandlers" : [
-            "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+            "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
         ]
     },
     "eventHandlers" : [
         {
-            "name" : "csv",
-            "class" : "org.forgerock.audit.events.handlers.csv.CSVAuditEventHandler",
+            "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
             "config" : {
-                "logDirectory" : "&{launcher.working.location}/audit"
-            },
-            "events" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+                "name" : "csv",
+                "logDirectory" : "&{launcher.working.location}/audit",
+                "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+            }
         },
         {
-            "name": "repo",
             "class": "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
-            "config": {},
-            "events": [ "access", "activity", "recon", "sync", "authentication", "config" ]
+            "config": {
+                "name": "repo",
+                "topics" : [ "access", "activity", "recon", "sync", "authentication", "config" ]
+            }
         }
     ],
     "extendedEventTypes" : {
@@ -41,9 +42,6 @@
                 "id": "/",
                 "type": "object",
                 "properties": {
-                    "objectId": {
-                        "type": "string"
-                    },
                     "status": {
                         "type": "string"
                     },
@@ -66,6 +64,22 @@
             },
             "watchedFields" : [ ],
             "passwordFields" : [ "password" ]
+        },
+        "access" : {
+            "schema": {
+                "$schema": "http://json-schema.org/draft-04/schema#",
+                "id": "/",
+                "type": "object",
+                "properties": {
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "id": "0",
+                            "type": "string"
+                        }
+                    }
+                }
+            }
         }
     },
     "customEventTypes" : {

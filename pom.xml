@@ -221,7 +221,7 @@
         <!-- Commons versions -->
         <commons.forgerock-script.version>2.0.0</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.1</commons.forgerock-i18n.version>
-        <commons.forgerock-audit.version>0.6.0</commons.forgerock-audit.version>
+        <commons.forgerock-audit.version>1.0.0</commons.forgerock-audit.version>
         <commons.forgerock-selfservice.version>0.3.0</commons.forgerock-selfservice.version>
 
         <!-- Third party dependencies -->
@@ -231,6 +231,7 @@
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.1</joda-time.version>
         <paxweb.version>4.1.1</paxweb.version>
+        <javax.inject.version>1_2</javax.inject.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
@@ -419,6 +420,12 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-audit-core</artifactId>
                 <version>${commons.forgerock-audit.version}</version>
+                <exclusions>
+                    <exclusion>
+                            <groupId>javax.inject</groupId>
+                            <artifactId>javax.inject</artifactId>
+                    </exclusion>
+                </exclusions>
             </dependency>
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
@@ -720,6 +727,11 @@
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.commons-configuration</artifactId>
                 <version>1.9_1</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.servicemix.bundles</groupId>
+                <artifactId>org.apache.servicemix.bundles.javax-inject</artifactId>
+                <version>${javax.inject.version}</version>
             </dependency>
 
             <dependency>
