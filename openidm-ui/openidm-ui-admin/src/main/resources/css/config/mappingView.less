@@ -251,6 +251,13 @@
     height: 164px;
   }
 
+  .row.no-gutters {
+    .col-sm-6 {
+      padding-left:0px;
+      padding-right:0px;
+    }
+  }
+
   .mapping, .placeholder {
     margin-bottom: 40px;
     height:340px;
@@ -268,9 +275,25 @@
 }
 
 /*
-  Mapping card styles
+  Mapping view base card
 */
 
+.mapping-base-card {
+  .row.no-gutters {
+    .col-sm-6 {
+      padding-left:0px;
+      padding-right:0px;
+
+      .btn-link {
+        width:100%;
+      }
+    }
+  }
+}
+
+/*
+  Mapping card styles
+*/
 .mapping {
   margin-bottom: 20px;
   position: relative;
@@ -900,6 +923,10 @@
   .mappings-list {
     .mapping, .placeholder {
       height: 175px;
+    }
+
+    .help-link {
+      width:50%;
     }
   }
 
