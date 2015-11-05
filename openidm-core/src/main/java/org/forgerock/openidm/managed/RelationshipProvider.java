@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -388,8 +389,8 @@ public abstract class RelationshipProvider {
             
             // If the request is from ManagedObjectSet then create and return the promise after formatting.
             if (context.containsContext(ManagedObjectContext.class)) {
-                return syncReferencedObjectCreateHandler.performRequest(
-                        request.getContent().get(REFERENCE_ID).asString(), createRequest, context)
+                return syncReferencedObjectCreateHandler
+                        .performRequest(request.getContent().get(REFERENCE_ID).asString(), createRequest, context)
                         .then(formatResponse(context, request));
             }
             
@@ -450,7 +451,7 @@ public abstract class RelationshipProvider {
             final ResourceResponse value = getManagedObject(context);
             
             // Do activity logging.
-            activityLogger.log(context, request, "read", getManagedObjectPath(context), null, value.getContent(), 
+            activityLogger.log(context, request, "read", getManagedObjectPath(context), null, value.getContent(),
                     Status.SUCCESS);
 
             return expandFields(context, request, response);
@@ -557,7 +558,7 @@ public abstract class RelationshipProvider {
                     null, Status.SUCCESS);
 
             // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
+            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
                     SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
             return expandFields(context, request, result);
@@ -619,23 +620,23 @@ public abstract class RelationshipProvider {
      */
     private Promise<ResourceResponse, ResourceException> updateIfChanged(final Context context, Request request,
             String id, String rev, ResourceResponse oldResource, JsonValue newValue) throws ResourceException {
-        // Save the old ID and revision before removing to do diff compare.
+
+        // Find changes, ignoring ID and REV as the newValue won't have those set.
         String oldResourceId = oldResource.getId();
         String oldResourceRevision = oldResource.getRevision();
-        // Remove the revision and id from the oldResource to match the newValue.
-        Map<String, Object> oldValue = oldResource.getContent().asMap();
+        JsonValue oldValue = oldResource.getContent();
         oldValue.remove(ResourceResponse.FIELD_CONTENT_ID);
         oldValue.remove(ResourceResponse.FIELD_CONTENT_REVISION);
-        // Test if the new and old are different.
-        if (newValue.asMap().equals(oldValue)) {
+        if (JsonPatch.diff(oldResource.getContent(), newValue).size() == 0) {
             // resource has not changed, return the old resource
-            return newResourceResponse(oldResourceId, oldResourceRevision, oldResource.getContent()).asPromise()
+            return newResourceResponse(oldResourceId, oldResourceRevision, oldValue).asPromise()
                     .then(formatResponse(context, request));
         } else {
             // resource has changed, update the relationship
+            UpdateRequest updateRequest =
+                    Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(id), newValue).setRevision(rev);
             return syncReferencedObjectUpdateHandler
-                    .performRequest(newValue,
-                            Requests.newUpdateRequest(REPO_RESOURCE_PATH.child(id), newValue).setRevision(rev), context)
+                    .performRequest(newValue, updateRequest, context)
                     .then(formatResponse(context, request));
         }
     }
@@ -972,7 +973,8 @@ public abstract class RelationshipProvider {
             }
             return performRequest(isReversePropertyFirst(relationshipJson)
                     ? relationshipJson.get(REPO_FIELD_FIRST_ID).asString()
-                    : relationshipJson.get(REPO_FIELD_SECOND_ID).asString(), request, context);
+                            : relationshipJson.get(REPO_FIELD_SECOND_ID).asString(),
+                    request, context);
         }
 
         /**
@@ -1006,6 +1008,15 @@ public abstract class RelationshipProvider {
                                             .thenOnResult(
                                                     new PerformSyncHandler<>(context, refToSync, request, before));
                                 }
+                            }, new AsyncFunction<ResourceException, ResourceResponse, ResourceException>() {
+                                @Override
+                                public Promise<ResourceResponse, ResourceException> apply(ResourceException e)
+                                        throws ResourceException {
+                                    // Since the read failed, the sync can't happen, but we still want to proceed with
+                                    // the request on the relationship.
+                                    logger.error("Unable to read '" + refToSync + "' so the sync will be skipped.", e);
+                                    return invokeRequest(context, request);
+                                }
                             });
         }
 
@@ -1024,6 +1035,8 @@ public abstract class RelationshipProvider {
         /**
          * After the makeRequest is made this function will when lookup the referenced object to collect the 'after'
          * state; then this will call a sync on the referenced object.
+         *
+         * @param <U> The Type of Request that was made.
          */
         private class PerformSyncHandler<U extends Request> implements ResultHandler<ResourceResponse> {
             private final Context context;
