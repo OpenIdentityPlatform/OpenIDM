@@ -23,7 +23,7 @@ CREATE INDEX idx_json_managedobjects_accountStatus ON openidm.managedobjects
 
 -- this will guarantee that a given user isn't assigned the same role value more than once.
 CREATE UNIQUE INDEX idx_json_managedobjectproperties_roles ON openidm.managedobjectproperties 
-    ( managedobjects_id, (propKey LIKE '/roles/%'), propValue );
+    ( managedobjects_id, propValue ) WHERE propKey LIKE '/roles/%';
 
 
 -- The PosgreSQL contrib extension 'pg_trgm' is needed to perform fast LIKE queries. Be sure you have installed
