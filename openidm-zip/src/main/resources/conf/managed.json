@@ -183,7 +183,7 @@
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
-                            "validate": false,
+                            "validate": true,
                             "reverseRelationship" : true,
                             "reversePropertyName" : "members",
                             "properties" : {
@@ -389,7 +389,7 @@
                         "title" : "Manager",
                         "viewable" : true,
                         "searchable" : false,
-                        "validate": false,
+                        "validate": true,
                         "properties" : {
                             "_ref" : {
                                 "type" : "string"
