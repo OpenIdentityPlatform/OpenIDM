@@ -873,7 +873,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     rev = decrypted.get("_rev").asString();
                 }
                 
-                // Populate the relainshionships
+                // Populate the relationships
                 final JsonValue relationships = fetchRelationshipFields(context, resource.getId());
                 decrypted.asMap().putAll(relationships.asMap());
 
@@ -885,15 +885,21 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
                 // Check if policies should be enforced
                 if (enforcePolicies) {
+                    // Build up a map of properties to validate (only the patched properties)
+                    JsonValue propertiesToValidate = json(object());
+                    for (PatchOperation operation : patchOperations) {
+                        JsonPointer field = operation.getField();
+                        propertiesToValidate.put(field, newValue.get(field));
+                    }
+                    // The action request to validate the policy of all the patched properties
                     ActionRequest policyAction = Requests.newActionRequest(
-                            ResourcePath.valueOf("policy").concat(managedId(resource.getId())).toString(), "validateObject");
-                    policyAction.setContent(newValue);
+                            ResourcePath.valueOf("policy").concat(managedId(resource.getId())).toString(), 
+                            "validateProperty").setContent(propertiesToValidate);
                     if (ContextUtil.isExternal(context)) {
-                        // this parameter is used in conjunction with the test in policy.js
-                        // to ensure that the reauth policy is enforced
+                        // this parameter is used in conjunction with the test in policy.js to ensure that the 
+                        // re-authentication policy is enforced.
                         policyAction.setAdditionalParameter("external", "true");
                     }
-
                     JsonValue result = connectionFactory.getConnection().action(context, policyAction).getJsonContent();
                     if (!result.isNull() && !result.get("result").asBoolean()) {
                         logger.debug("Requested patch failed policy validation: {}", result);
@@ -904,9 +910,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 ResourceResponse patchedResource =
                         update(context, request, resource.getId(), rev, resource.getContent(), newValue);
 
-                activityLogger.log(context, request, "",
-                        managedId(patchedResource.getId()).toString(), resource.getContent(), patchedResource.getContent(),
-                        Status.SUCCESS);
+                activityLogger.log(context, request, "", managedId(patchedResource.getId()).toString(),
+                        resource.getContent(), patchedResource.getContent(), Status.SUCCESS);
                 retry = false;
                 logger.debug("Patch successful!");
 
