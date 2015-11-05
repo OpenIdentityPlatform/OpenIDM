@@ -75,6 +75,7 @@ import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.openidm.util.RequestUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -85,7 +86,9 @@ import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.forgerock.util.Pair;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.ResultHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -1221,16 +1224,27 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param fieldsList the list of fields to read and merge with the relationship object.
      * @throws ResourceException if an error is encountered.
      */
-    private void expandResource(Context context, JsonValue value, List<JsonPointer> fieldsList)
+    private void expandResource(Context context, final JsonValue value, List<JsonPointer> fieldsList)
             throws ResourceException {
         if (!value.isNull() && value.get(SchemaField.FIELD_REFERENCE) != null) {
             // Create and issue a read request on the referenced resource with the specified list of fields
             ReadRequest request = Requests.newReadRequest(value.get(SchemaField.FIELD_REFERENCE).asString());
             request.addField(fieldsList.toArray(new JsonPointer[fieldsList.size()]));
-            ResourceResponse resource = connectionFactory.getConnection().read(context, request);
-            
-            // Merge the result with the supplied relationship object
-            value.asMap().putAll(resource.getContent().asMap());
+            connectionFactory.getConnection().readAsync(context, request).thenOnResultOrException(
+                    new ResultHandler<ResourceResponse>() {
+                        @Override
+                        public void handleResult(ResourceResponse resource) {
+                            // Merge the result with the supplied relationship object
+                            value.asMap().putAll(resource.getContent().asMap());
+                        }
+                    }, new ExceptionHandler<ResourceException>() {
+                        @Override
+                        public void handleException(ResourceException exception) {
+                            Map<String, Object> valueMap = value.asMap();
+                            valueMap.put(RelationshipUtil.REFERENCE_ERROR, true);
+                            valueMap.put(RelationshipUtil.REFERENCE_ERROR_MESSAGE, exception.getMessage());
+                        }
+                    });
         } else {
             logger.warn("Cannot expand a null relationship object");
         }
