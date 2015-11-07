@@ -37,7 +37,7 @@ define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
 
     var obj = {};
 
-    obj.findPropertiesList = function(type) {
+    obj.findPropertiesList = function(type, required) {
         var connectorUrl,
             properties,
             propertiesPromise = $.Deferred();
@@ -52,7 +52,13 @@ define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
                     connectorUrl = connectorUrl.config.split("/");
 
                     ConfigDelegate.readEntity(connectorUrl[1] +"/" +connectorUrl[2]).then(_.bind(function(config) {
-                        properties = config.objectTypes[type[2]].properties;
+                        if(required) {
+                            properties = _.pick(config.objectTypes[type[2]].properties, function(property) {
+                                return property.required === true;
+                            });
+                        } else {
+                            properties = config.objectTypes[type[2]].properties;
+                        }
 
                         propertiesPromise.resolve(properties, config);
                     }, this));
@@ -67,7 +73,24 @@ define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
                 }, this);
 
                 if(properties.schema && properties.schema.properties) {
-                    propertiesPromise.resolve(properties.schema.properties);
+                    if(required) {
+
+                        properties = _.pick(properties.schema.properties, function(value, key) {
+                            var found = false;
+
+                            _.each(properties.schema.required, function(field) {
+                                if(field === key) {
+                                    found = true;
+                                }
+                            });
+
+                            return found;
+                        });
+
+                        propertiesPromise.resolve(properties);
+                    } else {
+                        propertiesPromise.resolve(properties.schema.properties);
+                    }
                 } else {
                     propertiesPromise.resolve([]);
                 }
