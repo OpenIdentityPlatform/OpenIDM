@@ -1,8 +1,28 @@
 .selfservice-holder {
   position:relative;
 
+  ul {
+    list-style: none;
+    padding-left: 0px;
+
+    li.placeholder {
+      height:75px;
+      width:100%;
+    }
+  }
+
+  .dragged button {
+    display:none;
+  }
+
   .wide-card {
     height:125px;
+
+    &.disabled{
+      button {
+        display:none;
+      }
+    }
 
     .panel-heading {
       padding: 5px 15px 0 0;
@@ -19,6 +39,14 @@
       top: 1px;
       border:0;
       padding:0;
+
+      .btn-drag {
+        display: none;
+
+        .fa-arrows {
+          margin-right: 0px;
+        }
+      }
 
       .btn-link:hover {
         background-color:inherit;
@@ -115,6 +143,24 @@
   .selfservice-holder {
     .wide-card {
       height: 75px;
+
+      .panel-footer {
+        .btn-drag {
+          display:inline;
+        }
+      }
+
+      &.disabled {
+        .btn-drag {
+          display: none;
+        }
+      }
+
+      &.dragged {
+        .btn-drag {
+          display:none;
+        }
+      }
     }
   }
 }
