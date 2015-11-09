@@ -925,6 +925,43 @@
 		</includes>
 		<outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
 	</fileSet>
+    <!-- Setup Multiple Passwords Sample  -->
+    <fileSet>
+        <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+        <includes>
+            <include>**</include>
+        </includes>
+        <excludes>
+            <exclude>data/*.xsd</exclude>
+            <exclude>data/*.xml</exclude>
+        </excludes>
+        <outputDirectory>/openidm/samples/multiplepasswords</outputDirectory>
+    </fileSet>
+	<fileSet>
+		<directory>${basedir}/src/main/resources/samples/multiplepasswords</directory>
+		<includes>
+			<include>README.md</include>
+            <include>conf/**</include>
+            <include>script/**</include>
+		</includes>
+		<outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
+	</fileSet>
+	<fileSet>
+		<directory>${basedir}/src/main/resources/samples/provisioners</directory>
+		<includes>
+            <include>provisioner.openicf-ldap.json</include>
+            <include>provisioner.openicf-ldap2.json</include>
+		</includes>
+		<outputDirectory>/openidm/samples/multiplepasswords/conf</outputDirectory>
+	</fileSet>
+	<fileSet>
+		<directory>${basedir}/src/main/resources</directory>
+		<includes>
+			<include>conf/**</include>
+			<include>script/**</include>
+		</includes>
+		<outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
+	</fileSet>
   </fileSets>
     <!-- sample6 -->
     <files>

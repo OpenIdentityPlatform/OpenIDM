@@ -1,0 +1,52 @@
+{
+    "type" : "text/javascript",
+    "file" : "policy.js",
+    "additionalFiles": [ "script/pwpolicy.js" ],
+    "resources" : [
+        {
+            "resource" : "repo/internal/user/*",
+            "properties" : [
+                {
+                    "name" : "_id",
+                    "policies" : [
+                        {
+                            "policyId" : "cannot-contain-characters",
+                            "params" : {
+                                "forbiddenChars" : ["/"]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name" : "password",
+                    "policies" : [
+                        {
+                            "policyId" : "required"
+                        },
+                        {
+                            "policyId" : "not-empty"
+                        },
+                        {
+                            "policyId" : "at-least-X-capitals",
+                            "params" : {
+                                "numCaps" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "at-least-X-numbers",
+                            "params" : {
+                                "numNums" : 1
+                            }
+                        },
+                        {
+                            "policyId" : "minimum-length",
+                            "params" : {
+                                "minLength" : 8
+                            }
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}
