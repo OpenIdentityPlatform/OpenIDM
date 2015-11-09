@@ -23,18 +23,16 @@
 
                         <h3 class="block-header">{{t "templates.selfservice.registrationSteps"}}</h3>
                         <div class="selfservice-holder">
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    {{#each configList}}
-                                        {{> selfservice/_selfserviceblock this}}
-                                    {{/each}}
-                                </div>
-                            </div>
+                            <ul>
+                                {{#each configList}}
+                                    {{> selfservice/_selfserviceblock this}}
+                                {{/each}}
+                            </ul>
                         </div>
                     </div>
                 </div>
             </div>
-            {{> selfservice/_advancedoptions }}
+            {{> selfservice/_advancedoptions}}
         </div>
     </div>
 </div>

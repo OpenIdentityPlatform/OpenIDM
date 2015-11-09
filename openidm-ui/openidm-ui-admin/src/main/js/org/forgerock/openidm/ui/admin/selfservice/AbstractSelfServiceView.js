@@ -28,7 +28,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "bootstrap-dialog",
-    "selectize"
+    "selectize",
+    "jquerySortable"
 ], function($, _,
             bootstrap,
             handlebars,
@@ -39,23 +40,25 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             EventManager,
             Constants,
             BootstrapDialog,
-            selectize) {
+            selectize,
+            jquerySortable) {
     var AbstractSelfServiceView = AdminAbstractView.extend({
         controlAllSwitch: function(event) {
-            var check = $(event.target);
+            var check = $(event.target),
+                temp;
 
-            this.data.enableSelfService = check.is(':checked');
+            this.data.enableSelfService = check.is(":checked");
 
-            if(check.is(':checked')) {
+            if(check.is(":checked")) {
                 this.enableForm();
 
                 this.model.surpressSave = true;
-                this.$el.find(".section-check:not(:checked)").prop('checked', true).trigger("change");
+                this.$el.find(".section-check:not(:checked)").prop("checked", true).trigger("change");
                 this.model.surpressSave = false;
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = true;
 
                 $.when(
-                    ConfigDelegate.createEntity(this.model.configUrl, this.model.saveConfig),
+                    ConfigDelegate.createEntity(this.model.configUrl, this.orderCheck()),
                     ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
                 ).then(_.bind(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
@@ -64,7 +67,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 this.disableForm();
 
                 this.model.surpressSave = true;
-                this.$el.find(".section-check:checked").prop('checked', false).trigger("change");
+                this.$el.find(".section-check:checked").prop("checked", false).trigger("change");
                 this.model.surpressSave = false;
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = false;
 
@@ -103,23 +106,26 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 card = check.parents(".wide-card"),
                 type = card.attr("data-type"),
                 removeConfig = false,
-                defaultPosition = _.findIndex(this.model.configDefault.stageConfigs, function (defaultStage) {
+                orderPosition,
+                configPosition = _.findIndex(this.model.configDefault.stageConfigs, function (defaultStage) {
                     return defaultStage.name === type;
                 });
 
-            if(check.is(':checked')) {
+            if(check.is(":checked")) {
                 card.toggleClass("disabled", false);
                 card.toggleClass("active", true);
 
+                orderPosition = this.$el.find(".selfservice-holder ul li:not(.disabled)").index(card);
+
                 if(_.findWhere(this.model.saveConfig.stageConfigs, {"name" : type}) === undefined) {
-                    this.model.saveConfig.stageConfigs.splice(defaultPosition, 0, _.clone(this.model.configDefault.stageConfigs[defaultPosition]));
+                    this.model.saveConfig.stageConfigs.splice(orderPosition, 0, _.clone(this.model.configDefault.stageConfigs[configPosition]));
                 }
             } else {
                 card.toggleClass("active", false);
                 card.toggleClass("disabled", true);
 
                 if(this.$el.find(".section-check:checked").length === 0 && this.$el.find(".all-check:checked").length !== 0) {
-                    this.$el.find(".all-check").prop('checked', false).trigger("change");
+                    this.$el.find(".all-check").prop("checked", false).trigger("change");
                     removeConfig = true;
                 }
 
@@ -144,8 +150,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                     size: BootstrapDialog.SIZE_WIDE,
                     message: $(handlebars.compile("{{> selfservice/_" + type + "}}")(currentData)),
                     onshown: function (dialogRef) {
-                        dialogRef.$modalBody.find('.array-selection').selectize({
-                            delimiter: ',',
+                        dialogRef.$modalBody.find(".array-selection").selectize({
+                            delimiter: ",",
                             persist: false,
                             create: function (input) {
                                 return {
@@ -157,23 +163,23 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                     },
                     buttons: [
                         {
-                            label: $.t('common.form.close'),
+                            label: $.t("common.form.close"),
                             action: function (dialogRef) {
                                 dialogRef.close();
                             }
                         },
                         {
-                            label: $.t('common.form.save'),
+                            label: $.t("common.form.save"),
                             cssClass: "btn-primary",
                             id: "saveUserConfig",
                             action: function (dialogRef) {
-                                var formData = form2js('configDialogForm', '.', true),
+                                var formData = form2js("configDialogForm", ".", true),
                                     tempName;
 
                                 _.extend(currentData, formData);
 
                                 //Check for array items and set the values
-                                _.each(dialogRef.$modalBody.find('input.array-selection'), function (arraySelection) {
+                                _.each(dialogRef.$modalBody.find("input.array-selection"), function (arraySelection) {
                                     tempName = $(arraySelection).attr("data-formName");
                                     currentData[tempName] = $(arraySelection)[0].selectize.getValue().split(",");
                                 }, this);
@@ -188,26 +194,62 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             }
         },
         selfServiceRender: function(args, callback) {
+            var disabledList,
+                configList = [];
+
             ConfigDelegate.readEntity("ui/configuration").then(_.bind(function (uiConfig) {
                 this.model.uiConfig = uiConfig;
+
                 ConfigDelegate.readEntity(this.model.configUrl).then(_.bind(function(result){
                     $.extend(true, this.model.saveConfig, result);
                     $.extend(true, this.data.config, result);
 
                     this.data.hideAdvanced = false;
 
+                    _.each(this.data.configList, function(config, pos) {
+                        config.index = pos;
+                    });
+
+                    disabledList = _.filter(this.data.configList, function(config) {
+                        var filterCheck = true;
+
+                        _.each(result.stageConfigs, function(stage) {
+                            if(stage.name === config.type) {
+                                filterCheck = false;
+                            }
+                        }, this);
+
+                        return filterCheck;
+                    });
+
+                    _.each(result.stageConfigs, function(stage) {
+                        _.each(this.data.configList, function(config){
+                            if(stage.name === config.type) {
+                                configList.push(config);
+                            }
+                        }, this);
+                    }, this);
+
+                    _.each(disabledList, function(config) {
+                        configList.splice(config.index, 0, config);
+                    }, this);
+
+                    this.data.configList = configList;
+
                     this.parentRender(_.bind(function(){
-                        this.$el.find(".all-check").prop('checked', true);
-                        this.$el.find(".section-check").attr('disabled', false);
+                        this.$el.find(".all-check").prop("checked", true);
+                        this.$el.find(".section-check").attr("disabled", false);
 
                         this.model.surpressSave = true;
+                        this.setSortable();
 
                         _.each(result.stageConfigs, function(stage){
-                            this.$el.find("div[data-type='" +stage.name +"']").toggleClass("disabled", false);
-                            this.$el.find("div[data-type='" +stage.name +"'] .section-check").prop('checked', true).trigger("change");
+                            this.$el.find("li[data-type='" +stage.name +"']").toggleClass("disabled", false);
+                            this.$el.find("li[data-type='" +stage.name +"'] .section-check").prop("checked", true).trigger("change");
                         }, this);
 
                         this.model.surpressSave = false;
+
                         if(callback) {
                             callback();
                         }
@@ -219,6 +261,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
                     this.parentRender(_.bind(function(){
                         this.disableForm();
+                        this.setSortable();
 
                         if(callback) {
                             callback();
@@ -227,8 +270,65 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 },this));
             }, this));
         },
+
+        setSortable: function() {
+            var startIndex,
+                _this = this;
+
+            this.$el.find(".selfservice-holder ul").nestingSortable({
+                handle: "div",
+                items: "li",
+                toleranceElement: "ul",
+                placeholder: "<li class='placeholder well'></li>",
+                onMousedown: function ($item, _super, event) {
+                    startIndex = _this.$el.find(".selfservice-holder ul li:not(.disabled)").index($item);
+
+                    if (!event.target.nodeName.match(/^(input|select)$/i)) {
+                        event.preventDefault();
+                        return true;
+                    }
+                },
+                onDrop: function ($item, container, _super, event) {
+                    var endIndex = _this.$el.find(".selfservice-holder ul li:not(.disabled)").index($item);
+
+                    _super($item, container, _super, event);
+
+                    _this.setOrder(startIndex, endIndex);
+                }
+            });
+        },
+        setOrder: function(start, end) {
+            var movedElement = this.model.saveConfig.stageConfigs[start];
+
+            if(start !== end) {
+                this.model.saveConfig.stageConfigs.splice(start, 1);
+                this.model.saveConfig.stageConfigs.splice(end, 0, movedElement);
+            }
+
+            if(!_.isUndefined(movedElement)){
+                this.saveConfig();
+            }
+        },
+        orderCheck: function() {
+            var tempConfig = {},
+                stageOrder = [];
+
+            $.extend(true, tempConfig, this.model.saveConfig);
+
+            _.each(this.$el.find(".selfservice-holder ul li"), function(config) {
+                _.each(tempConfig.stageConfigs, function(stage){
+                    if(stage.name === $(config).attr("data-type")) {
+                        stageOrder.push(_.clone(stage));
+                    }
+                }, this);
+            }, this);
+
+            tempConfig.stageConfigs = stageOrder;
+
+            return tempConfig;
+        },
         saveConfig: function() {
-            var formData = form2js('advancedOptions', '.', true),
+            var formData = form2js("advancedOptions", ".", true),
                 saveData = {};
 
             $.extend(true, saveData, this.model.saveConfig, formData);
