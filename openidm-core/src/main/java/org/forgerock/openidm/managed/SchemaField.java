@@ -408,16 +408,15 @@ public class SchemaField {
         execScript(context, "onStore", onStore, value);
         setEncryptor();
         try {
-            if (encryptor != null && value.isDefined(name)) {
-                if (!cryptoService.isEncrypted(value)) {
-                    value.put(name, new JsonCrypto(encryptor.getType(), 
-                            encryptor.encrypt(value.get(name))).toJsonValue());
-                } 
-            } else if (hashingValue.isNotNull() && value.isDefined(name)) {
-                // Hash the field if not already hashed
-                if (!cryptoService.isEncrypted(value)) {
-                    String algorithm = hashingValue.get("algorithm").asString();
-                    value.put(name, cryptoService.hash(value.get(name), algorithm));
+            if (value.isDefined(name)) {
+                JsonValue propValue = value.get(name);
+                if (encryptor != null && !cryptoService.isEncrypted(propValue)) {
+                    // Encrypt the field
+                    value.put(name, new JsonCrypto(encryptor.getType(),  encryptor.encrypt(propValue)).toJsonValue());
+
+                } else if (hashingValue.isNotNull() && !cryptoService.isHashed(propValue)) {
+                    // Hash the field
+                    value.put(name, cryptoService.hash(propValue, hashingValue.get("algorithm").asString()));
                 }
             }
         } catch (JsonCryptoException jce) {

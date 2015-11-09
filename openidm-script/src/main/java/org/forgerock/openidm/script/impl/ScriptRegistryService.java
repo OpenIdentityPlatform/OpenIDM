@@ -153,6 +153,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         _reservedNames.add("encrypt");
         _reservedNames.add("decrypt");
         _reservedNames.add("isEncrypted");
+        _reservedNames.add("isHashed");
+        _reservedNames.add("matches");
 
         for (IdentityServerFunctions f : IdentityServerFunctions.values()) {
             _reservedNames.add(f.name());
@@ -467,6 +469,48 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 }
             }
         });
+        // isHashed(any value)
+        openidm.put("isHashed", new Function<Boolean>() {
+
+            static final long serialVersionUID = 1L;
+
+            public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                if (arguments == null || arguments.length == 0) {
+                    return false;
+                } else if (arguments.length == 1) {
+                    return cryptoService.isHashed(arguments[0] instanceof JsonValue
+                        ? (JsonValue) arguments[0] 
+                        : new JsonValue(arguments[0]));
+                } else {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
+                            "isHashed", arguments));
+                }
+            }
+        });
+        // matches(String plaintext, any value)
+        openidm.put("matches", new Function<Boolean>() {
+
+            static final long serialVersionUID = 1L;
+
+            public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                if (arguments == null || arguments.length == 0 || arguments.length == 1) {
+                    return false;
+                } else if (arguments.length == 2) {
+                    try {
+                        return cryptoService.matches(arguments[1].toString(), arguments[1] instanceof JsonValue
+                                ? (JsonValue) arguments[1] 
+                                : new JsonValue(arguments[1]));
+                    } catch (JsonCryptoException e) {
+                        throw new InternalServerErrorException(e.getMessage(), e);
+                    }
+                } else {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
+                            "matches", arguments));
+                }
+            }
+        });
         logger.info("Crypto functions are enabled");
     }
 
@@ -474,6 +518,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         openidm.remove("encrypt");
         openidm.remove("decrypt");
         openidm.remove("isEncrypted");
+        openidm.remove("isHashed");
+        openidm.remove("matches");
         logger.info("Crypto functions are disabled");
     }
 
