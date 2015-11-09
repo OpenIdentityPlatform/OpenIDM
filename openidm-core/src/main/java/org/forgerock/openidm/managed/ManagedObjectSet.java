@@ -892,7 +892,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     JsonValue propertiesToValidate = json(object());
                     for (PatchOperation operation : patchOperations) {
                         JsonPointer field = operation.getField();
-                        propertiesToValidate.put(field, newValue.get(field));
+                        propertiesToValidate.putPermissive(field, newValue.get(field));
                     }
                     // The action request to validate the policy of all the patched properties
                     ActionRequest policyAction = Requests.newActionRequest(
