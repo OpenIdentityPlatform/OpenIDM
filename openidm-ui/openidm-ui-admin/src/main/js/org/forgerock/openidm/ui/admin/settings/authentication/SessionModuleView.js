@@ -44,9 +44,9 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/SessionModuleView
         },
         data: {
             "properties": {
-                "maxTokenLifeMinutes": "",
-                "tokenIdleTimeMinutes": "",
-                "sessionOnly": ""
+                "maxTokenLife": "120",
+                "tokenIdleTime": "30",
+                "sessionOnly": "false"
             }
         },
         model: {},
@@ -60,8 +60,13 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/SessionModuleView
             this.model = _.extend(
                 {
                     "amTokenTime": "5",
-                    "defaultTokenTime": "120",
-                    "defaultTokenIdleTime": "30"
+                    "amTokenMinutes": false,
+                    "defaults": {
+                        "maxTokenLife": "120",
+                        "tokenIdleTime": "30",
+                        "maxTokenLifeMinutes": true,
+                        "tokenIdleTimeMinutes": true
+                    }
                 },
                 configs,
                 this.getAuthenticationData()
@@ -77,18 +82,39 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/SessionModuleView
                 this.data.sessionModule = _.clone(this.model.sessionModule);
             }
 
+            if (_.has(this.data.sessionModule.properties, "maxTokenLifeSeconds")) {
+                this.data.maxTokenLife = this.data.sessionModule.properties.maxTokenLifeSeconds;
+                this.data.maxTokenLifeMinutes = false;
+
+            } else if (_.has(this.data.sessionModule.properties, "maxTokenLifeMinutes")) {
+                this.data.maxTokenLife = this.data.sessionModule.properties.maxTokenLifeMinutes;
+                this.data.maxTokenLifeMinutes = true;
+            }
+
+            if (_.has(this.data.sessionModule.properties, "tokenIdleTimeSeconds")) {
+                this.data.tokenIdleTime = this.data.sessionModule.properties.tokenIdleTimeSeconds;
+                this.data.tokenIdleTimeMinutes = false;
+
+            } else if (_.has(this.data.sessionModule.properties, "tokenIdleTimeMinutes")) {
+                this.data.tokenIdleTime = this.data.sessionModule.properties.tokenIdleTimeMinutes;
+                this.data.tokenIdleTimeMinutes = true;
+            }
+
             // If there is an OPENAM module and the configured token settings are the defaults, them to the OPENAM session defaults
             if (this.model.hasAM &&
-                this.data.sessionModule.properties.maxTokenLifeMinutes === this.model.defaultTokenTime &&
-                this.data.sessionModule.properties.tokenIdleTimeMinutes === this.model.defaultTokenIdleTime) {
+                this.data.maxTokenLife === this.model.defaults.maxTokenLife && this.data.maxTokenLifeMinutes === this.model.defaults.maxTokenLifeMinutes &&
+                this.data.tokenIdleTime === this.model.defaults.tokenIdleTime && this.data.tokenIdleTimeMinutes === this.model.defaults.tokenIdleTimeMinutes) {
 
-                this.data.sessionModule.properties.maxTokenLifeMinutes = this.model.amTokenTime;
-                this.data.sessionModule.properties.tokenIdleTimeMinutes = this.model.amTokenTime;
+                this.data.sessionModule.properties.maxTokenLifeSeconds = this.model.amTokenTime;
+                this.data.sessionModule.properties.tokenIdleTimeSeconds = this.model.amTokenTime;
+
+                this.data.maxTokenLife = this.model.amTokenTime;
+                this.data.maxTokenLifeMinutes = this.model.amTokenMinutes;
+                this.data.tokenIdleTime = this.model.amTokenTime;
+                this.data.tokenIdleTimeMinutes = this.model.amTokenMinutes;
 
                 // If the use wants to, changes these settings they can so we remove this flag so its only set when an OPENAM_SESSION auth module is created
                 delete this.model.hasAM;
-
-                this.checkChanges();
 
             } else if (this.model.hasAM) {
                 delete this.model.hasAM;
@@ -110,6 +136,8 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/SessionModuleView
                     this.model.changesModule.reRender(this.$el.find(".authentication-session-changes"));
                 }
 
+                this.checkChanges();
+
                 if (callback) {
                     callback();
                 }
@@ -117,10 +145,26 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/SessionModuleView
         },
 
         checkChanges: function(e) {
-            if (!_.isUndefined(e) && e.currentTarget.type === "checkbox") {
-                this.data.sessionModule.properties[e.currentTarget.name] = e.currentTarget.checked;
-            } else if (!_.isUndefined(e)) {
-                this.data.sessionModule.properties[e.currentTarget.name] = $(e.currentTarget).val();
+
+            _.each(["maxTokenLifeSeconds", "maxTokenLifeMinutes", "tokenIdleTimeSeconds", "tokenIdleTimeMinutes"], _.bind(function(prop) {
+                if (_.has(this.data.sessionModule.properties, prop)) {
+                    delete this.data.sessionModule.properties[prop];
+                }
+            }, this));
+
+            this.data.sessionModule.properties.sessionOnly = this.$el.find("#sessionOnly").is(":checked");
+
+            if (this.$el.find("#maxTokenLifeUnits").val() === "seconds") {
+                this.data.sessionModule.properties.maxTokenLifeSeconds = this.$el.find("#maxTokenLife").val();
+            } else {
+                this.data.sessionModule.properties.maxTokenLifeMinutes = this.$el.find("#maxTokenLife").val();
+            }
+
+            if (this.$el.find("#tokenIdleTimeUnits").val() === "seconds") {
+                this.data.sessionModule.properties.tokenIdleTimeSeconds = this.$el.find("#tokenIdleTime").val();
+
+            } else {
+                this.data.sessionModule.properties.tokenIdleTimeMinutes = this.$el.find("#tokenIdleTime").val();
             }
 
             this.setProperties(["sessionModule"], this.data);
