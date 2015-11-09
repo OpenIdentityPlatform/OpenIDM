@@ -1801,7 +1801,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         final Iterator<QueryFilter<JsonPointer>> iterator) {
                     if (iterator.hasNext()) {
                         final QueryFilter<JsonPointer> right = iterator.next();
-                        return or(left.accept(this, helper), buildAnd(helper, right, iterator));
+                        return or(left.accept(this, helper), buildOr(helper, right, iterator));
                     } else {
                         return left.accept(this, helper);
                     }
