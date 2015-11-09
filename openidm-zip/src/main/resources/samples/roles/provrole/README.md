@@ -43,23 +43,24 @@ Note: the Example.ldif provided with this sample should be loaded to OpenDJ, if 
 
         $ opendj/bin/ldapmodify -a -c --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost --port 1389 --filename openidm/samples/roles/provrole/data/Example.ldif
 
-This sample should be run like the others using the following command:
+To run this sample, use the following command:
 
-        $ nohup ./startup.sh -p samples/roles/provrole > logs/console.out 2>&1&
+        $ ./startup.sh -p samples/roles/provrole
 
-in order to pick up the configuration that's provided here. The reconciliation of the external system (OpenDJ) can also 
-performed easily via the UI by running reconciliation for the first mapping (DJ --> Managed User) in order to populate
-the user entries.
+Then create the Employee and Contractor roles, as you learned in the previous (crudops) sample. You can use the Admin 
+UI or the REST interface to do this.
 
+When you have created the roles, reconcile the managed user repository with the external system (OpenDJ). The easiest 
+way to do this is by using the Admin UI. From the Dashboard, click Select a Mapping. Click on the first mapping 
+(System/Ldap/Account --> Managed User) and click Reconcile Now. This populates the managed user repository with the 
+entries in OpenDJ.
 
 This sample provides all the information you need to cover the following use cases:
 
-* Update a role with an entitlement (called assignments in OpenIDM)
-* Assign a role to a user and observe the entitlements for that user
-* Specify how entitlements will be propagated to an external system (OpenDJ)
-* Deallocate a role from a user and observe how the entitlements are withdrawn from the external system
-
-Note: throughout this document we refer to entitlements and assignments interchangeably, as they relate to roles.
+* Update a role with an assignment (sometimes called an entitlement)
+* Assign a role to a user and observe the assignments for that user
+* Specify how assignments will be propagated to an external system (OpenDJ)
+* Deallocate a role from a user and observe how the assignments are withdrawn from the external system
 
 
 1. Update the Employee role to add the correct groups and employee type
@@ -72,22 +73,27 @@ Let's take a look at the roles we created in the _crudops_ sample first:
                --request GET \
                'https://localhost:8443/openidm/managed/role?_queryFilter=true&_prettyPrint=true'
 
+        {
+            "result": [
+                {
+                    "_id": "336b53d8-e17a-4693-b422-e3c0aace025c",
+                    "_rev": "1",
+                    "name": "Employee",
+                    "description": "Role assigned to workers on the payroll."
+                },
                {
-                 "result" : [ {
-                   "name" : "Employee",
-                   "description" : "Role assigned to workers on the payroll.",
-                   "_id" : "Employee",
-                   "_rev" : "1"
-                 }, {
-                   "name" : "Contractor",
-                   "description" : "Role assigned to contract workers.",
-                   "_id" : "Contractor",
-                   "_rev" : "11"
-                 } ],
-                 "resultCount" : 2,
-                 "pagedResultsCookie" : null,
-                 "remainingPagedResults" : -1
+                    "_id": "e9a3aa84-350c-48f1-bee7-17bb47e1c303",
+                    "_rev": "1",
+                    "name": "Contractor",
+                    "description": "Role assigned to contract workers."
                }
+            ],
+            "resultCount": 2,
+            "pagedResultsCookie": null,
+            "totalPagedResultsPolicy": "NONE",
+            "totalPagedResults": -1,
+            "remainingPagedResults": -1
+        }
 
 Now, according to our company's policy, we need to make sure that every employee will have the correct _employeeType_ 
 attribute in OpenDJ (corporate directory).
@@ -134,7 +140,12 @@ entry:
                  ]' \
                'https://localhost:8443/openidm/managed/role/Employee'
 
-               {"_id":"Employee","_rev":"2","name":"Employee","description":"Role assigned to workers on the payroll.","assignments":[{"_ref":"managed/assignment/5d6dda22-20f2-491f-a9c1-6c3cffb2460e","_refProperties":{"_id":"06fb34cd-9904-487d-a8e4-6785d575c06c","_rev":"1"}}]}
+               {
+                 "_id": "Employee",
+                 "_rev": "2",
+                 "name": "Employee",
+                 "description": "Role assigned to workers on the payroll."
+               }
                
 2. Allocate the Employee role to bjensen
 
@@ -148,52 +159,28 @@ should have right now:
                'https://localhost:8443/openidm/managed/role?_queryFilter=true&_prettyPrint=true'
 
                {
-                 "result" : [ {
-                   "_id" : "Employee",
-                   "_rev" : "1",
-                   "name" : "Employee",
-                   "description" : "Role assigned to workers on the payroll.",
-                   "assignments": [
-                     {
-                       "_ref": "managed/assignment/5d6dda22-20f2-491f-a9c1-6c3cffb2460e",
-                       "_refProperties": {
-                         "_id": "6f3e22ae-c4a6-4422-a4f2-ac13458bf1c4",
-                         "_rev": "1"
-                       }
-                     }
-                   ]
-                 },
-                 {
-                   "_id" : "Contractor",
-                   "_rev" : "1",
-                   "name" : "Contractor",
-                   "description" : "Role assigned to contract workers."
-                 } ],
-                 "resultCount" : 2,
-                 "pagedResultsCookie" : null,
-                 "remainingPagedResults" : -1
+                   "result": [
+                       {
+                           "_id": "Employee",
+                           "_rev": "2",
+                           "name": "Employee",
+                           "description": "Role assigned to workers on the payroll."
+                       },
+                      {
+                           "_id": "Contractor",
+                           "_rev": "1",
+                           "name": "Contractor",
+                           "description": "Role assigned to contract workers."
+                      }
+                   ],
+                   "resultCount": 2,
+                   "pagedResultsCookie": null,
+                   "totalPagedResultsPolicy": "NONE",
+                   "totalPagedResults": -1,
+                   "remainingPagedResults": -1
                }
 
-Or something along those lines.
-
-Note: since the last step in the _crudops_ sample was to delete the Contractor role via the Admin UI, you might have to 
-issue the following request again to populate the Contractor role:
-
-        $ curl --insecure \
-               --header "Content-type: application/json" \
-               --header "X-OpenIDM-Username: openidm-admin" \
-               --header "X-OpenIDM-Password: openidm-admin" \
-               --header "If-None-Match: *" \
-               --request PUT \
-               --data '{
-               "properties" : {
-                   "name" : "Contractor",
-                   "description": "Role assigned to contract workers."
-                   }
-               }' \
-               https://localhost:8443/openidm/managed/role/Contractor
-
-Once you have both roles listed, you just need to assign the Employee role to bjensen. But first you need to find out 
+When you have both roles listed, you just need to assign the Employee role to bjensen. But first you need to find out 
 what the identifier is for bjensen's entry:
 
         $ curl --insecure \
@@ -228,7 +215,49 @@ Therefore you can assign the Employee role by using:
                  ]' \
                'https://localhost:8443/openidm/managed/user/8ff9639f-2a89-48a2-a0fd-9df4d5297eeb'
 
-               {"displayName":"Barbara Jensen","description":"Created for OpenIDM","givenName":"Barbara","mail":"bjensen@example.com", "telephoneNumber":"1-360-229-7105","sn":"Jensen","userName":"bjensen", "ldapGroups":["cn=openidm2,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":[{"_ref":"managed/role/Employee","_refProperties":{"_id":"193a60b6-7b2e-467e-a8fc-a59d67fca858","_rev":"1"}}],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/Employee","_refProperties":{"_id":"193a60b6-7b2e-467e-a8fc-a59d67fca858","_rev":"1"}}],"_id":"8ff9639f-2a89-48a2-a0fd-9df4d5297eeb","_rev":"4","effectiveAssignments":[{"_id":"5d6dda22-20f2-491f-a9c1-6c3cffb2460e","_rev":"1","name":"Contractor","description":"Role assigned to contract workers.","mapping" : "managedUser_systemLdapAccounts","attributes":[{"name":"employeeType","value":"Employee","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}]}]}
+               {
+                 "_id": "8ff9639f-2a89-48a2-a0fd-9df4d5297eeb",
+                 "_rev": "2",
+                 "displayName": "Barbara Jensen",
+                 "description": "Created for OpenIDM",
+                 "givenName": "Barbara",
+                 "mail": "bjensen@example.com",
+                 "telephoneNumber": "1-360-229-7105",
+                 "sn": "Jensen",
+                 "userName": "bjensen",
+                 "accountStatus": "active",
+                 "effectiveRoles": [
+                   {
+                     "_ref": "managed/role/Employee"
+                   }
+                 ],
+                 "effectiveAssignments": [
+                   {
+                     "name": "Employee",
+                     "description": "Assignment for employees.",
+                     "mapping": "managedUser_systemLdapAccounts",
+                     "attributes": [
+                       {
+                         "name": "employeeType",
+                         "value": "Employee",
+                         "assignmentOperation": "mergeWithTarget",
+                         "unassignmentOperation": "removeFromTarget"
+                       }
+                     ],
+                     "_id": "e9901373-60f4-4d86-b928-a6cd19449d50",
+                     "_rev": "1"
+                   }
+                 ],
+                 "roles": [
+                   {
+                     "_ref": "managed/role/Employee",
+                     "_refProperties": {
+                       "_id": "06b5b119-e450-4ee7-9559-d3d2a0cdf76f",
+                       "_rev": "1"
+                     }
+                   }
+                 ]
+               }
 
 Let's take a closer look at bjensen's entry for what we're really interested in, i.e. the roles, effective roles and 
 effective assignments:
@@ -272,12 +301,14 @@ effective assignments:
   } ],
   "resultCount" : 1,
   "pagedResultsCookie" : null,
+  "totalPagedResultsPolicy" : "NONE",
+  "totalPagedResults" : -1,
   "remainingPagedResults" : -1
 }
 
 We can now clearly see the impact of the new property we added to the role. The user now has a new (calculated) property
 which includes the set of assignments (or entitlements) that pertain to the user with that role. Currently this only 
-list the _employeeType_ attribute.
+lists the _employeeType_ attribute.
 
 3. Pushing assignments out to OpenDJ (external system)
 
@@ -294,14 +325,14 @@ properly:
 Now let's make this a little more interesting by adding the groups that an Employee should have in the corporate 
 directory (OpenDJ).
 
-We just need to update the Employee role with the appropriate assignments. First, let's look at the Employee role entry
-one more time:
+We just need to update the Employee role with the appropriate assignments. First, look at the current assignments of the 
+Employee role:
 
         $ curl --insecure \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
-               'https://localhost:8443/openidm/managed/role/Employee?_prettyPrint=true'
+               'https://localhost:8443/openidm/managed/role/Employee?_fields=assignments&_prettyPrint=true'
 
                {
                  "_id" : "Employee",
@@ -344,7 +375,30 @@ We simply need to add the attribute for groups to the assignment 5d6dda22-20f2-4
                ]' \
                'https://localhost:8443/openidm/managed/assignment/5d6dda22-20f2-491f-a9c1-6c3cffb2460e'
 
-               {"_id":"5d6dda22-20f2-491f-a9c1-6c3cffb2460e","_rev":"2","name":"Employee","description":"Assignment for employees","attributes":[{"name":"employeeType","value":"Employee","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"},{"name":"ldapGroups","value":["cn=Employees,ou=Groups,dc=example,dc=com","cn=Chat Users,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}],"onAssignment":{"file":"roles/onAssignment_ldap.js","type":"text/javascript"},"onUnassignment":{"file":"roles/onUnassignment_ldap.js","type":"text/javascript"}}
+               {
+                 "_id": "5d6dda22-20f2-491f-a9c1-6c3cffb2460e",
+                 "_rev": "2",
+                 "name": "Employee",
+                 "description": "Assignment for employees.",
+                 "mapping": "managedUser_systemLdapAccounts",
+                 "attributes": [
+                   {
+                     "name": "employeeType",
+                     "value": "Employee",
+                     "assignmentOperation": "mergeWithTarget",
+                     "unassignmentOperation": "removeFromTarget"
+                   },
+                   {
+                     "name": "ldapGroups",
+                     "value": [
+                       "cn=Employees,ou=Groups,dc=example,dc=com",
+                       "cn=Chat Users,ou=Groups,dc=example,dc=com"
+                     ],
+                     "assignmentOperation": "mergeWithTarget",
+                     "unassignmentOperation": "removeFromTarget"
+                   }
+                 ]
+               }
                
 After adding this new attribute to the assignment, bjensen should be added to the Chat Users and Employees groups.
 
@@ -410,7 +464,29 @@ First create the Contractor assignment:
                }' \
                'https://localhost:8443/openidm/managed/assignment/Contractor'
                
-               {"_id":"Contractor","_rev":"1","name":"Contractor","description":"Role assigned to contract workers.","attributes":[{"name":"ldapGroups","value":["cn=Contractors,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"},{"name":"employeeType","value":"Contractor","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}]}
+               {
+                 "_id": "Contractor",
+                 "_rev": "1",
+                 "name": "Contractor",
+                 "description": "Contractor assignment for contract workers.",
+                 "mapping": "managedUser_systemLdapAccounts",
+                 "attributes": [
+                   {
+                     "name": "ldapGroups",
+                     "value": [
+                       "cn=Contractors,ou=Groups,dc=example,dc=com"
+                     ],
+                     "assignmentOperation": "mergeWithTarget",
+                     "unassignmentOperation": "removeFromTarget"
+                   },
+                   {
+                     "name": "employeeType",
+                     "value": "Contractor",
+                     "assignmentOperation": "mergeWithTarget",
+                     "unassignmentOperation": "removeFromTarget"
+                   }
+                 ]
+               }
 
 Now add the Contractor assignment to the Contractor role:
 
@@ -431,8 +507,13 @@ Now add the Contractor assignment to the Contractor role:
                ]' \
                'https://localhost:8443/openidm/managed/role/Contractor'
 
-               {"_id":"Contractor","_rev":"1","name":"Contractor","description":"Role assigned to contract workers.","assignments":[{"_ref":"managed/assignment/Contractor","_refProperties":{"_id":"9ba10840-3450-4e24-9d20-69d4197ad556","_rev":"1"}}]}
-
+               {
+                 "_id": "Contractor",
+                 "_rev": "2",
+                 "name": "Contractor",
+                 "description": "Role assigned to contract workers."
+               }
+               
 Now we just need to allocate the Contractor role to jdoe and he should be automatically added to the Contractors group 
 in OpenDJ. Let's first take a look at jdoe's entry to make sure we know the value of the identifier:
 
@@ -470,7 +551,57 @@ Now we can update jdoe's entry with the Contractor role:
                  ]' \
                'https://localhost:8443/openidm/managed/user/3f9ada28-2809-4909-aadf-815567b00a4d'
 
-               {"_id":"3f9ada28-2809-4909-aadf-815567b00a4d","_rev":"2","displayName":"John Doe","description":"Created for OpenIDM","givenName":"John","mail":"jdoe@example.com","telephoneNumber":"1-415-599-1100","sn":"Doe","userName":"jdoe","accountStatus":"active","lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Wed Oct 07 2015 13:17:57 GMT-0700 (PDT)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[{"_ref":"managed/role/Contractor","_refProperties":{"_id":"e8295a1f-f367-489d-9573-f4ccbb2822d1","_rev":"1"}}],"effectiveAssignments":[{"assignedThrough":"managed/role/Contractor","name":"ldap","attributes":[{"name":"ldapGroups","value":["cn=Contractors,ou=Groups,dc=example,dc=com"],"assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"},{"name":"employeeType","value":"Contractor","assignmentOperation":"mergeWithTarget","unassignmentOperation":"removeFromTarget"}]}],"roles":[{"_ref":"managed/role/Contractor","_refProperties":{"_id":"e8295a1f-f367-489d-9573-f4ccbb2822d1","_rev":"1"}}],"authzRoles":null}
+               {
+                 "_id": "3f9ada28-2809-4909-aadf-815567b00a4d",
+                 "_rev": "2",
+                 "displayName": "John Doe",
+                 "description": "Created for OpenIDM",
+                 "givenName": "John",
+                 "mail": "jdoe@example.com",
+                 "telephoneNumber": "1-415-599-1100",
+                 "sn": "Doe",
+                 "userName": "jdoe",
+                 "accountStatus": "active",
+                 "effectiveRoles": [
+                   {
+                     "_ref": "managed/role/Contractor"
+                   }
+                 ],
+                 "effectiveAssignments": [
+                   {
+                     "name": "Contractor",
+                     "description": "Contractor assignment for contract workers.",
+                     "mapping": "managedUser_systemLdapAccounts",
+                     "attributes": [
+                       {
+                         "name": "ldapGroups",
+                         "value": [
+                           "cn=Contractors,ou=Groups,dc=example,dc=com"
+                         ],
+                         "assignmentOperation": "mergeWithTarget",
+                         "unassignmentOperation": "removeFromTarget"
+                       },
+                       {
+                         "name": "employeeType",
+                         "value": "Contractor",
+                         "assignmentOperation": "mergeWithTarget",
+                         "unassignmentOperation": "removeFromTarget"
+                       }
+                     ],
+                     "_id": "Contractor",
+                     "_rev": "1"
+                   }
+                 ],
+                 "roles": [
+                   {
+                     "_ref": "managed/role/Contractor",
+                     "_refProperties": {
+                       "_id": "e8295a1f-f367-489d-9573-f4ccbb2822d1",
+                       "_rev": "1"
+                     }
+                   }
+                 ]
+               }
 
 Let's now take a look at jdoe's entry in order to make sure that the proper employee type has been set and that jdoe has 
 been added to the Contractors group.
@@ -527,6 +658,8 @@ Again, we take a look at jdoe's entry to find out about its state:
                  } ],
                  "resultCount" : 1,
                  "pagedResultsCookie" : null,
+                 "totalPagedResultsPolicy" : "NONE",
+                 "totalPagedResults" : -1,
                  "remainingPagedResults" : -1
                }
 
@@ -547,10 +680,24 @@ also please note the entry's identifier that is used in the request's URL:
                  ]' \
                'https://localhost:8443/openidm/managed/user/3f9ada28-2809-4909-aadf-815567b00a4d'
 
-               {"displayName":"John Doe","description":"Created for OpenIDM","givenName":"John","mail":"jdoe@example.com","telephoneNumber":"1-415-599-1100","sn":"Doe","userName":"jdoe","ldapGroups":["cn=openidm,ou=Groups,dc=example,dc=com"],"accountStatus":"active","roles":[],"lastPasswordSet":"","postalCode":"","stateProvince":"","passwordAttempts":"0","lastPasswordAttempt":"Fri Apr 17 2015 16:57:21 GMT-0000 (UTC)","postalAddress":"","address2":"","country":"","city":"","effectiveRoles":[],"_id":"3f9ada28-2809-4909-aadf-815567b00a4d","_rev":"3","effectiveAssignments":{}}
+               {
+                 "_id": "3f9ada28-2809-4909-aadf-815567b00a4d",
+                 "_rev": "3",
+                 "displayName": "John Doe",
+                 "description": "Created for OpenIDM",
+                 "givenName": "John",
+                 "mail": "jdoe@example.com",
+                 "telephoneNumber": "1-415-599-1100",
+                 "sn": "Doe",
+                 "userName": "jdoe",
+                 "accountStatus": "active",
+                 "effectiveRoles": [],
+                 "effectiveAssignments": [],
+                 "roles": []
+               }
 
-This results in jdoe's entry in OpenDJ not belonging to the Contractors group anymore and its employee type being 
-undefined.
+This results in jdoe's entry in OpenDJ not belonging to the Contractors group anymore and in his employee type being 
+undefined. Check that with a query on his entry in OpenDJ:
 
 
         $ curl --insecure \
