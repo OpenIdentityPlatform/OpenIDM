@@ -46,7 +46,7 @@ if (effectiveRoles != null)  {
 
         // Only try to retrieve role details for role ids in URL format
         if (roleId !== null && roleId._ref !== null && roleId._ref.indexOf("managed/role") != -1) {
-            var roleRelationship =  openidm.read(roleId._ref);
+            var roleRelationship =  openidm.read(roleId._ref, null, [ "assignments" ]);
             logger.debug("Role relationship read: {}", roleRelationship);
 
             if (roleRelationship != null) {
