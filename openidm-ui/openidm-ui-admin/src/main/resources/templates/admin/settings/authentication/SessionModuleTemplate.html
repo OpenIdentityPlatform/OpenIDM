@@ -1,15 +1,30 @@
 <div class="form-horizontal">
     <div class="form-group">
-        <label for="maxTokenLifeMinutes" class="col-sm-3 control-label">{{t "templates.auth.maxLifeTitle"}}</label>
-        <div class="col-sm-6">
-            <input id="maxTokenLifeMinutes" type="text" class="form-control changes-watched" name="maxTokenLifeMinutes" value="{{sessionModule.properties.maxTokenLifeMinutes}}" />
+        <label for="maxTokenLife" class="col-sm-3 control-label">{{t "templates.auth.maxLifeTitle"}}</label>
+
+        <div class="col-sm-2">
+            <input id="maxTokenLife" type="text" class="form-control changes-watched" name="maxTokenLife" value="{{maxTokenLife}}" />
+        </div>
+        <div class="col-sm-2">
+            <select id="maxTokenLifeUnits" type="text" class="form-control changes-watched" name="maxTokenLifeUnits">
+                <option {{#if maxTokenLifeMinutes}}selected {{/if}}value="minutes">{{t "templates.auth.minutes"}}</option>
+                <option {{#unless maxTokenLifeMinutes}}selected {{/unless}}value="seconds">{{t "templates.auth.seconds"}}</option>
+            </select>
         </div>
     </div>
 
     <div class="form-group">
-        <label for="tokenIdleTimeMinutes" class="col-sm-3 control-label">{{t "templates.auth.idleTimeTitle"}}</label>
-        <div class="col-sm-6">
-            <input type="text" class="form-control changes-watched" id="tokenIdleTimeMinutes" name="tokenIdleTimeMinutes" value="{{sessionModule.properties.tokenIdleTimeMinutes}}" />
+        <label for="tokenIdleTime" class="col-sm-3 control-label">{{t "templates.auth.idleTimeTitle"}}</label>
+
+        <div class="col-sm-2">
+            <input type="text" class="form-control changes-watched" id="tokenIdleTime" name="tokenIdleTime" value="{{tokenIdleTime}}" />
+        </div>
+
+        <div class="col-sm-2">
+            <select id="tokenIdleTimeUnits" type="text" class="form-control changes-watched" name="tokenIdleTimeUnits">
+                <option {{#if tokenIdleTimeMinutes}}selected {{/if}}value="minutes">{{t "templates.auth.minutes"}}</option>
+                <option {{#unless tokenIdleTimeMinutes}}selected {{/unless}}value="seconds">{{t "templates.auth.seconds"}}</option>
+            </select>
         </div>
     </div>
 
