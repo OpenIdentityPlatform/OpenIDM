@@ -42,31 +42,31 @@
     <dt>Release Notes</dt>
     <dd>
      <a href="./doc/bootstrap/release-notes/index.html">HTML</a>,
-     <a href="./doc/OpenIDM-Release-Notes.pdf">PDF</a>
+     <a href="./doc/OpenIDM-${project.version}-Release-Notes.pdf">PDF</a>
     </dd>
 
     <dt>Getting Started With OpenIDM</dt>
     <dd>
      <a href="./doc/bootstrap/getting-started/index.html">HTML</a>,
-     <a href="./doc/OpenIDM-Getting-Started.pdf">PDF</a>
+     <a href="./doc/OpenIDM-${project.version}-Getting-Started.pdf">PDF</a>
     </dd>
 
     <dt>Installation Guide</dt>
     <dd>
      <a href="./doc/bootstrap/install-guide/index.html">HTML</a>,
-     <a href="./doc/OpenIDM-Install-Guide.pdf">PDF</a>
+     <a href="./doc/OpenIDM-${project.version}-Install-Guide.pdf">PDF</a>
     </dd>
 
     <dt>Samples Guide</dt>
     <dd>
      <a href="./doc/bootstrap/samples-guide/index.html">HTML</a>,
-     <a href="./doc/OpenIDM-Samples-Guide.pdf">PDF</a>
+     <a href="./doc/OpenIDM-${project.version}-Samples-Guide.pdf">PDF</a>
     </dd>
 
     <dt>Integrator's Guide</dt>
     <dd>
      <a href="./doc/bootstrap/integrators-guide/index.html">HTML</a>,
-     <a href="./doc/OpenIDM-Integrators-Guide.pdf">PDF</a>
+     <a href="./doc/OpenIDM-${project.version}-Integrators-Guide.pdf">PDF</a>
     </dd>
 
 <!--
