@@ -48,6 +48,14 @@ PROMPT Creating Sequence objecttypes_id_SEQ ...
 CREATE SEQUENCE  objecttypes_id_SEQ
   MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
 
+-- DROP SEQUENCE updateobjects_id_SEQ;
+
+
+PROMPT Creating Sequence updateobjects_id_SEQ ...
+CREATE SEQUENCE  updateobjects_id_SEQ
+  MINVALUE 1 MAXVALUE 999999999999999999999999 INCREMENT BY 1  NOCYCLE ;
+
+
 -- DROP TABLE uinotification CASCADE CONSTRAINTS;
 
 
@@ -828,6 +836,67 @@ CREATE INDEX fk_clusterobjects_objectypes ON clusterobjects
 )
 ;
 
+-- DROP TABLE updateobjectproperties CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table updateobjectproperties ...
+CREATE TABLE updateobjectproperties (
+  updateobjects_id NUMBER(24,0) NOT NULL,
+  propkey VARCHAR2(255 CHAR) NOT NULL,
+  proptype VARCHAR2(32 CHAR),
+  propvalue VARCHAR2(2000 CHAR)
+);
+
+
+PROMPT Creating Index fk_updateobjectproperties_gen on updateobjectproperties ...
+CREATE INDEX fk_updateobjectproperties_gen ON updateobjectproperties
+(
+  updateobjects_id
+)
+;
+PROMPT Creating Index idx_updateobjectproper_2 on updateobjectproperties ...
+CREATE INDEX idx_updateobjectproper_2 ON updateobjectproperties
+(
+  propkey,
+  propvalue
+)
+;
+
+-- DROP TABLE updateobjects CASCADE CONSTRAINTS;
+
+
+PROMPT Creating Table updateobjects ...
+CREATE TABLE updateobjects (
+  id NUMBER(24,0) NOT NULL,
+  objecttypes_id NUMBER(24,0) NOT NULL,
+  objectid VARCHAR2(255 CHAR) NOT NULL,
+  rev VARCHAR2(38 CHAR) NOT NULL,
+  fullobject CLOB
+);
+
+
+PROMPT Creating Primary Key Constraint PRIMARY_14 on table updateobjects ...
+ALTER TABLE updateobjects
+ADD CONSTRAINT PRIMARY_14 PRIMARY KEY
+(
+  id
+)
+ENABLE
+;
+PROMPT Creating Unique Index idx_updateobjects_object on updateobjects...
+CREATE UNIQUE INDEX idx_updateobjects_object ON updateobjects
+(
+  objecttypes_id,
+  objectid
+)
+;
+PROMPT Creating Index fk_updateobjects_objecttypes on updateobjects ...
+CREATE INDEX fk_updateobjects_objecttypes ON updateobjects
+(
+  objecttypes_id
+)
+;
+
 -- DROP TABLE objecttypes CASCADE CONSTRAINTS;
 
 
@@ -930,6 +999,34 @@ ADD CONSTRAINT fk_genericobjectproperties_gen FOREIGN KEY
   genericobjects_id
 )
 REFERENCES genericobjects
+(
+  id
+)
+ON DELETE CASCADE
+ENABLE
+;
+
+PROMPT Creating Foreign Key Constraint fk_updateobjectproperties_man on table updateobjectproperties...
+ALTER TABLE updateobjectproperties
+ADD CONSTRAINT fk_updateobjectproperties_man FOREIGN KEY
+(
+  updateobjects_id
+)
+REFERENCES updateobjects
+(
+  id
+)
+ON DELETE CASCADE
+ENABLE
+;
+
+PROMPT Creating Foreign Key Constraint fk_updateobjects_objectypes on table updateobjects...
+ALTER TABLE updateobjects
+ADD CONSTRAINT fk_updateobjects_objectypes FOREIGN KEY
+(
+  objecttypes_id
+)
+REFERENCES objecttypes
 (
   id
 )
@@ -1075,6 +1172,34 @@ BEGIN
    :new.id := v_newVal;
   END IF;
 END;
+
+/
+
+CREATE OR REPLACE TRIGGER clusterobjects_id_TRG BEFORE INSERT ON clusterobjects
+FOR EACH ROW
+  DECLARE
+    v_newVal NUMBER(12) := 0;
+    v_incval NUMBER(12) := 0;
+  BEGIN
+    IF INSERTING AND :new.id IS NULL THEN
+      SELECT  clusterobjects_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
+-- If this is the first time this table have been inserted into (sequence == 1)
+      IF v_newVal = 1 THEN
+--get the max indentity value from the table
+        SELECT NVL(max(id),0) INTO v_newVal FROM clusterobjects;
+        v_newVal := v_newVal + 1;
+--set the sequence to that value
+        LOOP
+          EXIT WHEN v_incval>=v_newVal;
+          SELECT clusterobjects_id_SEQ.nextval INTO v_incval FROM dual;
+        END LOOP;
+      END IF;
+--used to emulate LAST_INSERT_ID()
+--mysql_utilities.identity := v_newVal;
+-- assign the value from the sequence to emulate the identity column
+      :new.id := v_newVal;
+    END IF;
+  END;
 
 /
 

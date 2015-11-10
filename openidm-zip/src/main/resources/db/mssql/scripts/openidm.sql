@@ -600,6 +600,52 @@ END
 
 
 -- -----------------------------------------------------
+-- Table `openidm`.`updateobjects`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='updateobjects' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[updateobjects]
+(
+  id NUMERIC(19,0) NOT NULL IDENTITY ,
+  objecttypes_id NUMERIC(19,0) NOT NULL ,
+  objectid NVARCHAR(255) NOT NULL ,
+  rev NVARCHAR(38) NOT NULL ,
+  fullobject NTEXT NULL ,
+
+  CONSTRAINT fk_updateobjects_objecttypes
+  	FOREIGN KEY (objecttypes_id)
+  	REFERENCES [openidm].[objecttypes] (id)
+  	ON DELETE CASCADE
+  	ON UPDATE NO ACTION,
+  PRIMARY KEY CLUSTERED (id),
+);
+CREATE UNIQUE INDEX idx_updateobjects_object ON [openidm].[updateobjects] (objecttypes_id ASC, objectid ASC);
+CREATE INDEX fk_updateobjects_objecttypes ON [openidm].[updateobjects] (objecttypes_id ASC);
+END
+
+-- -----------------------------------------------------
+-- Table `openidm`.`updateobjectproperties`
+-- -----------------------------------------------------
+IF NOT EXISTS (SELECT name FROM sysobjects where name='updateobjectproperties' AND xtype='U')
+BEGIN
+CREATE  TABLE [openidm].[updateobjectproperties]
+(
+  updateobjects_id NUMERIC(19,0) NOT NULL ,
+  propkey NVARCHAR(255) NOT NULL ,
+  proptype NVARCHAR(32) NULL ,
+  propvalue NVARCHAR(195) NULL ,
+  CONSTRAINT fk_updateobjectproperties_updateobjects
+    FOREIGN KEY (updateobjects_id)
+    REFERENCES [openidm].[updateobjects] (id)
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION
+);
+CREATE INDEX fk_updateobjectproperties_updateobjects ON [openidm].[updateobjectproperties] (updateobjects_id ASC);
+CREATE INDEX idx_updateobjectproperties_prop ON [openidm].[updateobjectproperties] (propkey ASC, propvalue ASC);
+END
+
+
+-- -----------------------------------------------------
 -- Data for table `openidm`.`internaluser`
 -- -----------------------------------------------------
 IF (NOT EXISTS (SELECT objectid FROM openidm.internaluser WHERE objectid = N'openidm-admin'))
