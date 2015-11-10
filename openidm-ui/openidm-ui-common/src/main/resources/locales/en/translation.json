@@ -1367,6 +1367,7 @@
             }
         },
         "mapping": {
+            "move": "Move",
             "attributesGrid" : "Attributes Grid",
             "backToMapping" : "Back to Mappings",
             "conditionalUpon" : "Conditional Upon:",

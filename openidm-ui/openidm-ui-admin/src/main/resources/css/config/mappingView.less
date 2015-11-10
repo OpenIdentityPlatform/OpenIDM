@@ -251,7 +251,7 @@
     height: 164px;
   }
 
-  .mapping {
+  .mapping, .placeholder {
     margin-bottom: 40px;
     height:340px;
 
@@ -786,9 +786,26 @@
 }
 
 #mappingConfigHolder {
+  .connector-actions-buttons {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
   .help-link {
     border:none;
     width:100%;
+  }
+  .move-button {
+    cursor: move;
+    display: none;
+  }
+
+  ul {
+    padding:  0;
+
+    li {
+      list-style: none;
+    }
   }
 }
 
@@ -876,8 +893,12 @@
     }
   }
 
+  .move-button {
+    display: block !important;
+  }
+
   .mappings-list {
-    .mapping {
+    .mapping, .placeholder {
       height: 175px;
     }
   }
