@@ -381,29 +381,39 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   `notificationSubtype` VARCHAR(255) NULL ,
   PRIMARY KEY (`objectid`) );
 
-CREATE  TABLE IF NOT EXISTS `openidm`.`updates` (
+CREATE  TABLE IF NOT EXISTS `openidm`.`updateobjects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
-  `status` VARCHAR(64) NOT NULL ,
-  `statusMessage` VARCHAR(256) NOT NULL ,
-  `completedTasks` INT DEFAULT 0,
-  `totalTasks` INT DEFAULT 0,
-  `startDate` VARCHAR(29) NOT NULL,
-  `endDate` VARCHAR(29) NULL,
-  `userName` VARCHAR(256) NOT NULL,
-  `nodeId` VARCHAR(64) NULL ,
-  PRIMARY KEY (`id`) );
+  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `fullobject` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`id`) ,
+  UNIQUE INDEX `idx_updateobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
+  CONSTRAINT `fk_updateobjects_objecttypes`
+    FOREIGN KEY (`objecttypes_id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION) ;
 
-CREATE  TABLE IF NOT EXISTS `openidm`.`updatefile` (
-  `updateId` BIGINT UNSIGNED NOT NULL ,
-  `filePath` TEXT NOT NULL ,
-  `fileState` VARCHAR(64) NOT NULL ,
-  `backupFile` TEXT NULL ,
-  `stockFile` TEXT NULL ,
-  CONSTRAINT `fk_updatefileupdatesid_updatesid`
-  FOREIGN KEY (`updateId` )
-    REFERENCES `openidm`.`updates` (`id` )
-  ON DELETE CASCADE
-  ON UPDATE NO ACTION);
+  CREATE INDEX IF NOT EXISTS `openidm`.`fk_updateobjects_objecttypes`
+  ON `openidm`.`updateobjects` ( `objecttypes_id` ASC );
+
+
+CREATE  TABLE IF NOT EXISTS `openidm`.`updateobjectproperties` (
+  `updateobjects_id` BIGINT UNSIGNED NOT NULL ,
+  `propkey` VARCHAR(255) NOT NULL ,
+  `proptype` VARCHAR(32) NULL ,
+  `propvalue` TEXT NULL ,
+  CONSTRAINT `fk_updateobjectproperties_updateobjects`
+    FOREIGN KEY (`updateobjects_id` )
+    REFERENCES `openidm`.`updateobjects` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION);
+
+CREATE INDEX  IF NOT EXISTS  `openidm`.`fk_updateobjectproperties_updateobjects` ON
+`openidm`.`updateobjectproperties` (`updateobjects_id` ASC);
+
+CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_updateobjectproperties_prop` ON `openidm`.`updateobjectproperties` (`propkey` ASC, `propvalue` ASC);
 
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`)

@@ -482,6 +482,43 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
     ON UPDATE NO ACTION)
 ENGINE = InnoDB;
 
+-- -----------------------------------------------------
+-- Table `openidm`.`updateobjects`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`updateobjects` (
+  `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
+  `objecttypes_id` BIGINT UNSIGNED NOT NULL ,
+  `objectid` VARCHAR(255) NOT NULL ,
+  `rev` VARCHAR(38) NOT NULL ,
+  `fullobject` MEDIUMTEXT NULL ,
+  PRIMARY KEY (`id`) ,
+  INDEX `fk_updateobjects_objecttypes` (`objecttypes_id` ASC) ,
+  UNIQUE INDEX `idx_updateobjects_object` (`objecttypes_id` ASC, `objectid` ASC) ,
+  CONSTRAINT `fk_updateobjects_objecttypes`
+    FOREIGN KEY (`objecttypes_id` )
+    REFERENCES `openidm`.`objecttypes` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+  ENGINE = InnoDB;
+
+
+-- -----------------------------------------------------
+-- Table `openidm`.`updateobjectproperties`
+-- -----------------------------------------------------
+CREATE  TABLE IF NOT EXISTS `openidm`.`updateobjectproperties` (
+  `updateobjects_id` BIGINT UNSIGNED NOT NULL ,
+  `propkey` VARCHAR(255) NOT NULL ,
+  `proptype` VARCHAR(255) NULL ,
+  `propvalue` VARCHAR(2000) NULL ,
+  INDEX `fk_updateobjectproperties_updateobjects` (`updateobjects_id` ASC) ,
+  INDEX `idx_updateobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  CONSTRAINT `fk_updateobjectproperties_updateobjects`
+    FOREIGN KEY (`updateobjects_id` )
+    REFERENCES `openidm`.`updateobjects` (`id` )
+    ON DELETE CASCADE
+    ON UPDATE NO ACTION)
+  ENGINE = InnoDB;
+
 delimiter //
 
 create procedure `openidm`.`getAllFromTable` (t_schema varchar(255), t_name varchar(255), order_by varchar(255), order_dir varchar(255), num_rows bigint, skip bigint, acceptable_order_by varchar(512))

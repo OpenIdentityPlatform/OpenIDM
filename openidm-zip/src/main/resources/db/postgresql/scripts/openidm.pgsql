@@ -446,6 +446,38 @@ CREATE INDEX idx_clusterobjectproperties_prop ON openidm.clusterobjectproperties
 
 
 -- -----------------------------------------------------
+-- Table openidm.updateobjects
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.updateobjects (
+  id BIGSERIAL NOT NULL,
+  objecttypes_id BIGINT NOT NULL,
+  objectid VARCHAR(255) NOT NULL,
+  rev VARCHAR(38) NOT NULL,
+  fullobject JSON,
+  PRIMARY KEY (id),
+  CONSTRAINT fk_updateobjects_objecttypes FOREIGN KEY (objecttypes_id) REFERENCES openidm.objecttypes (id) ON DELETE CASCADE ON UPDATE NO ACTION,
+  CONSTRAINT idx_updateobjects_object UNIQUE (objecttypes_id, objectid)
+);
+
+
+
+-- -----------------------------------------------------
+-- Table openidm.updateobjectproperties
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.updateobjectproperties (
+  updateobjects_id BIGINT NOT NULL,
+  propkey VARCHAR(255) NOT NULL,
+  proptype VARCHAR(32) DEFAULT NULL,
+  propvalue TEXT,
+  CONSTRAINT fk_updateobjectproperties_updateobjects FOREIGN KEY (updateobjects_id) REFERENCES openidm.updateobjects (id) ON DELETE CASCADE ON UPDATE NO ACTION
+);
+CREATE INDEX fk_updateobjectproperties_updateobjects ON openidm.updateobjectproperties (updateobjects_id);
+CREATE INDEX idx_updateobjectproperties_prop ON openidm.updateobjectproperties (propkey,propvalue);
+
+
+-- -----------------------------------------------------
 -- Data for table openidm.internaluser
 -- -----------------------------------------------------
 START TRANSACTION;
