@@ -362,8 +362,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `response_elapsedtimeunits` VARCHAR(255) NULL ,
   `roles` TEXT NULL ,
   PRIMARY KEY (`objectid`),
-  INDEX `idx_auditaccess_status` (`status` ASC),
-  INDEX `idx_auditaccess_principal` (`principal`(28) ASC) )
+  INDEX `idx_auditaccess_status` (`response_status` ASC))
 ENGINE = InnoDB;
 
 
