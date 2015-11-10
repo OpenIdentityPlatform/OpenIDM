@@ -883,7 +883,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 JsonValue newValue = decrypted.copy();
                 boolean modified = JsonValuePatch.apply(newValue, patchOperations);
                 if (!modified) {
-                    return null;
+                    return newResourceResponse(request.getResourcePath(), revision, resource.getContent());
                 }
 
                 // Check if policies should be enforced
