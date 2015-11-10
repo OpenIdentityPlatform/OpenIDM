@@ -32,6 +32,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -49,14 +50,22 @@ import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
+import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link RelationshipProvider} representing a singleton relationship for the given field.
  */
 class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
-    
+    /**
+     * Setup logging for the {@link SingletonRelationshipProvider}.
+     */
+    private static final Logger logger = LoggerFactory.getLogger(SingletonRelationshipProvider.class);
+
+
     private final RequestHandler requestHandler;
 
     /**
@@ -108,7 +117,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * 
      * @param context The current context
      * @param managedObjectId The id of the managed object to find relationships associated with
-     * @return
+     * @return the promise of the query results.
      */
     private Promise<ResourceResponse, ResourceException> queryRelationship(final Context context, 
             final String managedObjectId) {
@@ -139,14 +148,43 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             if (relationships.isEmpty()) {
                 return new NotFoundException().asPromise();
             } else {
-                // TODO OPENIDM-4094 - check size and throw illegal state if more than one?
-                return newResultPromise(formatResponse(context, queryRequest).apply(relationships.get(0)));
+                // This is a singleton relationship so any others that exist need to be deleted.
+                // Remove the first one to keep as the one we want.
+                ResourceResponse relationship = relationships.remove(0);
+                if (!relationships.isEmpty()) {
+                    // If the list still has some extra relationships, they need to be deleted.
+                    deleteRelationships(context, relationships);
+                }
+                return newResultPromise(formatResponse(context, queryRequest).apply(relationship));
             }
         } catch (ResourceException e) {
             return e.asPromise();
         }
     }
-    
+
+    /**
+     * Loops through the resourceResponses and deletes them one by one.  Exceptions on the delete are only logged.
+     *
+     * @param context current context
+     * @param resourceResponses the resources to delete.
+     * @throws ResourceException if there is trouble getting the connection from the connection factory.
+     */
+    private void deleteRelationships(Context context, List<ResourceResponse> resourceResponses)
+            throws ResourceException {
+        for (final ResourceResponse resourceResponse : resourceResponses) {
+            DeleteRequest deleteRequest = Requests.newDeleteRequest(REPO_RESOURCE_PATH, resourceResponse.getId());
+            deleteRequest.setRevision(resourceResponse.getRevision());
+            connectionFactory.getConnection().deleteAsync(context, deleteRequest).thenOnException(
+                    new ExceptionHandler<ResourceException>() {
+                        @Override
+                        public void handleException(ResourceException exception) {
+                            logger.error("Error deleting relationship: " + resourceResponse.getId(), exception);
+                        }
+                    }
+            );
+        }
+    }
+
     /**
      * Persist the supplied {@link JsonValue} {@code value} as the new state of this singleton relationship on
      * {@code resourceId}.
