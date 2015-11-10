@@ -36,7 +36,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "jqueryui"
+    "jquerySortable"
 ], function($, _,
             AdminAbstractView,
             eventManager,
@@ -125,18 +125,31 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                     }, this);
 
                     this.parentRender(_.bind(function () {
-                        $('#mappingConfigHolder').sortable({
-                            items: '.mapping-config-body',
-                            start: _.bind(function (event, ui) {
-                                this.startIndex = this.$el.find("#mappingConfigHolder .mapping-config-body").index(ui.item);
+                        var startIndex = null;
+
+                        this.$el.find("#mappingConfigHolder ul").nestingSortable({
+                            handle: "div",
+                            items: "li",
+                            toleranceElement: "ul",
+                            disabledClass: "disabled",
+                            placeholder: "<li class='placeholder well'></li>",
+                            onMousedown: _.bind(function ($item, _super, event) {
+                                startIndex = this.$el.find("#mappingConfigHolder ul li:not(.disabled)").index($item);
+                                if (!event.target.nodeName.match(/^(input|select)$/i)) {
+                                    event.preventDefault();
+                                    return true;
+                                }
                             }, this),
-                            stop: _.bind(function (event, ui) {
-                                var stopIndex = this.$el.find("#mappingConfigHolder .mapping-config-body").index(ui.item),
+                            onDrop: _.bind(function ($item, container, _super, event) {
+                                var endIndex = this.$el.find("#mappingConfigHolder ul li:not(.disabled)").index($item),
                                     tempRemoved;
 
-                                if (this.startIndex !== stopIndex) {
-                                    tempRemoved = this.cleanConfig.splice(this.startIndex, 1);
-                                    this.cleanConfig.splice(stopIndex, 0, tempRemoved[0]);
+                                _super($item, container, _super, event);
+
+                                if (startIndex !== endIndex) {
+                                    tempRemoved = this.cleanConfig.splice(startIndex, 1);
+                                    this.cleanConfig.splice(endIndex, 0, tempRemoved[0]);
+
                                     configDelegate.updateEntity("sync", {"mappings": this.cleanConfig}).then(_.bind(function () {
                                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
                                     }, this));
