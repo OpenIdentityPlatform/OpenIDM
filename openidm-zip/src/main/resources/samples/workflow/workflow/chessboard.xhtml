@@ -16,7 +16,7 @@
     border-color: red;
 }
 .grid tbody tr td { background-color: #fff; }
- 
+
 .grid tbody tr:nth-child(odd) td:nth-child(even),
 .grid tbody tr:nth-child(even) td:nth-child(odd) { background-color: #eee; }
 
@@ -183,7 +183,12 @@ ol.players li {
 </table>​
 
 <script>
-(function () {
+require.config({
+  "paths": {
+    "jquery-ui": "https://ajax.googleapis.com/ajax/libs/jqueryui/1.10.0/jquery-ui.min"
+  }
+});
+require(["jquery-ui"], function () {
 
     {{#if variables.currentPlayer.length}}
     var currentPlayer = "{{variables.currentPlayer}}";
@@ -287,11 +292,11 @@ ol.players li {
 
         if (typeof(gridObj) === "undefined") {
             obj = getSquare(column, row, gridObj);
-            
+
             if (obj.attr("class")) {
                 classes = obj.attr("class").split(' ');
             }
-            
+
             if (obj.hasClass("piece")) {
                 retObj.side = (obj.hasClass("white") ? "white" : "black");
                 for (i in classes) {
@@ -303,7 +308,7 @@ ol.players li {
                     }
                 }
             }
-            
+
             if (obj.hasClass("potentialEnPassant")) {
                 retObj.potentialEnPassant = true;
             }
@@ -323,11 +328,11 @@ ol.players li {
         }
         return gridObj;
     };
-    
+
     var isKingInCheck = function(side,gridObj) {
         var validMoves = [],
             i,j,k,kingPos={};
-        
+
         for (i=0;i<8;i++) {
             for (j=0;j<8;j++) {
                 if (gridObj[i][j].hasOwnProperty("side") &&
@@ -355,27 +360,27 @@ ol.players li {
                 }
             }
         }
-        
+
         return false;
     };
-    
+
     var getValidMovesForPiece = function (gridObj, piece, position,ignoreCheck) {
         var moves = [],validMoves = [],
             i,tempGridObj,
             direction,checkPosition;
-    
+
         switch (piece.type) {
             case "pawn":
                 direction = (piece.side === "white") ? -1 : 1;
                 if (!getPieceAtPosition(position.column,position.row + (direction*1),gridObj).hasOwnProperty("side")) {
                     moves.push({column: position.column, row: position.row + (direction*1)});
                 }
-                
+
                 if (
                     (
-                        (piece.side === "white" && position.row === 7) || 
+                        (piece.side === "white" && position.row === 7) ||
                         (piece.side === "black" && position.row === 2)
-                    ) && 
+                    ) &&
                     !getPieceAtPosition(position.column,position.row + (direction*2),gridObj).hasOwnProperty("side") &&
                     !getPieceAtPosition(position.column,position.row + (direction*1),gridObj).hasOwnProperty("side")
                    ) {
@@ -402,15 +407,15 @@ ol.players li {
                         moves[i].special = "promotion";
                     }
                 }
-                
+
             break;
-                
-            case "knight": 
+
+            case "knight":
                 var ones = [-1,1],
                     twos = [-2,2],
                     i,j,k;
-                for (i=0;i<twos.length;i++) { 
-                    for (j=0;j<ones.length;j++) { 
+                for (i=0;i<twos.length;i++) {
+                    for (j=0;j<ones.length;j++) {
                         var pairs = [[twos[i],ones[j]], [ones[i],twos[j]]];
                         for (k=0;k<pairs.length;k++) {
                             if (position.row+pairs[k][0] >= 1 &&
@@ -423,7 +428,7 @@ ol.players li {
                                     }
                             }
                         }
-                    } 
+                    }
                 }
             break;
             case "bishop":
@@ -508,7 +513,7 @@ ol.players li {
                             row: position.row + opts[i][0],
                             column: position.column + opts[i][1]
                         };
-                    
+
                     if (checkCoords.row <= 8 && checkCoords.row >=1 &&
                         checkCoords.column <= 8 && checkCoords.column >= 1) {
                         checkPosition = getPieceAtPosition(checkCoords.column, checkCoords.row,gridObj);
@@ -572,7 +577,7 @@ ol.players li {
         }
         return validMoves;
     };
-        
+
     var getAllValidMovesForSide = function (side) {
         var validMoves = [],
             i,j,gridObj = grid2Obj();
@@ -599,7 +604,7 @@ ol.players li {
                 piece = getPieceAtPosition(pos.column,pos.row),
                 validMoves = getValidMovesForPiece(grid2Obj(), piece, pos),
                 i;
-            
+
             $(this).draggable("option", "revert", true);
             $(this).css("border-color", "yellow");
             for (i in validMoves) {
@@ -614,20 +619,20 @@ ol.players li {
         },
         disabled: true
     });
-    
+
     $(".grid .piece." + currentPlayer).draggable( "enable" );
-    
+
     $(".grid td").droppable({
         drop: function (event, ui) {
-            
+
             $(".grid td").removeClass("potentialEnPassant");
-            
+
             if ($(this).attr("special")) {
                 var newPosition = getGridPosition(this),
                     oldPosition = getGridPosition(ui.draggable[0]);
-                    
+
                 switch ($(this).attr("special")) {
-                    case "castle": 
+                    case "castle":
                         var currentRookSquare,newRookSquare;
                         if (oldPosition.column - newPosition.column === 2) {
                             currentRookSquare = getSquare(1,oldPosition.row);
@@ -638,9 +643,9 @@ ol.players li {
                         }
                         newRookSquare.attr("class", currentRookSquare.attr("class"));
                         currentRookSquare.attr("class", "");
-                            
+
                     break;
-                    case "twoSquareFirst": 
+                    case "twoSquareFirst":
                         var newRow = newPosition.row + ((oldPosition.row - newPosition.row)/2);
                         getSquare(newPosition.column, newRow).addClass("potentialEnPassant");
                     break;
@@ -663,10 +668,10 @@ ol.players li {
             }
             $(this).css("border-color", "");
             $(this).draggable( "enable" );
-            
+
             ui.draggable.attr("class", "");
             ui.draggable.draggable("option", "revert", false);
-            
+
             $(".grid .piece." + currentPlayer).draggable( "disable" );
             currentPlayer = (currentPlayer === "white") ? "black" : "white";
 
@@ -694,6 +699,6 @@ ol.players li {
         },
         disabled: true
     });
-    
-})();
+
+});
 </script>
