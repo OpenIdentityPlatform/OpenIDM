@@ -24,7 +24,17 @@
 
 package org.forgerock.openidm.servlet.internal;
 
+import static org.forgerock.json.resource.Requests.copyOfCreateRequest;
 import static org.forgerock.util.promise.Promises.newResultPromise;
+
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Pattern;
+
+import javax.script.ScriptException;
+import javax.servlet.ServletException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.Pair;
@@ -37,7 +47,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -73,6 +82,7 @@ import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
@@ -81,15 +91,6 @@ import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptException;
-import javax.servlet.ServletException;
-
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
 
 /**
  * The ConnectionFactory responsible for providing Connections to routing requests initiated
@@ -172,7 +173,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
                     public ResourceResponse create(Context context, CreateRequest request) throws ResourceException {
                         EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
                         try {
-                            return super.create(context, request);
+                            return super.create(context, copyOfCreateRequest(request));
                         } finally {
                             measure.end();
                         }
@@ -181,7 +182,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
                     public Promise<ResourceResponse, ResourceException> createAsync(
                             Context context, CreateRequest request) {
                         final EventEntry measure = Publisher.start(getRouterEventName(request), request, null);
-                        return super.createAsync(context, request)
+                        return super.createAsync(context, copyOfCreateRequest(request))
                                 .thenAlways(new Runnable() {
                                     @Override
                                     public void run() {
