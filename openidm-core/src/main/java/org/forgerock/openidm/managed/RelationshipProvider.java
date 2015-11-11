@@ -18,9 +18,12 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourcePath.*;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARAM_RESOURCE_CONTAINER;
+import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARAM_RESOURCE_ID;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction.notifyUpdate;
 import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
@@ -58,7 +61,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.patch.JsonValuePatch;
-import org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -412,8 +414,8 @@ public abstract class RelationshipProvider {
                     afterValue.getContent(), Status.SUCCESS);
 
             // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
-                    SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
+            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
+                    notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
             return expandFields(context, request, response);
         } catch (ResourceException e) {
@@ -510,8 +512,8 @@ public abstract class RelationshipProvider {
                     afterValue.getContent(), Status.SUCCESS);
 
             // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
-                    SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
+            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
+                    notifyUpdate, beforeValue.getContent(), afterValue.getContent());
 
             return expandFields(context, request, result);
         } catch (ResourceException e) {
@@ -559,7 +561,7 @@ public abstract class RelationshipProvider {
 
             // Changes to the relationship will trigger sync on the managed object that this field belongs to.
             managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
-                    SyncServiceAction.notifyUpdate, beforeValue.getContent(), afterValue.getContent());
+                    notifyUpdate, beforeValue.getContent(), afterValue.getContent());
             
             return expandFields(context, request, result);
         } catch (ResourceException e) {
@@ -704,8 +706,8 @@ public abstract class RelationshipProvider {
                         managedObjectBefore.getContent(), managedObjectAfter.getContent(), Status.SUCCESS);
 
                 // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-                managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context), 
-                        SyncServiceAction.notifyUpdate, managedObjectBefore.getContent(), 
+                managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
+                        notifyUpdate, managedObjectBefore.getContent(),
                         managedObjectAfter.getContent());
 
 
@@ -1066,12 +1068,22 @@ public abstract class RelationshipProvider {
                     ResourceResponse afterResponse = getConnection()
                             .read(context, Requests.newReadRequest(referenceToSync));
                     // now perform the sync
-                    logger.debug("after relationship change, calling sync on " + referenceToSync);
-                    managedObjectSyncService.performSyncAction(context, request, referenceToSync, notifyUpdate,
-                            before.getContent(), afterResponse.getContent());
+                    logger.debug("after relationship change on {}{}, making sync request on {}", resourceContainer,
+                            propertyName, referenceToSync);
+                    ResourcePath resourcePath = resourcePath(referenceToSync);
+                    final ActionRequest syncRequest = Requests.newActionRequest("sync", notifyUpdate.name())
+                            .setAdditionalParameter(ACTION_PARAM_RESOURCE_CONTAINER, resourcePath.parent().toString())
+                            .setAdditionalParameter(ACTION_PARAM_RESOURCE_ID, resourcePath.leaf())
+                            .setContent(
+                                    json(
+                                            object(
+                                                    field("oldValue", before.getContent().getObject()),
+                                                    field("newValue", afterResponse.getContent().getObject()))
+                                    ));
+                    getConnection().action(context, syncRequest);
                 } catch (Exception e) {
                     logger.warn("request on relationship was successful, however the reverse referenced object " +
-                            referenceToSync + " failed to sync.", e);
+                            referenceToSync + " failed to request a sync.", e);
                 }
             }
         }

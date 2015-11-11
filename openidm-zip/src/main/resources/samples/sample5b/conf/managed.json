@@ -465,6 +465,10 @@
         },
         {
             "name" : "assignment",
+            "onSync" : {
+                "type" : "text/javascript",
+                "source" : "require('roles/onSync-assignments').syncUsersOfRolesWithAssignment(resourceName, oldObject, newObject, ['roles']);"
+            },
             "schema" : {
                 "$schema" : "http://forgerock.org/json-schema#",
                 "type" : "object",
