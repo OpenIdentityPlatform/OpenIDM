@@ -48,6 +48,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
@@ -468,7 +469,7 @@ public class SchedulerService implements RequestHandler {
             object.put("_id", id);
             
             if (jobExists(id)) {
-                throw new ConflictException("Schedule already exists");
+                throw new PreconditionFailedException("Schedule already exists");
             }
 
             ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
@@ -487,7 +488,7 @@ public class SchedulerService implements RequestHandler {
         } catch (ParseException e) {
         	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (ObjectAlreadyExistsException e) {
-        	return new ConflictException(e.getMessage(), e).asPromise();
+            return new PreconditionFailedException(e.getMessage(), e).asPromise();
         } catch (SchedulerException e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         } catch (JsonException e) {
