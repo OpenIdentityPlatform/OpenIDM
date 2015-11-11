@@ -291,8 +291,8 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditrecon' AND xtype='U'
 BEGIN
 CREATE  TABLE  [openidm].[auditrecon]
 (
-  objectid NVARCHAR(38) NOT NULL ,
-  transactionid NVARCHAR(56) NOT NULL ,
+  objectid NVARCHAR(56) NOT NULL ,
+  transactionid NVARCHAR(255) NOT NULL ,
   activitydate NVARCHAR(29) NOT NULL ,
   eventname NVARCHAR(50) NULL ,
   userid NVARCHAR(255) NULL ,
@@ -324,8 +324,8 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditsync' AND xtype='U')
 BEGIN
 CREATE  TABLE  [openidm].[auditsync]
 (
-  objectid NVARCHAR(38) NOT NULL ,
-  transactionid NVARCHAR(56) NOT NULL ,
+  objectid NVARCHAR(56) NOT NULL ,
+  transactionid NVARCHAR(255) NOT NULL ,
   activitydate NVARCHAR(29) NOT NULL ,
   eventname NVARCHAR(50) NULL ,
   userid NVARCHAR(255) NULL ,
@@ -351,10 +351,10 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditconfig' and xtype='U
   BEGIN
     CREATE  TABLE [openidm].[auditconfig]
     (
-      objectid NVARCHAR(38) NOT NULL,
+      objectid NVARCHAR(56) NOT NULL,
       activitydate NVARCHAR(29) NOT NULL,
       eventname NVARCHAR(255) NULL,
-      transactionid NVARCHAR(56) NOT NULL,
+      transactionid NVARCHAR(255) NOT NULL,
       userid NVARCHAR(255) NULL,
       trackingids NTEXT,
       runas NVARCHAR(255) NULL,
@@ -378,10 +378,10 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditactivity' and xtype=
 BEGIN
 CREATE  TABLE [openidm].[auditactivity]
 (
-  objectid NVARCHAR(38) NOT NULL,
+  objectid NVARCHAR(56) NOT NULL,
   activitydate NVARCHAR(29) NOT NULL,
   eventname NVARCHAR(255) NULL,
-  transactionid NVARCHAR(56) NOT NULL,
+  transactionid NVARCHAR(255) NOT NULL,
   userid NVARCHAR(255) NULL,
   trackingids NTEXT,
   runas NVARCHAR(255) NULL,
@@ -406,10 +406,10 @@ END
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditaccess' and xtype='U')
 BEGIN
 CREATE  TABLE [openidm].[auditaccess] (
-  objectid NVARCHAR(38) NOT NULL ,
+  objectid NVARCHAR(56) NOT NULL ,
   activitydate NVARCHAR(29) NOT NULL ,
   eventname NVARCHAR(255) NULL ,
-  transactionid NVARCHAR(56) NOT NULL ,
+  transactionid NVARCHAR(255) NOT NULL ,
   userid NVARCHAR(255) NULL,
   trackingids NTEXT,
   server_ip NVARCHAR(40) ,
@@ -443,8 +443,8 @@ END
 IF NOT EXISTS (SELECT name FROM sysobjects where name='auditauthentication' and xtype='U')
 BEGIN
 CREATE TABLE [openidm].[auditauthentication] (
-  objectid NVARCHAR(38) NOT NULL ,
-  transactionid NVARCHAR(56) NOT NULL ,
+  objectid NVARCHAR(56) NOT NULL ,
+  transactionid NVARCHAR(255) NOT NULL ,
   activitydate NVARCHAR(29) NOT NULL ,
   userid NVARCHAR(255) NULL ,
   eventname NVARCHAR(50) NULL ,

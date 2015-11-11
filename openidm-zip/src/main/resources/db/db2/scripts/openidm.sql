@@ -242,8 +242,8 @@ COMMENT ON TABLE SOPENIDM.SECURITYKEYS IS 'OPENIDM - Security keys';
 -- -----------------------------------------------------
 CREATE TABLESPACE SOIDM20 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE sopenidm.auditauthentication (
-  objectid VARCHAR(38) NOT NULL,
-  transactionid VARCHAR(56) NOT NULL,
+  objectid VARCHAR(56) NOT NULL,
+  transactionid VARCHAR(255) NOT NULL,
   activitydate VARCHAR(29) NOT NULL,
   userid VARCHAR(255) NULL,
   eventname VARCHAR(50) NULL,
@@ -262,8 +262,8 @@ CREATE TABLE sopenidm.auditauthentication (
 
 CREATE TABLESPACE SOIDM08 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE SOPENIDM.AUDITRECON (
-    objectid VARCHAR(38) NOT NULL ,
-    transactionid VARCHAR(56) NOT NULL ,
+    objectid VARCHAR(56) NOT NULL ,
+    transactionid VARCHAR(255) NOT NULL ,
     activitydate VARCHAR(29) NOT NULL ,
     eventname VARCHAR(50) NULL ,
     userid VARCHAR(255) NULL ,
@@ -301,8 +301,8 @@ CREATE INDEX sopenidm.idx_auditrecon_status ON sopenidm.auditrecon (status ASC);
 
 CREATE TABLESPACE SOIDM13 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE sopenidm.auditsync (
-    objectid                VARCHAR(38) NOT NULL ,
-    transactionid           VARCHAR(56) NOT NULL ,
+    objectid                VARCHAR(56) NOT NULL ,
+    transactionid           VARCHAR(255) NOT NULL ,
     activitydate            VARCHAR(29) NOT NULL ,
     eventname               VARCHAR(50) NULL ,
     userid                  VARCHAR(255) NULL ,
@@ -325,10 +325,10 @@ COMMENT ON TABLE SOPENIDM.AUDITSYNC IS 'OPENIDM - Sync Audit Log';
 -- -----------------------------------------------------
 CREATE TABLESPACE SOIDM21 MANAGED BY AUTOMATIC STORAGE;
 CREATE  TABLE sopenidm.auditconfig (
-  objectid VARCHAR(38) NOT NULL ,
+  objectid VARCHAR(56) NOT NULL ,
   activitydate VARCHAR(29) NOT NULL,
   eventname VARCHAR(255) NULL ,
-  transactionid VARCHAR(56) NOT NULL ,
+  transactionid VARCHAR(255) NOT NULL ,
   userid VARCHAR(255) NULL ,
   trackingids CLOB(2M),
   runas VARCHAR(255) NULL ,
@@ -349,10 +349,10 @@ CREATE INDEX sopenidm.idx_auditconfig_transactionid ON sopenidm.auditconfig (tra
 
 CREATE TABLESPACE SOIDM09 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE SOPENIDM.AUDITACTIVITY (
-    objectid VARCHAR(38) NOT NULL ,
+    objectid VARCHAR(56) NOT NULL ,
     activitydate VARCHAR(29) NOT NULL,
     eventname VARCHAR(255) NULL ,
-    transactionid VARCHAR(56) NOT NULL ,
+    transactionid VARCHAR(255) NOT NULL ,
     userid VARCHAR(255) NULL ,
     trackingids CLOB(2M),
     runas VARCHAR(255) NULL ,
@@ -376,10 +376,10 @@ CREATE INDEX SOPENIDM.idx_auditactivity_transactionid ON SOPENIDM.AUDITACTIVITY 
 
 CREATE TABLESPACE SOIDM10 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE SOPENIDM.AUDITACCESS (
-    objectid VARCHAR(38) NOT NULL ,
+    objectid VARCHAR(56) NOT NULL ,
     activitydate VARCHAR(29) NOT NULL,
     eventname VARCHAR(255) ,
-    transactionid VARCHAR(56) NOT NULL ,
+    transactionid VARCHAR(255) NOT NULL ,
     userid VARCHAR(255) ,
     trackingids CLOB(2M),
     server_ip VARCHAR(40) ,
