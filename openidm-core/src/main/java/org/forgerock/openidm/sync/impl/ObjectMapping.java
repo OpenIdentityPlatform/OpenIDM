@@ -2304,6 +2304,7 @@ class ObjectMapping {
                         targetObjectAccessor = getCorrelatedTarget(resultValue);
 
                         Link checkExistingLink = new Link(ObjectMapping.this);
+                        checkExistingLink.setLinkQualifier(getLinkQualifier());
                         checkExistingLink.getLinkForTarget(targetObjectAccessor.getLocalId());
                         if (checkExistingLink._id == null || checkExistingLink.sourceId == null) {
                             situation = Situation.FOUND;
