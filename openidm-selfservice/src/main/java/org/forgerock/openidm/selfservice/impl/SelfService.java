@@ -18,6 +18,8 @@ package org.forgerock.openidm.selfservice.impl;
 import static org.forgerock.http.handler.HttpClientHandler.*;
 import static org.forgerock.json.resource.ResourcePath.*;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
@@ -42,40 +44,19 @@ import org.forgerock.http.spi.Loader;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.resource.RequestHandler;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourcePath;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.util.ContextUtil;
-import org.forgerock.selfservice.core.AnonymousProcessService;
 import org.forgerock.selfservice.core.ProcessStore;
-import org.forgerock.selfservice.core.ProgressStageBinder;
+import org.forgerock.selfservice.core.ProgressStage;
+import org.forgerock.selfservice.core.ProgressStageProvider;
 import org.forgerock.selfservice.core.config.StageConfig;
-import org.forgerock.selfservice.core.config.StageConfigVisitor;
+import org.forgerock.selfservice.core.config.StageConfigException;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenConfig;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandler;
 import org.forgerock.selfservice.core.snapshot.SnapshotTokenHandlerFactory;
-import org.forgerock.selfservice.json.JsonConfig;
-import org.forgerock.selfservice.stages.CommonConfigVisitor;
-import org.forgerock.selfservice.stages.captcha.CaptchaStage;
-import org.forgerock.selfservice.stages.captcha.CaptchaStageConfig;
-import org.forgerock.selfservice.stages.email.VerifyEmailAccountConfig;
-import org.forgerock.selfservice.stages.email.VerifyEmailAccountStage;
-import org.forgerock.selfservice.stages.email.VerifyUserIdConfig;
-import org.forgerock.selfservice.stages.email.VerifyUserIdStage;
-import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionConfig;
-import org.forgerock.selfservice.stages.kba.SecurityAnswerDefinitionStage;
-import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationConfig;
-import org.forgerock.selfservice.stages.kba.SecurityAnswerVerificationStage;
-import org.forgerock.selfservice.stages.registration.UserRegistrationConfig;
-import org.forgerock.selfservice.stages.registration.UserRegistrationStage;
-import org.forgerock.selfservice.stages.reset.ResetStage;
-import org.forgerock.selfservice.stages.reset.ResetStageConfig;
+import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
-import org.forgerock.selfservice.stages.user.UserDetailsConfig;
-import org.forgerock.selfservice.stages.user.UserDetailsStage;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
@@ -89,18 +70,18 @@ import org.slf4j.LoggerFactory;
  * This service supports self-registration, password reset, and forgotten username
  * per the Commons Self-Service stage configuration.
  */
-@Component(name = SelfService.PID, immediate = true, configurationFactory = true, policy=ConfigurationPolicy.REQUIRE)
+@Component(name = SelfService.PID, immediate = true, configurationFactory = true, policy = ConfigurationPolicy.REQUIRE)
 @Properties({
     @Property(name = "service.description", value = "OpenIDM SelfService Service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
 })
 public class SelfService {
-    public static final String PID = "org.forgerock.openidm.selfservice";
+    static final String PID = "org.forgerock.openidm.selfservice";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfService.class);
 
     /** the registered parent router-path for self-service flows */
-    private static final ResourcePath ROUTER_PATH = resourcePath("selfservice");
+    static final String ROUTER_PREFIX = "selfservice";
 
     /** this config key is present if the config represents a self-service process */
     private static final String STAGE_CONFIGS = "stageConfigs";
@@ -121,6 +102,10 @@ public class SelfService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
 
+    /** The KBA Configuration. */
+    @Reference(policy = ReferencePolicy.STATIC)
+    private KbaConfiguration kbaConfiguration;
+
     private Dictionary<String, Object> properties = null;
     private JsonValue config;
     private RequestHandler processService;
@@ -131,19 +116,16 @@ public class SelfService {
         LOGGER.debug("Activating Service with configuration {}", context.getProperties());
         try {
             config = enhancedConfig.getConfigurationAsJson(context);
-            // if no stage config is defined, this is not a self-service process config;
-            // finish activating without doing anything special
-            if (!config.isDefined(STAGE_CONFIGS)) {
-                return;
-            }
             amendConfig();
 
             // create self-service request handler
-            processService = new AnonymousProcessService<>(
-                    JsonConfig.buildProcessInstanceConfig(config),
-                    newStageConfigVisitor(newHttpClient()),
-                    newTokenHandlerFactory(),
-                    newProcessStore());
+            processService = JsonAnonymousProcessServiceBuilder.newBuilder()
+                    .withClassLoader(this.getClass().getClassLoader())
+                    .withJsonConfig(config)
+                    .withProgressStageProvider(newProgressStageProvider(newHttpClient()))
+                    .withTokenHandlerFactory(newTokenHandlerFactory())
+                    .withProcessStore(newProcessStore())
+                    .build();
 
             // begin service registration prep
             properties = context.getProperties();
@@ -156,7 +138,8 @@ public class SelfService {
                 throw new IllegalArgumentException("Configuration must have property: "
                         + ServerConstants.CONFIG_FACTORY_PID);
             }
-            properties.put(ServerConstants.ROUTER_PREFIX, ROUTER_PATH.concat(resourcePath(factoryPid)).toString());
+            properties.put(ServerConstants.ROUTER_PREFIX,
+                    resourcePath(ROUTER_PREFIX).concat(resourcePath(factoryPid)).toString());
 
             // service registration - register the AnonymousProcessService directly as a RequestHandler
             serviceRegistration = context.getBundleContext().registerService(
@@ -169,27 +152,14 @@ public class SelfService {
     }
 
     private void amendConfig() throws ResourceException {
-        // set serviceUrl for stage configs to use external/email
         for (JsonValue stageConfig : config.get(STAGE_CONFIGS)) {
-            if (stageConfig.isDefined("email")) {
-                stageConfig.get("email").put("serviceUrl", "external/email");
-            }
             if (stageConfig.isDefined(KBA_CONFIG)) {
-                // overwrite kbaConfig with read from config-store
-                stageConfig.put(KBA_CONFIG, readKbaConfig().getObject());
+                // overwrite kbaConfig with from KBA config service
+                stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
             }
         }
         // force storage type to stateless
         config.put("storage", "stateless");
-    }
-
-    private JsonValue readKbaConfig() throws ResourceException {
-        // TODO yipes! assume config at specific URL; make configurable
-        JsonValue config = connectionFactory.getConnection().read(ContextUtil.createInternalContext(),
-                Requests.newReadRequest("config/selfservice/kbaConfig"))
-            .getContent();
-        config.remove(ResourceResponse.FIELD_CONTENT_ID);
-        return config;
     }
 
     private Client newHttpClient() throws HttpApplicationException {
@@ -204,52 +174,47 @@ public class SelfService {
                                 })));
     }
 
-    private StageConfigVisitor newStageConfigVisitor(final Client httpClient) {
-        return new CommonConfigVisitor() {
+    private ProgressStageProvider newProgressStageProvider(final Client httpClient) {
+        return new ProgressStageProvider() {
 
             @Override
-            public ProgressStageBinder<?> build(ResetStageConfig config) {
-                return ProgressStageBinder.bind(new ResetStage(connectionFactory), config);
+            public ProgressStage<StageConfig> get(Class<? extends ProgressStage<StageConfig>> progressStageClass) {
+                Constructor<?>[] constructors = progressStageClass.getConstructors();
+
+                if (constructors.length > 1) {
+                    throw new StageConfigException("Only expected one constructor for the configured progress stage "
+                            + progressStageClass);
+                }
+
+                try {
+                    Constructor<? extends ProgressStage<StageConfig>> constructor =
+                            progressStageClass.getConstructor(constructors[0].getParameterTypes());
+
+                    Object[] parameters = getParameters(constructor);
+                    return constructor.newInstance(parameters);
+
+                } catch (NoSuchMethodException | InvocationTargetException |
+                        IllegalAccessException | InstantiationException e) {
+                    throw new StageConfigException("Unable to instantiate the configured progress stage", e);
+                }
             }
 
-            @Override
-            public ProgressStageBinder<?> build(SecurityAnswerDefinitionConfig config) {
-                return ProgressStageBinder.bind(new SecurityAnswerDefinitionStage(connectionFactory), config);
-            }
+            private Object[] getParameters(Constructor<?> constructor) {
+                Class<?>[] parameterTypes = constructor.getParameterTypes();
+                Object[] parameters = new Object[parameterTypes.length];
 
-            @Override
-            public ProgressStageBinder<?> build(SecurityAnswerVerificationConfig config) {
-                return ProgressStageBinder.bind(new SecurityAnswerVerificationStage(connectionFactory), config);
-            }
+                for (int i = 0; i < parameterTypes.length; i++) {
+                    if (parameterTypes[i].equals(ConnectionFactory.class)) {
+                        parameters[i] = connectionFactory;
+                    } else if (parameterTypes[i].equals(Client.class)) {
+                        parameters[i] = httpClient;
+                    } else {
+                        throw new StageConfigException("Unexpected parameter type for configured progress stage "
+                                + parameters[i]);
+                    }
+                }
 
-            @Override
-            public ProgressStageBinder<?> build(UserDetailsConfig config) {
-                return ProgressStageBinder.bind(new UserDetailsStage(), config);
-            }
-
-            @Override
-            public ProgressStageBinder<?> build(UserRegistrationConfig config) {
-                return ProgressStageBinder.bind(new UserRegistrationStage(connectionFactory), config);
-            }
-
-            @Override
-            public ProgressStageBinder<?> build(VerifyEmailAccountConfig config) {
-                return ProgressStageBinder.bind(new VerifyEmailAccountStage(connectionFactory), config);
-            }
-
-            @Override
-            public ProgressStageBinder<?> build(VerifyUserIdConfig config) {
-                return ProgressStageBinder.bind(new VerifyUserIdStage(connectionFactory), config);
-            }
-
-            @Override
-            public ProgressStageBinder<?> build(CaptchaStageConfig config) {
-                return ProgressStageBinder.bind(new CaptchaStage(httpClient), config);
-            }
-
-            @Override
-            public ProgressStageBinder<?> build(StageConfig<?> config) {
-                throw new UnsupportedOperationException("Unknown config type " + config.getName());
+                return parameters;
             }
         };
     }
