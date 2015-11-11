@@ -139,7 +139,7 @@ define("org/forgerock/openidm/ui/admin/connector/AbstractConnectorView", [
                                 this.setSubmitFlow();
 
                                 validatorsManager.validateAllFields(this.$el);
-
+                                this.$el.find("#connectorName").focus();
                                 if(_.isFunction(callback)){
                                     callback();
                                 }
