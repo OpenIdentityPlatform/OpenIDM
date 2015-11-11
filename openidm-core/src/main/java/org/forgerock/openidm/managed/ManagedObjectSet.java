@@ -659,7 +659,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
             ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
 
-            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId);
+            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, readRequest.getFields());
             readResponse.getContent().asMap().putAll(relationships.asMap());
 
             onRetrieve(managedContext, request, resourceId, readResponse);
@@ -676,21 +676,29 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     }
 
     /**
-     * Fetch the current relationship(s) for all relationship fields.
+     * Fetch the current relationship(s) for relationship fields set to be returned by default
+     * or specified in the {@link ReadRequest#getFields()}
      *
      * @param context The current context
      * @param resourceId The id of the resource to fetch relationships of
+     * @param requestFields The fields requested in the initial request
      * @return A {@link JsonValue} map containing all relationship fields and their values
      * @throws ResourceException 
      */
-    private JsonValue fetchRelationshipFields(Context context, String resourceId) 
+    private JsonValue fetchRelationshipFields(final Context context, final String resourceId,
+            final List<JsonPointer> requestFields)
             throws ExecutionException, InterruptedException, ResourceException {
         final JsonValue joined = json(object());
 
         for (Map.Entry<JsonPointer, RelationshipProvider> entry : relationshipProviders.entrySet()) {
             final JsonPointer field = entry.getKey();
             final RelationshipProvider provider = entry.getValue();
-            
+
+            // If relationship is hidden by default and not explicitly requested, skip
+            if (schema.getHiddenByDefaultFields().containsKey(field) && !requestFields.contains(field)) {
+                continue;
+            }
+
             try {
                 joined.put(field, provider.getRelationshipValueForResource(context, 
                         resourceId).getOrThrow().getObject());
@@ -764,7 +772,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             ResourceResponse resource = connectionFactory.getConnection().read(managedContext, readRequest);
             
             // Populate the relationship fields in the read resource
-            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId);
+            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
             resource.getContent().asMap().putAll(relationships.asMap());
             
             execScript(managedContext, ScriptHook.onDelete, decrypt(resource.getContent()), null);
@@ -881,7 +889,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 }
                 
                 // Populate the relationships
-                final JsonValue relationships = fetchRelationshipFields(context, resource.getId());
+                final JsonValue relationships = fetchRelationshipFields(context, resource.getId(), request.getFields());
                 decrypted.asMap().putAll(relationships.asMap());
 
                 JsonValue newValue = decrypted.copy();
@@ -991,7 +999,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     } else {
                         // Populate the relationship fields
                         try {
-                            JsonValue relationships = fetchRelationshipFields(managedContext, resource.getId());
+                            JsonValue relationships = fetchRelationshipFields(managedContext, resource.getId(), request.getFields());
                             resource.getContent().asMap().putAll(relationships.asMap());
                             resourceResponse = prepareResponse(managedContext, resource, request.getFields());
                         } catch (ResourceException e) {

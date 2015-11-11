@@ -178,7 +178,7 @@
                         "title" : "Provisioning Roles",
                         "viewable" : true,
                         "userEditable" : false,
-                        "returnByDefault" : true,
+                        "returnByDefault" : false,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
