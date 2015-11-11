@@ -43,7 +43,12 @@
                     <td><em>{{this.displayPostAction}}</em></td>
                     <td>
                         <button class="btn btn-link edit-policy"><i class="fa fa-pencil"></i></button>
-                        <button class="btn btn-link delete-policy{{#if disabled}} disabled{{/if}}"><i class="fa fa-times"></i></button>
+                        {{#if disabled}}
+                            <span class="delete-policy-disabled"></span>
+                        {{else}}
+                            <button class="btn btn-link delete-policy"><i class="fa fa-times"></i></button>
+
+                        {{/if}}
                     </td>
                 </tr>
                 {{/each}}
