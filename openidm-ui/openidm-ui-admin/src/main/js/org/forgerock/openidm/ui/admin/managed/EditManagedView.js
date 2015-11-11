@@ -107,6 +107,7 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                     if(managedObject.name === args[0]) {
                         this.data.currentManagedObject = managedObject;
                         this.data.currentManagedObjectIndex = iterator;
+                        this.splitSchemaAndProperties();
                     }
                 }, this));
 
@@ -141,6 +142,305 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
         },
 
         loadSchema: function() {
+            var JSONEditorDefaults = {
+                    disable_edit_json: true,
+                    disable_array_delete_all: true,
+                    disable_array_reorder: false,
+                    disable_collapse: true,
+                    disable_properties: true,
+                    show_errors: 'always',
+                    template: 'handlebars',
+                    no_additional_properties: true,
+                    additionalItems: false,
+                    required_by_default: true
+                },
+                JSONEditorSchema = {
+                        "title": "Managed Object",
+                        "type": "object",
+                        "headerTemplate": "{{self.title}}",
+                        "definitions": {
+                            "oneOfTypes": {
+                                "oneOf": [
+                                    {
+                                        "title": "String",
+                                        "type": "string",
+                                        "format": "hidden"
+                                    }, {
+                                        "title": "Array",
+                                        "type": "object",
+                                        "properties": {
+                                            "itemType": {
+                                                "title":"Item Type",
+                                                "$ref": "#/definitions/oneOfTypes"
+                                            }
+                                        }
+                                    }, {
+                                        "title": "Boolean",
+                                        "type": "string",
+                                        "displayType" : "Boolean",
+                                        "format": "hidden"
+                                    }, {
+                                        "title": "Integer",
+                                        "type": "string",
+                                        "format": "hidden"
+                                    }, {
+                                        "title": "Number",
+                                        "type": "string",
+                                        "format": "hidden"
+                                    },{
+                                        "title": "Object",
+                                        "$ref": "#/definitions/managedObject"
+                                    },
+                                    {
+                                        "title": "Relationship",
+                                        "$ref": "#/definitions/relationship"
+                                    }
+                                ]
+                            },
+                            "managedObject": {
+                                "type": "array",
+                                "format": "tabs",
+                                "items": {
+                                    "type": "object",
+                                    "title": "Property",
+                                    "headerTemplate": "{{self.propertyName}}",
+                                    "properties": {
+                                        "propertyName": {
+                                            "title": "Property Name",
+                                            "type": "string",
+                                            "propertyOrder": 1
+                                        },
+                                        "title": {
+                                            "title": "Readable Title",
+                                            "type": "string",
+                                            "propertyOrder": 2
+                                        },
+                                        "description": {
+                                            "title": "Description",
+                                            "type": "string",
+                                            "format": "textarea",
+                                            "propertyOrder": 3
+                                        },
+                                        "viewable": {
+                                            "title": "Viewable",
+                                            "type": "boolean",
+                                            "required": true,
+                                            "default": true,
+                                            "propertyOrder": 4
+                                        },
+                                        "searchable": {
+                                            "title": "Searchable",
+                                            "type": "boolean",
+                                            "required": true,
+                                            "default": false,
+                                            "propertyOrder": 5
+                                        },
+                                        "userEditable": {
+                                            "title": "End users allowed to edit?",
+                                            "type": "boolean",
+                                            "required": true,
+                                            "default": false,
+                                            "propertyOrder": 6
+                                        },
+                                        "minLength": {
+                                            "title": "Minimum Length",
+                                            "type": "string",
+                                            "propertyOrder": 7
+                                        },
+                                        "pattern": {
+                                            "title": "Pattern",
+                                            "type": "string",
+                                            "propertyOrder": 8
+                                        },
+                                        "policies": {
+                                            "title": "Validation policies",
+                                            "type": "array",
+                                            "required": true,
+                                            "items": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "policyId": {
+                                                        "type": "string",
+                                                        "title": "Policy"
+                                                    },
+                                                    "params": {
+                                                        "$ref": "#/definitions/policyParams"
+                                                    }
+                                                }
+                                            },
+                                            "default": [],
+                                            "propertyOrder": 9
+                                        },
+                                        "required": {
+                                            "title": "Required",
+                                            "type": "boolean",
+                                            "required": true,
+                                            "default": false,
+                                            "propertyOrder": 10
+                                        },
+                                        "returnByDefault": {
+                                            "title": "Return by Default",
+                                            "type": "boolean",
+                                            "required": true,
+                                            "default": false,
+                                            "propertyOrder": 11
+                                        },
+                                        "type": {
+                                            "title": "Type",
+                                            "$ref": "#/definitions/oneOfTypes",
+                                            "propertyOrder": 13
+                                        }
+                                    }
+                                }
+                            },
+                            "relationship": {
+                                "type": "object",
+                                "properties": {
+                                    "reverseRelationship": {
+                                        "title": "Reverse Relationship",
+                                        "type": "boolean",
+                                        "default": false
+                                    },
+                                    "reversePropertyName": {
+                                        "title": "Reverse Property Name",
+                                        "type": "string",
+                                        "required": true
+                                    },
+                                    "properties": {
+                                        "title": "Properties",
+                                        "type": "object",
+                                        "properties": {
+                                            "_ref": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "default": "string"
+                                                    }
+                                                }
+                                            },
+                                            "_refProperties": {
+                                                "type": "object",
+                                                "properties": {
+                                                    "type": {
+                                                        "type": "string",
+                                                        "default": "object"
+                                                    },
+                                                    "properties": {
+                                                        "$ref": "#/definitions/_refProperties"
+                                                    }
+                                                }
+                                            }
+                                            
+                                        }
+                                    },
+                                    "resourceCollection": {
+                                        "title": "Resource Collection",
+                                        "type": "array",
+                                        "items": {
+                                            "$ref": "#/definitions/resourceCollection"
+                                        }
+                                    }
+                                }
+                            },
+                            "_refProperties": {
+                                "title": "Properties",
+                                "type": "array",
+                                "format": "tabs",
+                                "items": {
+                                    "type": "object",
+                                    "headerTemplate": "{{self.propertyName}}",
+                                    "properties": {
+                                        "propertyName": {
+                                            "title": "Property Name",
+                                            "type": "string"
+                                        },
+                                        "type": {
+                                            "title": "Type",
+                                            "type": "string",
+                                            "default": "string"
+                                        },
+                                        "label": {
+                                            "title": "Label",
+                                            "type": "string",
+                                            "default": ""
+                                        }
+                                    }
+                                }
+                            },
+                            "policyParams": {
+                                "title": "Params",
+                                "type": "array",
+                                "format": "tabs",
+                                "items": {
+                                    "type": "object",
+                                    "properties": {
+                                        "paramName": {
+                                            "title": "Param Name",
+                                            "type": "string"
+                                        },
+                                        "value": {
+                                            "title": "Value",
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "resourceCollection": {
+                                "title": "Resource Collection",
+                                "type": "object",
+                                "properties": {
+                                    "path": {
+                                        "type": "string",
+                                        "title": "Path"
+                                    },
+                                    "query": {
+                                        "type": "object",
+                                        "title": "Query",
+                                        "properties": {
+                                            "queryFilter": {
+                                                "title": "Query Filter",
+                                                "type": "string"
+                                            },
+                                            "fields": {
+                                                "title": "Fields",
+                                                "type": "array",
+                                                "format": "table",
+                                                "items": {
+                                                    "title": "Field",
+                                                    "type": "string"
+                                                }
+                                            },
+                                            "sortKeys": {
+                                                "title": "Sort Keys",
+                                                "type": "array",
+                                                "format": "table",
+                                                "items": {
+                                                    "title": "Sort Key",
+                                                    "type": "string"
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "properties": {
+                            "title": {
+                                "title": "Readable Title",
+                                "type": "string"
+                            },
+                            "description": {
+                                "title": "Description",
+                                "type": "string"
+                            },
+                            "properties": {
+                                "title": "Schema Properties",
+                                "$ref": "#/definitions/managedObject"
+                            }
+                        }
+                    };
+            
             // This function needs to be re-written for the ability to set the value of oneOf type
             // enumerations.  Before "type" would take a value and never set the title(dropdown)
             // Now the setValue val is an object containing a value and a title.
@@ -159,313 +459,9 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 }
             };
 
-            this.data.managedObjectSchema = new JSONEditor(this.$el.find(".schemaEditor")[0], {
-                options: {
-                    disable_edit_json: true,
-                    disable_array_delete_all: true,
-                    disable_array_reorder: false,
-                    disable_collapse: true,
-                    disable_properties: true,
-                    show_errors: 'always',
-                    template: 'handlebars',
-                    no_additional_properties: true,
-                    additionalItems: false,
-                    required_by_default: true
-                },
-                schema: {
-                    "title": "Managed Object",
-                    "type": "object",
-                    "headerTemplate": "{{self.title}}",
-                    "definitions": {
-                        "oneOfTypes": {
-                            "oneOf": [
-                                {
-                                    "title": "String",
-                                    "type": "string",
-                                    "format": "hidden"
-                                }, {
-                                    "title": "Array",
-                                    "type": "object",
-                                    "properties": {
-                                        "itemType": {
-                                            "title":"Item Type",
-                                            "$ref": "#/definitions/oneOfTypes"
-                                        }
-                                    }
-                                }, {
-                                    "title": "Boolean",
-                                    "type": "string",
-                                    "displayType" : "Boolean",
-                                    "format": "hidden"
-                                }, {
-                                    "title": "Integer",
-                                    "type": "string",
-                                    "format": "hidden"
-                                }, {
-                                    "title": "Number",
-                                    "type": "string",
-                                    "format": "hidden"
-                                },{
-                                    "title": "Object",
-                                    "$ref": "#/definitions/managedObject"
-                                },
-                                {
-                                    "title": "Relationship",
-                                    "$ref": "#/definitions/relationship"
-                                }
-                            ]
-                        },
-                        "managedObject": {
-                            "type": "array",
-                            "format": "tabs",
-                            "items": {
-                                "type": "object",
-                                "title": "Property",
-                                "headerTemplate": "{{self.propertyName}}",
-                                "properties": {
-                                    "propertyName": {
-                                        "title": "Property Name",
-                                        "type": "string",
-                                        "propertyOrder": 1
-                                    },
-                                    "title": {
-                                        "title": "Readable Title",
-                                        "type": "string",
-                                        "propertyOrder": 2
-                                    },
-                                    "description": {
-                                        "title": "Description",
-                                        "type": "string",
-                                        "format": "textarea",
-                                        "propertyOrder": 3
-                                    },
-                                    "viewable": {
-                                        "title": "Viewable",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": true,
-                                        "propertyOrder": 4
-                                    },
-                                    "searchable": {
-                                        "title": "Searchable",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 5
-                                    },
-                                    "userEditable": {
-                                        "title": "End users allowed to edit?",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 6
-                                    },
-                                    "minLength": {
-                                        "title": "Minimum Length",
-                                        "type": "string",
-                                        "propertyOrder": 7
-                                    },
-                                    "pattern": {
-                                        "title": "Pattern",
-                                        "type": "string",
-                                        "propertyOrder": 8
-                                    },
-                                    "policies": {
-                                        "title": "Validation policies",
-                                        "type": "array",
-                                        "required": true,
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "policyId": {
-                                                    "type": "string",
-                                                    "title": "Policy"
-                                                },
-                                                "params": {
-                                                    "$ref": "#/definitions/policyParams"
-                                                }
-                                            }
-                                        },
-                                        "default": [],
-                                        "propertyOrder": 9
-                                    },
-                                    "required": {
-                                        "title": "Required",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 10
-                                    },
-                                    "returnByDefault": {
-                                        "title": "Return by Default",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 11
-                                    },
-                                    "isVirtual": {
-                                        "title": "Is Virtual?",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 12
-                                    },
-                                    "type": {
-                                        "title": "Type",
-                                        "$ref": "#/definitions/oneOfTypes",
-                                        "propertyOrder": 13
-                                    }
-                                }
-                            }
-                        },
-                        "relationship": {
-                            "type": "object",
-                            "properties": {
-                                "reverseRelationship": {
-                                    "title": "Reverse Relationship",
-                                    "type": "boolean",
-                                    "default": false
-                                },
-                                "reversePropertyName": {
-                                    "title": "Reverse Property Name",
-                                    "type": "string",
-                                    "required": true
-                                },
-                                "properties": {
-                                    "title": "Properties",
-                                    "type": "object",
-                                    "properties": {
-                                        "_ref": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "string"
-                                                }
-                                            }
-                                        },
-                                        "_refProperties": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "object"
-                                                },
-                                                "properties": {
-                                                    "$ref": "#/definitions/_refProperties"
-                                                }
-                                            }
-                                        }
-                                        
-                                    }
-                                },
-                                "resourceCollection": {
-                                    "title": "Resource Collection",
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/resourceCollection"
-                                    }
-                                }
-                            }
-                        },
-                        "_refProperties": {
-                            "title": "Properties",
-                            "type": "array",
-                            "format": "tabs",
-                            "items": {
-                                "type": "object",
-                                "headerTemplate": "{{self.propertyName}}",
-                                "properties": {
-                                    "propertyName": {
-                                        "title": "Property Name",
-                                        "type": "string"
-                                    },
-                                    "type": {
-                                        "title": "Type",
-                                        "type": "string",
-                                        "default": "string"
-                                    },
-                                    "label": {
-                                        "title": "Label",
-                                        "type": "string",
-                                        "default": ""
-                                    }
-                                }
-                            }
-                        },
-                        "policyParams": {
-                            "title": "Params",
-                            "type": "array",
-                            "format": "tabs",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "paramName": {
-                                        "title": "Param Name",
-                                        "type": "string"
-                                    },
-                                    "value": {
-                                        "title": "Value",
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        },
-                        "resourceCollection": {
-                            "title": "Resource Collection",
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "title": "Path"
-                                },
-                                "query": {
-                                    "type": "object",
-                                    "title": "Query",
-                                    "properties": {
-                                        "queryFilter": {
-                                            "title": "Query Filter",
-                                            "type": "string"
-                                        },
-                                        "fields": {
-                                            "title": "Fields",
-                                            "type": "array",
-                                            "format": "table",
-                                            "items": {
-                                                "title": "Field",
-                                                "type": "string"
-                                            }
-                                        },
-                                        "sortKeys": {
-                                            "title": "Sort Keys",
-                                            "type": "array",
-                                            "format": "table",
-                                            "items": {
-                                                "title": "Sort Key",
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "properties": {
-                        "title": {
-                            "title": "Readable Title",
-                            "type": "string"
-                        },
-                        "description": {
-                            "title": "Description",
-                            "type": "string"
-                        },
-                        "properties": {
-                            "title": "Schema Properties",
-                            "$ref": "#/definitions/managedObject"
-                        }
-                    }
-                }
-            });
+            this.data.managedObjectSchema = new JSONEditor(this.$el.find(".schemaEditor")[0], _.extend({
+                schema: JSONEditorSchema
+            }, JSONEditorDefaults));
 
             this.data.managedObjectSchema.on("change", _.bind(function () {
                 $(".schemaEditor input[type='hidden']").parent().hide();
@@ -693,14 +689,21 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 var convertPolicyParams = function (policies) {
                         _.each(policies, function (policy) {
                             var policyParams = {};
-                            _.each(policy.params, function (param) {
+                            _.each(policy.params, function (param, key) {
                                 var val;
                                 try {
                                     val = $.parseJSON(param.value);
                                 } catch (e) {
                                     val = param.value;
                                 }
-                                policyParams[param.paramName] = val;
+                                
+                                if (val && val.paramName) {
+                                    policyParams[val.paramName] = val.value;
+                                } else if (!val) {
+                                    policyParams[key] = param;
+                                } else {
+                                    policyParams[param.paramName] = val;
+                                }
                             });
                             policy.params = policyParams;
                         });
@@ -717,8 +720,7 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                     "policies": convertPolicyParams(property.policies),
                     "returnByDefault": property.returnByDefault,
                     "minLength": property.minLength,
-                    "pattern": property.pattern,
-                    "isVirtual": property.isVirtual
+                    "pattern": property.pattern
                 };
 
                 if (!node) {
@@ -837,8 +839,43 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
 
         saveManagedProperties: function(event) {
             event.preventDefault();
+            
+            var data = form2js('managedObjectPropertiesForm', '.', true),
+                properties = [];
 
-            //TODO Add in properties functionality from Schema
+            this.data.currentManagedObject.schema = this.getManagedSchema();
+            
+            _.each(data.properties, function (prop, index) {
+                console.log(prop);
+                
+                if (prop.encryption) {
+                    prop.encryption = {
+                        key: "openidm-sym-default"
+                    };
+                } else {
+                    delete prop.encryption;
+                }
+
+                if (prop.scope) {
+                    prop.scope = "private";
+                } else {
+                    delete prop.scope;
+                }
+
+                if (prop.type) {
+                    prop.type = "virtual";
+                } else {
+                    delete prop.type;
+                }
+
+                _.extend(prop, this.model.propertyScripts[index].getScripts());
+                
+                properties.push(prop);
+            }, this);
+            
+            this.data.currentManagedObject.properties = properties;
+
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
         },
 
         saveManagedScripts: function(event) {
