@@ -17,6 +17,8 @@
 package org.forgerock.openidm.audit.util;
 
 import static org.fest.assertions.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.services.context.RootContext;
@@ -51,8 +53,8 @@ public class OpenIDMActivityAuditEventBuilderTest {
                 .userId("fake")
                 .runAs(TEST_RUN_AS)
                 .operationFromRequest(request)
-                .before(null)
-                .after(null)
+                .before(json(object()))
+                .after(json(object()))
                 .changedFields(changedFields)
                 .revision("6")
                 .message(TEST_MESSAGE)
