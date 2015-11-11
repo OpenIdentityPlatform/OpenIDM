@@ -38,6 +38,7 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -135,6 +136,8 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
             } else {
                 return new BadRequestException("Unsupported action " + request.getAction()).asPromise();
             }
+        } catch (JsonValueException e) {
+            return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
