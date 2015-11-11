@@ -32,7 +32,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -47,10 +46,10 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
-import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
@@ -60,11 +59,6 @@ import org.slf4j.LoggerFactory;
  * A {@link RelationshipProvider} representing a singleton relationship for the given field.
  */
 class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
-    /**
-     * Setup logging for the {@link SingletonRelationshipProvider}.
-     */
-    private static final Logger logger = LoggerFactory.getLogger(SingletonRelationshipProvider.class);
-
 
     private final RequestHandler requestHandler;
 
@@ -143,45 +137,33 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             }
             
             queryRequest.setQueryFilter(filter);
-            connectionFactory.getConnection().query(context, queryRequest, relationships);
+            getConnection().query(context, queryRequest, relationships);
 
             if (relationships.isEmpty()) {
                 return new NotFoundException().asPromise();
+            } else if (relationships.size() == 1) {
+                return newResultPromise(formatResponse(context, queryRequest).apply(relationships.get(0)));
             } else {
-                // This is a singleton relationship so any others that exist need to be deleted.
-                // Remove the first one to keep as the one we want.
-                ResourceResponse relationship = relationships.remove(0);
-                if (!relationships.isEmpty()) {
-                    // If the list still has some extra relationships, they need to be deleted.
-                    deleteRelationships(context, relationships);
+                // This is a singleton relationship with more than 1 reference - this is an error.
+                // Collect all the erroneous references and add them to the error message.
+                List<String> errorReferences = new ArrayList<>();
+                for (ResourceResponse relationship : relationships) {
+                    JsonValue content = relationship.getContent();
+                    if (isReverseRelationship &&
+                            content.get(REPO_FIELD_FIRST_ID).defaultTo("").asString().equals(resourceFullPath)) {
+                        errorReferences.add(content.get(REPO_FIELD_SECOND_ID).asString());
+                    } else {
+                        errorReferences.add(content.get(REPO_FIELD_FIRST_ID).asString());
+                    }
                 }
+                ResourceResponse relationship = relationships.get(0);
+                relationship.getContent().add(RelationshipUtil.REFERENCE_ERROR, true);
+                relationship.getContent().add(RelationshipUtil.REFERENCE_ERROR_MESSAGE,
+                        "Multiple references found for singleton relationship " + errorReferences);
                 return newResultPromise(formatResponse(context, queryRequest).apply(relationship));
             }
         } catch (ResourceException e) {
             return e.asPromise();
-        }
-    }
-
-    /**
-     * Loops through the resourceResponses and deletes them one by one.  Exceptions on the delete are only logged.
-     *
-     * @param context current context
-     * @param resourceResponses the resources to delete.
-     * @throws ResourceException if there is trouble getting the connection from the connection factory.
-     */
-    private void deleteRelationships(Context context, List<ResourceResponse> resourceResponses)
-            throws ResourceException {
-        for (final ResourceResponse resourceResponse : resourceResponses) {
-            DeleteRequest deleteRequest = Requests.newDeleteRequest(REPO_RESOURCE_PATH, resourceResponse.getId());
-            deleteRequest.setRevision(resourceResponse.getRevision());
-            connectionFactory.getConnection().deleteAsync(context, deleteRequest).thenOnException(
-                    new ExceptionHandler<ResourceException>() {
-                        @Override
-                        public void handleException(ResourceException exception) {
-                            logger.error("Error deleting relationship: " + resourceResponse.getId(), exception);
-                        }
-                    }
-            );
         }
     }
 

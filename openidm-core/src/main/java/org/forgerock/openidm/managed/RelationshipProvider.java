@@ -18,13 +18,15 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.ResourcePath.*;
+import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARAM_RESOURCE_CONTAINER;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARAM_RESOURCE_ID;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction.notifyUpdate;
+import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ERROR;
+import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ERROR_MESSAGE;
 import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 import static org.forgerock.util.promise.Promises.newResultPromise;
@@ -173,14 +175,17 @@ public abstract class RelationshipProvider {
      * </pre>
      * <p/>
      * To a provider response format of:
+     *
      * <pre>
      *     {
-     *         "_ref": "/managed/roles/uuid"
+     *         "_ref": "/managed/roles/uuid",
      *         "_refProperties": {
      *             "_id": "someId",
      *             "_rev": "someRev",
      *             ...
-     *         }
+     *         },
+     *         "_refError": true,
+     *         "_refErrorMessage": "some error message"
      *     }
      * </pre>
      */
@@ -192,17 +197,18 @@ public abstract class RelationshipProvider {
                 
                 @Override
                 public ResourceResponse apply(final ResourceResponse raw) {
+                    final JsonValue rawContent = raw.getContent();
                     final JsonValue formatted = json(object());
                     final Map<String, Object> properties = new LinkedHashMap<>();
-                    final Map<String, Object> repoProperties = raw.getContent().get(REPO_FIELD_PROPERTIES).asMap();
+                    final Map<String, Object> repoProperties = rawContent.get(REPO_FIELD_PROPERTIES).asMap();
                     final String ref;
 
                     // set the field reference
-                    if (isReverseRelationship 
-                            && !raw.getContent().get(REPO_FIELD_FIRST_ID).asString().equals(resourceFullPath)) {
-                        ref = raw.getContent().get(REPO_FIELD_FIRST_ID).asString();
+                    if (isReverseRelationship
+                            && !rawContent.get(REPO_FIELD_FIRST_ID).asString().equals(resourceFullPath)) {
+                        ref = rawContent.get(REPO_FIELD_FIRST_ID).asString();
                     } else {
-                        ref = raw.getContent().get(REPO_FIELD_SECOND_ID).asString();
+                        ref = rawContent.get(REPO_FIELD_SECOND_ID).asString();
                     }
 
                     if (repoProperties != null) {
@@ -214,6 +220,13 @@ public abstract class RelationshipProvider {
 
                     formatted.put(SchemaField.FIELD_REFERENCE, ref);
                     formatted.put(SchemaField.FIELD_PROPERTIES, properties);
+
+                    // If has error, append error flag and message.
+                    if (rawContent.get(REFERENCE_ERROR).defaultTo(false).asBoolean()) {
+                        formatted.put(REFERENCE_ERROR, true);
+                        formatted.put(REFERENCE_ERROR_MESSAGE,
+                                rawContent.get(REFERENCE_ERROR_MESSAGE).defaultTo("").asString());
+                    }
 
                     // Return the resource without _id or _rev
                     return newResourceResponse(null, null, formatted);
