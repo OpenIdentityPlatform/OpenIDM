@@ -159,9 +159,19 @@
                         "indexType" : "unique"
                     },
                     {
-                        "propertyNames" : [ "firstId", "firstPropertyName", "secondId"],
+                        "propertyNames" : [ "firstId", "firstPropertyName", "secondId", "secondPropertyName" ],
                         "propertyType" : "string",
                         "indexType" : "unique"
+                    },
+                    {
+                        "propertyNames" : [ "firstId", "firstPropertyname" ],
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
+                    },
+                    {
+                        "propertyNames" : [ "secondId", "secondPropertyName" ],
+                        "propertyType" : "string",
+                        "indexType" : "notunique"
                     }
                 ]
             },
