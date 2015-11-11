@@ -731,7 +731,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
             for (JsonPointer pointer : request.getFields()) {
-                readRequest.addField(pointer);
+                if (pointer.equals(new JsonPointer("*"))) {
+                    readRequest.addField("");
+                } else if (!pointer.equals(SchemaField.FIELD_ALL_RELATIONSHIPS)) {
+                    readRequest.addField(pointer);
+                }
             }
             ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
             ResourceResponse decryptedResponse = decrypt(readResponse);
