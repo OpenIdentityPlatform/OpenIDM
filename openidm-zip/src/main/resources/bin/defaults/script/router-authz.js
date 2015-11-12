@@ -233,8 +233,9 @@ function ownDataOnly() {
  */
 function restrictPatchToFields(allowedFields) {
     return _.reduce(request.patchOperations, function (result, patchOp) {
-        // removes leading slashses from jsonpointer field specifications
-        var simpleField = patchOp.field.replace(/^\//, '');
+        // removes leading slashses from jsonpointer field specifications,
+        // and only considers the first path item in the jsonpointer path
+        var simpleField = patchOp.field.replace(/^\//, '').split("/")[0];
         return result && (_.indexOf(allowedFields, simpleField) !== -1);
     }, true);
 }
@@ -273,7 +274,7 @@ function onlyEditableManagedObjectProperties(objectName) {
                     // or the user is allowed to edit it
                     (
                         _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
-                        managedObject.schema.properties[propertyName].userEditable === true
+                        managedObjectConfig.schema.properties[propertyName].userEditable === true
                     )
                 );
         }, true);

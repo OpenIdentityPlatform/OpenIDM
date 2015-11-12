@@ -181,6 +181,12 @@ define("config/AppConfiguration", [
                                             "name": "config.AppConfiguration.Navigation.links.passwordReset",
                                             "icon": "fa fa-key",
                                             "inactive": false
+                                        },
+                                        {
+                                            "url": "#selfservice/forgotUsername/",
+                                            "name": "config.AppConfiguration.Navigation.links.forgotUsername",
+                                            "icon": "fa fa-question",
+                                            "inactive": false
                                         }
 
                                     ]

@@ -230,7 +230,7 @@ policyImpl = (function (){
         var queryParams,existing,requestId,requestBaseArray;
         if (value && value.length) {
             queryParams = {
-                "_queryFilter": property + ' eq "' + value + '"'
+                "_queryFilter": property + ' eq "' + value.replace(/"/g, '\\"') + '"'
             };
 
             requestId = resourceName.leaf();
@@ -604,7 +604,7 @@ policyProcessor = (function (policyConfig,policyImpl){
         }
         return reqs;
     },
-    
+
     getAppliedConditionalPolicies = function (conditionalPolicies, fallbackPolicies, fullObject) {
         var policies = [],
             i, j, condition, dependencies, failedCondition, passes;
@@ -655,11 +655,11 @@ policyProcessor = (function (policyConfig,policyImpl){
 
         appliedConditionalPolicies = getAppliedConditionalPolicies(conditionalPolicies, fallbackPolicies, fullObject);
         for (i = 0; i < appliedConditionalPolicies.length; i++) {
-            allPolicies.push(appliedConditionalPolicies[i]);   
+            allPolicies.push(appliedConditionalPolicies[i]);
         }
-        
+
         allPolicyRequirements = getAllPolicyRequirements(allPolicies);
-        
+
         for (i = 0; i < allPolicies.length; i++) {
             params = allPolicies[i].params;
             policy = getPolicy(allPolicies[i].policyId);
@@ -834,10 +834,10 @@ policyProcessor = (function (policyConfig,policyImpl){
                         prop.policies = newProp.policies;
                     }
                     // Check if there are conditional policies in the existing resource config
-                    if ((prop.conditionalPolicies !== null) && (prop.conditionalPolicies !== undefined) 
+                    if ((prop.conditionalPolicies !== null) && (prop.conditionalPolicies !== undefined)
                             && (prop.conditionalPolicies.length > 0)) {
                         // check if there are additional conditional policies
-                        if ((newProp.conditionalPolicies !== null) && (newProp.conditionalPolicies !== undefined) 
+                        if ((newProp.conditionalPolicies !== null) && (newProp.conditionalPolicies !== undefined)
                                 && (newProp.conditionalPolicies.length > 0)) {
                             // Merge the the conditional policies
                             prop.conditionalPolicies = prop.conditionalPolicies.concat(newProp.conditionalPolicies);
@@ -918,7 +918,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                         conditionalPolicies = resource.properties[i].conditionalPolicies;
                         fallbackPolicies = resource.properties[i].fallbackPolicies;
                         // Validate
-                        policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject, 
+                        policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
                                 propName, getPropertyValue(fullObject, propName), failedPolicyRequirements);
                     }
                 } else if (action === "validateProperty") {
@@ -930,7 +930,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                             conditionalPolicies = prop.conditionalPolicies;
                             fallbackPolicies = prop.fallbackPolicies;
                             // Validate
-                            policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject, 
+                            policyRequirements = validate(policies, conditionalPolicies, fallbackPolicies, fullObject,
                                     propName, props[propName], failedPolicyRequirements);
                         }
                     }

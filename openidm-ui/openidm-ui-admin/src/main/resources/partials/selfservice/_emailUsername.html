@@ -1,0 +1,16 @@
+<form id="configDialogForm" class="form-horizontal">
+    {{> form/_basicInput value=from label="templates.selfservice.emailUsername.emailFrom" property="email.from" noValidation="true"}}
+    {{> form/_basicInput value=mimeType label="templates.selfservice.emailUsername.mimeType" property="email.mimeType" noValidation="true"}}
+    {{> form/_basicInput value=usernameToken label="templates.selfservice.emailUsername.usernameToken" property="email.usernameToken" noValidation="true"}}
+
+
+    {{> selfservice/_translationMap
+        label="templates.selfservice.emailUsername.subjectTranslations"
+        property=subjectTranslations
+        fieldName="subjectTranslations"}}
+
+    {{> selfservice/_translationMap
+        label="templates.selfservice.emailUsername.messageTranslations"
+        property=messageTranslations
+        fieldName="messageTranslations"}}
+</form>

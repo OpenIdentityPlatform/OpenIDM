@@ -43,6 +43,66 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             selectize,
             jquerySortable) {
     var AbstractSelfServiceView = AdminAbstractView.extend({
+        events: {
+            "change .all-check" : "controlAllSwitch",
+            "change .section-check" : "controlSectionSwitch",
+            "click .save-config" : "saveConfig",
+            "click .wide-card.active" : "showDetailDialog",
+            "click li.disabled a" : "preventTab"
+        },
+        partials : [
+            "partials/selfservice/_translationMap.html",
+            "partials/selfservice/_translationItem.html",
+            "partials/selfservice/_advancedoptions.html",
+            "partials/selfservice/_selfserviceblock.html",
+            "partials/form/_basicInput.html"
+        ],
+        data: {
+            hideAdvanced: true,
+            config: {},
+            configList: []
+        },
+        addTranslation: function (e) {
+            e.preventDefault();
+
+            var translationMapGroup = $(e.target).closest(".translationMapGroup"),
+                currentStageConfig = e.data.currentStageConfig,
+                field = translationMapGroup.attr("field"),
+                locale = translationMapGroup.find(".newTranslationLocale"),
+                text = translationMapGroup.find(".newTranslationText");
+
+            if (!_.has(currentStageConfig[field][locale.val()])) {
+                currentStageConfig[field][locale.val()] = text.val();
+                translationMapGroup
+                    .find("ul")
+                    .append(
+                        handlebars.compile("{{> selfservice/_translationItem}}")({
+                            locale: locale.val(),
+                            text: text.val()
+                        })
+                    );
+                text.val("");
+                locale.val("").focus();
+            }
+        },
+        deleteTranslation: function (e) {
+            e.preventDefault();
+
+            var translationMapGroup = $(e.target).closest(".translationMapGroup"),
+                currentStageConfig = e.data.currentStageConfig,
+                field = translationMapGroup.attr("field"),
+                localeField = translationMapGroup.find(".newTranslationLocale"),
+                textField = translationMapGroup.find(".newTranslationText"),
+                localeValue = $(e.target).closest("li").attr("locale"),
+                textValue = $(e.target).closest("li").find(".localizedText").text();
+
+            delete currentStageConfig[field][localeValue];
+            translationMapGroup.find("li[locale='"+localeValue+"']").remove();
+
+            localeField.val(localeValue);
+            textField.val(textValue).focus();
+
+        },
         controlAllSwitch: function(event) {
             var check = $(event.target),
                 temp;
@@ -150,7 +210,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                     type: BootstrapDialog.TYPE_DEFAULT,
                     size: BootstrapDialog.SIZE_WIDE,
                     message: $(handlebars.compile("{{> selfservice/_" + type + "}}")(currentData)),
-                    onshown: function (dialogRef) {
+                    onshown: _.bind(function (dialogRef) {
+
                         dialogRef.$modalBody.find(".array-selection").selectize({
                             delimiter: ",",
                             persist: false,
@@ -161,7 +222,18 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                                 };
                             }
                         });
-                    },
+                        dialogRef.$modalBody.on("submit", "form", function (e) {
+                            e.preventDefault();
+                            return false;
+                        });
+                        dialogRef.$modalBody.on("click", ".translationMapGroup button.add",
+                            {currentStageConfig: currentData},
+                            _.bind(this.addTranslation, this));
+
+                        dialogRef.$modalBody.on("click", ".translationMapGroup button.delete",
+                            {currentStageConfig: currentData},
+                            _.bind(this.deleteTranslation, this));
+                    }, this),
                     buttons: [
                         {
                             label: $.t("common.form.close"),
@@ -334,7 +406,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
             $.extend(true, saveData, this.model.saveConfig, formData);
 
-            ConfigDelegate.updateEntity(this.model.configUrl, saveData).then(_.bind(function() {
+            return ConfigDelegate.updateEntity(this.model.configUrl, saveData).then(_.bind(function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
             }, this));
         },

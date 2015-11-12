@@ -1,0 +1,16 @@
+
+<div class="translationMapGroup well" field="{{fieldName}}">
+    <h2 class="panel-title">{{t label}}</h2>
+    <ul class="list-unstyled">
+    {{#each property}}
+        {{> selfservice/_translationItem locale=@key text=this}}
+    {{/each}}
+    </ul>
+    <div class="col-sm-2">
+        <input type="text" class="newTranslationLocale form-control" placeholder="{{t "templates.selfservice.locale"}}"/>
+    </div>
+    <div class="col-sm-6">
+        <input type="text" class="newTranslationText form-control" placeholder="{{t "templates.selfservice.localText"}}"/>
+    </div>
+    <button type="button" class="btn btn-primary add">{{t "common.form.add"}}</button>
+</div>
