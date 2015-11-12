@@ -1,0 +1,175 @@
+{
+  "extendedTopics": {
+    "activity": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "passwordChanged": {
+            "type": "boolean"
+          }
+        }
+      }
+    },
+    "access": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "roles": {
+            "type": "array",
+            "items": {
+              "id": "0",
+              "type": "string"
+            }
+          }
+        }
+      }
+    }
+  },
+  "customTopics" : {
+    "recon": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "authentication": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          "action": {
+            "type": "string"
+          },
+          "exception": {
+            "type": "string"
+          },
+          "linkQualifier": {
+            "type": "string"
+          },
+          "mapping": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "messageDetail": {
+            "type": "object",
+            "properties": {}
+          },
+          "situation": {
+            "type": "string"
+          },
+          "sourceObjectId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetObjectId": {
+            "type": "string"
+          },
+          "reconciling": {
+            "type": "string"
+          },
+          "ambiguousTargetObjectIds": {
+            "type": "string"
+          },
+          "reconAction": {
+            "type": "string"
+          },
+          "entryType": {
+            "type": "string"
+          },
+          "reconId": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "sync": {
+      "schema": {
+        "$schema": "http://json-schema.org/draft-04/schema#",
+        "id": "/",
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string"
+          },
+          "transactionId": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          },
+          "eventName": {
+            "type": "string"
+          },
+          "authentication": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              }
+            }
+          },
+          "action": {
+            "type": "string"
+          },
+          "exception": {
+            "type": "string"
+          },
+          "linkQualifier": {
+            "type": "string"
+          },
+          "mapping": {
+            "type": "string"
+          },
+          "message": {
+            "type": "string"
+          },
+          "messageDetail": {
+            "type": "object",
+            "properties": {}
+          },
+          "situation": {
+            "type": "string"
+          },
+          "sourceObjectId": {
+            "type": "string"
+          },
+          "status": {
+            "type": "string"
+          },
+          "targetObjectId": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}

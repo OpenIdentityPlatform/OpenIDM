@@ -149,12 +149,12 @@ public class AuditServiceImpl implements AuditService {
 
     private static final String AUDIT_SERVICE_CONFIG = "auditServiceConfig";
     private static final String EVENT_HANDLERS = "eventHandlers";
-    private static final String EXTENDED_EVENT_TYPES = "extendedEventTypes";
+    private static final String EVENT_TOPICS = "eventTopics";
+    private static final String CUSTOM_TOPICS  = "customTopics";
     private static final JsonPointer WATCHED_PASSWORDS_CONFIG_POINTER = new JsonPointer(
-            EXTENDED_EVENT_TYPES + "/activity/passwordFields");
+            EVENT_TOPICS + "/activity/passwordFields");
     private static final JsonPointer WATCHED_FIELDS_CONFIG_POINTER = new JsonPointer(
-            EXTENDED_EVENT_TYPES + "/activity/watchedFields");
-    private static final String CUSTOM_EVENT_TYPES = "customEventTypes";
+            EVENT_TOPICS + "/activity/watchedFields");
 
     private final JsonValueObjectConverter<AuditLogFilter> fieldJsonValueObjectConverter =
             new JsonValueObjectConverter<AuditLogFilter>() {
@@ -177,7 +177,7 @@ public class AuditServiceImpl implements AuditService {
 
     private final AuditLogFilterBuilder auditLogFilterBuilder = new AuditLogFilterBuilder()
             /* filter config events on configured actions to include */
-            .add("extendedEventTypes/config/filter/actions",
+            .add("eventTopics/config/filter/actions",
                     new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) {
@@ -185,7 +185,7 @@ public class AuditServiceImpl implements AuditService {
                         }
                     })
             /* filter activity events on configured actions to include */
-            .add("extendedEventTypes/activity/filter/actions",
+            .add("eventTopics/activity/filter/actions",
                     new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) {
@@ -193,7 +193,7 @@ public class AuditServiceImpl implements AuditService {
                         }
                     })
             /* filter activity events on configured actions to include when a particular trigger context is in scope */
-            .add("extendedEventTypes/activity/filter/triggers",
+            .add("eventTopics/activity/filter/triggers",
                     new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
                         public AuditLogFilter apply(JsonValue triggers) {
@@ -205,7 +205,7 @@ public class AuditServiceImpl implements AuditService {
                         }
                     })
             /* filter recon events on configured actions to include */
-            .add("customEventTypes/recon/filter/actions",
+            .add("eventTopics/recon/filter/actions",
                     new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
                         public AuditLogFilter apply(JsonValue actions) {
@@ -213,7 +213,7 @@ public class AuditServiceImpl implements AuditService {
                         }
                     })
             /* filter recon events on configured actions to include when a particular trigger context is in scope */
-            .add("customEventTypes/recon/filter/triggers",
+            .add("eventTopics/recon/filter/triggers",
                     new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
                         public AuditLogFilter apply(JsonValue triggers) {
@@ -225,8 +225,16 @@ public class AuditServiceImpl implements AuditService {
                         }
                     })
             /* filter events with specific field values for any event type */
-            .add("extendedEventTypes/*/filter/fields", fieldJsonValueObjectConverter)
-            .add("customEventTypes/*/filter/fields", fieldJsonValueObjectConverter);
+            .add("eventTopics/*/filter/fields", fieldJsonValueObjectConverter);
+
+    private enum DefaultAuditTopics {
+        access,
+        authentication,
+        activity,
+        config,
+        sync,
+        recon,
+    }
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -235,25 +243,7 @@ public class AuditServiceImpl implements AuditService {
             // Upon activation the ScriptRegistry is present so we can add script-based audit log filters for event
             // types
 
-            auditLogFilterBuilder.add("extendedEventTypes/*/filter/script",
-                    new JsonValueObjectConverter<AuditLogFilter>() {
-                        @Override
-                        public AuditLogFilter apply(JsonValue scriptConfig) {
-                            List<AuditLogFilter> filters = new ArrayList<>();
-                            for (String eventType : scriptConfig.keys()) {
-                                JsonValue filterConfig = scriptConfig.get(eventType);
-                                try {
-                                    filters.add(newScriptedFilter(eventType, scriptRegistry.takeScript(filterConfig)));
-                                } catch (Exception e) {
-                                    LOGGER.error(
-                                            "Audit Log Filter builder threw exception {} while processing {} for {}",
-                                            e.getClass().getName(), filterConfig.toString(), eventType, e);
-                                }
-                            }
-                            return newOrCompositeFilter(filters);
-                        }
-                    });
-            auditLogFilterBuilder.add("customEventTypes/*/filter/script",
+            auditLogFilterBuilder.add("eventTopics/*/filter/script",
                     new JsonValueObjectConverter<AuditLogFilter>() {
                         @Override
                         public AuditLogFilter apply(JsonValue scriptConfig) {
@@ -275,12 +265,14 @@ public class AuditServiceImpl implements AuditService {
             config = enhancedConfig.getConfigurationAsJson(compContext);
             auditFilter = auditLogFilterBuilder.build(config);
 
-            AuditServiceConfiguration serviceConfig =
+            final JsonValue topics = AuditJsonConfig.getJson(getClass().getResourceAsStream("/auditTopics.json"));
+            final AuditServiceConfiguration serviceConfig =
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
             final EventTopicsMetaData eventTopicsMetaData = EventTopicsMetaDataBuilder
                     .coreTopicSchemas()
-                    .withCoreTopicSchemaExtensions(config.get(EXTENDED_EVENT_TYPES))
-                    .withAdditionalTopicSchemas(config.get(CUSTOM_EVENT_TYPES)).build();
+                    .withCoreTopicSchemaExtensions(topics.get(EVENT_TOPICS))
+                    .withAdditionalTopicSchemas(
+                            getCustomTopics(topics.get(CUSTOM_TOPICS).copy(), config.get(EVENT_TOPICS).copy())).build();
             final AuditServiceBuilder auditServiceBuilder = AuditServiceBuilder.newAuditService()
                     .withConfiguration(serviceConfig)
                     .withEventTopicsMetaData(eventTopicsMetaData)
@@ -581,35 +573,6 @@ public class AuditServiceImpl implements AuditService {
         return a == b || (a != null && a.equals(b));
     }
 
-    /**
-     * Fetches a list of JsonPointers from the config file under a specified event and field name
-     * Expects it to look similar to:
-     *
-     *<PRE>
-     * {
-     *    "eventTypes": {
-     *      "activity" : {
-     *        "watchedFields": [ "email" ],
-     *        "passwordFields": [ "password1", "password2" ]
-     *      }
-     *    }
-     * }
-     * </PRE>
-     *
-     * @param config the config object to draw from
-     * @param event which event to draw from. ie "activity"
-     * @param fieldName which fieldName to draw from. ie "watchedFields"
-     * @return list containing the JsonPointers generated by the strings in the field
-     */
-    private List<JsonPointer> getEventJsonPointerList(JsonValue config, String event, String fieldName) {
-        ArrayList<JsonPointer> fieldList = new ArrayList<>();
-        JsonValue fields = config.get(EXTENDED_EVENT_TYPES).get(event).get(fieldName);
-        for (JsonValue field : fields) {
-            fieldList.add(field.asPointer());
-        }
-        return fieldList;
-    }
-
     private void formatException(final JsonValue entry) throws Exception {
         if (!entry.isDefined(EXCEPTION)
                 || entry.get(EXCEPTION).isNull()
@@ -679,5 +642,14 @@ public class AuditServiceImpl implements AuditService {
                     "Unable to get available audit event handlers and their config schema", e)
                     .asPromise();
         }
+    }
+
+    private JsonValue getCustomTopics(JsonValue defaultTopics, JsonValue configuredTopics) {
+        final JsonValue customTopics = defaultTopics;
+        for (DefaultAuditTopics defaultAuditTopic : DefaultAuditTopics.values()) {
+            configuredTopics.remove(defaultAuditTopic.name().toLowerCase());
+        }
+        customTopics.asMap().putAll(configuredTopics.asMap());
+        return customTopics;
     }
 }

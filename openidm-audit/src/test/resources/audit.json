@@ -13,27 +13,8 @@
       }
     }
   ],
-  "extendedEventTypes" : {
+  "eventTopics" : {
     "activity": {
-      "schema": {
-        "$schema": "http://json-schema.org/draft-04/schema#",
-        "id": "/",
-        "type": "object",
-        "properties": {
-          "objectId": {
-            "type": "string"
-          },
-          "status": {
-            "type": "string"
-          },
-          "message": {
-            "type": "string"
-          },
-          "passwordChanged": {
-            "type": "boolean"
-          }
-        }
-      },
       "filter" : {
         "actions" : [
           "create",
@@ -45,9 +26,7 @@
       },
       "watchedFields" : [ "mail" ],
       "passwordFields" : [ "password" ]
-    }
-  },
-  "customEventTypes" : {
+    },
     "test": {
       "schema": {
         "$schema": "http://json-schema.org/draft-04/schema#",
