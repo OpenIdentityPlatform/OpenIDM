@@ -145,11 +145,13 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                         label: $.t("common.form.update"),
                         id:"scriptDialogUpdate",
                         cssClass: 'btn-primary',
+                        hotkey: 13,
                         action: _.bind(function(dialogRef) {
                             this.formSubmit();
                             dialogRef.close();
                         },_this)
-                    }]
+                    }
+                ]
             });
         }
     });
