@@ -92,7 +92,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             this.data.requiredProperties = [];
             this.data.missingRequiredProperties = [];
-            this.model.mappingProperties = null;
+
+            if(args && args.mappingProperties) {
+                this.model.mappingProperties = args.mappingProperties;
+            } else {
+                this.model.mappingProperties = null;
+            }
 
             this.data.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
 
@@ -171,7 +176,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         clearChanges: function(e) {
             e.preventDefault();
 
-            this.model.mappingProperties = null;
             this.render();
         },
 
@@ -201,8 +205,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         },
 
         setMappingProperties: function(mappingProperties) {
-            this.model.mappingProperties = mappingProperties;
-            this.render();
+            this.render({
+                "mappingProperties" : mappingProperties
+            });
         },
 
         loadGrid: function(evalResults, attributes) {
@@ -371,7 +376,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                     UIUtils.confirmDialog($.t("templates.mapping.confirmRemoveProperty",{property: this.model.attributes.attribute.target}), "danger", _.bind(function(){
                                         _this.model.mappingProperties.splice(($(event.target).parents("tr")[0].rowIndex - 1), 1);
                                         _this.checkChanges();
-                                        _this.render();
+                                        _this.render({
+                                            "mappingProperties" : _this.model.mappingProperties
+                                        });
                                     }, this));
                                 }
                             }
