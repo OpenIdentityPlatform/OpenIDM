@@ -1,0 +1,12 @@
+<form id="configDialogForm" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.selfservice.userQuery.validQueryFields"}}</label>
+        <div class="col-sm-6">
+            <input type="text" class="form-control array-selection" data-formName="validQueryFields" value="{{validQueryFields}}">
+        </div>
+    </div>
+
+    {{> form/_basicInput value=identityIdField label="templates.selfservice.userQuery.identityIdField" property="identityIdField" noValidation="true" }}
+    {{> form/_basicInput value=identityEmailField label="templates.selfservice.userQuery.identityEmailField" property="identityEmailField" noValidation="true"}}
+    {{> form/_basicInput value=identityServiceUrl label="templates.selfservice.userQuery.identityServiceUrl" property="identityServiceUrl" noValidation="true"}}
+</form>

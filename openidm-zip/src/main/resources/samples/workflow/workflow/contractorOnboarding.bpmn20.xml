@@ -99,7 +99,7 @@
                 // Automatically send the user a password reset email
                 openidm.action("selfservice/reset", "submitRequirements", [
                     input: [
-                        username: newUserFromRepo.result[0].userName
+                        queryFilter: '/userName eq "' + newUserFromRepo.result[0].userName.replace(/"/, "\\\"") + '"'
                     ]
                 ])
 

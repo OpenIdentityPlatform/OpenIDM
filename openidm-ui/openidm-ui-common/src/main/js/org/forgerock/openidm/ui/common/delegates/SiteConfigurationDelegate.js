@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/*global define */
+/*global define, require */
 
 define("org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate", [
     "org/forgerock/openidm/ui/common/util/Constants",
@@ -43,6 +43,17 @@ define("org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate", [
             url: "",
             headers: headers
         }).then(function(data) {
+
+            if (data.configuration.kbaEnabled === true) {
+                require.config({"map": { "*": {
+                    "UserProfileView" : "org/forgerock/commons/ui/user/profile/UserProfileKBAView"
+                } } } );
+            } else {
+                require.config({"map": { "*": {
+                    "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView"
+                } } } );
+            }
+
             if(successCallback) {
                 successCallback(data.configuration);
             }

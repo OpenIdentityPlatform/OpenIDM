@@ -18,32 +18,19 @@
 
 define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", [
     "jquery",
-    "org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView"
-], function($, AbstractSelfServiceView) {
+    "lodash",
+    "org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+], function($, _, AbstractSelfServiceView, ConfigDelegate) {
     var UserRegistrationConfigView = AbstractSelfServiceView.extend({
         template: "templates/admin/selfservice/UserRegistrationConfigTemplate.html",
-        events: {
-            "change .all-check" : "controlAllSwitch",
-            "change .section-check" : "controlSectionSwitch",
-            "click .save-config" : "saveConfig",
-            "click .wide-card.active" : "showDetailDialog",
-            "click li.disabled a" : "preventTab"
-        },
-        partials: [
+        partials: AbstractSelfServiceView.prototype.partials.concat([
             "partials/selfservice/_emailValidation.html",
             "partials/selfservice/_kbaStage.html",
             "partials/selfservice/_selfRegistration.html",
             "partials/selfservice/_userDetails.html",
-            "partials/selfservice/_captcha.html",
-            "partials/selfservice/_advancedoptions.html",
-            "partials/selfservice/_selfserviceblock.html",
-            "partials/form/_basicInput.html"
-        ],
-        data: {
-            hideAdvanced: true,
-            config: {},
-            configList: []
-        },
+            "partials/selfservice/_captcha.html"
+        ]),
         model: {
             surpressSave: false,
             uiConfigurationParameter: "selfRegistration",
@@ -60,14 +47,21 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     },
                     {
                         "name" : "emailValidation",
-                        "email" : {
-                            "from" : "info@admin.org",
-                            "subject" : "Register new account",
-                            "mimeType" : "text/html",
-                            "message" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-                            "verificationLinkToken" : "%link%",
-                            "verificationLink" : "https://localhost:8443/#register/"
-                        }
+                        "identityEmailField" : "mail",
+                        "emailServiceUrl": "external/email",
+                        "from" : "info@admin.org",
+                        "subject" : "Register new account",
+                        "mimeType" : "text/html",
+                        "subjectTranslations" : {
+                            "en" : "Register new account",
+                            "fr" : "Créer un nouveau compte"
+                        },
+                        "messageTranslations" : {
+                            "en" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+                            "fr" : "<h3>Ceci est votre mail d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification email</a></h4>"
+                        },
+                        "verificationLinkToken" : "%link%",
+                        "verificationLink" : "https://localhost:8443/#register/"
                     },
                     {
                         "name" : "userDetails",
@@ -75,7 +69,6 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     },
                     {
                         "name" : "kbaSecurityAnswerDefinitionStage",
-                        "kbaPropertyName" : "kbaInfo",
                         "kbaConfig" : null
                     },
                     {
@@ -130,6 +123,17 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
             }];
 
             this.selfServiceRender(args, callback);
+        },
+        saveConfig: function () {
+            return AbstractSelfServiceView.prototype.saveConfig.call(this).then(_.bind(function () {
+                var kbaEnabled = !!_.find(this.model.saveConfig.stageConfigs, function (stage) {
+                    return stage.name === "kbaSecurityAnswerDefinitionStage";
+                });
+                if (kbaEnabled !== this.model.uiConfig.configuration.kbaEnabled) {
+                    this.model.uiConfig.configuration.kbaEnabled = kbaEnabled;
+                    return ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig);
+                }
+            }, this));
         }
     });
 

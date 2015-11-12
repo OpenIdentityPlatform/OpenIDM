@@ -166,6 +166,8 @@
             "selfService" : {
                 "userRegistrationSave" : "User registration configuration saved",
                 "userRegistrationDelete" : "User registration configuration deleted",
+                "usernameSave" : "Forgotten username retrieval configuration saved",
+                "usernameDelete" : "Forgotten username retrieval configuration deleted",
                 "passwordSave" : "Password configuration saved",
                 "passwordDelete" : "Password configuration deleted"
             },
@@ -198,7 +200,8 @@
                     "roles": "Roles",
                     "userSelfService" : "User Self-Service",
                     "userRegistration" : "User Registration",
-                    "passwordReset" : "Password Reset"
+                    "passwordReset" : "Password Reset",
+                    "forgotUsername" : "Forgotten Username"
                 }
             }
         }
@@ -266,7 +269,8 @@
                 "registerAccount" : "Register",
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset your password",
-                "loginWithOpenAM": "Login with OpenAM"
+                "loginWithOpenAM": "Login with OpenAM",
+                "forgotUsername" : "Forgot Username?"
             },
             "404" : {
                 "pageNotFound" : "Page not found",
@@ -426,17 +430,29 @@
             "created": "Created"
         },
         "selfservice" : {
+            "locale" : "locale",
+            "localText" : "Localized Text",
             "emailValidationPasswordDialog" : "Configure Password Email Validation",
+
             "passwordSelfServiceHelp" : "Configure the end-user password reset experience.",
+            "usernameSelfServiceHelp" : "Configure the end-user forgotten username retrieval experience.",
             "userRegistrationSelfServiceHelp" : "Configure the end-user registration experience.",
+
             "enableUserRegistration" : "Enable User Registration",
             "enablePassword" : "Enable Password Reset",
+            "enableForgotUsername" : "Enable Forgotten Username Retrieval",
+
             "userRegistration" : "User Registration",
             "passwordReset" : "Password Reset",
+            "forgotUsername" : "Forgotten Username Retrieval",
+
             "options" : "Options",
             "advanced" : "Advanced",
+
             "registrationSteps" : "Registration Steps",
             "passwordSteps" : "Password Reset Steps",
+            "usernameSteps" : "Forgotten Username Steps",
+
             "emailValidation" : "Email Validation",
             "emailValidationDescription" : "Verify that the user has access to the email account",
             "kbaSecurityAnswerDefinitionStageTitle" : "KBA Stage",
@@ -456,7 +472,8 @@
             "tokenExpire" : "Token LifeTime (seconds)",
             "password" : {
                 "resetStageTitle" : "Configure Password Reset Form",
-                "userIdValidationTitle" : "Configure Validation Email",
+                "emailValidationTitle" : "Configure Validation Email",
+                "userQueryTitle" : "Configure User Lookup Form",
                 "captchaTitle" : "reCAPTCHA for Password Reset"
             },
             "user" : {
@@ -465,6 +482,12 @@
                 "kbaStageTitle" : "Configure KBA Stage",
                 "userDetailsTitle" : "Configure User Details",
                 "captchaTitle" : "reCAPTCHA for Registration"
+            },
+            "username" : {
+                "captchaTitle" : "reCAPTCHA for Forgotten Username",
+                "userQueryTitle" : "Configure User Lookup Form",
+                "emailUsernameTitle" : "Configure Email Username",
+                "retrieveUsernameTitle" : "Display Username"
             },
             "userRegistrationForm" : {
                 "identityServiceUrl" : "Identity Service URL",
@@ -489,8 +512,10 @@
                 "question" : "Question",
                 "questionHelp" : "Security question for user registration"
             },
-            "userIdValidation" : {
-                "queryFields" : "Query Fields",
+            "userQuery" : {
+                "name" : "User Query Form",
+                "description": "Configure form used to find users during password reset",
+                "validQueryFields" : "Valid Query Fields",
                 "queryFieldsHelp" : "",
                 "identityIdField" : "Identity Id Field",
                 "identityIdFieldHelp"  : "",
@@ -523,6 +548,22 @@
             "resetStage" : {
                 "passwordField" : "Password Field",
                 "passwordFieldHelp" : ""
+            },
+            "emailUsername" : {
+                "name" : "Email Username",
+                "description" : "Send the user an email containing their username",
+                "emailFrom" : "Email From",
+                "mimeType" : "Mime Type (text/html or text/plain)",
+                "subjectTranslations" : "Email Subject",
+                "messageTranslations" : "Email Message",
+                "emailMessageHelp" : "",
+                "usernameToken" : "Username Token",
+                "verificationLinkTokenHelp" : ""
+            },
+            "retrieveUsername" : {
+                "name" : "Display Username",
+                "description" : "Show the username directly to the user",
+                "noOptions" : "No options necessary to configure"
             }
         },
         "managed" : {
@@ -1569,6 +1610,7 @@
             "error" : "Error",
             "warning" : "Warning",
             "filter" : "Filter...",
+            "passwordPlaceholder": "••••••••••••",
             "validation" : {
                 "VALID_PHONE_FORMAT": "Must be a valid phone number",
                 "VALID_NAME_FORMAT": "Must have valid name characters",
@@ -1607,6 +1649,13 @@
             }
         },
         "user" : {
+            "userQuery" : {
+                "mainEnterPrompt": "Enter your ",
+                "optionalEnterPrompt": "or your ",
+                "orAllEnterPrompt" : "or all of the following information",
+                "title" : "Enter details to find your account",
+                "any" : "Any of these:"
+            },
             "passwordReset" : {
                 "title": "Reset Your Password",
                 "completed": "Your password has been successfully reset.",
@@ -1621,16 +1670,24 @@
                 "tryAgain": "Try Registering Again",
                 "return": "Return to Login Page"
             },
+            "forgotUsername" : {
+                "title" : "Retrieve Your Username",
+                "checkEmail" : "An email containing your username has been sent to your account.",
+                "failed": "Unable to retrieve your username",
+                "found": "Your username is ",
+                "tryAgain": "Try Finding Your Username Again",
+                "return": "Return to Login Page"
+            },
             "kba" : {
                 "answerQuestions": "Answer security questions below to reset your password.",
-                "description": "The Security Question selected and corresponding answer provided by you will be used to help identify you in the event that you forget your password.",
+                "description": "Select security question(s) below. These questions will help us verify your identity if you forget your password.",
                 "provideAnother": "Add another question",
                 "selectQuestion": "Select a security question",
                 "provideYourOwn": "Provide your own",
                 "customQuestion": "Custom Security Question",
-                "answer": "Security Answer"
+                "answer": "Security Answer",
+                "securityQuestions": "Security Questions"
             },
-            "userIdValidation" : "Enter the username or email address associated with your account. We will send you an email with a link that will allow you to reset your password.",
             "emailValidation" : "Enter your email address to proceed. We will send you an email with a link that will allow you to continue registering.",
             "send": "Send",
             "validateCode" : "An email has been sent to the address you entered. Click the link in that email to proceed.",

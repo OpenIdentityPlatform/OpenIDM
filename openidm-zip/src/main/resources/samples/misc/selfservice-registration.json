@@ -2,14 +2,21 @@
     "stageConfigs" : [
         {
             "name" : "emailValidation",
-            "email" : {
-                "from" : "info@admin.org",
-                "subject" : "Register new account",
-                "mimeType" : "text/html",
-                "message" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
-                "verificationLinkToken" : "%link%",
-                "verificationLink" : "https://localhost:8443/#register/"
-            }
+            "identityEmailField" : "mail",
+            "emailServiceUrl" : "external/email",
+            "from" : "info@admin.org",
+            "subject" : "Register new account",
+            "mimeType" : "text/html",
+            "subjectTranslations" : {
+                "en" : "Register new account",
+                "fr" : "Créer un nouveau compte"
+            },
+            "messageTranslations" : {
+                "en" : "<h3>This is your registration email.</h3><h4><a href=\"%link%\">Email verification link</a></h4>",
+                "fr" : "<h3>Ceci est votre mail d'inscription.</h3><h4><a href=\"%link%\">Lien de vérification email</a></h4>"
+            },
+            "verificationLinkToken" : "%link%",
+            "verificationLink" : "https://localhost:8443/#register/"
         },
         {
             "name" : "userDetails",
@@ -17,7 +24,6 @@
         },
         {
             "name" : "kbaSecurityAnswerDefinitionStage",
-            "kbaPropertyName" : "kbaInfo",
             "kbaConfig" : null
         },
         {
@@ -33,7 +39,7 @@
         "jweAlgorithm" : "RSAES_PKCS1_V1_5",
         "encryptionMethod" : "A128CBC_HS256",
         "jwsAlgorithm" : "HS256",
-        "tokenExpiry" : 1800
+        "tokenExpiry" : "1800"
     },
     "storage" : "stateless"
 }

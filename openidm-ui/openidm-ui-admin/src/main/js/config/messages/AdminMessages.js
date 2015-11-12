@@ -184,6 +184,14 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.selfService.userRegistrationDelete",
             type: "error"
         },
+        "selfServiceUsernameSave" : {
+            msg: "config.messages.selfService.usernameSave",
+            type: "info"
+        },
+        "selfServiceUsernameDelete": {
+            msg: "config.messages.selfService.usernameDelete",
+            type: "error"
+        },
         "selfServicePasswordSave" : {
             msg: "config.messages.selfService.passwordSave",
             type: "info"

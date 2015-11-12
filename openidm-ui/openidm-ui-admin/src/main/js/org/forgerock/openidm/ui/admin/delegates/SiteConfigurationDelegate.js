@@ -47,6 +47,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
             // In the admin context, these are always false.
             config.passwordReset = false;
             config.selfRegistration = false;
+            config.forgotUsername = false;
             successCallback(config);
         });
     };

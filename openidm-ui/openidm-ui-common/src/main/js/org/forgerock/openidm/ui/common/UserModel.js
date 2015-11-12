@@ -29,6 +29,10 @@ define("org/forgerock/openidm/ui/common/UserModel", [
         protectedAttributeList: [],
         sync: function (method, model, options) {
             var headers = {};
+            if (options.silent === true) {
+                return this;
+            }
+
             if (method === "update" || method === "patch") {
                 if (this.currentPassword !== undefined) {
                     headers[Constants.HEADER_PARAM_REAUTH] = this.currentPassword;

@@ -96,6 +96,22 @@ var httpAccessConfig =
            "customAuthz" : "checkIfUIIsEnabled('passwordReset')"
         },
 
+        {
+           "pattern"    : "selfservice/username",
+           "roles"      : "*",
+           "methods"    : "read,action",
+           "actions"    : "submitRequirements",
+           "customAuthz" : "checkIfUIIsEnabled('forgotUsername')"
+        },
+
+        {
+           "pattern"    : "selfservice/kba",
+           "roles"      : "openidm-authorized",
+           "methods"    : "read",
+           "actions"    : "*",
+           "customAuthz" : "checkIfUIIsEnabled('kbaEnabled')"
+        },
+
         // rules governing requests originating from forgerock-selfservice
         {
             "pattern"   : "managed/user",
@@ -109,14 +125,14 @@ var httpAccessConfig =
             "roles"     : "*",
             "methods"   : "query",
             "actions"   : "*",
-            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest()"
+            "customAuthz" : "(checkIfUIIsEnabled('forgotUsername') || checkIfUIIsEnabled('passwordReset')) && isSelfServiceRequest()"
         },
         {
             "pattern"   : "managed/user/*",
             "roles"     : "*",
             "methods"   : "read",
             "actions"   : "*",
-            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest()"
+            "customAuthz" : "(checkIfUIIsEnabled('forgotUsername') || checkIfUIIsEnabled('passwordReset')) && isSelfServiceRequest()"
         },
         {
             "pattern"   : "managed/user/*",
@@ -130,7 +146,7 @@ var httpAccessConfig =
             "roles"     : "*",
             "methods"   : "action",
             "actions"   : "send",
-            "customAuthz" : "(checkIfUIIsEnabled('passwordReset') || checkIfUIIsEnabled('selfRegistration')) && isSelfServiceRequest()"
+            "customAuthz" : "(checkIfUIIsEnabled('forgotUsername') || checkIfUIIsEnabled('passwordReset') || checkIfUIIsEnabled('selfRegistration')) && isSelfServiceRequest()"
         },
 
         // openidm-admin can request nearly anything (except query expressions on repo endpoints)
@@ -217,6 +233,13 @@ var httpAccessConfig =
             "methods"   : "update,patch",
             "actions"   : "*",
             "customAuthz" : "ownDataOnly() && onlyEditableManagedObjectProperties('user')"
+        },
+        {
+            "pattern"   : "selfservice/user/*",
+            "roles"     : "openidm-authorized",
+            "methods"   : "patch",
+            "actions"   : "*",
+            "customAuthz" : "(request.resourcePath === 'selfservice/user/' + context.security.authorization.id) && onlyEditableManagedObjectProperties('user')"
         },
 
         // enforcement of which notifications you can read and delete is done within the endpoint

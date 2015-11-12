@@ -16,23 +16,24 @@
 
 /*global define */
 
-define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
+define("org/forgerock/openidm/ui/admin/selfservice/ForgotUsernameConfigView", [
     "jquery",
     "org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView"
 ], function($, AbstractSelfServiceView) {
-    var PasswordResetConfigView = AbstractSelfServiceView.extend({
-        template: "templates/admin/selfservice/PasswordResetConfigTemplate.html",
+    var ForgotUsernameConfigView = AbstractSelfServiceView.extend({
+        template: "templates/admin/selfservice/ForgotUsernameConfigTemplate.html",
         partials: AbstractSelfServiceView.prototype.partials.concat([
             "partials/selfservice/_userQuery.html",
-            "partials/selfservice/_resetStage.html",
-            "partials/selfservice/_captcha.html"
+            "partials/selfservice/_captcha.html",
+            "partials/selfservice/_emailUsername.html",
+            "partials/selfservice/_retrieveUsername.html"
         ]),
         model: {
             surpressSave: false,
-            uiConfigurationParameter: "passwordReset",
-            serviceType: "password",
-            configUrl: "selfservice/reset",
-            msgType: "selfServicePassword",
+            uiConfigurationParameter: "forgotUsername",
+            serviceType: "username",
+            configUrl: "selfservice/username",
+            msgType: "selfServiceUsername",
             "configDefault": {
                 "stageConfigs": [
                     {
@@ -44,7 +45,6 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                     {
                         "name" : "userQuery",
                         "validQueryFields" : [
-                            "userName",
                             "mail",
                             "givenName",
                             "sn"
@@ -55,34 +55,20 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                         "identityServiceUrl" : "managed/user"
                     },
                     {
-                        "name" : "emailValidation",
-                        "identityEmailField" : "mail",
+                        "name" : "emailUsername",
                         "emailServiceUrl": "external/email",
-                        "from" : "info@admin.org",
-                        "subject" : "Reset password email",
-                        "mimeType" : "text/html",
+                        "from": "info@admin.org",
+                        "mimeType": "text/html",
                         "subjectTranslations": {
-                          "en": "Reset your password",
-                          "fr": "Réinitialisez votre mot de passe"
+                            "en": "Account Information - username"
                         },
                         "messageTranslations": {
-                          "en": "<h3>Click to reset your password</h3><h4><a href=\"%link%\">Password reset link</a></h4>",
-                          "fr": "<h3>Cliquez pour réinitialiser votre mot de passe</h3><h4><a href=\"%link%\">Mot de passe lien de réinitialisation</a></h4>"
+                            "en": "<h3>Username is:</h3><br />%username%"
                         },
-                        "verificationLinkToken" : "%link%",
-                        "verificationLink" : "https://localhost:8443/#passwordReset/"
+                        "usernameToken": "%username%"
                     },
                     {
-                      "name" : "kbaSecurityAnswerVerificationStage",
-                      "kbaPropertyName" : "kbaInfo",
-                      "identityServiceUrl" : "managed/user",
-                      "numberOfQuestionsUserMustAnswer" : "1",
-                      "kbaConfig" : null
-                    },
-                    {
-                        "name" : "resetStage",
-                        "identityServiceUrl" : "managed/user",
-                        "identityPasswordField" : "password"
+                      "name" : "retrieveUsername"
                     }
                 ],
                 "snapshotToken" : {
@@ -103,8 +89,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
             this.data.configList = [{
                 type: "captcha",
                 title: $.t("templates.selfservice.password.captchaTitle"),
-                help: $.t("templates.selfservice.captcha.description"),
-                editable: true
+                help: $.t("templates.selfservice.captcha.description")
             },
             {
                 type: "userQuery",
@@ -112,27 +97,19 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 help: $.t("templates.selfservice.userQuery.description")
             },
             {
-                type: "emailValidation",
-                title: $.t("templates.selfservice.emailValidation"),
-                help: $.t("templates.selfservice.emailValidationDescription"),
-                editable: true
+                type: "emailUsername",
+                title: $.t("templates.selfservice.emailUsername.name"),
+                help: $.t("templates.selfservice.emailUsername.description")
             },
             {
-                type: "kbaSecurityAnswerVerificationStage",
-                title: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageForm"),
-                help: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageFormDescription"),
-                editable: false
-            },
-            {
-                type: "resetStage",
-                title: $.t("templates.selfservice.passwordResetForm"),
-                help: $.t("templates.selfservice.passwordResetFormDescription"),
-                editable: true
+                type: "retrieveUsername",
+                title: $.t("templates.selfservice.retrieveUsername.name"),
+                help: $.t("templates.selfservice.retrieveUsername.description")
             }];
 
             this.selfServiceRender(args, callback);
         }
     });
 
-    return new PasswordResetConfigView();
+    return new ForgotUsernameConfigView();
 });

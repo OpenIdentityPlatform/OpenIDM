@@ -43,6 +43,11 @@ define("config/routes/AdminRoutesConfig", [
             role: "ui-admin",
             url: "selfservice/passwordreset/"
         },
+        "forgotUsernameView" : {
+            view: "org/forgerock/openidm/ui/admin/selfservice/ForgotUsernameConfigView",
+            role: "ui-admin",
+            url: "selfservice/forgotUsername/"
+        },
         "connectorListView" : {
             view: "org/forgerock/openidm/ui/admin/connector/ConnectorListView",
             role: "ui-admin",
