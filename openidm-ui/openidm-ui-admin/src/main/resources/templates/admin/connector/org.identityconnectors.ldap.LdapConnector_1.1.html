@@ -172,9 +172,24 @@
     <div id="accountObject" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="accountObjectClassesWrapper" aria-expanded="true">
         <div class="panel-body connector-array-component" id="accountObjectClassesWrapper">
             <div class="form-group">
-                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountSearchFilter"}}</label>
-                <div class="input-group col-sm-8">
-                    <input autocomplete="off" class="form-control filter" type="text" id="accountSearchFilter" name="configurationProperties.accountSearchFilter" value="{{connectorDefaults.configurationProperties.accountSearchFilter}}" />
+                <label class="control-label col-sm-3" >{{t "templates.connector.ldapConnector.accountSearchFilter"}}</label>
+                <div class="input-group col-sm-8 filter-holder">
+
+                    <input class="form-control"
+                           disabled
+                           autocomplete="off"
+                           type="text"
+                           id="accountSearchFilter"
+                           name="configurationProperties.accountSearchFilter"
+                           data-target="#userFilterModal"
+                           placeholder="{{t "templates.connector.ldapConnector.noFilter"}}"
+                    value="{{connectorDefaults.configurationProperties.accountSearchFilter}}">
+                    <div class="input-group-modal-btn input-group-btn">
+                        <button class="clean-btn filter" data-toggle="modal" type="button">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                    </div>
+
                 </div>
             </div>
 
@@ -224,9 +239,24 @@
         <div class="panel-body connector-array-component" id="groupObjectClassesWrapper">
             <div class="form-group">
                 <label class="control-label col-sm-3">Group Filter</label>
-                <div class="input-group col-sm-8">
-                    <input autocomplete="off" class="form-control filter" type="text" id="groupSearchFilter" name="configurationProperties.groupSearchFilter" value="{{connectorDefaults.configurationProperties.groupSearchFilter}}" />
+
+                <div class="input-group col-sm-8 filter-holder">
+                    <input class="form-control"
+                           disabled
+                           autocomplete="off"
+                           type="text"
+                           id="groupSearchFilter"
+                           name="configurationProperties.groupSearchFilter"
+                           data-target="#userFilterModal"
+                           placeholder="{{t "templates.connector.ldapConnector.noFilter"}}"
+                    value="{{connectorDefaults.configurationProperties.groupSearchFilter}}">
+                    <div class="input-group-modal-btn input-group-btn">
+                        <button class="clean-btn filter" data-toggle="modal" type="button">
+                            <i class="fa fa-pencil"></i>
+                        </button>
+                    </div>
                 </div>
+
             </div>
 
             <hr/>

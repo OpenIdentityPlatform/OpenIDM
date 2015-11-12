@@ -40,7 +40,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
         events: {
             "click .add-btn": "addField",
             "click .remove-btn": "removeField",
-            "focus .filter": "showFilterDialog",
+            "click .filter": "showFilterDialog",
             "click #ssl": "toggleSSLPort",
             "click #syncBaseContext" : "toggleSyncBaseContext",
             "click #toggleCert": "toggleCert",
@@ -209,7 +209,7 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
         showFilterDialog: function (event) {
             event.preventDefault();
 
-            var filterProp = $(event.target).attr("id"),
+            var filterProp = $(event.target).closest(".filter-holder").find("input").attr("id"),
                 updatePromise = $.Deferred();
 
             ldapFilterDialog.render({
