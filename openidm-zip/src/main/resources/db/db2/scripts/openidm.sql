@@ -405,7 +405,7 @@ CREATE TABLE SOPENIDM.AUDITACCESS (
     PRIMARY KEY (OBJECTID)
 ) IN DOPENIDM.SOIDM10;
 COMMENT ON TABLE SOPENIDM.AUDITACCESS IS 'OPENIDM - Audit Access';
-CREATE INDEX SOPENIDM.idx_auditaccess_status ON SOPENIDM.AUDITACCESS (status ASC);
+CREATE INDEX SOPENIDM.idx_auditaccess_response_status ON SOPENIDM.AUDITACCESS (response_status ASC);
 --CREATE INDEX SOPENIDM.idx_auditaccess_principal ON SOPENIDM.AUDITACCESS (principal(28) ASC);
 
 -- -----------------------------------------------------
@@ -426,13 +426,13 @@ COMMENT ON TABLE SOPENIDM.INTERNALUSER IS 'OPENIDM - Internal User';
 -- Table openidm.internaluser
 -- -----------------------------------------------------
 
-CREATE TABLESPACE SOIDM14 MANAGED BY AUTOMATIC STORAGE;
+CREATE TABLESPACE SOIDM26 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE SOPENIDM.INTERNALROLE (
     objectid                   VARCHAR(254)    NOT NULL,
     rev                        VARCHAR(38),
     description                VARCHAR(1024),
     PRIMARY KEY (objectid)
-) IN DOPENIDM.SOIDM14;
+) IN DOPENIDM.SOIDM26;
 COMMENT ON TABLE SOPENIDM.INTERNALROLE IS 'OPENIDM - Internal Role';
 
 -- -----------------------------------------------------
@@ -581,10 +581,10 @@ INSERT INTO sopenidm.internaluser (objectid, rev, pwd, roles) VALUES ('anonymous
 
 INSERT INTO sopenidm.internalrole (objectid, rev, description)
 VALUES
-('openidm-authorized', '0', 'Basic minimum user') UNION ALL
-('openidm-admin', '0', 'Administrative access') UNION ALL
-('openidm-cert', '0', 'Authenticated via certificate') UNION ALL
-('openidm-tasks-manager', '0', 'Allowed to reassign workflow tasks') UNION ALL
+('openidm-authorized', '0', 'Basic minimum user'),
+('openidm-admin', '0', 'Administrative access'),
+('openidm-cert', '0', 'Authenticated via certificate'),
+('openidm-tasks-manager', '0', 'Allowed to reassign workflow tasks'),
 ('openidm-reg', '0', 'Anonymous access');
 
 
