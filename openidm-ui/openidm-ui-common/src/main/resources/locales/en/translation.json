@@ -1283,6 +1283,7 @@
                 "jndiProperties" : "JNDI Properties"
             },
             "ldapConnector" : {
+                "noFilter": "No user filter added...",
                 "ldapType" : "LDAP Type",
                 "ldapTypeChange" : "Are you sure you want to change to these LDAP details? Any unsaved work will be lost.",
                 "link": "Setup Active Directory",
