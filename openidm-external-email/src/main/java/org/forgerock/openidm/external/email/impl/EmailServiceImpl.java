@@ -1,31 +1,20 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2015 ForgeRock AS.
  */
 
 package org.forgerock.openidm.external.email.impl;
-
-import java.util.HashMap;
-import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -37,7 +26,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.services.context.Context;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ForbiddenException;
@@ -45,21 +33,18 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Email service implementation
- * 
+ * Email service implementation.
  */
 @Component(name = EmailServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
@@ -71,6 +56,9 @@ public class EmailServiceImpl implements SingletonResourceProvider {
     final static Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
     public static final String PID = "org.forgerock.openidm.external.email";
 
+    /** EmailService parameter to indicate sending asynchronously */
+    public static final String PARAM_ASYNC = "async";
+
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
@@ -79,16 +67,21 @@ public class EmailServiceImpl implements SingletonResourceProvider {
 
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
-        Map<String, Object> result = new HashMap<>();
-        logger.debug("External Email service action called for {} with {}",
-                request.getResourcePath(), request.getContent());
-        try {
-            emailClient.send(request.getContent());
-        } catch (ResourceException e) {
-            return e.asPromise();
+        // Support async email; default to synchronous
+        final boolean sendAsync = Boolean.valueOf(request.getAdditionalParameter(PARAM_ASYNC));
+
+        logger.debug("External Email service action {}-{} called for {} with {}",
+                request.getAction(), sendAsync ? "async" : "sync", request.getResourcePath(), request.getContent());
+
+        if (sendAsync) {
+            return emailClient.sendAsync(request.getContent());
+        } else {
+            try {
+                return emailClient.send(request.getContent()).asPromise();
+            } catch (ResourceException e) {
+                return e.asPromise();
+            }
         }
-        result.put("status", "OK");
-        return Promises.newResultPromise(Responses.newActionResponse(new JsonValue(result)));
     }
 
     @Override
@@ -116,12 +109,12 @@ public class EmailServiceImpl implements SingletonResourceProvider {
             logger.warn("Configuration invalid, can not start external email client service.", ex);
             throw ex;
         }
-        logger.info(" external email service started.");
+        logger.info("External email service started.");
     }
 
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext.getProperties());
-        logger.info("Notification service stopped.");
+        logger.info("External email service stoped.");
     }
 }
