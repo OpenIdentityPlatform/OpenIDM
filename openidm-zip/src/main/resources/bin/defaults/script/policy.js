@@ -745,7 +745,7 @@ policyProcessor = (function (policyConfig,policyImpl){
             resourceConfig;
 
         // only managed objects support additional policies
-        if (resource !== "managed") {
+        if (resource !== "managed" || parts.length > 3) {
             return [];
         } else {
             resourceConfig = openidm.read("config/managed");
