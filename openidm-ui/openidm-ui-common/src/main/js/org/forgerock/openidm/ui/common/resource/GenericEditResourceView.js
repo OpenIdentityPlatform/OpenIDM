@@ -314,9 +314,11 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                         delete formVal[key];
                     }
                 }, this);
-
-                _.each(this.$el.find(".resourceCollectionArrayValue"), function(element) {
-                    formVal[$(element).attr("propname")] = JSON.parse($(element).val());
+            } else {
+                _.each(this.$el.find(".resourceCollectionValue"), function(element) {
+                    try {
+                        formVal[$(element).attr("propname")] = JSON.parse($(element).val());
+                    } catch (e) {}
                 });
             }
 
@@ -520,6 +522,13 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                 convertArrayField = function(prop) {
                     _this.editor.getEditor('root' + prop.selector.replace("\\","")).destroy();
+                    
+                    //in case this relationship array field is returned by default 
+                    //remove it from the original version of the resource
+                    if (_this.oldObject[prop.propName]) {
+                        delete _this.oldObject[prop.propName];
+                    }
+                    
                     return addTab(prop, {
                         templateId : "tabContentTemplate",
                         tabView: new RelationshipArrayView(),

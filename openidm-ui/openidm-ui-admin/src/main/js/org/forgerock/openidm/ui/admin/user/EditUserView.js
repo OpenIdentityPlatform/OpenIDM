@@ -39,7 +39,7 @@ function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsMan
 
     EditUserView.prototype.render = function (args, callback) {
         GenericEditResourceView.render.call(this, args, _.bind(function () {
-            if (_.has(this.data.schema.properties, "password")) {
+            if (_.has(this.data.schema.properties, "password") && !this.$el.find("#password").length) {
                 this.addPasswordTab();
             }
             if (callback) {
