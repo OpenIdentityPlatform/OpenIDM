@@ -134,7 +134,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/Corr
                 this.data.isAny = false;
             }
 
-            this.parentRender(function () {
+            this.parentRender(_.bind(function () {
                 function emptyGroups(node) {
                     var returnVal = true,
                         arrayCheck = function (v) {
@@ -183,14 +183,11 @@ define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/Corr
                         this.$el.find(".queryScript").hide();
                     }
 
-                    this.$el.find(".expressionTree .expressionMenu").menu({
-                        position: { my: "right top", at: "left-4 top-6" }
-                    }).hide();
 
                     this.$el.find(".expressionTree .remove:first").prop('disabled', true);
                     this.validate();
                 }, this));
-            });
+            }, this));
         },
 
         validLinkQualifier: function (linkQualifier) {
@@ -288,12 +285,6 @@ define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/Corr
             if ($(clickedEle).not("button")) {
                 clickedEle = $(clickedEle).closest("button");
             }
-
-            this.$el.find(".expressionMenu").hide();
-
-            $(clickedEle).next(".expressionMenu").show().hover(_.noop(), function () {
-                $(this).hide();
-            });
         },
 
         getExpressionContext: function (e) {

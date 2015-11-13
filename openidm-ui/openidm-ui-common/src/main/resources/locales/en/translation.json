@@ -668,6 +668,8 @@
                 "and": "AND",
                 "or": "OR",
                 "removeTitle": "Remove this item",
+                "fields" : "Fields",
+                "groups" : "Groups",
                 "addTitle": "Add new field or group item"
             },
             "notFound": "Not Found",
