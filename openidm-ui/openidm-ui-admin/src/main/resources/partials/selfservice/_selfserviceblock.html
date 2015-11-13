@@ -1,4 +1,4 @@
-<li class="card wide-card disabled panel" data-type="{{type}}">
+<li class="card wide-card disabled panel" data-editable="{{editable}}" data-type="{{type}}">
     <div class="card-body">
         <div class="switch-holder panel-heading">
             <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
@@ -15,9 +15,11 @@
             <button type="button" class="btn btn-link btn-drag" data-toggle="dropdown" aria-expanded="false">
                 <i class="fa fa-arrows"></i>
             </button>
-            <button type="button" class="btn btn-link" data-toggle="dropdown" aria-expanded="false">
-                <i class="fa fa-pencil"></i>
-            </button>
+            {{#if editable}}
+                <button type="button" class="btn btn-link" data-toggle="dropdown" aria-expanded="false">
+                    <i class="fa fa-pencil"></i>
+                </button>
+            {{/if}}
         </div>
     </div>
 </li>

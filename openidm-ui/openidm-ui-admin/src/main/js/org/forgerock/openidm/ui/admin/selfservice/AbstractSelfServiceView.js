@@ -140,10 +140,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
         },
         showDetailDialog: function(event) {
             var type = $(event.target).parents(".wide-card").attr("data-type"),
+                editable = $(event.target).parents(".wide-card").attr("data-editable"),
                 currentData = _.findWhere(this.model.saveConfig.stageConfigs, {"name" : type}),
                 self = this;
 
-            if($(event.target).parents(".checkbox").length === 0) {
+            if($(event.target).parents(".checkbox").length === 0 && editable === "true") {
                 this.dialog = BootstrapDialog.show({
                     title: $.t("templates.selfservice." + this.model.serviceType + "." + type + "Title"),
                     type: BootstrapDialog.TYPE_DEFAULT,
