@@ -221,7 +221,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
         deleteSelected: function(e) {
             e.preventDefault();
 
-            uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDeleteSelected" ,{ objectTitle: this.data.objectName }),  "danger", _.bind(function(){
+            uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDeleteSelected"),  "danger", _.bind(function(){
                 var promArr = [];
                 _.each(this.data.selectedItems, _.bind(function(objectId) {
                     promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId, null, _.bind(function() {
@@ -230,7 +230,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 }, this));
                 $.when.apply($,promArr).then(_.bind(function(proms){
                     this.render(this.data.args, _.bind(function() {
-                        messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess",{ objectTitle: this.data.objectName })});
+                        messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess")});
                     },this));
                 },this));
             }, this));

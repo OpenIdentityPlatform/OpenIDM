@@ -84,6 +84,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
                 buttons: [
                     {
                         label: $.t('common.form.close'),
+                        id: "resourceCollectionSearchDialogCloseBtn",
                         action: function(dialogRef){
                             dialogRef.close();
                         }
@@ -91,7 +92,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
                     {
                         label: saveButtonText,
                         cssClass: "btn-primary",
-                        id: "resourceCollectionSearchDialog",
+                        id: "resourceCollectionSearchDialogSaveBtn",
                         action: function(dialogRef) {
                             if (_this.currentDialog.find("#select_" + _this.data.property.propName).val()) {
                                 var newVal = _this.getNewVal();
