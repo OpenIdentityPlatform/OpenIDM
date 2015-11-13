@@ -369,6 +369,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                                 logger.debug("Concurrent change during update, retrying {} {}", pid, rev);
                                 ReadRequest readRequest = Requests.newReadRequest(id);
                                 existing = repo.read(readRequest).getContent().asMap();
+                                rev = (String) existing.get("_rev");
                                 retry = true;
                             }
                         } while (retry);
