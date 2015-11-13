@@ -1,31 +1,28 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.external.email.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -39,27 +36,25 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.api.annotations.Actions;
 import org.forgerock.api.annotations.Handler;
 import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Parameter;
 import org.forgerock.api.annotations.Schema;
 import org.forgerock.api.annotations.SingletonProvider;
+import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ForbiddenException;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -80,12 +75,25 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Outbound Email Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "external/email") })
 public class EmailServiceImpl implements SingletonResourceProvider {
-    final static Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(EmailServiceImpl.class);
     public static final String PID = "org.forgerock.openidm.external.email";
+
+    private static final String CONFIG_MAIL_THREAD_POOL_SIZE = "threadPoolSize";
+    private static final int DEFAULT_THREAD_POOL_SIZE = 20;
+
+    /** Response send when email has been submitted, but we're not waiting for completion */
+    static final ActionResponse DID_NOT_WAIT = newActionResponse(json(object(
+            field("status", "OK"),
+            field("message", "Email submitted"))));
+
+    /** EmailService parameter to indicate sending asynchronously */
+    static final String PARAM_WAIT_FOR_COMPLETION = "waitForCompletion";
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
+
+    private ExecutorService executorService;
 
     EmailClient emailClient;
 
@@ -95,7 +103,17 @@ public class EmailServiceImpl implements SingletonResourceProvider {
             @org.forgerock.api.annotations.Action(
                     operationDescription = @Operation(
                             description = "Send email",
-                            errorRefs = "frapi:common#/errors/badRequest"),
+                            errorRefs = "frapi:common#/errors/badRequest",
+                            parameters = {
+                                    @Parameter(
+                                            name = "waitForCompletion",
+                                            description = "Whether or not request will block until email has been "
+                                                    + "accepted by the SMTP server.",
+                                            type = "string",
+                                            required = false,
+                                            defaultValue = "true",
+                                            source = ParameterSource.ADDITIONAL)
+                            }),
                     name = "send",
                     request = @Schema(schemaResource = "sendActionRequest.json"),
                     response = @Schema(schemaResource = "sendActionResponse.json"))
@@ -106,16 +124,18 @@ public class EmailServiceImpl implements SingletonResourceProvider {
             case sendEmail:
                 logger.warn("\"sendEmail\" is deprecated, please use the \"send\" action instead");
             case send:
-                Map<String, Object> result = new HashMap<>();
-                logger.debug("External Email service action called for {} with {}",
+                // Support (not) waiting for completion of email to send
+                final boolean waitForCompletion = !"false".equalsIgnoreCase(
+                        request.getAdditionalParameter(PARAM_WAIT_FOR_COMPLETION));
+
+                logger.debug("External Email service action {} ({}) called for {} with {}",
+                        request.getAction(), waitForCompletion ? "wait" : "don't wait",
                         request.getResourcePath(), request.getContent());
-                try {
-                    emailClient.send(request.getContent());
-                } catch (ResourceException e) {
-                    return e.asPromise();
-                }
-                result.put("status", "OK");
-                return Promises.newResultPromise(Responses.newActionResponse(new JsonValue(result)));
+
+                final Promise<ActionResponse, ResourceException> promise = emailClient.sendAsync(request.getContent());
+                return waitForCompletion
+                        ? promise
+                        : DID_NOT_WAIT.asPromise();
             default:
                 return new BadRequestException("Not a supported Action").asPromise();
         }
@@ -140,18 +160,23 @@ public class EmailServiceImpl implements SingletonResourceProvider {
     void activate(ComponentContext compContext) {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
         try {
-            emailClient = new EmailClient(enhancedConfig.getConfigurationAsJson(compContext));
+            final JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
+            executorService = Executors.newFixedThreadPool(
+                    config.get(CONFIG_MAIL_THREAD_POOL_SIZE).defaultTo(DEFAULT_THREAD_POOL_SIZE).asInteger());
+
+            emailClient = new EmailClient(config, executorService);
             logger.debug("external email client enabled");
         } catch (RuntimeException ex) {
             logger.warn("Configuration invalid, can not start external email client service.", ex);
             throw ex;
         }
-        logger.info(" external email service started.");
+        logger.info("External email service started.");
     }
 
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext.getProperties());
-        logger.info("Notification service stopped.");
+        executorService.shutdown();
+        logger.info("External email service stopped.");
     }
 }

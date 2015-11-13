@@ -1,34 +1,40 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.external.email.impl;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+
 import com.sun.mail.util.MailSSLSocketFactory;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.util.promise.Promise;
+import org.forgerock.util.promise.PromiseImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Session;
@@ -41,16 +47,16 @@ import javax.mail.internet.MimeMessage;
  * Email client.
  */
 public class EmailClient {
+    private static final Logger logger = LoggerFactory.getLogger(EmailClient.class);
+
+    /** Response returned when the email has been sent */
+    static final ActionResponse SUCCESS = newActionResponse(json(object(
+            field("status", "OK"),
+            field("message", "Email sent"))));
 
     private static final String DEFAULT_HOST = "localhost";
     private static final String DEFAULT_PORT = "25";
-    private String username = null;
-    private String password = null;
-    private String fromAddr = null;
-    private boolean smtpAuth = false;
-    private Properties props = new Properties();
-    private Session session;
-    
+
     // Keys in the JSON configuration
     public static final String CONFIG_MAIL_SMTP_HOST = "host";
     public static final String CONFIG_MAIL_SMTP_PORT = "port";
@@ -63,7 +69,22 @@ public class EmailClient {
     public static final String CONFIG_MAIL_FROM = "from";
     public static final String CONFIG_MAIL_DEBUG = "debug";
 
-    public EmailClient(JsonValue config) throws RuntimeException {
+    private final ExecutorService executorService;
+    private String username = null;
+    private String password = null;
+    private String fromAddr = null;
+    private boolean smtpAuth = false;
+    private Properties props = new Properties();
+    private Session session;
+
+    /**
+     * Construct EmailClient with JSON configuration.
+     *
+     * @param config JSON configuration
+     * @throws RuntimeException
+     */
+    EmailClient(JsonValue config, ExecutorService executorService) throws RuntimeException {
+        this.executorService = executorService;
 
         props.put("mail.smtp.host", config.get(CONFIG_MAIL_SMTP_HOST).defaultTo(DEFAULT_HOST).asString());
         props.put("mail.smtp.port", config.get(CONFIG_MAIL_SMTP_PORT).defaultTo(DEFAULT_PORT).asString());
@@ -97,6 +118,36 @@ public class EmailClient {
     }
 
     /**
+     * Send the email in a separate thread, without waiting for it to complete.
+     *
+     * from : the From: address
+     * to : The To: recipients - a comma separated email address strings
+     * cc: The Cc: recipients - a comma separated email address strings
+     * bcc: The Bcc: recipients - a comma separated email address strings
+     * subject: The subject
+     * body : the message body
+     *
+     * @param params a JsonValue containing the from, to, cc, bcc, subject, and body parameters
+     * @return the Promise to complete when the email has sent successfully or throws an Exception
+     */
+    Promise<ActionResponse, ResourceException> sendAsync(final JsonValue params) {
+        final PromiseImpl<ActionResponse, ResourceException> promise = PromiseImpl.create();
+        executorService.submit(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            promise.handleResult(send(params));
+                        } catch (ResourceException e) {
+                            logger.error("Unable to send message", e);
+                            promise.handleException(e);
+                        }
+                    }
+                });
+        return promise;
+    }
+
+    /**
      * Send the email according to the parameters in <em>params</em>:
      *
      * from : the From: address
@@ -107,9 +158,10 @@ public class EmailClient {
      * body : the message body
      *
      * @param params a JsonValue containing the from, to, cc, bcc, subject, and body parameters
-     * @throws BadRequestException
+     * @return a response with the result of the synchronous action
+     * @throws ResourceException on failure
      */
-    public void send(JsonValue params) throws BadRequestException {
+    private ActionResponse send(JsonValue params) throws ResourceException {
         InternetAddress from = null;
         InternetAddress[] to = null;
         InternetAddress[] cc = null;
@@ -180,7 +232,9 @@ public class EmailClient {
                     .defaultTo(params.get("_body"))
                     .getObject();
 
-            if (type.equalsIgnoreCase("text/plain") || type.equalsIgnoreCase("text/html") || type.equalsIgnoreCase("text/xml")) {
+            if (type.equalsIgnoreCase("text/plain")
+                    || type.equalsIgnoreCase("text/html")
+                    || type.equalsIgnoreCase("text/xml")) {
                 if (body != null && body instanceof String) {
                     message.setContent(body, type);
                 } else {
@@ -203,10 +257,10 @@ public class EmailClient {
             transport.close();
 
         } catch (MessagingException e) {
-            throw new BadRequestException(e);
+            throw new InternalServerErrorException(e);
         }
+
+        return SUCCESS;
     }
 
-    public void format() {
-    }
 }

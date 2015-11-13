@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.external.email.impl;
 
@@ -20,8 +20,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -42,46 +41,43 @@ import org.testng.annotations.Test;
 
 public class EmailServiceImplTest {
 
-    public static final String RESOURCE_PATH = "resourcePath";
-    public static final String STATUS = "status";
-    public static final String OK = "OK";
+    private static final String RESOURCE_PATH = "resourcePath";
+    private static final String STATUS = "status";
+    private static final String OK = "OK";
 
     @Test
     public void testSuccessfulActionInstance() throws Exception {
         // given
-        final EmailClient emailClient = mock(EmailClient.class);
         final EmailServiceImpl emailService = new EmailServiceImpl();
+        emailService.emailClient = mock(EmailClient.class);
         final ActionRequest actionRequest = mock(ActionRequest.class);
 
-        emailService.emailClient = emailClient;
-        doNothing().when(emailClient).send(any(JsonValue.class));
+        ActionResponse expectedResponse = Responses.newActionResponse(json(object(field(STATUS, OK))));
+
         when(actionRequest.getActionAsEnum(EmailServiceImpl.Action.class)).thenReturn(EmailServiceImpl.Action.send);
         when(actionRequest.getResourcePath()).thenReturn(RESOURCE_PATH);
         when(actionRequest.getContent()).thenReturn(json(object()));
+        doReturn(expectedResponse.asPromise()).when(emailService.emailClient).sendAsync(any(JsonValue.class));
 
         // when
         Promise<ActionResponse, ResourceException> promise =
                 emailService.actionInstance(mock(Context.class), actionRequest);
 
         // then
-        ActionResponse expectedResponse = Responses.newActionResponse(JsonValue.json(object(
-                field(STATUS, OK)
-        )));
         assertThat(promise).succeeded().isInstanceOf(ActionResponse.class).isEqualTo(expectedResponse);
     }
 
     @Test
     public void testFailedActionInstance() throws Exception {
         // given
-        final EmailClient emailClient = mock(EmailClient.class);
         final EmailServiceImpl emailService = new EmailServiceImpl();
+        emailService.emailClient = mock(EmailClient.class);
         final ActionRequest actionRequest = mock(ActionRequest.class);
 
-        emailService.emailClient = emailClient;
-        doThrow(new BadRequestException()).when(emailClient).send(any(JsonValue.class));
         when(actionRequest.getActionAsEnum(EmailServiceImpl.Action.class)).thenReturn(EmailServiceImpl.Action.send);
         when(actionRequest.getResourcePath()).thenReturn(RESOURCE_PATH);
         when(actionRequest.getContent()).thenReturn(json(object()));
+        doReturn(new BadRequestException().asPromise()).when(emailService.emailClient).sendAsync(any(JsonValue.class));
 
         // when
         Promise<ActionResponse, ResourceException> promise =
@@ -128,5 +124,50 @@ public class EmailServiceImplTest {
 
         // then
         assertThat(promise).failedWithException().isInstanceOf(ForbiddenException.class);
+    }
+
+    @Test
+    public void testWaitForCompletion() throws Exception {
+        // given
+        final EmailServiceImpl emailService = new EmailServiceImpl();
+        emailService.emailClient = mock(EmailClient.class);
+        final ActionRequest actionRequest = mock(ActionRequest.class);
+
+        ActionResponse expectedResponse = EmailClient.SUCCESS;
+
+        when(actionRequest.getActionAsEnum(EmailServiceImpl.Action.class)).thenReturn(EmailServiceImpl.Action.send);
+        when(actionRequest.getResourcePath()).thenReturn(RESOURCE_PATH);
+        when(actionRequest.getContent()).thenReturn(json(object()));
+        doReturn(expectedResponse.asPromise()).when(emailService.emailClient).sendAsync(any(JsonValue.class));
+
+        // when
+        Promise<ActionResponse, ResourceException> promise =
+                emailService.actionInstance(mock(Context.class), actionRequest);
+
+        // then
+        assertThat(promise).succeeded().isInstanceOf(ActionResponse.class).isEqualTo(expectedResponse);
+    }
+
+    @Test
+    public void testNoWaitForCompletion() throws Exception {
+        // given
+        final EmailServiceImpl emailService = new EmailServiceImpl();
+        emailService.emailClient = mock(EmailClient.class);
+        final ActionRequest actionRequest = mock(ActionRequest.class);
+
+        ActionResponse expectedResponse = EmailServiceImpl.DID_NOT_WAIT;
+
+        when(actionRequest.getActionAsEnum(EmailServiceImpl.Action.class)).thenReturn(EmailServiceImpl.Action.send);
+        when(actionRequest.getResourcePath()).thenReturn(RESOURCE_PATH);
+        when(actionRequest.getContent()).thenReturn(json(object()));
+        when(actionRequest.getAdditionalParameter("waitForCompletion")).thenReturn("false");
+        doReturn(expectedResponse.asPromise()).when(emailService.emailClient).sendAsync(any(JsonValue.class));
+
+        // when
+        Promise<ActionResponse, ResourceException> promise =
+                emailService.actionInstance(mock(Context.class), actionRequest);
+
+        // then
+        assertThat(promise).succeeded().isInstanceOf(ActionResponse.class).isEqualTo(expectedResponse);
     }
 }
