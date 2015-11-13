@@ -84,7 +84,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 e.preventDefault();
             }
             
-            uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDeleteSelected" ,{ objectTitle: this.data.prop.title }),  "danger", _.bind(function(){
+            uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDeleteSelected"),  "danger", _.bind(function(){
                 var promArr = [];
                 
                 _.each(this.data.selectedItems, _.bind(function(relationship) {
@@ -93,7 +93,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 
                 $.when.apply($,promArr).then(_.bind(function(proms){
                     this.reloadGrid(null, _.bind(function() {
-                        messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess",{ objectTitle: this.data.prop.title })});
+                        messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess")});
                     },this));
                 },this));
             }, this));
