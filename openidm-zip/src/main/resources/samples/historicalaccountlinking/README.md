@@ -35,6 +35,7 @@ The sample includes the following customized configuration files:
     "attributesToSynchronize" : [ "uid", "sn", "cn", "givenName", "mail", "description", "telephoneNumber" ],
 *   conf/sync.json describes how accounts in the directory server map to managed users in OpenIDM.
 *   conf/managed.json contains the updated schema for managed users which includes the "historicalAccounts" property.
+*   conf/schedule-liveSync contains the configuration for the scheduled live sync job.
 
 This sample includes the following scripts:
 
@@ -44,6 +45,10 @@ This sample includes the following scripts:
 *   script/onUnlink-managedUser_systemLdapAccounts.js  Updates the relationship entry's properties representing the 
     linked target object with a "unlinkDate" specifying the date the target was unlinked, and sets "active" to false
     indicating that the target is no longer linked.
+*   script/check_account_state_change.js  On a live sync or recon event this script will check if the ldap account state
+    has changed. If the state has changed it will update the historical account properties to indicate the new state 
+    (enabled/disabled) and the date that the state was changed.  The date can only be approximated and is set to the
+    time that the change was detected by the script.
 
 Setup OpenDJ
 ------------
@@ -59,7 +64,7 @@ Setup OpenDJ
 3.  Load the Example.ldif file supplied in the data folder into OpenDJ.
 
         $ opendj/bin/ldapmodify -a -c --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
-        --port 1389 --filename /path/to/openidm/samples/sample2b/data/Example.ldif
+        --port 1389 --filename /path/to/openidm/samples/historicalaccountlinking/data/Example.ldif
 
 After you import the data, ou=People,dc=example,dc=com contains two user entries. Although all attributes to synchronize 
 can be multi-valued in LDAP, this sample defines only mail as a multi-valued attribute in OpenIDM.
@@ -95,6 +100,7 @@ Run The Sample In OpenIDM
 
         $ curl -k -u "openidm-admin:openidm-admin" \
         "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
+        
         {
           "result" : [ {
             "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
@@ -116,6 +122,7 @@ and the linkDate was set in the properties, along with "active" set to true.
 
         $ curl -k -u "openidm-admin:openidm-admin" \
         "http://localhost:8080/openidm/managed/user/user/historicalAccounts?_queryId=query-all"
+        
         {
           "pagedResultsCookie": null,
           "remainingPagedResults": -1,
@@ -126,7 +133,9 @@ and the linkDate was set in the properties, along with "active" set to true.
                 "_id": "087cbd37-e086-42ba-bda6-65c5f88a5992",
                 "_rev": "1",
                 "active": true,
-                "linkDate": "Wed Oct 07 2015 15:26:45 GMT-0700 (PDT)"
+                "linkDate": "Wed Oct 07 2015 15:26:45 GMT-0700 (PDT)",
+                "state": "enabled",
+                "stateLastChanged": "Fri Nov 13 2015 09:55:46 GMT-0800 (PST)"
               }
             }
           ],
@@ -135,11 +144,49 @@ and the linkDate was set in the properties, along with "active" set to true.
           "totalPagedResultsPolicy": "NONE"
         }
 
-5.  Deactivate the managed user.
+5.  Now start the liveSync schedule so that changes in the ldap server are picked up.  This can be done by editing the
+file samples/historicalaccountlinking/conf/schedule-liveSync.json to set "enabled" : true.
 
-        $ curl -k -u "openidm-admin:openidm-admin" --header "If-Match: *" --request PATCH \
-        --data '[ { "operation" : "replace", "field" : "accountStatus", "value" : "inactive" } ]' \
-        'https://localhost:8443/openidm/managed/user/user'
+6.  Use the OpenDJ manage-account script to disable the account within OpenDJ.  This will result in liveSync picking up
+the change and the "state" changing in the historical account properties of the managed user.
+
+        $ ./bin/manage-account set-account-is-disabled --port 4444 --bindDN "cn=Directory Manager" \
+        --bindPassword password --operationValue true --targetDN uid=user.smith0,ou=people,dc=example,dc=com --trustAll
+
+        Account Is Disabled:  true
+        
+7.  Wait a few seconds for liveSync to pick up then change then request all "historicalAccounts" of the managed user and
+see that the state of the account is now disabled and the date that the state changed has been recorded.
+
+        $ curl -k -u "openidm-admin:openidm-admin" \
+        "http://localhost:8080/openidm/managed/user/user/historicalAccounts?_queryId=query-all"
+        
+        {
+            "pagedResultsCookie": null,
+            "remainingPagedResults": -1,
+            "result": [
+                {
+                    "_ref": "system/ldap/account/uid=user.smith0,ou=People,dc=example,dc=com",
+                    "_refProperties": {
+                        "_id": "893d5c33-e4aa-41fe-91c9-37098b442ce7",
+                        "_rev": "2",
+                        "active": true,
+                        "linkDate": "Fri Nov 13 2015 09:55:46 GMT-0800 (PST)",
+                        "state": "disabled",
+                        "stateLastChanged": "Fri Nov 13 2015 10:01:30 GMT-0800 (PST)"
+                    }
+                }
+            ],
+            "resultCount": 1,
+            "totalPagedResults": -1,
+            "totalPagedResultsPolicy": "NONE"
+        }
+
+8.  Deactivate the managed user.
+
+        $ curl -k -u "openidm-admin:openidm-admin" -H "If-Match: *" -H "Content-type: application/json" -X PATCH \
+        -d '[ { "operation" : "replace", "field" : "accountStatus", "value" : "inactive" } ]' \
+        'http://localhost:8080/openidm/managed/user/user'
         {
           "_id": "user",
           "_rev": "2",
@@ -149,32 +196,35 @@ and the linkDate was set in the properties, along with "active" set to true.
           "userName": "user.smith"
         }
 
-6.  Request all "historicalAccounts" of the newly created managed user and see the relationship has been updated and the
+9.  Request all "historicalAccounts" of the newly created managed user and see the relationship has been updated and the
 "unlinkDate was set in the properties, along with "active" set to false.
 
         $ curl -k -u "openidm-admin:openidm-admin" \
         "http://localhost:8080/openidm/managed/user/user/historicalAccounts?_queryId=query-all"
+        
         {
-          "pagedResultsCookie": null,
-          "remainingPagedResults": -1,
-          "result": [
-            {
-              "_ref": "system/ldap/account/uid=user.smith0,ou=People,dc=example,dc=com",
-              "_refProperties": {
-                "_id": "087cbd37-e086-42ba-bda6-65c5f88a5992",
-                "_rev": "3",
-                "active": false,
-                "linkDate": "Wed Oct 07 2015 15:26:45 GMT-0700 (PDT)",
-                "unlinkDate": "Wed Oct 07 2015 15:36:55 GMT-0700 (PDT)"
-              }
-            }
-          ],
-          "resultCount": 1,
-          "totalPagedResults": -1,
-          "totalPagedResultsPolicy": "NONE"
+            "pagedResultsCookie": null,
+            "remainingPagedResults": -1,
+            "result": [
+                {
+                    "_ref": "system/ldap/account/uid=user.smith0,ou=People,dc=example,dc=com",
+                    "_refProperties": {
+                        "_id": "893d5c33-e4aa-41fe-91c9-37098b442ce7",
+                        "_rev": "3",
+                        "active": false,
+                        "linkDate": "Fri Nov 13 2015 09:55:46 GMT-0800 (PST)",
+                        "state": "disabled",
+                        "stateLastChanged": "Fri Nov 13 2015 10:01:30 GMT-0800 (PST)",
+                        "unlinkDate": "Fri Nov 13 2015 10:10:38 GMT-0800 (PST)"
+                    }
+                }
+            ],
+            "resultCount": 1,
+            "totalPagedResults": -1,
+            "totalPagedResultsPolicy": "NONE"
         }
 
-7.  Activate the managed user.
+10.  Activate the managed user.
 
         $ curl -k -u "openidm-admin:openidm-admin" --header "If-Match: *" --request PATCH \
         --data '[ { "operation" : "replace", "field" : "accountStatus", "value" : "active" } ]' \
@@ -188,7 +238,7 @@ and the linkDate was set in the properties, along with "active" set to true.
           "userName": "user.smith"
         }
 
-8.  Request all identifiers in OpenDJ. Verifying that a new user user.smith1 was created.
+11.  Request all identifiers in OpenDJ. Verifying that a new user user.smith1 was created.
 
         $ curl -k -u "openidm-admin:openidm-admin" \
         "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
@@ -211,7 +261,7 @@ and the linkDate was set in the properties, along with "active" set to true.
           "remainingPagedResults" : -1
         }
 
-9.  Request all "historicalAccounts" of the newly created managed user and see a new relationship was just created for
+12.  Request all "historicalAccounts" of the newly created managed user and see a new relationship was just created for
 the newly linked user in OpenDJ and the linkDate was set in the properties, along with "active" set to true.
 
         $ curl -k -u "openidm-admin:openidm-admin" \
@@ -244,4 +294,4 @@ the newly linked user in OpenDJ and the linkDate was set in the properties, alon
           "totalPagedResultsPolicy": "NONE"
 
 
-Repeating steps 5) through 9) will create more and more historical accounts for the user.
+Repeating steps 8) through 12) will create more and more historical accounts for the user.

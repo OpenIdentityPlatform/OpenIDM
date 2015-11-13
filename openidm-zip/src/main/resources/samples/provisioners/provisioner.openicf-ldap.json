@@ -158,6 +158,11 @@
                     },
                     "nativeName" : "ldapGroups",
                     "nativeType" : "string"
+                },
+                "disabled" : {
+                    "type" : "string",
+                    "nativeName" : "ds-pwp-account-disabled",
+                    "nativeType" : "boolean"
                 }
             }
         },
