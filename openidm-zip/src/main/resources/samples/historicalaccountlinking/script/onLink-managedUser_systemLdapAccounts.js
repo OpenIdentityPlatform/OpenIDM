@@ -34,11 +34,14 @@
 
 var targetRef = mappingConfig.target + "/" + target._id,
     sourcePath = mappingConfig.source + "/" + source._id,
+    state = target.disabled ? "disabled" : "enabled",
     historicalAccount = {
 		"_ref" : targetRef,
         "_refProperties" : {
         	"active" : true,
-        	"linkDate" : (new Date()).toString()
+        	"linkDate" : (new Date()).toString(),
+            "state" : state,
+            "stateLastChanged" : (new Date()).toString()
         }
     },
     result;

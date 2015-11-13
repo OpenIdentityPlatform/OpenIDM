@@ -109,6 +109,79 @@
                     "action" : "IGNORE"
                 }
             ]
+        },
+        {
+            "name" : "systemLdapAccounts_managedUser",
+            "source" : "system/ldap/account",
+            "target" : "managed/user",
+            "onCreate" : {
+                "type" : "text/javascript",
+                "file" : "script/check_account_state_change.js"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "file" : "script/check_account_state_change.js"
+            },
+            "properties" : [
+                {
+                    "source" : "cn",
+                    "target" : "displayName"
+                },
+                {
+                    "source" : "description",
+                    "target" : "description"
+                },
+                {
+                    "source" : "givenName",
+                    "target" : "givenName"
+                },
+                {
+                    "source" : "mail",
+                    "target" : "mail"
+                },
+                {
+                    "source" : "telephoneNumber",
+                    "target" : "telephoneNumber"
+                },
+                {
+                    "source" : "sn",
+                    "target" : "sn"
+                }
+            ],
+            "policies" : [
+                {
+                    "situation" : "CONFIRMED",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "FOUND",
+                    "action" : "UPDATE"
+                },
+                {
+                    "situation" : "ABSENT",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "AMBIGUOUS",
+                    "action" : "EXCEPTION"
+                },
+                {
+                    "situation" : "MISSING",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "SOURCE_MISSING",
+                    "action" : "DELETE"
+                },
+                {
+                    "situation" : "UNQUALIFIED",
+                    "action" : "IGNORE"
+                },
+                {
+                    "situation" : "UNASSIGNED",
+                    "action" : "IGNORE"
+                }
+            ]
         }
     ]
 }
