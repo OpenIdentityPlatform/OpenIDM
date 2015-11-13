@@ -1,5 +1,5 @@
 <label class="queryTypeTitle">{{t "templates.correlation.linkQualifier"}}:
-    <select name="linkQualifier" class="linkQualifier">
+    <select name="linkQualifier" class="linkQualifier form-control">
         <option value="" disabled selected>{{t "templates.correlation.selectLQ"}}</option>
         {{#each availableLinkQualifiers}}
         <option value="{{this}}">{{this}}</option>
@@ -16,37 +16,39 @@
     <input type="radio" name="queryType" id="expressionTreeQueryRadio" value="expression" class="queryType" checked="checked" />
     <label for="expressionTreeQueryRadio" class="queryTypeTitle">{{t "templates.correlation.expressionBuilder"}}</label>
 
-    <div class="expressionTree queryContainer">
+    <div class="expressionTree queryContainer form-inline">
         <p>{{t "templates.correlation.query.correlationDescription"}}</p>
 
-        <ul>
+        <ul class="expression-tree-list">
             <li index="{{#if isAny}}any{{else}}all{{/if}}" class="node">
                 {{#expressionDisplay expressionTree fieldNames}}
 
-                <select>
+                <select class="form-control">
                     {{#each types}}
                     <option {{#if selected}} selected{{/if}} value="{{value}}">{{label}}</option>
                     {{/each}}
                 </select>
 
-                <button class="btn btn-default remove object" title="{{t "templates.correlation.query.removeTitle"}}"><i class="fa fa-lg fa-minus"></i></button>
-                <button class="btn btn-default add" title="{{t "templates.correlation.query.addTitle"}}"><i class="fa fa-plus"></i></button>
-
-                <ul class="expressionMenu">
-                    <li>
-                        <a class="parentMenuChoice">{{t "templates.correlation.query.addField"}}</a>
-                        <ul>
-                            {{#each filteredFieldNames}}
-                            <li><a href="#" class="addField">{{.}}</a></li>
-                            {{/each}}
-                        </ul>
-                    </li>
-                    <li><a class="addGroup">{{t "templates.correlation.query.addGroup"}}</a></li>
-                </ul>
-
+                <div class="dropdown">
+                    <button class="btn btn-default remove object" title="{{t "templates.correlation.query.removeTitle"}}"><i class="fa fa-lg fa-minus"></i></button>
+                    <button class="btn btn-default add" type="button" data-toggle="dropdown" title="{{t "templates.correlation.query.addTitle"}}"><i class="fa fa-plus"></i></button>
+                    <ul class="dropdown-menu expressionMenu" role="menu">
+                        <li class="dropdown-header">
+                            {{t "templates.correlation.query.fields"}}
+                        </li>
+                        {{#each filteredFieldNames}}
+                        <li><a href="#" class="addField">{{.}}</a></li>
+                        {{/each}}
+                        <li class="divider"></li>
+                        <li class="dropdown-header">
+                            {{t "templates.correlation.query.groups"}}
+                        </li>
+                        <li><a href="#" class="addGroup">{{t "templates.correlation.query.addGroup"}}</a></li>
+                    </ul>
+                </div>
 
                 {{#if expressionTree.length}}
-                <ul>
+                <ul class="expression-tree-list">
                     {{#each expressionTree}}
                     {{#if isObject}}
                     <li index="{{index}}" class="node">
