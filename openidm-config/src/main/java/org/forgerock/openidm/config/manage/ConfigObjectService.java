@@ -49,6 +49,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonPointer;
@@ -613,6 +615,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         queryRequest.setResourcePath("repo/config");
         if (filter != null) {
             queryRequest.setQueryFilter(asConfigQueryFilter(filter));
+        } else if (QueryConstants.QUERY_ALL_IDS.equals(queryRequest.getQueryId())) {
+            return new NotSupportedException(
+                    request.getQueryId() + " is not supported").asPromise();
         }
 
         try {
@@ -628,7 +633,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                                     content.get(ConfigBootstrapHelper.CONFIG_ALIAS).asString(),
                                     content.get(ConfigBootstrapHelper.SERVICE_PID).asString(),
                                     content.get(ConfigBootstrapHelper.SERVICE_FACTORY_PID).asString());
-                            handler.handleResource(newResourceResponse(id, null, config));
+                            handler.handleResource(newResourceResponse(id, resource.getRevision(), config));
 
                             auditContent.add(config);
 
