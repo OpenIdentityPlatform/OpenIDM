@@ -187,6 +187,7 @@
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
+                            "validate" : true,
                             "properties" : {
                                 "_ref" : { "type" : "string" },
                                 "_refProperties": {
@@ -315,6 +316,7 @@
                     },
                     "manager" : {
                         "type" : "relationship",
+                        "validate" : true,
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
@@ -395,6 +397,7 @@
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
+                            "validate" : "true",
                             "reverseRelationship": true,
                             "reversePropertyName": "roles",
                             "properties" : {
@@ -543,6 +546,7 @@
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
+                            "validate" : true,
                             "reverseRelationship": true,
                             "reversePropertyName": "assignments",
                             "properties" : {
