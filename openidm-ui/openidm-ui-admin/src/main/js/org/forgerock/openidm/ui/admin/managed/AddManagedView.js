@@ -82,7 +82,6 @@ define("org/forgerock/openidm/ui/admin/managed/AddManagedView", [
             var managedObject = form2js('addManagedObjectForm', '.', true),
                 nameCheck;
 
-            managedObject.properties = [];
             managedObject.schema = {};
             managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
 
