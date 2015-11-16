@@ -112,40 +112,42 @@ define("org/forgerock/openidm/ui/admin/managed/AbstractManagedView", [
                 properties = [],
                 schemaProperties = {};
             
-            _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
-                var property = _.pick(val,propertiesFields);
-                
-                if (!_.isEmpty(property)) {
-                    property.name = key;
+            if (this.data.currentManagedObject) {
+                _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
+                    var property = _.pick(val,propertiesFields);
                     
-                    if (property.isVirtual) {
-                        property.type = "virtual";
-                        delete property.isVirtual;
+                    if (!_.isEmpty(property)) {
+                        property.name = key;
+                        
+                        if (property.isVirtual) {
+                            property.type = "virtual";
+                            delete property.isVirtual;
+                        }
+                        
+                        properties.push(property);
                     }
-                    
-                    properties.push(property);
-                }
-            });
-            
-            this.data.currentManagedObject.properties = properties;
-            
-            _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
-                val = _.omit(val,propertiesFields);
-                schemaProperties[key] = val;
-            });
-            
-            this.data.currentManagedObject.schema.properties = schemaProperties;
+                });
+                
+                this.data.currentManagedObject.properties = properties;
+                
+                _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
+                    val = _.omit(val,propertiesFields);
+                    schemaProperties[key] = val;
+                });
+                
+                this.data.currentManagedObject.schema.properties = schemaProperties;
+            }
         },
         
         combineSchemaAndProperties: function () {
-            var properties = this.data.currentManagedObject.properties;
-            
-            _.each(this.data.currentManagedObject.properties, _.bind(function (property) {
-                if (property.type === "virtual") {
-                    this.data.currentManagedObject.schema.properties[property.name].isVirtual = true;
-                }
-                _.extend(this.data.currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectedEvents"));
-            }, this));
+            if (this.data.currentManagedObject) {
+                _.each(this.data.currentManagedObject.properties, _.bind(function (property) {
+                    if (property.type === "virtual") {
+                        this.data.currentManagedObject.schema.properties[property.name].isVirtual = true;
+                    }
+                    _.extend(this.data.currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectedEvents"));
+                }, this));
+            }
         }
     });
 
