@@ -16,8 +16,6 @@
 
 
 /*global object, historyFields, historySize */
-var cipher = "AES/CBC/PKCS5Padding",
-     alias = identityServer.getProperty("openidm.config.crypto.alias", "true", true);
 
 if (!object.accountStatus) {
     object.accountStatus = 'active';
@@ -39,8 +37,6 @@ for (var index in historyFields) {
     
     if (object[field]) {
         object.fieldHistory[field].shift();
-        object.fieldHistory[field].push(object.password);
+        object.fieldHistory[field].push(openidm.hash(object[field], "SHA-256"));
     }
-    
-    object.fieldHistory[field] = openidm.encrypt(object.fieldHistory[field], cipher, alias);
 }

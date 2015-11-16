@@ -14,29 +14,22 @@
  * Copyright 2015 ForgeRock AS.
  */
 
-/*global newObject, oldObject */
-var cipher = "AES/CBC/PKCS5Padding",
-    alias = identityServer.getProperty("openidm.config.crypto.alias", "true", true);
+/*global newObject, oldObject */;
 
 for (var index in historyFields) {
-    var matchHashed, newValue, oldValue, field = historyFields[index];
+    var matchHashed, newValue, oldValue, field = historyFields[index], history;
     
     // Read in the old field history
     object.fieldHistory = oldObject.fieldHistory;
-    
-    // Decrypt the field history array
-    if (openidm.isEncrypted(object.fieldHistory[field])) {
-        object.fieldHistory[field] = openidm.decrypt(object.fieldHistory[field]);
-    }
 
     // Create the new history array if it doesn't already exist
     if (typeof object.fieldHistory[field] === "undefined") {
         object.fieldHistory[field] = new Array(historySize);
     }
 
-    // Get decrypted new and old field values
-    newValue = openidm.isEncrypted(object[field]) ? openidm.decrypt(object[field]) : object[field];
-    oldValue = openidm.isEncrypted(oldObject[field]) ? openidm.decrypt(oldObject[field]) : oldObject[field];
+    // Get new and old field values
+    newValue = object[field];
+    oldValue = openidm.decrypt(oldObject[field]);
     
     // Determine if a plain text value needs to be compared to a hashed value
     matchHashed = openidm.isHashed(oldValue) && !openidm.isHashed(newValue);
@@ -46,9 +39,6 @@ for (var index in historyFields) {
             || (!matchHashed && JSON.stringify(newValue) !== JSON.stringify(oldValue))) {
         // The values are different, so store then new value.
         object.fieldHistory[field].shift();
-        object.fieldHistory[field].push(object[field]);
+        object.fieldHistory[field].push(openidm.hash(object[field], "SHA-256"));
     }
-
-    // Encrypt the field history array
-    object.fieldHistory[field] = openidm.encrypt(object.fieldHistory[field], cipher, alias);
 }

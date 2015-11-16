@@ -41,9 +41,9 @@ function isNew(fullObject, value, params, property) {
     }
 
     // Decrypt the "fieldHistory" field.
-    fieldHistory = openidm.decrypt(currentObject.fieldHistory);
+    fieldHistory = currentObject.fieldHistory;
     
-    // Don't enforce this policy is there is no history object available
+    // Don't enforce this policy if there is no history object available
     if (fieldHistory[property] === null || fieldHistory[property] === undefined) {
         return [];
     }
@@ -60,11 +60,7 @@ function isNew(fullObject, value, params, property) {
     }
 
     // Get the last field values
-    if (openidm.isEncrypted(fieldHistory[property])) {
-        lastFieldValues = openidm.decrypt(fieldHistory[property]);
-    } else {
-        lastFieldValues = fieldHistory[property];
-    }
+    lastFieldValues = fieldHistory[property];
 
     if (params.historyLength !== undefined) {
         historyLength = params.historyLength;
@@ -75,7 +71,8 @@ function isNew(fullObject, value, params, property) {
     numOfFields = lastFieldValues.length;
     // Check if the current value matches any previous values
     for(i = numOfFields - 1; i >= (numOfFields - historyLength) && i >= 0; i--) {
-        if (lastFieldValues[i] === value) {
+        if ((openidm.isHashed(lastFieldValues[i]) && openidm.matches(value, lastFieldValues[i]))
+                || (lastFieldValues[i] === value)) {
             return [{"policyRequirement": "IS_NEW"}];
         }
     }
