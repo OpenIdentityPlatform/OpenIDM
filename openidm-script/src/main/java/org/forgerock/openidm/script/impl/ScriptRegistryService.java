@@ -499,7 +499,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                     return false;
                 } else if (arguments.length == 2) {
                     try {
-                        return cryptoService.matches(arguments[1].toString(), arguments[1] instanceof JsonValue
+                        return cryptoService.matches(arguments[0].toString(), arguments[1] instanceof JsonValue
                                 ? (JsonValue) arguments[1] 
                                 : new JsonValue(arguments[1]));
                     } catch (JsonCryptoException e) {
