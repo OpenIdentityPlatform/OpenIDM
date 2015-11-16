@@ -386,13 +386,13 @@
                     },
                     "manager" : {
                         "type" : "relationship",
+                        "validate" : true,
                         "reverseRelationship" : true,
                         "reversePropertyName" : "reports",
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
                         "searchable" : false,
-                        "validate": true,
                         "properties" : {
                             "_ref" : {
                                 "type" : "string"
@@ -495,8 +495,9 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
-                            "reverseRelationship" : true,
-                            "reversePropertyName" : "roles",
+                            "validate" : true,
+                            "reverseRelationship": true,
+                            "reversePropertyName": "roles",
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -664,8 +665,9 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
-                            "reverseRelationship" : true,
-                            "reversePropertyName" : "assignments",
+                            "validate" : true,
+                            "reverseRelationship": true,
+                            "reversePropertyName": "assignments",
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"

@@ -279,6 +279,7 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
+                            "validate" : true,
                             "reverseRelationship" : true,
                             "reversePropertyName" : "manager",
                             "properties" : {
@@ -388,13 +389,13 @@
                     },
                     "manager" : {
                         "type" : "relationship",
+                        "validate" : true,
                         "reverseRelationship" : true,
                         "reversePropertyName" : "reports",
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
                         "searchable" : false,
-                        "validate": true,
                         "properties" : {
                             "_ref" : {
                                 "type" : "string"
@@ -478,6 +479,7 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
+                            "validate" : true,
                             "reverseRelationship" : true,
                             "reversePropertyName" : "roles",
                             "properties" : {
