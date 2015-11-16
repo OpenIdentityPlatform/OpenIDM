@@ -266,7 +266,7 @@ public class SalesforceConnection extends ClientResource {
             additionalHeaders = new Series<Header>(Header.class);
             result.getAttributes().put(HeaderConstants.ATTRIBUTE_HEADERS, additionalHeaders);
         }
-        additionalHeaders.add(HeaderConstants.HEADER_AUTHORIZATION, authentication
+        additionalHeaders.set(HeaderConstants.HEADER_AUTHORIZATION, authentication
                 .getAuthorization());
     }
 
