@@ -576,8 +576,8 @@ CREATE INDEX SOPENIDM.IDX_UPDATEOBJECTPROPERTIES_UPDATEOBJECTS ON SOPENIDM.UPDAT
 -- Data for table openidm.internaluser
 -- -----------------------------------------------------
 
-INSERT INTO sopenidm.internaluser (objectid, rev, pwd, roles) VALUES ('openidm-admin', '0', 'openidm-admin', '["openidm-admin","openidm-authorized"]');
-INSERT INTO sopenidm.internaluser (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', '["openidm-reg"]');
+INSERT INTO sopenidm.internaluser (objectid, rev, pwd, roles) VALUES ('openidm-admin', '0', 'openidm-admin', '[ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]');
+INSERT INTO sopenidm.internaluser (objectid, rev, pwd, roles) VALUES ('anonymous', '0', 'anonymous', '[ { "_ref" : "repo/internal/role/openidm-reg" } ]');
 
 INSERT INTO sopenidm.internalrole (objectid, rev, description)
 VALUES
