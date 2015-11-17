@@ -659,7 +659,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
             ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
 
-            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, readRequest.getFields());
+            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
             readResponse.getContent().asMap().putAll(relationships.asMap());
 
             onRetrieve(managedContext, request, resourceId, readResponse);
