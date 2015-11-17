@@ -19,6 +19,7 @@
  * be sync'ed.  Users are always sync'ed, except if the only change is in the ignoreProperties.
  */
 (function () {
+    var _ = require('lib/lodash');
 
     /**
      * If shouldSyncUsers then this will call sync on all users of all roles that have the assignment that got sync'ed
@@ -31,17 +32,26 @@
     exports.syncUsersOfRolesWithAssignment =
         function (resourceName, oldValue, newValue, ignoredProperties) {
             logger.debug("onSync-assignments script invoked for {}", resourceName.toString());
-            var roles, i, j;
+            var roles;
+            var users=[];
             if (shouldSyncUsers(oldValue, newValue, ignoredProperties)) {
                 roles = openidm.query(resourceName.toString() + '/roles', {'_queryFilter': 'true'}, ['members']).result;
-                for (i = 0; i < roles.length; i++) {
-                    for (j = 0; j < roles[i].members.length; j++) {
-                        logger.debug("onSync-assignments will call triggerSyncCheck for {}", roles[i].members[j]._ref);
-                        openidm.action(roles[i].members[j]._ref, "triggerSyncCheck", {}, {});
+                _.each(roles, function (role) {
+                    _.each(role.members, function (user) {
+                        users.push(user._ref);
+                    });
+                });
+
+                // triggerSyncCheck for each unique user.
+                _(users)
+                    .uniq()
+                    .each(function (user) {
+                        logger.debug("onSync-assignments will call triggerSyncCheck for {}", user);
+                        openidm.action(user, "triggerSyncCheck", {}, {});
                     }
-                }
+                );
             } else {
-                logger.info("onSync-assignments will NOT call triggerSyncCheck the users", resourceName.toString());
+                logger.debug("onSync-assignments will NOT call triggerSyncCheck the users", resourceName.toString());
             }
         };
 
@@ -55,7 +65,6 @@
      * any of the ignoredProperties.
      */
     function shouldSyncUsers(oldValue, newValue, ignoredProperties) {
-        var _ = require('lib/lodash');
         var oldCopy, newCopy;
 
         // If they already match then we should sync.
