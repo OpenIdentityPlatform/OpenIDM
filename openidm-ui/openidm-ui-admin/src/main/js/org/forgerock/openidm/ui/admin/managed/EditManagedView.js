@@ -745,7 +745,8 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 "$schema": "http://forgerock.org/json-schema#",
                 "type": "object",
                 "title": this.data.managedObjectSchema.getValue().title,
-                "description": this.data.managedObjectSchema.getValue().description
+                "description": this.data.managedObjectSchema.getValue().description,
+                "icon": this.$el.find("#managedObjectIcon").val()
             }, this.getObjectProperties(this.data.managedObjectSchema.getValue().properties));
         },
 
@@ -846,8 +847,6 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
             this.data.currentManagedObject.schema = this.getManagedSchema();
             
             _.each(data.properties, function (prop, index) {
-                console.log(prop);
-                
                 if (prop.encryption) {
                     prop.encryption = {
                         key: "openidm-sym-default"
