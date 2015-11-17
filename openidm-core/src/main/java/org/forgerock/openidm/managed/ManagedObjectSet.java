@@ -512,7 +512,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         for (final JsonPointer relationshipField : relationshipProviders.keySet()) {
             final JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
 
-            if (relationshipValue != null) {
+            if (relationshipValue.isNotNull()) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
                 persisted.add(provider.setRelationshipValueForResource(context, resourceId, 
                         relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
