@@ -417,11 +417,11 @@ CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_updateobjectproperties_prop` ON `ope
 
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`)
-SELECT 'openidm-admin', '0', 'openidm-admin', '["openidm-admin","openidm-authorized"]' 
+SELECT 'openidm-admin', '0', 'openidm-admin', '[ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]' 
 WHERE NOT EXISTS (SELECT * FROM `openidm`.`internaluser` WHERE `objectid` = 'openidm-admin');
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`)
-SELECT 'anonymous', '0', 'anonymous', '["openidm-reg"]'
+SELECT 'anonymous', '0', 'anonymous', '[ { "_ref" : "repo/internal/role/openidm-reg" } ]'
 WHERE NOT EXISTS (SELECT * FROM `openidm`.`internaluser` WHERE `objectid` = 'anonymous');
 
 INSERT INTO `openidm`.`internalrole` (`objectid`, `rev`, `description`)
