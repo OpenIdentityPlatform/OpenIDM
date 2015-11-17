@@ -1,4 +1,7 @@
 ++++
+<!-- please include docs in any mod of this file
+It's designed for "single sourcing" with the published docs -->
+
 <!-- TODO: after conversion (AC) delete all info above, except xml version
   ! CCPL HEADER START
   !
@@ -96,19 +99,7 @@ Alternatively, use the following REST calls to set up identities for the noted u
   "telephoneNumber" : "1-360-229-7105",
   "sn" : "Jensen",
   "userName" : "bjensen",
-  "accountStatus" : "active",
-  "authzRoles" : [ 
-    {
-      "_ref" : "repo/internal/role/openidm-authorized"
-    }
-  ],
-  "roles" : [],
-  "postalCode" : "",
-  "stateProvince" : "",
-  "postalAddress" : "",
-  "address2" : "",
-  "country" : "",
-  "city" : ""
+  "accountStatus" : "active"
 }' \
 "https://localhost:8443/openidm/managed/user?_action=create"</userinput></screen>
 
@@ -126,18 +117,7 @@ Alternatively, use the following REST calls to set up identities for the noted u
   "telephoneNumber" : "1-415-599-1100",
   "sn" : "Doe",
   "userName" : "jdoe",
-  "accountStatus" : "active",
-  "authzRoles" : [ 
-    {
-      "_ref" : "repo/internal/role/openidm-authorized"
-    }
-  ],
-  "postalCode" : "",
-  "stateProvince" : "",
-  "postalAddress" : "",
-  "address2" : "",
-  "country" : "",
-  "city" : ""
+  "accountStatus" : "active"
 }' \
 "https://localhost:8443/openidm/managed/user?_action=create"</userinput></screen>
 
@@ -230,7 +210,13 @@ To confirm, you should see output that includes two roles for user `jdoe`. The f
 `_id` number; the number that you see will be different.
 
 ++++
-<screen>"roles":[ { "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34" } ],</screen>
+<screen>"roles":[ {
+  "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34",
+    "_refProperties" : {
+      "_id" : "65a00c7a-fba2-42ba-9598-4b4633d039ae",
+      "_rev" : "1"
+    }
+  } ],</screen>
 ++++
 
 And this next command adds the `Customer` role to user `bjensen`:
@@ -255,22 +241,50 @@ And this next command adds the `Customer` role to user `bjensen`:
 "https://localhost:8443/openidm/managed/user/d0b79f30-946f-413a-b7d1-d813034fa345"</userinput></screen>
 ++++
 
-To confirm, you should see output that includes two roles for user `bjensen`, in this case:
+To confirm, you should see output that includes the `Customer` role for user `bjensen`, in this case:
 
 ++++
-<screen>"roles":[ { "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b" } ],</screen>
+<screen>"roles":[ {
+  "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b",
+    "_refProperties" : {
+      "_id" : "459a90ab-ff01-4186-8749-cca9caf12454",
+      "_rev" : "1"
+    }
+  } ],</screen>
 ++++
 
 Now assign the `customer` role to user `jdoe`, as that user is a customer and an agent:
 
 ++++
+<screen>$ <userinput>curl \
+--cacert self-signed.crt \
+--header "Content-type: application/json" \
+--header "X-OpenIDM-Username: openidm-admin" \
+--header "X-OpenIDM-Password: openidm-admin" \
+--header "If-Match: *" \
+--request PATCH \
+--data '[
+    {
+      "operation" : "add",
+      "field" : "/roles/-",
+      "value" : {
+        "_ref" : "managed/role/006935c2-b080-45cd-8347-881df42cae0c"
+      }
+    }
+  ]' \
+"https://localhost:8443/openidm/managed/user/a3335177-7366-4656-a66c-8d6e77a5786f"</userinput></screen>
 ++++
 
-Now user `jdoe` should have two roles:
+User `jdoe` should now have two roles:
 
 ++++
-<screen>"roles":[ { "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34" }, 
-{ "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b" } ],</screen>
+<screen>"roles":[ {
+  "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34",
+  ...
+}, {
+  "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b",
+  ...
+} ],</screen>
 ++++
 
 [[multiaccount-background]]
@@ -347,44 +361,24 @@ The following validSource script looks through the effective roles of a user, wi
 * Ensures that OpenIDM looks through the source *only* for the specified role.
 
 ++++
-<programlisting language="javascript"><![CDATA["validSource" : {
+<programlisting language="javascript">"validSource" : {
         "type" : "text/javascript",
         "globals" : { },
         "source" : "var res = false;\nvar i=0;\n\nwhile
-          (!res && i < source.effectiveRoles.length) {\n
+          (!res &amp;&amp; i < source.effectiveRoles.length) {\n
           var roleId = source.effectiveRoles[i];\n
-            if (roleId != null && roleId.indexOf(\"/\") != -1) {\n
+            if (roleId != null &amp;&amp; roleId.indexOf(\"/\") != -1) {\n
               var roleInfo = openidm.read(roleId);\n
                 res = (((roleInfo.properties.name === 'Agent')\n
-                  &&(linkQualifier ==='agent'))\n
+                  &amp;&amp;(linkQualifier ==='agent'))\n
                   || ((roleInfo.properties.name === 'Insured')\n
-                  &&(linkQualifier ==='insured')));\n
+                  &amp;&amp;(linkQualifier ==='insured')));\n
                 }\n
               i++;\n}\n\nres"
-        }]]></programlisting>
+        }></programlisting>
 ++++
 
-You can see how correlation queries are configured in the `sync.json` file. Note how it recognizes accounts from each 
-LDAP category in case they already exist on the target system.
-
-++++
-<programlisting>"correlationQuery" : [
-  {
-    "linkQualifier" : "insured",
-    "type" : "text/javascript",
-    "globals" : { },
-    "source" : "var map = {'_queryFilter': 'dn eq \\\"uid=' + source.userName +
-      ',ou=Customers,dc=example,dc=com\\\"'}; map;"
-  },
-  {
-    "linkQualifier" : "agent",
-    "type" : "text/javascript",
-    "globals" : { },
-    "source" : "var map = {'_queryFilter': 'dn eq \\\"uid=' + source.userName +
-      ',ou=Contractors,dc=example,dc=com\\\"'}; map;"
-  }
-],......</programlisting>
-++++
+You can see how correlation queries are configured in the `sync.json` file.
 
 The structure for the correlation query specifies one of two link qualifiers: insured or agent. For each link qualifier, 
 the correlation query defines a script that verifies if the subject `dn` belongs in a specific container. For this 
@@ -427,21 +421,21 @@ how the expression builder is configured for this sample.
 The following code snippet shows how the `validSource` script segregates accounts based on link qualifiers and roles:
 
 ++++
-<programlisting language="javascript"><![CDATA["validSource" : {
+<programlisting language="javascript">"validSource" : {
   "type" : "text/javascript",
   "globals" : { },
   "source" : "var res = false;
     var i=0;
 
-    while (!res && i &lt; source.effectiveRoles.length) {
+    while (!res &amp;&amp; i &lt; source.effectiveRoles.length) {
       var roleId = source.effectiveRoles[i];
       if (roleId != null &amp;&amp; roleId.indexOf("/") != -1) {
         var roleInfo = openidm.read(roleId);
         logger.warn("Role Info : {}",roleInfo);
         res = (((roleInfo.properties.name === 'Agent')
-          &&(linkQualifier ==='agent'))
+          &amp;&amp;(linkQualifier ==='agent'))
         || ((roleInfo.properties.name === 'Insured')
-          &&;(linkQualifier ==='insured')));
+          &amp;&amp;(linkQualifier ==='insured')));
         }
         i++;
       }
@@ -570,6 +564,7 @@ Add the agent assignment to the agent role:
     }
   ]' \
 "https://localhost:8443/openidm/managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b"</userinput></screen>
+++++
 
 [[multiaccountlinking-recon]]
 Reconciling Managed Users to the External LDAP Server
@@ -608,5 +603,5 @@ role. You can confirm the same result in the Admin UI:
 . Click Manage > Role.
 . You should see both `Agent` and `Customer` in the Role List window that appears.
 . Click Agent > Users. You should see that user `jdoe` is included as an Agent.
-. Click Back to Roles > Customer > Users. You should see that users `bjensen` and `jdoe` are included as Customers.
-
+. Click Back to Roles > Customer > Users. You should see that users `bjensen` and
+`jdoe` are included as Customers.
