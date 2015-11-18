@@ -2,7 +2,7 @@
 <!-- please include docs in any mod of this file
 It's designed for "single sourcing" with the published docs -->
 
-<!-- TODO: after conversion (AC) delete all info above, except xml version
+<!--
   ! CCPL HEADER START
   !
   ! This work is licensed under the Creative Commons
@@ -25,8 +25,6 @@ It's designed for "single sourcing" with the published docs -->
   !
   !      Copyright 2015 ForgeRock AS
   !
-TODO: AC, delete section xml:id line and section closing about 10 lines below
-then in the last line sub article > chapter
 -->
 <chapter xml:id='sample-multiaccount-linking'
          xmlns='http://docbook.org/ns/docbook'
@@ -600,8 +598,7 @@ Reviewing the Result
 You have already confirmed that user `bjensen` has a `customer` role, and user `jdoe` has both a `customer` and `agent` 
 role. You can confirm the same result in the Admin UI:
 
-. Click Manage > Role.
-. You should see both `Agent` and `Customer` in the Role List window that appears.
+. Click Manage > Role. You should see both `Agent` and `Customer` in the Role List window that appears.
 . Click Agent > Users. You should see that user `jdoe` is included as an Agent.
 . Click Back to Roles > Customer > Users. You should see that users `bjensen` and
 `jdoe` are included as Customers.
