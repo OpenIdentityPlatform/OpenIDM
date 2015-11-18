@@ -132,7 +132,7 @@ public class ManagedObjectSchema {
     public Map<JsonPointer, SchemaField> getHiddenByDefaultFields() {
         return hiddenByDefaultFields;
     }
-    
+
     /**
      * Determines if the supplied {@link JsonPointer} represents a resource expanded field name or a relationship 
      * field, and if so, returns a {@link Pair} representing the relationship field's name on the left and the 

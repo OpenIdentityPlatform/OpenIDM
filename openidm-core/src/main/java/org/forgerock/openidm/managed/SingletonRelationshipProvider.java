@@ -67,22 +67,18 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      *
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath      Name of the resource we are handling relationships for eg. managed/user
-     * @param propertyName      Name of property on first object represents the relationship
-     * @param uriPropertyName   Property name used on the URI for nested routes
-     * @param isReverse If this provider represents a reverse relationship
+     * @param schemaField       The schema of the field representing this relationship in the parent object.
      * @param activityLogger The audit activity logger to use
      * @param managedObjectSyncService Service to send sync events to
      */
     public SingletonRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath,
-            final JsonPointer propertyName, final JsonPointer reversePropertyName, final String uriPropertyName, 
-            final boolean isReverse, final ActivityLogger activityLogger,
+            final SchemaField schemaField, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, reversePropertyName, isReverse, activityLogger,
-                managedObjectSyncService);
+        super(connectionFactory, resourcePath, schemaField, activityLogger, managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,
-                uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, uriPropertyName)),
+                uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, schemaField.getName())),
                 Resources.newSingleton(this));
         this.requestHandler = router;
     }
@@ -122,18 +118,18 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             queryRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, managedObjectId);
 
             final QueryFilter<JsonPointer> filter;
-            if (isReverseRelationship) {
+            if (schemaField.isReverseRelationship()) {
                 filter = or(
                         and(
                                 equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
-                                equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName)),
+                                equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyPtr)),
                         and(
                                 equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourceFullPath),
-                                equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), propertyName)));      
+                                equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), propertyPtr)));
             } else {    
                 filter = and(
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyPtr));
             }
             
             queryRequest.setQueryFilter(filter);
@@ -149,7 +145,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 List<String> errorReferences = new ArrayList<>();
                 for (ResourceResponse relationship : relationships) {
                     JsonValue content = relationship.getContent();
-                    if (isReverseRelationship &&
+                    if (schemaField.isReverseRelationship() &&
                             content.get(REPO_FIELD_FIRST_ID).defaultTo("").asString().equals(resourceFullPath)) {
                         errorReferences.add(content.get(REPO_FIELD_SECOND_ID).asString());
                     } else {

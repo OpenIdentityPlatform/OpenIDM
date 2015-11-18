@@ -99,16 +99,11 @@ public abstract class RelationshipProvider {
      *  managed object path such as: "managed/user" or "managed/role". */
     protected final ResourcePath resourceContainer;
 
-    /** The name of the property on this managed object that this relationship represents. */
-    protected final JsonPointer propertyName;
+    /** The schemaField representing this relationship */
+    protected final SchemaField schemaField;
 
-    /** The name of the property on the managed object at the other end of relationship that this relationship
-     *  represents */
-    protected final JsonPointer reversePropertyName;
-
-    /** A boolean indicating if this is a reverse relationship, meaning that there are managed objects with properties 
-     *  representing this relationship on both ends */
-    protected final boolean isReverseRelationship;
+    /** A {@link JsonPointer} to the property representing this relationship in the parent object. */
+    protected final JsonPointer propertyPtr;
 
     /** The name of the firstId field in the repo */
     protected static final String REPO_FIELD_FIRST_ID = "firstId";
@@ -159,7 +154,7 @@ public abstract class RelationshipProvider {
 
     /**
      * Returns a Function to format a resource from the repository to that expected by the provider consumer. First
-     * object properties are removed and {@code secondId} (or {@code firstId} if {@link #isReverseRelationship})
+     * object properties are removed and {@code secondId} (or {@code firstId} if it's a reverse relationship)
      * will be converted to {@code _ref}
      * <p/>
      * This will convert repo resources in the format of:
@@ -204,7 +199,7 @@ public abstract class RelationshipProvider {
                     final String ref;
 
                     // set the field reference
-                    if (isReverseRelationship
+                    if (schemaField.isReverseRelationship()
                             && !rawContent.get(REPO_FIELD_FIRST_ID).asString().equals(resourceFullPath)) {
                         ref = rawContent.get(REPO_FIELD_FIRST_ID).asString();
                     } else {
@@ -288,11 +283,11 @@ public abstract class RelationshipProvider {
                 : null;
 
         if (relationshipField.isArray()) {
-            return new CollectionRelationshipProvider(connectionFactory, resourcePath, propName, reversePropName, 
-                    relationshipField.getName(), isReverseRelationship, activityLogger, managedObjectSyncService);
+            return new CollectionRelationshipProvider(connectionFactory, resourcePath, relationshipField,
+                    activityLogger, managedObjectSyncService);
         } else {
-            return new SingletonRelationshipProvider(connectionFactory, resourcePath, propName, reversePropName, 
-                    relationshipField.getName(), isReverseRelationship, activityLogger, managedObjectSyncService);
+            return new SingletonRelationshipProvider(connectionFactory, resourcePath, relationshipField,
+                    activityLogger, managedObjectSyncService);
         }
     }
 
@@ -301,17 +296,17 @@ public abstract class RelationshipProvider {
      * 
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
-     * @param propertyName Name of property on first object represents the relationship
-     * @param isReverse Whether or not this relationship is isReverse
+     * @param schemaField The field used to represent this relationship in the parent object
+     * @param activityLogger The audit activity logger to use
+     * @param managedObjectSyncService Service to send sync events to
      */
     protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, final JsonPointer reversePropertyName, final boolean isReverse, 
-            ActivityLogger activityLogger, final ManagedObjectSyncService managedObjectSyncService) {
+            final SchemaField schemaField, final ActivityLogger activityLogger,
+            final ManagedObjectSyncService managedObjectSyncService) {
         this.connectionFactory = connectionFactory;
         this.resourceContainer = resourcePath;
-        this.propertyName = propertyName;
-        this.reversePropertyName = reversePropertyName;
-        this.isReverseRelationship = isReverse;
+        this.schemaField = schemaField;
+        this.propertyPtr = new JsonPointer(schemaField.getName());
         this.activityLogger = activityLogger;
         this.managedObjectSyncService = managedObjectSyncService;
     }
@@ -823,7 +818,7 @@ public abstract class RelationshipProvider {
             properties.remove(FIELD_CONTENT_REVISION);
         }
 
-        if (isReverseRelationship) {
+        if (schemaField.isReverseRelationship()) {
             // Compare the resource paths and set firstId/secondId and firstPropertyName/secondPropertyName based on
             // lexicographic ordering to ensure consistency for reverse (bidirectional) relationships.
             // We want to prevent the case where a bidirectional relationship may be updated from a operation on either
@@ -831,24 +826,24 @@ public abstract class RelationshipProvider {
             if (firstResourcePath.toString().compareTo(object.get(FIELD_REFERENCE).asString()) < 0) {
                 return json(object(
                         field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
-                        field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
+                        field(REPO_FIELD_FIRST_PROPERTY_NAME, schemaField.getName()),
                         field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE).asString()),
-                        field(REPO_FIELD_SECOND_PROPERTY_NAME, reversePropertyName.toString()),
+                        field(REPO_FIELD_SECOND_PROPERTY_NAME, schemaField.getReversePropertyName()),
                         field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
                 ));
             } else {
                 return json(object(
                         field(REPO_FIELD_FIRST_ID, object.get(FIELD_REFERENCE).asString()),
-                        field(REPO_FIELD_FIRST_PROPERTY_NAME, reversePropertyName.toString()),
+                        field(REPO_FIELD_FIRST_PROPERTY_NAME, schemaField.getReversePropertyName()),
                         field(REPO_FIELD_SECOND_ID, firstResourcePath.toString()),
-                        field(REPO_FIELD_SECOND_PROPERTY_NAME, propertyName.toString()),
+                        field(REPO_FIELD_SECOND_PROPERTY_NAME, schemaField.getName()),
                         field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
                 ));
             }
         } else {
             return json(object(
                     field(REPO_FIELD_FIRST_ID, firstResourcePath.toString()),
-                    field(REPO_FIELD_FIRST_PROPERTY_NAME, propertyName.toString()),
+                    field(REPO_FIELD_FIRST_PROPERTY_NAME, schemaField.getName()),
                     field(REPO_FIELD_SECOND_ID, object.get(FIELD_REFERENCE).asString()),
                     field(REPO_FIELD_SECOND_PROPERTY_NAME, null),
                     field(REPO_FIELD_PROPERTIES, properties == null ? null : properties.asMap())
@@ -1082,7 +1077,7 @@ public abstract class RelationshipProvider {
                             .read(context, Requests.newReadRequest(referenceToSync));
                     // now perform the sync
                     logger.debug("after relationship change on {}{}, making sync request on {}", resourceContainer,
-                            propertyName, referenceToSync);
+                            schemaField.getName(), referenceToSync);
                     ResourcePath resourcePath = resourcePath(referenceToSync);
                     final ActionRequest syncRequest = Requests.newActionRequest("sync", notifyUpdate.name())
                             .setAdditionalParameter(ACTION_PARAM_RESOURCE_CONTAINER, resourcePath.parent().toString())
@@ -1109,7 +1104,7 @@ public abstract class RelationshipProvider {
      * @return true if isReverseRelationship and the reversePropertyName is set.
      */
     private boolean isReverseSyncNeeded() {
-        return isReverseRelationship && null != reversePropertyName;
+        return schemaField.isReverseRelationship() && null != schemaField.getReversePropertyName();
     }
 
     /**
@@ -1134,6 +1129,10 @@ public abstract class RelationshipProvider {
      * @return true if the repo json's firstPropertyName matches this relationship's reversePropertyName
      */
     private boolean isReversePropertyFirst(JsonValue relationshipJson) {
-        return relationshipJson.get(REPO_FIELD_FIRST_PROPERTY_NAME).asString().equals(reversePropertyName.toString());
+        return relationshipJson.get(REPO_FIELD_FIRST_PROPERTY_NAME).asString().equals(schemaField.getReversePropertyName());
+    }
+
+    public SchemaField getSchemaField() {
+        return schemaField;
     }
 }
