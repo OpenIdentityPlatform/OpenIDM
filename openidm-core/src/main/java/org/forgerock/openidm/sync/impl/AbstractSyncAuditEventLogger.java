@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.sync.impl;
 
+import java.util.Collections;
+
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
@@ -187,6 +189,7 @@ public abstract class AbstractSyncAuditEventLogger<T extends AbstractSyncAuditEv
                     .timestamp(System.currentTimeMillis())
                     .eventName(getEventName())
                     .userId(context.asContext(SecurityContext.class).getAuthenticationId())
+                    .trackingIds(Collections.<String>emptySet())
                     .action(null != syncOperation ? syncOperation.action : null)
                     .exception(exception)
                     .linkQualifier(linkQualifier)

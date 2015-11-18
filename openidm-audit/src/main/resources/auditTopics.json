@@ -54,12 +54,14 @@
           "eventName": {
             "type": "string"
           },
-          "authentication": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              }
+          "userId": {
+            "type": "string"
+          },
+          "trackingIds": {
+            "type": "array",
+            "items": {
+              "id": "0",
+              "type": "string"
             }
           },
           "action": {
@@ -129,12 +131,14 @@
           "eventName": {
             "type": "string"
           },
-          "authentication": {
-            "type": "object",
-            "properties": {
-              "id": {
-                "type": "string"
-              }
+          "userId": {
+            "type": "string"
+          },
+          "trackingIds": {
+            "type": "array",
+            "items": {
+              "id": "0",
+              "type": "string"
             }
           },
           "action": {
