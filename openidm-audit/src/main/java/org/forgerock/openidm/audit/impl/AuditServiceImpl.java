@@ -150,6 +150,7 @@ public class AuditServiceImpl implements AuditService {
     private static final String AUDIT_SERVICE_CONFIG = "auditServiceConfig";
     private static final String EVENT_HANDLERS = "eventHandlers";
     private static final String EVENT_TOPICS = "eventTopics";
+    private static final String EXTENDED_TOPICS = "extendedTopics";
     private static final String CUSTOM_TOPICS  = "customTopics";
     private static final JsonPointer WATCHED_PASSWORDS_CONFIG_POINTER = new JsonPointer(
             EVENT_TOPICS + "/activity/passwordFields");
@@ -270,7 +271,7 @@ public class AuditServiceImpl implements AuditService {
                     AuditJsonConfig.parseAuditServiceConfiguration(config.get(AUDIT_SERVICE_CONFIG));
             final EventTopicsMetaData eventTopicsMetaData = EventTopicsMetaDataBuilder
                     .coreTopicSchemas()
-                    .withCoreTopicSchemaExtensions(topics.get(EVENT_TOPICS))
+                    .withCoreTopicSchemaExtensions(topics.get(EXTENDED_TOPICS))
                     .withAdditionalTopicSchemas(
                             getCustomTopics(topics.get(CUSTOM_TOPICS).copy(), config.get(EVENT_TOPICS).copy())).build();
             final AuditServiceBuilder auditServiceBuilder = AuditServiceBuilder.newAuditService()
