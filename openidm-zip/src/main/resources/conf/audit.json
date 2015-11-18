@@ -5,7 +5,21 @@
             "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
-        ]
+        ],
+        "filterPolicies" : {
+            "value" : {
+                "excludeIf" : [
+                    "/access/http/request/headers/Authorization",
+                    "/access/http/request/headers/X-OpenIDM-Password",
+                    "/access/http/request/cookies/session-jwt",
+                    "/access/http/response/headers/Authorization",
+                    "/access/http/response/headers/X-OpenIDM-Password"
+                ],
+                "includeIf" : [
+
+                ]
+            }
+        }
     },
     "eventHandlers" : [
         {

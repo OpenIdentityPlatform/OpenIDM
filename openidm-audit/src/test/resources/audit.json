@@ -1,7 +1,21 @@
 {
   "auditServiceConfig" : {
     "handlerForQueries" : "passthrough",
-    "availableAuditEventHandlers" : ["org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler"]
+    "availableAuditEventHandlers" : ["org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler"],
+    "filterPolicies" : {
+      "value" : {
+        "excludeIf" : [
+          "/access/http/request/headers/Authorization",
+          "/access/http/request/headers/X-OpenIDM-Password",
+          "/access/http/request/cookies/session-jwt",
+          "/access/http/response/headers/Authorization",
+          "/access/http/response/headers/X-OpenIDM-Password"
+        ],
+        "includeIf" : [
+
+        ]
+      }
+    }
   },
   "eventHandlers" : [
     {
