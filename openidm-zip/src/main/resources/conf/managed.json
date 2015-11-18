@@ -272,7 +272,7 @@
                     },
                     "reports" : {
                         "description" : "",
-                        "title" : "Reports",
+                        "title" : "Direct Reports",
                         "viewable" : true,
                         "userEditable" : false,
                         "type" : "array",

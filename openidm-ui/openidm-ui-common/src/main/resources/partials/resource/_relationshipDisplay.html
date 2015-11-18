@@ -11,7 +11,8 @@
         </div>
     </div>
     <div class="media-body media-middle">
-        <a id="relationshipLink-{{propName}}" href="#">{{displayText}}</a>
+        <a id="resourceEditLink-{{propName}}" href="#{{resourceEditPath}}">{{displayText}}</a> 
+        <a id="relationshipLink-{{propName}}"  href="#" class="btn btn-default btn-xs updateRelationshipButton"><i class="fa fa-pencil"></i>{{editButtonText}}</a>
     </div>
 </div>
 {{/if}}

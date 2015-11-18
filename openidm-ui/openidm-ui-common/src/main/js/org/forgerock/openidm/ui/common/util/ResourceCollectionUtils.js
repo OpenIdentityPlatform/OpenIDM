@@ -101,6 +101,11 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                                 modifiedResult = _.map(result, function(item){
                                     return convertNestedProps(item);
                                 });
+                                
+                            if (prop.parentObjectId) {
+                                //filter out any values that are the same as the parentObjectId
+                                modifiedResult = _.reject(modifiedResult, function (mr) { return mr._id === prop.parentObjectId; });
+                            }
 
                             callback(modifiedResult);
                         },

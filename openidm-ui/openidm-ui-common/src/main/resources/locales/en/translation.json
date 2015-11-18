@@ -354,7 +354,9 @@
                 "createNewResource": "Create New __resource__",
                 "updateResource": "Update __resource__",
                 "removeSelectedResource": "Remove Selected __resource__",
-                "type": "Type"
+                "type": "Type",
+                "showChart": "Show Chart",
+                "showList": "Show List"
             },
             "ResourceList":
             {
