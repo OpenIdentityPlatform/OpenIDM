@@ -85,22 +85,19 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * Create a new relationship set for the given managed resource
      * @param connectionFactory Connection factory used to access the repository
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
-     * @param propertyName Name of property on first object represents the relationship
-     * @param uriPropertyName   Property name used on the URI for nested routes
-     * @param isReverse If this provider represents a reverse relationship
+     * @param schemaField The schema of the field representing this relationship in the parent object.
      * @param activityLogger The audit activity logger to use
      * @param managedObjectSyncService Service to send sync events to
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
-            final JsonPointer propertyName, final JsonPointer reversePropertyName, final String uriPropertyName, 
-            final boolean isReverse, final ActivityLogger activityLogger, 
+            final SchemaField schemaField, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, propertyName, reversePropertyName, isReverse, activityLogger,
+        super(connectionFactory, resourcePath, schemaField, activityLogger,
                 managedObjectSyncService);
 
         final Router router = new Router();
         router.addRoute(RoutingMode.STARTS_WITH, 
-                uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, uriPropertyName)), 
+                uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, schemaField.getName())),
                 Resources.newCollection(this));
         this.requestHandler = router;
     }
@@ -332,13 +329,13 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             
             QueryFilter<JsonPointer> filter;
             ResourcePath resourcePath = firstResourcePath(context, request);
-            if (isReverseRelationship) {
+            if (schemaField.isReverseRelationship()) {
                 QueryFilter<JsonPointer> firstFilter = and(
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
                 QueryFilter<JsonPointer> secondFilter = and(
                         equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourcePath),
-                        equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), propertyName));
+                        equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), schemaField.getName()));
                 if (request.getQueryFilter() != null) {
                     filter = or(
                             and(firstFilter, 
@@ -351,9 +348,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             } else {    
                 filter = and(
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyName));
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
                 if (request.getQueryFilter() != null) {
-                    filter = and(filter, asRelationshipQueryFilter(isReverseRelationship, request.getQueryFilter()));
+                    filter = and(filter, asRelationshipQueryFilter(schemaField.isReverseRelationship(), request.getQueryFilter()));
                 }
             }
 

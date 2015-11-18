@@ -514,7 +514,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             if (relationshipValue.isNotNull()) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
-                persisted.add(provider.setRelationshipValueForResource(context, resourceId, 
+                persisted.add(provider.setRelationshipValueForResource(context, resourceId,
                         relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
                             @Override
                             public JsonValue apply(JsonValue jsonValue) throws ResourceException {
@@ -694,17 +694,22 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             final JsonPointer field = entry.getKey();
             final RelationshipProvider provider = entry.getValue();
 
-            // If relationship is hidden by default and not explicitly requested, skip
-            if (schema.getHiddenByDefaultFields().containsKey(field) && !requestFields.contains(field)) {
-                continue;
+            // Only return relationships set to return by default
+            // Unless explicitly requested or all relationships requested via *_ref
+            if (requestFields.contains(SchemaField.FIELD_ALL_RELATIONSHIPS)
+                    || provider.getSchemaField().isReturnedByDefault()
+                    || requestFields.contains(field)) {
+                try {
+                    joined.put(field, provider.getRelationshipValueForResource(context,
+                            resourceId).getOrThrow().getObject());
+                } catch (NotFoundException e) {
+                    joined.put(field, null);
+                }
+            } else {
+                // relationship was not requested or set to return by default
+                logger.debug("Relationship field {} skipped", field);
             }
 
-            try {
-                joined.put(field, provider.getRelationshipValueForResource(context, 
-                        resourceId).getOrThrow().getObject());
-            } catch (NotFoundException e) {
-                joined.put(field, null);
-            }
         }
 
         return joined;
