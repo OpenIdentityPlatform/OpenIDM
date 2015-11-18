@@ -397,7 +397,7 @@
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
-                            "validate" : "true",
+                            "validate" : true,
                             "reverseRelationship": true,
                             "reversePropertyName": "roles",
                             "properties" : {
