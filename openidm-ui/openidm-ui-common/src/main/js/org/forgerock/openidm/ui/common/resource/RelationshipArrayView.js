@@ -37,6 +37,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
     "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
     "org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "d3",
     "backgrid-paginator",
     "backgrid-selectall"
 ], function(
@@ -51,7 +52,8 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
         AbstractCollection,
         resourceCollectionUtils,
         resourceCollectionSearchDialog,
-        uiUtils) {
+        uiUtils,
+        d3) {
     var RelationshipArrayView = AbstractView.extend({
         template: "templates/admin/resource/RelationshipArrayViewTemplate.html",
         noBaseTemplate: true,
@@ -61,14 +63,33 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             "click .reload-grid-btn": "reloadGrid",
             "click .add-relationship-btn": "addRelationship",
             "click .remove-relationships-btn": "removeRelationships",
-            "click .clear-filters-btn": "clearFilters"
+            "click .clear-filters-btn": "clearFilters",
+            "click .toggle-chart": "toggleChart"
+        },
+
+        toggleChart: function(event){
+            if (event) {
+                event.preventDefault();
+            }
+            
+            if (this.data.showChart) {
+                this.data.showChart = false;
+                
+                this.$el.find('.relationshipListContainer').show();
+                this.$el.find('.relationshipGraphContainer').hide();
+            } else {
+                this.data.showChart = true;
+                
+                this.$el.find('.relationshipListContainer').hide();
+                this.$el.find('.relationshipGraphContainer').show();
+            }
         },
 
         clearFilters: function(event){
             if (event) {
                 event.preventDefault();
             }
-            event.preventDefault();
+            
             this.render(this.args);
             this.$el.find('.clear-filters-btn').prop('disabled', true);
         },
@@ -104,10 +125,6 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 event.preventDefault();
             }
             this.model.relationships.fetch();
-            
-            if (callback) {
-                callback();
-            }
         },
         getURL: function(){
             return "/" + constants.context + "/" + this.relationshipUrl;
@@ -126,6 +143,8 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 relationshipPropName = this.data.prop.propName,
                 relationshipProp = this.schema.properties[this.data.prop.propName].items;
             
+            this.hasRefProperties = _.toArray(relationshipProp.properties._refProperties.properties).length > 1;
+            
             cols.push({
                 "name": "details",
                 "label": $.t("templates.admin.ResourceEdit.details"),
@@ -133,9 +152,10 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                     render: function () {
                         var propertyValuePath = resourceCollectionUtils.getPropertyValuePath(this.model.attributes),
                             resourceCollectionIndex = resourceCollectionUtils.getResourceCollectionIndex(_this.schema, propertyValuePath, _this.data.prop.propName),
-                            txt = resourceCollectionUtils.getDisplayText(_this.data.prop, this.model.attributes, resourceCollectionIndex);
+                            txt = resourceCollectionUtils.getDisplayText(_this.data.prop, this.model.attributes, resourceCollectionIndex),
+                            link = '<a class="resourceEditLink" href="#resource/' + propertyValuePath + '/edit/' + this.model.attributes._id + '">' + txt + '</a>';
                         
-                        this.$el.html(txt);
+                        this.$el.html(link);
                         
                         return this;
                     }
@@ -168,6 +188,10 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 sortable: false,
                 editable: false
             });
+            
+            if (this.hasRefProperties) {
+                this.$el.find('.clear-filters-btn').show();
+            }
             
             _.each(relationshipProp.properties._refProperties.properties, _.bind(function(col,colName){
                 if(colName !== "_id"){
@@ -208,11 +232,12 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             this.data.grid_id = "relationshipArray-" + args.prop.propName;
             this.grid_id_selector = "#" + this.data.grid_id;
             this.data.selectedItems = [];
-
+            this.data.showChart = args.showChart || false;
+            
             this.parentRender(function() {
                 
                 this.buildRelationshipArrayGrid(this.getCols());
-
+                
                 if(callback) {
                     callback();
                 }
@@ -245,11 +270,15 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                     callback: function(e) {
                         var $target = $(e.target);
 
-                        if ($target.is("input") || $target.is(".select-row-cell")) {
+                        if ($target.is("input") || $target.is(".select-row-cell") || $target.hasClass("resourceEditLink")) {
                             return;
                         }
                         
-                        _this.openResourceCollectionDialog(this.model.attributes);
+                        if (_this.hasRefProperties) {
+                            _this.openResourceCollectionDialog(this.model.attributes);
+                        } else {
+                            location.href = $target.find(".resourceEditLink").attr("href");
+                        }
                     }
                 })
             });
@@ -264,6 +293,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             this.bindDefaultHandlers();
 
             this.model.relationships.getFirstPage();
+
         },
 
         onRowSelect: function (model, selected) {
@@ -286,6 +316,29 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             }, this));
 
             this.model.relationships.on("backgrid:sort", BackgridUtils.doubleSortFix);
+            
+            this.model.relationships.on("sync", _.bind(function (collection) {
+                var hasFilters = false;
+                _.each(collection.state.filters, function (filter) {
+                    if (filter.value.length) {
+                        hasFilters = true;
+                    }
+                });
+
+                if (hasFilters) {
+                    this.$el.find('.clear-filters-btn').prop('disabled', false);
+                } else {
+                    this.$el.find('.clear-filters-btn').prop('disabled', true);
+                }
+                
+                if (collection.models.length) {
+                    this.loadChart(collection.models);
+                    this.$el.find(".toggle-chart-buttons").show();
+                } else {
+                    this.data.showChart = false;
+                    this.$el.find(".toggle-chart-buttons").hide();
+                }
+            }, this));
         },
         
         deleteRelationship: function (value) {
@@ -327,6 +380,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             if (!propertyValue) {
                 opts.onChange = function (value, newText) {
                     _this.createRelationship(value).then(function () {
+                        _this.args.showChart = _this.data.showChart;
                         _this.render(_this.args);
                     });
                 };
@@ -341,6 +395,107 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             }
             
             resourceCollectionSearchDialog.render(opts);
+        },
+        loadChart: function(models) {
+            this.$el.find("#relationshipGraphBody-" + this.data.prop.propName).empty();
+            var elementSelector = "#relationshipGraphBody-" + this.data.prop.propName,
+                treeData = {
+                    "name" : this.data.prop.parentDisplayText,
+                    "parent" : "null",
+                    "children" : [
+
+                    ]
+                },
+                margin = {
+                    top: 20,
+                    right: 120,
+                    bottom: 20,
+                    left: 350
+                },
+                width = 1024 - margin.right - margin.left,
+                height = 500 - margin.top - margin.bottom,
+                i = 0,
+                tree = d3.layout.tree().size([height, width]),
+                diagonal = d3.svg.diagonal().projection(function(d) {
+                    return [d.y, d.x];
+                }),
+                svg = d3.select(elementSelector).append("svg")
+                    .attr("width", width + margin.right + margin.left)
+                    .attr("height", height + margin.top + margin.bottom)
+                    .append("g")
+                    .attr("transform", "translate(" + margin.left + "," + margin.top + ")"),
+                root = null,
+                update = function(source) {
+                    var nodes = tree.nodes(root).reverse(),
+                        links = tree.links(nodes),
+                        nodeEnter,
+                        node,
+                        link;
+
+                    //Normalize for fixed-depth.
+                    nodes.forEach(function(data) { data.y = data.depth * 180; });
+
+                    //Declare the nodes
+                    node = svg.selectAll("g.node").data(nodes, function(data) {
+                        if(!data.id) {
+                            data.id = ++i;
+                        }
+
+                        return data.id;
+                    });
+
+                    //Enter the nodes.
+                    nodeEnter = node.enter().append("g")
+                        .attr("class", "node")
+                        .attr("transform", function(data) {
+                            return "translate(" + data.y + "," + data.x + ")";
+                        });
+
+                    //Add Circles
+                    nodeEnter.append("circle")
+                        .attr("r", 10)
+                        .style("fill", "#fff");
+
+                    //Add Text
+                    nodeEnter.append("svg:a")
+                        .attr("xlink:href", function(data){return data.url;})
+                        .append("text")
+                        .attr("x", function(data) {
+                            return data.children || data._children ? -13 : 13;
+                        })
+                        .attr("dy", ".35em")
+                        .attr("text-anchor", function(data) {
+                            return data.children || data._children ? "end" : "start";
+                        })
+                        .html(function(data) { return data.name; })
+                        .style("fill-opacity", 1);
+
+                    //Generate the paths
+                    link = svg.selectAll("path.link").data(links, function(d) {
+                        return d.target.id;
+                    });
+
+                    //Add the paths
+                    link.enter().insert("path", "g")
+                        .attr("class", "link")
+                        .attr("d", diagonal);
+                };
+
+            _.each(models, _.bind(function(model){
+                var propertyValuePath = resourceCollectionUtils.getPropertyValuePath(model.attributes),
+                    resourceCollectionIndex = resourceCollectionUtils.getResourceCollectionIndex(this.schema, propertyValuePath, this.data.prop.propName),
+                    displayText = resourceCollectionUtils.getDisplayText(this.data.prop, model.attributes, resourceCollectionIndex);
+
+                treeData.children.push({
+                    "name" : displayText,
+                    "parent" : "null",
+                    "url" : "#resource/" + propertyValuePath + "/edit/" + model.attributes._id
+                });
+            }, this));
+
+            root = treeData;
+
+            update(root);
         }
     });
 

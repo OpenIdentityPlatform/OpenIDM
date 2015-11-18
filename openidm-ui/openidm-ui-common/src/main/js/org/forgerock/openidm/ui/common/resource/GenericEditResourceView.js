@@ -435,25 +435,16 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                         if (prop.type === "array") {
                             if(prop.items.resourceCollection && _.has(filteredObject,key)) {
+                                prop.parentObjectId =  _this.objectId;
                                 prop.relationshipUrl = _this.data.objectType + "/" + _this.objectName + "/" + _this.objectId + "/" + prop.propName;
                                 prop.typeRelationship = true;
+                                prop.parentDisplayText = _this.data.objectDisplayText;
                                 return convertArrayField(prop);
                             }
                         }
 
                         if (prop.resourceCollection) {
-                            return convertField(prop).then(function (resp) {
-
-                                if (_this.data.objectType + "/" + _this.objectName === prop.resourceCollection.path && prop.resourceCollection.label && prop.resourceCollection.label.length) {
-                                    prop.parentId = prop.resourceCollection.path + "/" + _this.objectId;
-                                    prop.parentValue = _this.oldObject;
-                                    prop.typeRelationship = true;
-                                    return showRelationships(prop);
-                                } else {
-                                    return resp;
-                                }
-
-                            });
+                            return convertField(prop);
                         }
 
                         // nothing special needed for this field
@@ -470,7 +461,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                  */
                 convertField = function (prop) {
                     var el = _this.$el.find("#0-root" + prop.selector.replace(/\./g, "-")),//this is the JSONEditor field to be hidden and changed by the button/dialog
-                        buttonId = "JSONEditorAutocomplete_" + prop.selector.replace("\\",""),
+                        buttonId = "relationshipLink-" + prop.propName,
                         button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({ 
                                 "newRelationship": true, 
                                 "displayText" : $.t("templates.admin.ResourceEdit.addResource",{ resource: prop.title }),
@@ -478,7 +469,18 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                              })),
                         propertyValuePath,
                         iconClass,
-                        resourceCollectionSchema;
+                        resourceCollectionSchema,
+                        resourceEditPath = function () {
+                            var val = JSON.parse(el.val()),
+                                route = "resource/",
+                                pathArray = val._ref.split("/");
+                            
+                            pathArray.pop();
+                            
+                            route += pathArray.join("/") + "/edit/" + val._id;
+                            
+                            return route;
+                        };
                     
                     if (el.val().length) {
                         propertyValuePath = resourceCollectionUtils.getPropertyValuePath(JSON.parse(el.val()));
@@ -487,15 +489,17 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                         if (resourceCollectionSchema) {
                             iconClass = resourceCollectionSchema.schema.icon;
                         }
-                        
+
                         button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({ 
                             "iconClass": iconClass || "fa-cube", 
                             "displayText": resourceCollectionUtils.getDisplayText(prop, JSON.parse(el.val()), resourceCollectionUtils.getResourceCollectionIndex(_this.data.schema,propertyValuePath, prop.propName)),
-                            "propName": prop.propName
+                            "editButtonText": $.t("templates.admin.ResourceEdit.updateResource",{ resource: prop.title }),
+                            "propName": prop.propName,
+                            "resourceEditPath": resourceEditPath()
                          }));
                        
                     }
-                    
+
                     button.click(function (e) {
                         var opts = {
                                 property: prop,
@@ -505,11 +509,14 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                                     _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue(JSON.stringify(value));
                                     button.remove();
                                     convertField(prop);
-                                    _this.$el.find("#relationshipLink-" + prop.propName).text(newText);
+                                    _this.$el.find("#resourceEditLink-" + prop.propName).text(newText);
                                 }
                         };
-                        e.preventDefault();
-                        ResourceCollectionSearchDialog.render(opts);
+                        
+                        if ($(e.target).attr("id") === buttonId) {
+                            e.preventDefault();
+                            ResourceCollectionSearchDialog.render(opts);
+                        }
                     });
     
                     el.attr("style","display: none !important");

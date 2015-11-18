@@ -180,7 +180,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
                         _.map(prop.resourceCollection, function (resourceCollection) {
                             resourceCollections.push({
                                 path : resourceCollection.path,
-                                label : pathToLabel(resourceCollection.path)
+                                label : resourceCollection.label || pathToLabel(resourceCollection.path)
                             });
                         });
                         
@@ -217,7 +217,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
             
             if ( resourceCollection.path.split("/")[0] === "system" || resourceCollection.path.split("/")[0] === "managed") {
                 addResourceLink.attr("href", "#resource/" + resourceCollection.path + "/add/");
-                addResourceLink.find("span").text($.t("templates.admin.ResourceEdit.createNewResource", { resource : resourceCollection.label }));
+                addResourceLink.find("span").text($.t("templates.admin.ResourceEdit.createNewResource", { resource : resourceCollection.label || resourceCollection.path }));
                 addResourceLink.show();
             } else {
                 addResourceLink.hide();

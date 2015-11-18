@@ -394,6 +394,10 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                                         "type": "string",
                                         "title": "Path"
                                     },
+                                    "label": {
+                                        "type": "string",
+                                        "title": "Label"
+                                    },
                                     "query": {
                                         "type": "object",
                                         "title": "Query",
