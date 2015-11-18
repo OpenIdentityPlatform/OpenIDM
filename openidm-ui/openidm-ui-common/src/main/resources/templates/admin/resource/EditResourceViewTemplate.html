@@ -12,6 +12,11 @@
                 </div>
                 <div class="media-body  media-top">
                     <h4 class="page-type">{{objectTitle}}</h4>
+	                <div class="page-header-button-group">
+	                    {{#unless newObject}}
+	                    <a href="#" class="btn btn-default" id="deleteBtn">{{t "common.form.delete"}}</a>
+	                    {{/unless}}
+	                </div>
                     <h1 class="media-heading">
                         {{#if newObject}}{{t "templates.admin.ResourceEdit.new"}} {{objectTitle}}{{else}}{{objectDisplayText}}{{/if}}
                     </h1>
@@ -78,7 +83,6 @@
                 </div>
                 <div class="pull-right">
                     {{#unless newObject}}
-                    <a href="#" class="btn btn-default" id="deleteBtn">{{t "common.form.delete"}}</a>
                     <a href="#" class="btn btn-default" id="resetBtn" disabled>{{t "common.form.reset"}}</a>
                     {{/unless}}
                     <a href="#" class="btn btn-primary" id="saveBtn" disabled>{{t "common.form.save"}}</a>
