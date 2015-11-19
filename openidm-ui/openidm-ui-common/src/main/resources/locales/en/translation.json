@@ -18,10 +18,13 @@
         "quickStart" : {
             "addANewConnector" : "Add Connector",
             "createANewMapping" : "Create Mapping",
+            "createANewRole" : "Create Role",
+            "createAUser" : "Create User",
             "manageRole" : "Manage Role",
             "addANewDevice" : "Add Device",
             "setupRegistration" : "Set up Registration",
             "setupPasswordReset" : "Set up Password Reset",
+            "setupAuthentication" : "Set up Authentication",
             "manageUser" : "Manage User",
             "setupSystem" : "Set up System",
             "viewProfile" : "View Profile",

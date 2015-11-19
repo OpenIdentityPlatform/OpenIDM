@@ -71,21 +71,28 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessDashboard
         showStartProcessView: function(event) {
             event.preventDefault();
             var parent = $(event.target).parents(".process-item"),
-                id = parent.find('[name="id"]').val();
-
-            this.$el.find(".claim-item .fa-caret-down").toggleClass("fa-caret-right", true);
-            this.$el.find(".claim-item .fa-caret-down").toggleClass("fa-caret-down", false);
-
-            parent.find(".details-link .fa").toggleClass("fa-caret-right", false);
-            parent.find(".details-link .fa").toggleClass("fa-caret-down", true);
+                id = parent.find('[name="id"]').val(),
+                collapse = parent.find('#processDetails').length;
 
             this.$el.find("#processDetails").remove();
-
             this.$el.find(".selected-process").removeClass('selected-process');
-            $(event.target).parents(".process-item").find('.process-item-holder').addClass('selected-process');
-            $(event.target).parents(".process-item").find('.process-item-holder').append('<div id="processDetails" style="margin-top: 10px;"></div>');
 
-            this.renderStartProcessView(id);
+            if (collapse) {
+                parent.find(".details-link .fa").toggleClass("fa-caret-right", true);
+                parent.find(".details-link .fa").toggleClass("fa-caret-down", false);
+
+            } else {
+                this.$el.find(".fa-caret-down").toggleClass("fa-caret-right", true);
+                this.$el.find(".fa-caret-down").toggleClass("fa-caret-down", false);
+
+                parent.find(".details-link .fa").toggleClass("fa-caret-right", false);
+                parent.find(".details-link .fa").toggleClass("fa-caret-down", true);
+
+                $(event.target).parents(".process-item").find('.process-item-holder').addClass('selected-process');
+                $(event.target).parents(".process-item").find('.process-item-holder').append('<div id="processDetails" style="margin-top: 10px;"></div>');
+
+                this.renderStartProcessView(id);
+            }
         },
 
         renderStartProcessView: function(id) {
