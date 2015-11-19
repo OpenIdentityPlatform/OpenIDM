@@ -89,22 +89,26 @@ define("org/forgerock/openidm/ui/admin/selfservice/ForgotUsernameConfigView", [
             this.data.configList = [{
                 type: "captcha",
                 title: $.t("templates.selfservice.password.captchaTitle"),
-                help: $.t("templates.selfservice.captcha.description")
+                help: $.t("templates.selfservice.captcha.description"),
+                editable: true
             },
             {
                 type: "userQuery",
                 title: $.t("templates.selfservice.userQuery.name"),
-                help: $.t("templates.selfservice.userQuery.description")
+                help: $.t("templates.selfservice.userQuery.description"),
+                editable: true
             },
             {
                 type: "emailUsername",
                 title: $.t("templates.selfservice.emailUsername.name"),
-                help: $.t("templates.selfservice.emailUsername.description")
+                help: $.t("templates.selfservice.emailUsername.description"),
+                editable: true
             },
             {
                 type: "retrieveUsername",
                 title: $.t("templates.selfservice.retrieveUsername.name"),
-                help: $.t("templates.selfservice.retrieveUsername.description")
+                help: $.t("templates.selfservice.retrieveUsername.description"),
+                editable: false
             }];
 
             this.selfServiceRender(args, callback);
