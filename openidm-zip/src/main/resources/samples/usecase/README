@@ -356,7 +356,7 @@ Usecase5 - Certification workflows
         --request PUT \
         --data '{
           "name":"production-planning-assignment",
-          "description":"Assignment for Production Planning department"},
+          "description":"Assignment for Production Planning department",
           "mapping": "managedUser_systemBusiness",
           "attributes":[ {
             "name": "memberOf",
@@ -375,7 +375,7 @@ Usecase5 - Certification workflows
         --request PUT \
         --data '{
           "name":"sales-distribution",
-          "description":"Assignment for Sales and Distribution department"},
+          "description":"Assignment for Sales and Distribution department",
           "mapping": "managedUser_systemBusiness",
           "attributes":[ { 
             "name": "memberOf",
@@ -394,7 +394,7 @@ Usecase5 - Certification workflows
         --request PUT \
         --data '{
           "name":"treasury-payments",
-          "description":"Assignment for for Treasury and Payments department"},
+          "description":"Assignment for for Treasury and Payments department",
           "mapping": "managedUser_systemBusiness",
           "attributes":[ { 
             "name": "memberOf",

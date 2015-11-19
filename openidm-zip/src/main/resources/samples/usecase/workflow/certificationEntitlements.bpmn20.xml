@@ -7,10 +7,13 @@
       <script> 
                 role = openidm.read('managed/role/' + roleId);
                 assignments = role.assignments;
-                uidata = [rolename:role.name, roleid:role._id, roledescription:role.properties.description];
+                uidata = [rolename:role.name, roleid:role._id, roledescription:role.description];
                 uiassignments = [];
-                assignments.each { key, value -&gt;
-                    uiassignments.push([assignmentname:key, attributes:value.attributes]);
+                assignments.each{ assignmentRef -&gt;
+                    assignment = openidm.read(assignmentRef._ref);
+                    assignment.each{ key, value -&gt;
+                        uiassignments.push([assignmentname:key, attributes:value.attributes]);
+                    }
                 }
                 uidata.assignments = uiassignments;
                 execution.setVariable('uidata', uidata);
@@ -27,16 +30,19 @@
     <scriptTask id="patchManagedRole" name="Patch Role" scriptFormat="groovy" activiti:autoStoreVariables="false">
       <script>
                 role = openidm.read('managed/role/' + roleId);
-                role.assignments.each{ key, value ->
-                    for (attribute in value.attributes) {
-                        newValue = execution.getVariable(key + attribute.name + 'Assignments');
-                        org.json.JSONArray jsonObj = new org.json.JSONArray(newValue)
-                        list = [];
-                        for(int i = 0; i &lt; jsonObj.length(); i++){
-                            list.push(jsonObj.getString(i));
-                        }
-                        attribute.value = list;
-                    }
+                role.assignments.each{ assignmentRef -&gt;
+                    assignment = openidm.read(assignmentRef._ref);
+                    assignment.each{ key, value -&gt;
+	                    for (attribute in value.attributes) {
+	                        newValue = execution.getVariable(key + attribute.name + 'Assignments');
+	                        org.json.JSONArray jsonObj = new org.json.JSONArray(newValue)
+	                        list = [];
+	                        for(int i = 0; i &lt; jsonObj.length(); i++){
+	                            list.push(jsonObj.getString(i));
+	                        }
+	                        attribute.value = list;
+	                    }
+	                }
                 }
                 openidm.update('managed/role/' + roleId, null, role);
                 

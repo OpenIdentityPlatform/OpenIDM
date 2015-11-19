@@ -135,7 +135,7 @@
                     assignedManager = openidm.read('managed/user/' + candidateUsers.get(0))
                 }
                 managerMap = "managed/user/"+assignedManager._id
-                user.put("manager", managerMap)
+                user.put("manager", [_ref:managerMap])
 
                 openidm.create('managed/user', null, user)
                 

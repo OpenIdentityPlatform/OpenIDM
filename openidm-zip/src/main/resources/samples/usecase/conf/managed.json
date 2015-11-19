@@ -187,7 +187,7 @@
                         "title" : "Managed Roles",
                         "viewable" : true,
                         "userEditable" : false,
-                        "returnByDefault" : false,
+                        "returnByDefault" : true,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
@@ -320,7 +320,6 @@
                     },
                     "manager" : {
                         "type" : "relationship",
-                        "validate" : true,
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
