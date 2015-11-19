@@ -23,7 +23,7 @@
                 user.effectiveRoles.each {
                     role = roles.find {e -&gt; e.rid.equals(it._ref)};
                     if (role != null) {
-                        role.dynamic = !user.roles.contains(it._ref);
+                        role.dynamic = !user.roles.find{e -&gt; e._ref.equals(it._ref)};
                         role.actualManaged = true;
                         role.newManaged = true;
                     }
@@ -76,10 +76,10 @@
  	 	        }
                 
                 user = openidm.read('managed/user/' + userId);
-                newManagedRoles = user.roles.findAll {it.startsWith('openidm-')}.toList();
+                newManagedRoles = [];
                 roles.each {
                     if (it.newManaged &amp;&amp; !it.dynamic) {
-                        newManagedRoles.push(it.rid);
+                        newManagedRoles.push([_ref: it.rid]);
                     }
                 }
                 

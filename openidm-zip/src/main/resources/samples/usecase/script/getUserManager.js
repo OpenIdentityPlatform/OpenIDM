@@ -57,15 +57,15 @@ function processDelegates(delegate, candidates) {
         }
         var userId = request.additionalParameters.userId,
         user = openidm.read("managed/user/"+userId), i,
-        managerCandidates = ["superadmin"], manager;
+        managerCandidates = [ "managed/user/superadmin" ], manager;
 
         if (!user) {
             throw "User not found: " + userId;
         }
 
-        if (user.manager && user.manager.managerId) {
-            pushIfNotContains(managerCandidates, user.manager.managerId);
-            manager = openidm.read("managed/user/"+user.manager.managerId);
+        if (user.manager && user.manager._ref) {
+            pushIfNotContains(managerCandidates, user.manager._ref);
+            manager = openidm.read(user.manager._ref);
             if (manager.delegates !== undefined) {
                 for (i = 0; i < manager.delegates.length; i++) {
                     processDelegates(manager.delegates[i], managerCandidates);
