@@ -78,13 +78,19 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
 
             var parent = $(event.target).parents(".list-group-item"),
                 id = parent.find("input[name=taskId]").val(),
+                collapse = parent.find('#taskDetails').length,
                 task;
 
             this.$el.find(".claim-item .fa-caret-down").toggleClass("fa-caret-right", true);
             this.$el.find(".claim-item .fa-caret-down").toggleClass("fa-caret-down", false);
 
-            parent.find(".details-link .fa").toggleClass("fa-caret-right", false);
-            parent.find(".details-link .fa").toggleClass("fa-caret-down", true);
+            if (collapse) { // hide div and switch arrow
+                this.$el.find("#taskDetails").remove();
+                id = null;
+            } else {
+                parent.find(".details-link .fa").toggleClass("fa-caret-right", false);
+                parent.find(".details-link .fa").toggleClass("fa-caret-down", true);
+            }
 
             if(id) {
                 task = this.getTaskFromCacheById(id);
