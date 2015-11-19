@@ -144,14 +144,21 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
                 this.correlationScript = InlineScriptEditor.generateScriptEditor({
                     "element": this.$el.find("#correlationScriptContent"),
                     "eventName": "correlationScript",
-                    "noValidation": false,
+                    "disableValidation": false,
                     "scriptData": scriptData,
                     "disablePassedVariable": false,
-                    "placeHolder" : "['test', 'default']"
-                });
+                    "placeHolder" : "['test', 'default']",
+                    "validationCallback": _.bind(function(valid) {
+                        if (this.$el.find(".correlationQueryType").val() === "script") {
+                            this.$el.find(".saveCorrelationQuery").prop('disabled', !valid);
+                            this.$el.find(".resetCorrelationQuery").prop('disabled', !valid);
+                        }
+                    }, this)
+                }, _.bind(function(){
+                    this.changeCorrelationQueryType();
+                    this.checkButtons();
+                }, this));
 
-                this.changeCorrelationQueryType();
-                this.checkButtons();
             });
         },
 
@@ -170,8 +177,12 @@ define("org/forgerock/openidm/ui/admin/mapping/association/AssociationRuleView",
                 showWarning = false;
                 this.$el.find(".correlationQueryChangesMsg").hide();
 
-            } else if (this.$el.find(".correlationQueryType").val() === "script") {
-                showWarning = false;
+            }  else if (this.$el.find(".correlationQueryType").val() === "script") {
+                this.$el.find(".correlationQueryChangesMsg").hide();
+
+                if(this.correlationScript.generateScript()) {
+                    showWarning = false;
+                }
             }
 
             this.$el.find(".saveCorrelationQuery").prop('disabled', showWarning);
