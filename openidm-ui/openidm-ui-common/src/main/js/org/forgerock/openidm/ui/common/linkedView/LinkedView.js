@@ -139,6 +139,12 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
                                 delete this.data.linkedData.linkedTo[selection].content._id;
                             }
 
+                            _.each(this.data.linkedData.linkedTo[selection].content, function(value, key) {
+                                if(_.isArray(value) && value.length === 0) {
+                                    this.data.linkedData.linkedTo[selection].content[key] = undefined;
+                                }
+                            }, this);
+
                             this.editor.setValue(this.data.linkedData.linkedTo[selection].content);
 
                             this.$el.find("#linkedViewContent h3:first").hide();
