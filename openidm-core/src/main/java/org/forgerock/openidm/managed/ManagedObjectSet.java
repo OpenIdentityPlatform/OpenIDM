@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.managed;
 
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -1274,12 +1275,20 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param value The JsonValue map to strip relationship fields from
      * @return A {@link JsonValue} object containing the stripped fields.
      */
-    protected JsonValue stripRelationshipFields(JsonValue value) {
+    protected JsonValue stripRelationshipFields(final JsonValue value) {
         final JsonValue stripped = json(object());
 
         for (JsonPointer field : schema.getRelationshipFields()) {
-            JsonValue fieldValue = value.get(field);
-            stripped.put(field, fieldValue != null ? fieldValue.getObject() : null);
+            final JsonValue fieldValue = value.get(field);
+            final Object strippedValue;
+            if (null != fieldValue) {
+                strippedValue = fieldValue.getObject();
+            } else if (schema.getField(field).isArray()) {
+                strippedValue = array();
+            } else {
+                strippedValue = null;
+            }
+            stripped.put(field, strippedValue);
             value.remove(field);
         }
 
