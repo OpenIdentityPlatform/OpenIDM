@@ -193,8 +193,8 @@ public class SchemaFieldTest {
 
     @Test
     public void testValidatedRelationship() {
-        assertFalse(relationshipField.isValidateRelationship());
-        assertTrue(relationshipFieldValidate.isValidateRelationship());
+        assertFalse(relationshipField.isValidationRequired());
+        assertTrue(relationshipFieldValidate.isValidationRequired());
     }
 
 }

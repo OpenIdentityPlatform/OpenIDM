@@ -303,15 +303,15 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     }
 
     /**
-     * Implemented to simply call validateRelationshipExists for the simple field.
+     * Implemented to simply call validateRelationship for the single field.
      *
      * @param relationshipField field to validate.
      * @param context context of the original request.
      * @throws ResourceException BadRequestException when the relationship is found to be non-existent, otherwise by
      * some other issue.
-     * @see #validateRelationshipExists(JsonValue, Context)
+     * @see RelationshipValidator#validateRelationship(JsonValue, Context)
      */
     public void validateRelationshipField(JsonValue relationshipField, Context context) throws ResourceException {
-        validateRelationshipExists(relationshipField, context);
+        relationshipValidator.validateRelationship(relationshipField,context);
     }
 }

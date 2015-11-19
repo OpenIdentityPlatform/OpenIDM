@@ -744,7 +744,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private void validateRelationshipFields(JsonValue value, Context context) throws ResourceException {
         for (JsonPointer field : schema.getRelationshipFields()) {
             JsonValue fieldValue = value.get(field);
-            if (schema.getField(field).isValidateRelationship() && fieldValue != null && fieldValue.isNotNull()) {
+            if (schema.getField(field).isValidationRequired() && fieldValue != null && fieldValue.isNotNull()) {
                 relationshipProviders.get(field).validateRelationshipField(fieldValue, context);
             }
         }

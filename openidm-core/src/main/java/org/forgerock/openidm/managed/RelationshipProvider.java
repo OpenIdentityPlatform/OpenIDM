@@ -15,19 +15,13 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
+import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARAM_RESOURCE_CONTAINER;
-import static org.forgerock.openidm.sync.impl.SynchronizationService.ACTION_PARAM_RESOURCE_ID;
+import static org.forgerock.openidm.sync.impl.SynchronizationService.*;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction.notifyUpdate;
-import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ERROR;
-import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ERROR_MESSAGE;
-import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
+import static org.forgerock.openidm.util.RelationshipUtil.*;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -49,7 +43,6 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
@@ -134,6 +127,11 @@ public abstract class RelationshipProvider {
     
     /** The name of the field containing the revision */
     public static final JsonPointer FIELD_REV = FIELD_PROPERTIES.child(FIELD_CONTENT_REVISION);
+
+    /**
+     * The validator responsible for testing if the relationship request is valid.
+     */
+    protected final RelationshipValidator relationshipValidator;
 
     /**
      * Returns a Function to format a resource from the repository to that expected by the provider consumer. This is 
@@ -276,12 +274,6 @@ public abstract class RelationshipProvider {
     public static RelationshipProvider newProvider(final ConnectionFactory connectionFactory,
             final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger,
             final ManagedObjectSyncService managedObjectSyncService) {
-        final JsonPointer propName = new JsonPointer(relationshipField.getName());
-        final boolean isReverseRelationship = relationshipField.isReverseRelationship();
-        final JsonPointer reversePropName = isReverseRelationship
-                ? new JsonPointer(relationshipField.getReversePropertyName())
-                : null;
-
         if (relationshipField.isArray()) {
             return new CollectionRelationshipProvider(connectionFactory, resourcePath, relationshipField,
                     activityLogger, managedObjectSyncService);
@@ -309,6 +301,9 @@ public abstract class RelationshipProvider {
         this.propertyPtr = new JsonPointer(schemaField.getName());
         this.activityLogger = activityLogger;
         this.managedObjectSyncService = managedObjectSyncService;
+        this.relationshipValidator = (schemaField.isReverseRelationship())
+                ? new ReverseRelationshipValidator(this)
+                : new ForwardRelationshipValidator(this);
     }
 
     /**
@@ -356,7 +351,7 @@ public abstract class RelationshipProvider {
     public abstract Promise<JsonValue, ResourceException> clear(Context context, String resourceId);
 
     /**
-     * Tests that all references in the relationship field exist.
+     * Tests that all references in the relationship field are valid according to this provider's validator.
      *
      * @param relationshipField field to validate
      * @param context context of the request working with the relationship.
@@ -365,23 +360,6 @@ public abstract class RelationshipProvider {
      */
     public abstract void validateRelationshipField(JsonValue relationshipField, Context context)
             throws ResourceException;
-
-    /**
-     * Does a read on the relationshipField.  If found not to exist then the relationshipField is invalid.
-     *
-     * @param relationshipField the field to be validated.
-     * @param context context of the request working with the relationship.
-     * @throws ResourceException BadRequestException when the relationship does not exist, otherwise for other issues.
-     */
-    protected void validateRelationshipExists(JsonValue relationshipField, Context context) throws ResourceException {
-        String ref = relationshipField.get(REFERENCE_ID).asString();
-        try {
-            connectionFactory.getConnection().read(context, Requests.newReadRequest(ref));
-        } catch (NotFoundException e) {
-            throw new BadRequestException("The referenced relationship '" + ref + "' on '" +
-                    relationshipField.getPointer() + "' does not exist", e);
-        }
-    }
 
     /**
      * Creates a relationship object.
@@ -892,7 +870,7 @@ public abstract class RelationshipProvider {
     protected Connection getConnection() throws ResourceException {
         return connectionFactory.getConnection();
     }
-    
+
     /**
      * Performs resourceExpansion on the supplied response based on the fields specified in the current request.
      * 
