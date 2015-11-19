@@ -94,8 +94,8 @@ public class SchemaField {
     /** Matches against firstPropertyName if this is an inverse relationship */
     private String reversePropertyName;
 
-    /** Indicates if the relationship will be validated before saving or updating the object */
-    private boolean validateRelationship = false;
+    /** Indicates if the field will be validated before saving or updating the object */
+    private boolean validationRequired = false;
     
     /** The CryptoService implementation */
     private CryptoService cryptoService;
@@ -154,7 +154,10 @@ public class SchemaField {
         if (isRelationship() || isVirtual()) {
             this.returnByDefault = schema.get("returnByDefault").defaultTo(false).asBoolean();
         }
-        
+
+        // Set validation flag
+        this.validationRequired = schema.get("validate").defaultTo(false).asBoolean();
+
         // Initialize the encryptor if encryption is defined.
         encryptionValue = schema.get("encryption");
         if (encryptionValue.isNotNull()) {
@@ -196,7 +199,6 @@ public class SchemaField {
                 if (this.isReverseRelationship) {
                     this.reversePropertyName = schema.get("reversePropertyName").required().asString();
                 }
-                this.validateRelationship = schema.get("validate").defaultTo(false).asBoolean();
             }
         }
     }
@@ -220,7 +222,7 @@ public class SchemaField {
     /**
      * Sets the type of the schema field.
      * 
-     * @param the type of this schema field
+     * @param type the type of this schema field
      */
     private void setType(String type) {
         if (type.equals("relationship")) {
@@ -314,12 +316,12 @@ public class SchemaField {
     }
 
     /**
-     * Returns true if the relationship should be validated before any action is taken on the managed object.
+     * Returns true if the field should be validated before any action is taken on the managed object.
      *
-     * @return True if the relationship should be validated before any action is taken on the managed object.
+     * @return True if the field should be validated before any action is taken on the managed object.
      */
-    public boolean isValidateRelationship() {
-        return validateRelationship;
+    public boolean isValidationRequired() {
+        return validationRequired;
     }
     
     /**

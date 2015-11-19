@@ -180,9 +180,9 @@
                         "userEditable" : false,
                         "returnByDefault" : false,
                         "type" : "array",
+                        "validate": true,
                         "items" : {
                             "type" : "relationship",
-                            "validate": true,
                             "reverseRelationship" : true,
                             "reversePropertyName" : "members",
                             "properties" : {
@@ -275,6 +275,7 @@
                         "userEditable" : false,
                         "type" : "array",
                         "returnByDefault" : false,
+                        "validate": true,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship" : true,
@@ -493,9 +494,9 @@
                         "viewable" : true,
                         "type" : "array",
                         "returnByDefault" : false,
+                        "validate" : true,
                         "items" : {
                             "type" : "relationship",
-                            "validate" : true,
                             "reverseRelationship": true,
                             "reversePropertyName": "roles",
                             "properties" : {
@@ -536,6 +537,7 @@
                         "viewable" : true,
                         "returnByDefault" : false,
                         "type" : "array",
+                        "validate" : true,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship" : true,
@@ -663,9 +665,9 @@
                         "userEditable" : false,
                         "type" : "array",
                         "returnByDefault" : false,
+                        "validate" : true,
                         "items" : {
                             "type" : "relationship",
-                            "validate" : true,
                             "reverseRelationship": true,
                             "reversePropertyName": "assignments",
                             "properties" : {

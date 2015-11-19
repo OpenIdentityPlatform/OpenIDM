@@ -16,14 +16,11 @@
 
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
-import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.util.promise.Promises.when;
+import static org.forgerock.util.promise.Promises.*;
 import static org.forgerock.util.query.QueryFilter.*;
 
 import java.util.ArrayList;
@@ -530,17 +527,17 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
     }
 
     /**
-     * Implemented to iterate through the collection calling validateRelationshipExists for each relationship within the
+     * Implemented to iterate through the collection calling validateRelationship for each relationship within the
      * relationshipField.
      *
      * @param relationshipField field to iterate over.
      * @param context context of the original request.
-     * @throws ResourceException Bad
-     * @see #validateRelationshipExists(JsonValue, Context)
+     * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
+     * @see RelationshipValidator#validateRelationship(JsonValue, Context)
      */
     public void validateRelationshipField(JsonValue relationshipField, Context context) throws ResourceException {
-        for (JsonValue collectionValue : relationshipField) {
-            validateRelationshipExists(collectionValue, context);
+        for (JsonValue fieldItem : relationshipField) {
+            relationshipValidator.validateRelationship(fieldItem, context);
         }
     }
 }
