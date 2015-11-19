@@ -36,7 +36,7 @@ if (rolesPropName === undefined) {
 logger.trace("Configured rolesPropName: {}", rolesPropName);
 
 var directRoles = object[rolesPropName];
-var effectiveRoles = directRoles === null ? [] : directRoles;
+var effectiveRoles = directRoles == null ? [] : directRoles;
 
 // This is the location to expand to dynamic roles, 
 // project role script return values can then be added via
