@@ -98,6 +98,13 @@ public enum IDMAuthModule {
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
             return new OpenIdConnectModule();
         }
+    },
+    /** Trusted Request Attribute Auth Module. */
+    TRUSTED_ATTRIBUTE {
+        @Override
+        public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
+            return new TrustedRequestAttributeAuthModule();
+        }
     };
 
     public abstract AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory);

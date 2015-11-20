@@ -33,7 +33,7 @@
 (function () {
 
     var _ = require("lib/lodash"),
-        user = openidm.read(security.authorization.component + "/" + security.authorization.id);
+        user;
 
     if (!_.has(properties.propertyMapping, 'userRoles')) {
         throw {
@@ -41,6 +41,7 @@
             "message" : "Authentication not properly configured; missing userRoles propertyMapping entry"
         };
     }
+    user = openidm.read(security.authorization.component + "/" + security.authorization.id, { }, [ "*", properties.propertyMapping.userRoles ]);
 
     if (!user || !_.has(user, properties.propertyMapping.userRoles)) {
         throw {
