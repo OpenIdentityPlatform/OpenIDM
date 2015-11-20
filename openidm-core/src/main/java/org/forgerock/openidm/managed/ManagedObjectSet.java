@@ -31,9 +31,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -448,11 +450,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param rev the revision of hte object being modified
      * @param oldValue the old value of the object
      * @param newValue the new value of the object
+     * @param relationshipFields a set of relationship fields to persist
      * @return a {@link ResourceResponse} object representing the updated resource
      * @throws ResourceException
      */
     private ResourceResponse update(final Context context, Request request, String resourceId, String rev,
-    		JsonValue oldValue, JsonValue newValue)
+    		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
             throws ResourceException {
 
         if (newValue.asMap().equals(oldValue.asMap())) { // object hasn't changed
@@ -485,7 +488,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         responseContent.asMap().putAll(strippedRelationshipFields.asMap());
 
         // Persists all relationship fields that are present in the new value and updates their values.
-        responseContent.asMap().putAll(persistRelationships(context, resourceId, responseContent).asMap());
+        responseContent.asMap().putAll(persistRelationships(context, resourceId, responseContent, relationshipFields)
+                .asMap());
 
         // Execute the postUpdate script if configured
         execScript(context, ScriptHook.postUpdate, responseContent,
@@ -504,13 +508,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param context The current context
      * @param resourceId The id of the resource these relationships are associated with
      * @param json A JsonValue map that contains relationship fields and value(s) to be persisted
+     * @param relationshipFields a set of relationship fields to persist
      * @return A {@link JsonValue} map containing each relationship field and its persisted value(s)
      */
-    private JsonValue persistRelationships(Context context, String resourceId, final JsonValue json) 
-            throws ResourceException {
+    private JsonValue persistRelationships(Context context, String resourceId, final JsonValue json, 
+            Set<JsonPointer> relationshipFields) throws ResourceException {
         final List<Promise<JsonValue, ResourceException>> persisted = new ArrayList<>();
 
-        for (final JsonPointer relationshipField : relationshipProviders.keySet()) {
+        for (final JsonPointer relationshipField : relationshipFields) {
             final JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
 
             if (relationshipValue.isNotNull()) {
@@ -633,7 +638,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             content.asMap().putAll(strippedRelationshipFields.asMap());
             
             // Persists all relationship fields that are present in the created object and updates their values.
-            content.asMap().putAll(persistRelationships(managedContext, resourceId, content).asMap());
+            content.asMap().putAll(persistRelationships(managedContext, resourceId, content, 
+                    relationshipProviders.keySet()).asMap());
 
             // Execute the postCreate script if configured
             execScript(managedContext, ScriptHook.postCreate, content,
@@ -755,7 +761,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             ResourceResponse decryptedResponse = decrypt(readResponse);
 
             ResourceResponse updatedResponse = update(managedContext, request, resourceId, request.getRevision(),
-            		decryptedResponse.getContent(), _new);
+            		decryptedResponse.getContent(), _new, relationshipProviders.keySet());
             
             activityLogger.log(managedContext, request, "update", managedId(readResponse.getId()).toString(),
                     readResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
@@ -845,8 +851,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *
      * @throws ResourceException
      */
-    private ResourceResponse patchResourceById(Context context, Request request,
-                                       String resourceId, String revision, List<PatchOperation> patchOperations)
+    private ResourceResponse patchResourceById(Context context, Request request, String resourceId, String revision, 
+            List<PatchOperation> patchOperations)
             throws ResourceException {
         idRequired(request.getResourcePath());
         noSubObjects(request.getResourcePath());
@@ -872,8 +878,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *
      * @throws ResourceException
      */
-    private ResourceResponse patchResource(Context context, Request request,
-    		ResourceResponse resource, String revision, List<PatchOperation> patchOperations)
+    private ResourceResponse patchResource(Context context, Request request, ResourceResponse resource, String revision, 
+            List<PatchOperation> patchOperations)
         throws ResourceException {
 
         // FIXME: There's no way to decrypt a patch document. :-( Luckily, it'll work for now with patch action.
@@ -888,14 +894,33 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             	// decrypt any incoming encrypted properties
                 JsonValue decrypted = decrypt(resource.getContent());
+                
+                // Create a Set containing all the patched relationship fields
+                Set<JsonPointer> patchedRelationshipFields = new HashSet<JsonPointer>();
+                for (PatchOperation operation : patchOperations) {
+                    // Getting the first token as we currently only support top-level relationship fields
+                    // This allows us to ignore trailing array index's or '-' characters.
+                    JsonPointer field = new JsonPointer(operation.getField().get(0));
+                    SchemaField schemaField = schema.getField(field);
+                    if (schemaField != null && schemaField.isRelationship()) {
+                        patchedRelationshipFields.add(field);
+                    }
+                }
 
                 // If we haven't defined a revision, we need to get the current revision
                 if (revision == null) {
                     rev = decrypted.get("_rev").asString();
                 }
                 
-                // Populate the relationships
-                final JsonValue relationships = fetchRelationshipFields(context, resource.getId(), request.getFields());
+                // Merge the relationship fields with the fields specified in the request
+                final Set<JsonPointer> allFields = new HashSet<JsonPointer>(request.getFields());
+                allFields.addAll(patchedRelationshipFields);
+                
+                // Fetch the relationship fields
+                final JsonValue relationships = fetchRelationshipFields(context, resource.getId(), 
+                        new ArrayList<JsonPointer>(allFields));
+
+                // Populate the decrypted resource with the relationship fields
                 decrypted.asMap().putAll(relationships.asMap());
 
                 JsonValue newValue = decrypted.copy();
@@ -909,6 +934,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     // Build up a map of properties to validate (only the patched properties)
                     JsonValue propertiesToValidate = json(object());
                     for (PatchOperation operation : patchOperations) {
+                        // Getting the first token as we currently only support top-level relationship fields
+                        // This allows us to ignore trailing array index's or '-' characters.
                         String field = operation.getField().get(0);
                         propertiesToValidate.put(field, newValue.get(field));
                     }
@@ -928,8 +955,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     }
                 }
 
-                ResourceResponse patchedResource =
-                        update(context, request, resource.getId(), rev, resource.getContent(), newValue);
+                ResourceResponse patchedResource = update(context, request, resource.getId(), rev, 
+                        resource.getContent(), newValue, patchedRelationshipFields);
 
                 activityLogger.log(context, request, "", managedId(patchedResource.getId()).toString(),
                         resource.getContent(), patchedResource.getContent(), Status.SUCCESS);
