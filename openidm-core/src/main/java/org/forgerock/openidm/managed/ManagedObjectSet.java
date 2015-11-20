@@ -697,26 +697,37 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             throws ExecutionException, InterruptedException, ResourceException {
         final JsonValue joined = json(object());
 
+        /*
+         * Create set only containing the head of request fields
+         * Allows for a relationship to be fetched when only an expansion is requested.
+         * ie. a field of foo/name will retrieve the foo relationship
+         */
+        final Set<JsonPointer> fieldHeads = new HashSet<>();
+        for (JsonPointer field : requestFields) {
+            // A blank _fields param can yield a single '/' (empty) pointer
+            if (!field.isEmpty()) {
+                fieldHeads.add(new JsonPointer(field.get(0)));
+            }
+        }
+
         for (Map.Entry<JsonPointer, RelationshipProvider> entry : relationshipProviders.entrySet()) {
             final JsonPointer field = entry.getKey();
             final RelationshipProvider provider = entry.getValue();
 
-            // Only return relationships set to return by default
-            // Unless explicitly requested or all relationships requested via *_ref
             if (requestFields.contains(SchemaField.FIELD_ALL_RELATIONSHIPS)
                     || provider.getSchemaField().isReturnedByDefault()
-                    || requestFields.contains(field)) {
+                    || fieldHeads.contains(field)) { // only check head of request fields (see above)
                 try {
                     joined.put(field, provider.getRelationshipValueForResource(context,
                             resourceId).getOrThrow().getObject());
                 } catch (NotFoundException e) {
+                    logger.debug("No {} relationships found for {}", field, resourceId);
                     joined.put(field, null);
                 }
             } else {
                 // relationship was not requested or set to return by default
                 logger.debug("Relationship field {} skipped", field);
             }
-
         }
 
         return joined;
