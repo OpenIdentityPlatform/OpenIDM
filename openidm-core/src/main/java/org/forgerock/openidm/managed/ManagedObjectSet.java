@@ -465,28 +465,31 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
             throws ResourceException {
 
-        if (isEqual(oldValue, newValue)) { // object hasn't changed
+        JsonValue decryptedNew = decrypt(newValue);
+        JsonValue decryptedOld = decrypt(oldValue);
+        
+        if (isEqual(decryptedOld, decryptedNew)) { // object hasn't changed
             return newResourceResponse(resourceId, rev, oldValue);
         }
 
         // Execute the onUpdate script if configured
-        execScript(context, ScriptHook.onUpdate, newValue,
-                prepareScriptBindings(context, request, resourceId, oldValue, newValue));
+        execScript(context, ScriptHook.onUpdate, decryptedNew,
+                prepareScriptBindings(context, request, resourceId, decryptedOld, decryptedNew));
 
         // Validate relationships before persisting
-        validateRelationshipFields(context, oldValue, newValue);
+        validateRelationshipFields(context, decryptedOld, decryptedNew);
 
         // Populate the virtual properties (so they are updated for sync-ing)
-        populateVirtualProperties(context, request, newValue);
+        populateVirtualProperties(context, request, decryptedNew);
 
         // Remove relationships so they don't get persisted in the repository with the managed object details.
-        JsonValue strippedRelationshipFields = stripRelationshipFields(newValue);
+        JsonValue strippedRelationshipFields = stripRelationshipFields(decryptedNew);
 
         // Perform pre-property encryption
-        onStore(context, newValue); // performs per-property encryption
+        onStore(context, decryptedNew); // performs per-property encryption
 
         // Perform update
-        UpdateRequest updateRequest = Requests.newUpdateRequest(repoId(resourceId), newValue);
+        UpdateRequest updateRequest = Requests.newUpdateRequest(repoId(resourceId), decryptedNew);
         updateRequest.setRevision(rev);
         ResourceResponse response = connectionFactory.getConnection().update(context, updateRequest);
         JsonValue responseContent = response.getContent();
@@ -500,10 +503,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
         // Execute the postUpdate script if configured
         execScript(context, ScriptHook.postUpdate, responseContent,
-                prepareScriptBindings(context, request, resourceId, oldValue, responseContent));
+                prepareScriptBindings(context, request, resourceId, decryptedOld, responseContent));
 
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
-                oldValue, responseContent);
+                decryptedOld, responseContent);
 
         return response;
     }
@@ -783,9 +786,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         Context managedContext = new ManagedObjectContext(context);
 
         try {
-            // decrypt any incoming encrypted properties
-            JsonValue _new = decrypt(request.getContent());
-
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
             for (JsonPointer pointer : request.getFields()) {
                 if (pointer.equals(new JsonPointer("*"))) {
@@ -795,10 +795,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 }
             }
             ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
-            ResourceResponse decryptedResponse = decrypt(readResponse);
 
             ResourceResponse updatedResponse = update(managedContext, request, resourceId, request.getRevision(),
-            		decryptedResponse.getContent(), _new, relationshipProviders.keySet());
+            		readResponse.getContent(), request.getContent(), relationshipProviders.keySet());
             
             activityLogger.log(managedContext, request, "update", managedId(readResponse.getId()).toString(),
                     readResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
@@ -928,9 +927,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         do {
             logger.debug("patch name={} id={}", name, request.getResourcePath());
             try {
+                // Keep a copy of the oldValue
+                JsonValue oldValue = resource.getContent().copy();
 
-            	// decrypt any incoming encrypted properties
-                JsonValue decrypted = decrypt(resource.getContent());
+                // If we haven't defined a revision, we need to get the current revision
+                if (revision == null) {
+                    rev = oldValue.get("_rev").asString();
+                }
                 
                 // Create a Set containing all the patched relationship fields
                 Set<JsonPointer> patchedRelationshipFields = new HashSet<JsonPointer>();
@@ -943,11 +946,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         patchedRelationshipFields.add(field);
                     }
                 }
-
-                // If we haven't defined a revision, we need to get the current revision
-                if (revision == null) {
-                    rev = decrypted.get("_rev").asString();
-                }
                 
                 // Merge the relationship fields with the fields specified in the request
                 final Set<JsonPointer> allFields = new HashSet<JsonPointer>(request.getFields());
@@ -957,14 +955,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 final JsonValue relationships = fetchRelationshipFields(context, resource.getId(), 
                         new ArrayList<JsonPointer>(allFields));
 
-                // Populate the decrypted resource with the relationship fields
-                decrypted.asMap().putAll(relationships.asMap());
-                resource.getContent().asMap().putAll(relationships.asMap());
+                // Populate the oldValue with the relationship fields
+                oldValue.asMap().putAll(relationships.asMap());
 
-                JsonValue newValue = decrypted.copy();
+                JsonValue newValue = decrypt(oldValue);
                 boolean modified = JsonValuePatch.apply(newValue, patchOperations);
                 if (!modified) {
-                    return newResourceResponse(request.getResourcePath(), revision, resource.getContent());
+                    ResourceResponse response = newResourceResponse(resource.getId(), revision, oldValue);
+                    return prepareResponse(context, response, request.getFields());
                 }
 
                 // Check if policies should be enforced
@@ -993,11 +991,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     }
                 }
 
-                ResourceResponse patchedResource = update(context, request, resource.getId(), rev, 
-                        resource.getContent(), newValue, patchedRelationshipFields);
+                ResourceResponse patchedResource =
+                        update(context, request, resource.getId(), rev, oldValue, newValue, patchedRelationshipFields);
 
                 activityLogger.log(context, request, "", managedId(patchedResource.getId()).toString(),
-                        resource.getContent(), patchedResource.getContent(), Status.SUCCESS);
+                        oldValue, patchedResource.getContent(), Status.SUCCESS);
                 retry = false;
                 logger.debug("Patch successful!");
 
