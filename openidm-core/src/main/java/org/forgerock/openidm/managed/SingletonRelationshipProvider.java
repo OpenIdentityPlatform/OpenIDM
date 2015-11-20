@@ -52,8 +52,6 @@ import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * A {@link RelationshipProvider} representing a singleton relationship for the given field.
@@ -122,14 +120,14 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 filter = or(
                         and(
                                 equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
-                                equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyPtr)),
+                                equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName())),
                         and(
                                 equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourceFullPath),
-                                equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), propertyPtr)));
+                                equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), schemaField.getName())));
             } else {    
                 filter = and(
                         equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), propertyPtr));
+                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
             }
             
             queryRequest.setQueryFilter(filter);
