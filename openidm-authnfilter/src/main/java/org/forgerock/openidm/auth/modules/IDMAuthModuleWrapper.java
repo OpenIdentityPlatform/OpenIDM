@@ -20,6 +20,7 @@ import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.openidm.auth.modules.MappingRoleCalculator.GroupComparison;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
@@ -203,7 +204,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                         String queryId = properties.get(QUERY_ID).asString();
                         String authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
 
-                        String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
+                        final String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
                         String groupMembership = properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString();
                         List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES)
                                 .defaultTo(Collections.emptyList())
@@ -223,15 +224,20 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                                         if (request == null) {
                                             return null;
                                         }
+                                        request.addField(""); // request all default fields
+                                        if (userRoles != null) {
+                                            // ensure we request the roles field if the property is specified
+                                            request.addField("", userRoles);
+                                        }
                                         final List<ResourceResponse> resources = new ArrayList<>();
                                         connectionFactory.getConnection().query(
                                                 ContextUtil.createInternalContext(), request, resources);
 
                                         if (resources.isEmpty()) {
-                                            throw ResourceException.getException(401,
+                                            throw newResourceException(401,
                                                     "Access denied, no user detail could be retrieved.");
                                         } else if (resources.size() > 1) {
-                                            throw ResourceException.getException(401,
+                                            throw newResourceException(401,
                                                     "Access denied, user detail retrieved was ambiguous.");
                                         }
                                         return resources.get(0);
@@ -245,7 +251,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                         roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership,
                                 roleMapping, groupComparison);
 
-                        JsonValue scriptConfig =  properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
+                        JsonValue scriptConfig = properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
                         if (!scriptConfig.isNull()) {
                             augmentScript = getAugmentScript(scriptConfig);
                             logger.debug("Registered script {}", augmentScript);

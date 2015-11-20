@@ -534,6 +534,25 @@
             </includes>
             <outputDirectory>/openidm/samples/fullStack</outputDirectory>
         </fileSet>
+        <!-- Setup Trusted ServletFilter Sample  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/**</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/trustedservletfilter</outputDirectory>
+        </fileSet>
         <!-- Setup use case samples-->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/usecase</directory>

@@ -1,0 +1,50 @@
+{
+    "serverAuthContext" : {
+        "sessionModule" : {
+            "name" : "JWT_SESSION",
+            "properties" : {
+                "keyAlias" : "openidm-localhost",
+                "privateKeyPassword" : "&{openidm.keystore.password}",
+                "keystoreType" : "&{openidm.keystore.type}",
+                "keystoreFile" : "&{openidm.keystore.location}",
+                "keystorePassword" : "&{openidm.keystore.password}",
+                "maxTokenLifeMinutes" : "120",
+                "tokenIdleTimeMinutes" : "30",
+                "sessionOnly" : true
+            }
+        },
+        "authModules" : [
+            {
+                "name" : "INTERNAL_USER",
+                "properties" : {
+                    "queryId" : "credential-internaluser-query",
+                    "queryOnResource" : "repo/internal/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userCredential" : "password",
+                        "userRoles" : "roles"
+                    },
+                    "defaultUserRoles" : [ ]
+                },
+                "enabled" : true
+            },
+            {
+                "name" : "TRUSTED_ATTRIBUTE",
+                "properties" : {
+                    "queryOnResource" : "managed/user",
+                    "propertyMapping" : {
+                        "authenticationId" : "username",
+                        "userRoles" : "authzRoles"
+                    },
+                    "defaultUserRoles" : [ ],
+                    "authenticationIdAttribute" : "X-ForgeRock-AuthenticationId",
+                    "augmentSecurityContext" : {
+                        "type" : "text/javascript",
+                        "file" : "auth/populateRolesFromRelationship.js"
+                    }
+                },
+                "enabled" : true
+            }
+        ]
+    }
+}

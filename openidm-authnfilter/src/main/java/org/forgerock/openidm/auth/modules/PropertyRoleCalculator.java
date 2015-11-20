@@ -90,7 +90,7 @@ class PropertyRoleCalculator implements RoleCalculator {
             // Roles are now set.
             // Note: roles can be further augmented with a script if more complex behavior is desired
 
-            logger.debug("Used {}object property to update context for {} with userid : {}, roles : {}",
+            logger.debug("Used {} object property to update context for {} with userid : {}, roles : {}",
                     userRoles != null ? (userRoles+" ") : "",
                     securityContextMapper.getAuthenticationId(),
                     securityContextMapper.getUserId(),

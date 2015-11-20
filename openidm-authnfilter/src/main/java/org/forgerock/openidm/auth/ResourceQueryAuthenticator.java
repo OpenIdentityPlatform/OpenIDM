@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.auth;
 
+import static org.forgerock.json.resource.ResourceException.newResourceException;
+
 import org.eclipse.jetty.jaas.spi.UserInfo;
 import org.eclipse.jetty.util.security.Password;
 import org.forgerock.json.crypto.JsonCryptoException;
@@ -151,7 +153,7 @@ class ResourceQueryAuthenticator implements Authenticator {
             for (ResourceResponse entry : result) {
                 logger.debug("Ambiguous matching username for {} found id: {}", username, entry.getId());
             }
-            throw ResourceException.getException(401, "Access denied, user detail retrieved was ambiguous.");
+            throw newResourceException(401, "Access denied, user detail retrieved was ambiguous.");
         }
 
         return result.iterator().next(); // the retrieved resource
