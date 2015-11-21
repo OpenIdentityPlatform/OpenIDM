@@ -161,7 +161,7 @@
                     {
                         "propertyNames" : [ "firstId", "firstPropertyName", "secondId", "secondPropertyName" ],
                         "propertyType" : "string",
-                        "indexType" : "unique"
+                        "indexType" : "notunique"
                     },
                     {
                         "propertyNames" : [ "firstId", "firstPropertyname" ],
