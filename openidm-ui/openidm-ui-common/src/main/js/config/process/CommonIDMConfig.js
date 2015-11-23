@@ -70,13 +70,13 @@ define("config/process/CommonIDMConfig", [
                         errors = "Unknown";
 
                     if (typeof response === "object" && response !== null &&
-                        typeof response.detail === "object" && response.message === "Failed policy validation") {
+                        typeof response.detail === "object" && (response.message === "Failed policy validation" || response.message === "Policy validation failed")) {
 
                         errors = _.chain(response.detail.failedPolicyRequirements)
                                     .groupBy('property')
                                     .pairs()
                                     .map(function (a) {
-                                        return a[0] + ": " +
+                                        return " - " + a[0] + ": " +
                                             _.chain(a[1])
                                                 .pluck('policyRequirements')
                                                 .map(function (pr) {
@@ -88,11 +88,11 @@ define("config/process/CommonIDMConfig", [
                                                 .join(", ");
                                     })
                                     .value()
-                                    .join("; ");
+                                    .join(" <br/> ");
 
                     }
 
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, {key: "userValidationError", validationErrors: errors});
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, {key: "resourceValidationError", validationErrors: errors});
                 }
             }
         ];
