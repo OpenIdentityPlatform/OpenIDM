@@ -4,6 +4,7 @@
         <label style="margin-left:15px;" class="pull-left control-label" for="linkedViewSelect">{{t "templates.admin.LinkedTemplate.linkedResource"}}</label>
         <div class="col-sm-6">
             <select class="form-control" id="linkedViewSelect" name="linkedViewSelect">
+                <option value="all">{{t "templates.admin.LinkedTemplate.allLinkedResources"}}</option>
                 {{#each_with_index linkedResources}}
                 <option value="{{index}}">{{value}}</option>
                 {{/each_with_index}}

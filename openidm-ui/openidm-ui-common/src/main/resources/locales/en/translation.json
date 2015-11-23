@@ -336,7 +336,8 @@
                 "linkedResource" : "Linked Resource",
                 "linkedSystems" : "Linked Systems",
                 "noLinkedSystems" : "No Linked Systems Available.",
-                "recordMissing" : "Linked record missing."
+                "recordMissing" : "Linked record missing.",
+                "allLinkedResources" : "All Linked Resources"
             },
             "ResourceEdit":
             {
