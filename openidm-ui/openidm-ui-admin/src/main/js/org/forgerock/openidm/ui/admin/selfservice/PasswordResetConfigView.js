@@ -25,7 +25,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
         partials: AbstractSelfServiceView.prototype.partials.concat([
             "partials/selfservice/_userQuery.html",
             "partials/selfservice/_resetStage.html",
-            "partials/selfservice/_captcha.html"
+            "partials/selfservice/_captcha.html",
+            "partials/selfservice/_emailValidation.html"
         ]),
         model: {
             surpressSave: false,
@@ -109,7 +110,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
             {
                 type: "userQuery",
                 title: $.t("templates.selfservice.userQuery.name"),
-                help: $.t("templates.selfservice.userQuery.description")
+                help: $.t("templates.selfservice.userQuery.description"),
+                editable: true
             },
             {
                 type: "emailValidation",
