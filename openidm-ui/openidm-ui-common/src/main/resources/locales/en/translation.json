@@ -109,7 +109,8 @@
                 "claimedTask" : "Task has been claimed.",
                 "unclaimedTask" : "Task has been unclaimed.",
                 "startedProcess" : "Process has been started.",
-                "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__"
+                "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__",
+                "resourceValidationError": "Unable to update resource. Validation Failed.<br/>Reason(s):<br/> __validationErrors__"
             },
             "ConnectorMessages" : {
                 "connectorSaved" : "Connector has been validated and successfully saved.",
@@ -1626,6 +1627,7 @@
                 "VALID_DATE" : "Must be a valid date",
                 "UNIQUE" : "Already exists",
                 "REAUTH_REQUIRED" : "",
+                "MATCH_REGEXP" : "Has to match pattern: __regexp__",
                 "formContainsErrors" : "Form contains validation errors",
                 "atLeastOneCapitalLetter" : "At least one capital letter",
                 "atLeastOneNumber" : "At least one number",

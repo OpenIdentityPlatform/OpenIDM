@@ -31,6 +31,10 @@ define("config/messages/CommonIDMMessages", [
             "userValidationError" : {
                 msg: "config.messages.AdminMessages.userValidationError",
                 type: "error"
+            },
+            "resourceValidationError" : {
+                msg: "config.messages.AdminMessages.resourceValidationError",
+                type: "error"
             }
     };
 

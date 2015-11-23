@@ -128,7 +128,11 @@
                         "type" : "string",
                         "searchable" : true,
                         "userEditable" : true,
-                        "pattern" : ".+@.+"
+                        "policies" : [
+                            {
+                                "policyId" : "valid-email-address-format"
+                            }
+                        ]
                     },
                     "sn" : {
                         "title" : "Last Name",

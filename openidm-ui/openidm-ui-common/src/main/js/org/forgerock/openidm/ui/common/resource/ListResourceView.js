@@ -72,7 +72,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             if(event) {
                 event.preventDefault();
             }
-            this.model.resources.fetch();
+            
+            this.render(this.data.args);
         },
 
         clearFilters: function(event){
@@ -224,14 +225,11 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDeleteSelected"),  "danger", _.bind(function(){
                 var promArr = [];
                 _.each(this.data.selectedItems, _.bind(function(objectId) {
-                    promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId, null, _.bind(function() {
-                        this.reloadGrid();
-                    }, this)));
+                    promArr.push(resourceDelegate.deleteResource(this.data.serviceUrl, objectId, null));
                 }, this));
                 $.when.apply($,promArr).then(_.bind(function(proms){
-                    this.render(this.data.args, _.bind(function() {
-                        messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess")});
-                    },this));
+                    this.reloadGrid();
+                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess")});
                 },this));
             }, this));
         },
