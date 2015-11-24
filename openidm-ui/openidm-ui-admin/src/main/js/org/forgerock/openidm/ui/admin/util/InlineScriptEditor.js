@@ -60,6 +60,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 "customValidate": "customValidate"
             },
             model : {
+                autoFocus: true,
                 scriptData: null,
                 eventName: null,
                 disablePassedVariable: false,
@@ -81,6 +82,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
             /*
              Properties that can be set through args:
 
+             autoFocus - Tells the script widget to focus itself once loaded (defaults to true)
              scriptData - Set if you have script data from a previous save or want a default
              eventName - Name to display also needed as a unique ID when more then one editor is on the page
              disablePassedVariable - Flag to turn on and off passed variables
@@ -139,7 +141,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                     this.cmBox = codeMirror.fromTextArea(this.$el.find(".scriptSourceCode")[0], {
                         lineNumbers: true,
-                        autofocus: true,
+                        autofocus: this.model.autoFocus,
                         viewportMargin: Infinity,
                         theme: "forgerock",
                         mode: mode
@@ -257,6 +259,8 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     }
 
                     this.customValidate();
+
+                    this.model.autoFocus = true;
 
                     if (callback) {
                         callback();
@@ -474,12 +478,18 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     this.cmBox.setOption("readOnly", "");
                     this.$el.find(".inline-code").toggleClass("code-mirror-disabled", false);
                     codeMirror.refresh();
-                    codeMirror.focus();
+
+                    if(this.model.autoFocus) {
+                        codeMirror.focus();
+                    }
                 } else {
                     this.setSelectedScript(sourceCode, filePath);
                     this.cmBox.setOption("readOnly", "nocursor");
                     this.$el.find(".inline-code").toggleClass("code-mirror-disabled", true);
-                    filePath.focus();
+
+                    if(this.model.autoFocus) {
+                        filePath.focus();
+                    }
                 }
             },
 
