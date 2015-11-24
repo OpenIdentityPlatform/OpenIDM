@@ -306,6 +306,12 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                                         "type": "string",
                                         "required": true
                                     },
+                                    "validate": {
+                                        "title": "Validate",
+                                        "type": "boolean",
+                                        "required": true,
+                                        "default": false
+                                    },
                                     "properties": {
                                         "title": "Properties",
                                         "type": "object",

@@ -145,8 +145,10 @@ define("org/forgerock/openidm/ui/admin/managed/AbstractManagedView", [
                     if (property.type === "virtual") {
                         this.data.currentManagedObject.schema.properties[property.name].isVirtual = true;
                     }
-                    _.extend(this.data.currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectedEvents"));
+                    _.extend(this.data.currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectEvents"));
                 }, this));
+                
+                delete this.data.currentManagedObject.properties;
             }
         }
     });

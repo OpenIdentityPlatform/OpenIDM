@@ -17,7 +17,6 @@
                 "$schema" : "http://json-schema.org/draft-03/schema",
                 "order" : [
                     "_id",
-                    "password",
                     "userName",
                     "password",
                     "givenName",
