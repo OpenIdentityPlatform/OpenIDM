@@ -24,7 +24,6 @@ import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.RESULT;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
@@ -37,6 +36,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.generator.IdGenerator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +48,7 @@ public class IDMAuditApi implements AuditApi {
     private static final Logger LOGGER = LoggerFactory.getLogger(IDMAuditApi.class);
     public static final String SESSION_ID = "sessionId";
     public static final String REQUEST_ID = "requestId";
+    public static final String TRANSACTION_ID = "transactionId";
 
     private final ConnectionFactory connectionFactory;
 
@@ -81,7 +82,7 @@ public class IDMAuditApi implements AuditApi {
                 .result(auditMessage.get(RESULT).asEnum(Status.class))
                 .userId(username)
                 .trackingIds(trackingIds)
-                .transactionId(UUID.randomUUID().toString())
+                .transactionId(getTransactionId(auditMessage))
                 .timestamp(System.currentTimeMillis())
                 .eventName("authentication")
                 .toEvent();
@@ -92,6 +93,15 @@ public class IDMAuditApi implements AuditApi {
             connectionFactory.getConnection().create(context, createRequest);
         } catch (ResourceException e) {
             LOGGER.warn("Failed to log entry for {}", username, e);
+        }
+    }
+
+    private String getTransactionId(JsonValue auditMessage) {
+        final JsonValue transactionId = auditMessage.get(TRANSACTION_ID);
+        if (transactionId.isNotNull()) {
+            return transactionId.asString();
+        } else {
+            return IdGenerator.DEFAULT.generate();
         }
     }
 }

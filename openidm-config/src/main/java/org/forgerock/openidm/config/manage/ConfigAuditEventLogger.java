@@ -21,10 +21,8 @@ import static org.forgerock.json.JsonValue.object;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.ConfigAuditEventBuilder;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -33,10 +31,14 @@ import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Utilizing the ConfigAuditEventBuilder this class will send log events of config changes to the commons
@@ -73,7 +75,7 @@ public class ConfigAuditEventLogger {
                     .operationFromRequest(request)
                     .userId(authenticationId)
                     .runAs(authenticationId)
-                    .transactionIdFromRootContext(context)
+                    .transactionId(ContextUtil.getTransactionId(context))
                     .revision(configAuditState.getRevision())
                     .timestamp(System.currentTimeMillis())
                     .objectId(configAuditState.getId())
