@@ -80,27 +80,33 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
 
             resourceDelegate.getSchema(args).then(_.bind(function (schema) {
+                var readUrl;
+                
                 this.data.args = args;
 
                 this.data.objectType = args[0];
                 this.isSystemResource = false;
                 this.objectName = args[1];
                 this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
+                
+                readUrl = this.data.serviceUrl +"/" + objectId + "?_fields=" + resourceCollectionUtils.getFieldsToExpand(schema.properties);
+                
+
+                if (this.data.objectType === "system") {
+                    this.isSystemResource = true;
+                    this.objectName += "/" + args[2];
+                    readUrl = this.data.serviceUrl +"/" + objectId;
+                }
 
                 if(objectId){
                     resourceReadPromise = serviceInvoker.restCall({
-                        url: this.data.serviceUrl +"/" + objectId + "?_fields=" + resourceCollectionUtils.getFieldsToExpand(schema.properties)
+                        url: readUrl
                     });
                     this.objectId = objectId;
                     this.data.newObject = false;
                 } else {
                     resourceReadPromise = $.Deferred().resolve({});
                     this.data.newObject = true;
-                }
-
-                if (this.data.objectType === "system") {
-                    this.isSystemResource = true;
-                    this.objectName += "/" + args[2];
                 }
 
                 resourceReadPromise.then(_.bind(function(resource){

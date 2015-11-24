@@ -120,6 +120,10 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
                                 }
                                 
                                 schema.properties = resourceCollectionUtils.convertRelationshipTypes(schema.properties);
+                                
+                                if (schema.allSchemas) {
+                                    delete schema.allSchemas;
+                                }
     
                                 this.editors[selection] = new JSONEditor(
                                         this.$el.find("#linkedViewContent")[0],
