@@ -21,7 +21,6 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -54,10 +53,8 @@ public class EmailServiceImplTest {
         final EmailServiceImpl emailService = new EmailServiceImpl();
         final ActionRequest actionRequest = mock(ActionRequest.class);
 
-        ActionResponse expectedResponse = Responses.newActionResponse(json(object(field(STATUS, OK))));
-
         emailService.emailClient = emailClient;
-        doReturn(expectedResponse).when(emailClient).send(any(JsonValue.class));
+        doNothing().when(emailClient).send(any(JsonValue.class));
         when(actionRequest.getResourcePath()).thenReturn(RESOURCE_PATH);
         when(actionRequest.getContent()).thenReturn(json(object()));
 
@@ -66,6 +63,9 @@ public class EmailServiceImplTest {
                 emailService.actionInstance(mock(Context.class), actionRequest);
 
         // then
+        ActionResponse expectedResponse = Responses.newActionResponse(JsonValue.json(object(
+                field(STATUS, OK)
+        )));
         assertThat(promise).succeeded().isInstanceOf(ActionResponse.class).isEqualTo(expectedResponse);
     }
 
