@@ -46,6 +46,9 @@ import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.script.Scope;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
@@ -137,6 +140,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
     // ----- Implementation of RequestHandler interface
 
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/action"), null, null);
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -163,10 +167,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } finally {
+            measure.end();
         }
     }
 
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/create"), null, null);
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -182,10 +189,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } finally {
+            measure.end();
         }
     }
 
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/delete"), null, null);
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -201,10 +211,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } finally {
+            measure.end();
         }
     }
 
     public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/patch"), null, null);
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -220,6 +233,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } finally {
+            measure.end();
         }
     }
 
@@ -230,6 +245,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
      */
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
             final QueryResourceHandler handler) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/query"), null, null);
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -327,6 +343,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } finally {
+            measure.end();
         }
     }
     
@@ -351,6 +369,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
     
 
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/read"), null, null);
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -366,10 +385,13 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } finally {
+            measure.end();
         }
     }
 
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/script/" + this.getScriptEntry().getName().getName() + "/update"), null, null);
         try {
             final ScriptEntry _scriptEntry = getScriptEntry();
             if (!_scriptEntry.isActive()) {
@@ -385,6 +407,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        } finally {
+            measure.end();
         }
     }
 

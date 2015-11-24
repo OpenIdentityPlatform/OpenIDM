@@ -77,6 +77,9 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.RelationshipUtil;
@@ -271,25 +274,31 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private void execScript(final Context context, ScriptHook hook, JsonValue value, JsonValue additionalProps)
             throws ResourceException {
         final ScriptEntry scriptEntry = scriptHooks.get(hook);
-        if (null != scriptEntry && scriptEntry.isActive()) {
-            Script script = scriptEntry.getScript(context);
-            script.put("object", value);
-            if (additionalProps != null && !additionalProps.isNull()) {
-                for (String key : additionalProps.keys()) {
-                    script.put(key, additionalProps.get(key));
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/managed/" + this.getName() + "/execScript/" + hook.name()), null, null);
+
+        try {
+            if (null != scriptEntry && scriptEntry.isActive()) {
+                Script script = scriptEntry.getScript(context);
+                script.put("object", value);
+                if (additionalProps != null && !additionalProps.isNull()) {
+                    for (String key : additionalProps.keys()) {
+                        script.put(key, additionalProps.get(key));
+                    }
+                }
+                try {
+                    script.eval(); // allows direct modification to the object
+                } catch (ScriptThrownException ste) {
+                    // Allow for scripts to set their own exception
+                    throw ste.toResourceException(ResourceException.INTERNAL_ERROR,
+                            hook.name() + " script encountered exception");
+                } catch (ScriptException se) {
+                    String msg = hook.name() + " script encountered exception";
+                    logger.debug(msg, se);
+                    throw new InternalServerErrorException(msg, se);
                 }
             }
-            try {
-                script.eval(); // allows direct modification to the object
-            } catch (ScriptThrownException ste) {
-                // Allow for scripts to set their own exception
-                throw ste.toResourceException(ResourceException.INTERNAL_ERROR,
-                        hook.name() + " script encountered exception");
-            } catch (ScriptException se) {
-                String msg = hook.name() + " script encountered exception";
-                logger.debug(msg, se);
-                throw new InternalServerErrorException(msg, se);
-            }
+        } finally {
+            measure.end();
         }
     }
 
@@ -515,39 +524,46 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      */
     private JsonValue persistRelationships(final boolean clearExisting, Context context, String resourceId, final JsonValue json,
             Set<JsonPointer> relationshipFields) throws ResourceException {
-        final List<Promise<JsonValue, ResourceException>> persisted = new ArrayList<>();
+        EventEntry measurement = Publisher.start(Name.get("openidm/internal/managedobjectset/persistRelationships"), json, context);
 
-        for (final JsonPointer relationshipField : relationshipFields) {
-            final JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
+        try {
+            final List<Promise<JsonValue, ResourceException>> persisted = new ArrayList<>();
 
-            // Relationships not present in the request will be null
-            // Relationships present in the request but set to null will be JsonValue(null)
-            if (relationshipValue != null) {
-                RelationshipProvider provider = relationshipProviders.get(relationshipField);
-                persisted.add(provider.setRelationshipValueForResource(clearExisting, context, resourceId,
-                        relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
-                            @Override
-                            public JsonValue apply(JsonValue jsonValue) throws ResourceException {
-                                return json(object(field(relationshipField.leaf(), jsonValue.getObject())));
-                            }
-                        }
-                ));
-            }
-        }
+            for (final JsonPointer relationshipField : relationshipFields) {
+                // value of the relationship in the managed object
+                final JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
 
-        return when(persisted).then(new Function<List<JsonValue>, JsonValue, ResourceException>() {
-            @Override
-            public JsonValue apply(List<JsonValue> jsonValues) throws ResourceException {
-                final JsonValue joined = json(object());
-
-                // Join json maps
-                for (JsonValue value : jsonValues) {
-                    joined.asMap().putAll(value.asMap());
+                // Relationships not present in the request will be null
+                // Relationships present in the request but set to null will be JsonValue(null)
+                if (relationshipValue != null) {
+                    RelationshipProvider provider = relationshipProviders.get(relationshipField);
+                    persisted.add(provider.setRelationshipValueForResource(clearExisting, context, resourceId,
+                            relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
+                                                        @Override
+                                                        public JsonValue apply(JsonValue jsonValue) throws ResourceException {
+                                                            return json(object(field(relationshipField.leaf(), jsonValue.getObject())));
+                                                        }
+                                                    }
+                    ));
                 }
-
-                return joined;
             }
-        }).getOrThrowUninterruptibly();
+
+            return when(persisted).then(new Function<List<JsonValue>, JsonValue, ResourceException>() {
+                @Override
+                public JsonValue apply(List<JsonValue> jsonValues) throws ResourceException {
+                    final JsonValue joined = json(object());
+
+                    // Join json maps
+                    for (JsonValue value : jsonValues) {
+                        joined.asMap().putAll(value.asMap());
+                    }
+
+                    return joined;
+                }
+            }).getOrThrowUninterruptibly();
+        } finally {
+            measurement.end();
+        }
     }
 
     /**
@@ -641,7 +657,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             // Place stripped relationships back in content
             content.asMap().putAll(strippedRelationshipFields.asMap());
 
-            // Persists all relationship fields that are present in the created object and updates their values.
+            // Persists all relationship fields and place their persisted values in content
             content.asMap().putAll(persistRelationships(true, managedContext, resourceId, content,
                     relationshipProviders.keySet()).asMap());
 
@@ -699,42 +715,48 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private JsonValue fetchRelationshipFields(final Context context, final String resourceId,
             final List<JsonPointer> requestFields)
             throws ExecutionException, InterruptedException, ResourceException {
-        final JsonValue joined = json(object());
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/managed/set/fetchRealtionshipFields"), resourceId, context);
 
-        /*
-         * Create set only containing the head of request fields
-         * Allows for a relationship to be fetched when only an expansion is requested.
-         * ie. a field of foo/name will retrieve the foo relationship
-         */
-        final Set<JsonPointer> fieldHeads = new HashSet<>();
-        for (JsonPointer field : requestFields) {
-            // A blank _fields param can yield a single '/' (empty) pointer
-            if (!field.isEmpty()) {
-                fieldHeads.add(new JsonPointer(field.get(0)));
-            }
-        }
+        try {
+            final JsonValue joined = json(object());
 
-        for (Map.Entry<JsonPointer, RelationshipProvider> entry : relationshipProviders.entrySet()) {
-            final JsonPointer field = entry.getKey();
-            final RelationshipProvider provider = entry.getValue();
-
-            if (requestFields.contains(SchemaField.FIELD_ALL_RELATIONSHIPS)
-                    || provider.getSchemaField().isReturnedByDefault()
-                    || fieldHeads.contains(field)) { // only check head of request fields (see above)
-                try {
-                    joined.put(field, provider.getRelationshipValueForResource(context,
-                            resourceId).getOrThrow().getObject());
-                } catch (NotFoundException e) {
-                    logger.debug("No {} relationships found for {}", field, resourceId);
-                    joined.put(field, null);
+            /*
+             * Create set only containing the head of request fields
+             * Allows for a relationship to be fetched when only an expansion is requested.
+             * ie. a field of foo/name will retrieve the foo relationship
+             */
+            final Set<JsonPointer> fieldHeads = new HashSet<>();
+            for (JsonPointer field : requestFields) {
+                // A blank _fields param can yield a single '/' (empty) pointer
+                if (!field.isEmpty()) {
+                    fieldHeads.add(new JsonPointer(field.get(0)));
                 }
-            } else {
-                // relationship was not requested or set to return by default
-                logger.debug("Relationship field {} skipped", field);
             }
-        }
 
-        return joined;
+            for (Map.Entry<JsonPointer, RelationshipProvider> entry : relationshipProviders.entrySet()) {
+                final JsonPointer field = entry.getKey();
+                final RelationshipProvider provider = entry.getValue();
+
+                if (requestFields.contains(SchemaField.FIELD_ALL_RELATIONSHIPS)
+                        || provider.getSchemaField().isReturnedByDefault()
+                        || fieldHeads.contains(field)) { // only check head of request fields (see above)
+                    try {
+                        joined.put(field, provider.getRelationshipValueForResource(context,
+                                resourceId).getOrThrow().getObject());
+                    } catch (NotFoundException e) {
+                        logger.debug("No {} relationships found for {}", field, resourceId);
+                        joined.put(field, null);
+                    }
+                } else {
+                    // relationship was not requested or set to return by default
+                    logger.debug("Relationship field {} skipped", field);
+                }
+            }
+
+            return joined;
+        } finally {
+            measure.end();
+        }
     }
 
     /**
