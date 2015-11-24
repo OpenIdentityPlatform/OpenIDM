@@ -302,7 +302,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 state: state,
                 queryParams: BackgridUtils.getQueryParams({
                     _queryFilter: 'true'
-                })
+                }, this.isSystemResource)
             });
 
             this.model.resources = new ResourceCollection();

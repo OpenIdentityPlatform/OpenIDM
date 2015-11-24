@@ -53,19 +53,24 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
         return params.length === 0 ? true : params.join(" AND ");
     };
     
-    obj.getQueryParams = function (data) {
+    obj.getQueryParams = function (data, isSystemResource) {
         data = data || {};
+        var queryParams = {
+                _sortKeys: this.sortKeys,
+                _queryFilter: function () {
+                    return obj.queryFilter.call(this, { _queryFilter: data._queryFilter });
+                },
+                _fields: data._fields || "",
+                pageSize: "_pageSize",
+                _pagedResultsOffset: this.pagedResultsOffset,
+                _totalPagedResultsPolicy: "ESTIMATE"
+            };
+        
+        if (isSystemResource) {
+            delete queryParams._fields;
+        }
 
-        return {
-            _sortKeys: this.sortKeys,
-            _queryFilter: function () {
-                return obj.queryFilter.call(this, { _queryFilter: data._queryFilter });
-            },
-            _fields: data._fields || "",
-            pageSize: "_pageSize",
-            _pagedResultsOffset: this.pagedResultsOffset,
-            _totalPagedResultsPolicy: "ESTIMATE"
-        };
+        return queryParams;
     };
 
     obj.getState = function (sortCol, data) {
