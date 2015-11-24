@@ -21,10 +21,14 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.services.context.TransactionIdContext;
+import org.forgerock.util.generator.IdGenerator;
 import org.testng.annotations.Test;
 
 public class OpenIDMActivityAuditEventBuilderTest {
@@ -47,7 +51,7 @@ public class OpenIDMActivityAuditEventBuilderTest {
         String[] changedFields = new String[]{"test"};
 
         AuditEvent event = OpenIDMActivityAuditEventBuilder.auditEventBuilder()
-                .transactionIdFromRootContext(context)
+                .transactionId(ContextUtil.getTransactionId(context))
                 .timestamp(System.currentTimeMillis())
                 .eventName(RouterActivityLogger.ACTIVITY_EVENT_NAME)
                 .userId("fake")

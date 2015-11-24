@@ -24,7 +24,10 @@
 
 package org.forgerock.openidm.router.impl;
 
+import static org.forgerock.http.filter.TransactionIdInboundFilter.SYSPROP_TRUST_TRANSACTION_HEADER;
 import static org.forgerock.services.context.ClientContext.newInternalClientContext;
+
+import java.util.List;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -35,13 +38,18 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.openidm.router.IDMConnectionFactory;
-import org.forgerock.services.context.Context;
+import org.forgerock.http.header.MalformedHeaderException;
+import org.forgerock.http.header.TransactionIdHeader;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.http.HttpContext;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.services.TransactionId;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.TransactionIdContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.osgi.framework.Constants;
@@ -139,7 +147,7 @@ public class JsonResourceRouterService implements IDMConnectionFactory {
                 return new AbstractConnectionWrapper<Connection>(connectionFactory.getConnection()) {
                     @Override
                     protected Context transform(Context context) {
-                        return newInternalClientContext(context);
+                        return newInternalClientContext(newTransactionIdContext(context));
                     }
                 };
             }
@@ -166,6 +174,32 @@ public class JsonResourceRouterService implements IDMConnectionFactory {
     @Override
     public Promise<Connection, ResourceException> getExternalConnectionAsync() {
         return connectionFactory.getConnectionAsync();
+    }
+
+    private Context newTransactionIdContext(final Context context) {
+        return context.containsContext(TransactionIdContext.class)
+                ? context
+                : new TransactionIdContext(context, createTransactionId(context));
+
+    }
+
+    private TransactionId createTransactionId(final Context context) {
+        try {
+            if (context.containsContext(HttpContext.class) && isTransactionIdHeaderEnabled()) {
+                final List<String> header =
+                        context.asContext(HttpContext.class).getHeaders().get(TransactionIdHeader.NAME);
+                if (header != null && !header.isEmpty()) {
+                    return TransactionIdHeader.valueOf(header.get(0)).getTransactionId();
+                }
+            }
+        } catch (MalformedHeaderException ex) {
+            logger.trace("The TransactionId header is malformed.", ex);
+        }
+        return new TransactionId();
+    }
+
+    private boolean isTransactionIdHeaderEnabled() {
+        return Boolean.getBoolean(SYSPROP_TRUST_TRANSACTION_HEADER);
     }
 
 }

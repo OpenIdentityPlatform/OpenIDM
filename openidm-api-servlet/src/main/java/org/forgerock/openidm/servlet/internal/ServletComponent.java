@@ -16,12 +16,14 @@
 
 package org.forgerock.openidm.servlet.internal;
 
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
+import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
+
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
-
 import javax.script.ScriptException;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
@@ -41,6 +43,7 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.filter.TransactionIdInboundFilter;
 import org.forgerock.http.handler.Handlers;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.servlet.HttpFrameworkServlet;
@@ -50,9 +53,6 @@ import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.servletregistration.ServletFilterRegistrator;
 import org.forgerock.openidm.servletregistration.ServletRegistration;
-
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
-import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.Factory;
@@ -117,6 +117,9 @@ public class ServletComponent implements EventHandler {
     protected Map<ServletFilterRegistrator, ScriptEntry> filterRegistratorMap =
             new HashMap<ServletFilterRegistrator, ScriptEntry>();
 
+    // creates the inbound transactionId filter to set the transactionId context.
+    private final Filter transactionIdInboundFilter = new TransactionIdInboundFilter();
+
     protected synchronized void bindRegistrator(ServletFilterRegistrator registrator, Map<String, Object> properties) {
         JsonValue scriptConfig = registrator.getConfiguration()
                 .get(SERVLET_FILTER_SCRIPT_EXTENSIONS)
@@ -152,7 +155,10 @@ public class ServletComponent implements EventHandler {
                 new HttpApplication() {
                     @Override
                     public Handler start() throws HttpApplicationException {
-                        return Handlers.chainOf(handler, authFilter);
+                        // Add the transactionIdInboundFilter before the authFilter so that CAF will have the
+                        // TransactionIdContext set so that CAF can populate the AuditApi message with the
+                        // transactionId
+                        return Handlers.chainOf(handler, transactionIdInboundFilter, authFilter);
                     }
 
                     @Override

@@ -31,7 +31,6 @@ import static org.forgerock.json.JsonValue.object;
 import java.util.List;
 
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.Connection;
@@ -42,8 +41,10 @@ import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.SecurityContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -130,7 +131,7 @@ public class RouterActivityLogger implements ActivityLogger {
             String afterValue = getJsonForLog(after, requestType);
 
             AuditEvent auditEvent = OpenIDMActivityAuditEventBuilder.auditEventBuilder()
-                    .transactionIdFromRootContext(context)
+                    .transactionId(ContextUtil.getTransactionId(context))
                     .timestamp(System.currentTimeMillis())
                     .eventName(ACTIVITY_EVENT_NAME)
                     .userId(getRequester(context))

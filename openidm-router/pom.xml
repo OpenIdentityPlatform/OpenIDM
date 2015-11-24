@@ -34,7 +34,7 @@
     <name>OpenIDM Router Bundle</name>
     <description>This bundle contains OpenIDM</description>
     <properties>
-        <openidm.osgi.import.defaults>org.forgerock.json.resource.http,org.forgerock.script,org.forgerock.openidm.sync</openidm.osgi.import.defaults>
+        <openidm.osgi.import.defaults>org.forgerock.script,org.forgerock.openidm.sync</openidm.osgi.import.defaults>
     </properties>
     <dependencies>
         <dependency>
