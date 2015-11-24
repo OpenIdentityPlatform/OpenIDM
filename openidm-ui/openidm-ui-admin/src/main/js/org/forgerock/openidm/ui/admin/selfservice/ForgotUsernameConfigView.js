@@ -90,25 +90,29 @@ define("org/forgerock/openidm/ui/admin/selfservice/ForgotUsernameConfigView", [
                 type: "captcha",
                 title: $.t("templates.selfservice.username.captchaTitle"),
                 help: $.t("templates.selfservice.captcha.description"),
-                editable: true
+                editable: true,
+                enabledByDefault: false
             },
             {
                 type: "userQuery",
                 title: $.t("templates.selfservice.userQuery.name"),
                 help: $.t("templates.selfservice.userQuery.description"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             },
             {
                 type: "emailUsername",
                 title: $.t("templates.selfservice.emailUsername.name"),
                 help: $.t("templates.selfservice.emailUsername.description"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             },
             {
                 type: "retrieveUsername",
                 title: $.t("templates.selfservice.retrieveUsername.name"),
                 help: $.t("templates.selfservice.retrieveUsername.description"),
-                editable: false
+                editable: false,
+                enabledByDefault: true
             }];
 
             this.selfServiceRender(args, callback);

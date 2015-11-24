@@ -95,31 +95,36 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 type: "captcha",
                 title: $.t("templates.selfservice.user.captchaTitle"),
                 help: $.t("templates.selfservice.captcha.description"),
-                editable: true
+                editable: true,
+                enabledByDefault: false
             },
             {
                 type: "emailValidation",
                 title: $.t("templates.selfservice.emailValidation"),
                 help: $.t("templates.selfservice.emailValidationDescription"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             },
             {
                 type: "userDetails",
                 title: $.t("templates.selfservice.userDetailsTitle"),
                 help: $.t("templates.selfservice.userDetailsHelp"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             },
             {
                 type: "kbaSecurityAnswerDefinitionStage",
                 title: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageTitle"),
                 help: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageHelp"),
-                editable: false
+                editable: false,
+                enabledByDefault: true
             },
             {
                 type: "selfRegistration",
                 title: $.t("templates.selfservice.registrationForm"),
                 help: $.t("templates.selfservice.registrationFormDescription"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             }];
 
             this.selfServiceRender(args, callback);

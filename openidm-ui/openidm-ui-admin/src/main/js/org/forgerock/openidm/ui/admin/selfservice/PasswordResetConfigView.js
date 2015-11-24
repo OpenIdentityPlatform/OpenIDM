@@ -105,31 +105,36 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 type: "captcha",
                 title: $.t("templates.selfservice.password.captchaTitle"),
                 help: $.t("templates.selfservice.captcha.description"),
-                editable: true
+                editable: true,
+                enabledByDefault: false
             },
             {
                 type: "userQuery",
                 title: $.t("templates.selfservice.userQuery.name"),
                 help: $.t("templates.selfservice.userQuery.description"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             },
             {
                 type: "emailValidation",
                 title: $.t("templates.selfservice.emailValidation"),
                 help: $.t("templates.selfservice.emailValidationDescription"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             },
             {
                 type: "kbaSecurityAnswerVerificationStage",
                 title: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageForm"),
                 help: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageFormDescription"),
-                editable: false
+                editable: false,
+                enabledByDefault: true
             },
             {
                 type: "resetStage",
                 title: $.t("templates.selfservice.passwordResetForm"),
                 help: $.t("templates.selfservice.passwordResetFormDescription"),
-                editable: true
+                editable: true,
+                enabledByDefault: true
             }];
 
             this.selfServiceRender(args, callback);
