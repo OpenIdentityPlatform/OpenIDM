@@ -554,6 +554,7 @@
             },
             "resetStage" : {
                 "passwordField" : "Password Field",
+                "identityServiceURL" : "Identity Service URL",
                 "passwordFieldHelp" : ""
             },
             "emailUsername" : {
