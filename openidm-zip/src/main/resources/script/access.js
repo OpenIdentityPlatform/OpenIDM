@@ -137,8 +137,8 @@ var httpAccessConfig =
         {
             "pattern"   : "managed/user/*",
             "roles"     : "*",
-            "methods"   : "patch",
-            "actions"   : "*",
+            "methods"   : "patch,action",
+            "actions"   : "patch",
             "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user')"
         },
         {
@@ -230,15 +230,15 @@ var httpAccessConfig =
         {
             "pattern"   : "*",
             "roles"     : "openidm-authorized",
-            "methods"   : "update,patch",
-            "actions"   : "*",
+            "methods"   : "update,patch,action",
+            "actions"   : "patch",
             "customAuthz" : "ownDataOnly() && onlyEditableManagedObjectProperties('user')"
         },
         {
             "pattern"   : "selfservice/user/*",
             "roles"     : "openidm-authorized",
-            "methods"   : "patch",
-            "actions"   : "*",
+            "methods"   : "patch,action",
+            "actions"   : "patch",
             "customAuthz" : "(request.resourcePath === 'selfservice/user/' + context.security.authorization.id) && onlyEditableManagedObjectProperties('user')"
         },
 

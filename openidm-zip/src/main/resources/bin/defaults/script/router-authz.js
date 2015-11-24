@@ -278,7 +278,7 @@ function onlyEditableManagedObjectProperties(objectName) {
                     )
                 );
         }, true);
-    } else if (request.method === "patch") {
+    } else if (request.method === "patch" || (request.method === "action" && request.action === "patch")) {
         // Every field being patched must be checked
         return restrictPatchToFields(
             // generate an array of all userEditable properties in the schema
