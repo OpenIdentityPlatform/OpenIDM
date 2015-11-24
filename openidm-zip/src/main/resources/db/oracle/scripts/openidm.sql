@@ -513,42 +513,6 @@ CREATE INDEX fk_genericobjects_objecttypes ON genericobjects
 )
 ;
 
--- DROP TABLE relationships CASCADE CONSTRAINTS;
-
-
-PROMPT Creating Table relationships ...
-CREATE TABLE relationships (
-  id NUMBER(24,0) NOT NULL,
-  objectid VARCHAR2(255 CHAR) NOT NULL,
-  rev VARCHAR2(38 CHAR) NOT NULL,
-  firstid VARCHAR2(255 CHAR) NOT NULL,
-  firstpropname VARCHAR2(32 CHAR) NOT NULL,
-  secondid VARCHAR2(255 CHAR) NOT NULL,
-  properties CLOB
-);
-
-
-PROMPT Creating Primary Key Constraint pk_relationships on table relationships ...
-ALTER TABLE relationships
-ADD CONSTRAINT pk_relationships PRIMARY KEY
-(
-  id
-)
-ENABLE
-;
-PROMPT Creating Unique Index idx_relationships_first on relationships...
-CREATE UNIQUE INDEX idx_relationships_first ON relationships
-(
-  firstid,
-  firstpropname
-)
-;
-PROMPT Creating Unique Index idx_relationships_objectid on relationships ...
-CREATE UNIQUE INDEX idx_relationships_objectid ON relationships
-(
-  objectid
-)
-;
 
 -- DROP TABLE internaluser CASCADE CONSTRAINTS;
 
