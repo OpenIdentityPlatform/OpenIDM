@@ -105,7 +105,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
         },
         controlAllSwitch: function(event) {
             var check = $(event.target),
-                temp;
+                tempConfig;
 
             this.data.enableSelfService = check.is(":checked");
 
@@ -113,8 +113,23 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 this.enableForm();
 
                 this.model.surpressSave = true;
-                this.$el.find(".section-check:not(:checked)").prop("checked", true).trigger("change");
+
+                _.each(this.$el.find(".wide-card"), function(card) {
+                    tempConfig = _.find(this.data.configList, function(config) {
+                        return $(card).attr("data-type") === config.type;
+                    }, this);
+
+                    if(tempConfig.enabledByDefault) {
+                        $(card).find(".section-check").prop("checked", true).trigger("change");
+                    } else {
+                        this.model.saveConfig.stageConfigs = _.reject(this.model.saveConfig.stageConfigs, function(stage) {
+                            return stage.name === $(card).attr("data-type");
+                        });
+                    }
+                }, this);
+
                 this.model.surpressSave = false;
+
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = true;
 
                 $.when(
