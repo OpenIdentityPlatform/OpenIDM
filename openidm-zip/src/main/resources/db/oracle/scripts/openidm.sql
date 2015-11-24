@@ -105,7 +105,7 @@ CREATE TABLE auditaccess (
   http_request_secure VARCHAR2(255 CHAR) NULL ,
   http_request_method VARCHAR2(255 CHAR) NULL ,
   http_request_path VARCHAR2(255 CHAR) NULL ,
-  http_request_queryparameters CLOB(2M) NULL ,
+  http_request_queryparameters CLOB NULL ,
   http_request_headers CLOB NULL ,
   http_request_cookies CLOB NULL ,
   http_response_headers CLOB NULL ,
@@ -128,6 +128,8 @@ ADD CONSTRAINT PRIMARY_OBJECTID PRIMARY KEY
 )
 ENABLE
 ;
+
+-- DROP TABLE auditauthentication CASCADE CONSTRAINTS;
 
 -- -----------------------------------------------------
 -- Table openidm.auditauthentication
@@ -185,9 +187,9 @@ CREATE TABLE auditconfig (
 COMMENT ON COLUMN auditconfig.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
 ;
 
-PROMPT Creating Primary Key Constraint PRIMARY_8 on table auditconfig ...
+PROMPT Creating Primary Key Constraint pk_auditconfig on table auditconfig ...
 ALTER TABLE auditconfig
-ADD CONSTRAINT PRIMARY_8 PRIMARY KEY
+ADD CONSTRAINT pk_auditconfig PRIMARY KEY
 (
   objectid
 )
@@ -202,7 +204,7 @@ CREATE INDEX idx_auditconfig_transactionid ON auditconfig
 
 
 
---  DROP TABLE auditactivity CASCADE CONSTRAINTS;
+-- DROP TABLE auditactivity CASCADE CONSTRAINTS;
 
 -- -----------------------------------------------------
 -- Table openidm.auditactivity
@@ -231,16 +233,16 @@ CREATE TABLE auditactivity (
 COMMENT ON COLUMN auditactivity.activitydate IS 'Date format: 2011-09-09T14:58:17.654+02:00'
 ;
 
-PROMPT Creating Primary Key Constraint PRIMARY_8 on table auditactivity ...
+PROMPT Creating Primary Key Constraint pk_auditactivity on table auditactivity ...
 ALTER TABLE auditactivity
-ADD CONSTRAINT PRIMARY_8 PRIMARY KEY
+ADD CONSTRAINT pk_auditactivity PRIMARY KEY
 (
   objectid
 )
 ENABLE
 ;
-PROMPT Creating Index idx_auditactivity_transactionid on auditactivity ...
-CREATE INDEX idx_auditactivity_transactionid ON auditactivity
+PROMPT Creating Index idx_auditactivity_transid on auditactivity ...
+CREATE INDEX idx_auditactivity_transid ON auditactivity
 (
   transactionid
 ) 
@@ -427,9 +429,9 @@ CREATE TABLE relationships (
 );
 
 
-PROMPT Creating Primary Key Constraint PRIMARY_3 on table relationships ...
+PROMPT Creating Primary Key Constraint pk_relationships on table relationships ...
 ALTER TABLE relationships
-ADD CONSTRAINT PRIMARY_3 PRIMARY KEY
+ADD CONSTRAINT pk_relationships PRIMARY KEY
 (
   id
 )
@@ -558,6 +560,9 @@ CREATE TABLE internaluser (
   pwd VARCHAR2(510 CHAR),
   roles VARCHAR2(1024 CHAR)
 );
+
+
+-- DROP TABLE internalrole CASCADE CONSTRAINTS;
 
 PROMPT Creating Table internalrole ...
 CREATE TABLE internalrole (
