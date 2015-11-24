@@ -46,6 +46,9 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
@@ -90,13 +93,19 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(final Context context, final String resourceId) {
-        return queryRelationship(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue,
-                ResourceException>() {
-            @Override
-            public Promise<JsonValue, ResourceException> apply(ResourceResponse value) throws ResourceException {
-                return newResultPromise(value.getContent());
-            }
-        });
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/singleton/getRelationshipValueForResource"), resourceId, context);
+
+        try {
+            return queryRelationship(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue,
+                    ResourceException>() {
+                @Override
+                public Promise<JsonValue, ResourceException> apply(ResourceResponse value) throws ResourceException {
+                    return newResultPromise(value.getContent());
+                }
+            });
+        } finally {
+            measure.end();
+        }
     }
     
     /**
@@ -164,67 +173,79 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     @Override
     public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean clearExisting,
             final Context context, final String resourceId, final JsonValue value) {
-        if (value.isNotNull()) {
-            try {
-                final JsonValue id = value.get(FIELD_ID);
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/singleton/setRelationshipValueForResource"), resourceId, context);
 
-                // Update if we got an id, otherwise replace
-                if (id != null && id.isNotNull()) {
-                    final UpdateRequest updateRequest = Requests.newUpdateRequest("", value);
-                    updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
-                    return updateInstance(context, value.get(FIELD_ID).asString(), updateRequest)
-                            .then(new Function<ResourceResponse, JsonValue, ResourceException>() {
-                                @Override
-                                public JsonValue apply(ResourceResponse resourceResponse) throws ResourceException {
-                                    return resourceResponse.getContent();
-                                }
-                            });
-                } else { // no id, replace current instance
-                    if (!clearExisting) {
-                        clear(context, resourceId);
-                    }
+        try {
+            if (value.isNotNull()) {
+                try {
+                    final JsonValue id = value.get(FIELD_ID);
 
-                    final CreateRequest createRequest = Requests.newCreateRequest("", value);
-                    createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
-                    return createInstance(context, createRequest).then(new Function<ResourceResponse, JsonValue, ResourceException>() {
-                        @Override
-                        public JsonValue apply(ResourceResponse resourceResponse) throws ResourceException {
-                            return resourceResponse.getContent();
+                    // Update if we got an id, otherwise replace
+                    if (id != null && id.isNotNull()) {
+                        final UpdateRequest updateRequest = Requests.newUpdateRequest("", value);
+                        updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                        return updateInstance(context, value.get(FIELD_ID).asString(), updateRequest)
+                                .then(new Function<ResourceResponse, JsonValue, ResourceException>() {
+                                    @Override
+                                    public JsonValue apply(ResourceResponse resourceResponse) throws ResourceException {
+                                        return resourceResponse.getContent();
+                                    }
+                                });
+                    } else { // no id, replace current instance
+                        if (!clearExisting) {
+                            clear(context, resourceId);
                         }
-                    });
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            }
-        } else {
-            if (!clearExisting) {
-                clear(context, resourceId);
-            }
 
-            return newResultPromise(json(null));
+                        final CreateRequest createRequest = Requests.newCreateRequest("", value);
+                        createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                        return createInstance(context, createRequest).then(new Function<ResourceResponse, JsonValue, ResourceException>() {
+                            @Override
+                            public JsonValue apply(ResourceResponse resourceResponse) throws ResourceException {
+                                return resourceResponse.getContent();
+                            }
+                        });
+                    }
+                } catch (ResourceException e) {
+                    return e.asPromise();
+                }
+            } else {
+                if (!clearExisting) {
+                    clear(context, resourceId);
+                }
+
+                return newResultPromise(json(null));
+            }
+        } finally {
+            measure.end();
         }
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> clear(final Context context, final String resourceId) {
-        return getRelationshipValueForResource(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
-            @Override
-            public JsonValue apply(JsonValue relationship) throws ResourceException {
-                return deleteInstance(context, relationship.get(FIELD_ID).asString(),
-                        Requests.newDeleteRequest("")).getOrThrowUninterruptibly().getContent();
-            }
-        }).thenCatch(new Function<ResourceException, JsonValue, ResourceException>() {
-            @Override
-            public JsonValue apply(ResourceException e) throws ResourceException {
-                // Since we wish to clear here NotFound is not an error. Return empty json
-                if (e instanceof NotFoundException) {
-                    return json(null);
-                } else {
-                    throw e;
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/singleton/clear"), resourceId, context);
+
+        try {
+            return getRelationshipValueForResource(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
+                @Override
+                public JsonValue apply(JsonValue relationship) throws ResourceException {
+                    return deleteInstance(context, relationship.get(FIELD_ID).asString(),
+                            Requests.newDeleteRequest("")).getOrThrowUninterruptibly().getContent();
                 }
-            }
-        });
+            }).thenCatch(new Function<ResourceException, JsonValue, ResourceException>() {
+                @Override
+                public JsonValue apply(ResourceException e) throws ResourceException {
+                    // Since we wish to clear here NotFound is not an error. Return empty json
+                    if (e instanceof NotFoundException) {
+                        return json(null);
+                    } else {
+                        throw e;
+                    }
+                }
+            });
+        } finally {
+            measure.end();
+        }
     }
 
     /** {@inheritDoc} */

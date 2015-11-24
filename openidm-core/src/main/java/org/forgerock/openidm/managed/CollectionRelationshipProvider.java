@@ -55,6 +55,9 @@ import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -108,6 +111,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(final Context context, final String resourceId) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/collection/getRelationshipValueForResource"), resourceId, context);
+
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest("");
             queryRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
@@ -130,83 +135,91 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             return newResultPromise(buf);
         } catch (ResourceException e) {
             return e.asPromise();
+        } finally {
+            measure.end();
         }
     }
 
     @Override
     public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean clearExisting, Context context, String resourceId,
             JsonValue relationships) {
-        relationships.expect(List.class);
-
-        // Set of relationship IDs for updating (don't delete)
-        final Set<String> relationshipsToKeep = new HashSet<>();
-
-        // Set of relationships to perform an update on (have an _id)
-        final List<JsonValue> relationshipsToUpdate = new ArrayList<>();
-
-        // Set of relationships to create (no _id field)
-        final List<JsonValue> relationshipsToCreate = new ArrayList<>();
-
-        // JsonValue array to contain persisted relations
-        final JsonValue results = json(array());
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/collection/setRelationshipValueForResource"), resourceId, context);
 
         try {
-            if (relationships.isNotNull() && !relationships.asList().isEmpty()) {
-                // Split relationships in to to-be-updated (_id present) and to-be-created
-                for (JsonValue relationship : relationships) {
-                    final JsonValue id =
-                            relationship.get(FIELD_ID);
-                    if (id != null && id.isNotNull()) { // need update
-                        relationshipsToUpdate.add(relationship);
-                        relationshipsToKeep.add(id.asString());
-                    } else { // no id. create
-                        relationshipsToCreate.add(relationship);
+            relationships.expect(List.class);
+
+            // Set of relationship IDs for updating (don't delete)
+            final Set<String> relationshipsToKeep = new HashSet<>();
+
+            // Set of relationships to perform an update on (have an _id)
+            final List<JsonValue> relationshipsToUpdate = new ArrayList<>();
+
+            // Set of relationships to create (no _id field)
+            final List<JsonValue> relationshipsToCreate = new ArrayList<>();
+
+            // JsonValue array to contain persisted relations
+            final JsonValue results = json(array());
+
+            try {
+                if (relationships.isNotNull() && !relationships.asList().isEmpty()) {
+                    // Split relationships in to to-be-updated (_id present) and to-be-created
+                    for (JsonValue relationship : relationships) {
+                        final JsonValue id =
+                                relationship.get(FIELD_ID);
+                        if (id != null && id.isNotNull()) { // need update
+                            relationshipsToUpdate.add(relationship);
+                            relationshipsToKeep.add(id.asString());
+                        } else { // no id. create
+                            relationshipsToCreate.add(relationship);
+                        }
                     }
 
                     if (!clearExisting) {
                         // Call get() so we block until they are deleted.
                         clearNotIn(context, resourceId, relationshipsToKeep).getOrThrowUninterruptibly();
                     }
-                }
-            } else {
-                // We didn't get any relations to persist. Clear and return empty array.
-                if (!clearExisting) {
-                    clear(context, resourceId);
-                }
-                return newResultPromise(results);
-            }
-
-            /*
-             * Create or update relationships
-             */
-
-            // List of promises returned by update and create to when() on later
-            final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
-
-            for (JsonValue toUpdate : relationshipsToUpdate) {
-                final UpdateRequest updateRequest = Requests.newUpdateRequest("", toUpdate);
-                updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
-                promises.add(updateInstance(context, toUpdate.get(FIELD_ID).asString(), updateRequest));
-            }
-
-            for (JsonValue toCreate : relationshipsToCreate) {
-                final CreateRequest createRequest = Requests.newCreateRequest("", toCreate);
-                createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
-                promises.add(createInstance(context, createRequest));
-            }
-
-            return when(promises).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
-                @Override
-                public JsonValue apply(List<ResourceResponse> responses) throws ResourceException {
-                    final JsonValue value = json(array());
-                    for (final ResourceResponse response : responses) {
-                        value.add(response.getContent().getObject());
+                } else {
+                    // We didn't get any relations to persist. Clear and return empty array.
+                    if (!clearExisting) {
+                        clear(context, resourceId);
                     }
-                    return value;
+                    return newResultPromise(results);
                 }
-            });
-        } catch (ResourceException e) {
-            return e.asPromise();
+
+                /*
+                 * Create or update relationships
+                 */
+
+                // List of promises returned by update and create to when() on later
+                final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
+
+                for (JsonValue toUpdate : relationshipsToUpdate) {
+                    final UpdateRequest updateRequest = Requests.newUpdateRequest("", toUpdate);
+                    updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                    promises.add(updateInstance(context, toUpdate.get(FIELD_ID).asString(), updateRequest));
+                }
+
+                for (JsonValue toCreate : relationshipsToCreate) {
+                    final CreateRequest createRequest = Requests.newCreateRequest("", toCreate);
+                    createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                    promises.add(createInstance(context, createRequest));
+                }
+
+                return when(promises).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
+                    @Override
+                    public JsonValue apply(List<ResourceResponse> responses) throws ResourceException {
+                        final JsonValue value = json(array());
+                        for (final ResourceResponse response : responses) {
+                            value.add(response.getContent().getObject());
+                        }
+                        return value;
+                    }
+                });
+            } catch (ResourceException e) {
+                return e.asPromise();
+            }
+        } finally {
+            measure.end();
         }
     }
 
@@ -220,67 +233,79 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      */
     private Promise<JsonValue, ResourceException> clearNotIn(final Context context, final String resourceId,
             final Set<String> relationshipsToKeep) {
-        return getRelationshipValueForResource(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
-            @Override
-            public Promise<JsonValue, ResourceException> apply(JsonValue existingRelationships) throws ResourceException {
-                final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/collection/clearNotIn"), resourceId, context);
 
-                for (JsonValue relationship : existingRelationships) {
-                    final String id = relationship.get(FIELD_ID).asString();
+        try {
+            return getRelationshipValueForResource(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
+                @Override
+                public Promise<JsonValue, ResourceException> apply(JsonValue existingRelationships) throws ResourceException {
+                    final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
 
-                    // Delete if we're not told to keep this id
-                    if (!relationshipsToKeep.contains(id)) {
-                        final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
-                        deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
-                        promises.add(deleteInstance(context, id, deleteRequest));
-                    }
-                }
+                    for (JsonValue relationship : existingRelationships) {
+                        final String id = relationship.get(FIELD_ID).asString();
 
-                return when(promises).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
-                    @Override
-                    public JsonValue apply(List<ResourceResponse> resourceResponses) throws ResourceException {
-                        final JsonValue result = json(array());
-                        for (ResourceResponse resourceResponse : resourceResponses) {
-                            result.add(resourceResponse.getContent());
+                        // Delete if we're not told to keep this id
+                        if (!relationshipsToKeep.contains(id)) {
+                            final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
+                            deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                            promises.add(deleteInstance(context, id, deleteRequest));
                         }
-                        return result;
                     }
-                });
-            }
-        });
+
+                    return when(promises).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
+                        @Override
+                        public JsonValue apply(List<ResourceResponse> resourceResponses) throws ResourceException {
+                            final JsonValue result = json(array());
+                            for (ResourceResponse resourceResponse : resourceResponses) {
+                                result.add(resourceResponse.getContent());
+                            }
+                            return result;
+                        }
+                    });
+                }
+            });
+        } finally {
+            measure.end();
+        }
     }
 
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> clear(final Context context, final String resourceId) {
-        /*
-         * FIXME - Performance here is terrible. We read every relationship just to get the id to delete.
-         *         Need a deleteByQueryFilter() to remove all relationships for a given firstId
-         */
-        return getRelationshipValueForResource(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
-            @Override
-            public Promise<JsonValue, ResourceException> apply(JsonValue existing) throws ResourceException {
-                final List<Promise<ResourceResponse, ResourceException>> deleted = new ArrayList<>();
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/collection/clear"), resourceId, null);
 
-                for (JsonValue relationship : existing) {
-                    final String id = relationship.get(FIELD_ID).asString();
-                    DeleteRequest deleteRequest = Requests.newDeleteRequest("");
-                    deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
-                    deleted.add(deleteInstance(context, id, deleteRequest));
-                }
+        try {
+            /*
+             * FIXME - Performance here is terrible. We read every relationship just to get the id to delete.
+             *         Need a deleteByQueryFilter() to remove all relationships for a given firstId
+             */
+            return getRelationshipValueForResource(context, resourceId).thenAsync(new AsyncFunction<JsonValue, JsonValue, ResourceException>() {
+                @Override
+                public Promise<JsonValue, ResourceException> apply(JsonValue existing) throws ResourceException {
+                    final List<Promise<ResourceResponse, ResourceException>> deleted = new ArrayList<>();
 
-                return when(deleted).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
-                    @Override
-                    public JsonValue apply(List<ResourceResponse> resourceResponses) throws ResourceException {
-                        final JsonValue deleted = json(array());
-                        for (ResourceResponse resourceResponse : resourceResponses) {
-                            deleted.add(resourceResponse.getContent());
-                        }
-                        return deleted;
+                    for (JsonValue relationship : existing) {
+                        final String id = relationship.get(FIELD_ID).asString();
+                        DeleteRequest deleteRequest = Requests.newDeleteRequest("");
+                        deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                        deleted.add(deleteInstance(context, id, deleteRequest));
                     }
-                });
-            }
-        });
+
+                    return when(deleted).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
+                        @Override
+                        public JsonValue apply(List<ResourceResponse> resourceResponses) throws ResourceException {
+                            final JsonValue deleted = json(array());
+                            for (ResourceResponse resourceResponse : resourceResponses) {
+                                deleted.add(resourceResponse.getContent());
+                            }
+                            return deleted;
+                        }
+                    });
+                }
+            });
+        } finally {
+            measure.end();
+        }
     }
 
     /** {@inheritDoc} */
