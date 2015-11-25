@@ -250,7 +250,9 @@ function restrictPatchToFields(allowedFields) {
 function onlyEditableManagedObjectProperties(objectName) {
     var managedConfig = openidm.read("config/managed"),
         managedObjectConfig = _.findWhere(managedConfig.objects, {"name": objectName}),
-        currentObject;
+        currentObject,
+        JsonPatch = org.forgerock.json.patch.JsonPatch,
+        JsonValue = org.forgerock.json.JsonValue;
 
     if (!managedObjectConfig || !managedObjectConfig.schema || !managedObjectConfig.schema.properties) {
         return false;
@@ -270,7 +272,10 @@ function onlyEditableManagedObjectProperties(objectName) {
             return result &&
                 (
                     // either the value has not changed...
-                    _.isEqual(request.content[propertyName], currentObject[propertyName]) ||
+                    JsonPatch.diff(
+                        JsonValue(request.content[propertyName]),
+                        JsonValue(currentObject[propertyName])
+                    ).asList().size() === 0 ||
                     // or the user is allowed to edit it
                     (
                         _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
