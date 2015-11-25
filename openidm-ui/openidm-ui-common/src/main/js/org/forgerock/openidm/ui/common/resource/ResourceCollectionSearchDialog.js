@@ -247,7 +247,7 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
                 
             return {
                 val: newVal,
-                text: this.currentDialog.find(".selectize-input:eq(1)").find("[data-value=" + relationshipValue + "]").text()
+                text: this.currentDialog.find(".selectize-input:eq(1)").find("[data-value]").text()
             };
         }
     });

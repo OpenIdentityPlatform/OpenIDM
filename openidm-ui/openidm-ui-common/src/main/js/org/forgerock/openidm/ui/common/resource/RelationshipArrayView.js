@@ -124,7 +124,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             if(event) {
                 event.preventDefault();
             }
-            this.model.relationships.fetch();
+            this.render(this.args);
         },
         getURL: function(){
             return "/" + constants.context + "/" + this.relationshipUrl;
@@ -250,7 +250,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 pager_id = grid_id + '-paginator',
                 RelationshipCollection = AbstractCollection.extend({
                     url: url,
-                    state: BackgridUtils.getState(cols[1].name),
+                    state: BackgridUtils.getState("_id"),
                     queryParams: BackgridUtils.getQueryParams({
                         _queryFilter: 'true',
                         _fields: ''
@@ -268,16 +268,21 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 collection: _this.model.relationships,
                 row: BackgridUtils.ClickableRow.extend({
                     callback: function(e) {
-                        var $target = $(e.target);
+                        var $target = $(e.target),
+                            isInternal = this.model.attributes._ref.indexOf("repo/internal") === 0;
+                        
+                        if (isInternal) {
+                            e.preventDefault();
+                        }
 
                         if ($target.is("input") || $target.is(".select-row-cell") || $target.hasClass("resourceEditLink")) {
                             return;
                         }
                         
-                        if (_this.hasRefProperties) {
+                        if (_this.hasRefProperties || isInternal) {
                             _this.openResourceCollectionDialog(this.model.attributes);
                         } else {
-                            location.href = $target.find(".resourceEditLink").attr("href");
+                            location.href = $target.closest("tr").find(".resourceEditLink").attr("href");
                         }
                     }
                 })
