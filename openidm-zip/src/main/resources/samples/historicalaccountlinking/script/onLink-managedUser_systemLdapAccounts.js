@@ -15,9 +15,8 @@
  */
 
 /**
- * When a managed/user is linked to a target resource, this adds a relationship to to the managed/user's 
- * historicalAccounts field which also includes the linked date property and will set the historical account as being 
- * active.
+ * When a managed/user is linked to a target resource, this adds a relationship to the managed/user's historicalAccounts
+ * field which also includes the linked date property and will set the historical account as being active.
  * 
  * The newly added relationship is of the form:
  * 

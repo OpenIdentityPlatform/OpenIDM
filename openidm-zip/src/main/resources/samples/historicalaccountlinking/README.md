@@ -91,6 +91,8 @@ Run The Sample In OpenIDM
         "sn" : "Smith",
         "password" : "TestPassw0rd",
         "displayName" : "User Smith",
+        "description" : "Test User",
+        "telephoneNumber" : "1234567890",
         "mail" : "user.smith@example.com",
         "_id" : "user"
         }' \
@@ -99,7 +101,7 @@ Run The Sample In OpenIDM
 3.  Request all identifiers in OpenDJ. Verifying that user.smith0 was created.
 
         $ curl -k -u "openidm-admin:openidm-admin" \
-        "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
+        "http://localhost:8080/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
         
         {
           "result" : [ {
@@ -228,7 +230,7 @@ see that the state of the account is now disabled and the date that the state ch
 
         $ curl -k -u "openidm-admin:openidm-admin" --header "If-Match: *" --request PATCH \
         --data '[ { "operation" : "replace", "field" : "accountStatus", "value" : "active" } ]' \
-        'https://localhost:8443/openidm/managed/user/user'
+        'http://localhost:8080/openidm/managed/user/user'
         {
           "_id": "user",
           "_rev": "2",
@@ -241,7 +243,7 @@ see that the state of the account is now disabled and the date that the state ch
 11.  Request all identifiers in OpenDJ. Verifying that a new user user.smith1 was created.
 
         $ curl -k -u "openidm-admin:openidm-admin" \
-        "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
+        "http://localhost:8080/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
         {
           "result" : [ {
             "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
