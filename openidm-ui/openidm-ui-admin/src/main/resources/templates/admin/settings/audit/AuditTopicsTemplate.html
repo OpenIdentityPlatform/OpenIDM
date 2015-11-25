@@ -8,7 +8,7 @@
     </thead>
 
     <tbody>
-    {{#each events}}
+    {{#each topics}}
     <tr>
         <td>{{name}}</td>
         <td>
@@ -31,6 +31,8 @@
     </tbody>
 </table>
 
-<button class="btn btn-default addEvent"><i class="fa fa-plus"></i> {{t "templates.audit.events.addCustom"}}</button>
+<div class="form-group">
+    <button class="btn btn-default addEvent"><i class="fa fa-plus"></i> {{t "templates.audit.events.addCustom"}}</button>
+</div>
 
 <div class="audit-events-alert"></div>

@@ -2,9 +2,9 @@
     <!--AuditEventHandlersView-->
     <div class="panel panel-default panel-collapse">
         <div class="panel-heading" role="tab" id="AuditEventHandlersHeader">
-            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#configuring-event-handlers" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#configuring-topic-handlers" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#AuditEventHandlersBody" aria-expanded="true" aria-controls="AuditEventHandlersHeader">
+                <a data-toggle="collapse" href="#AuditEventHandlersBody" aria-expanded="true" aria-controls="AuditEventHandlersHeader" role="button">
                     {{t "templates.audit.eventHandlers.title"}}
                 </a>
             </h4>
@@ -20,12 +20,12 @@
         </div>
     </div>
 
-    <!--AuditEventsView-->
+    <!--AuditTopicsView-->
     <div class="panel panel-default panel-collapse">
         <div class="panel-heading" role="tab" id="AuditEventsHeader">
-            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#audit-log-types" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#audit-log-topics" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#AuditEventsBody" aria-expanded="true" aria-controls="AuditEventsHeader">
+                <a data-toggle="collapse" href="#AuditEventsBody" aria-expanded="true" aria-controls="AuditEventsHeader" role="button">
                     {{t "templates.audit.events.title"}}
                 </a>
             </h4>
@@ -35,7 +35,28 @@
             <div class="panel-body">
                 <div class="group-body">
                     <p class="panel-description">{{t "templates.audit.events.desc"}}</p>
-                    <div id="AuditEventsView"></div>
+                    <div id="AuditTopicsView"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!--AuditFilterPoliciesView-->
+    <div class="panel panel-default panel-collapse">
+        <div class="panel-heading" role="tab" id="AuditFilterPoliciesHeader">
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#filtering-audit-policies" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+            <h4 class="panel-title">
+                <a data-toggle="collapse" href="#AuditFilterPoliciesBody" aria-expanded="true" aria-controls="AuditFilterPoliciesHeader" role="button">
+                    {{t "templates.audit.filterPolicies.title"}}
+                </a>
+            </h4>
+        </div>
+
+        <div id="AuditFilterPoliciesBody" class="collapse in" role="tabpanel" aria-labelledby="AuditFilterPoliciesHeader" aria-expanded="true">
+            <div class="panel-body">
+                <div class="group-body">
+                    <p class="panel-description">{{t "templates.audit.filterPolicies.desc"}}</p>
+                    <div id="AuditFilterPoliciesView"></div>
                 </div>
             </div>
         </div>
@@ -44,9 +65,9 @@
     <!--ExceptionFormatterView-->
     <div class="panel panel-default panel-collapse">
         <div class="panel-heading" role="tab" id="ExceptionFormatterHeader">
-            <!--<a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>-->
+            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/index.html#audit-exception-formatter" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
             <h4 class="panel-title">
-                <a data-toggle="collapse" href="#ExceptionFormatterBody" aria-expanded="true" aria-controls="ExceptionFormatterHeader">
+                <a data-toggle="collapse" href="#ExceptionFormatterBody" aria-expanded="true" aria-controls="ExceptionFormatterHeader" role="button">
                     {{t "templates.audit.exceptionFormatter.title"}}
                 </a>
             </h4>

@@ -56,6 +56,10 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractView", [
                 return _.clone(auditDataChanges, true);
             },
 
+            getTopics: function() {
+                return _.union(_.keys(_.clone(auditDataChanges.eventTopics, true)), ["authentication", "access", "activity", "recon", "sync", "config"]);
+            },
+
             setProperties: function(properties, object) {
                 _.each(properties, function(prop) {
                     if (_.isEmpty(object[prop]) &&
@@ -66,6 +70,14 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractView", [
                         auditDataChanges[prop] = object[prop];
                     }
                 }, this);
+            },
+
+            setFilterPolicies: function(policies) {
+                auditDataChanges.auditServiceConfig.filterPolicies = policies;
+            },
+
+            setUseForQueries: function(event) {
+                auditDataChanges.auditServiceConfig.handlerForQueries = event;
             },
 
             saveAudit: function(callback) {

@@ -24,7 +24,7 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
+define("org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsDialog", [
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractView",
@@ -34,7 +34,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "bootstrap-dialog",
-    "jsonEditor"
+    "jsonEditor",
+    "bootstrap-tabdrop"
 
 ], function($, _,
             AuditAdminAbstractView,
@@ -46,8 +47,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
             BootstrapDialog,
             JSONEditor) {
 
-    var AuditEventsDialog = AuditAdminAbstractView.extend({
-        template: "templates/admin/settings/audit/AuditEventsDialogTemplate.html",
+    var AuditTopicsDialog = AuditAdminAbstractView.extend({
+        template: "templates/admin/settings/audit/AuditTopicsDialogTemplate.html",
         el: "#dialogs",
         events: {
             "onValidate": "onValidate",
@@ -114,43 +115,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
 
             this.preRenderSetup(_.clone(args, true));
 
-
-            if (this.data.defaults.limitedEdits) {
-                _.extend(JSONEditor.defaults.options, {
-                    ajax: false,
-                    disable_array_add: true,
-                    disable_array_delete: true,
-                    disable_array_reorder: true,
-                    disable_collapse: false,
-                    disable_edit_json: true,
-                    disable_properties: true,
-                    iconlib: "fontawesome4",
-                    no_additional_properties: false,
-                    object_layout: "normal",
-                    required_by_default: true,
-                    show_errors: "never",
-                    template: "handlebars",
-                    theme: "bootstrap3"
-                });
-            } else {
-                _.extend(JSONEditor.defaults.options, {
-                    ajax: false,
-                    disable_array_add: false,
-                    disable_array_delete: false,
-                    disable_array_reorder: false,
-                    disable_collapse: false,
-                    disable_edit_json: false,
-                    disable_properties: false,
-                    iconlib: "fontawesome4",
-                    no_additional_properties: false,
-                    object_layout: "normal",
-                    required_by_default: true,
-                    show_errors: "never",
-                    template: "handlebars",
-                    theme: "bootstrap3"
-                });
-            }
-
             this.model.currentDialog = $('<div id="AuditEventsDialog"></div>');
             this.setElement(this.model.currentDialog);
             $('#dialogs').append(this.model.currentDialog);
@@ -160,15 +124,22 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
                 size: BootstrapDialog.SIZE_WIDE,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.model.currentDialog,
-                onshown: _this.renderTemplate(_this.data),
+                onshown: function() {
+                    _this.renderTemplate(_this.data, function() {
+                        _this.$el.find(".nav-tabs").tabdrop();
+
+                        _this.$el.find(".nav-tabs").on("shown.bs.tab", function (e) {
+                            _this.model.filterScript.refresh();
+                        });
+                    });
+                },
                 buttons: [
                     {
                         label: $.t("common.form.cancel"),
                         action: function(dialogRef) {
                             dialogRef.close();
                         }
-                    },
-                    {
+                    }, {
                         label: $.t("common.form.submit"),
                         id: "submitAuditEvent",
                         cssClass: "btn-primary",
@@ -199,7 +170,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
             });
         },
 
-        renderTemplate: function(data) {
+        renderTemplate: function(data, callback) {
             var script = {},
                 schema = {},
                 triggers = [],
@@ -240,15 +211,61 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
                     validatorsManager.bindValidators(this.$el.find("#auditEventsForm"));
                     validatorsManager.validateAllFields(this.$el.find("#auditEventsForm"));
 
-                    this.$el.find(".nav-tabs").tabdrop();
 
-                    this.data.schemaEditor = new JSONEditor(this.$el.find("#schemaPane .jsonEditorContainer")[0], {schema:{}});
-                    this.data.schemaEditor.setValue(schema);
+                    var jsonOptions = {};
 
                     if (this.data.defaults.limitedEdits) {
-                        this.data.schemaEditor.disable();
+                        jsonOptions =  {
+                            ajax: false,
+                            disable_array_add: true,
+                            disable_array_delete: true,
+                            disable_array_reorder: true,
+                            disable_collapse: false,
+                            disable_edit_json: true,
+                            disable_properties: true,
+                            iconlib: "fontawesome4",
+                            no_additional_properties: false,
+                            object_layout: "normal",
+                            required_by_default: true,
+                            show_errors: "never",
+                            template: "handlebars",
+                            theme: "bootstrap3"
+                        };
+                    } else {
+                        jsonOptions = {
+                            ajax: false,
+                            disable_array_add: false,
+                            disable_array_delete: false,
+                            disable_array_reorder: false,
+                            disable_collapse: false,
+                            disable_edit_json: false,
+                            disable_properties: false,
+                            iconlib: "fontawesome4",
+                            no_additional_properties: false,
+                            object_layout: "normal",
+                            required_by_default: true,
+                            show_errors: "never",
+                            template: "handlebars",
+                            theme: "bootstrap3"
+                        };
                     }
 
+                    if (!this.data.defaults.isDefault || this.data.defaults.event.schema) {
+                        this.data.schemaEditor = new JSONEditor(this.$el.find("#schemaPane .jsonEditorContainer")[0], _.extend({
+                            schema: {}
+                        }, jsonOptions));
+
+                        this.data.schemaEditor.setValue(schema);
+
+
+                        if (this.data.defaults.limitedEdits) {
+                            this.data.schemaEditor.disable();
+                        }
+
+                        this.data.schemaEditor.on('change', _.bind(function() {
+                            this.data.defaults.event.schema = this.data.schemaEditor.getValue();
+                        }, this));
+                    }
                     this.$el.find(".filterActions").selectize({
                         delimiter: ',',
                         persist: false,
@@ -288,10 +305,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
                         });
                     }, this);
 
-                    this.data.schemaEditor.on('change', _.bind(function() {
-                        this.data.defaults.event.schema = this.data.schemaEditor.getValue();
-                    }, this));
-
                     this.model.filterScript = InlineScriptEditor.generateScriptEditor({
                         "element": this.$el.find("#filterScript"),
                         "eventName": "filterScript",
@@ -315,6 +328,11 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
                         }, this),
                         "scriptData": script
                     });
+
+                    if (callback) {
+                        callback();
+                    }
+
                 }, this),
                 "replace"
             );
@@ -438,5 +456,5 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog", [
 
     });
 
-    return new AuditEventsDialog();
+    return new AuditTopicsDialog();
 });

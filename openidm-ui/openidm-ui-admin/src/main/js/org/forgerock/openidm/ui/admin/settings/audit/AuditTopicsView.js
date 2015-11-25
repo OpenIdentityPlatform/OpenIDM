@@ -24,20 +24,21 @@
 
 /*global define*/
 
-define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView", [
+define("org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsView", [
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractView",
-    "org/forgerock/openidm/ui/admin/settings/audit/AuditEventsDialog",
+    "org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsDialog",
     "org/forgerock/commons/ui/common/components/ChangesPending"
 
-], function($, _, AuditAdminAbstractView,
-            AuditEventsDialog,
+], function($, _,
+            AuditAdminAbstractView,
+            AuditTopicsDialog,
             ChangesPending) {
 
-    var AuditEventsView = AuditAdminAbstractView.extend({
-        template: "templates/admin/settings/audit/AuditEventsTemplate.html",
-        element: "#AuditEventsView",
+    var AuditTopicsView = AuditAdminAbstractView.extend({
+        template: "templates/admin/settings/audit/AuditTopicsTemplate.html",
+        element: "#AuditTopicsView",
         noBaseTemplate: true,
         events: {
             "click .editEvent": "editEvent",
@@ -46,14 +47,22 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView", [
         },
 
         constants: {
-            DEFAULT_EVENTS: ["authentication", "access", "activity", "recon", "sync"],
+            DEFAULT_TOPICS_LIST: ["authentication", "access", "activity", "recon", "sync", "config"],
+            DEFAULT_TOPICS: {
+                "authentication": {},
+                "access": {},
+                "activity": {},
+                "recon": {},
+                "sync": {},
+                "config": {}
+            },
             CRUDPAQ_ACTIONS: ["action", "create", "delete", "patch", "query", "read", "update"],
             CUSTOM_CRUDPAQ_ACTIONS: ["create", "delete", "update", "link", "unlink", "exception", "ignore"]
         },
 
         render: function (args, callback) {
             this.data = {
-                events: []
+                topics: []
             };
 
             this.model = {
@@ -64,6 +73,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView", [
                     "access": [],
                     "activity": this.constants.CRUDPAQ_ACTIONS,
                     "custom": this.constants.CRUDPAQ_ACTIONS,
+                    "config": this.constants.CRUDPAQ_ACTIONS,
                     "recon": this.constants.CUSTOM_CRUDPAQ_ACTIONS,
                     "sync": this.constants.CUSTOM_CRUDPAQ_ACTIONS
                 }
@@ -72,41 +82,35 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView", [
             if (!_.has(args, "model")) {
                 this.model.auditData = this.getAuditData();
 
-                if (_.has(this.model.auditData, "extendedEventTypes")) {
-                    _.extend(this.model.events, this.model.auditData.extendedEventTypes);
-                }
-                if (_.has(this.model.auditData, "customEventTypes")) {
-                    _.extend(this.model.events, this.model.auditData.customEventTypes);
+                if (_.has(this.model.auditData, "eventTopics")) {
+                    this.model.topics = _.extend(_.clone(this.constants.DEFAULT_TOPICS, true), _.clone(this.model.auditData.eventTopics, true));
                 }
             } else {
                 this.model = args.model;
             }
 
-            _.each(_.clone(this.model.events, true), function (event, name) {
-                event.defaultEvents = _.contains(this.constants.DEFAULT_EVENTS, name);
+            _.each(_.clone(this.model.topics, true), function (event, name) {
+                event.defaultEvents = _.contains(this.constants.DEFAULT_TOPICS_LIST, name);
                 event.name = name;
-                this.data.events.push(event);
+                this.data.topics.push(event);
             }, this);
 
             this.parentRender(_.bind(function() {
-                this.breakoutEvents();
 
                 if (!_.has(this.model, "changesModule")) {
                     this.model.changesModule = ChangesPending.watchChanges({
                         element: this.$el.find(".audit-events-alert"),
                         undo: true,
-                        watchedObj: _.clone(this.model.auditData, true),
-                        watchedProperties: ["customEventTypes", "extendedEventTypes"],
+                        watchedObj: $.extend({}, this.model.auditData),
+                        watchedProperties: ["eventTopics"],
                         undoCallback: _.bind(function (original) {
-                            this.model.auditData = _.extend(this.model.auditData, original);
-                            this.model.events = {};
+                            this.model.auditData.eventTopics = original.eventTopics;
+                            this.model.topics = {};
 
-                            if (_.has(this.model.auditData, "extendedEventTypes")) {
-                                _.extend(this.model.events, this.model.auditData.extendedEventTypes);
+                            if (_.has(this.model.auditData, "eventTopics")) {
+                                this.model.topics = _.extend(_.clone(this.constants.DEFAULT_TOPICS, true), _.clone(this.model.auditData.eventTopics, true));
                             }
-                            if (_.has(this.model.auditData, "customEventTypes")) {
-                                _.extend(this.model.events, this.model.auditData.customEventTypes);
-                            }
+
                             this.reRender();
                         }, this)
                     });
@@ -124,36 +128,26 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView", [
         },
 
         reRender: function() {
-            this.breakoutEvents();
-            this.setProperties(["customEventTypes", "extendedEventTypes"], this.model.auditData);
-            this.model.changesModule.makeChanges(_.clone(this.model.auditData, true));
-            this.render({model: this.model});
-        },
+            this.model.auditData.eventTopics = this.model.topics;
 
-        breakoutEvents: function() {
-            this.model.auditData.customEventTypes = {};
-            this.model.auditData.extendedEventTypes = {};
-            _.each(this.model.events, function (event, key) {
-                if (_.contains(["activity", "authentication", "access"], key)) {
-                    this.model.auditData.extendedEventTypes[key] = event;
-                } else {
-                    this.model.auditData.customEventTypes[key] = event;
-                }
-            }, this);
+            this.setProperties(["eventTopics"], this.model.auditData);
+            this.model.changesModule.makeChanges(this.model.auditData);
+            this.render({model: this.model});
         },
 
         addEvent:function(e) {
             e.preventDefault();
-            AuditEventsDialog.render(
+            AuditTopicsDialog.render(
                 {
                     "event": {},
                     "eventName": "",
-                    "definedEvents": _.keys(this.model.events),
+                    "isDefault": false,
+                    "definedEvents": _.keys(this.model.topics),
                     "eventDeclarativeActions": this.model.EVENT_ACTIONS.custom,
                     "newEvent": true
                 },
                 _.bind(function(results) {
-                    this.model.events[results.eventName] = results.data;
+                    this.model.topics[results.eventName] = results.data;
                     this.reRender();
                 }, this)
             );
@@ -164,13 +158,14 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView", [
 
             var eventName = $(e.currentTarget).attr("data-name"),
                 dialogConfig = {
+                    "event": this.model.topics[eventName],
                     "eventName": eventName,
-                    "event": this.model.events[eventName],
-                    "definedEvents": _.keys(this.model.events),
+                    "isDefault": _.contains(this.constants.DEFAULT_TOPICS_LIST, eventName),
+                    "definedEvents": _.keys(this.model.topics),
                     "newEvent": false
                 };
 
-            if (_.contains(this.constants.DEFAULT_EVENTS, eventName) && eventName !== "custom") {
+            if (_.contains(this.constants.DEFAULT_TOPICS_LIST, eventName) && eventName !== "custom") {
                 dialogConfig.eventDeclarativeActions = this.model.EVENT_ACTIONS[eventName];
                 dialogConfig.limitedEdits = true;
 
@@ -183,19 +178,19 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView", [
                 dialogConfig.triggers = {"recon": this.model.EVENT_ACTIONS.recon};
             }
 
-            AuditEventsDialog.render(dialogConfig,
+            AuditTopicsDialog.render(dialogConfig,
                 _.bind(function(results) {
-                    this.model.events[results.eventName] = results.data;
+                    this.model.topics[results.eventName] = results.data;
                     this.reRender();
                 }, this));
         },
 
         deleteEvent:function(e) {
             e.preventDefault();
-            delete this.model.events[$(e.currentTarget).attr("data-name")];
+            delete this.model.topics[$(e.currentTarget).attr("data-name")];
             this.reRender();
         }
     });
 
-    return new AuditEventsView();
+    return new AuditTopicsView();
 });

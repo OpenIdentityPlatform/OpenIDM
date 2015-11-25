@@ -845,7 +845,7 @@
                     "watchedFields": "Watched Fields",
                     "passwordFields": "Password Fields",
                     "filterActionsDesc": "Configure actions to be audited",
-                    "noActions": "There are no actions for this type of event.",
+                    "noActions": "Schema cannot be edited on default event topics",
                     "filterFieldsDesc": "Limit audit logs by entry type and value",
                     "filterFieldDelete": "Delete Field",
                     "filterFieldAddField": "Add Field",
@@ -854,6 +854,25 @@
                     "watchedFieldsDesc": "Defines properties to monitor (e.g. email, address)",
                     "passwordFieldsDesc": "Identify attributes to treat as password fields."
                 }
+            },
+            "filterPolicies": {
+                "title": "Audit Filter Policies",
+                "desc": "Limit audit logs by applying filter policies.",
+                "add": "Add Filter Policy",
+                "type": "Object Type",
+                "includeExclude": "Include/Exclude",
+                "location": "Location URI of the Object",
+                "excludeIf": "Exclude",
+                "includeIf": "Include",
+                "field": "Field",
+                "value": "Value",
+                "edit": "Edit Filter Policy",
+                "add": "Add Filter Policy",
+                "typeHelp": "Type of filter policy to be added to audit.",
+                "topic": "Audit Topic to Filter",
+                "topicsHelp": "Options",
+                "excludeIncludeHelp": "Include or exclude this value/field from audit.",
+                "locationHelp": "URI of the field or value to filter"
             },
             "exceptionFormatter": {
                 "title": "Exception Formatter",
@@ -1865,6 +1884,230 @@
                 },
                 "FrequentlyUsedApplicationsView" : {
                     "clickHereToAdd" : "Click %shere%s to add."
+                }
+            }
+        }
+    },
+    "audit": {
+        "handlers": {
+            "all": {
+                "name": {
+                    "help": "Name of the audit event handler"
+                },
+                "topics": {
+                    "help": "List of topics handled by an audit event handler"
+                },
+                "enabled": {
+                    "help": "Enables or disables an audit event handler"
+                }
+            },
+            "csv": {
+                "logDirectory": {
+                    "help": "Directory in which to store audit log CSV files"
+                },
+                "formatting": {
+                    "help": "CSV Output Formatting",
+                    "quoteChar": {
+                        "help": "Character to append and prepend to a CSV field"
+                    },
+                    "delimiterChar": {
+                        "help": "Character between CSV fields."
+                    },
+                    "endOfLineSymbols": {
+                        "help": "Characters that mark the end of a line"
+                    }
+                },
+                "security": {
+                    "help": "CSV Tamper Evident Configuration",
+                    "enabled": {
+                        "help": "Enables the CSV tamper evident feature"
+                    },
+                    "filename": {
+                        "help": "Path to Java keystore"
+                    },
+                    "password": {
+                        "help": "Password for Java keystore"
+                    },
+                    "secureStorageName": {
+                        "help": "Supports tamper-evident logging"
+                    },
+                    "signatureInterval": {
+                        "help": "Signature generation interval"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for optional event buffering",
+                    "enabled": {
+                        "help": "Enables or disables buffering"
+                    },
+                    "autoFlush": {
+                        "help":"If enabled, does not flush after each event (so improves performance)"
+                    }
+                }
+            },
+            "jdbc": {
+                "databaseType": {
+                    "help": "Identifies the database in use (MySQL, Oracle SQL)"
+                },
+                "connectionPool": {
+                    "help": "Connection Pool",
+                    "dataSourceClassName": {
+                        "help": "Fully qualified JDBC driver class name"
+                    },
+                    "jdbcUrl": {
+                        "help": "Url of the JDBC database"
+                    },
+                    "username": {
+                      "help": "Database Username"
+                    },
+                    "password": {
+                      "help": "Database Password"
+                    },
+                    "autoCommit": {
+                        "help": "Enables or disables automatic committing of changes to the database"
+                    },
+                    "connectionTimeout": {
+                      "help": "Max wait time before failing the connection attempt"
+                    },
+                    "idleTimeout": {
+                      "help": "Max idle time before the connection is closed"
+                    },
+                    "maxLifetime": {
+                      "help": "The maximum time a JDBC connection can be open"
+                    },
+                    "minIdle": {
+                      "help": "Minimum number of idle connections in the connection pool"
+                    },
+                    "maxPoolSize": {
+                      "help": "Maximum number of connections in the connection pool"
+                    },
+                    "poolName": {
+                      "help": "Name of the connection pool"
+                    }
+                },
+                "tableMappings": {
+                    "help": "Event to Database Schema Mappings"
+                },
+                "mapping": {
+                    "event": {
+                        "help": "Audit Event Topic"
+                    },
+                    "table": {
+                        "help": "Database Table"
+                    },
+                    "fieldToColumn": {
+                        "help": "Mapping of audit event topic fields to database table fields"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for optional event buffering",
+                    "enabled": {
+                        "help": "Enables or disables audit event buffering"
+                    },
+                    "autoFlush": {
+                        "help": "If enabled, does not flush after each event (so improves performance)"
+                    },
+                    "maxSize": {
+                        "help": "Max buffer size before flushing"
+                    },
+                    "writerThreads": {
+                        "help": "Number of threads used to write the buffered events"
+                    },
+                    "interval": {
+                        "help": "Interval at which buffered events are written to the database"
+                    },
+                    "maxBatchedEvents": {
+                        "help": "Maximum number of batched statements the database can support per connection"
+                    }
+                }
+            },
+            "syslog": {
+                "transportProtocol": {
+                    "help": "Transport Protocol"
+                },
+                "host": {
+                    "help": "Host name or IP address of receiving syslog server"
+                },
+                "port": {
+                    "help": "Port number of receiving syslog server"
+                },
+                "connectTimeout": {
+                    "help": "Timeout for connecting to syslog server (seconds)"
+                },
+                "facility": {
+                    "help": "Syslog facility value to apply to all events"
+                },
+                "severityFieldMappings": {
+                    "help": "Defaults to INFORMATIONAL if no mapping is defined",
+                    "topic": {
+                        "help": "Audit Event Topic"
+                    },
+                    "field": {
+                        "help": "Audit Event Field"
+                    },
+                    "valueMappings": {
+                        "help": "Mapping of event values to Syslog SEVERITY values"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for optional event buffering",
+                    "enabled": {
+                        "help": "Enables or disables audit event buffering"
+                    }
+                }
+            },
+            "file": {
+                "minFreeSpaceRequired": {
+                    "help": "Minimum amount of disk space required on the system where audit files are stored"
+                },
+                "rotationFilePrefix": {
+                    "help": "Prefix to prepend to audit files when rotating audit files"
+                },
+                "maxDiskSpaceToUse": {
+                    "help": "The maximum amount of disk space the audit files can occupy"
+                },
+                "rotationTimes": {
+                    "help": "Durations after midnight to trigger file rotation"
+                },
+                "rotationInterval": {
+                    "help": "Interval to trigger audit file rotations"
+                },
+                "rotationEnabled": {
+                    "help": "Enables and disables audit file rotation"
+                },
+                "rotationFileSuffix": {
+                    "help": "Suffix to append to audit files when they are rotated. Suffix should be a timestamp"
+                },
+                "fileRetention": {
+                    "help": "Configures audit file retention"
+                },
+                "fileRotation": {
+                    "help": "Configures audit file rotation"
+                },
+                "maxFileSize": {
+                    "help": "Maximum size an audit file can grow to, before rotation is triggered"
+                },
+                "maxNumberOfHistoryFiles": {
+                    "help": "Maximum number of backup audit files allowed"
+                }
+            }
+        },
+        "service": {
+            "handlerForQueries": {
+                "help": "Handler for reading and querying"
+            },
+            "availableAuditEventHandlers" : {
+                "help": "List of available handler classes"
+            },
+            "filter": {
+                "policies": {
+                    "help": "Create policies to filter parts of an audit event",
+                    "include": {
+                        "help": "A list of fields (JSON pointers) to include in the audit event"
+                    },
+                    "exclude": {
+                        "help": "A list of fields (JSON pointers) to exclude from the audit event"
+                    }
                 }
             }
         }

@@ -38,7 +38,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "bootstrap-dialog",
     "jsonEditor",
-    "bootstrap-tabdrop"
+    "bootstrap-tabdrop",
+    "selectize"
 
 ], function($, _, AuditAdminAbstractView,
             AuditDelegate,
@@ -60,33 +61,30 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
         model: {},
 
         render: function(args, callback) {
-            _.extend(JSONEditor.defaults.options, {
-                theme: "bootstrap3",
-                iconlib: "fontawesome4",
-                disable_edit_json: true,
-                disable_array_reorder: true,
-                disable_collapse: true,
-                disable_properties: true,
-                no_additional_properties: true,
-                show_errors: "never"
-            });
-
             var _this = this,
                 title = "";
 
             this.data = _.clone(args);
 
-            this.data.events = {};
+            // We don't want JSON Editor handeling these fields, we will add them back to the config before saving.
+            if (_.has(this.data.eventHandler, "config")) {
+                if (_.has(this.data.eventHandler.config, "name")) {
+                    this.data.name = this.data.eventHandler.config.name;
+                    delete this.data.eventHandler.config.name;
+                }
+                if (_.has(this.data.eventHandler.config, "topics")) {
+                    this.data.selectedTopics = this.data.eventHandler.config.topics;
+                    delete this.data.eventHandler.config.topics;
+                }
+            }
 
             if (this.data.newEventHandler) {
                 title = $.t("templates.audit.eventHandlers.dialog.add") + ": " +  _.last(this.data.eventHandlerType.split("."));
             } else {
-                title = $.t("templates.audit.eventHandlers.dialog.edit") + ": " + this.data.eventHandler.name;
+                title = $.t("templates.audit.eventHandlers.dialog.edit") + ": " + this.data.name;
             }
 
-            _.each(this.data.availableEvents, function(event) {
-                this.data.events[event] = _.contains(this.data.eventHandler.events, event);
-            }, this);
+            this.data.topics = _.union(this.data.selectedTopics, this.getTopics());
 
             AuditDelegate.availableHandlers().then(_.bind(function (data) {
                 this.data.handler = _.findWhere(data, {"class": this.data.eventHandlerType});
@@ -116,20 +114,14 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                                     eventHandler: {}
                                 };
 
+                                data.eventHandler.class = this.data.eventHandlerType;
+
                                 if (!_.isEmpty(this.data.schemaEditor)) {
                                     data.eventHandler.config =  this.data.schemaEditor.getValue();
                                 }
 
-                                data.eventHandler.name = this.$el.find("#eventHandlerName").val();
-                                data.eventHandler.class = this.data.eventHandlerType;
-                                data.eventHandler.events = [];
-
-                                _.each(this.$el.find(".auditEventsCheckBox"), function(check) {
-                                    if (check.checked) {
-                                        data.eventHandler.events.push(check.value);
-                                    }
-                                }, this);
-
+                                data.eventHandler.config.name = this.$el.find("#eventHandlerName").val();
+                                data.eventHandler.config.topics = this.$el.find(".topics").val();
                                 data.useForQueries = this.$el.find(".useForQueries").is(":checked");
 
                                 if (callback) {
@@ -144,6 +136,23 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
             }, this));
         },
 
+        /**
+         * Performs a deep search of a provided object,
+         * if any nested properties has the key "description" it is translated.
+         * @param schema
+         */
+        translateDescriptions: function(schema) {
+            if (_.has(schema, "description")) {
+                schema.description = $.t(schema.description);
+            }
+
+            _.forEach(schema, function(subSchema) {
+                if (_.isObject(subSchema)) {
+                    this.translateDescriptions(subSchema);
+                }
+            }, this);
+        },
+
         renderTemplate: function(data) {
             uiUtils.renderTemplate(
                 this.template,
@@ -156,10 +165,37 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                     }
                     validatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
                     validatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
+
                     if (!_.isEmpty(schema)) {
-                        this.data.schemaEditor = new JSONEditor(this.$el.find("#auditEventHandlerConfig")[0], {schema: schema});
+
+                        if (_.has(schema.properties, "name")) {
+                            delete schema.properties.name;
+                        }
+                        if (_.has(schema.properties, "topics")) {
+                            delete schema.properties.topics;
+                        }
+
+                        this.translateDescriptions(schema);
+                        this.data.schemaEditor = new JSONEditor(this.$el.find("#auditEventHandlerConfig")[0],
+                            _.extend({"schema": schema}, {
+                                required_by_default	: true,
+                                disable_edit_json: true,
+                                disable_array_reorder: true,
+                                disable_collapse: true,
+                                disable_properties: true,
+                                no_additional_properties: true,
+                                show_errors: "never"
+                            }));
                         this.data.schemaEditor.setValue(this.data.eventHandler.config);
                     }
+
+                    this.$el.find(".topics").selectize({
+                        delimiter: ',',
+                        persist: false,
+                        create: false,
+                        items: this.data.selectedTopics
+                    });
+
                 }, this),
                 "replace"
             );
