@@ -28,14 +28,26 @@
 
 /*global object */
 
+var directRoles = null, 
+    response;
+
 logger.debug("Invoked effectiveRoles script on property {}", propertyName);
+
 // Allow for configuration in virtual attribute config, but default
 if (rolesPropName === undefined) {
     var rolesPropName = "roles";
 }
+
 logger.trace("Configured rolesPropName: {}", rolesPropName);
 
-var directRoles = object[rolesPropName];
+if (object[rolesPropName] === undefined) {
+    logger.trace("User's " + rolesPropName + " is not present so querying the roles", rolesPropName);
+    response = openidm.query("managed/user/" + object._id + "/" + rolesPropName,  {"_queryFilter": "true"});
+    directRoles = response.result;
+} else {
+    directRoles = object[rolesPropName];
+}
+
 var effectiveRoles = directRoles == null ? [] : directRoles;
 
 // This is the location to expand to dynamic roles, 
