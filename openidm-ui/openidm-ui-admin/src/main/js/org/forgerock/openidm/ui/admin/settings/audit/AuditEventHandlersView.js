@@ -31,7 +31,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
     "org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
     "org/forgerock/commons/ui/common/components/ChangesPending"
 
-], function ($, _, AuditAdminAbstractView,
+], function ($, _,
+             AuditAdminAbstractView,
              AuditEventHandlersDialog,
              ChangesPending) {
 
@@ -51,7 +52,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
         render: function (args, callback) {
             this.data.definedEventHandlers = [];
             this.data.eventHandlers = [];
-            this.model.events = {};
+            this.model.events = [];
+
             var ONE_HANDLER_MAX_PROP_NAME = "RepositoryAuditEventHandler",
                 allowRepo = true;
 
@@ -61,12 +63,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
                 this.model.auditData = this.getAuditData();
             }
 
-            if (_.has(this.model.auditData, "extendedEventTypes")) {
-                _.extend(this.model.events, this.model.auditData.extendedEventTypes);
-            }
-            if (_.has(this.model.auditData, "customEventTypes")) {
-                _.extend(this.model.events, this.model.auditData.customEventTypes);
-            }
 
             if (_.has(this.model.auditData, "auditServiceConfig") && _.has(this.model.auditData.auditServiceConfig, "handlerForQueries")) {
                 this.model.useForQueries = _.clone(this.model.auditData.auditServiceConfig.handlerForQueries, true);
@@ -75,8 +71,10 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
             }
 
             if (_.has(this.model.auditData, "eventHandlers")) {
+                this.model.events = _.clone(this.model.auditData.eventHandlers, true);
+
                 _.each(_.clone(this.model.auditData.eventHandlers, true), function(handler) {
-                    if (handler.name === this.model.useForQueries) {
+                    if (handler.config.name === this.model.useForQueries) {
                         handler.useForQueries = true;
                     }
 
@@ -88,8 +86,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
                         }
                     }
 
-                    if (_.has(handler, "events")) {
-                        handler.events = handler.events.join(", ");
+                    if (_.has(handler.config, "topics")) {
+                        handler.config.topics = handler.config.topics.join(", ");
                     }
                     this.data.definedEventHandlers.push(handler);
                 }, this);
@@ -130,8 +128,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
                                 }
                             }, this);
 
-                            this.setProperties(["auditServiceConfig", "eventHandlers"], this.model.auditData);
-
+                            this.setProperties(["eventHandlers"], this.model.auditData);
+                            this.setUseForQueries(this.model.auditData.auditServiceConfig.handlerForQueries);
                             this.reRender();
                         }, this)
                     });
@@ -154,7 +152,9 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
                 reRender: true,
                 auditData: this.model.auditData
             });
-            this.setProperties(["auditServiceConfig", "eventHandlers"], this.model.auditData);
+            this.setProperties(["eventHandlers"], this.model.auditData);
+            this.setUseForQueries(this.model.auditData.auditServiceConfig.handlerForQueries);
+
             this.model.changesModule.makeChanges(_.clone(this.model.auditData));
         },
 
@@ -167,19 +167,20 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
             }
 
             this.model.auditData.auditServiceConfig.handlerForQueries = eventHandlerName;
-
             this.reRender();
         },
 
         deleteEventHandler: function (e) {
             e.preventDefault();
             var eventHandlerName = $(e.currentTarget).attr("data-name");
-            this.model.auditData.eventHandlers.splice(_.findIndex(this.model.auditData.eventHandlers, {"name": eventHandlerName}), 1);
+
+            this.model.auditData.eventHandlers.splice(_.findIndex(this.model.auditData.eventHandlers, {"config": {"name": eventHandlerName}}), 1);
+
             if (_.has(this.model.auditData, "auditServiceConfig") &&
                 _.has(this.model.auditData.auditServiceConfig, "handlerForQueries") &&
                 this.model.auditData.auditServiceConfig.handlerForQueries === eventHandlerName &&
                 this.model.auditData.eventHandlers.length > 0) {
-                this.model.auditData.auditServiceConfig.handlerForQueries = this.model.auditData.eventHandlers[0].name;
+                this.model.auditData.auditServiceConfig.handlerForQueries = this.model.auditData.eventHandlers[0].config.name;
             }
 
             this.reRender();
@@ -188,7 +189,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
         editEventHandler: function (e) {
             e.preventDefault();
             var eventHandlerName = $(e.currentTarget).attr("data-name"),
-                event = _.findWhere(this.model.auditData.eventHandlers, { "name": eventHandlerName }),
+                event = _.findWhere(this.model.auditData.eventHandlers, {"config": {"name": eventHandlerName}}),
                 useForQueries = true;
 
             if (_.has(this.model.auditData, "auditServiceConfig") &&
@@ -200,18 +201,17 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
             AuditEventHandlersDialog.render(
                 {
                     "eventHandlerType": event.class,
-                    "eventHandler": event,
+                    "eventHandler": _.clone(event, true),
                     "newEventHandler": false,
-                    "availableEvents": _.keys(this.model.events),
                     "useForQueries": useForQueries,
-                    "usedEventHandlerNames": _.map(this.model.auditData.eventHandlers, function (t) {return t.name;})
+                    "usedEventHandlerNames": _.map(this.model.auditData.eventHandlers, function (t) {return t.config.name;})
                 },
                 _.bind(function (results) {
                     if (results.useForQueries) {
-                        this.model.auditData.auditServiceConfig.handlerForQueries = results.eventHandler.name;
+                        this.model.auditData.auditServiceConfig.handlerForQueries = results.eventHandler.config.name;
                     }
 
-                    var index = _.indexOf(this.model.auditData.eventHandlers, _.findWhere(this.model.auditData.eventHandlers, { "name": results.eventHandler.name }));
+                    var index = _.indexOf(this.model.auditData.eventHandlers, _.findWhere(this.model.auditData.eventHandlers, {"config": {"name": results.eventHandler.config.name }}));
                     this.model.auditData.eventHandlers[index] = results.eventHandler;
 
                     this.reRender();
@@ -228,12 +228,11 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
                         "eventHandlerType": newHandler,
                         "eventHandler": {},
                         "newEventHandler": true,
-                        "availableEvents": _.keys(this.model.events),
-                        "usedEventHandlerNames": _.map(this.model.auditData.eventHandlers, function (t) {return t.name;})
+                        "usedEventHandlerNames": _.map(this.model.auditData.eventHandlers, function (t) {return t.config.name;})
                     },
                     _.bind(function (results) {
                         if (results.useForQueries) {
-                            this.model.auditData.auditServiceConfig.handlerForQueries = results.eventHandler.name;
+                            this.model.auditData.auditServiceConfig.handlerForQueries = results.eventHandler.config.name;
                         }
 
                         this.model.auditData.eventHandlers.push(results.eventHandler);

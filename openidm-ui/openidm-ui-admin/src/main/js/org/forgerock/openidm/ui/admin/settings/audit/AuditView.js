@@ -29,13 +29,15 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditView", [
     "underscore",
     "org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractView",
     "org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView",
-    "org/forgerock/openidm/ui/admin/settings/audit/AuditEventsView",
+    "org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsView",
+    "org/forgerock/openidm/ui/admin/settings/audit/AuditFilterPoliciesView",
     "org/forgerock/openidm/ui/admin/settings/audit/ExceptionFormatterView",
     "org/forgerock/commons/ui/common/util/Constants"
 
 ], function ($, _, AuditAdminAbstractView,
              AuditEventHandlersView,
-             AuditEventsView,
+             AuditTopicsView,
+             AuditFilterPoliciesView,
              ExceptionFormatterView,
              constants) {
 
@@ -53,7 +55,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditView", [
             this.retrieveAuditData(_.bind(function () {
                 this.parentRender(function () {
                     AuditEventHandlersView.render();
-                    AuditEventsView.render();
+                    AuditTopicsView.render();
+                    AuditFilterPoliciesView.render();
                     ExceptionFormatterView.render();
                 });
             }, this));
@@ -63,7 +66,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditView", [
             e.preventDefault();
             this.saveAudit();
             AuditEventHandlersView.render({"saved": true});
-            AuditEventsView.render({"saved": true});
+            AuditTopicsView.render({"saved": true});
+            AuditFilterPoliciesView.render({"saved": true});
             ExceptionFormatterView.render({ "saved": true });
         }
     });

@@ -102,7 +102,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/ExceptionFormatterView", [
                     "onDeletePassedVariable": _.bind(this.checkChanges, this),
                     "onAddPassedVariable": _.bind(this.checkChanges, this),
                     "onChange": _.bind(this.checkChanges, this),
-                    "scriptData": this.model.exceptionFormatterData
+                    "scriptData": this.model.exceptionFormatterData,
+                    "autoFocus": false
                 });
             }, this));
         },

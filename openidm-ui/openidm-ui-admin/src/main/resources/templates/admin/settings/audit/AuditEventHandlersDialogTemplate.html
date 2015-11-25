@@ -3,7 +3,7 @@
         <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.name"}}</label>
         <div class="col-sm-6">
             <input class="form-control"
-                   value="{{eventHandler.name}}"
+                   value="{{name}}"
                    data-unique-list="{{stringify usedEventHandlerNames}}"
                    id="eventHandlerName"
                    {{#if newEventHandler}}
@@ -18,13 +18,11 @@
     <div class="form-group">
         <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.auditEvents"}}</label>
         <div class="col-sm-6">
-            {{#each events}}
-            <div class="checkbox">
-                <label>
-                    <input type="checkbox" class="auditEventsCheckBox" {{#if this}}checked {{/if}}value="{{@key}}"> {{@key}}
-                </label>
-            </div>
-            {{/each}}
+            <select class="topics" multiple="multiple">
+                {{#each topics}}
+                <option value="{{this}}">{{this}}</option>
+                {{/each}}
+            </select>
         </div>
     </div>
     <div class="form-group">
