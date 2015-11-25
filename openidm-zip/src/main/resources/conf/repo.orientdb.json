@@ -157,21 +157,6 @@
                         "propertyName" : "_openidm_id",
                         "propertyType" : "string",
                         "indexType" : "unique"
-                    },
-                    {
-                        "propertyNames" : [ "firstId", "firstPropertyName", "secondId", "secondPropertyName" ],
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
-                        "propertyNames" : [ "firstId", "firstPropertyname" ],
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
-                    },
-                    {
-                        "propertyNames" : [ "secondId", "secondPropertyName" ],
-                        "propertyType" : "string",
-                        "indexType" : "notunique"
                     }
                 ]
             },
