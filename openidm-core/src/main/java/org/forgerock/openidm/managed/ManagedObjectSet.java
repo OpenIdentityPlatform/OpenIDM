@@ -518,7 +518,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         for (final JsonPointer relationshipField : relationshipFields) {
             final JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
 
-            if (relationshipValue.isNotNull()) {
+            if (relationshipValue != null) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
                 persisted.add(provider.setRelationshipValueForResource(context, resourceId,
                         relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
@@ -1090,12 +1090,22 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     ResourceResponse patchResponse = patchResourceById(managedContext, request, resourceId, null, operations);
                     return newActionResponse(patchResponse.getContent()).asPromise();
                 case triggerSyncCheck:
-                    // Sync changes if required, in particular virtual/calculated attribute changes
+                    // Sync changes if required
+                    // Read in managed object to get updated virtual attributes. The result of the read request will be 
+                    // compared against the last sync'd value stored in the repository (in the updateInstance() request 
+                    // below) to determine an update/sync is required.
+                    final List<JsonPointer> requestFields = request.getFields();
                     final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId).toString());
+                    if (!requestFields.isEmpty()) {
+                        readRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
+                    }
                     logger.debug("Attempt sync of {}", readRequest.getResourcePath());
                     ResourceResponse currentResource = connectionFactory.getConnection().read(managedContext, readRequest);
                     UpdateRequest updateRequest = Requests.newUpdateRequest(readRequest.getResourcePath(),
                     		currentResource.getContent());
+                    if (!requestFields.isEmpty()) {
+                        updateRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
+                    }
                     ResourceResponse updateResponse = updateInstance(managedContext, resourceId, updateRequest).get();
                     logger.debug("Sync of {} complete", readRequest.getResourcePath());
                     return Responses.newActionResponse(updateResponse.getContent()).asPromise();
@@ -1321,13 +1331,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             final Object strippedValue;
             if (null != fieldValue) {
                 strippedValue = fieldValue.getObject();
-            } else if (schema.getField(field).isArray()) {
-                strippedValue = array();
-            } else {
-                strippedValue = null;
+                stripped.put(field, strippedValue);
+                value.remove(field);
             }
-            stripped.put(field, strippedValue);
-            value.remove(field);
         }
 
         return stripped;

@@ -47,7 +47,9 @@
                     .uniq()
                     .each(function (user) {
                         logger.debug("onSync-assignments will call triggerSyncCheck for {}", user);
-                        openidm.action(user, "triggerSyncCheck", {}, {});
+                        // Issue triggerSyncCheck action and set fields to "*" to indicate all default fields plus any
+                        // virtual fields on the managed user, which will pick up changes to "effectiveAssignments".
+                        openidm.action(user, "triggerSyncCheck", {}, {}, ["*"]);
                     }
                 );
             } else {
