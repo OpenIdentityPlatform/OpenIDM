@@ -2401,12 +2401,15 @@ class ObjectMapping {
             } else if (correlation.hasCorrelation(getLinkQualifier()) && (correlateEmptyTargetSet || !hadEmptyTargetObjectSet())) {
                 EventEntry measure = Publisher.start(EVENT_CORRELATE_TARGET, getSourceObject(), null);
 
-                Map<String, Object> scope = new HashMap<String, Object>();
-                if (sourceObjectOverride != null) {
-                    scope.put("source", sourceObjectOverride.asMap());
-                } else {
-                    scope.put("source", getSourceObject().asMap());
+                final JsonValue sourceObject = (sourceObjectOverride != null)
+                        ? sourceObjectOverride
+                        : getSourceObject();
+                if (sourceObject == null) {
+                    throw new SynchronizationException("Source object " + getSourceObjectId() + " no longer exists");
                 }
+                Map<String, Object> queryScope = new HashMap<String, Object>();
+                queryScope.put("source", sourceObject.asMap());
+
                 try {
                     result = correlation.correlate(scope, getLinkQualifier());
                 } finally {
