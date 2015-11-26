@@ -15,13 +15,13 @@
  */
 
 Sample Historical Account Linking LDAP <-> Internal Repository
-=======================================================
+==============================================================
 
-This sample shows you historical account linking between the OpenIDM's managed users and a local LDAP directory server, 
+This sample shows you historical account linking between OpenIDM's managed users and a local LDAP directory server, 
 such as OpenDJ. OpenIDM is the source of records and drives all changes to downstream systems. Managed users in OpenIDM 
-will maintain a list of historically linked accounts on the local LDAP server. This list will be stored in the 
-"historicalAccounts" field of a managed user and will contain all past and current accounts. Each account will be 
-represented as a relationship and will contain information about the date linked/unlinked and whether the account is 
+maintain a list of all the accounts that have been linked to, on the local LDAP server. This list is stored in the 
+"historicalAccounts" field of the managed user entry, and contains all past and current linked accounts. Each account 
+is represented as a relationship and contains information about the date linked/unlinked and whether the account is 
 currently active.
 
 The sample includes the following customized configuration files:
@@ -43,7 +43,7 @@ This sample includes the following scripts:
     the managed user for the newly linked target object.  Adds two relationship properties: "linkDate" specifying the 
     date the link was created, and "active" which is set to true to indicate that the target is currently linked.  
 *   script/onUnlink-managedUser_systemLdapAccounts.js  Updates the relationship entry's properties representing the 
-    linked target object with a "unlinkDate" specifying the date the target was unlinked, and sets "active" to false
+    linked target object with an "unlinkDate" specifying the date the target was unlinked, and sets "active" to false,
     indicating that the target is no longer linked.
 *   script/check_account_state_change.js  On a live sync or recon event this script will check if the ldap account state
     has changed. If the state has changed it will update the historical account properties to indicate the new state 
@@ -61,7 +61,22 @@ Setup OpenDJ
         --rootUserPassword password --adminConnectorPort 4444 --baseDN dc=com --acceptLicense --addBaseEntry \
         --no-prompt --quiet
 
-3.  Load the Example.ldif file supplied in the data folder into OpenDJ.
+3.  Enable replication on the OpenDJ server.
+    Although there is only one LDAP server in this example, you must enable replication so that the server has an 
+    external change log. The change log is required for LiveSync between OpenDJ and OpenIDM.
+    
+        $ opendj/bin/dsconfig create-replication-server -h localhost -p 4444 \
+          -D "cn=directory manager" -w password -X -n \
+          --provider-name "Multimaster Synchronization" --set replication-port:8989 \
+          --set replication-server-id:2 --type generic
+      
+        $ opendj/bin/dsconfig create-replication-domain -h localhost -p 4444 \
+          -D "cn=directory manager" -w password -X -n \
+          --provider-name "Multimaster Synchronization" --set base-dn:dc=example,dc=com \
+          --set replication-server:localhost:8989 --set server-id:3 \
+          --type generic --domain-name example_com
+
+4.  Load the Example.ldif file supplied in the data folder into OpenDJ.
 
         $ opendj/bin/ldapmodify -a -c --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
         --port 1389 --filename /path/to/openidm/samples/historicalaccountlinking/data/Example.ldif
@@ -81,27 +96,30 @@ Run The Sample In OpenIDM
 
 2.  Create a user in OpenIDM.
 
-        $ curl --header "Content-Type: application/json" \
+        $ curl -k \
+        --header "Content-Type: application/json" \
         --header "X-OpenIDM-Username: openidm-admin" \
         --header "X-OpenIDM-Password: openidm-admin" \
         --request POST \
         --data '{
-        "userName": "user.smith",
-        "givenName": "User",
+        "userName": "joe.smith",
+        "givenName": "Joe",
         "sn" : "Smith",
         "password" : "TestPassw0rd",
-        "displayName" : "User Smith",
+        "displayName" : "Joe Smith",
         "description" : "Test User",
-        "telephoneNumber" : "1234567890",
-        "mail" : "user.smith@example.com",
-        "_id" : "user"
+        "telephoneNumber" : "1234567890",        
+        "mail" : "joe.smith@example.com",
+        "_id" : "joesmith"
         }' \
-        http://localhost:8080/openidm/managed/user?_action=create
+        https://localhost:8443/openidm/managed/user?_action=create
 
-3.  Request all identifiers in OpenDJ. Verifying that user.smith0 was created.
+3.  Request all identifiers in OpenDJ to verify that joe.smith0 was created by the implicit sync from OpenIDM to OpenDJ.
 
-        $ curl -k -u "openidm-admin:openidm-admin" \
-        "http://localhost:8080/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
         
         {
           "result" : [ {
@@ -111,26 +129,28 @@ Run The Sample In OpenIDM
             "dn" : "uid=bjensen,ou=People,dc=example,dc=com",
             "_id" : "uid=bjensen,ou=People,dc=example,dc=com"
           }, {
-            "dn" : "uid=user.smith,ou=People,dc=example,dc=com",
-            "_id" : "uid=user.smith,ou=People,dc=example,dc=com"
+            "dn" : "uid=joe.smith0,ou=People,dc=example,dc=com",
+            "_id" : "uid=joe.smith0,ou=People,dc=example,dc=com"
           } ],
           "resultCount" : 3,
           "pagedResultsCookie" : null,
           "remainingPagedResults" : -1
         }
 
-4.  Request all "historicalAccounts" of the newly created managed user and see the relationship that was just created 
-and the linkDate was set in the properties, along with "active" set to true.
+4.  Request all "historicalAccounts" of the newly created managed user. See the relationship that was just created 
+and the linkDate that was set in the properties, along with "active" set to true.
 
-        $ curl -k -u "openidm-admin:openidm-admin" \
-        "http://localhost:8080/openidm/managed/user/user/historicalAccounts?_queryId=query-all"
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        "https://localhost:8443/openidm/managed/user/joesmith/historicalAccounts?_queryId=query-all"
         
         {
           "pagedResultsCookie": null,
           "remainingPagedResults": -1,
           "result": [
             {
-              "_ref": "system/ldap/account/uid=user.smith0,ou=People,dc=example,dc=com",
+              "_ref": "system/ldap/account/uid=joe.smith0,ou=People,dc=example,dc=com",
               "_refProperties": {
                 "_id": "087cbd37-e086-42ba-bda6-65c5f88a5992",
                 "_rev": "1",
@@ -153,22 +173,24 @@ file samples/historicalaccountlinking/conf/schedule-liveSync.json to set "enable
 the change and the "state" changing in the historical account properties of the managed user.
 
         $ ./bin/manage-account set-account-is-disabled --port 4444 --bindDN "cn=Directory Manager" \
-        --bindPassword password --operationValue true --targetDN uid=user.smith0,ou=people,dc=example,dc=com --trustAll
+        --bindPassword password --operationValue true --targetDN uid=joe.smith0,ou=people,dc=example,dc=com --trustAll
 
         Account Is Disabled:  true
         
-7.  Wait a few seconds for liveSync to pick up then change then request all "historicalAccounts" of the managed user and
-see that the state of the account is now disabled and the date that the state changed has been recorded.
+7.  Wait a few seconds for liveSync to pick up the change then request all "historicalAccounts" of the managed user.
+Note that the state of the account is now disabled and the date that the state changed has been recorded.
 
-        $ curl -k -u "openidm-admin:openidm-admin" \
-        "http://localhost:8080/openidm/managed/user/user/historicalAccounts?_queryId=query-all"
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \        
+        "https://localhost:8443/openidm/managed/user/joesmith/historicalAccounts?_queryId=query-all"
         
         {
             "pagedResultsCookie": null,
             "remainingPagedResults": -1,
             "result": [
                 {
-                    "_ref": "system/ldap/account/uid=user.smith0,ou=People,dc=example,dc=com",
+                    "_ref": "system/ldap/account/uid=joe.smith0,ou=People,dc=example,dc=com",
                     "_refProperties": {
                         "_id": "893d5c33-e4aa-41fe-91c9-37098b442ce7",
                         "_rev": "2",
@@ -186,30 +208,36 @@ see that the state of the account is now disabled and the date that the state ch
 
 8.  Deactivate the managed user.
 
-        $ curl -k -u "openidm-admin:openidm-admin" -H "If-Match: *" -H "Content-type: application/json" -X PATCH \
-        -d '[ { "operation" : "replace", "field" : "accountStatus", "value" : "inactive" } ]' \
-        'http://localhost:8080/openidm/managed/user/user'
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \        
+        --header "Content-type: application/json" \
+        --request PATCH \
+        --data '[ { "operation" : "replace", "field" : "accountStatus", "value" : "inactive" } ]' \
+        'https://localhost:8443/openidm/managed/user/joesmith'
         {
-          "_id": "user",
+          "_id": "joesmith",
           "_rev": "2",
           "accountStatus": "inactive",
           "address2": "",
           ...
-          "userName": "user.smith"
+          "userName": "joe.smith"
         }
 
-9.  Request all "historicalAccounts" of the newly created managed user and see the relationship has been updated and the
-"unlinkDate was set in the properties, along with "active" set to false.
+9.  Request all "historicalAccounts" of the managed user. Note that the relationship has been updated - the
+"unlinkDate was set in the properties and "active" was set to false.
 
-        $ curl -k -u "openidm-admin:openidm-admin" \
-        "http://localhost:8080/openidm/managed/user/user/historicalAccounts?_queryId=query-all"
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \        
+        "https://localhost:8443/openidm/managed/user/joesmith/historicalAccounts?_queryId=query-all"
         
         {
             "pagedResultsCookie": null,
             "remainingPagedResults": -1,
             "result": [
                 {
-                    "_ref": "system/ldap/account/uid=user.smith0,ou=People,dc=example,dc=com",
+                    "_ref": "system/ldap/account/uid=joe.smith0,ou=People,dc=example,dc=com",
                     "_refProperties": {
                         "_id": "893d5c33-e4aa-41fe-91c9-37098b442ce7",
                         "_rev": "3",
@@ -228,22 +256,28 @@ see that the state of the account is now disabled and the date that the state ch
 
 10.  Activate the managed user.
 
-        $ curl -k -u "openidm-admin:openidm-admin" --header "If-Match: *" --request PATCH \
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \
+        --header "Content-type: application/json" \                
+        --request PATCH \
         --data '[ { "operation" : "replace", "field" : "accountStatus", "value" : "active" } ]' \
-        'http://localhost:8080/openidm/managed/user/user'
+        'https://localhost:8443/openidm/managed/user/joesmith'
         {
-          "_id": "user",
+          "_id": "joesmith",
           "_rev": "2",
           "accountStatus": "active",
           "address2": "",
           ...
-          "userName": "user.smith"
+          "userName": "joe.smith"
         }
 
-11.  Request all identifiers in OpenDJ. Verifying that a new user user.smith1 was created.
+11.  Request all identifiers in OpenDJ. Verify that a new user joe.smith1 was created.
 
-        $ curl -k -u "openidm-admin:openidm-admin" \
-        "http://localhost:8080/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \        
+        "https://localhost:8443/openidm/system/ldap/account?_queryId=query-all-ids&_prettyPrint=true"
         {
           "result" : [ {
             "dn" : "uid=jdoe,ou=People,dc=example,dc=com",
@@ -252,28 +286,30 @@ see that the state of the account is now disabled and the date that the state ch
             "dn" : "uid=bjensen,ou=People,dc=example,dc=com",
             "_id" : "uid=bjensen,ou=People,dc=example,dc=com"
           }, {
-            "dn" : "uid=user.smith0,ou=People,dc=example,dc=com",
-            "_id" : "uid=user.smith0,ou=People,dc=example,dc=com"
+            "dn" : "uid=joe.smith0,ou=People,dc=example,dc=com",
+            "_id" : "uid=joe.smith0,ou=People,dc=example,dc=com"
           }, {
-            "dn" : "uid=user.smith1,ou=People,dc=example,dc=com",
-            "_id" : "uid=user.smith1,ou=People,dc=example,dc=com"
+            "dn" : "uid=joe.smith1,ou=People,dc=example,dc=com",
+            "_id" : "uid=joe.smith1,ou=People,dc=example,dc=com"
           } ],
           "resultCount" : 3,
           "pagedResultsCookie" : null,
           "remainingPagedResults" : -1
         }
 
-12.  Request all "historicalAccounts" of the newly created managed user and see a new relationship was just created for
-the newly linked user in OpenDJ and the linkDate was set in the properties, along with "active" set to true.
+12.  Request all "historicalAccounts" of the managed user and note that a new relationship was created for the newly 
+linked user in OpenDJ. The linkDate was set in the properties and "active" was set to true.
 
-        $ curl -k -u "openidm-admin:openidm-admin" \
-        "http://localhost:8080/openidm/managed/user/user/historicalAccounts?_queryId=query-all"
+        $ curl -k \
+        --header "X-OpenIDM-Username: openidm-admin" \
+        --header "X-OpenIDM-Password: openidm-admin" \        
+        "https://localhost:8443/openidm/managed/user/joesmith/historicalAccounts?_queryId=query-all"
         {
           "pagedResultsCookie": null,
           "remainingPagedResults": -1,
           "result": [
             {
-              "_ref": "system/ldap/account/uid=user.smith0,ou=People,dc=example,dc=com",
+              "_ref": "system/ldap/account/uid=joe.smith0,ou=People,dc=example,dc=com",
               "_refProperties": {
                 "_id": "087cbd37-e086-42ba-bda6-65c5f88a5992",
                 "_rev": "1",
@@ -282,7 +318,7 @@ the newly linked user in OpenDJ and the linkDate was set in the properties, alon
               }
             },
             {
-              "_ref": "system/ldap/account/uid=user.smith1,ou=People,dc=example,dc=com",
+              "_ref": "system/ldap/account/uid=joe.smith1,ou=People,dc=example,dc=com",
               "_refProperties": {
                 "_id": "b79e838a-c79d-40fd-8393-87650ddf1465",
                 "_rev": "1",
