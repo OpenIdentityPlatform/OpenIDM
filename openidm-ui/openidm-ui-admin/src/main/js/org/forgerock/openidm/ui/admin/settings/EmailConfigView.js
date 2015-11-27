@@ -49,6 +49,7 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
             "onValidate": "onValidate",
             "customValidate": "customValidate",
             "click #emailAuth": "toggleUserPass",
+            "change #emailToggle": "toggleEmail",
             "change #emailAuthPassword": "updatePassword",
             "click #saveEmailConfig": "save"
         },
@@ -100,6 +101,15 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
             this.parentRender(_.bind(function() {
                 validatorsManager.bindValidators(this.$el.find("#emailConfigForm"));
                 validatorsManager.validateAllFields(this.$el.find("#emailConfigForm"));
+
+                if (_.isEmpty(this.data.config) || !this.data.config.host) {
+                    this.$el.find("#emailToggle").prop("checked", false);
+                    this.$el.find("#emailSettingsForm").hide();
+                } else {
+                    this.$el.find("#emailToggle").prop("checked", true);
+                    this.toggleEmail();
+                }
+
                 if (callback) {
                     callback();
                 }
@@ -108,6 +118,20 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
 
         toggleUserPass: function(e) {
             this.$el.find("#smtpauth").slideToggle($(e.currentTarget).prop("checked"));
+        },
+
+        toggleEmail: function() {
+            if (!this.$el.find("#emailToggle").is(":checked")) {
+                if (this.$el.find("#smtpauth").is(":visible")) {
+                    this.$el.find("#smtpauth").slideToggle();
+                }
+                this.$el.find("fieldset").find("input:checkbox").prop("checked", false);
+                this.$el.find("fieldset").prop("disabled", true);
+                this.$el.find("#emailSettingsForm").hide();
+            } else {
+                this.$el.find("fieldset").prop("disabled", false);
+                this.$el.find("#emailSettingsForm").show();
+            }
         },
 
         updatePassword: function(e) {
@@ -137,9 +161,14 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
                 }
             }
 
+            if (!this.$el.find("#emailToggle").is(":checked")) {
+                this.data.config = {};
+            }
+
             if (this.model.externalEmailExists) {
                 ConfigDelegate.updateEntity("external.email", this.data.config).then(_.bind(function() {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "emailConfigSaveSuccess");
+                    this.render();
                 }, this));
             } else {
                 ConfigDelegate.createEntity("external.email", this.data.config).then(_.bind(function() {
