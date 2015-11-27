@@ -8,68 +8,84 @@
             </p>
 
             <div class="form-horizontal">
-                <div class="form-group has-feedback">
-                    <label for="emailHost" class="col-sm-3 control-label">{{t "templates.emailConfig.host"}}</label>
-                    <div class="col-sm-6">
-                        <input id="emailHost" type="text" class="form-control" name="host" value="{{config.host}}" data-validator="required" data-validator-event="keyup blur"/>
-                        <div class="validation-message"></div>
-                        <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
-                    </div>
-                </div>
-
-                <div class="form-group has-feedback">
-                    <label for="emailPort" class="col-sm-3 control-label">{{t "templates.emailConfig.port"}}</label>
-                    <div class="col-sm-6">
-                        <input id="emailPort" type="text" class="form-control" name="port" value="{{config.port}}" data-validator="required" data-validator-event="keyup blur"/>
-                        <div class="validation-message"></div>
-                        <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
-                    </div>
-                </div>
-
-                <div class="form-group has-feedback">
-                    <label for="emailFrom" class="col-sm-3 control-label">{{t "templates.emailConfig.from"}}</label>
-                    <div class="col-sm-6">
-                        <input id="emailFrom" type="email" data-prop="from" class="form-control" name="from" value="{{config.from}}" />
-                    </div>
-                </div>
 
                 <div class="form-group">
-                    <label for="emailTLS" class="col-sm-3 control-label">{{t "templates.emailConfig.tls"}}</label>
+                    <label class="all-check col-sm-3 control-label">{{t "templates.emailConfig.enable"}}</label>
                     <div class="col-sm-6">
-                        <div class="checkbox">
+                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                             <label>
-                                <input type="checkbox" name="starttls.enable" id="emailTLS" {{#if config.starttls.enable}}checked{{/if}}/>
+                                <input id="emailToggle" type="checkbox"><span></span>
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label for="emailAuth" class="col-sm-3 control-label" >{{t "templates.emailConfig.smtp"}}</label>
-                    <div class="col-sm-6">
-                        <div class="checkbox">
-                            <label>
-                                <input type="checkbox" name="auth.enable" id="emailAuth" {{#if config.auth.enable}}checked{{/if}}/>
-                            </label>
+                <div id="emailSettingsForm">
+                    <fieldset disabled="disabled">
+                        <div class="form-group has-feedback">
+                            <label for="emailHost" class="col-sm-3 control-label">{{t "templates.emailConfig.host"}}</label>
+                            <div class="col-sm-6">
+                                <input id="emailHost" type="text" class="form-control" name="host" value="{{config.host}}" data-validator="required" data-validator-event="keyup blur"/>
+                                <div class="validation-message"></div>
+                                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <div class="collapse in" id="smtpauth"{{#unless config.auth.enable}} style="display:none;"{{/unless}}>
-                    <div class="well">
                         <div class="form-group has-feedback">
-                            <label class="col-sm-3 control-label">{{t 'templates.emailConfig.username'}}</label>
+                            <label for="emailPort" class="col-sm-3 control-label">{{t "templates.emailConfig.port"}}</label>
                             <div class="col-sm-6">
-                                <input type="text" id="emailAuthUsername" name="auth.username" class="form-control" value="{{config.auth.username}}">
+                                <input id="emailPort" type="text" class="form-control" name="port" value="{{config.port}}" data-validator="required" data-validator-event="keyup blur"/>
+                                <div class="validation-message"></div>
+                                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                             </div>
                         </div>
+
                         <div class="form-group has-feedback">
-                            <label class="col-sm-3 control-label">{{t 'templates.emailConfig.password'}}</label>
+                            <label for="emailFrom" class="col-sm-3 control-label">{{t "templates.emailConfig.from"}}</label>
                             <div class="col-sm-6">
-                                <input type="password" id="emailAuthPassword" class="form-control" value="{{config.auth.password}}">
+                                <input id="emailFrom" type="email" data-prop="from" class="form-control" name="from" value="{{config.from}}" />
                             </div>
                         </div>
-                    </div>
+
+                        <div class="form-group">
+                            <label for="emailTLS" class="col-sm-3 control-label">{{t "templates.emailConfig.tls"}}</label>
+                            <div class="col-sm-6">
+                                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                    <label>
+                                        <input type="checkbox" name="starttls.enable" id="emailTLS" {{#if config.starttls.enable}}checked{{/if}}/><span></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="emailAuth" class="col-sm-3 control-label" >{{t "templates.emailConfig.smtp"}}</label>
+                            <div class="col-sm-6">
+                                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                    <label>
+                                        <input type="checkbox" name="auth.enable" id="emailAuth" {{#if config.auth.enable}}checked{{/if}}/><span></span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="collapse in" id="smtpauth"{{#unless config.auth.enable}} style="display:none;"{{/unless}}>
+                            <div class="well">
+                                <div class="form-group has-feedback">
+                                    <label class="col-sm-3 control-label">{{t 'templates.emailConfig.username'}}</label>
+                                    <div class="col-sm-6">
+                                        <input type="text" id="emailAuthUsername" name="auth.username" class="form-control" value="{{config.auth.username}}">
+                                    </div>
+                                </div>
+                                <div class="form-group has-feedback">
+                                    <label class="col-sm-3 control-label">{{t 'templates.emailConfig.password'}}</label>
+                                    <div class="col-sm-6">
+                                        <input type="password" id="emailAuthPassword" class="form-control" value="{{config.auth.password}}">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
                 </div>
             </div>
         </div>

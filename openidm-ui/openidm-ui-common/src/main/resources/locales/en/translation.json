@@ -1133,6 +1133,7 @@
             "url": "Relative URL"
         },
         "emailConfig": {
+            "enable": "Enable Email",
             "title": "Email",
             "desc": "Configure the outbound email service",
             "host": "Host",
