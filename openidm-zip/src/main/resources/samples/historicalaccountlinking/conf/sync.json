@@ -11,7 +11,7 @@
             },
             "onUpdate" : {
                 "type" : "text/javascript",
-                "source" : "target.uid = source.userName + (source.historicalAccounts.length - 1);"
+                "source" : "var accounts = openidm.query('managed/user/' + source._id + '/historicalAccounts', { '_queryId' : 'query-all' }).result; target.uid = source.userName + (accounts.length - 1);"
             },
             "onLink" : {
                 "type" : "text/javascript",
