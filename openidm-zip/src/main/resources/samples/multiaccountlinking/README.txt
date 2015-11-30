@@ -296,13 +296,11 @@ OpenIDM defines mappings between source and target accounts in the `sync.json` f
 between one source entry and multiple target entries using a concept known as a "link qualifier," which enables 
 one-to-many relationships in mappings and policies.
 
-For more information on resource mappings and link qualifiers, see the following sections of the Integrator's Guide:
+For more information on resource mappings and link qualifiers, see the following sections of the Integrator's Guide:]
 
-http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#mapping-link-qualifiers[Using Link Qualifiers in a Mapping]
+http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#synchronization-mappings-file[Configuring the Synchronization Mapping]
 
-http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#admin-ui-resource-mapping[Configuring a Resource Mapping from the UI]
-
-http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#link-qualifier[Link Qualifier definition]
+http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#mapping-link-qualifiers[Adding Link Qualifiers to a Mapping]
 
 In this sample, we use two link qualifiers:
 
@@ -355,6 +353,7 @@ categories of users. The following excerpt of the `sync.json` file includes that
 ++++
 
 The following validSource script looks through the effective roles of a user, with two objectives:
+
 * Determine whether the user has an `Agent` or `Insured` role.
 * Ensures that OpenIDM looks through the source *only* for the specified role.
 
@@ -439,7 +438,7 @@ The following code snippet shows how the `validSource` script segregates account
       }
 
       res"
-}]]></programlisting>
+}</programlisting>
 ++++
 
 The `validSource` script uses the effectiveRoles property to determine whether a user has the `Agent` or the `Insured` 
