@@ -44,7 +44,7 @@ define("org/forgerock/openidm/ui/admin/mapping/PropertiesView", [
         data: {},
 
         render: function (args, callback) {
-            this.data.hasLinkQualifiers = this.getCurrentMapping().linkQualifiers === true;
+            this.data.hasLinkQualifiers = !_.isUndefined(this.getCurrentMapping().linkQualifiers);
 
             this.parentRender(_.bind(function () {
 

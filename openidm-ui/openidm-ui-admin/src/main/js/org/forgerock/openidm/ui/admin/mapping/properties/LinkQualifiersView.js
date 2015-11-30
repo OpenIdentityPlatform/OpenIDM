@@ -94,6 +94,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
                     this.populateScriptLinkQualifier(linkQualifiers);
                 }
 
+                if(scriptData && scriptData.globals && scriptData.globals.returnAll) {
+                    delete scriptData.globals.returnAll;
+                }
+
                 this.linkQualifierScript = inlineScriptEditor.generateScriptEditor({
                         "element": this.$el.find("#scriptLinkQualifierBody"),
                         "eventName": "linkQualifierScript",
@@ -110,6 +114,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
 
                 $("#linkQualifierPanel").on('shown.bs.collapse', _.bind(function () {
                     this.linkQualifierScript.refresh();
+                }, this));
+
+                this.$el.find("#linkQualifierTabs a").on("shown.bs.tab", _.bind(function (e) {
+                    if($(e.target).attr("id") === "scriptQualifierTab") {
+                        this.linkQualifierScript.refresh();
+                    }
                 }, this));
             });
         },
@@ -130,8 +140,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
         },
 
         sectionControl: function(event) {
-            var selected = $(event.target),
-                currentTab = selected.prop("id");
+            var selected = $(event.target);
 
             selected.parent().find('.active').removeClass('active');
 
@@ -245,7 +254,12 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
                         this.showErrorMessage(result.responseJSON.message);
                     }, this));
             } else {
-                this.showErrorMessage($.t("templates.mapping.validLinkQualifierScript"));
+                this.$el.find("#staticLinkQualifierList").empty();
+                this.$el.find("#staticLinkQualifierList").append('<button type="button" class="removeLinkQualifier btn btn-primary">'
+                    + '<span class="linkQualifier">default</span>'
+                    + '</button>');
+
+                this.saveDeclarative();
             }
         },
 
