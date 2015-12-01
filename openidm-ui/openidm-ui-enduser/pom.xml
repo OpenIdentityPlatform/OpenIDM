@@ -349,13 +349,23 @@
                                             <classpath refid="maven.compile.classpath" />
                                             <arg value="${requirejs.dir}/r-2.1.10.js" />
                                             <arg value="-o" />
-                                            <arg value="cssIn=${project.build.directory}/www/css/styles.css" />
-                                            <arg value="out=${project.build.directory}/www/css/styles_min.css" />
+                                            <arg value="cssIn=${project.build.directory}/www/css/structure.css" />
+                                            <arg value="out=${project.build.directory}/www/css/structure_min.css" />
                                             <arg value="optimizeCss=standard" />
-                                            <arg value="cssImportIgnore=bootstrap-3.3.4-custom.css" />
                                         </java>
 
-                                        <move file="${project.build.directory}/www/css/styles_min.css" tofile="${project.build.directory}/www/css/styles.css" />
+                                        <move file="${project.build.directory}/www/css/structure_min.css" tofile="${project.build.directory}/www/css/structure.css" />
+
+                                        <java classname="org.mozilla.javascript.tools.shell.Main">
+                                            <classpath refid="maven.compile.classpath" />
+                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
+                                            <arg value="-o" />
+                                            <arg value="cssIn=${project.build.directory}/www/css/theme.css" />
+                                            <arg value="out=${project.build.directory}/www/css/theme_min.css" />
+                                            <arg value="optimizeCss=standard" />
+                                        </java>
+
+                                        <move file="${project.build.directory}/www/css/theme_min.css" tofile="${project.build.directory}/www/css/theme.css" />
 
                                     </target>
                                 </configuration>
