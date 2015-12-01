@@ -53,6 +53,15 @@
                     }
                 ]
             },
+            "internal_role" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
             "managed_user" : {
                 "index" : [
                     {
@@ -88,6 +97,15 @@
                 ]
             },
             "managed_role" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "managed_assignment" : {
                 "index" : [
                     {
                         "propertyName" : "_openidm_id",
@@ -137,11 +155,6 @@
                 "index": [
                     {
                         "propertyName" : "_openidm_id",
-                        "propertyType" : "string",
-                        "indexType" : "unique"
-                    },
-                    {
-                        "propertyNames" : [ "firstId", "firstPropertyName", "secondId"],
                         "propertyType" : "string",
                         "indexType" : "unique"
                     }
@@ -342,6 +355,16 @@
             },
             "audit_sync" : {},
             "audit_config" : {},
+            "updates" : {
+                "index" : [
+                    {
+                        "propertyName" : "_openidm_id",
+                        "propertyType" : "string",
+                        "indexType" : "unique"
+                    }
+                ]
+            },
+            "update_file" : {},
             "_studio_bookmark" : {}
         }
     },
