@@ -15,7 +15,6 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -26,7 +25,6 @@ import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.promise.Promises.when;
 
-import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -39,6 +37,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
+import javax.script.ScriptException;
+
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -47,7 +47,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -75,6 +75,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.util.ContextUtil;
@@ -152,7 +153,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private final CryptoService cryptoService;
 
     /** The connection factory for access to the router */
-    private final ConnectionFactory connectionFactory;
+    private final IDMConnectionFactory connectionFactory;
 
     /** Audit Activity Log helper */
     private final ActivityLogger activityLogger;
@@ -198,7 +199,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *             invalid.
      */
     public ManagedObjectSet(final ScriptRegistry scriptRegistry, final CryptoService cryptoService,
-            final AtomicReference<RouteService> syncRoute, ConnectionFactory connectionFactory, JsonValue config)
+            final AtomicReference<RouteService> syncRoute, IDMConnectionFactory connectionFactory, JsonValue config)
             throws JsonValueException, ScriptException {
         this.cryptoService = cryptoService;
         this.syncRoute = syncRoute;
@@ -1296,10 +1297,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private void expandResource(Context context, final JsonValue value, List<JsonPointer> fieldsList)
             throws ResourceException {
         if (!value.isNull() && value.get(SchemaField.FIELD_REFERENCE) != null) {
+            final Connection connection = ContextUtil.isExternal(context) 
+                    ? connectionFactory.getExternalConnection()
+                    : connectionFactory.getConnection();
             // Create and issue a read request on the referenced resource with the specified list of fields
             ReadRequest request = Requests.newReadRequest(value.get(SchemaField.FIELD_REFERENCE).asString());
             request.addField(fieldsList.toArray(new JsonPointer[fieldsList.size()]));
-            connectionFactory.getConnection().readAsync(context, request).thenOnResultOrException(
+            connection.readAsync(context, request).thenOnResultOrException(
                     new ResultHandler<ResourceResponse>() {
                         @Override
                         public void handleResult(ResourceResponse resource) {
