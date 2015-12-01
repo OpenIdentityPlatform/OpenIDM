@@ -232,7 +232,17 @@ function ownDataOnly() {
  * @returns {Boolean}
  */
 function restrictPatchToFields(allowedFields) {
-    return _.reduce(request.patchOperations, function (result, patchOp) {
+    var patchOps;
+
+    if (request.method === "patch") {
+        patchOps = request.patchOperations;
+    } else if (request.method === "action" && request.action === "patch") {
+        patchOps = request.content;
+    } else {
+        return false;
+    }
+
+    return _.reduce(patchOps, function (result, patchOp) {
         // removes leading slashses from jsonpointer field specifications,
         // and only considers the first path item in the jsonpointer path
         var simpleField = patchOp.field.replace(/^\//, '').split("/")[0];
