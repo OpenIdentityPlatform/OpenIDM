@@ -90,7 +90,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     /** {@inheritDoc} */
     @Override
     public Promise<JsonValue, ResourceException> getRelationshipValueForResource(final Context context, final String resourceId) {
-        return queryRelationship(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue, 
+        return queryRelationship(context, resourceId).thenAsync(new AsyncFunction<ResourceResponse, JsonValue,
                 ResourceException>() {
             @Override
             public Promise<JsonValue, ResourceException> apply(ResourceResponse value) throws ResourceException {
@@ -161,21 +161,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
         }
     }
 
-    /**
-     * Persist the supplied {@link JsonValue} {@code value} as the new state of this singleton relationship on
-     * {@code resourceId}.
-     *
-     * <em>This is currently the only means of creating an instance of this singleton</em>
-     *
-     * @param context The context of this request
-     * @param resourceId Id of the resource relation fields in value are to be memebers of
-     * @param value A {@link JsonValue} map of relationship fields and their values
-     *
-     * @return The persisted instance of {@code value}
-     */
     @Override
-    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, 
-            JsonValue value) {
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean isCreate,
+            final Context context, final String resourceId, final JsonValue value) {
         if (value.isNotNull()) {
             try {
                 final JsonValue id = value.get(FIELD_ID);
@@ -192,7 +180,9 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                                 }
                             });
                 } else { // no id, replace current instance
-                    clear(context, resourceId);
+                    if (!isCreate) {
+                        clear(context, resourceId);
+                    }
 
                     final CreateRequest createRequest = Requests.newCreateRequest("", value);
                     createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
@@ -206,9 +196,11 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
             } catch (ResourceException e) {
                 return e.asPromise();
             }
-
         } else {
-            clear(context, resourceId);
+            if (!isCreate) {
+                clear(context, resourceId);
+            }
+
             return newResultPromise(json(null));
         }
     }

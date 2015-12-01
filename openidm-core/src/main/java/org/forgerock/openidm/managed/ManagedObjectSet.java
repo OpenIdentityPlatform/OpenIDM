@@ -488,7 +488,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         responseContent.asMap().putAll(strippedRelationshipFields.asMap());
 
         // Persists all relationship fields that are present in the new value and updates their values.
-        responseContent.asMap().putAll(persistRelationships(context, resourceId, responseContent, relationshipFields)
+        responseContent.asMap().putAll(persistRelationships(false, context, resourceId, responseContent, relationshipFields)
                 .asMap());
 
         // Execute the postUpdate script if configured
@@ -511,16 +511,18 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param relationshipFields a set of relationship fields to persist
      * @return A {@link JsonValue} map containing each relationship field and its persisted value(s)
      */
-    private JsonValue persistRelationships(Context context, String resourceId, final JsonValue json, 
+    private JsonValue persistRelationships(final boolean isCreate, Context context, String resourceId, final JsonValue json,
             Set<JsonPointer> relationshipFields) throws ResourceException {
         final List<Promise<JsonValue, ResourceException>> persisted = new ArrayList<>();
 
         for (final JsonPointer relationshipField : relationshipFields) {
             final JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
 
+            // Relationships not present in the request will be null
+            // Relationships present in the request but set to null will be JsonValue(null)
             if (relationshipValue != null) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
-                persisted.add(provider.setRelationshipValueForResource(context, resourceId,
+                persisted.add(provider.setRelationshipValueForResource(isCreate, context, resourceId,
                         relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
                             @Override
                             public JsonValue apply(JsonValue jsonValue) throws ResourceException {
@@ -620,7 +622,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             populateVirtualProperties(managedContext, value);
 
             // Remove relationships so they don't get persisted in the repository with the managed object details.
-            JsonValue strippedRelationshipFields = stripRelationshipFields(value);
+            final JsonValue strippedRelationshipFields = stripRelationshipFields(value);
 
             // includes per-property encryption
             onStore(managedContext, value);
@@ -633,12 +635,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             activityLogger.log(managedContext, request, "create", managedId(resourceId).toString(), null, content, 
                     Status.SUCCESS);
-            
+
             // Place stripped relationships back in content
             content.asMap().putAll(strippedRelationshipFields.asMap());
-            
+
             // Persists all relationship fields that are present in the created object and updates their values.
-            content.asMap().putAll(persistRelationships(managedContext, resourceId, content, 
+            content.asMap().putAll(persistRelationships(true, managedContext, resourceId, content,
                     relationshipProviders.keySet()).asMap());
 
             // Execute the postCreate script if configured
@@ -1321,9 +1323,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * {@link JsonValue} object containing the stripped fields.
      *
      * @param value The JsonValue map to strip relationship fields from
-     * @return A {@link JsonValue} object containing the stripped fields.
+     * @return A {@link JsonValue} containing the stripped fields.
      */
-    protected JsonValue stripRelationshipFields(final JsonValue value) {
+    private JsonValue stripRelationshipFields(final JsonValue value) {
+        value.expect(Map.class);
+
         final JsonValue stripped = json(object());
 
         for (JsonPointer field : schema.getRelationshipFields()) {

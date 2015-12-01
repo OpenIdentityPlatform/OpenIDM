@@ -133,11 +133,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
         }
     }
 
-    /** {@inheritDoc} */
-    // create/update relationship references. Update if we have UUIDs
-    // delete all relationships not in this array
     @Override
-    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(Context context, String resourceId, 
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean isCreate, Context context, String resourceId,
             JsonValue relationships) {
         relationships.expect(List.class);
 
@@ -165,13 +162,17 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     } else { // no id. create
                         relationshipsToCreate.add(relationship);
                     }
-                }
 
-                // Call get() so we block until they are deleted.
-                clearNotIn(context, resourceId, relationshipsToKeep).getOrThrowUninterruptibly();
+                    if (!isCreate) {
+                        // Call get() so we block until they are deleted.
+                        clearNotIn(context, resourceId, relationshipsToKeep).getOrThrowUninterruptibly();
+                    }
+                }
             } else {
                 // We didn't get any relations to persist. Clear and return empty array.
-                clear(context, resourceId);
+                if (!isCreate) {
+                    clear(context, resourceId);
+                }
                 return newResultPromise(results);
             }
 
