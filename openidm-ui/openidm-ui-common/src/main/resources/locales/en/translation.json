@@ -592,6 +592,7 @@
             "managedPropertyMessage" : "Add managed object properties related to security or virtual roles.",
             "addProperty" : "Add Property",
             "encrypted" : "Encrypted",
+            "hashed" : "Hashed",
             "private" : "Private",
             "virtual" : "Virtual",
             "duplicateNameError" : "Duplicate name detected. Please provide a unique name.",

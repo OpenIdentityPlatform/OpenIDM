@@ -108,7 +108,7 @@ define("org/forgerock/openidm/ui/admin/managed/AbstractManagedView", [
         },
         
         splitSchemaAndProperties: function () {
-            var propertiesFields = ["encryption","scope", "onRetrieve", "onValidate", "onStore", "isVirtual"],
+            var propertiesFields = ["encryption","scope", "onRetrieve", "onValidate", "onStore", "isVirtual", "secureHash"],
                 properties = [],
                 schemaProperties = {};
             
