@@ -34,14 +34,14 @@
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <i class="fa fa-ellipsis-v"></i></a>
                 <ul class="dropdown-menu"></ul>
             </li>
-            <li class="active"><a href="#managedDetailsContainer" role="tab" data-toggle="tab" aria-expanded="true">{{t "templates.managed.details"}}</a></li>
-            <li class=""><a href="#managedSchemaContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.schema"}}</a></li>
+            <li class="{{#unless showSchema}}active{{/unless}}"><a href="#managedDetailsContainer" role="tab" data-toggle="tab" aria-expanded="{{#unless showSchema}}true{{else}}false{{/unless}}">{{t "templates.managed.details"}}</a></li>
+            <li class="{{#if showSchema}}active{{/if}}"><a href="#managedSchemaContainer" role="tab" data-toggle="tab" aria-expanded="{{#if showSchema}}true{{else}}false{{/if}}">{{t "templates.managed.schema"}}</a></li>
             <li class=""><a href="#managedScriptsContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.scripts"}}</a></li>
             <li class=""><a href="#managedPropertiesContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.properties"}}</a></li>
         </ul>
     </div>
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane active" id="managedDetailsContainer">
+        <div role="tabpanel" class="tab-pane {{#unless showSchema}}active{{/unless}}" id="managedDetailsContainer">
             <div class="panel no-margin-bottom">
                 <form id="managedObjectDetailsForm" class="form-horizontal" role="form" autocomplete="off">
                     <div id="managedForm2JS" class="panel-body">
@@ -104,7 +104,7 @@
                             <div id="managedPropertyWrapper">
                                 {{#if currentManagedObject.properties.length}}
                                     {{#each_with_index currentManagedObject.properties}}
-                                        {{> managed/_property}}
+                                        {{> managed/_property availableProperties=../availableProperties}}
                                     {{/each_with_index}}
                                 {{/if}}
                             </div>
@@ -119,7 +119,7 @@
                 </form>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="managedSchemaContainer">
+        <div role="tabpanel" class="tab-pane {{#if showSchema}}active{{/if}}" id="managedSchemaContainer">
             <div class="panel no-margin-bottom">
                 <form id="managedObjectSchemaForm" role="form">
                     <div id="managedSchema" class="panel-body">

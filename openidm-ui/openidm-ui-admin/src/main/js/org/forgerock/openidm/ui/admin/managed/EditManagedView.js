@@ -85,13 +85,18 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 repoCheckPromise,
                 eventKeys,
                 propertiesEventList = ["onValidate", "onRetrieve", "onStore"];
-
+            
+            this.args = args;
             this.data = {
                 selectEvents: [],
                 addedEvents: [],
                 propertiesEventList: propertiesEventList,
                 docHelpUrl : Constants.DOC_URL
             };
+            
+            if (this.args[1] && this.args[1] === "showSchema") {
+                this.data.showSchema = true;
+            }
 
             this.eventHooks = [];
             this.propertyHooks = [];
@@ -133,6 +138,8 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                         property.addedEvents = _.intersection(eventKeys, propertiesEventList);
                         property.selectEvents = _.difference(propertiesEventList, eventKeys);
                     }, this);
+                    
+                    this.data.availableProperties = _.keys(_.omit(this.data.currentManagedObject.schema.properties,"_id"));
                 }
 
                 this.checkRepo(configFiles[0], _.bind(function(){
@@ -812,6 +819,8 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 });
 
                 this.$el.find(".nav-tabs").tabdrop();
+                
+
 
                 if (callback) {
                     callback();
@@ -879,7 +888,9 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
 
                 _.extend(prop, this.model.propertyScripts[index].getScripts());
                 
-                properties.push(prop);
+                if (prop.name) {
+                    properties.push(prop);
+                }
             }, this);
             
             this.data.currentManagedObject.properties = properties;
@@ -908,7 +919,10 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
 
             this.data.currentManagedObject.schema = this.getManagedSchema();
 
-            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.bind(function () {
+                this.args.push("showSchema");
+                this.render(this.args);
+            }, this));
         },
 
         deleteManaged: function(event) {
@@ -952,9 +966,9 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 field,
                 input;
 
-            field = $(handlebars.compile("{{> managed/_property}}")());
+            field = $(handlebars.compile("{{> managed/_property}}")({ availableProperties : this.data.availableProperties }));
             field.removeAttr("id");
-            input = field.find('input[type=text]');
+            input = field.find('select');
             input.val("");
             input.attr("data-validator-event","keyup blur");
             input.attr("data-validator","required");
