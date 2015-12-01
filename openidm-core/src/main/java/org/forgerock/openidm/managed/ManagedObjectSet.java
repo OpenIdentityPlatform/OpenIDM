@@ -345,11 +345,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
     }
 
-    private void populateVirtualProperties(Context context, JsonValue content) throws ForbiddenException,
+    private void populateVirtualProperties(final Context context, final Request request, final JsonValue content) throws ForbiddenException,
             InternalServerErrorException {
         for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
             SchemaField field = getSchema().getField(key);
-            if (field.isVirtual()) {
+            // Only populate if field is returned by default or explicitly requested
+            if (field.isVirtual() && (field.isReturnedByDefault() || request.getFields().contains(field))) {
                 field.onRetrieve(context, content);
             }
         }
@@ -480,7 +481,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         validateRelationshipFields(newValue, context);
 
         // Populate the virtual properties (so they are updated for sync-ing)
-        populateVirtualProperties(context, newValue);
+        populateVirtualProperties(context, request, newValue);
 
         // Remove relationships so they don't get persisted in the repository with the managed object details.
         JsonValue strippedRelationshipFields = stripRelationshipFields(newValue);
@@ -637,7 +638,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             validateRelationshipFields(value, managedContext);
 
             // Populate the virtual properties (so they are available for sync-ing)
-            populateVirtualProperties(managedContext, value);
+            populateVirtualProperties(managedContext, request, value);
 
             // Remove relationships so they don't get persisted in the repository with the managed object details.
             final JsonValue strippedRelationshipFields = stripRelationshipFields(value);
