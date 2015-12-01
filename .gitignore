@@ -93,3 +93,6 @@ local.properties
 
 # npm modules
 node_modules
+
+# OSX Finder garbage
+.DS_Store
