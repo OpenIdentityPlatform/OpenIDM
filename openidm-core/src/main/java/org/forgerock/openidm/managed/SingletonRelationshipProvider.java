@@ -162,7 +162,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean isCreate,
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean clearExisting,
             final Context context, final String resourceId, final JsonValue value) {
         if (value.isNotNull()) {
             try {
@@ -180,7 +180,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                                 }
                             });
                 } else { // no id, replace current instance
-                    if (!isCreate) {
+                    if (!clearExisting) {
                         clear(context, resourceId);
                     }
 
@@ -197,7 +197,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 return e.asPromise();
             }
         } else {
-            if (!isCreate) {
+            if (!clearExisting) {
                 clear(context, resourceId);
             }
 

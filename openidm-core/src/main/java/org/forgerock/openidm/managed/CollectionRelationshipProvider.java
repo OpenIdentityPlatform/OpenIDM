@@ -134,7 +134,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
     }
 
     @Override
-    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean isCreate, Context context, String resourceId,
+    public Promise<JsonValue, ResourceException> setRelationshipValueForResource(final boolean clearExisting, Context context, String resourceId,
             JsonValue relationships) {
         relationships.expect(List.class);
 
@@ -163,14 +163,14 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                         relationshipsToCreate.add(relationship);
                     }
 
-                    if (!isCreate) {
+                    if (!clearExisting) {
                         // Call get() so we block until they are deleted.
                         clearNotIn(context, resourceId, relationshipsToKeep).getOrThrowUninterruptibly();
                     }
                 }
             } else {
                 // We didn't get any relations to persist. Clear and return empty array.
-                if (!isCreate) {
+                if (!clearExisting) {
                     clear(context, resourceId);
                 }
                 return newResultPromise(results);

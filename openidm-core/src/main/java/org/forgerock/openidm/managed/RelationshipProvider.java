@@ -328,7 +328,7 @@ public abstract class RelationshipProvider {
      * Set the supplied {@link JsonValue} as the current state of this relationship. This will support updating any 
      * existing relationship (_id is present) and remove any relationship not present in the value from the repository.
      *
-     * @param isCreate If this is an initial create of the resource (don't clear)
+     * @param clearExisting If existing (non-present) relationships should be cleared
      * @param context The context of this request
      * @param resourceId Id of the resource relation fields in value are to be memebers of
      * @param value A {@link JsonValue} map of relationship fields and their values
@@ -338,8 +338,8 @@ public abstract class RelationshipProvider {
      * @return A promise containing a JsonValue of the persisted relationship(s) for the given resourceId or
      *         ResourceException if an error occurred
      */
-    public abstract Promise<JsonValue, ResourceException> setRelationshipValueForResource(boolean isCreate, final Context context,
-            final String resourceId, final JsonValue value);
+    public abstract Promise<JsonValue, ResourceException> setRelationshipValueForResource(boolean clearExisting,
+            final Context context, final String resourceId, final JsonValue value);
 
     /**
      * Clear any relationship associated with the given resource. This could be used if for example a resource no longer 

@@ -505,13 +505,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * Persist all relationship fields contained in the JsonValue map to their accompanying
      * {@link #relationshipProviders}
      *
+     * @param clearExisting If existing (those not present in the object) should be cleared
      * @param context The current context
      * @param resourceId The id of the resource these relationships are associated with
      * @param json A JsonValue map that contains relationship fields and value(s) to be persisted
      * @param relationshipFields a set of relationship fields to persist
      * @return A {@link JsonValue} map containing each relationship field and its persisted value(s)
      */
-    private JsonValue persistRelationships(final boolean isCreate, Context context, String resourceId, final JsonValue json,
+    private JsonValue persistRelationships(final boolean clearExisting, Context context, String resourceId, final JsonValue json,
             Set<JsonPointer> relationshipFields) throws ResourceException {
         final List<Promise<JsonValue, ResourceException>> persisted = new ArrayList<>();
 
@@ -522,7 +523,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             // Relationships present in the request but set to null will be JsonValue(null)
             if (relationshipValue != null) {
                 RelationshipProvider provider = relationshipProviders.get(relationshipField);
-                persisted.add(provider.setRelationshipValueForResource(isCreate, context, resourceId,
+                persisted.add(provider.setRelationshipValueForResource(clearExisting, context, resourceId,
                         relationshipValue).then(new Function<JsonValue, JsonValue, ResourceException>() {
                             @Override
                             public JsonValue apply(JsonValue jsonValue) throws ResourceException {
