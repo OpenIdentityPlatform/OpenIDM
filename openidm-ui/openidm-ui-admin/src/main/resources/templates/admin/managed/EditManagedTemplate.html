@@ -104,7 +104,7 @@
                             <div id="managedPropertyWrapper">
                                 {{#if currentManagedObject.properties.length}}
                                     {{#each_with_index currentManagedObject.properties}}
-                                        {{> managed/_property availableProperties=../availableProperties}}
+                                        {{> managed/_property availableProperties=../availableProperties availableHashes=../availableHashes}}
                                     {{/each_with_index}}
                                 {{/if}}
                             </div>

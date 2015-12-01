@@ -132,14 +132,15 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                     _.each(this.data.currentManagedObject.properties, function (property) {
                         eventKeys = _.chain(property)
                             .keys()
-                            .without("name", "encryption", "scope", "type")
+                            .without("name", "encryption", "scope", "type", "secureHash")
                             .value();
 
                         property.addedEvents = _.intersection(eventKeys, propertiesEventList);
                         property.selectEvents = _.difference(propertiesEventList, eventKeys);
                     }, this);
-                    
+
                     this.data.availableProperties = _.keys(_.omit(this.data.currentManagedObject.schema.properties,"_id"));
+                    this.data.availableHashes = ["MD5","SHA-1","SHA-256","SHA-384","SHA-512"];
                 }
 
                 this.checkRepo(configFiles[0], _.bind(function(){
@@ -820,7 +821,11 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
 
                 this.$el.find(".nav-tabs").tabdrop();
                 
-
+                if(this.data.currentManagedObject.properties) {
+                    _.each(this.data.currentManagedObject.properties, function (property, index) {
+                        this.setPropertyHashToggle(index);
+                    }, this);
+                }
 
                 if (callback) {
                     callback();
@@ -885,6 +890,16 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 } else {
                     delete prop.type;
                 }
+
+                if (prop.secureHash) {
+                    prop.secureHash = {
+                        algorithm: prop.algorithm
+                    };
+                } else {
+                    delete prop.secureHash;
+                }
+                
+                delete prop.algorithm;
 
                 _.extend(prop, this.model.propertyScripts[index].getScripts());
                 
@@ -963,24 +978,34 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
             event.preventDefault();
 
             var checkboxes,
+                secureHashSelection,
                 field,
                 input;
 
-            field = $(handlebars.compile("{{> managed/_property}}")({ availableProperties : this.data.availableProperties }));
+            field = $(handlebars.compile("{{> managed/_property}}")({ 
+                availableProperties : this.data.availableProperties,
+                availableHashes : this.data.availableHashes 
+            }));
             field.removeAttr("id");
-            input = field.find('select');
+            input = field.find('.properties_name_selection');
             input.val("");
             input.attr("data-validator-event","keyup blur");
             input.attr("data-validator","required");
 
             checkboxes = field.find(".checkbox");
+            secureHashSelection = field.find(".secureHash_selection");
 
             this.propertiesCounter = this.propertiesCounter + 1;
 
             input.prop( "name", "properties[" +this.propertiesCounter  +"].name");
             $(checkboxes[0]).prop( "name", "properties[" +this.propertiesCounter  +"].encryption");
+            $(checkboxes[0]).prop( "id", this.propertiesCounter  +"_encryption_cb");
             $(checkboxes[1]).prop( "name", "properties[" +this.propertiesCounter  +"].scope");
             $(checkboxes[2]).prop( "name", "properties[" +this.propertiesCounter  +"].type");
+            $(checkboxes[3]).prop( "name", "properties[" +this.propertiesCounter  +"].secureHash");
+            $(checkboxes[3]).prop( "id", this.propertiesCounter  + "_secureHash_cb");
+            $(secureHashSelection[0]).prop( "name", "properties[" +this.propertiesCounter  +"].algorithm");
+            $(secureHashSelection[0]).prop( "id", this.propertiesCounter  + "_secureHash_selection");
 
             field.show();
 
@@ -1000,6 +1025,29 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
             }));
 
             this.$el.find('#managedPropertyWrapper').append(field);
+            this.setPropertyHashToggle(this.propertiesCounter);
+        },
+        
+        setPropertyHashToggle: function (index) {
+            var encryption_cb = this.$el.find("#" + index + "_encryption_cb"),
+                secureHash_cb = this.$el.find("#" + index + "_secureHash_cb"),
+                secureHash_selection = this.$el.find("#" + index + "_secureHash_selection");
+            
+            encryption_cb.click(function(){
+                if ($(this).is(":checked")) {
+                    secureHash_selection.hide();
+                    secureHash_cb.attr("checked",false);
+                }
+            });
+            
+            secureHash_cb.click(function(){
+                if ($(this).is(":checked")) {
+                    secureHash_selection.show();
+                    encryption_cb.attr("checked",false);
+                } else {
+                    secureHash_selection.hide();
+                }
+            });
         },
 
         removeProperty: function(event) {
