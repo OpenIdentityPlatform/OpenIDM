@@ -31,9 +31,11 @@ require.config({
             "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
             "LoginView": "org/forgerock/openidm/ui/common/login/LoginView",
             "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
-            "RegisterView": "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
+            "RegisterView": "org/forgerock/openidm/ui/user/anonymousProcess/SelfRegistrationView",
             "ForgotUsernameView": "org/forgerock/commons/ui/user/anonymousProcess/ForgotUsernameView",
-            "PasswordResetView": "org/forgerock/commons/ui/user/anonymousProcess/PasswordResetView",
+            "PasswordResetView": "org/forgerock/openidm/ui/user/anonymousProcess/PasswordResetView",
+            "KBADelegate": "org/forgerock/commons/ui/user/delegates/KBADelegate",
+            "NavigationFilter" : "org/forgerock/commons/ui/common/components/navigation/filters/RoleFilter",
             // TODO: Remove this when there are no longer any references to the "underscore" dependency
             "underscore": "lodash"
         }

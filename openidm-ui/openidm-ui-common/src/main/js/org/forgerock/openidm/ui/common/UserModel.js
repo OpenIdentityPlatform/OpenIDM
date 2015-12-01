@@ -85,8 +85,13 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                         return _.has(Configuration.globalData.roles, getRoleFromRef(r));
                     })
                     .map(function (r) {
-                        return Configuration.globalData.roles[getRoleFromRef(r)];
+                        if (Configuration.globalData.roles[getRoleFromRef(r)] === "ui-user") {
+                            return ["ui-user","ui-self-service-user"];
+                        } else {
+                            return Configuration.globalData.roles[getRoleFromRef(r)];
+                        }
                     })
+                    .flatten()
                     .value();
         },
         parse: function (response) {
