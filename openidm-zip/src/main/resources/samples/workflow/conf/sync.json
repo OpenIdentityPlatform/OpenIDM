@@ -213,10 +213,10 @@
                     "target" : "password"
                 },
                 {
-                    "source" : "authzRoles",
+                    "source" : "",
                     "transform" : {
                         "type" : "text/javascript",
-                        "source" : "source.map(function (r) { return r._ref.split('/').pop(); } ).join(',')"
+                        "source" : "openidm.query('managed/user/' + source._id + '/authzRoles', {'_queryFilter': 'true'}).result.map(function (r) { return r._ref.split('/').pop(); } ).join(',')"
                     },
                     "target" : "roles"
                 },
