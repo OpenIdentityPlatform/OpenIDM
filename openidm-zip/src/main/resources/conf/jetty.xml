@@ -267,11 +267,12 @@
                     <Arg>openidm.port.mutualauth</Arg>
                 </Call>
                 </Set>
-                <Call class="org.forgerock.openidm.jetty.DisableOpenIDMAuth" name="add">
+                <!--Call class="org.forgerock.openidm.jetty.DisableOpenIDMAuth"
+        name="add">
                     <Arg>
                         <Ref refid="MutualAuthPort"/>
                     </Arg>
-                </Call>
+                </Call-->
             </New>
         </Arg>
     </Call>

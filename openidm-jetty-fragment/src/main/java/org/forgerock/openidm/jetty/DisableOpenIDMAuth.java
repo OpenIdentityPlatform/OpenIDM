@@ -29,6 +29,10 @@ import org.slf4j.LoggerFactory;
  * a way to mark which connector to not apply the OpenIDM authentication mechanism on.
  * Allows for just using SSL mutual auth on a given port.
  *
+ * Note : because of recent changes in the initialization of the auth/e modules
+ * this class isn't called in time anymore from the jetty.xml to properly
+ * initialize the client cert auth module. The call was therefore removed from
+ * jetty.xml. 
  */
 public final class DisableOpenIDMAuth {
 
