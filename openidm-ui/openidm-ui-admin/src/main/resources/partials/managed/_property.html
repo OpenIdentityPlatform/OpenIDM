@@ -4,7 +4,12 @@
             <div class="input-group-addon">
                 <button type="button" title="" class="clean-btn property-remove remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
             </div>
-            <input class="form-control" type="text" name="properties[{{index}}].name" value="{{value.name}}"/>
+            <select class="form-control" name="properties[{{index}}].name">
+                <option value=""></option>
+                {{#each availableProperties}}
+                    <option value="{{this}}" {{#equals this ../value.name}}selected{{/equals}}>{{this}}</option>
+                {{/each}}
+            </select>
         </div>
         <div class="input-group">
             <label class="inline-label">
