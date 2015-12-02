@@ -114,36 +114,20 @@ public class RouterActivityLogger implements ActivityLogger {
         }
 
         try {
-
-            // grab authenticationId from security context, if one exists.
-            String authenticationId = getRequester(context);
-
-            String revision = getRevision(before, after);
-
-            //will be true if any of the watched password fields have changed.
-            //TODO once dependency is resolved, get action from AuditService.AuditAction rather than these strings.
-            boolean passwordChanged = getChangedFields("getChangedPasswordFields", before, after, context).length > 0;
-
-            String[] changedFields = getChangedFields("getChangedWatchedFields", before, after, context);
-
-            RequestType requestType = request.getRequestType();
-            String beforeValue = getJsonForLog(before, requestType);
-            String afterValue = getJsonForLog(after, requestType);
-
-            AuditEvent auditEvent = OpenIDMActivityAuditEventBuilder.auditEventBuilder()
+            final AuditEvent auditEvent = OpenIDMActivityAuditEventBuilder.auditEventBuilder()
                     .transactionId(ContextUtil.getTransactionId(context))
                     .timestamp(System.currentTimeMillis())
                     .eventName(ACTIVITY_EVENT_NAME)
                     .userId(getRequester(context))
-                    .runAs(authenticationId)
+                    .runAs(getRequester(context))
                     .operationFromCrestRequest(request)
-                    .before(beforeValue)
-                    .after(afterValue)
-                    .changedFields(changedFields)
-                    .revision(revision)
+                    .before(getJsonForLog(before, request.getRequestType()))
+                    .after(getJsonForLog(after, request.getRequestType()))
+                    .changedFields(getChangedFields("getChangedWatchedFields", before, after, context))
+                    .revision(getRevision(before, after))
                     .message(message)
                     .objectId(objectId)
-                    .passwordChanged(passwordChanged)
+                    .passwordChanged(getChangedFields("getChangedPasswordFields", before, after, context).length > 0)
                     .status(status)
                     .toEvent();
 
@@ -200,16 +184,17 @@ public class RouterActivityLogger implements ActivityLogger {
      *
      * @param value       the value to be returned if not a READ or QUERY, and not overridden by logFullObjects.
      * @param requestType the type of request.
-     * @return the value to be returned if not a READ or QUERY, and not overridden by logFullObjects; null otherwise.
+     * @return the value to be returned if not a READ or QUERY, and not overridden by logFullObjects; otherwise a
+     * {@link JsonValue} wrapped null.
      */
-    private String getJsonForLog(JsonValue value, RequestType requestType) {
+    private JsonValue getJsonForLog(JsonValue value, RequestType requestType) {
         boolean isReadOrQueryRequest = RequestType.READ.equals(requestType) || RequestType.QUERY.equals(requestType);
 
         if (logFullObjects || !isReadOrQueryRequest) {
-            return value != null ? value.toString() : null;
+            return value != null ? value : json(null);
         }
 
-        return null;
+        return json(null);
     }
 
     /**

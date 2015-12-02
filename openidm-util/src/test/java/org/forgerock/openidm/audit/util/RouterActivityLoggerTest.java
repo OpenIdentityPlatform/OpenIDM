@@ -26,11 +26,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Map;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -42,9 +37,11 @@ import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
-import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyAccessor;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.SecurityContext;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -122,11 +119,11 @@ public class RouterActivityLoggerTest {
         RequestType requestType = request.getRequestType();
         assertThat(requestType).isEqualTo(RequestType.READ);
 
-        String capturedAfter = content.get(OpenIDMActivityAuditEventBuilder.AFTER).asString();
-        assertThat(capturedAfter).isNull();
+        JsonValue capturedAfter = content.get(OpenIDMActivityAuditEventBuilder.AFTER);
+        assertThat(capturedAfter.isNull()).isTrue();
 
-        String capturedBefore = content.get(OpenIDMActivityAuditEventBuilder.BEFORE).asString();
-        assertThat(capturedBefore).isNull();
+        JsonValue capturedBefore = content.get(OpenIDMActivityAuditEventBuilder.BEFORE);
+        assertThat(capturedBefore.isNull()).isTrue();
 
 
     }
@@ -225,11 +222,9 @@ public class RouterActivityLoggerTest {
 
         JsonValue content = createRequestArgumentCaptor.getValue().getContent();
 
-        String capturedAfter = content.get(OpenIDMActivityAuditEventBuilder.AFTER).asString();
-        ObjectMapper mapper = new ObjectMapper();
-        Map<String, String> afterJson = mapper.readValue(capturedAfter, Map.class);
+        JsonValue capturedAfter = content.get(OpenIDMActivityAuditEventBuilder.AFTER);
 
-        String rev = afterJson.get(ResourceResponse.FIELD_CONTENT_REVISION);
+        String rev = capturedAfter.get(ResourceResponse.FIELD_CONTENT_REVISION).asString();
         assertThat(rev).isEqualTo("2");
 
     }
