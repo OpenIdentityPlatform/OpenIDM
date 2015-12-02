@@ -128,6 +128,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             this.data.versionDisplay = {};
             this.data.currentMainVersion = null;
             this.data.objectTypes = null;
+            this.data.versionCheck = null;
             this.oAuthConnector = false;
             this.connectorTypeRef = null;
             this.connectorList = null;
@@ -162,7 +163,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                     .value();
 
                 var splitDetails = args[0].match(/(.*?)_(.*)/).splice(1),
-                    urlArgs = router.convertCurrentUrlToJSON();
+                    urlArgs = router.convertCurrentUrlToJSON(),
+                    version;
 
                 this.data.editState = true;
                 this.data.systemType = splitDetails[0];
@@ -211,6 +213,24 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
 
                         return parseFloat(this.data.currentMainVersion) === parseFloat(tempVersion);
                     }, this);
+
+                    version = this.data.fullversion;
+
+                    if(version.indexOf("(") !== -1 || version.indexOf(")") !== -1 || version.indexOf("[") !== -1 || version.indexOf("]") !== -1) {
+                        version = version.replace(/\[|\)|\(|\]/g,'');
+                        version = version.split(",");
+                        version = version[0].split(".");
+                        version = version[0] +"." +version[1];
+                    } else {
+                        version = version.split(".");
+                        version = version[0] +"." +version[1];
+                    }
+
+                    if(version >= 1.4) {
+                        this.data.versionCheck = true;
+                    } else {
+                        this.data.versionCheck = false;
+                    }
 
                     //Get the connector type for top header display
                     this.data.displayConnectorType = this.data.versionDisplay[0].versions[0].displayName;
