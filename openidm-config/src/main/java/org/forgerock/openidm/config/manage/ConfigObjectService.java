@@ -354,7 +354,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             String revision = (null == after)
                     ? null
                     : after.get(ResourceResponse.FIELD_CONTENT_REVISION).asString();
-            return newResultPromise(new ConfigAuditState(resourcePath.toString(), revision, null, after));
+            return newResultPromise(new ConfigAuditState(parsedId.toString(), revision, null, after));
 
         } catch (ResourceException ex) {
             return ex.asPromise();
