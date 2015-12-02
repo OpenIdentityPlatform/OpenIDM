@@ -76,6 +76,11 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                     this.data.selectedTopics = this.data.eventHandler.config.topics;
                     delete this.data.eventHandler.config.topics;
                 }
+
+                if (_.has(this.data.eventHandler.config, "enabled")) {
+                    this.data.enabled = this.data.eventHandler.config.enabled;
+                    delete this.data.eventHandler.config.enabled;
+                }
             }
 
             if (this.data.newEventHandler) {
@@ -122,6 +127,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
 
                                 data.eventHandler.config.name = this.$el.find("#eventHandlerName").val();
                                 data.eventHandler.config.topics = this.$el.find(".topics").val();
+                                data.eventHandler.config.enabled = this.$el.find("#enabled").is(":checked");
                                 data.useForQueries = this.$el.find(".useForQueries").is(":checked");
 
                                 if (callback) {
@@ -174,18 +180,26 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                         if (_.has(schema.properties, "topics")) {
                             delete schema.properties.topics;
                         }
+                        if (_.has(schema.properties, "enabled")) {
+                            delete schema.properties.enabled;
+                        }
 
                         this.translateDescriptions(schema);
-                        this.data.schemaEditor = new JSONEditor(this.$el.find("#auditEventHandlerConfig")[0],
-                            _.extend({"schema": schema}, {
-                                required_by_default	: true,
-                                disable_edit_json: true,
-                                disable_array_reorder: true,
-                                disable_collapse: true,
-                                disable_properties: true,
-                                no_additional_properties: true,
-                                show_errors: "never"
-                            }));
+                        this.data.schemaEditor = new JSONEditor(this.$el.find("#auditEventHandlerConfig")[0], {
+                            "schema": schema,
+                            "disable_edit_json": true,
+                            "disable_array_reorder": false,
+                            "disable_collapse": true,
+                            "disable_properties": true,
+                            "show_errors": "never",
+                            "template": "handlebars",
+                            "iconlib": "fontawesome4",
+                            "theme": "bootstrap3",
+                            "no_additional_properties": true,
+                            "additionalItems": false,
+                            "required_by_default": true
+                        });
+
                         this.data.schemaEditor.setValue(this.data.eventHandler.config);
                     }
 

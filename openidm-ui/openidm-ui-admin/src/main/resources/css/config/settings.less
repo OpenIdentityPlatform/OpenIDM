@@ -196,35 +196,44 @@
   margin-top:10px;
 }
 
-#AuthenticationModuleDialog {
-  margin-top: -15px;
+#auditEventHandlerConfig {
+  .row, .form-group {
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
 
-  .basicForm, .advancedForm {
-    h3 {
-      font-size: 14px;
-      text-transform: capitalize;
-      i {
-        margin-right: 5px;
-        cursor: pointer;
-        & + span {
-          cursor: pointer;
-        }
-      }
-    }
-
-    .btn {
-      font-size: 13px;
-      border-radius: 5px;
+#AuthenticationModuleDialog .basicForm,
+#AuthenticationModuleDialog .advancedForm,
+#auditEventHandlerConfig {
+  h3 {
+    font-size: 14px;
+    text-transform: capitalize;
+    i {
       margin-right: 5px;
-      i {
-        margin: 0;
+      cursor: pointer;
+      & + span {
+        cursor: pointer;
       }
-    }
-
-    .btn:last-child {
-      margin-right: 0;
     }
   }
+
+  .btn {
+    font-size: 13px;
+    border-radius: 5px;
+    margin-right: 5px;
+    i {
+      margin: 0;
+    }
+  }
+
+  .btn:last-child {
+    margin-right: 0;
+  }
+}
+
+#AuthenticationModuleDialog {
+  margin-top: -15px;
 
   .advancedForm {
     margin-bottom: 15px;
