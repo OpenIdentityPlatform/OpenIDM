@@ -34,7 +34,32 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
 
     var obj = new AbstractDelegate(constants.host + "/openidm/policy");
 
+    obj.readEntity = function (baseEntity) {
+        if (baseEntity === "selfservice/registration") {
+            return AbstractDelegate.prototype.readEntity.call(this, "managed/user").then(function (policy) {
+                return _.extend(policy, {
+                    properties: _.map(policy.properties, function (prop) {
+                        return _.extend(prop, {
+                            "name": "user." + prop.name
+                        });
+                    })
+                });
+            });
+        } else if (baseEntity === "selfservice/reset") {
+            return AbstractDelegate.prototype.readEntity.call(this, "managed/user").then(function (policy) {
+                return _.extend(policy, {
+                    properties: _.filter(policy.properties, function (prop) {
+                        return prop.name === "password";
+                    })
+                });
+            });
+        } else {
+            return AbstractDelegate.prototype.readEntity.call(this, baseEntity);
+        }
+    };
+
     obj.validateProperty = function (baseEntity, args, callback) {
+        var promise;
         /*
          * We are calling the validateObject action here instead of validateProperty
          * because we need to pass in entire object context in order to support policies
@@ -42,11 +67,30 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
          * particular property we are attempting to validate was included in the list of those
          * with errors.
          */
-        return obj.serviceCall({
-            url: "/" + baseEntity + "?_action=validateObject",
-            data: JSON.stringify(args.fullObject),
-            type: "POST"
-        }).then(function (data){
+
+        if (baseEntity === "selfservice/registration") {
+            promise = obj.serviceCall({
+                url: "/managed/user/-?_action=validateObject",
+                data: JSON.stringify(args.fullObject.user),
+                type: "POST"
+            }).then(function (data) {
+                return {
+                    failedPolicyRequirements : _.map(data.failedPolicyRequirements, function (failure) {
+                        return _.extend(failure, {
+                            "property" : "user." + failure.property
+                        });
+                    })
+                };
+            });
+        } else {
+            promise = obj.serviceCall({
+                url: "/" + baseEntity + "?_action=validateObject",
+                data: JSON.stringify(args.fullObject),
+                type: "POST"
+            });
+        }
+
+        return promise.then(function (data) {
             var haveWeFailed = false;
             if (data.failedPolicyRequirements) {
                 _.each(data.failedPolicyRequirements, function (failedReq) {

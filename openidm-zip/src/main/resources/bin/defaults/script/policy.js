@@ -779,11 +779,11 @@ policyProcessor = (function (policyConfig,policyImpl){
                         if ((_.isArray(pair[1].type) && _.contains(pair[1].type, "string")) ||
                             (pair[1].type === "string")) {
 
-                            if (_.isNumber(pair[1].minLength)) {
+                            if (!isNaN(parseInt(pair[1].minLength))) {
                                 standardPolicies.push({
                                     "policyId" : "minimum-length",
                                     "params" : {
-                                        "minLength" : pair[1].minLength
+                                        "minLength" : parseInt(pair[1].minLength)
                                     }
                                 });
                             }

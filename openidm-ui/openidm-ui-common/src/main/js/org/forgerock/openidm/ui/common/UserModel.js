@@ -50,14 +50,6 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                 }
             }
             return AbstractModel.prototype.sync.call(this, method, model, options)
-                .always(_.bind(function () {
-                    if (this.has("password")) {
-                        // usually password won't be included in the response, but it will for openidm-admin
-                        this.unset("password");
-                    }
-
-                    delete this.currentPassword;
-                }, this))
                 .fail(_.bind(function (xhr) {
                     var previous = this.previousAttributes();
                     this.clear();
@@ -69,6 +61,14 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                             }
                         });
                     }
+                }, this))
+                .always(_.bind(function () {
+                    if (this.has("password")) {
+                        // usually password won't be included in the response, but it will for openidm-admin
+                        this.unset("password");
+                    }
+
+                    delete this.currentPassword;
                 }, this));
         },
         getUIRoles: function (roles) {
@@ -130,6 +130,7 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                 this.id = sessionDetails.authorization.id;
                 this.url = "/" + Constants.context + "/" + sessionDetails.authorization.component;
                 this.component = sessionDetails.authorization.component;
+                this.baseEntity = this.component + "/" + this.id;
                 this.uiroles = this.getUIRoles(sessionDetails.authorization.roles);
                 return $.when(this.fetch(), this.getValidationRules()).then(_.bind(function () {
                     return this;
