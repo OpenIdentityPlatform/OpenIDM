@@ -72,7 +72,7 @@ public class ConfigAuditEventLogger {
 
             // Build the event utilizing the config builder.
             AuditEvent auditEvent = ConfigAuditEventBuilder.configEvent()
-                    .operationFromRequest(request)
+                    .operationFromCrestRequest(request)
                     .userId(authenticationId)
                     .runAs(authenticationId)
                     .transactionId(ContextUtil.getTransactionId(context))

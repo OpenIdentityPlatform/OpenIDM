@@ -10,18 +10,18 @@
       },
       "enabled": {
         "type": "boolean",
-        "description": "audit.handlers.all.enabled"
+        "description": "audit.handlers.all.enabled.help"
       },
       "topics": {
         "type": "array",
-        "description": "audit.handlers.all.topics",
+        "description": "audit.handlers.all.topics.help",
         "items": {
           "type": "string"
         }
       },
       "name": {
         "type": "string",
-        "description": "audit.handlers.all.name"
+        "description": "audit.handlers.all.name.help"
       }
     }
   }

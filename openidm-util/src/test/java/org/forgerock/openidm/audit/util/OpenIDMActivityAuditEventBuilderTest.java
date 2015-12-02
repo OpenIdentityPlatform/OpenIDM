@@ -56,7 +56,7 @@ public class OpenIDMActivityAuditEventBuilderTest {
                 .eventName(RouterActivityLogger.ACTIVITY_EVENT_NAME)
                 .userId("fake")
                 .runAs(TEST_RUN_AS)
-                .operationFromRequest(request)
+                .operationFromCrestRequest(request)
                 .before(json(object()))
                 .after(json(object()))
                 .changedFields(changedFields)
