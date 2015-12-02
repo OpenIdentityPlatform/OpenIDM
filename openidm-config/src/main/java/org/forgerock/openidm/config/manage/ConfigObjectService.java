@@ -260,7 +260,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             return new InternalServerErrorException(
                     "Failure to load configuration for " + resourcePath + ": " + ex.getMessage(), ex).asPromise();
         }
-        return Promises.newResultPromise(new ConfigAuditState(resourcePath.toString(),
+        return newResultPromise(new ConfigAuditState(resourcePath.toString(),
                 result.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(), result, result));
     }
 
@@ -542,7 +542,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             config.delete();
             logger.debug("Deleted configuration for {}", resourcePath.toString());
 
-            return Promises.newResultPromise(new ConfigAuditState(resourcePath.toString(),
+            return newResultPromise(new ConfigAuditState(resourcePath.toString(),
                     value.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(), value, null));
         } catch (ResourceException ex) {
             return ex.asPromise();
@@ -555,7 +555,27 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
+    public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
+        return patch(context, request)
+                .thenAsync(
+                        new AsyncFunction<ConfigAuditState, ResourceResponse, ResourceException>() {
+                            @Override
+                            public Promise<ResourceResponse, ResourceException> apply(
+                                    ConfigAuditState configAuditState) throws ResourceException {
+                                // Log audit event.
+                                auditLogger.log(configAuditState, request, context, connectionFactory);
+
+                                return newResourceResponse(
+                                        configAuditState.getId(),
+                                        configAuditState.getRevision(),
+                                        configAuditState.getAfter()).asPromise();
+
+                            }
+                        });
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Promise<ConfigAuditState, ResourceException> patch(final Context context, final PatchRequest request) {
         final ResourcePath resourcePath = request.getResourcePathObject();
         final ParsedId parsedId;
         try {
@@ -574,15 +594,21 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         + ", can not patch the configuration.");
             }
 
-            JsonValue subject = enhancedConfig.getConfiguration(existingConfig, request.getResourcePath(), false);
-            JsonValuePatch.apply(subject, request.getPatchOperations());
+            final JsonValue before = enhancedConfig.getConfiguration(existingConfig, request.getResourcePath(), false);
+            final JsonValue after = before.copy();
+            JsonValuePatch.apply(after, request.getPatchOperations());
 
             existingConfig = configCrypto.encrypt(
-                    parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, subject);
+                    parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, after);
             config.update(existingConfig);
 
             logger.debug("Patched existing configuration for {} with {}", resourcePath.toString(), existingConfig);
-            return newResourceResponse(request.getResourcePath(), null, subject).asPromise();
+            return newResultPromise(
+                    new ConfigAuditState(
+                            resourcePath.toString(),
+                            after.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(),
+                            before,
+                            after));
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (JsonValueException e) {
