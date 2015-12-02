@@ -39,8 +39,6 @@ import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Utilizing the ConfigAuditEventBuilder this class will send log events of config changes to the commons
  * audit module.
@@ -49,7 +47,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  */
 public class ConfigAuditEventLogger {
     private static final Logger LOGGER = LoggerFactory.getLogger(ConfigAuditEventLogger.class);
-    private static final ObjectMapper mapper = new ObjectMapper();
 
     public static final String CONFIG_AUDIT_EVENT_NAME = "CONFIG";
     public static final String AUDIT_CONFIG_REST_PATH = "audit/config";
@@ -63,27 +60,22 @@ public class ConfigAuditEventLogger {
     public final Promise<ResourceResponse, ResourceException> log(ConfigAuditState configAuditState, Request request,
             Context context, ConnectionFactory connectionFactory) {
         try {
-
-            JsonValue before = configAuditState.getBefore();
-            JsonValue after = configAuditState.getAfter();
-
-            // Get authenticationId from security context, if it exists.
-            String authenticationId = (context.containsContext(SecurityContext.class))
-                    ? context.asContext(SecurityContext.class).getAuthenticationId() : null;
-
             // Build the event utilizing the config builder.
             final AuditEvent auditEvent = ConfigAuditEventBuilder.configEvent()
                     .operationFromCrestRequest(request)
-                    .userId(authenticationId)
-                    .runAs(authenticationId)
+                    .userId(getUserId(context))
+                    .runAs(getUserId(context))
                     .transactionId(ContextUtil.getTransactionId(context))
                     .revision(configAuditState.getRevision())
                     .timestamp(System.currentTimeMillis())
                     .objectId(configAuditState.getId())
                     .eventName(CONFIG_AUDIT_EVENT_NAME)
-                    .before(null != before ? mapper.writeValueAsString(before.getObject()) : "")
-                    .after(null != after ? mapper.writeValueAsString(after.getObject()) : "")
-                    .changedFields(getChangedFields(before, after, request.getRequestType()))
+                    .before(configAuditState.getBefore())
+                    .after(configAuditState.getAfter())
+                    .changedFields(getChangedFields(
+                            configAuditState.getBefore(),
+                            configAuditState.getAfter(),
+                            request.getRequestType()))
                     .toEvent();
 
             return connectionFactory.getConnection().create(context,
@@ -124,6 +116,12 @@ public class ConfigAuditEventLogger {
             }
         }
         return changedFields.toArray(new String[changedFields.size()]);
+    }
+
+    private String getUserId(final Context context) {
+        return context.containsContext(SecurityContext.class)
+                ? context.asContext(SecurityContext.class).getAuthenticationId()
+                : null;
     }
 
 }
