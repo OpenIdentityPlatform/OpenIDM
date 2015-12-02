@@ -105,6 +105,21 @@ var httpAccessConfig =
         },
 
         {
+            "pattern"   : "policy/managed/user",
+            "roles"     : "*",
+            "methods"   : "read",
+            "actions"   : "",
+            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('passwordReset')"
+        },
+        {
+            "pattern"   : "policy/managed/user/-",
+            "roles"     : "*",
+            "methods"   : "action",
+            "actions"   : "validateObject",
+            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('passwordReset')"
+        },
+
+        {
            "pattern"    : "selfservice/kba",
            "roles"      : "openidm-authorized",
            "methods"    : "read",
