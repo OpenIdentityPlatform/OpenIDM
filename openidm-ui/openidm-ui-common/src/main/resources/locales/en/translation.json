@@ -817,9 +817,10 @@
                 "name": "Name",
                 "type": "Type",
                 "auditEvents": "Audit Events",
-                "useForQueries": "Use for queries",
+                "useForQueries": "Use for Queries",
                 "addOption": "Add an event handler...",
                 "addButton": "Add Event Handler",
+                "enabled": "Enabled",
                 "dialog": {
                     "add": "Add Audit Event Handler",
                     "edit": "Edit Audit Event Handler"

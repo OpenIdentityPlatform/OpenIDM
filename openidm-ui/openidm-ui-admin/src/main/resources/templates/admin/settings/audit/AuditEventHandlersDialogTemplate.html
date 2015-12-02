@@ -15,6 +15,7 @@
             <div class="validation-message"></div>
         </div>
     </div>
+
     <div class="form-group">
         <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.auditEvents"}}</label>
         <div class="col-sm-6">
@@ -25,16 +26,28 @@
             </select>
         </div>
     </div>
+
     <div class="form-group">
         <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.useForQueries"}}</label>
         <div class="col-sm-6">
-            <div class="checkbox">
+            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                 <label>
-                    <input type="checkbox" class="useForQueries" {{#if useForQueries}}checked {{/if}}/>
+                    <input id="useForQueries" class="changes-watched section-check useForQueries" name="useForQueries" type="checkbox" {{#if useForQueries}}checked{{/if}}><span></span>
                 </label>
             </div>
         </div>
     </div>
 
-    <div id="auditEventHandlerConfig" class="jsonEditorContainer panel-body no-well-border transparent-well"></div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.enabled"}}</label>
+        <div class="col-sm-6">
+            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                <label>
+                    <input id="enabled" class="changes-watched section-check" name="enabled" type="checkbox" {{#if enabled}}checked{{/if}}><span></span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div id="auditEventHandlerConfig" class="jsonEditorContainer panel-body"></div>
 </form>
