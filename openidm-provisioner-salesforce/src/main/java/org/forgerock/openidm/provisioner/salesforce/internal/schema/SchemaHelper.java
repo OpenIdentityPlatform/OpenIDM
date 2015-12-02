@@ -3124,12 +3124,6 @@ public class SchemaHelper {
                                             field("nativeName", "LastReferencedDate"),
                                             field("nativeType", "datetime"),
                                             field("required", false)
-                                    )),
-                                    field("PSA__c", object(
-                                            field("type", "textarea"),
-                                            field("nativeName", "PSA__c"),
-                                            field("nativeType", "textarea"),
-                                            field("required", false)
                                     ))
                             ))
                     ))
