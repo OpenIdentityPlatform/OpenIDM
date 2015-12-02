@@ -195,11 +195,11 @@ public class AuditFilter implements Filter {
         final OpenIDMAccessAuditEventBuilder accessAuditEventBuilder = new OpenIDMAccessAuditEventBuilder();
         accessAuditEventBuilder
                 .rolesFromCrestContext(context)
-                .forHttpCrestRequest(context, state.request)
+                .forHttpRequest(context, state.request)
                 // TODO CAUD-114 .serverFromHttpContext(context)
                 .requestFromCrestRequest(state.request)
-                .clientFromHttpContext(context)
-                .httpFromHttpContext(context)
+                .clientFromContext(context)
+                .httpFromContext(context)
                 .transactionId(ContextUtil.getTransactionId(context))
                 .eventName("access")
                 .userId(getUserId(context));

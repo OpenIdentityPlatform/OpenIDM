@@ -136,7 +136,7 @@ public class RouterActivityLogger implements ActivityLogger {
                     .eventName(ACTIVITY_EVENT_NAME)
                     .userId(getRequester(context))
                     .runAs(authenticationId)
-                    .operationFromRequest(request)
+                    .operationFromCrestRequest(request)
                     .before(beforeValue)
                     .after(afterValue)
                     .changedFields(changedFields)
