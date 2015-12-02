@@ -210,7 +210,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                 version = version[0].split(".");
                 version = version[0] +"." +version[1];
             } else {
-                version = version[0].split(".");
+                version = version.split(".");
                 version = version[0] +"." +version[1];
             }
 

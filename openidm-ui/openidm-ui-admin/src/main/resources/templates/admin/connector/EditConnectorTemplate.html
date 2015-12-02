@@ -19,10 +19,12 @@
                         <i class="fa fa-ellipsis-v fa-lg"></i>
                     </button>
                     <ul class="dropdown-menu pull-right" role="menu">
-                        {{#each objectTypes}}
-                        <li class="data-link"><a href="#resource/system/{{../connectorName}}/{{@key}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{@key}})</a></li>
-                        {{/each}}
-                        <li class="divider"></li>
+                        {{#if versionCheck}}
+                            {{#each objectTypes}}
+                            <li class="data-link"><a href="#resource/system/{{../connectorName}}/{{@key}}/list/"><i class="fa fa-database"></i>{{t "templates.admin.ResourceEdit.data"}} ({{@key}})</a></li>
+                            {{/each}}
+                            <li class="divider"></li>
+                        {{/if}}
                         <li id="deleteResource"><a href="#"><i class="fa fa-times"></i>{{t "common.form.delete"}}</a></li>
                     </ul>
                 </div>
