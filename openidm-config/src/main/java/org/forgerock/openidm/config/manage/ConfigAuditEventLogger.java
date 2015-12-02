@@ -28,6 +28,7 @@ import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -71,7 +72,7 @@ public class ConfigAuditEventLogger {
                     ? context.asContext(SecurityContext.class).getAuthenticationId() : null;
 
             // Build the event utilizing the config builder.
-            AuditEvent auditEvent = ConfigAuditEventBuilder.configEvent()
+            final AuditEvent auditEvent = ConfigAuditEventBuilder.configEvent()
                     .operationFromCrestRequest(request)
                     .userId(authenticationId)
                     .runAs(authenticationId)
@@ -82,7 +83,7 @@ public class ConfigAuditEventLogger {
                     .eventName(CONFIG_AUDIT_EVENT_NAME)
                     .before(null != before ? mapper.writeValueAsString(before.getObject()) : "")
                     .after(null != after ? mapper.writeValueAsString(after.getObject()) : "")
-                    .changedFields(getChangedFields(before, after))
+                    .changedFields(getChangedFields(before, after, request.getRequestType()))
                     .toEvent();
 
             return connectionFactory.getConnection().create(context,
@@ -96,7 +97,12 @@ public class ConfigAuditEventLogger {
         }
     }
 
-    private String[] getChangedFields(JsonValue before, JsonValue after) {
+    private String[] getChangedFields(JsonValue before, JsonValue after, RequestType requestType) {
+        if (RequestType.READ.equals(requestType) || RequestType.QUERY.equals(requestType)) {
+            // if reading or query there are no changed fields
+            return new String[0];
+        }
+
         if (null == before && null == after) {
             return new String[0];
         }
