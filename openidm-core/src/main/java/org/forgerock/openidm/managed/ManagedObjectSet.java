@@ -350,7 +350,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
             SchemaField field = getSchema().getField(key);
             // Only populate if field is returned by default or explicitly requested
-            if (field.isVirtual() && (field.isReturnedByDefault() || request.getFields().contains(field))) {
+            if (field.isVirtual() && (field.isReturnedByDefault() || request.getFields().contains(key))) {
                 field.onRetrieve(context, content);
             }
         }
