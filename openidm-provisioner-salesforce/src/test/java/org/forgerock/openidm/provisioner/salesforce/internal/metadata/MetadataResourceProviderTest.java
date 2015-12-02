@@ -13,20 +13,20 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.provisioner.salesforce.internal.GuiceSalesforceModule;
 import org.forgerock.openidm.provisioner.salesforce.internal.SalesforceConnection;
+import org.forgerock.openidm.provisioner.salesforce.internal.TestUtil;
+import org.forgerock.services.context.RootContext;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
@@ -45,7 +45,7 @@ public class MetadataResourceProviderTest {
 
     @Inject
     @Nullable
-    RouterRegistry routerRegistry = null;
+    TestUtil.TestRouterRegistry routerRegistry = null;
 
     @BeforeClass
     public void beforeClass() throws Exception {
@@ -61,37 +61,37 @@ public class MetadataResourceProviderTest {
                 new JsonValue(SalesforceConnection.mapper.readValue(TEST_CONFIG, Map.class));
         CreateRequest createRequest =
                 Requests.newCreateRequest("/system/test/metadata/samlssoconfig", content);
-        Resource resource0 =
-                routerRegistry.getConnection("test").create(new RootContext(), createRequest);
+        ResourceResponse resource0 =
+                routerRegistry.getConnection().create(new RootContext(), createRequest);
 
         Assert.assertNotNull(resource0.getId());
         ReadRequest readRequest =
                 Requests.newReadRequest("/system/test/metadata/SamlSsoConfig", resource0.getId());
-        Resource resource1 =
-                routerRegistry.getConnection("test").read(new RootContext(), readRequest);
+        ResourceResponse resource1 =
+                routerRegistry.getConnection().read(new RootContext(), readRequest);
 
         UpdateRequest updateRequest =
                 Requests.newUpdateRequest("/system/test/metadata/SamlSsoConfig", resource1.getId(),
                         content);
         updateRequest.getContent().put("fullName", "Test SAML Config RENAME");
-        Resource resource2 =
-                routerRegistry.getConnection("test").update(new RootContext(), updateRequest);
+        ResourceResponse resource2 =
+                routerRegistry.getConnection().update(new RootContext(), updateRequest);
 
         Assert.assertEquals(resource2.getId(), "Test SAML Config RENAME");
         DeleteRequest deleteRequest =
                 Requests.newDeleteRequest("/system/test/metadata/SamlSsoConfig", resource2.getId());
-        Resource resource3 =
-                routerRegistry.getConnection("test").delete(new RootContext(), deleteRequest);
+        ResourceResponse resource3 =
+                routerRegistry.getConnection().delete(new RootContext(), deleteRequest);
     }
 
     @Test
     public void testQueryCollection() throws Exception {
         QueryRequest queryRequest = Requests.newQueryRequest("/system/test/metadata/samlssoconfig");
         queryRequest.setQueryId(ServerConstants.QUERY_ALL_IDS);
-        Set<Resource> results = new HashSet<Resource>();
+        Set<ResourceResponse> results = new HashSet<ResourceResponse>();
 
-        QueryResult queryResult =
-                routerRegistry.getConnection("test")
+        QueryResponse queryResult =
+                routerRegistry.getConnection()
                         .query(new RootContext(), queryRequest, results);
 
         Assert.assertFalse(results.isEmpty());
@@ -104,8 +104,8 @@ public class MetadataResourceProviderTest {
         queryRequest.setQueryId(ServerConstants.QUERY_ALL_IDS);
         int i = 0;
         do {
-            Set<Resource> results = new HashSet<Resource>();
-            routerRegistry.getConnection("test").query(new RootContext(), queryRequest, results);
+            Set<ResourceResponse> results = new HashSet<ResourceResponse>();
+            routerRegistry.getConnection().query(new RootContext(), queryRequest, results);
             // Assert.assertFalse(results.isEmpty());
             Thread.sleep(16 * 60 * 1000);
             Toolkit.getDefaultToolkit().beep();

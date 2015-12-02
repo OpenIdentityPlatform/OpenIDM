@@ -12,17 +12,16 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>3.2.0-SNAPSHOT</version>
+        <version>4.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-salesforce</artifactId>
     <version>${provisioner.salesforcemodule.version}</version>
     <name>OpenIDM Salesforce Provisioner Service</name>
     <packaging>bundle</packaging>
-    <description>This bundle is an adapter between Salesforce API v${provisioner.salesforcemodule.version} and Common Resource Access Protocol</description>
+    <description>This bundle is an adapter between Salesforce API v${salesforce.api.version} and Common Resource Access Protocol</description>
 
     <properties>
-        <jetty-version>8.1.9.v20130131</jetty-version>
-        <openidm.version>3.1.0</openidm.version>
+        <jetty-version>9.2.9.v20150224</jetty-version>
         <salesforce.api.version>29</salesforce.api.version>
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.2-SNAPSHOT</provisioner.salesforcemodule.version>
         <restlet.version>2.1.2</restlet.version>
@@ -64,17 +63,17 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-enhanced-config</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-router</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-provisioner</artifactId>
-            <version>${openidm.version}</version>
+            <version>${project.parent.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
@@ -193,12 +192,6 @@
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.9.5</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.httpclient</artifactId>
-            <version>${restlet.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>

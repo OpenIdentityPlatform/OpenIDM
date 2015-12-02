@@ -6,6 +6,11 @@
 
 package org.forgerock.openidm.provisioner.salesforce.internal;
 
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.provisioner.salesforce.internal.SalesforceConnectorUtil.adapt;
+
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -24,29 +29,29 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryFilter;
+import org.forgerock.util.query.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceName;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
@@ -63,13 +68,15 @@ import org.forgerock.openidm.provisioner.SimpleSystemIdentifier;
 import org.forgerock.openidm.provisioner.salesforce.internal.data.SObjectDescribe;
 import org.forgerock.openidm.provisioner.salesforce.internal.metadata.MetadataResourceProvider;
 import org.forgerock.openidm.provisioner.salesforce.internal.schema.SchemaHelper;
-import org.forgerock.openidm.provisioner.salesforce.util.StringSQLRenderer;
-import org.forgerock.openidm.provisioner.salesforce.util.StringSQLQueryFilterVisitor;
+import org.forgerock.openidm.repo.util.StringSQLRenderer;
+import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.restlet.Response;
@@ -200,7 +207,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                     }
                 });
 
-        ResourceName system = new ResourceName("system", systemIdentifier.getName());
+        ResourcePath system = new ResourcePath("system", systemIdentifier.getName());
 
         RouteBuilder builder = RouteBuilder.newBuilder();
 
@@ -259,7 +266,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         }
     }
 
-    private String getPartition(ServerContext context) throws ResourceException {
+    private String getPartition(Context context) throws ResourceException {
         Map<String, String> variables = ResourceUtil.getUriTemplateVariables(context);
         if (null != variables && variables.containsKey("partition")) {
             return variables.get("partition");
@@ -276,7 +283,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
     }
 
     @Override
-    public Map<String, Object> getStatus(ServerContext serverContext) {
+    public Map<String, Object> getStatus(Context serverContext) {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         JsonValue jv = new JsonValue(result);
 
@@ -318,7 +325,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
     }
 
     @Override
-    public JsonValue liveSynchronize(String objectType, JsonValue previousStage) throws ResourceException {
+    public JsonValue liveSynchronize(Context context, String objectType, JsonValue previousStage) throws ResourceException {
         return previousStage;
     }
 
@@ -329,54 +336,47 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
 
     @Override
-    public void actionInstance(ServerContext serverContext, ActionRequest actionRequest,
-            ResultHandler<JsonValue> resultHandler) {
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest actionRequest) {
         try {
-
             if (ACTION_TEST_CONNECTOR.equals(actionRequest.getAction())) {
-                resultHandler.handleResult(new JsonValue(getStatus(serverContext)));
+                return newActionResponse(new JsonValue(getStatus(context))).asPromise();
             } else {
-                resultHandler.handleError(new BadRequestException("Unsupported action: " + actionRequest.getAction()));
+                return new BadRequestException("Unsupported action: " + actionRequest.getAction()).asPromise();
             }
         } catch (Exception e) {
-            resultHandler.handleError(ResourceUtil.adapt(e));
+            return adapt(e).asPromise();
         }
     }
 
     @Override
-    public void patchInstance(ServerContext serverContext, PatchRequest patchRequest,
-            ResultHandler<Resource> resourceResultHandler) {
-        ResourceUtil.notSupportedOnInstance(patchRequest);
+    public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest patchRequest) {
+        return ResourceUtil.notSupportedOnInstance(patchRequest).asPromise();
     }
 
     @Override
-    public void readInstance(ServerContext serverContext, ReadRequest readRequest,
-            ResultHandler<Resource> resourceResultHandler) {
-        ResourceUtil.notSupportedOnInstance(readRequest);
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest readRequest) {
+        return ResourceUtil.notSupportedOnInstance(readRequest).asPromise();
     }
 
     @Override
-    public void updateInstance(ServerContext serverContext, UpdateRequest updateRequest,
-            ResultHandler<Resource> resourceResultHandler) {
-        ResourceUtil.notSupportedOnInstance(updateRequest);
+    public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest updateRequest) {
+        return ResourceUtil.notSupportedOnInstance(updateRequest).asPromise();
     }
 
     private class SObjectResourceProvider implements CollectionResourceProvider {
 
         @Override
-        public void actionCollection(ServerContext context, ActionRequest request,
-                ResultHandler<JsonValue> handler) {
-            ResourceUtil.notSupportedOnCollection(request);
+        public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
+            return ResourceUtil.notSupportedOnCollection(request).asPromise();
         }
 
         @Override
-        public void actionInstance(ServerContext context, String resourceId, ActionRequest request,
-                ResultHandler<JsonValue> handler) {
-            ResourceUtil.notSupportedOnInstance(request);
+        public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, ActionRequest request) {
+            return ResourceUtil.notSupportedOnInstance(request).asPromise();
         }
 
         @Override
-        public void createInstance(ServerContext context, CreateRequest request, ResultHandler<Resource> handler) {
+        public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest request) {
             try {
                 final String type = getPartition(context);
                 final SObjectDescribe describe = getSObjectDescribe(type);
@@ -396,43 +396,40 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                             final JsonValue result = new JsonValue(rep.getObject());
                             result.asMap().putAll(create.asMap());
                             if (result.get("success").asBoolean()) {
-                                result.put(Resource.FIELD_CONTENT_ID, result.get("id").getObject());
+                                result.put(ResourceResponse.FIELD_CONTENT_ID, result.get("id").getObject());
                             }
                             if (result.isDefined("errors") && result.get("errors").size() > 0) {
-                                handler.handleError(new InternalServerErrorException(
-                                        "Failed to create FIX ME"));
+                                return new InternalServerErrorException("Failed to create FIX ME").asPromise();
                             } else {
-                                final Resource resource = new Resource(result.get("id").asString(), "", result);
+                                final ResourceResponse resource = newResourceResponse(result.get("id").asString(), "", result);
                                 activityLogger.log(context, request, "message",
                                         getSource(type, resource.getId()), null,
                                         resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
-                                handler.handleResult(resource);
+                                return resource.asPromise();
                             }
                         } else {
-                            handler.handleError(new InternalServerErrorException(
-                                    "Failed to create FIX ME?"));
+                            return new InternalServerErrorException("Failed to create FIX ME?").asPromise();
                         }
                     } catch (ResourceException e) {
                         activityLogger.log(context, request, "message",
                                 getSource(type, request.getNewResourceId()), request.getContent(),
                                 null, org.forgerock.openidm.audit.util.Status.FAILURE);
-                        handler.handleError(e);
+                        return e.asPromise();
                     } finally {
                         if (null != cr) {
                             cr.release();
                         }
                     }
                 } else {
-                    handler.handleError(new BadRequestException("Type not supported: " + type));
+                    return new BadRequestException("Type not supported: " + type).asPromise();
                 }
             } catch (Throwable t) {
-                handler.handleError(ResourceUtil.adapt(t));
+                return adapt(t).asPromise();
             }
         }
 
         @Override
-        public void deleteInstance(ServerContext context, String resourceId, DeleteRequest request,
-                ResultHandler<Resource> handler) {
+        public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String resourceId, DeleteRequest request) {
             try {
                 final String type = getPartition(context);
                 final ClientResource cr = getClientResource(type, resourceId);
@@ -441,7 +438,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                     handleRequest(cr, true);
                     final JsonValue result;
                     final Representation body = cr.getResponse().getEntity();
-                    final Resource resource;
+                    final ResourceResponse resource;
                     if (null != body && body instanceof EmptyRepresentation == false) {
                         final JacksonRepresentation<Map> rep =
                                 new JacksonRepresentation<Map>(body, Map.class);
@@ -449,35 +446,34 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                     } else {
                         result = new JsonValue(new HashMap<String, Object>());
                     }
-                    resource = new Resource(resourceId, request.getRevision(), result);
-                    result.put(Resource.FIELD_CONTENT_ID, resource.getId());
+                    resource = newResourceResponse(resourceId, request.getRevision(), result);
+                    result.put(ResourceResponse.FIELD_CONTENT_ID, resource.getId());
                     activityLogger.log(context, request, "message", getSource(type, resource.getId()),
                             resource.getContent(), null, org.forgerock.openidm.audit.util.Status.SUCCESS);
-                    handler.handleResult(resource);
+                    return resource.asPromise();
                 } catch (ResourceException e) {
                     activityLogger.log(context, request, "message",
                             getSource(type, resourceId), null,
                             null, org.forgerock.openidm.audit.util.Status.FAILURE);
-                    handler.handleError(e);
+                    return e.asPromise();
                 } finally {
                     if (null != cr) {
                         cr.release();
                     }
                 }
             } catch (Throwable t) {
-                handler.handleError(ResourceUtil.adapt(t));
+                return adapt(t).asPromise();
             }
         }
 
         @Override
-        public void patchInstance(ServerContext context, String resourceId, PatchRequest request,
-                ResultHandler<Resource> handler) {
-            ResourceUtil.notSupportedOnInstance(request);
+        public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String resourceId, PatchRequest request) {
+            return ResourceUtil.notSupportedOnInstance(request).asPromise();
         }
 
         @Override
-        public void queryCollection(final ServerContext context, final QueryRequest request,
-                final QueryResultHandler handler) {
+        public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request,
+                final QueryResourceHandler handler) {
 
             String type = "?";
             try {
@@ -489,20 +485,17 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                     } else if (config.queryIdExists(request.getQueryId())) {
                         queryExpression = config.getQueryExpression(request.getQueryId());
                     } else {
-                        handler.handleError(new BadRequestException("Unsupported QueryId" + request.getQueryId()));
-                        return;
+                        return new BadRequestException("Unsupported QueryId" + request.getQueryId()).asPromise();
                     }
                 } else if (StringUtils.isNotBlank(request.getQueryExpression())) {
                     queryExpression = request.getQueryExpression();
                 } else if (request.getQueryFilter() != null) {
                     queryExpression = buildQueryExpressionFromQueryFilter(type, request.getQueryFilter());
                 } else {
-                    handler.handleError(
-                            new BadRequestException("One of queryId, queryExpression, or queryFilter must be specified"));
-                    return;
+                    return new BadRequestException("One of queryId, queryExpression, or queryFilter must be specified").asPromise();
                 }
 
-                executeQuery(handler, queryExpression);
+                return executeQuery(handler, queryExpression).asPromise();
             } catch (Throwable t) {
                 final String queryRequestMessage;
                 if (request.getQueryId() != null) {
@@ -517,13 +510,12 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 }
 
                 logger.error(t.getMessage() + " while executing " + queryRequestMessage + " on partition " + type, t);
-                handler.handleError(ResourceUtil.adapt(t));
+                return adapt(t).asPromise();
             }
         }
 
         @Override
-        public void readInstance(ServerContext context, String resourceId, ReadRequest request,
-                ResultHandler<Resource> handler) {
+        public Promise<ResourceResponse, ResourceException> readInstance(Context context, String resourceId, ReadRequest request) {
             try {
                 final String type = getPartition(context);
                 final ClientResource cr = getClientResource(type, resourceId);
@@ -534,34 +526,33 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         final JacksonRepresentation<Map> rep =
                                 new JacksonRepresentation<Map>(body, Map.class);
                         final JsonValue result = new JsonValue(rep.getObject());
-                        result.put(Resource.FIELD_CONTENT_ID, result.get("Id").asString());
-                        final Resource resource =
-                                new Resource(result.get("Id").asString(), result.get(REVISION_FIELD).asString(), result);
+                        result.put(ResourceResponse.FIELD_CONTENT_ID, result.get("Id").asString());
+                        final ResourceResponse resource =
+                                newResourceResponse(result.get("Id").asString(), result.get(REVISION_FIELD).asString(), result);
                         activityLogger.log(context, request, "message",
                                 getSource(type, resource.getId()), resource.getContent(),
                                 resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
-                        handler.handleResult(resource);
+                        return resource.asPromise();
                     } else {
-                        handler.handleError(new NotFoundException());
+                        return new NotFoundException().asPromise();
                     }
                 } catch (ResourceException e) {
                     activityLogger.log(context, request, "message",
                             getSource(type, resourceId), null,
                             null, org.forgerock.openidm.audit.util.Status.FAILURE);
-                    handler.handleError(e);
+                    return e.asPromise();
                 } finally {
                     if (null != cr) {
                         cr.release();
                     }
                 }
             } catch (Throwable t) {
-                handler.handleError(ResourceUtil.adapt(t));
+                return adapt(t).asPromise();
             }
         }
 
         @Override
-        public void updateInstance(ServerContext context, String resourceId, UpdateRequest request,
-                ResultHandler<Resource> handler) {
+        public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String resourceId, UpdateRequest request) {
             try {
                 final String type = getPartition(context);
                 final SObjectDescribe describe = getSObjectDescribe(type);
@@ -587,27 +578,27 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                             result = new JsonValue(new HashMap<String, Object>());
                         }
                         result.asMap().putAll(update.asMap());
-                        result.put(Resource.FIELD_CONTENT_ID, resourceId);
-                        final Resource resource = new Resource(resourceId, request.getRevision(), result);
+                        result.put(ResourceResponse.FIELD_CONTENT_ID, resourceId);
+                        final ResourceResponse resource = newResourceResponse(resourceId, request.getRevision(), result);
                         activityLogger.log(context, request, "message",
                                 getSource(type, resource.getId()), null,
                                 resource.getContent(), org.forgerock.openidm.audit.util.Status.SUCCESS);
-                        handler.handleResult(resource);
+                        return resource.asPromise();
                     } catch (ResourceException e) {
                         activityLogger.log(context, request, "message",
                                 getSource(type, resourceId), request.getContent(),
                                 null, org.forgerock.openidm.audit.util.Status.FAILURE);
-                        handler.handleError(e);
+                        return e.asPromise();
                     } finally {
                         if (null != cr) {
                             cr.release();
                         }
                     }
                 } else {
-                    handler.handleError(new BadRequestException("Type not supported: " + type));
+                    return new BadRequestException("Type not supported: " + type).asPromise();
                 }
             } catch (Throwable t) {
-                handler.handleError(ResourceUtil.adapt(t));
+                return adapt(t).asPromise();
             }
         }
     }
@@ -659,7 +650,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         throw new IllegalArgumentException("Only one level JsonPointer supported");
                     }
 
-                    if (Resource.FIELD_CONTENT_ID.equals(field.leaf())) {
+                    if (ResourceResponse.FIELD_CONTENT_ID.equals(field.leaf())) {
                         return "Id";
                     } else {
                         return field.leaf();
@@ -690,10 +681,10 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 + StringUtils.join(SchemaHelper.getObjectProperties(type), ", ")
                 + " FROM " + type
                 + " WHERE "
-                + queryFilter.accept(SALESFORCE_QUERY_FILTER_VISITOR, null).toSQL();
+                + queryFilter.accept(SALESFORCE_QUERY_FILTER_VISITOR, null).toString();
     }
 
-    private boolean executeQuery(QueryResultHandler handler, String queryExpression) throws ResourceException {
+    private QueryResponse executeQuery(QueryResourceHandler handler, String queryExpression) throws ResourceException {
         Integer totalSize = null;
         JsonValue result = null;
         String pagedResultsCookie = null;
@@ -713,8 +704,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         pagedResultsCookie = queryValue.substring(6);
                         // TODO Calculate the remainingPagedResults
                         String pos = pagedResultsCookie.substring(pagedResultsCookie.indexOf('-') + 1);
-                        handler.handleResult(new QueryResult(pagedResultsCookie, totalSize - Integer.getInteger(pos)));
-                        return true;
+                        return newQueryResponse(pagedResultsCookie, CountPolicy.EXACT, totalSize - Integer.getInteger(pos));
                     }
                     result = sendClientRequest(Method.GET, queryValue);
                 } else {
@@ -723,10 +713,10 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 if (result != null) {
                     for (JsonValue record : result.get("records")) {
                         if (record.isDefined("Id")) {
-                            record.put(Resource.FIELD_CONTENT_ID, record.get("Id").asString());
+                            record.put(ResourceResponse.FIELD_CONTENT_ID, record.get("Id").asString());
                         }
                         handler.handleResource(
-                                new Resource(record.get("Id").asString(), record.get(REVISION_FIELD).asString(), record));
+                                newResourceResponse(record.get("Id").asString(), record.get(REVISION_FIELD).asString(), record));
                     }
                     if (totalSize == null) {
                         totalSize = result.get("totalSize").asInteger();
@@ -741,8 +731,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 throw new InternalServerErrorException(e);
             }
         } while (true);
-        handler.handleResult(new QueryResult());
-        return false;
+        return newQueryResponse();
     }
 
     private JsonValue sendClientRequest(Method method, String id,
@@ -770,8 +759,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         }
     }
 
-    protected void handleRequest(final ClientResource resource, boolean tryReauth)
-            throws ResourceException {
+    protected void handleRequest(final ClientResource resource, boolean tryReauth) throws ResourceException {
         try {
             resource.handle();
         } catch (Exception e) {
@@ -824,8 +812,8 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         }
 
         @Override
-        public void readInstance(ServerContext serverContext, String instanceName,
-                ReadRequest readRequest, ResultHandler<Resource> resourceResultHandler) {
+        public Promise<ResourceResponse, ResourceException> readInstance(Context context, String instanceName,
+                ReadRequest readRequest) {
             try {
                 final ClientResource cr = getClientResource(type, instanceName);
                 try {
@@ -835,11 +823,11 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                         JacksonRepresentation<Map> rep = new JacksonRepresentation<Map>(body, Map.class);
                         JsonValue result = new JsonValue(rep.getObject());
                         if (result.isDefined("Id")) {
-                            result.put(Resource.FIELD_CONTENT_ID, result.get("Id").required().asString());
+                            result.put(ResourceResponse.FIELD_CONTENT_ID, result.get("Id").required().asString());
                         }
-                        resourceResultHandler.handleResult(new Resource(result.get("Id").asString(), "", result));
+                        return newResourceResponse(result.get("Id").asString(), "", result).asPromise();
                     } else {
-                        resourceResultHandler.handleError(new NotFoundException("Resource not Found"));
+                        return new NotFoundException("Resource not Found").asPromise();
                     }
                 } finally {
                     if (null != cr) {
@@ -847,7 +835,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                     }
                 }
             } catch (Throwable t) {
-                resourceResultHandler.handleError(ResourceUtil.adapt(t));
+                return adapt(t).asPromise();
             }
         }
 
@@ -863,45 +851,39 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         }
 
         @Override
-        public void actionCollection(ServerContext serverContext, ActionRequest actionRequest,
-                ResultHandler<JsonValue> jsonValueResultHandler) {
-            ResourceUtil.notSupportedOnCollection(actionRequest);
+        public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest actionRequest) {
+            return ResourceUtil.notSupportedOnCollection(actionRequest).asPromise();
         }
 
         @Override
-        public void actionInstance(ServerContext serverContext, String s,
-                ActionRequest actionRequest, ResultHandler<JsonValue> jsonValueResultHandler) {
-            ResourceUtil.notSupportedOnInstance(actionRequest);
+        public Promise<ActionResponse, ResourceException> actionInstance(Context context, String s, ActionRequest actionRequest) {
+            return ResourceUtil.notSupportedOnInstance(actionRequest).asPromise();
         }
 
         @Override
-        public void createInstance(ServerContext serverContext, CreateRequest createRequest,
-                ResultHandler<Resource> resourceResultHandler) {
-            ResourceUtil.notSupportedOnInstance(createRequest);
+        public Promise<ResourceResponse, ResourceException> createInstance(Context context, CreateRequest createRequest) {
+            return ResourceUtil.notSupportedOnInstance(createRequest).asPromise();
         }
 
         @Override
-        public void deleteInstance(ServerContext serverContext, String s,
-                DeleteRequest deleteRequest, ResultHandler<Resource> resourceResultHandler) {
-            ResourceUtil.notSupportedOnInstance(deleteRequest);
+        public Promise<ResourceResponse, ResourceException> deleteInstance(Context context, String s, DeleteRequest deleteRequest) {
+            return ResourceUtil.notSupportedOnInstance(deleteRequest).asPromise();
         }
 
         @Override
-        public void patchInstance(ServerContext serverContext, String s, PatchRequest patchRequest,
-                ResultHandler<Resource> resourceResultHandler) {
-            ResourceUtil.notSupportedOnInstance(patchRequest);
+        public Promise<ResourceResponse, ResourceException> patchInstance(Context context, String s, PatchRequest patchRequest) {
+            return ResourceUtil.notSupportedOnInstance(patchRequest).asPromise();
         }
 
         @Override
-        public void queryCollection(ServerContext serverContext, QueryRequest queryRequest,
-                QueryResultHandler queryResultHandler) {
-            ResourceUtil.notSupportedOnCollection(queryRequest);
+        public Promise<QueryResponse, ResourceException> queryCollection(Context context, QueryRequest queryRequest,
+                QueryResourceHandler queryResourceHandler) {
+            return ResourceUtil.notSupportedOnCollection(queryRequest).asPromise();
         }
 
         @Override
-        public void updateInstance(ServerContext serverContext, String s,
-                UpdateRequest updateRequest, ResultHandler<Resource> resourceResultHandler) {
-            ResourceUtil.notSupportedOnInstance(updateRequest);
+        public Promise<ResourceResponse, ResourceException> updateInstance(Context context, String s, UpdateRequest updateRequest) {
+            return ResourceUtil.notSupportedOnInstance(updateRequest).asPromise();
         }
     }
 }
