@@ -380,7 +380,12 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                                             "default": ""
                                         }
                                     }
-                                }
+                                },
+                                "default": [{
+                                    "propertyName": "_id",
+                                    "type": "string",
+                                    "label": ""
+                                }]
                             },
                             "policyParams": {
                                 "title": "Params",
@@ -931,8 +936,6 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
 
         saveManagedSchema: function(event) {
             event.preventDefault();
-
-            this.data.currentManagedObject.schema = this.getManagedSchema();
 
             this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.bind(function () {
                 this.args.push("showSchema");
