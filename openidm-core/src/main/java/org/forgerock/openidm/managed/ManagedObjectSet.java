@@ -1254,13 +1254,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 }
             }
         }
-        
+
         // Remove all relationship and virtual fields that are not returned by default, or explicitly listed
         for (JsonPointer key : fieldsToRemove.keySet()) {
             logger.debug("Removing field {} from the response object", key);
             resource.getContent().remove(key);
         }
-        
+
+        // List of promises representing results of resource expansion
+        List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
         // Loop over the relationship fields to expand
         for (JsonPointer fieldToExpand : resourceExpansionMap.keySet()) {
             // The schema for the field to expand
@@ -1275,11 +1277,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     if (schemaField.isArray()) {
                         // The field is an array of relationship objects
                         for (JsonValue value : fieldValue) {
-                            expandResource(context, value, fieldsList);
+                            promises.add(expandResource(context, value, fieldsList));
                         }
                     } else {
                         // The field is a relationship object  
-                        expandResource(context, fieldValue, fieldsList);
+                        promises.add(expandResource(context, fieldValue, fieldsList));
                     }
                 } else {
                     logger.warn("Cannot expand a null relationship object");
@@ -1287,6 +1289,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             } catch (ResourceException e) {
                 logger.error("Error expanding resource " + fieldToExpand + " with value " + fieldValue, e);
             }
+        }
+        
+        try {
+            when(promises).getOrThrowUninterruptibly();
+        } catch (ResourceException e) {
+            // Exceptions are already handled in expandResource, so this should never happen.
+            logger.error("Error performing resource expansion", e);
         }
         
         // only cull private properties if this is an external call
@@ -1317,8 +1326,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param fieldsList the list of fields to read and merge with the relationship object.
      * @throws ResourceException if an error is encountered.
      */
-    private void expandResource(Context context, final JsonValue value, List<JsonPointer> fieldsList)
-            throws ResourceException {
+    private Promise<ResourceResponse, ResourceException> expandResource(Context context, final JsonValue value, 
+            List<JsonPointer> fieldsList) throws ResourceException {
         if (!value.isNull() && value.get(SchemaField.FIELD_REFERENCE) != null) {
             final Connection connection = ContextUtil.isExternal(context) 
                     ? connectionFactory.getExternalConnection()
@@ -1326,7 +1335,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             // Create and issue a read request on the referenced resource with the specified list of fields
             ReadRequest request = Requests.newReadRequest(value.get(SchemaField.FIELD_REFERENCE).asString());
             request.addField(fieldsList.toArray(new JsonPointer[fieldsList.size()]));
-            connection.readAsync(context, request).thenOnResultOrException(
+            return connection.readAsync(context, request).thenOnResultOrException(
                     new ResultHandler<ResourceResponse>() {
                         @Override
                         public void handleResult(ResourceResponse resource) {
@@ -1343,6 +1352,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     });
         } else {
             logger.warn("Cannot expand a null relationship object");
+            return newResourceResponse(null, null, null).asPromise();
         }
     }
 
