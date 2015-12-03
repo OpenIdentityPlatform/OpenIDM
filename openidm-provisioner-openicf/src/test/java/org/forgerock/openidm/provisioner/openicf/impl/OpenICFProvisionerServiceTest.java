@@ -721,7 +721,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
     }
 
 
-    @Test(dataProvider = "groovy-only", enabled = true)
+    @Test(dataProvider = "groovy-only", enabled = false)
     public void testPagedSearch(String systemName) throws Exception {
 
         for (int i = 0; i < 100; i++) {
