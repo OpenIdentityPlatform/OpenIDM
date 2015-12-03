@@ -75,6 +75,8 @@ define("org/forgerock/openidm/ui/admin/managed/AbstractManagedView", [
 
         saveManagedObject: function(managedObject, saveObject, routeTo) {
             var promises = [];
+
+            managedObject.schema = this.getManagedSchema();
             
             this.combineSchemaAndProperties();
 

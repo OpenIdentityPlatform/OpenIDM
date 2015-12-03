@@ -371,7 +371,19 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                     "operation": "add",
                     "field": "/" + this.data.prop.propName + "/-",
                     "value": newVal
-                }])
+                }]),
+                errorsHandlers : {
+                        "error": {
+                            status: "400"
+                        }
+                    },
+                error: function (e) {
+                    if (e.status === 400 && e.responseJSON.message.indexOf("conflict with existing") > -1) {
+                        messagesManager.messages.addMessage({ "type": "error", "message": $.t("templates.admin.ResourceEdit.conflictWithExistingRelationship") });
+                    } else {
+                        messagesManager.messages.addMessage({ "type": "error", "message": $.t("config.messages.CommonMessages.badRequestError") });
+                    }
+                }
             });
         },
         openResourceCollectionDialog: function (propertyValue) {

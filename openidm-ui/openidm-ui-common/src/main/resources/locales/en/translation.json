@@ -361,7 +361,8 @@
                 "removeSelectedResource": "Remove Selected __resource__",
                 "type": "Type",
                 "showChart": "Show Chart",
-                "showList": "Show List"
+                "showList": "Show List",
+                "conflictWithExistingRelationship": "Conflict with Existing Relationship"
             },
             "ResourceList":
             {
