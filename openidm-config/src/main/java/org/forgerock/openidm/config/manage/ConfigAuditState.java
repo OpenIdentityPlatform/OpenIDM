@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.config.manage;
 
+import static org.forgerock.json.JsonValue.json;
+
 import org.forgerock.json.JsonValue;
 
 /**
@@ -40,8 +42,8 @@ public class ConfigAuditState {
     public ConfigAuditState(String id, String revision, JsonValue before, JsonValue after) {
         this.id = id;
         this.revision = revision;
-        this.before = before;
-        this.after = after;
+        this.before = before != null ? before : json(null);
+        this.after = after != null ? after : json(null);
     }
 
     /**
