@@ -117,9 +117,6 @@ public class ServletComponent implements EventHandler {
     protected Map<ServletFilterRegistrator, ScriptEntry> filterRegistratorMap =
             new HashMap<ServletFilterRegistrator, ScriptEntry>();
 
-    // creates the inbound transactionId filter to set the transactionId context.
-    private final Filter transactionIdInboundFilter = new TransactionIdInboundFilter();
-
     protected synchronized void bindRegistrator(ServletFilterRegistrator registrator, Map<String, Object> properties) {
         JsonValue scriptConfig = registrator.getConfiguration()
                 .get(SERVLET_FILTER_SCRIPT_EXTENSIONS)
@@ -155,10 +152,7 @@ public class ServletComponent implements EventHandler {
                 new HttpApplication() {
                     @Override
                     public Handler start() throws HttpApplicationException {
-                        // Add the transactionIdInboundFilter before the authFilter so that CAF will have the
-                        // TransactionIdContext set so that CAF can populate the AuditApi message with the
-                        // transactionId
-                        return Handlers.chainOf(handler, transactionIdInboundFilter, authFilter);
+                        return Handlers.chainOf(handler, authFilter);
                     }
 
                     @Override
