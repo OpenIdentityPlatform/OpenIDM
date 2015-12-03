@@ -51,6 +51,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonPointer;
@@ -173,23 +174,23 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ResourceResponse, ResourceException>  handleRead(final Context context, final ReadRequest request) {
-
         return read(request.getResourcePathObject())
                 .thenAsync(
                         new AsyncFunction<ConfigAuditState, ResourceResponse, ResourceException>() {
                             @Override
                             public Promise<ResourceResponse, ResourceException> apply(
                                     ConfigAuditState configAuditState) {
-                                // Log audit event.
-                                auditLogger.log(configAuditState, request, context, connectionFactory);
+                                if (ContextUtil.isExternal(context)) {
+                                    // Log audit event.
+                                    auditLogger.log(configAuditState, request, context, connectionFactory);
+                                }
 
                                 return newResourceResponse(
                                         configAuditState.getId(),
                                         configAuditState.getRevision(),
                                         configAuditState.getAfter()).asPromise();
                             }
-                        }
-                );
+                        });
     }
 
     /**
