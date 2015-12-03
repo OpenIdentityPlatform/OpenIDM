@@ -155,9 +155,6 @@ public class SchemaField {
             this.returnByDefault = schema.get("returnByDefault").defaultTo(false).asBoolean();
         }
 
-        // Set validation flag
-        this.validationRequired = schema.get("validate").defaultTo(false).asBoolean();
-
         // Initialize the encryptor if encryption is defined.
         encryptionValue = schema.get("encryption");
         if (encryptionValue.isNotNull()) {
@@ -200,6 +197,8 @@ public class SchemaField {
                     this.reversePropertyName = schema.get("reversePropertyName").required().asString();
                 }
             }
+            // Set validation flag
+            this.validationRequired = schema.get("validate").defaultTo(false).asBoolean();
         }
     }
     
