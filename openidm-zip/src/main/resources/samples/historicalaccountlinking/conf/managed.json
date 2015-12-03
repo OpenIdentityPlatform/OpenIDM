@@ -180,11 +180,11 @@
                         "userEditable" : false,
                         "returnByDefault" : false,
                         "type" : "array",
-                        "validate": true,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship" : true,
                             "reversePropertyName" : "members",
+                            "validate": true,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -275,11 +275,11 @@
                         "userEditable" : false,
                         "type" : "array",
                         "returnByDefault" : false,
-                        "validate": true,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship" : true,
                             "reversePropertyName" : "manager",
+                            "validate": true,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -494,11 +494,11 @@
                         "viewable" : true,
                         "type" : "array",
                         "returnByDefault" : false,
-                        "validate" : true,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship": true,
                             "reversePropertyName": "roles",
+                            "validate" : true,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -537,11 +537,11 @@
                         "viewable" : true,
                         "returnByDefault" : false,
                         "type" : "array",
-                        "validate" : true,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship" : true,
                             "reversePropertyName" : "roles",
+                            "validate" : true,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -665,11 +665,11 @@
                         "userEditable" : false,
                         "type" : "array",
                         "returnByDefault" : false,
-                        "validate" : true,
                         "items" : {
                             "type" : "relationship",
                             "reverseRelationship": true,
                             "reversePropertyName": "assignments",
+                            "validate" : true,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
