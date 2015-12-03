@@ -5,12 +5,14 @@
         </div>
 
         <div class="btn-toolbar" role="toolbar" aria-label="toolbar">
+            {{#unless isSystemResource}}
             <div class="btn-group" role="group" aria-label="add resource">
                 <a href="{{addLinkHref}}" title="{{t "templates.admin.ResourceEdit.new"}} {{pageTitle}}"><button class="btn btn-primary" type="button"><span class="fa fa-plus"></span> {{t "templates.admin.ResourceEdit.new"}} {{pageTitle}}</button></a>
             </div>
             <div class="btn-group pull-right" role="group" aria-label="delete selected">
                 <button type="button"  class="btn btn-default"  id="deleteSelected" disabled><span class="fa fa-trash"></span>{{t 'common.form.deleteSelected'}}</button>
             </div>
+            {{/unless}}
             <div class="btn-group pull-right" role="group" aria-label="clear filters">
                 <button type="button"  class="btn btn-default"  id="clearFiltersBtn" disabled><span class="fa fa-times"></span>{{t 'common.form.clearFilters'}}</button>
             </div>

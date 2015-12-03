@@ -14,7 +14,9 @@
                     <h4 class="page-type">{{objectTitle}}</h4>
 	                <div class="page-header-button-group">
 	                    {{#unless newObject}}
-	                    <a href="#" class="btn btn-default" id="deleteBtn">{{t "common.form.delete"}}</a>
+	                       {{#unless isSystemResource}}
+	                       <a href="#" class="btn btn-default" id="deleteBtn" role="button">{{t "common.form.delete"}}</a>
+	                       {{/unless}}
 	                    {{/unless}}
 	                </div>
                     <h1 class="media-heading">
@@ -76,6 +78,7 @@
                     </div>
                 </div>
             </div>
+            {{#unless isSystemResource}}
             <div class="panel-footer">
                 <div id="resourceChangesPending" class="alert alert-warning" style="display: none;">
                     <i class="fa fa-exclamation-circle"></i><strong> {{t "templates.mapping.changesPending"}}</strong>
@@ -88,6 +91,7 @@
                     <a href="#" class="btn btn-primary" id="saveBtn" disabled>{{t "common.form.save"}}</a>
                 </div>
             </div>
+            {{/unless}}
         </div>
     </div>
 </div>

@@ -85,7 +85,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 this.data.args = args;
 
                 this.data.objectType = args[0];
-                this.isSystemResource = false;
+                this.data.isSystemResource = false;
                 this.objectName = args[1];
                 this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
                 
@@ -93,7 +93,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 
 
                 if (this.data.objectType === "system") {
-                    this.isSystemResource = true;
+                    this.data.isSystemResource = true;
                     this.objectName += "/" + args[2];
                     readUrl = this.data.serviceUrl +"/" + objectId;
                 }
@@ -114,12 +114,12 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                     this.data.schema = schema;
 
-                    if(this.isSystemResource) {
+                    if(this.data.isSystemResource) {
                         this.data.objectTitle = this.objectName;
                     }
 
                     if(!this.data.newObject) {
-                        if(this.isSystemResource) {
+                        if(this.data.isSystemResource) {
                             displayField = _.chain(schema.properties)
                                             .map(function(val, key) { val.name = key; return val; })
                                             .where({ nativeName: "__NAME__" })
@@ -200,7 +200,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 }, this));
             }
 
-            if (this.isSystemResource) {
+            if (this.data.isSystemResource) {
                 schema.title = this.data.objectTitle;
                 if (this.data.newObject) {
                     _.each(schema.properties,function(p) {
@@ -219,14 +219,19 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                     this.showPendingChanges();
                 }, this));
             }, this));
+            
+            if (this.data.isSystemResource) {
+                this.$el.find(".row select").hide();
+                this.$el.find(".row input").prop("disabled", true);
+            }
         },
         showPendingChanges : function() {
             var changedFields = [],
                 newValue = _.extend({},this.oldObject, this.getFormValue());
 
             if(_.isEqual(newValue, this.oldObject)) {
-                this.$el.find("#saveBtn").attr("disabled", true);
-                this.$el.find("#resetBtn").attr("disabled", true);
+                this.$el.find("#saveBtn").prop("disabled", true);
+                this.$el.find("#resetBtn").prop("disabled", true);
                 this.$el.find("#resourceChangesPending").hide();
             } else {
                 if(!this.data.newObject) {
@@ -334,7 +339,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             var formVal = this.getFormValue(),
                 successCallback = _.bind(function(editedObject){
                     var msg = (this.data.newObject) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess",
-                        editRouteName = (!this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+                        editRouteName = (!this.data.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
 
                     messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.objectTitle })});
                     this.data.editedObject = editedObject;
@@ -355,7 +360,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 formVal = _.omit(formVal,function (val) { return val === "" || val === null; });
                 resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
             } else {
-                if (!this.isSystemResource) {
+                if (!this.data.isSystemResource) {
                     _.each(this.$el.find(".resourceCollectionValue"), function(element) {
                         var val = $(element).val();
 
@@ -371,7 +376,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             }
         },
         backToList: function(e){
-            var routeName = (!this.isSystemResource) ? "adminListManagedObjectView" : "adminListSystemObjectView";
+            var routeName = (!this.data.isSystemResource) ? "adminListManagedObjectView" : "adminListSystemObjectView";
 
             if(e){
                 e.preventDefault();

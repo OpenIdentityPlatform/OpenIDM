@@ -108,7 +108,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                     this.data.validObject = true;
                     if(schema){
                         this.data.pageTitle = this.data.objectName;
-                        if (schema.title && !this.isSystemResource) {
+                        if (schema.title && !this.data.isSystemResource) {
                             this.data.pageTitle = schema.title;
                         }
 
@@ -117,7 +117,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                 if(col.type === "object") {
                                     setCols(col.properties, colName);
                                 } else {
-                                    if(col.searchable || this.isSystemResource){
+                                    if(col.searchable || this.data.isSystemResource){
                                         //if _id is in the schema properties and is searchable add it
                                         if(colName === "_id") {
 
@@ -241,12 +241,12 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
             this.data.objectName = args[1];
             this.data.grid_id = args[0] + "ViewTable";
             this.grid_id_selector = "#" + this.data.grid_id;
-            this.isSystemResource = false;
+            this.data.isSystemResource = false;
             this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
             this.data.selectedItems = [];
 
             if (this.data.objectType === "system") {
-                this.isSystemResource = true;
+                this.data.isSystemResource = true;
                 this.data.objectName += "/" + args[2];
                 this.data.addLinkHref = "#resource/" + args[0] + "/" + args[1] + "/" + args[2] + "/add/";
             }
@@ -274,7 +274,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 state,
                 defaultSystemResourceSortKey;
 
-            if (this.isSystemResource) {
+            if (this.data.isSystemResource) {
                 _.map(this.schema.properties, function (val,key) {
                     if (!defaultSystemResourceSortKey && val.type === "string") {
                         defaultSystemResourceSortKey = key;
@@ -301,8 +301,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                 model: ResourceModel,
                 state: state,
                 queryParams: BackgridUtils.getQueryParams({
-                    _queryFilter: 'true'
-                }, this.isSystemResource)
+                    _queryFilter: (this.data.isSystemResource) ?  defaultSystemResourceSortKey + ' sw ""' : 'true'
+                }, this.data.isSystemResource)
             });
 
             this.model.resources = new ResourceCollection();
@@ -321,7 +321,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                         if ($target.is("input") || $target.is(".select-row-cell")) {
                             return;
                         }
-                        routeName = (!_this.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
+                        routeName = (!_this.data.isSystemResource) ? "adminEditManagedObjectView" : "adminEditSystemObjectView";
 
                         args.push(this.model.id);
 
