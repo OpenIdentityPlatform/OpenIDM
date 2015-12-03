@@ -123,12 +123,14 @@ public final class ResourceServlet extends HttpServlet {
             URL url = null;
             String loadDir = (String) PropertyUtil.substVars(extensionDir, IdentityServer.getInstance(), false);
             File file = new File(loadDir + target);
-            if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
+            if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath())
+                    && file.exists() && !file.isDirectory()) {
                 url = file.getCanonicalFile().toURI().toURL();
             } else {
                 loadDir = (String) PropertyUtil.substVars(defaultDir, IdentityServer.getInstance(), false);
                 file = new File(loadDir + target);
-                if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath()) && file.exists()) {
+                if (file.getCanonicalPath().startsWith(new File(loadDir).getCanonicalPath())
+                        && file.exists() && !file.isDirectory()) {
                     url = file.getCanonicalFile().toURI().toURL();
                 }
             }
