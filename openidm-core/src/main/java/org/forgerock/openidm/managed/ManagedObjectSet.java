@@ -22,6 +22,7 @@ import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
 import static org.forgerock.openidm.util.ResourceUtil.isEqual;
 import static org.forgerock.util.promise.Promises.*;
 
+import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -33,8 +34,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
-
-import javax.script.ScriptException;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
@@ -1226,6 +1225,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         // Allow the field by removing it from the fieldsToRemove list.
                         logger.debug("Allowing field {} to be returned", field);
                         fieldsToRemove.remove(field);
+                    } else if (schema.hasArrayIndexedField(field)) {
+                        // Allow the indexed array field (ex: role/0) by removing it from the fieldsToRemove list.
+                        logger.debug("Allowing field {} to be returned", field.parent());
+                        fieldsToRemove.remove(field.parent());
                     } else {
                         // Check for resource expansion and build up map of fields to expand
                         Pair<JsonPointer, JsonPointer> expansionPair = schema.getResourceExpansionField(field);
