@@ -56,7 +56,7 @@ public class DelegatedAuthModuleTest {
         authenticator = mock(Authenticator.class);
         when(authenticatorFactory.apply(any(JsonValue.class))).thenReturn(authenticator);
 
-        module = new DelegatedAuthModule(authenticatorFactory);
+        module = new DelegatedAuthModule(authenticatorFactory, IDMAuthModule.DELEGATED);
         module.initialize(null, null, null, json(object(field("queryOnResource", ""))).asMap());
     }
 

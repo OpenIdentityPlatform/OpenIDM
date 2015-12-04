@@ -54,35 +54,40 @@ public enum IDMAuthModule {
     DELEGATED {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
-            return new DelegatedAuthModule(authenticatorFactory);
+            return newInstance(authenticatorFactory, this);
+        }
+
+        @Override
+        public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory, IDMAuthModule module) {
+            return new DelegatedAuthModule(authenticatorFactory, module);
         }
     },
     /** Managed User Auth Module. */
     MANAGED_USER {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
-            return DELEGATED.newInstance(authenticatorFactory);
+            return DELEGATED.newInstance(authenticatorFactory, this);
         }
     },
     /** Internal User Auth Module. */
     INTERNAL_USER {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
-            return DELEGATED.newInstance(authenticatorFactory);
+            return DELEGATED.newInstance(authenticatorFactory, this);
         }
     },
     /** Static User Auth Module. */
     STATIC_USER {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
-            return DELEGATED.newInstance(authenticatorFactory);
+            return DELEGATED.newInstance(authenticatorFactory, this);
         }
     },
     /** Passthrough to OpenICF connector Auth Module. */
     PASSTHROUGH {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
-            return DELEGATED.newInstance(authenticatorFactory);
+            return DELEGATED.newInstance(authenticatorFactory, this);
         }
     },
     /** IWA Auth Module. */
@@ -108,4 +113,9 @@ public enum IDMAuthModule {
     };
 
     public abstract AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory);
+
+    public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory, IDMAuthModule module) {
+        // ignore the module enum
+        return newInstance(authenticatorFactory);
+    }
 }
