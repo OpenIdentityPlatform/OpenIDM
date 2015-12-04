@@ -15,15 +15,12 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
-import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.util.promise.Promises.when;
+import static org.forgerock.openidm.util.ResourceUtil.isEqual;
+import static org.forgerock.util.promise.Promises.*;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -469,8 +466,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
             throws ResourceException {
 
-        if (newValue.asMap().equals(oldValue.asMap())) { // object hasn't changed
-            return newResourceResponse(resourceId, rev, null);
+        if (isEqual(oldValue, newValue)) { // object hasn't changed
+            return newResourceResponse(resourceId, rev, oldValue);
         }
 
         // Execute the onUpdate script if configured
