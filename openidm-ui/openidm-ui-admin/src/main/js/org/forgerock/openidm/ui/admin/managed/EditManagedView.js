@@ -811,19 +811,6 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
 
                 }, this);
 
-                //hide or show the correct fields for Relationship types
-                _.each(this.$el.find("select:not([name])"), function (select) {
-                    var arrayItemProps = $(select).parent().closest(".row").find(".well:first").find(".row:lt(2)");
-                    
-                    if ($(select).val() === "Relationship") {
-                        //if this relationship is not an array of relationships
-                        //hide "Return by Default" (under relationship type), "Reverse Relationship", and "Reverse Property Name" 
-                        if (arrayItemProps.has("[data-schemapath*='itemType']").length === 0) {
-                            arrayItemProps.hide();
-                        }
-                    }
-                });
-
                 this.$el.find(".nav-tabs").tabdrop();
                 
                 if(this.data.currentManagedObject.properties) {
