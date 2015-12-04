@@ -22,7 +22,7 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.*;
 import static org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction.notifyUpdate;
 import static org.forgerock.openidm.util.RelationshipUtil.*;
-import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
+import static org.forgerock.openidm.util.ResourceUtil.*;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
@@ -34,7 +34,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -56,9 +55,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.patch.JsonValuePatch;
-import org.forgerock.openidm.smartevent.EventEntry;
-import org.forgerock.openidm.smartevent.Name;
-import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -614,14 +610,10 @@ public abstract class RelationshipProvider {
             String id, String rev, ResourceResponse oldResource, JsonValue newValue) throws ResourceException {
 
         // Find changes, ignoring ID and REV as the newValue won't have those set.
-        String oldResourceId = oldResource.getId();
-        String oldResourceRevision = oldResource.getRevision();
-        JsonValue oldValue = oldResource.getContent();
-        oldValue.remove(ResourceResponse.FIELD_CONTENT_ID);
-        oldValue.remove(ResourceResponse.FIELD_CONTENT_REVISION);
-        if (JsonPatch.diff(oldResource.getContent(), newValue).size() == 0) {
+        if (isEqual(oldResource.getContent(), newValue)) {
             // resource has not changed, return the old resource
-            return newResourceResponse(oldResourceId, oldResourceRevision, oldValue).asPromise()
+            return newResourceResponse(oldResource.getId(), oldResource.getRevision(), oldResource.getContent())
+                    .asPromise()
                     .then(formatResponse(context, request));
         } else {
             // resource has changed, update the relationship

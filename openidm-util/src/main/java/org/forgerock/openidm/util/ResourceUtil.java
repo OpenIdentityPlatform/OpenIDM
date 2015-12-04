@@ -24,23 +24,26 @@
 
 package org.forgerock.openidm.util;
 
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.ResourceResponse.*;
+
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 
 /**
  * Resource utilities.
@@ -48,7 +51,7 @@ import org.forgerock.json.resource.ResourceResponse;
 public class ResourceUtil {
 
     /** The name of the field in the resource content which contains the resource ID as a JsonPointer. */
-    public static JsonPointer RESOURCE_FIELD_CONTENT_ID_POINTER = new JsonPointer(ResourceResponse.FIELD_CONTENT_ID);
+    public static JsonPointer RESOURCE_FIELD_CONTENT_ID_POINTER = new JsonPointer(FIELD_CONTENT_ID);
 
     /**
      * {@code ResourceUtil} instances should NOT be constructed in standard
@@ -182,5 +185,23 @@ public class ResourceUtil {
     public static ResourceException notSupportedOnInstance(final Request request) {
         return new NotSupportedException(ResourceMessages.ERR_OPERATION_NOT_SUPPORTED_EXPECTATION
                 .get(request.getRequestType().name()).toString());
+    }
+
+    /**
+     * Compares the old vs new json to see if the contents are equal, ignoring _id and _rev.
+     *
+     * @param oldValue old json to compare.
+     * @param newValue new json to compare against oldValue.
+     * @return true if the two values are equal ignoring the _id and _rev.
+     * @see JsonPatch#diff(JsonValue, JsonValue)
+     */
+    public static boolean isEqual(JsonValue oldValue, JsonValue newValue) {
+        JsonValue tmpOldValue = null == oldValue ? json(object()) : oldValue.copy();
+        JsonValue tmpNewValue = null == newValue ? json(object()) : newValue.copy();
+        tmpOldValue.remove(FIELD_CONTENT_ID);
+        tmpOldValue.remove(FIELD_CONTENT_REVISION);
+        tmpNewValue.remove(FIELD_CONTENT_ID);
+        tmpNewValue.remove(FIELD_CONTENT_REVISION);
+        return JsonPatch.diff(tmpOldValue, tmpNewValue).size() == 0;
     }
 }

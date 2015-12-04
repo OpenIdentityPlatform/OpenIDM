@@ -447,6 +447,10 @@
                 "type" : "text/javascript",
                 "file" : "roles/onDelete-roles.js"
             },
+            "onSync" : {
+                "type" : "text/javascript",
+                "source" : "require('roles/onSync-roles').syncUsersOfRoles(resourceName, oldObject, newObject, ['members']);"
+            },
             "schema" : {
                 "$schema" : "http://forgerock.org/json-schema#",
                 "type" : "object",
