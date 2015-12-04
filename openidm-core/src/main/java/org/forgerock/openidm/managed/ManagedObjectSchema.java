@@ -23,12 +23,11 @@
  */
 package org.forgerock.openidm.managed;
 
+import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.script.ScriptException;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -181,6 +180,18 @@ public class ManagedObjectSchema {
         }
         return null;
     }
-    
-    
+
+    /**
+     * Returns true if the fieldIndexPointer refers to an index of an array field: ie 'roles/0'.  It would not
+     * match on field expansions like 'roles/*&#47;description'
+     *
+     * @param fieldIndexPointer the possible pointer to an index of an array field.
+     * @return true if the fieldIndexPointer refers to an index of an array field
+     */
+    public boolean hasArrayIndexedField(JsonPointer fieldIndexPointer) {
+        return fieldIndexPointer.size() == 2
+                && hasField(fieldIndexPointer.parent())
+                && fieldIndexPointer.leaf().matches("[0-9]+")
+                && getField(fieldIndexPointer.parent()).isArray();
+    }
 }

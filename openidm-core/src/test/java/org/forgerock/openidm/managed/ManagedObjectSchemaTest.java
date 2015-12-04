@@ -23,22 +23,18 @@
  */
 package org.forgerock.openidm.managed;
 
+import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.mock;
+import static org.testng.Assert.*;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
-import static org.testng.Assert.assertTrue;
-
+import javax.script.ScriptException;
 import java.util.List;
 import java.util.Set;
 
-import javax.script.ScriptException;
-
 import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.annotations.BeforeTest;
@@ -50,7 +46,7 @@ import org.testng.annotations.Test;
 public class ManagedObjectSchemaTest {
 
     private ManagedObjectSchema schema;
-    
+
     @BeforeTest
     public void setup() throws JsonValueException, ScriptException {
         ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
@@ -142,4 +138,13 @@ public class ManagedObjectSchemaTest {
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2/field3")).getFirst(), new JsonPointer("field6"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2/field3")).getSecond(), new JsonPointer("field2/field3"));     
     }
+
+    @Test
+    public void testHasArrayIndexedField() {
+        assertTrue(schema.hasArrayIndexedField(new JsonPointer("field5/0")));
+        assertFalse(schema.hasArrayIndexedField(new JsonPointer("field5/*/field2")));
+        assertFalse(schema.hasArrayIndexedField(new JsonPointer("field5")));
+        assertFalse(schema.hasArrayIndexedField(new JsonPointer("field5/0/field2")));
+    }
+
 }
