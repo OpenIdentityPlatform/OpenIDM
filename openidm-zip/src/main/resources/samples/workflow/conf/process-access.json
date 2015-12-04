@@ -18,7 +18,7 @@
             "propertiesCheck" : {
                 "property" : "_id",
                 "matches" : "chess",
-                "requiresRole" : "openidm-authorized"
+                "requiresRole" : "openidm-admin"
             }
         }
     ]

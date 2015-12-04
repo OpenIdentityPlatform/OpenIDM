@@ -97,11 +97,18 @@
                 requestDate = formatUTC.format(new Date());
 
                 // Automatically send the user a password reset email
-                openidm.action("selfservice/reset", "submitRequirements", [
-                    input: [
-                        queryFilter: '/userName eq "' + newUserFromRepo.result[0].userName.replace(/"/, "\\\"") + '"'
-                    ]
-                ])
+                // Current limitation with supplying locale via http headers requires the call to be made via http
+                openidm.action("external/rest", "call", [
+                    "url": "https://localhost:"+identityServer.getProperty('openidm.port.https')+"/openidm/selfservice/reset?_action=submitRequirements",
+                    "method": "POST",
+                    "headers": [
+                        "Content-type": "application/json",
+                        "X-OpenIDM-Username": "anonymous",
+                        "X-OpenIDM-Password": "anonymous",
+                        "Accept-Language": "en-US,en"
+                    ],
+                    "body": '{"input": {"queryFilter": "/userName eq \\\"' + newUserFromRepo.result[0].userName.replace(/"/, "\\\"") + '\\\""}}'
+                ]);
 
                 def newContractorNotification = [
                 "receiverId": newUserFromRepo.result[0]._id,
