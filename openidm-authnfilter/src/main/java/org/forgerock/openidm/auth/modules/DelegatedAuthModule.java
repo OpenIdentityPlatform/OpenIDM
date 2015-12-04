@@ -69,6 +69,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
     };
 
     private final AuthenticatorFactory authenticatorFactory;
+    private final IDMAuthModule moduleId;
 
     private Authenticator authenticator = NULL_AUTHENTICATOR;
     private String queryOnResource = "";
@@ -80,9 +81,10 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
      *
      * @param authenticatorFactory
      */
-    public DelegatedAuthModule(AuthenticatorFactory authenticatorFactory) {
+    public DelegatedAuthModule(AuthenticatorFactory authenticatorFactory, IDMAuthModule moduleId) {
         Reject.ifNull(authenticatorFactory, "AuthenticationFactory cannot be null");
         this.authenticatorFactory = authenticatorFactory;
+        this.moduleId = moduleId;
     }
 
     /**
@@ -95,7 +97,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
 
     @Override
     public String getModuleId() {
-        return "Delegated";
+        return moduleId.name();
     }
 
     /**

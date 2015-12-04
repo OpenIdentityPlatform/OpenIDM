@@ -163,7 +163,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
 
     @Override
     public String getModuleId() {
-        return "IDMAuthModuleWrapper";
+        return authModule.getModuleId();
     }
 
     /**

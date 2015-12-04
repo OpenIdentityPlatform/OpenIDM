@@ -34,6 +34,7 @@ import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.generator.IdGenerator;
@@ -50,6 +51,13 @@ public class IDMAuditApi implements AuditApi {
     public static final String REQUEST_ID = "requestId";
     public static final String TRANSACTION_ID = "transactionId";
 
+    // Copy of CAF audit message keys defined in AuditTrail, but not exposed
+    // TODO they should be public in CAF
+    private static final String ENTRIES_KEY = "entries";
+    private static final String RESULT_KEY = "result";
+    private static final String MODULE_ID_KEY = "moduleId";
+    private static final String SUCCESSFUL_RESULT = "SUCCESSFUL";
+
     private final ConnectionFactory connectionFactory;
 
     IDMAuditApi(ConnectionFactory connectionFactory) {
@@ -61,6 +69,13 @@ public class IDMAuditApi implements AuditApi {
      */
     @Override
     public void audit(JsonValue auditMessage) {
+        for (JsonValue entry : auditMessage.get(ENTRIES_KEY)) {
+            if (SUCCESSFUL_RESULT.equals(entry.get(RESULT_KEY).asString())
+                    && IDMAuthModule.STATIC_USER.name().equals(entry.get(MODULE_ID_KEY).asString())) {
+                return;
+            }
+        }
+
         List<String> principals = auditMessage.get(PRINCIPAL).asList(String.class);
         String username = "";
         if (principals != null && !principals.isEmpty()) {
