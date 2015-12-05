@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2014-2015 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -42,10 +42,10 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder
 import org.apache.http.impl.nio.conn.PoolingNHttpClientConnectionManager
 import org.apache.http.impl.nio.reactor.DefaultConnectingIOReactor
 import org.apache.http.nio.reactor.ConnectingIOReactor
-import org.forgerock.json.fluent.JsonValue
-import org.forgerock.json.resource.Context
-import org.forgerock.json.resource.QueryResult
-import org.forgerock.json.resource.Resource
+import org.forgerock.json.JsonValue
+import org.forgerock.services.context.Context
+import org.forgerock.json.resource.QueryResponse
+import org.forgerock.json.resource.ResourceResponse
 import org.identityconnectors.common.security.GuardedString
 
 import org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConfiguration.AuthMethod
@@ -142,9 +142,9 @@ customize {
     onComplete { Object result ->
         if (result instanceof JsonValue) {
 
-        } else if (result instanceof Resource) {
+        } else if (result instanceof ResourceResponse) {
 
-        } else if (result instanceof QueryResult) {
+        } else if (result instanceof QueryResponse) {
 
         }
         completed(result)

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2014-2015 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,11 +23,11 @@
  */
 
 import org.forgerock.json.resource.Connection
-import org.forgerock.json.resource.QueryFilter
+import org.forgerock.util.query.QueryFilter
 import org.forgerock.json.resource.QueryRequest
 import org.forgerock.json.resource.Requests
-import org.forgerock.json.resource.Resource
-import org.forgerock.json.resource.RootContext
+import org.forgerock.json.resource.ResourceResponse
+import org.forgerock.services.context.RootContext
 import org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
 import org.identityconnectors.common.logging.Log
@@ -68,7 +68,7 @@ if (objectClassInfo != null) {
     } else if (results.size() > 1) {
         throw new ConnectException("Multiple results 'userName' is not unique!")
     } else {
-        Resource r = results.get(0) as Resource;
+        ResourceResponse r = results.get(0) as ResourceResponse;
         return new Uid(r.id, r.revision)
     }
 

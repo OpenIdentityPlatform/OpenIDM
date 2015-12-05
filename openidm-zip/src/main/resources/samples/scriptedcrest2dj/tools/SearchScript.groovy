@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2014-2015 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -25,13 +25,13 @@
 
 import groovy.json.JsonOutput
 import org.forgerock.json.resource.Connection
-import org.forgerock.json.resource.QueryFilter
+import org.forgerock.util.query.QueryFilter
 import org.forgerock.json.resource.QueryRequest
-import org.forgerock.json.resource.QueryResult
-import org.forgerock.json.resource.QueryResultHandler
+import org.forgerock.json.resource.QueryResponse
+import org.forgerock.json.resource.QueryResourceHandler
 import org.forgerock.json.resource.Requests
-import org.forgerock.json.resource.Resource
-import org.forgerock.json.resource.RootContext
+import org.forgerock.json.resource.ResourceResponse
+import org.forgerock.services.context.RootContext
 import org.forgerock.json.resource.SortKey
 import org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConfiguration
 import org.forgerock.openicf.misc.crest.CRESTFilterVisitor
@@ -161,7 +161,7 @@ if (objectClassInfo != null) {
             handleError   : { org.forgerock.json.resource.ResourceException error ->
                 log.error(error, error.message)
             },
-            handleResource: { Resource resource ->
+            handleResource: { ResourceResponse resource ->
                 handler {
                     uid resource.id, resource.revision
                     setObjectClass objectClass
@@ -192,8 +192,8 @@ if (objectClassInfo != null) {
                     }
                 }
             },
-            handleResult  : { QueryResult result -> }
-    ] as QueryResultHandler)
+            handleResult  : { QueryResponse result -> }
+    ] as QueryResourceHandler)
 
     return new SearchResult(result.pagedResultsCookie, result.remainingPagedResults);
 

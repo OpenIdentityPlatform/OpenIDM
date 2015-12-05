@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2014-2015 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,14 +24,14 @@
 
 import org.forgerock.json.resource.Connection
 import org.forgerock.json.resource.NotFoundException
-import org.forgerock.json.resource.QueryFilter
+import org.forgerock.util.query.QueryFilter
 import org.forgerock.json.resource.QueryRequest
-import org.forgerock.json.resource.QueryResult
-import org.forgerock.json.resource.QueryResultHandler
+import org.forgerock.json.resource.QueryResponse
+import org.forgerock.json.resource.QueryResourceHandler
 import org.forgerock.json.resource.ReadRequest
 import org.forgerock.json.resource.Requests
-import org.forgerock.json.resource.Resource
-import org.forgerock.json.resource.RootContext
+import org.forgerock.json.resource.ResourceResponse
+import org.forgerock.services.context.RootContext
 import org.forgerock.json.resource.SortKey
 import org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
@@ -81,7 +81,7 @@ switch (operation) {
                         log.error(error, error.message)
                         exception = error
                     },
-                    handleResource: { Resource resource ->
+                    handleResource: { ResourceResponse resource ->
                         lastToken = resource.id
 
                         def content = resource.content.getObject();
@@ -159,8 +159,8 @@ switch (operation) {
                             }
                         })
                     },
-                    handleResult  : { QueryResult result -> }
-            ] as QueryResultHandler)
+                    handleResult  : { QueryResponse result -> }
+            ] as QueryResourceHandler)
 
             if (exception != null) {
                 throw new ConnectorException(exception.message, exception);
@@ -189,12 +189,12 @@ switch (operation) {
                     log.error(error, error.message)
                     exception = error
                 },
-                handleResource: { Resource resource ->
+                handleResource: { ResourceResponse resource ->
                     lastToken = resource.id
                     return true;
                 },
-                handleResult  : { QueryResult result -> }
-        ] as QueryResultHandler)
+                handleResult  : { QueryResponse result -> }
+        ] as QueryResourceHandler)
 
         if (exception != null) {
             throw new ConnectorException(exception.message, exception);

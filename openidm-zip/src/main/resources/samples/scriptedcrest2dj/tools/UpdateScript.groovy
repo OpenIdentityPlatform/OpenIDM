@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2014-2015 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -27,8 +27,8 @@ import org.forgerock.json.resource.NotFoundException
 import org.forgerock.json.resource.PatchRequest
 import org.forgerock.json.resource.ReadRequest
 import org.forgerock.json.resource.Requests
-import org.forgerock.json.resource.Resource
-import org.forgerock.json.resource.RootContext
+import org.forgerock.json.resource.ResourceResponse
+import org.forgerock.services.context.RootContext
 import org.forgerock.json.resource.UpdateRequest
 import org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConfiguration
 import org.forgerock.openicf.misc.scriptedcommon.OperationType
@@ -63,7 +63,7 @@ switch (operation) {
                 ReadRequest request = Requests.newReadRequest(objectClassInfo.resourceContainer, uid.uidValue)
                 request.addField("/")
                 try {
-                    Resource resource = connection.read(new RootContext(), request)
+                    ResourceResponse resource = connection.read(new RootContext(), request)
 
                     updateAttributes.each {
                         def info = objectClassInfo.attributes[it.name]
@@ -112,7 +112,7 @@ switch (operation) {
                 request.addField("_id", "_rev")
 
 
-                Resource resource = connection.patch(new RootContext(), request)
+                ResourceResponse resource = connection.patch(new RootContext(), request)
                 return new Uid(resource.getId(), resource.getRevision())
             }
         } else {

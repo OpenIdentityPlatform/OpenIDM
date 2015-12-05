@@ -158,6 +158,7 @@ OpenIDM Instructions
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
+          --header "If-Match: *" \
           --request PUT \
           --data '{
           "name": {
@@ -198,6 +199,7 @@ OpenIDM Instructions
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
+          --header "If-Match: *" \
           --request PUT \
           --data '{
           "_id" : "group1",
