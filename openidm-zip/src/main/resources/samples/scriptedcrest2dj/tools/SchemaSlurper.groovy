@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+ * Copyright 2014-2015 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -24,7 +24,7 @@
 
 import groovy.json.JsonOutput
 import groovy.json.JsonSlurper
-import org.forgerock.json.fluent.JsonPointer
+import org.forgerock.json.JsonPointer
 import org.forgerock.openicf.misc.crest.VisitorParameter
 import org.identityconnectors.common.CollectionUtil
 import org.identityconnectors.common.Pair
