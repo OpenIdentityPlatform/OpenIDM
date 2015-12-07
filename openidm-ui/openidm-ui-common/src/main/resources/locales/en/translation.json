@@ -1732,6 +1732,7 @@
             "username" : "Username",
             "emailAddress" : "Email address",
             "givenName" : "First Name",
+            "familyName" : "Last Name",
             "sn" : "Last Name",
             "basicInfo": "Basic Info",
             "changePassword" : "Change password",
