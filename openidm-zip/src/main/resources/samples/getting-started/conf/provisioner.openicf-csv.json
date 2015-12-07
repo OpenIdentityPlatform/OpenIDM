@@ -27,7 +27,9 @@
         "SEARCH" : -1
     },
     "configurationProperties" : {
-        "csvFile" : "&{launcher.project.location}/data/hr.csv"
+        "csvFile" : "&{launcher.project.location}/data/hr.csv",
+        "headerName" : "username",
+        "headerUid" : "uid"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,

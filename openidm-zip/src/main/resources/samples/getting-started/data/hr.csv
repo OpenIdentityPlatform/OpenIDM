@@ -1,4 +1,4 @@
-"firstName", "uid", "lastName", "email", "employeeNumber"
-"Barbara", "BJENSEN", "Jensen", "bjensen@example.com", "123456"
-"Jane", "JSANCHEZ", "Sanchez", "jsanchez@example.com", "234567"
-"Steven", "SCARTER", "Carter", "scarter@example.com", "654321"
+"username", "firstName", "uid", "lastName", "email", "employeeNumber"
+"bjensen", "Barbara", "BJENSEN", "Jensen", "bjensen@example.com", "123456"
+"jsanchez", "Jane", "JSANCHEZ", "Sanchez", "jsanchez@example.com", "234567"
+"scarter", "Steven", "SCARTER", "Carter", "scarter@example.com", "654321"
