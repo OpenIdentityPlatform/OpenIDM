@@ -353,12 +353,13 @@ public abstract class RelationshipProvider {
     /**
      * Tests that all references in the relationship field are valid according to this provider's validator.
      *
-     * @param relationshipField field to validate
      * @param context context of the request working with the relationship.
+     * @param oldValue old value of field to refer to during validation of the newValue
+     * @param newValue new value of field to validate
      * @throws ResourceException BadRequestException if the relationship is found to be not valid, otherwise for other
      * issues.
      */
-    public abstract void validateRelationshipField(JsonValue relationshipField, Context context)
+    public abstract void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue)
             throws ResourceException;
 
     /**

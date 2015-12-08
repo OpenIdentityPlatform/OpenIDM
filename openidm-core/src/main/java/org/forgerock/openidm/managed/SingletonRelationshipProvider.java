@@ -19,9 +19,7 @@ import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.util.query.QueryFilter.and;
-import static org.forgerock.util.query.QueryFilter.equalTo;
-import static org.forgerock.util.query.QueryFilter.or;
+import static org.forgerock.util.query.QueryFilter.*;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,6 +28,7 @@ import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotFoundException;
@@ -55,11 +54,15 @@ import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link RelationshipProvider} representing a singleton relationship for the given field.
  */
 class SingletonRelationshipProvider extends RelationshipProvider implements SingletonResourceProvider {
+
+    private static final Logger logger = LoggerFactory.getLogger(SingletonRelationshipProvider.class);
 
     private final RequestHandler requestHandler;
 
@@ -316,15 +319,21 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     }
 
     /**
-     * Implemented to simply call validateRelationship for the single field.
+     * Implemented to simply call validateRelationship for the single field, if it has changed.
      *
-     * @param relationshipField field to validate.
      * @param context context of the original request.
-     * @throws ResourceException BadRequestException when the relationship is found to be non-existent, otherwise by
-     * some other issue.
+     * @param oldValue old value of field to validate
+     * @param newValue new value of field to validate
+     * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
      * @see RelationshipValidator#validateRelationship(JsonValue, Context)
      */
-    public void validateRelationshipField(JsonValue relationshipField, Context context) throws ResourceException {
-        relationshipValidator.validateRelationship(relationshipField,context);
+    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue)
+            throws ResourceException {
+        if (oldValue.isNull() && newValue.isNull()) {
+            logger.debug("not validating relationship as old and new values are both null.");
+        } else if (oldValue.isNull() || !oldValue.getObject().equals(newValue.getObject())) {
+            relationshipValidator.validateRelationship(newValue, context);
+        }
     }
+
 }
