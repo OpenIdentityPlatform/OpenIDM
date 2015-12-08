@@ -189,6 +189,9 @@ class ObjectMapping {
     /** a script to execute when a source object and a target object are to be unlinked */
     private Script onUnlinkScript;
 
+    /** a script to execute when a reconciliation process has started */
+    private Script onReconScript;
+
     /** a script to execute on each mapping event regardless of the operation */
     private Script resultScript;
 
@@ -274,6 +277,9 @@ class ObjectMapping {
         defaultMapping = Scripts.newInstance(config.get("defaultMapping").defaultTo(
                 json(object(field(SourceUnit.ATTR_TYPE, "text/javascript"),
                     field(SourceUnit.ATTR_NAME, "roles/defaultMapping.js")))));
+        onReconScript = Scripts.newInstance(config.get("onRecon").defaultTo(
+                json(object(field(SourceUnit.ATTR_TYPE, "groovy"),
+                    field(SourceUnit.ATTR_NAME, "roles/onRecon.groovy")))));
         onCreateScript = Scripts.newInstance(config.get("onCreate"));
         onUpdateScript = Scripts.newInstance(config.get("onUpdate"));
         onDeleteScript = Scripts.newInstance(config.get("onDelete"));
@@ -683,7 +689,7 @@ class ObjectMapping {
     }
 
     /**
-     * Returns {@code true} if the specified object identifer is in this mapping's source
+     * Returns {@code true} if the specified object identifier is in this mapping's source
      * object set.
      */
     public boolean isSourceObject(String resourceContainer, String resourceId) {
@@ -927,6 +933,9 @@ class ObjectMapping {
         reconContext.setStage(ReconStage.ACTIVE_QUERY_ENTRIES);
         Context context = ObjectSetContext.get();
         try {
+            // Execute onRecon script.
+            executeOnRecon(context);
+            
             context = new TriggerContext(context, "recon");
             ObjectSetContext.push(context);
             logReconStart(reconContext, context);
@@ -988,11 +997,13 @@ class ObjectMapping {
                 // Query next page of results if paging
                 if (queryNextPage) {
                     LOGGER.debug("Querying next page of source ids");
-                    sourceQueryResult = reconContext.querySourceIter(reconSourceQueryPageSize, sourceQueryResult.getPagingCookie());
+                    sourceQueryResult = reconContext.querySourceIter(reconSourceQueryPageSize, 
+                            sourceQueryResult.getPagingCookie());
                     sourceIter = sourceQueryResult.getIterator();
                 }
                 // Perform source recon phase on current set of source ids
-                ReconPhase sourcePhase = new ReconPhase(sourceIter, reconContext, context, allLinks, remainingTargetIds, sourceRecon);
+                ReconPhase sourcePhase = 
+                        new ReconPhase(sourceIter, reconContext, context, allLinks, remainingTargetIds, sourceRecon);
                 sourcePhase.setFeedSize(feedSize);
                 sourcePhase.execute();
                 queryNextPage = true;
@@ -1057,6 +1068,23 @@ class ObjectMapping {
         }
 
 // TODO: cleanup orphan link objects (no matching source or target) here
+    }
+    
+    private void executeOnRecon(Context context) throws SynchronizationException {
+        if (onReconScript != null) {
+            Map<String, Object> scope = new HashMap<String, Object>();
+            scope.put("context", context);
+            scope.put("mappingConfig", config);
+            try {
+                onReconScript.exec(scope);
+            } catch (ScriptThrownException se) {
+                throw toSynchronizationException(se, name, "onRecon");
+            } catch (ScriptException se) {
+                LOGGER.debug("{} script encountered exception", name + " onRecon", se);
+                throw new SynchronizationException(
+                        new InternalErrorException(name + " onRecon script encountered exception", se));
+            }
+        }
     }
 
     /**
