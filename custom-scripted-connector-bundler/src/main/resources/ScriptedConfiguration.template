@@ -48,7 +48,7 @@ public class {{packageName}}Configuration extends {{configBaseClass}} {
     // Exposed configuration properties.
 
     {{#properties}}
-    private {{type}} {{name}} = {{{formattedValue}}};
+    private {{type}} {{nameCamelCase}} = {{{formattedValue}}};
     @ConfigurationProperty(order = {{order}},
             displayMessageKey = "{{name}}.display",
             groupMessageKey = "{{replace group ' ' ''}}.group",
