@@ -1301,7 +1301,15 @@
                 "filePath" : "File Path",
                 "uniqueAttribute" : "Unique Attribute",
                 "nameAttribute" : "Name Attribute",
-                "passwordAttribute" : "Password Attribute"
+                "passwordAttribute" : "Password Attribute",
+                "csvFile" : "CSV File",
+                "headerUid" : "Header UID",
+                "headerName" : "Header Name",
+                "headerPassword" : "Header Password",
+                "quoteCharacter" : "Quote Character",
+                "fieldDelimiter" : "Field Delimiter",
+                "newlineString" : "Newline String",
+                "syncFileRetentionCount" : "Sync Retention Count"
             },
             "xmlConnector" : {
                 "xsdicfFilePath" : "XSD ICF File Path",
