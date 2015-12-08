@@ -37,7 +37,6 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryFilter;
-import org.forgerock.json.resource.QueryFilterVisitor;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResult;
 import org.forgerock.json.resource.QueryResultHandler;
@@ -55,7 +54,6 @@ import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
@@ -151,6 +149,12 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected CryptoService cryptoService = null;
 
+    /**
+     * Enhanced configuration service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private EnhancedConfig enhancedConfig;
+
     private final ConcurrentMap<String, SObjectDescribe> schema = new ConcurrentHashMap<String, SObjectDescribe>();
 
     /* Internal routing objects to register and remove the routes. */
@@ -159,8 +163,6 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
     @Activate
     void activate(ComponentContext context) throws Exception {
         factoryPid = (String) context.getProperties().get("config.factory-pid");
-
-        EnhancedConfig enhancedConfig = JSONEnhancedConfig.newInstance();
 
         try {
             jsonConfiguration = enhancedConfig.getConfigurationAsJson(context);
@@ -282,6 +284,7 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         jv.put("enabled", jsonConfiguration.get("enabled").defaultTo(Boolean.TRUE).asBoolean());
         jv.put("config", "config/provisioner.salesforce/" + factoryPid);
         jv.put("objectTypes", SchemaHelper.getObjectSchema().keys());
+        jv.put("displayName", "Salesforce Connector");
 
         try {
             jv.put(ConnectorConfigurationHelper.CONNECTOR_REF,
@@ -476,8 +479,9 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         public void queryCollection(final ServerContext context, final QueryRequest request,
                 final QueryResultHandler handler) {
 
+            String type = "?";
             try {
-                final String type = getPartition(context);
+                type = getPartition(context);
                 final String queryExpression;
                 if (StringUtils.isNotBlank(request.getQueryId())) {
                     if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
@@ -500,6 +504,19 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
 
                 executeQuery(handler, queryExpression);
             } catch (Throwable t) {
+                final String queryRequestMessage;
+                if (request.getQueryId() != null) {
+                    queryRequestMessage = "queryId=" + request.getQueryId();
+                } else if (request.getQueryExpression() != null) {
+                    queryRequestMessage = "queryExpression=" + request.getQueryExpression();
+                } else if (request.getQueryFilter() != null) {
+                    queryRequestMessage = "queryFilter=" + request.getQueryFilter().toString();
+                } else {
+                    // can't happen
+                    queryRequestMessage = "unknown query";
+                }
+
+                logger.error(t.getMessage() + " while executing " + queryRequestMessage + " on partition " + type, t);
                 handler.handleError(ResourceUtil.adapt(t));
             }
         }
