@@ -22,22 +22,18 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-import static org.forgerock.json.JsonValue.*;
 
 import groovy.sql.Sql
-
-import java.sql.Connection;
-
-import org.identityconnectors.common.logging.Log
-import org.identityconnectors.framework.common.objects.AttributeUtil;
-import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.Uid;
-import org.identityconnectors.framework.common.objects.SearchResult;
-import org.identityconnectors.framework.common.objects.OperationOptions
-import org.identityconnectors.framework.common.objects.filter.EqualsFilter;
-import org.identityconnectors.framework.common.objects.filter.Filter;
-
 import org.forgerock.openicf.misc.scriptedcommon.MapFilterVisitor
+import org.identityconnectors.common.logging.Log
+import org.identityconnectors.framework.common.objects.ObjectClass
+import org.identityconnectors.framework.common.objects.OperationOptions
+import org.identityconnectors.framework.common.objects.SearchResult
+import org.identityconnectors.framework.common.objects.filter.Filter
+
+import java.sql.Connection
+
+import static org.forgerock.json.JsonValue.field
 
 def connection = connection as Connection
 def options = options as OperationOptions
@@ -55,6 +51,7 @@ def auditrecon = new ObjectClass("auditrecon")
 def auditactivity = new ObjectClass("auditactivity")
 def auditaccess = new ObjectClass("auditaccess")
 def auditsync = new ObjectClass("auditsync")
+def auditconfig = new ObjectClass("auditconfig")
 
 // Use the specified _pagedResultsCookie to query based on
 // activitydate and auto-incrememnt id
@@ -175,10 +172,10 @@ switch ( objectClass ) {
                 handler {
                     uid dataCollector.uid
                     id dataCollector.id
-                    attribute 'activity', dataCollector.activity
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'eventname', dataCollector.eventname
+                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids).getObject()
                     attribute 'server',
                             JsonValueUtil.fromEntries(
                                 field("ip", dataCollector.server_ip),
@@ -190,36 +187,33 @@ switch ( objectClass ) {
                                 field("ip", dataCollector.client_ip),
                                 field("port", dataCollector.client_port)
                             ).getObject()
-                    attribute 'authentication',
+                    attribute 'userid', dataCollector.userid
+                    attribute 'request',
                             JsonValueUtil.fromEntries(
-                                field("id", dataCollector.userid)
-                            ).getObject()
-                    attribute 'authorization',
-                            JsonValueUtil.fromEntries(
-                                field("id", dataCollector.principal),
-                                field("roles",
-                                        JsonValueUtil.fromJsonString(dataCollector.roles)?.getObject()),
-                                field("component", dataCollector.auth_component)
-                            ).getObject()
-                    attribute 'resource',
-                            JsonValueUtil.fromEntries(
-                                field("uri", dataCollector.resource_uri),
-                                field("protocol", dataCollector.resource_protocol),
-                                field("method", dataCollector.resource_method),
-                                field("detail", dataCollector.resource_detail)
+                                field("protocol", dataCollector.request_protocol),
+                                field("operation", dataCollector.request_operation),
+                                field("detail", JsonValueUtil.fromJsonString(dataCollector.request_detail).getObject())
                             ).getObject()
                     attribute 'http',
                             JsonValueUtil.fromEntries(
-                                field("method", dataCollector.http_method),
-                                field("path", dataCollector.http_path),
-                                field("querystring", dataCollector.http_querystring),
-                                field("headers",
-                                        JsonValueUtil.fromJsonString(dataCollector.http_headers)?.getObject())
+                                    field("request", JsonValueUtil.fromEntries(
+                                            field("secure", JsonValueUtil.booleanFromString(dataCollector.http_request_secure)),
+                                            field("method", dataCollector.http_request_method),
+                                            field("path", dataCollector.http_request_path),
+                                            field("queryParameters", JsonValueUtil.fromJsonString(dataCollector.http_request_queryparameters).getObject()),
+                                            field("headers", JsonValueUtil.fromJsonString(dataCollector.http_request_headers).getObject()),
+                                            field("cookies", JsonValueUtil.fromJsonString(dataCollector.http_request_cookies).getObject())
+                                    ).getObject()),
+                                    field("response", JsonValueUtil.fromEntries(
+                                            field("headers", JsonValueUtil.fromJsonString(dataCollector.http_response_headers).getObject())
+                                    ).getObject()),
                             ).getObject()
                     attribute 'response',
                             JsonValueUtil.fromEntries(
-                                field("status", dataCollector.status),
-                                field("elapsedTime", dataCollector.elapsedtime)
+                                field("status", dataCollector.response_status),
+                                field("statusCode", dataCollector.response_statuscode),
+                                field("elapsedTime", dataCollector.response_elapsedtime),
+                                field("elaspesTimeUnits", dataCollector.response_elapsedtimeunits)
                             ).getObject()
                 }
             }
@@ -237,29 +231,31 @@ switch ( objectClass ) {
                 dataCollector = [
                     id : row.id as String,
                     uid : row.objectid,
-                    activity : row.activity,
                     activitydate : row.activitydate,
                     transactionid : row.transactionid,
                     eventname : row.eventname,
+                    userid : row.userid,
+                    trackingids : row.trackingids,
                     server_ip : row.server_ip,
                     server_port : row.server_port,
                     client_host : row.client_host,
                     client_ip : row.client_ip,
                     client_port : row.client_port,
-                    userid : row.userid,
-                    principal : row.principal,
-                    roles : row.roles,
-                    auth_component : row.auth_component,
-                    resource_uri : row.resource_uri,
-                    protocol : row.resource_protocol,
-                    resource_method : row.resource_method,
-                    resource_detail : row.resource_detail,
-                    http_method : row.http_method,
-                    http_path : row.http_path,
-                    http_querystring : row.http_querystring,
-                    http_headers : row.http_headers,
-                    status : row.status,
-                    elapsedtime : row.elapsedtime
+                    request_protocol : row.request_protocol,
+                    request_operation : row.request_operation,
+                    request_detail : row.request_detail,
+                    http_request_secure : row.http_request_secure,
+                    http_request_method : row.http_request_method,
+                    http_request_path : row.http_request_path,
+                    http_request_queryparameters : row.http_request_queryparameters,
+                    http_request_headers : row.http_request_headers,
+                    http_request_cookies : row.http_request_cookies,
+                    http_response_headers : row.http_response_headers,
+                    response_status : row.response_status,
+                    response_statuscode : row.response_statuscode,
+                    response_elapsedtime : row.response_elapsedtime,
+                    response_elapsedtimeunits : row.response_elapsedtimeunits,
+                    roles : row.roles
                 ]
             }
 
@@ -282,16 +278,13 @@ switch ( objectClass ) {
                     id dataCollector.id
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'activitydate', dataCollector.activitydate
-                    attribute 'authentication',
-                            JsonValueUtil.fromEntries(
-                                field("id", dataCollector.userid)
-                            ).getObject()
+                    attribute 'userid', dataCollector.userid
                     attribute 'eventname', dataCollector.eventname
+                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids)?.getObject()
                     attribute 'result', dataCollector.result
                     attribute 'principal', dataCollector.principals
                     attribute 'context',
                             JsonValueUtil.fromJsonString(dataCollector.context)?.getObject()
-                    attribute 'sessionid', dataCollector.sessionid
                     attribute 'entries',
                             JsonValueUtil.fromJsonString(dataCollector.entries)?.getObject()
                 }
@@ -314,10 +307,11 @@ switch ( objectClass ) {
                     activitydate : row.activitydate,
                     userid : row.userid,
                     eventname : row.eventname,
+                    trackingids : row.trackingids,
                     result : row.result,
                     context : row.context,
-                    sessionid : row.sessionid,
-                    entries : row.entries
+                    entries : row.entries,
+                    principal : row.principals
                 ]
             }
 
@@ -339,25 +333,13 @@ switch ( objectClass ) {
                     uid dataCollector.uid
                     id dataCollector.id
                     attribute 'activitydate', dataCollector.activitydate
-                    attribute 'activity', dataCollector.activity
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'eventname', dataCollector.eventname
-                    attribute 'authentication',
-                            JsonValueUtil.fromEntries(
-                                field("id", dataCollector.userid)
-                            ).getObject()
+                    attribute 'userid', dataCollector.userid
                     attribute 'runas', dataCollector.runas
-                    attribute 'resourceOperation',
-                            JsonValueUtil.fromEntries(
-                                field("uri", dataCollector.resource_uri),
-                                field("protocol", dataCollector.resource_protocol),
-                                field("operation", JsonValueUtil.fromEntries(
-                                    field("method", dataCollector.resource_method),
-                                    field("detail", dataCollector.resource_detail)
-                                ).getObject())
-                            ).getObject()
-                    attribute 'subjectbefore', dataCollector.subjectbefore
-                    attribute 'subjectafter', dataCollector.subjectafter
+                    attribute 'operation', dataCollector.operation
+                    attribute 'subjectbefore', JsonValueUtil.fromJsonString(dataCollector.subjectbefore).getObject()
+                    attribute 'subjectafter', JsonValueUtil.fromJsonString(dataCollector.subjectafter).getObject()
                     attribute 'changedfields',
                             JsonValueUtil.fromJsonString(dataCollector.changedfields)?.getObject()
                     attribute 'passwordchanged', JsonValueUtil.booleanFromString(dataCollector.passwordchanged)
@@ -365,6 +347,7 @@ switch ( objectClass ) {
                     attribute 'message', dataCollector.message
                     attribute 'activityobjectid', dataCollector.activityobjectid
                     attribute 'status', dataCollector.status
+                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids)?.getObject()
                 }
             }
         }
@@ -382,15 +365,11 @@ switch ( objectClass ) {
                     id : row.id as String,
                     uid : row.objectid,
                     activitydate : row.activitydate,
-                    activity : row.activity,
                     transactionid : row.transactionid,
                     eventname : row.eventname,
                     userid : row.userid,
                     runas : row.runas,
-                    resource_uri : row.resource_uri,
-                    resource_protocol : row.resource_protocol,
-                    resource_method : row.resource_method,
-                    resource_detail : row.resource_detail,
+                    operation : row.operation,
                     subjectbefore : row.subjectbefore,
                     subjectafter : row.subjectafter,
                     changedfields : row.changedfields,
@@ -398,7 +377,8 @@ switch ( objectClass ) {
                     subjectrev : row.subjectrev,
                     message : row.message,
                     activityobjectid : row.activityobjectid,
-                    status : row.status
+                    status : row.status,
+                    trackingids : row.trackingids
                 ]
             }
 
@@ -422,10 +402,8 @@ switch ( objectClass ) {
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'eventname', dataCollector.eventname
-                    attribute 'authentication',
-                            JsonValueUtil.fromEntries(
-                                field("id", dataCollector.userid)
-                            ).getObject()
+                    attribute 'userid', dataCollector.userid
+                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids)?.getObject()
                     attribute 'activity', dataCollector.activity
                     attribute 'exceptiondetail', dataCollector.exceptiondetail
                     attribute 'linkqualifier', dataCollector.linkqualifier
@@ -462,6 +440,7 @@ switch ( objectClass ) {
                     activitydate : row.activitydate,
                     eventname : row.eventname,
                     userid : row.userid,
+                    trackingids : row.trackingids,
                     activity : row.activity,
                     exceptiondetail : row.exceptiondetail,
                     linkqualifier : row.linkqualifier,
@@ -499,10 +478,8 @@ switch ( objectClass ) {
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'eventname', dataCollector.eventname
-                    attribute 'authentication',
-                            JsonValueUtil.fromEntries(
-                                field("id", dataCollector.userid)
-                            ).getObject()
+                    attribute 'userid', dataCollector.userid
+                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids)?.getObject()
                     attribute 'activity', dataCollector.activity
                     attribute 'exceptiondetail', dataCollector.exceptiondetail
                     attribute 'linkqualifier', dataCollector.linkqualifier
@@ -534,6 +511,7 @@ switch ( objectClass ) {
                     activitydate : row.activitydate,
                     eventname : row.eventname,
                     userid : row.userid,
+                    trackingids : row.trackingids,
                     activity : row.activity,
                     exceptiondetail : row.exceptiondetail,
                     linkqualifier : row.linkqualifier,
@@ -552,6 +530,67 @@ switch ( objectClass ) {
         });
 
         handleCollectedData();
+        break
+
+    case auditconfig:
+        def dataCollector = [ uid: "" ]
+
+        def handleCollectedData = {
+            if (dataCollector.uid != "") {
+                handler {
+                    uid dataCollector.uid
+                    id dataCollector.id
+                    attribute 'activitydate', dataCollector.activitydate
+                    attribute 'transactionid', dataCollector.transactionid
+                    attribute 'eventname', dataCollector.eventname
+                    attribute 'userid', dataCollector.userid
+                    attribute 'runas', dataCollector.runas
+                    attribute 'operation', dataCollector.operation
+                    attribute 'beforeObject', JsonValueUtil.fromJsonString(dataCollector.subjectbefore).getObject()
+                    attribute 'afterObject', JsonValueUtil.fromJsonString(dataCollector.subjectafter).getObject()
+                    attribute 'changedfields',
+                            JsonValueUtil.fromJsonString(dataCollector.changedfields)?.getObject()
+                    attribute 'rev', dataCollector.subjectrev
+                    attribute 'configobjectid', dataCollector.activityobjectid
+                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids)?.getObject()
+                }
+            }
+        }
+
+        def statement = """
+            SELECT * FROM auditconfig ${where} ${orderBy} ${limit}
+        """
+
+        sql.eachRow(statement, whereParams, { row ->
+            if (dataCollector.uid != row.objectid) {
+                // process each row of the resultset
+                handleCollectedData();
+
+                dataCollector = [
+                        id : row.id as String,
+                        uid : row.objectid,
+                        activitydate : row.activitydate,
+                        transactionid : row.transactionid,
+                        eventname : row.eventname,
+                        userid : row.userid,
+                        runas : row.runas,
+                        operation : row.operation,
+                        subjectbefore : row.beforeObject,
+                        subjectafter : row.afterObject,
+                        changedfields : row.changedfields,
+                        subjectrev : row.rev,
+                        activityobjectid : row.configobjectid,
+                        trackingids : row.trackingids
+                ]
+            }
+
+            lastActivitydate = row.activitydate
+            lastId = row.id
+            resultCount++
+        });
+
+        handleCollectedData();
+
         break
 
     default:
