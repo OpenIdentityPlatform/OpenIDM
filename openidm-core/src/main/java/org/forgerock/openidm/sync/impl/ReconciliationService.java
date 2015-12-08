@@ -49,6 +49,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.sync.ReconContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -253,7 +254,7 @@ public class ReconciliationService
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException>  handleAction(Context context, ActionRequest request) {
+    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
         ObjectSetContext.push(context);
         try {
             if (request.getAction() == null) {
@@ -277,14 +278,16 @@ public class ReconciliationService
                         } else {
                             waitForCompletion = Boolean.parseBoolean(waitParam.asString());
                         }
-                        reconId = reconcile(ReconAction.valueOf(request.getAction()), mapping, waitForCompletion, paramsVal, request.getContent());
+                        reconId = reconcile(ReconAction.valueOf(request.getAction()), mapping, waitForCompletion, 
+                                paramsVal, request.getContent());
                         result.put("_id",  reconId);
                         result.put("state", reconRuns.get(reconId).getState());
                     } catch (SynchronizationException se) {
                         throw new ConflictException(se);
                     }
                 } else {
-                    throw new BadRequestException("Action " + request.getAction() + " on reconciliation not supported " + request.getAdditionalParameters());
+                    throw new BadRequestException("Action " + request.getAction() + " on reconciliation not supported " 
+                            + request.getAdditionalParameters());
                 }
             } else {
                 // operation on individual resource
@@ -300,7 +303,8 @@ public class ReconciliationService
                     result.put("action", request.getAction());
                     result.put("status", "SUCCESS");
                 } else {
-                    throw new BadRequestException("Action " + request.getAction() + " on recon run " + id + " not supported " + request.getAdditionalParameters());
+                    throw new BadRequestException("Action " + request.getAction() + " on recon run " + id 
+                            + " not supported " + request.getAdditionalParameters());
                 }
             }
             return newActionResponse(new JsonValue(result)).asPromise();
@@ -319,13 +323,30 @@ public class ReconciliationService
      * {@inheritDoc}
      */
     @Override
-    public String reconcile(ReconAction reconAction, final JsonValue mapping, Boolean synchronous, JsonValue reconParams, JsonValue config)
-            throws ResourceException {
+    public String reconcile(ReconAction reconAction, final JsonValue mapping, Boolean synchronous, 
+            JsonValue reconParams, JsonValue config) throws ResourceException {
+        
+        ObjectMapping objMapping = null;
+        if (mapping.isString()) {
+            objMapping = mappings.getMapping(mapping.asString());
+        } else if (mapping.isMap()) {
+            // FIXME: Entire mapping configs defined in scheduled jobs?! Not a good idea! –PB
+            objMapping = mappings.createMapping(mapping);
+        } else {
+            throw new BadRequestException("Unknown mapping type");
+        }
 
-        final ReconciliationContext reconContext = newReconContext(reconAction, mapping, reconParams, config);
-        addReconRun(reconContext);
+        // Set the ReconContext on the request context chain.
+        Context currentContext = ObjectSetContext.pop();
+        ObjectSetContext.push(new ReconContext(currentContext, objMapping.getName()));
+        
+        final ReconciliationContext reconciliationContext =
+                newReconContext(reconAction, objMapping, reconParams, config);
+        
+        
+        addReconRun(reconciliationContext);
         if (Boolean.TRUE.equals(synchronous)) {
-            reconcile(reconContext);
+            reconcile(reconciliationContext);
         } else {
             final Context threadContext = ObjectSetContext.get();
             Runnable command = new Runnable() {
@@ -333,7 +354,7 @@ public class ReconciliationService
                 public void run() {
                     try {
                         ObjectSetContext.push(threadContext);
-                        reconcile(reconContext);
+                        reconcile(reconciliationContext);
                     } catch (SynchronizationException ex) {
                         logger.info("Reconciliation reported exception", ex);
                     } catch (Exception ex) {
@@ -346,7 +367,7 @@ public class ReconciliationService
             };
             fullReconExecutor.execute(command);
         }
-        return reconContext.getReconId();
+        return reconciliationContext.getReconId();
     }
 
     /**
@@ -359,26 +380,14 @@ public class ReconciliationService
      * @param reconParams
      * @return a new reconciliation context
      */
-    private ReconciliationContext newReconContext(ReconAction reconAction, JsonValue mapping, JsonValue reconParams, JsonValue config)
-            throws ResourceException {
-
-        ReconciliationContext reconContext = null;
+    private ReconciliationContext newReconContext(ReconAction reconAction, ObjectMapping mapping, JsonValue reconParams,
+            JsonValue config) throws ResourceException {
         if (mappings == null) {
             throw new BadRequestException("Unknown mapping type, no mappings configured");
         }
 
         Context context = ObjectSetContext.get();
-        ObjectMapping objMapping = null;
-        if (mapping.isString()) {
-            objMapping = mappings.getMapping(mapping.asString());
-        } else if (mapping.isMap()) {
-// FIXME: Entire mapping configs defined in scheduled jobs?! Not a good idea! –PB
-            objMapping = mappings.createMapping(mapping);
-        } else {
-            throw new BadRequestException("Unknown mapping type");
-        }
-
-        return new ReconciliationContext(reconAction, objMapping, context, reconParams, config, this);
+        return new ReconciliationContext(reconAction, mapping, context, reconParams, config, this);
     }
 
     /**

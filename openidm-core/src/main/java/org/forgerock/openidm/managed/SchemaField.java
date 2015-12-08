@@ -350,6 +350,7 @@ public class SchemaField {
             scope.put("property", managedObject.get(name).getObject());
             scope.put("propertyName", name);
             scope.put("object", managedObject.getObject());
+            scope.put("context", context);
             try {
                 result = scope.eval();
             } catch (ScriptException se) {

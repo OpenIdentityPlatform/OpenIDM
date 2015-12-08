@@ -1,4 +1,4 @@
---DROP SCHEMA IF EXISTS openidm CASCADE;
+DROP SCHEMA IF EXISTS openidm CASCADE;
 CREATE SCHEMA openidm AUTHORIZATION openidm;
 
 -- -----------------------------------------------------
@@ -129,8 +129,18 @@ CREATE TABLE openidm.relationships (
   CONSTRAINT idx_relationships_object UNIQUE (objecttypes_id, objectid)
 );
 
+CREATE INDEX idx_json_relationships_firstId ON openidm.relationships 
+    ( json_extract_path_text(fullobject, 'firstId') );
+CREATE INDEX idx_json_relationships_firstPropertyName ON openidm.relationships 
+    ( json_extract_path_text(fullobject, 'firstPropertyName') );
+
+CREATE INDEX idx_json_relationships_secondId ON openidm.relationships 
+    ( json_extract_path_text(fullobject, 'secondId') );
+CREATE INDEX idx_json_relationships_secondPropertyName ON openidm.relationships 
+    ( json_extract_path_text(fullobject, 'secondPropertyName') );
+
 -- -----------------------------------------------------
--- Table openidm.relationshipproperties
+-- Table openidm.relationshipproperties (not used in postgres)
 -- -----------------------------------------------------
 
 CREATE TABLE openidm.relationshipproperties (
