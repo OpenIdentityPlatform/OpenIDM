@@ -102,8 +102,7 @@ public class TableQueries {
 
                 QueryInfo queryInfo = new QueryInfo(queryString, tokenNames);
                 configured.put(queryName, queryInfo);
-                logger.info("Configured query converted to JDBC query {} and tokens {}", queryString,
-                        tokenNames);
+                logger.debug("Configured query converted to JDBC query {} and tokens {}", queryString, tokenNames);
             }
         }
 
