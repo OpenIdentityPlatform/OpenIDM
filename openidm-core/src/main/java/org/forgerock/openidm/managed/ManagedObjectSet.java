@@ -1240,10 +1240,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                             if (!resourceExpansionMap.containsKey(relationshipField)) {
                             	// Initialize the list of fields in the resource expansion map
                                 resourceExpansionMap.put(relationshipField, new ArrayList<JsonPointer>());
-                                // replace the field in the fields list with the relationship field
-                                fields.remove(field);
+                                // Add the relationship field to the fields list (so it is included in the response)
                                 fields.add(relationshipField);
                             }
+                            // Remove the expanded field from the list of fields (since it will be included as part of
+                            // the relationship field (after resource expansion) in the response.
+                            fields.remove(field);
                             resourceExpansionMap.get(relationshipField).add(expansionPair.getSecond());
                         }
                     }
