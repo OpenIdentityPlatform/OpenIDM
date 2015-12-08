@@ -58,6 +58,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -556,14 +557,26 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * Implemented to iterate through the collection calling validateRelationship for each relationship within the
      * relationshipField.
      *
-     * @param relationshipField field to iterate over.
      * @param context context of the original request.
+     * @param oldValue old value of field to validate
+     * @param newValue new value of field to validate
      * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
      * @see RelationshipValidator#validateRelationship(JsonValue, Context)
      */
-    public void validateRelationshipField(JsonValue relationshipField, Context context) throws ResourceException {
-        for (JsonValue fieldItem : relationshipField) {
-            relationshipValidator.validateRelationship(fieldItem, context);
+    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue)
+            throws ResourceException {
+        Set<String> oldReferences = new HashSet<>();
+        if (oldValue.isNotNull()) {
+            for (JsonValue oldItem : oldValue) {
+                oldReferences.add(oldItem.get(RelationshipUtil.REFERENCE_ID).asString());
+            }
+        }
+        for (JsonValue newItem : newValue) {
+            // If the relationship is found in the existing/old relationships, then we can skip validation.
+            if (!oldReferences.contains(newItem.get(RelationshipUtil.REFERENCE_ID).asString())) {
+                logger.debug("validating new relationship {} for {}: ", newItem, propertyPtr);
+                relationshipValidator.validateRelationship(newItem, context);
+            }
         }
     }
 }

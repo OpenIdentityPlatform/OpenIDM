@@ -474,7 +474,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 prepareScriptBindings(context, request, resourceId, oldValue, newValue));
 
         // Validate relationships before persisting
-        validateRelationshipFields(newValue, context);
+        validateRelationshipFields(context, oldValue, newValue);
 
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, request, newValue);
@@ -631,7 +631,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Validate relationships before persisting
-            validateRelationshipFields(value, managedContext);
+            validateRelationshipFields(managedContext, json(object()), value);
 
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(managedContext, request, value);
@@ -759,16 +759,19 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     /**
      * This will traverse the jsonValue and validate that all relationship references are valid.
      *
-     * @param value json object that will get its relationship fields validated.
+     * @param oldValue previous state of the json.
+     * @param newValue json object that will get its relationship fields validated.
      * @param context context of the request that is in progress.
      * @throws ResourceException BadRequestException when the first invalid relationship reference is discovered,
      * otherwise for other issues.
      */
-    private void validateRelationshipFields(JsonValue value, Context context) throws ResourceException {
+    private void validateRelationshipFields(Context context, JsonValue oldValue, JsonValue newValue)
+            throws ResourceException {
         for (JsonPointer field : schema.getRelationshipFields()) {
-            JsonValue fieldValue = value.get(field);
-            if (schema.getField(field).isValidationRequired() && fieldValue != null && fieldValue.isNotNull()) {
-                relationshipProviders.get(field).validateRelationshipField(fieldValue, context);
+            if (schema.getField(field).isValidationRequired()) {
+                relationshipProviders.get(field).validateRelationshipField(context,
+                        oldValue.get(field) == null ? json(null) : oldValue.get(field),
+                        newValue.get(field) == null ? json(null) : newValue.get(field));
             }
         }
     }
@@ -956,6 +959,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
                 // Populate the decrypted resource with the relationship fields
                 decrypted.asMap().putAll(relationships.asMap());
+                resource.getContent().asMap().putAll(relationships.asMap());
 
                 JsonValue newValue = decrypted.copy();
                 boolean modified = JsonValuePatch.apply(newValue, patchOperations);
