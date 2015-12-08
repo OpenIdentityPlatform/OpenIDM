@@ -58,22 +58,10 @@
                     "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
-                "action" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activity",
-                    "nativeType" : "string"
-                },
                 "timestamp" : {
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "activitydate",
-                    "nativeType" : "string"
-                },
-                "transactionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "transactionid",
                     "nativeType" : "string"
                 },
                 "eventName" : {
@@ -82,11 +70,26 @@
                     "nativeName" : "eventname",
                     "nativeType" : "string"
                 },
-                "authentication" : {
-                    "type" : "object",
+                "transactionId" : {
+                    "type" : "string",
                     "required" : false,
-                    "nativeName" : "authentication",
-                    "nativeType" : "object"
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
+                "userId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "userid",
+                    "nativeType" : "string"
+                },
+                "trackingIds" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "trackingids",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
                 },
                 "server" : {
                     "type" : "object",
@@ -100,16 +103,10 @@
                     "nativeName" : "client",
                     "nativeType" : "object"
                 },
-                "authorization" : {
+                "request" : {
                     "type" : "object",
                     "required" : false,
-                    "nativeName" : "authorization",
-                    "nativeType" : "object"
-                },
-                "resourceOperation" : {
-                    "type" : "object",
-                    "required" : false,
-                    "nativeName" : "resourceOperation",
+                    "nativeName" : "request",
                     "nativeType" : "object"
                 },
                 "http" : {
@@ -123,10 +120,18 @@
                     "required" : false,
                     "nativeName" : "response",
                     "nativeType" : "object"
+                },
+                "roles" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "roles",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
                 }
             }
         },
-
         "activity" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "objectid",
@@ -139,22 +144,10 @@
                     "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
-                "action" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "activity",
-                    "nativeType" : "string"
-                },
                 "timestamp" : {
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "activitydate",
-                    "nativeType" : "string"
-                },
-                "transactionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "transactionid",
                     "nativeType" : "string"
                 },
                 "eventName" : {
@@ -163,11 +156,26 @@
                     "nativeName" : "eventname",
                     "nativeType" : "string"
                 },
-                "authentication" : {
-                    "type" : "object",
+                "transactionId" : {
+                    "type" : "string",
                     "required" : false,
-                    "nativeName" : "authentication",
-                    "nativeType" : "object"
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
+                "userId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "userid",
+                    "nativeType" : "string"
+                },
+                "trackingIds" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "trackingids",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
                 },
                 "runAs" : {
                     "type" : "string",
@@ -175,23 +183,29 @@
                     "nativeName" : "runas",
                     "nativeType" : "string"
                 },
-                "resourceOperation" : {
-                    "type" : "object",
+                "objectId" : {
+                    "type" : "string",
                     "required" : false,
-                    "nativeName" : "resourceOperation",
-                    "nativeType" : "object"
+                    "nativeName" : "activityobjectid",
+                    "nativeType" : "string"
+                },
+                "operation" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "operation",
+                    "nativeType" : "string"
                 },
                 "before" : {
-                    "type" : "string",
+                    "type" : "object",
                     "required" : false,
                     "nativeName" : "subjectbefore",
-                    "nativeType" : "string"
+                    "nativeType" : "object"
                 },
                 "after" : {
-                    "type" : "string",
+                    "type" : "object",
                     "required" : false,
                     "nativeName" : "subjectafter",
-                    "nativeType" : "string"
+                    "nativeType" : "object"
                 },
                 "changedFields" : {
                     "type" : "string",
@@ -208,17 +222,11 @@
                     "nativeName" : "revision",
                     "nativeType" : "string"
                 },
-                "objectId" : {
-                    "type" : "string",
+                "passwordChanged" : {
+                    "type" : "boolean",
                     "required" : false,
-                    "nativeName" : "objectid",
-                    "nativeType" : "string"
-                },
-                "status" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "status",
-                    "nativeType" : "string"
+                    "nativeName" : "passwordchanged",
+                    "nativeType" : "boolean"
                 },
                 "message" : {
                     "type" : "string",
@@ -226,15 +234,14 @@
                     "nativeName" : "message",
                     "nativeType" : "string"
                 },
-                "passwordChanged" : {
-                    "type" : "boolean",
+                "status" : {
+                    "type" : "string",
                     "required" : false,
-                    "nativeName" : "passwordchanged",
-                    "nativeType" : "boolean"
+                    "nativeName" : "status",
+                    "nativeType" : "string"
                 }
             }
         },
-
         "authentication" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "objectid",
@@ -247,16 +254,22 @@
                     "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
+                "transactionId" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
                 "timestamp" : {
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "activitydate",
                     "nativeType" : "string"
                 },
-                "transactionId" : {
+                "userId" : {
                     "type" : "string",
-                    "required" : true,
-                    "nativeName" : "transactionid",
+                    "required" : false,
+                    "nativeName" : "userid",
                     "nativeType" : "string"
                 },
                 "eventName" : {
@@ -264,12 +277,6 @@
                     "required" : false,
                     "nativeName" : "eventname",
                     "nativeType" : "string"
-                },
-                "authentication" : {
-                    "type" : "object",
-                    "required" : false,
-                    "nativeName" : "authentication",
-                    "nativeType" : "object"
                 },
                 "result" : {
                     "type" : "string",
@@ -292,12 +299,6 @@
                     "nativeName" : "context",
                     "nativeType" : "object"
                 },
-                "sessionId" : {
-                    "type" : "string",
-                    "required" : false,
-                    "nativeName" : "sessionid",
-                    "nativeType" : "string"
-                },
                 "entries" : {
                     "type" : "object",
                     "required" : false,
@@ -306,10 +307,18 @@
                     "flags" : [
                         "MULTIVALUED"
                     ]
+                },
+                "trackingIds" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "trackingids",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
                 }
             }
         },
-
         "recon" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "objectid",
@@ -340,22 +349,31 @@
                     "nativeName" : "eventname",
                     "nativeType" : "string"
                 },
-                "authentication" : {
-                    "type" : "object",
+                "userId" : {
+                    "type" : "string",
                     "required" : false,
-                    "nativeName" : "authentication",
-                    "nativeType" : "object"
+                    "nativeName" : "userid",
+                    "nativeType" : "string"
+                },
+                "trackingIds" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "trackingids",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
                 },
                 "action" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "action",
+                    "nativeName" : "activity",
                     "nativeType" : "string"
                 },
                 "exception" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "exception",
+                    "nativeName" : "exceptiondetail",
                     "nativeType" : "string"
                 },
                 "linkQualifier" : {
@@ -465,14 +483,23 @@
                 "eventName" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "eventName",
+                    "nativeName" : "eventname",
                     "nativeType" : "string"
                 },
-                "authentication" : {
-                    "type" : "object",
+                "userId" : {
+                    "type" : "string",
                     "required" : false,
-                    "nativeName" : "authentication",
-                    "nativeType" : "object"
+                    "nativeName" : "userid",
+                    "nativeType" : "string"
+                },
+                "trackingIds" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "trackingids",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
                 },
                 "action" : {
                     "type" : "string",
@@ -483,7 +510,7 @@
                 "exception" : {
                     "type" : "string",
                     "required" : false,
-                    "nativeName" : "exception",
+                    "nativeName" : "exceptiondetail",
                     "nativeType" : "string"
                 },
                 "linkQualifier" : {
@@ -532,6 +559,98 @@
                     "type" : "string",
                     "required" : false,
                     "nativeName" : "targetobjectid",
+                    "nativeType" : "string"
+                }
+            }
+        },
+        "config" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "objectid",
+            "type" : "object",
+            "nativeType" : "auditconfig",
+            "properties" : {
+                "_id" : {
+                    "type" : "string",
+                    "required" : true,
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "timestamp" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "activitydate",
+                    "nativeType" : "string"
+                },
+                "eventName" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "eventname",
+                    "nativeType" : "string"
+                },
+                "transactionId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "transactionid",
+                    "nativeType" : "string"
+                },
+                "userId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "userid",
+                    "nativeType" : "string"
+                },
+                "trackingIds" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "trackingids",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
+                },
+                "runAs" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "runas",
+                    "nativeType" : "string"
+                },
+                "objectId" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "configobjectid",
+                    "nativeType" : "string"
+                },
+                "operation" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "operation",
+                    "nativeType" : "string"
+                },
+                "before" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "beforeObject",
+                    "nativeType" : "object"
+                },
+                "after" : {
+                    "type" : "object",
+                    "required" : false,
+                    "nativeName" : "afterObject",
+                    "nativeType" : "object"
+                },
+                "changedFields" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "changedfields",
+                    "nativeType" : "string",
+                    "flags" : [
+                        "MULTIVALUED"
+                    ]
+                },
+                "revision" : {
+                    "type" : "string",
+                    "required" : false,
+                    "nativeName" : "rev",
                     "nativeType" : "string"
                 }
             }

@@ -36,6 +36,7 @@
             "filter" : {
                 "actions" : [
                     "create",
+                    "read",
                     "update",
                     "delete",
                     "patch",

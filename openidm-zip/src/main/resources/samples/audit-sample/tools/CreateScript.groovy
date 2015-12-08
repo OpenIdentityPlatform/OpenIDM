@@ -23,17 +23,14 @@
  */
 
 
-import org.forgerock.openicf.common.protobuf.CommonObjectMessages
-import org.identityconnectors.framework.common.objects.Uid
 
-import static org.forgerock.json.JsonValue.*;
+import groovy.sql.Sql
+import org.identityconnectors.framework.common.objects.Attribute
+import org.identityconnectors.framework.common.objects.ObjectClass
 
-import groovy.sql.Sql;
+import java.sql.Connection
 
-import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.ObjectClass;
-
-import java.sql.Connection;
+import static org.forgerock.json.JsonValue.json;
 
 // Parameters:
 // The connector sends us the following:
@@ -56,6 +53,7 @@ def auditrecon = new ObjectClass("auditrecon");
 def auditactivity = new ObjectClass("auditactivity");
 def auditaccess = new ObjectClass("auditaccess");
 def auditsync = new ObjectClass("auditsync");
+def auditconfig = new ObjectClass("auditconfig");
 
 //convert attributes to map
 Map<String, Attribute> attributeMap = new HashMap<String, Attribute>();
@@ -66,109 +64,112 @@ for (Attribute attribute : attributes) {
 switch ( objectClass ) {
     case auditaccess:
         sql.execute("INSERT INTO auditaccess " +
-                "(objectid, activity, activitydate, transactionid, eventname, server_ip, server_port, client_host, " +
-                "client_ip, client_port, userid, principal, roles, auth_component, resource_uri, resource_protocol, " +
-                "resource_method, resource_detail, http_method, http_path, http_querystring, http_headers, status, " +
-                "elapsedtime" +
-                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "(objectid, activitydate, eventname, transactionid, userid, trackingids, server_ip, server_port, client_host, " +
+                "client_ip, client_port, request_protocol, request_operation, request_detail, " +
+                "http_request_secure, http_request_method, http_request_path, http_request_queryparameters, " +
+                "http_request_headers, http_request_cookies, http_response_headers, response_status, " +
+                "response_statuscode, response_elapsedtime, response_elapsedtimeunits, roles" +
+                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 [
                     id,
-                    attributeMap.get("activity")?.getValue()?.get(0),
                     attributeMap.get("activitydate")?.getValue()?.get(0),
-                    attributeMap.get("transactionid")?.getValue()?.get(0),
                     attributeMap.get("eventname")?.getValue()?.get(0),
+                    attributeMap.get("transactionid")?.getValue()?.get(0),
+                    attributeMap.get("userid")?.getValue()?.get(0),
+                    json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString(),
                     attributeMap.get("server")?.getValue()?.get(0)?.get("ip"),
                     attributeMap.get("server")?.getValue()?.get(0)?.get("port"),
                     attributeMap.get("client")?.getValue()?.get(0)?.get("host"),
                     attributeMap.get("client")?.getValue()?.get(0)?.get("ip"),
                     attributeMap.get("client")?.getValue()?.get(0)?.get("port"),
-                    attributeMap.get("authentication")?.getValue()?.get(0)?.get("id"),
-                    attributeMap.get("authorization")?.getValue()?.get(0)?.get("id"),
-                    attributeMap.get("authorization")?.getValue()?.get(0)?.get("roles") != null
-                            ? json(attributeMap.get("authorization")?.getValue()?.get(0)?.get("roles")).toString()
-                            : null,
-                    attributeMap.get("authorization")?.getValue()?.get(0)?.get("component"),
-                    attributeMap.get("resource")?.getValue()?.get(0)?.get("uri"),
-                    attributeMap.get("resource")?.getValue()?.get(0)?.get("protocol"),
-                    attributeMap.get("resource")?.getValue()?.get(0)?.get("method"),
-                    attributeMap.get("resource")?.getValue()?.get(0)?.get("detail"),
-                    attributeMap.get("http")?.getValue()?.get(0)?.get("method"),
-                    attributeMap.get("http")?.getValue()?.get(0)?.get("path"),
-                    attributeMap.get("http")?.getValue()?.get(0)?.get("querystring"),
-                    attributeMap.get("http")?.getValue()?.get(0)?.get('headers') != null
-                            ? json(attributeMap.get("http")?.getValue()?.get(0)?.get('headers')).toString()
-                            : null,
+                    attributeMap.get("request")?.getValue()?.get(0)?.get("protocol"),
+                    attributeMap.get("request")?.getValue()?.get(0)?.get("operation"),
+                    json(attributeMap.get("request")?.getValue()?.get(0)?.get("detail")).toString(),
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("secure"),
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("method"),
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("path"),
+                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("queryParameters")).toString(),
+                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("headers")).toString(),
+                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("cookies")).toString(),
+                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("response")?.get(0)?.get("headers")).toString(),
                     attributeMap.get("response")?.getValue()?.get(0)?.get("status"),
+                    attributeMap.get("response")?.getValue()?.get(0)?.get("statusCode"),
                     attributeMap.get("response")?.getValue()?.get(0)?.get("elapsedTime"),
+                    attributeMap.get("response")?.getValue()?.get(0)?.get('elapsedTimeUnits'),
+                    json(attributeMap.get("roles")?.getValue()).toString(),
                 ]);
         break;
 
     case auditauthentication:
         sql.execute("INSERT INTO auditauthentication " +
-                "(objectid, transactionid, activitydate, userid, eventname, result, principals, context, sessionid, " +
-                "entries" +
+                "(objectid, transactionid, activitydate, userid, eventname, result, principals, context, " +
+                "entries, trackingids" +
                 ") values (?,?,?,?,?,?,?,?,?,?)",
                 [
                     id,
                     attributeMap.get("transactionid")?.getValue()?.get(0),
                     attributeMap.get("activitydate")?.getValue()?.get(0),
-                    attributeMap.get("authentication")?.getValue()?.get(0)?.get("id"),
+                    attributeMap.get("userid")?.getValue().get(0),
                     attributeMap.get("eventname")?.getValue()?.get(0),
                     attributeMap.get("result")?.getValue()?.get(0),
                     attributeMap.get("principal")?.getValue()?.get(0),
                     attributeMap.get("context")?.getValue()?.get(0) != null
                             ? json(attributeMap.get("context")?.getValue()?.get(0)).toString()
                             : null,
-                    attributeMap.get("sessionid")?.getValue()?.get(0),
                     attributeMap.get("entries")?.getValue()?.get(0) != null
                             ? json(attributeMap.get("entries")?.getValue()?.get(0)).toString()
+                            : null,
+                    attributeMap.get("trackingids")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString()
                             : null
                 ]);
         break;
 
     case auditactivity:
         sql.execute("INSERT INTO auditactivity (" +
-                "objectid, activitydate, activity, transactionid, eventname, userid, runas, resource_uri, " +
-                "resource_protocol, resource_method, resource_detail, subjectbefore, subjectafter, changedfields, " +
-                "passwordchanged, subjectrev, message, activityobjectid, status" +
-                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                "objectid, activitydate, eventname, transactionid, userid, trackingids, runas, activityobjectid, " +
+                "operation, subjectbefore, subjectafter, changedfields, " +
+                "subjectrev, passwordchanged, message, status" +
+                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 [
                     id, // objectid
                     attributeMap.get("activitydate")?.getValue()?.get(0),
-                    attributeMap.get("activity")?.getValue()?.get(0),
-                    attributeMap.get("transactionid")?.getValue()?.get(0),
                     attributeMap.get("eventname")?.getValue()?.get(0),
-                    attributeMap.get("authentication")?.getValue()?.get(0)?.get("id"),
+                    attributeMap.get("transactionid")?.getValue()?.get(0),
+                    attributeMap.get("userid")?.getValue()?.get(0),
+                    attributeMap.get("trackingids")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString()
+                            : null,
                     attributeMap.get("runas")?.getValue()?.get(0),
-                    attributeMap.get("resourceOperation")?.getValue()?.get(0)?.get("uri"),
-                    attributeMap.get("resourceOperation")?.getValue()?.get(0)?.get("protocol"),
-                    attributeMap.get("resourceOperation")?.getValue()?.get(0)?.get("operation")?.get("method"),
-                    attributeMap.get("resourceOperation")?.getValue()?.get(0)?.get("operation")?.get("detail"),
-                    attributeMap.get("subjectbefore")?.getValue()?.get(0),
-                    attributeMap.get("subjectafter")?.getValue()?.get(0),
+                    attributeMap.get("activityobjectid")?.getValue()?.get(0),
+                    attributeMap.get("operation")?.getValue()?.get(0),
+                    json(attributeMap.get("subjectbefore")?.getValue()?.get(0)).toString(),
+                    json(attributeMap.get("subjectafter")?.getValue()?.get(0)).toString(),
                     attributeMap.get("changedfields")?.getValue()?.get(0) != null
                             ? json(attributeMap.get("changedfields")?.getValue()?.get(0)).toString()
                             : null,
-                    attributeMap.get("passwordchanged")?.getValue()?.get(0)?.toString(),
                     attributeMap.get("subjectrev")?.getValue()?.get(0),
+                    attributeMap.get("passwordchanged")?.getValue()?.get(0)?.toString(),
                     attributeMap.get("message")?.getValue()?.get(0),
-                    attributeMap.get("activityobjectid")?.getValue()?.get(0),
                     attributeMap.get("status")?.getValue()?.get(0)
                 ]);
         break;
 
     case auditrecon:
         sql.execute("INSERT INTO auditrecon (" +
-                "objectid, transactionid, activitydate, eventname, userid, activity, exceptiondetail, linkqualifier, " +
+                "objectid, transactionid, activitydate, eventname, userid, trackingids, activity, exceptiondetail, linkqualifier, " +
                 "mapping, message, messagedetail, situation, sourceobjectid, status, targetobjectid, reconciling, " +
                 "ambiguoustargetobjectids, reconaction, entrytype, reconid" +
-                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 [
                     id, // objectid
                     attributeMap.get("transactionid")?.getValue()?.get(0),
                     attributeMap.get("activitydate")?.getValue()?.get(0),
                     attributeMap.get("eventname")?.getValue()?.get(0),
-                    attributeMap.get("authentication")?.getValue()?.get(0)?.get("id"),
+                    attributeMap.get("userid")?.getValue()?.get(0),
+                    attributeMap.get("trackingids")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString()
+                            : null,
                     attributeMap.get("activity")?.getValue()?.get(0),
                     attributeMap.get("exceptiondetail")?.getValue()?.get(0),
                     attributeMap.get("linkqualifier")?.getValue()?.get(0),
@@ -191,15 +192,18 @@ switch ( objectClass ) {
 
     case auditsync:
         sql.execute("INSERT INTO auditsync (" +
-                "objectid, transactionid, activitydate, eventname, userid, activity, exceptiondetail, " +
+                "objectid, transactionid, activitydate, eventname, userid, trackingids, activity, exceptiondetail, " +
                 "linkqualifier, mapping, message, messagedetail, situation, sourceobjectid, status, targetobjectid" +
-                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 [
                     id,
                     attributeMap.get("transactionid")?.getValue()?.get(0),
                     attributeMap.get("activitydate")?.getValue()?.get(0),
                     attributeMap.get("eventname")?.getValue()?.get(0),
-                    attributeMap.get("authentication")?.getValue()?.get(0)?.get("id"),
+                    attributeMap.get("userid")?.getValue()?.get(0),
+                    attributeMap.get("trackingids")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString()
+                            : null,
                     attributeMap.get("activity")?.getValue()?.get(0),
                     attributeMap.get("exceptiondetail")?.getValue()?.get(0),
                     attributeMap.get("linkqualifier")?.getValue()?.get(0),
@@ -212,6 +216,33 @@ switch ( objectClass ) {
                     attributeMap.get("sourceobjectid")?.getValue()?.get(0),
                     attributeMap.get("status")?.getValue()?.get(0),
                     attributeMap.get("targetobjectid")?.getValue()?.get(0)
+                ]);
+        break;
+
+    case auditconfig:
+        sql.execute("INSERT INTO auditconfig (" +
+                "objectid, activitydate, eventname, transactionid, userid, trackingids, runas, configobjectid, " +
+                "operation, beforeObject, afterObject, changedfields, " +
+                "rev" +
+                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                [
+                        id, // objectid
+                        attributeMap.get("activitydate")?.getValue()?.get(0),
+                        attributeMap.get("eventname")?.getValue()?.get(0),
+                        attributeMap.get("transactionid")?.getValue()?.get(0),
+                        attributeMap.get("userid")?.getValue()?.get(0),
+                        attributeMap.get("trackingids")?.getValue()?.get(0) != null
+                                ? json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString()
+                                : null,
+                        attributeMap.get("runas")?.getValue()?.get(0),
+                        attributeMap.get("configobjectid")?.getValue()?.get(0),
+                        attributeMap.get("operation")?.getValue()?.get(0),
+                        json(attributeMap.get("beforeObject")?.getValue()?.get(0)).toString(),
+                        json(attributeMap.get("afterObject")?.getValue()?.get(0)).toString(),
+                        attributeMap.get("changedfields")?.getValue()?.get(0) != null
+                                ? json(attributeMap.get("changedfields")?.getValue()?.get(0)).toString()
+                                : null,
+                        attributeMap.get("rev")?.getValue()?.get(0)
                 ]);
         break;
 
