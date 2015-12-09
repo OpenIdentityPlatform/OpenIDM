@@ -22,12 +22,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.services.context.ClientContext;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
-import org.forgerock.services.context.TransactionIdContext;
-import org.forgerock.util.generator.IdGenerator;
 
 /**
  */
@@ -76,18 +74,5 @@ public class ContextUtil {
         authzid.put(SecurityContext.AUTHZID_ROLES, roles);
         authzid.put(SecurityContext.AUTHZID_COMPONENT, "internal/user");
         return newInternalClientContext(new SecurityContext(new RootContext(), INTERNAL_AUTHENTICATION_ID, authzid));
-    }
-
-    /**
-     * Gets the {@link TransactionIdContext} value from the {@link Context} chain.
-     * @param context The CREST context chain.
-     * @return The transactionId value.
-     */
-    public static String getTransactionId(Context context) {
-        if (context.containsContext(TransactionIdContext.class)) {
-            return context.asContext(TransactionIdContext.class).getTransactionId().getValue();
-        } else {
-            return IdGenerator.DEFAULT.generate();
-        }
     }
 }
