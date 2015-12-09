@@ -355,17 +355,11 @@ public class SalesforceConfiguration {
             throw new IllegalArgumentException("Parameter 'clientSecret' must not be blank.");
         }
 
-        if (null == getRefreshToken()) {
-
-            if (StringUtils.isBlank(username)) {
-                throw new IllegalArgumentException("Parameter 'username' must not be blank.");
-            }
-            if (StringUtils.isBlank(password)) {
-                throw new IllegalArgumentException("Parameter 'password' must not be blank.");
-            }
-        } else if (StringUtils.isBlank(getRefreshToken())) {
-            throw new IllegalArgumentException("Parameter 'refreshToken' must not be blank.");
+        if (StringUtils.isBlank(getRefreshToken())
+                && (StringUtils.isBlank(username) || StringUtils.isBlank(password))) {
+            throw new IllegalArgumentException("One of 'refreshToken' or 'username'/'password' is required.");
         }
+
         return this;
     }
 

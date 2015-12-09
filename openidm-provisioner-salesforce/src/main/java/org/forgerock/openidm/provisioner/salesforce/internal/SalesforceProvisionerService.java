@@ -43,6 +43,7 @@ import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.RetryableException;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
@@ -194,18 +195,22 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
         }
 
         // Test the connection in a separate thread to not hold up the activate process
-        connection = new SalesforceConnection(config);
-        Executors.newSingleThreadExecutor().submit(
-                new Runnable() {
-                    @Override
-                    public void run() {
-                        try {
-                            testConnection(true);
-                        } catch (Exception e) {
-                            logger.warn("Couldn't test Salesforce connection - activating in incomplete state", e);
+        try {
+            connection = new SalesforceConnection(config);
+            Executors.newSingleThreadExecutor().submit(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                testConnection(true);
+                            } catch (Exception e) {
+                                logger.warn("Couldn't test Salesforce connection - activating in incomplete state", e);
+                            }
                         }
-                    }
-                });
+                    });
+        } catch (Exception e) {
+            logger.warn("Couldn't initialize Salesforce connection - activating in incomplete state", e);
+        }
 
         ResourcePath system = new ResourcePath("system", systemIdentifier.getName());
 
@@ -252,9 +257,14 @@ public class SalesforceProvisionerService implements ProvisionerService, Singlet
                 throw new ServiceUnavailableException("Salesforce Connector not available");
             }
             connection.test();
-        } catch (ResourceException e) {
+        } catch (RetryableException e) {
             // authenticate or the test throws this, temporary error
-            logger.warn("Service temporarily unavailable; cannot start Salesforce Connector: " + e.getMessage());
+            logger.info("Service temporarily unavailable; cannot start Salesforce Connector: " + e.getMessage());
+            if (!ignoreResourceException) {
+                throw e;
+            }
+        } catch (ResourceException e) {
+            logger.warn("Service unavailable; cannot start Salesforce Connector: " + e.getMessage());
             if (!ignoreResourceException) {
                 throw e;
             }
