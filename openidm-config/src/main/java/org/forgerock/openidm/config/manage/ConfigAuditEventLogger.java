@@ -32,7 +32,6 @@ import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.promise.Promise;
@@ -65,7 +64,7 @@ public class ConfigAuditEventLogger {
                     .operationFromCrestRequest(request)
                     .userId(getUserId(context))
                     .runAs(getUserId(context))
-                    .transactionId(ContextUtil.getTransactionId(context))
+                    .transactionIdFromContext(context)
                     .revision(configAuditState.getRevision())
                     .timestamp(System.currentTimeMillis())
                     .objectId(configAuditState.getId())

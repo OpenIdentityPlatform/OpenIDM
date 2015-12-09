@@ -27,6 +27,7 @@ import static org.mockito.Mockito.when;
 import java.util.Arrays;
 import java.util.UUID;
 
+import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
@@ -37,6 +38,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.sync.ReconAction;
+import org.forgerock.services.context.TransactionIdContext;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -50,8 +52,11 @@ public class AbstractSyncAuditEventLoggerTest {
 
     @BeforeClass
     public void setup() throws Exception {
-        SecurityContext securityContext = new SecurityContext(new RootContext("test_id"), AUTHENTICATION_ID, null);
-        context = securityContext;
+        context =
+                new TransactionIdContext(
+                        new SecurityContext(
+                                new RootContext("test_id"), AUTHENTICATION_ID, null),
+                        new TransactionId());
 
         syncOperation = mock(ObjectMapping.SourceSyncOperation.class);
         syncOperation.action = ReconAction.CREATE;

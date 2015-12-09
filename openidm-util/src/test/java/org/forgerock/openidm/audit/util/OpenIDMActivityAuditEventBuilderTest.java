@@ -22,6 +22,7 @@ import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
@@ -47,11 +48,11 @@ public class OpenIDMActivityAuditEventBuilderTest {
     public void testAuditEventBuilder() {
 
         Request request = Requests.newActionRequest("some/resource", "customAction");
-        RootContext context = new RootContext(TEST_CONTEXT_ID);
+        Context context = new TransactionIdContext(new RootContext(TEST_CONTEXT_ID), new TransactionId());
         String[] changedFields = new String[]{"test"};
 
         AuditEvent event = OpenIDMActivityAuditEventBuilder.auditEventBuilder()
-                .transactionId(ContextUtil.getTransactionId(context))
+                .transactionIdFromContext(context)
                 .timestamp(System.currentTimeMillis())
                 .eventName(RouterActivityLogger.ACTIVITY_EVENT_NAME)
                 .userId("fake")

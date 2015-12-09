@@ -39,9 +39,11 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyAccessor;
+import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
+import org.forgerock.services.context.TransactionIdContext;
 import org.mockito.ArgumentCaptor;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
@@ -64,7 +66,11 @@ public class RouterActivityLoggerTest {
     @BeforeClass
     public void setup() throws Exception {
 
-        context = new SecurityContext(new RootContext("test_id"), AUTHENTICATION_ID, null);
+        context =
+                new TransactionIdContext(
+                        new SecurityContext(
+                                new RootContext("test_id"), AUTHENTICATION_ID, null),
+                        new TransactionId());
 
         before = json(object(
                 field(ResourceResponse.FIELD_CONTENT_REVISION, "1"),

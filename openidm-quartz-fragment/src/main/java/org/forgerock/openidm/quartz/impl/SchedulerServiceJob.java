@@ -41,7 +41,6 @@ import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.openidm.config.enhanced.InvalidException;
-import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
 import org.forgerock.services.context.Context;
@@ -192,7 +191,7 @@ public class SchedulerServiceJob implements Job {
                         "CREST",
                         "ScheduledTask",
                         json(object(field("taskName", jobContext.getJobDetail().getFullName()))))
-                .transactionId(ContextUtil.getTransactionId(context))
+                .transactionIdFromContext(context)
                 .userId(context.asContext(SecurityContext.class).getAuthenticationId())
                 .timestamp(System.currentTimeMillis())
                 .eventName("access");

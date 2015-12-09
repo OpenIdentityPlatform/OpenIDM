@@ -200,7 +200,7 @@ public class AuditFilter implements Filter {
                 .requestFromCrestRequest(state.request)
                 .clientFromContext(context)
                 .httpFromContext(context)
-                .transactionId(ContextUtil.getTransactionId(context))
+                .transactionIdFromContext(context)
                 .eventName("access")
                 .userId(getUserId(context));
 

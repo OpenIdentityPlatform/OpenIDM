@@ -24,7 +24,6 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.SecurityContext;
 
@@ -186,7 +185,7 @@ public abstract class AbstractSyncAuditEventLogger<T extends AbstractSyncAuditEv
 
         try {
             T eventBuilder = getEventBuilder()
-                    .transactionId(ContextUtil.getTransactionId(context))
+                    .transactionIdFromContext(context)
                     .timestamp(System.currentTimeMillis())
                     .eventName(getEventName())
                     .userId(context.asContext(SecurityContext.class).getAuthenticationId())
