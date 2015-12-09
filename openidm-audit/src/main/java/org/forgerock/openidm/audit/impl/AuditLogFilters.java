@@ -127,7 +127,7 @@ public class AuditLogFilters {
         @Override
         public boolean isFiltered(Context context, CreateRequest request) {
             // don't filter requests that do not specify an action
-            if (request.getContent().get(field).isNull()) {
+            if (request.getContent().get(field) == null || request.getContent().get(field).isNull()) {
                 return false;
             }
             try {
