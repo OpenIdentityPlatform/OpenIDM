@@ -1068,7 +1068,7 @@
             <outputFileNameMapping>handlebars.js</outputFileNameMapping>
             <outputDirectory>/openidm/bin/defaults/script/lib</outputDirectory>
             <includes>
-                <include>org.forgerock.commons.ui.libs:handlebars</include>
+                <include>org.forgerock.commons.ui.libs:handlebars:js:4.0.5</include>
             </includes>
         </dependencySet>
         <!-- Explode UI for easy modification -->

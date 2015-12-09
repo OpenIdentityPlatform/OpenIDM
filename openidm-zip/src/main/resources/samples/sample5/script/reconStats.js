@@ -3,16 +3,16 @@
 // First build the HTML body with the recon statistics
 // Then use the external email service to email the report
 // 3 objects are passed to the script:
-// 
+//
 // global: contains general information about reconciliation (mapping name,
 // recon id, start date, end date)
-// 
+//
 // source: contains detailed information about source system processing
 // (system name, start date, end date, duration, situations/entries)
-// 
+//
 // target: contains detailed information about target system processing
 // (system name, start date, end date, duration, situations/entries)
-// 
+//
 // Author: Gael.Allioux@forgerock.com
 // Date: 11/30/2011
 
@@ -41,7 +41,7 @@ if (openidm.read("config/external.email")) {
     target.durationMinutes = Math.floor(target.duration / 60.0) / 1000;
     target.entryListDurationSeconds = Math.floor(target.entryListDuration * 1000.0 / 1000) / 1000.0;
 
-    load(identityServer.getInstallLocation() + "/bin/defaults/script/lib/handlebars.js");
+    Handlebars = require("lib/handlebars");
 
     template = Handlebars.compile(readFile(identityServer.getProjectLocation() + "/script/reconStatTemplate.html"));
 
@@ -56,4 +56,3 @@ if (openidm.read("config/external.email")) {
 } else {
     console.log("Email service not configured; report not generated. ");
 }
-
