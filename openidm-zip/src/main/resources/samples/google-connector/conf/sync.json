@@ -22,6 +22,14 @@
                     "source" : "__NAME__"
                 },
                 {
+                    "target" : "accountStatus",
+                    "source" : "suspensionReason",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "!source ? 'active' : 'inactive';"
+                    }
+                },
+                {
                     "target" : "mail",
                     "source" : "emails",
                     "transform" : {
