@@ -69,6 +69,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                     },
                     {
                         "name" : "kbaSecurityAnswerDefinitionStage",
+                        "numberOfAnswersUserMustSet": 1,
                         "kbaConfig" : null
                     },
                     {
