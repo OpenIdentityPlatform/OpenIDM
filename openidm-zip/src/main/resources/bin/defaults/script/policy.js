@@ -511,6 +511,10 @@ policyProcessor = (function (policyConfig,policyImpl){
             tmpObject = requestObject,
             i;
 
+        if (requestObject === null) {
+            return null;
+        }
+
         for (i = 0; i < propAddress.length; i++) {
             propAddress[i] = propAddress[i].replace(/\[\*\]$/, ''); // replace a trailing array indicator, if found
             tmpObject = tmpObject[propAddress[i]];

@@ -1,6 +1,5 @@
 {
     "kbaPropertyName" : "kbaInfo",
-    "numberOfAnswersUserMustSet": 1,
     "questions" : {
         "1" : {
             "en" : "What's your favorite color?",
