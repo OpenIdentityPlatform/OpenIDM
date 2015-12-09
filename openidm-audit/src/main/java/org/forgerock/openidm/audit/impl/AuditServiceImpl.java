@@ -40,8 +40,10 @@ import static org.forgerock.openidm.audit.impl.AuditLogFilters.newReconActionFil
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.newScriptedFilter;
 
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -62,6 +64,10 @@ import org.forgerock.audit.DependencyProviderBase;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.EventTopicsMetaDataBuilder;
 import org.forgerock.audit.json.AuditJsonConfig;
+import org.forgerock.audit.providers.DefaultKeyStoreHandlerProvider;
+import org.forgerock.audit.providers.KeyStoreHandlerProvider;
+import org.forgerock.audit.secure.JcaKeyStoreHandler;
+import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
@@ -87,6 +93,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.Script;
@@ -94,6 +101,7 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -113,6 +121,10 @@ public class AuditServiceImpl implements AuditService {
     private static final Logger LOGGER = LoggerFactory.getLogger(AuditServiceImpl.class);
     public static final String EXCEPTION_FORMATTER = "exceptionFormatter";
     public static final String EXCEPTION = "exception";
+    private static final String OPENIDM_KEYSTORE_NAME = "openidm";
+    private static final String OPENIDM_KEYSTORE_TYPE = "openidm.keystore.type";
+    private static final String OPENIDM_KEYSTORE_LOCATION = "openidm.keystore.location";
+    private static final String OPENIDM_KEYSTORE_PASSWORD = "openidm.keystore.password";
 
     // ----- Declarative Service Implementation
 
@@ -156,6 +168,8 @@ public class AuditServiceImpl implements AuditService {
             EVENT_TOPICS + "/activity/passwordFields");
     private static final JsonPointer WATCHED_FIELDS_CONFIG_POINTER = new JsonPointer(
             EVENT_TOPICS + "/activity/watchedFields");
+
+    private KeyStoreHandlerProvider keyStoreHandlerProvider;
 
     private final JsonValueObjectConverter<AuditLogFilter> fieldJsonValueObjectConverter =
             new JsonValueObjectConverter<AuditLogFilter>() {
@@ -265,6 +279,7 @@ public class AuditServiceImpl implements AuditService {
 
             config = enhancedConfig.getConfigurationAsJson(compContext);
             auditFilter = auditLogFilterBuilder.build(config);
+            keyStoreHandlerProvider = createKeyStoreHandlerProvider();
 
             final JsonValue topics = AuditJsonConfig.getJson(getClass().getResourceAsStream("/auditTopics.json"));
             final AuditServiceConfiguration serviceConfig =
@@ -283,6 +298,8 @@ public class AuditServiceImpl implements AuditService {
                         public <T> T getDependency(Class<T> clazz) throws ClassNotFoundException {
                             if (ConnectionFactory.class.isAssignableFrom(clazz)) {
                                 return (T) connectionFactory;
+                            } else if (KeyStoreHandlerProvider.class.isAssignableFrom(clazz)) {
+                                return (T) keyStoreHandlerProvider;
                             } else {
                                 return super.getDependency(clazz);
                             }
@@ -652,5 +669,15 @@ public class AuditServiceImpl implements AuditService {
         }
         customTopics.asMap().putAll(configuredTopics.asMap());
         return customTopics;
+    }
+
+    @VisibleForTesting
+    protected KeyStoreHandlerProvider createKeyStoreHandlerProvider() throws Exception {
+        final Map<String, KeyStoreHandler> keystoreHandlers = new LinkedHashMap<>(1);
+        keystoreHandlers.put(OPENIDM_KEYSTORE_NAME, new JcaKeyStoreHandler(
+                JettyPropertyUtil.getProperty(OPENIDM_KEYSTORE_TYPE, false),
+                JettyPropertyUtil.getProperty(OPENIDM_KEYSTORE_LOCATION, false),
+                JettyPropertyUtil.getProperty(OPENIDM_KEYSTORE_PASSWORD, false)));
+        return new DefaultKeyStoreHandlerProvider(keystoreHandlers);
     }
 }
