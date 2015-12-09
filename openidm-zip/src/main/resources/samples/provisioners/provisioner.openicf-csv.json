@@ -68,6 +68,11 @@
                     "type" : "string",
                     "nativeName" : "firstName",
                     "nativeType" : "string"
+                },
+                "username" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "username"
                 }
             }
         }
