@@ -34,6 +34,8 @@ import java.util.List;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
+import org.forgerock.audit.providers.DefaultKeyStoreHandlerProvider;
+import org.forgerock.audit.providers.KeyStoreHandlerProvider;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.http.util.Json;
@@ -82,7 +84,12 @@ public class AuditServiceImplTest {
         final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
         final ScriptEntry scriptEntry = mock(ScriptEntry.class);
         final JsonValue config = AuditTestUtils.getJson(getResource(AUDIT_JSON_FILE));
-        final AuditServiceImpl auditService = new AuditServiceImpl();
+        final AuditServiceImpl auditService = new AuditServiceImpl() {
+            @Override
+            protected KeyStoreHandlerProvider createKeyStoreHandlerProvider() throws Exception {
+                return new DefaultKeyStoreHandlerProvider();
+            }
+        };
 
         auditService.bindEnhancedConfig(jsonEnhancedConfig);
         auditService.bindScriptRegistry(scriptRegistry);
@@ -354,7 +361,12 @@ public class AuditServiceImplTest {
         final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
         final ScriptEntry scriptEntry = mock(ScriptEntry.class);
         final Script script = mock(Script.class);
-        final AuditServiceImpl auditService = new AuditServiceImpl();
+        final AuditServiceImpl auditService = new AuditServiceImpl() {
+            @Override
+            protected KeyStoreHandlerProvider createKeyStoreHandlerProvider() throws Exception {
+                return new DefaultKeyStoreHandlerProvider();
+            }
+        };
 
         auditService.bindEnhancedConfig(jsonEnhancedConfig);
         auditService.bindScriptRegistry(scriptRegistry);
