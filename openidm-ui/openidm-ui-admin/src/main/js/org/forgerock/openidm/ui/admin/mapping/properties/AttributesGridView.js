@@ -326,7 +326,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                             transformIcon = "File: " + this.model.attributes.attribute.transform.file;
                                         }
                                     } else {
-                                        transformIcon = this.model.attributes.transform.condition;
+                                        transformIcon = this.model.attributes.attribute.transform;
                                     }
 
                                     iconElement.append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
