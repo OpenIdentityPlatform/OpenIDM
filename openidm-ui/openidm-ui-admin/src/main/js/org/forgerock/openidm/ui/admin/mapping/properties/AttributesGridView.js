@@ -300,7 +300,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                             className: "properties-icon-container-parent",
                             render: function () {
                                 var iconElement = $('<div class="properties-icon-container"></div>'),
-                                    conditionIcon = "";
+                                    conditionIcon = "",
+                                    transformIcon = "";
 
                                 if(this.model.attributes.attribute.condition) {
                                     if(_.isObject(this.model.attributes.attribute.condition)) {
@@ -318,8 +319,18 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                 }
 
                                 if(this.model.attributes.attribute.transform) {
+                                    if(_.isObject(this.model.attributes.attribute.transform)) {
+                                        if(this.model.attributes.attribute.transform.source) {
+                                            transformIcon = this.model.attributes.attribute.transform.source;
+                                        } else {
+                                            transformIcon = "File: " + this.model.attributes.attribute.transform.file;
+                                        }
+                                    } else {
+                                        transformIcon = this.model.attributes.transform.condition;
+                                    }
+
                                     iconElement.append('<span class="badge properties-badge" rel="tooltip" data-toggle="popover" data-placement="top" title=""><i class="fa fa-wrench"></i>'
-                                        +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +this.model.attributes.attribute.transform.source +'</pre></div></span>');
+                                        +'<div style="display:none;" class="tooltip-details">' +$.t("templates.mapping.transformationScriptApplied") +'<pre class="text-muted code-tooltip">' +transformIcon +'</pre></div></span>');
                                 }
 
                                 this.$el.html(iconElement);
