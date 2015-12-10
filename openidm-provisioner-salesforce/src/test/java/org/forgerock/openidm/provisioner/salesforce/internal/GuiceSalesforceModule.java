@@ -10,9 +10,8 @@ import java.io.File;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.router.RouterRegistry;
-import org.forgerock.openidm.provisioner.salesforce.internal.SalesforceProvisionerService;
 import org.testng.Reporter;
 
 import com.google.inject.AbstractModule;
@@ -26,7 +25,7 @@ import com.google.inject.Singleton;
  */
 public class GuiceSalesforceModule extends AbstractModule {
 
-    private RouterRegistry registry;
+    private TestUtil.TestRouterRegistry registry;
     private final AtomicBoolean active = new AtomicBoolean(false);
 
     @Override
@@ -35,7 +34,7 @@ public class GuiceSalesforceModule extends AbstractModule {
 
     @Provides
     @Singleton
-    public RouterRegistry provideRouterRegistry() {
+    public TestUtil.TestRouterRegistry provideRouterRegistry() {
         if (null == registry) {
             synchronized (this) {
                 if (null == registry && active.compareAndSet(false, true)) {
