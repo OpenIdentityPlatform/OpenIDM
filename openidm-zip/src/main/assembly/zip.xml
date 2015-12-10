@@ -718,7 +718,7 @@
             <outputDirectory>/openidm/samples/usecase/usecase4</outputDirectory>
         </fileSet>
 
-        <!--Use case 5 Certification workflow-->
+        <!--Use case 5 Certification workflow
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -763,7 +763,7 @@
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase5</outputDirectory>
         </fileSet>
-
+        -->
         <!--Use case 6 Password change workflow-->
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>

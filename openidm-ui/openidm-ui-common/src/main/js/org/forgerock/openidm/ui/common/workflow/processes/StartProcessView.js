@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
     "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/openidm/ui/common/workflow/FormManager",
     "org/forgerock/openidm/ui/common/workflow/processes/TemplateStartProcessForm",
-    "org/forgerock/commons/ui/common/util/FormGenerationUtils",
+    "org/forgerock/openidm/ui/common/util/FormGenerationUtils",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/util/ModuleLoader"
 ], function($, _,
@@ -125,6 +125,8 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
                             templateStartProcessForm.render({"formProperties": definition.formProperties.formPropertyHandlers}, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
                                 validatorsManager.bindValidators(this.$el);
                                 validatorsManager.validateAllFields(this.$el);
+
+                                this.$el.find("select").toggleClass("form-control", true);
 
                                 if(callback) {
                                     callback();

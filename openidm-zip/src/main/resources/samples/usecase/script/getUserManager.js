@@ -6,10 +6,10 @@ function pushIfNotContains(list, item) {
 
 function setISO8601(dateInput, string) {
     var regexp = "([0-9]{4})(-([0-9]{2})(-([0-9]{2})" +
-    "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\\.([0-9]+))?)?" +
-    "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?",
-    d = string.match(new RegExp(regexp)),
-    offset = 0, date = new Date(d[1], 0, 1), time;
+            "(T([0-9]{2}):([0-9]{2})(:([0-9]{2})(\\.([0-9]+))?)?" +
+            "(Z|(([-+])([0-9]{2}):([0-9]{2})))?)?)?)?",
+        d = string.match(new RegExp(regexp)),
+        offset = 0, date = new Date(d[1], 0, 1), time;
 
     if (d[3]) {
         date.setMonth(d[3] - 1);
@@ -41,10 +41,10 @@ function setISO8601(dateInput, string) {
 }
 
 function processDelegates(delegate, candidates) {
-   var startDate = setISO8601(new Date(), delegate.startDate),
-    endDate = setISO8601(new Date(), delegate.endDate),
-    now = new Date();
-    
+    var startDate = setISO8601(new Date(), delegate.startDate),
+        endDate = setISO8601(new Date(), delegate.endDate),
+        now = new Date();
+
     if (startDate < now && now < endDate ) {
         pushIfNotContains(candidates, delegate.to);
     }
@@ -53,16 +53,14 @@ function processDelegates(delegate, candidates) {
 (function () {
     if (request.method === "query") {
         if (!request.additionalParameters.userId) {
-        throw "Parameter userId is required";   
+            throw "Parameter userId is required";
         }
         var userId = request.additionalParameters.userId,
-        user = openidm.read("managed/user/"+userId), i,
-        managerCandidates = [ "managed/user/superadmin" ], manager;
-
+            user = openidm.read("managed/user/"+userId, null, ["*", "manager"]), i,
+            managerCandidates = [ "managed/user/superadmin" ], manager;
         if (!user) {
             throw "User not found: " + userId;
         }
-
         if (user.manager && user.manager._ref) {
             pushIfNotContains(managerCandidates, user.manager._ref);
             manager = openidm.read(user.manager._ref);
@@ -72,8 +70,11 @@ function processDelegates(delegate, candidates) {
                 }
             }
         }
-
-        return managerCandidates;
+        return managerCandidates.map(function (manager) {
+            return {
+                "userName": openidm.read(manager).userName
+            };
+        });
     } else {
         throw "Unsupported operation: " + request.method;
     }

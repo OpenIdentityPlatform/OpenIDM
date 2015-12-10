@@ -181,34 +181,49 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TasksMenuView", [
         },
 
         displayTasks: function(tasks) {
-            var process, data, processName, taskType, taskName, actions, i, task, active, before, types = 0;
+            var process,
+                data = {
+                    taskGroup : []
+                },
+                processName,
+                taskType,
+                taskName,
+                actions,
+                i,
+                task,
+                active,
+                before,
+                types = 0,
+                taskGroup;
+
             this.tasks = tasks;
             this.$el.html('');
 
             for(processName in tasks) {
-                process = tasks[processName];
-
                 types++;
 
-                data = {
+                process = tasks[processName];
+
+                data.taskGroup.push({
                     processName: process.name,
                     taskName: process.name,
                     count: process.tasks.length,
-                    headers: this.getParamsForTaskType(taskType),
                     batchOperation: this.category === 'assigned',
                     id: process.name.replace(/\s/g, '') + this.category + types,
                     taskCount: process.tasks.length,
-                    tasks: process.tasks
-                };
+                    tasks: []
+                });
 
-                for(i = 0; i < data.tasks.length; i++) {
-                    task = process.tasks[i];
+                for(i = 0; i < process.tasks.length; i++) {
+                    taskGroup = data.taskGroup[data.taskGroup.length - 1];
 
-                    data.tasks[i].convertedTask = this.prepareParamsFromTask(data.tasks[i]);
+                    taskGroup.tasks.push(process.tasks[i]);
+
+                    taskGroup.tasks[taskGroup.tasks.length - 1].convertedTask = this.prepareParamsFromTask(process.tasks[i]);
                 }
-
-                uiUtils.renderTemplate("templates/workflow/tasks/ProcessUserTaskTableTemplate.html", this.$el, data);
             }
+
+            uiUtils.renderTemplate("templates/workflow/tasks/ProcessUserTaskTableTemplate.html", this.$el, data);
 
             this.refreshAssignedSelectors();
 
