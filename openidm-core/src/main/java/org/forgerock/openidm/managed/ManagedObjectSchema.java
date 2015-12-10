@@ -25,7 +25,7 @@ package org.forgerock.openidm.managed;
 
 import javax.script.ScriptException;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -66,9 +66,9 @@ public class ManagedObjectSchema {
     public ManagedObjectSchema(JsonValue schema, ScriptRegistry scriptRegistry, CryptoService cryptoService) 
             throws JsonValueException, ScriptException {
         JsonValue schemaProperties = schema.get("properties").expect(Map.class);
-        fields = new HashMap<JsonPointer, SchemaField>();
-        relationshipFields = new ArrayList<JsonPointer>();
-        hiddenByDefaultFields = new HashMap<JsonPointer, SchemaField>();
+        fields = new LinkedHashMap<>();
+        relationshipFields = new ArrayList<>();
+        hiddenByDefaultFields = new LinkedHashMap<>();
         if (!schemaProperties.isNull()) {
             for (String propertyKey : schemaProperties.keys()) {
                 SchemaField schemaField = new SchemaField(propertyKey, schemaProperties.get(propertyKey), 
