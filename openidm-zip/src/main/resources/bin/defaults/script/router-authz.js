@@ -459,10 +459,6 @@ function allow() {
     var roles,
         action;
 
-    if (!(context.caller.external || isSelfServiceRequest())) {
-        return true;
-    }
-
     roles = context.security.authorization.roles;
     action = "";
     if (request.action) {
