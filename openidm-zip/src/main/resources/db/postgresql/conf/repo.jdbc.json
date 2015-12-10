@@ -64,12 +64,7 @@
             "managed/user" : {
                 "mainTable" : "managedobjects",
                 "propertiesTable" : "managedobjectproperties",
-                "searchableDefault" : false,
-                "properties": {
-                    "/roles": {
-                        "searchable": true
-                    }
-                }
+                "searchableDefault" : false
             },
             "scheduler" : {
                 "mainTable" : "schedulerobjects",
@@ -89,7 +84,7 @@
             "relationship": {
                 "mainTable" : "relationships",
                 "propertiesTable" : "relationshipproperties",
-                "searchableDefault" : true
+                "searchableDefault" : false
             },
             "updates" : {
                 "mainTable" : "updateobjects",
