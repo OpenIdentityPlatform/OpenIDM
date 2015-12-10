@@ -76,7 +76,9 @@ switch ( objectClass ) {
                     attributeMap.get("eventname")?.getValue()?.get(0),
                     attributeMap.get("transactionid")?.getValue()?.get(0),
                     attributeMap.get("userid")?.getValue()?.get(0),
-                    json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString(),
+                    attributeMap.get("trackingids")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("trackingids")?.getValue()?.get(0)).toString()
+                            : null,
                     attributeMap.get("server")?.getValue()?.get(0)?.get("ip"),
                     attributeMap.get("server")?.getValue()?.get(0)?.get("port"),
                     attributeMap.get("client")?.getValue()?.get(0)?.get("host"),
@@ -84,19 +86,31 @@ switch ( objectClass ) {
                     attributeMap.get("client")?.getValue()?.get(0)?.get("port"),
                     attributeMap.get("request")?.getValue()?.get(0)?.get("protocol"),
                     attributeMap.get("request")?.getValue()?.get(0)?.get("operation"),
-                    json(attributeMap.get("request")?.getValue()?.get(0)?.get("detail")).toString(),
-                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("secure"),
-                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("method"),
-                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("path"),
-                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("queryParameters")).toString(),
-                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("headers")).toString(),
-                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get(0)?.get("cookies")).toString(),
-                    json(attributeMap.get("http")?.getValue()?.get(0)?.get("response")?.get(0)?.get("headers")).toString(),
+                    attributeMap.get("request")?.getValue()?.get(0)?.get("detail") != null
+                            ? json(attributeMap.get("request")?.getValue()?.get(0)?.get("detail")).toString()
+                            : null,
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("secure"),
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("method"),
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("path"),
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("queryParameters") != null
+                            ? json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("queryParameters")).toString()
+                            : null,
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("headers") != null
+                            ? json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("headers")).toString()
+                            : null,
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("cookies") != null
+                            ? json(attributeMap.get("http")?.getValue()?.get(0)?.get("request")?.get("cookies")).toString()
+                            : null,
+                    attributeMap.get("http")?.getValue()?.get(0)?.get("response")?.get("headers") != null
+                            ? json(attributeMap.get("http")?.getValue()?.get(0)?.get("response")?.get("headers")).toString()
+                            : null,
                     attributeMap.get("response")?.getValue()?.get(0)?.get("status"),
                     attributeMap.get("response")?.getValue()?.get(0)?.get("statusCode"),
                     attributeMap.get("response")?.getValue()?.get(0)?.get("elapsedTime"),
                     attributeMap.get("response")?.getValue()?.get(0)?.get('elapsedTimeUnits'),
-                    json(attributeMap.get("roles")?.getValue()).toString(),
+                    attributeMap.get("roles")?.getValue() != null
+                            ? json(attributeMap.get("roles")?.getValue()).toString()
+                            : null,
                 ]);
         break;
 
@@ -143,13 +157,19 @@ switch ( objectClass ) {
                     attributeMap.get("runas")?.getValue()?.get(0),
                     attributeMap.get("activityobjectid")?.getValue()?.get(0),
                     attributeMap.get("operation")?.getValue()?.get(0),
-                    json(attributeMap.get("subjectbefore")?.getValue()?.get(0)).toString(),
-                    json(attributeMap.get("subjectafter")?.getValue()?.get(0)).toString(),
+                    attributeMap.get("subjectbefore")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("subjectbefore")?.getValue()?.get(0)).toString()
+                            : null,
+                    attributeMap.get("subjectafter")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("subjectafter")?.getValue()?.get(0)).toString()
+                            : null,
                     attributeMap.get("changedfields")?.getValue()?.get(0) != null
                             ? json(attributeMap.get("changedfields")?.getValue()?.get(0)).toString()
                             : null,
                     attributeMap.get("subjectrev")?.getValue()?.get(0),
-                    attributeMap.get("passwordchanged")?.getValue()?.get(0)?.toString(),
+                    attributeMap.get("passwordchanged")?.getValue()?.get(0) != null
+                            ? json(attributeMap.get("passwordchanged")?.getValue()?.get(0)).toString()
+                            : null,
                     attributeMap.get("message")?.getValue()?.get(0),
                     attributeMap.get("status")?.getValue()?.get(0)
                 ]);
@@ -237,8 +257,12 @@ switch ( objectClass ) {
                         attributeMap.get("runas")?.getValue()?.get(0),
                         attributeMap.get("configobjectid")?.getValue()?.get(0),
                         attributeMap.get("operation")?.getValue()?.get(0),
-                        json(attributeMap.get("beforeObject")?.getValue()?.get(0)).toString(),
-                        json(attributeMap.get("afterObject")?.getValue()?.get(0)).toString(),
+                        attributeMap.get("beforeObject")?.getValue()?.get(0) != null
+                                ? json(attributeMap.get("beforeObject")?.getValue()?.get(0)).toString()
+                                : null,
+                        attributeMap.get("afterObject")?.getValue()?.get(0) != null
+                                ? json(attributeMap.get("afterObject")?.getValue()?.get(0)).toString()
+                                : null,
                         attributeMap.get("changedfields")?.getValue()?.get(0) != null
                                 ? json(attributeMap.get("changedfields")?.getValue()?.get(0)).toString()
                                 : null,
