@@ -175,46 +175,46 @@ switch ( objectClass ) {
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'eventname', dataCollector.eventname
-                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids).getObject()
+                    attribute 'trackingids', JsonValueUtil.fromJsonString(dataCollector.trackingids)?.getObject()
                     attribute 'server',
                             JsonValueUtil.fromEntries(
                                 field("ip", dataCollector.server_ip),
                                 field("port", dataCollector.server_port)
-                            ).getObject()
+                            )?.getObject()
                     attribute 'client',
                             JsonValueUtil.fromEntries(
                                 field("host", dataCollector.client_host),
                                 field("ip", dataCollector.client_ip),
                                 field("port", dataCollector.client_port)
-                            ).getObject()
+                            )?.getObject()
                     attribute 'userid', dataCollector.userid
                     attribute 'request',
                             JsonValueUtil.fromEntries(
                                 field("protocol", dataCollector.request_protocol),
                                 field("operation", dataCollector.request_operation),
-                                field("detail", JsonValueUtil.fromJsonString(dataCollector.request_detail).getObject())
-                            ).getObject()
+                                field("detail", JsonValueUtil.fromJsonString(dataCollector.request_detail)?.getObject())
+                            )?.getObject()
                     attribute 'http',
                             JsonValueUtil.fromEntries(
                                     field("request", JsonValueUtil.fromEntries(
                                             field("secure", JsonValueUtil.booleanFromString(dataCollector.http_request_secure)),
                                             field("method", dataCollector.http_request_method),
                                             field("path", dataCollector.http_request_path),
-                                            field("queryParameters", JsonValueUtil.fromJsonString(dataCollector.http_request_queryparameters).getObject()),
-                                            field("headers", JsonValueUtil.fromJsonString(dataCollector.http_request_headers).getObject()),
-                                            field("cookies", JsonValueUtil.fromJsonString(dataCollector.http_request_cookies).getObject())
-                                    ).getObject()),
+                                            field("queryParameters", JsonValueUtil.fromJsonString(dataCollector.http_request_queryparameters)?.getObject()),
+                                            field("headers", JsonValueUtil.fromJsonString(dataCollector.http_request_headers)?.getObject()),
+                                            field("cookies", JsonValueUtil.fromJsonString(dataCollector.http_request_cookies)?.getObject())
+                                    )?.getObject()),
                                     field("response", JsonValueUtil.fromEntries(
-                                            field("headers", JsonValueUtil.fromJsonString(dataCollector.http_response_headers).getObject())
-                                    ).getObject()),
-                            ).getObject()
+                                            field("headers", JsonValueUtil.fromJsonString(dataCollector.http_response_headers)?.getObject())
+                                    )?.getObject()),
+                            )?.getObject()
                     attribute 'response',
                             JsonValueUtil.fromEntries(
                                 field("status", dataCollector.response_status),
                                 field("statusCode", dataCollector.response_statuscode),
                                 field("elapsedTime", dataCollector.response_elapsedtime),
                                 field("elaspesTimeUnits", dataCollector.response_elapsedtimeunits)
-                            ).getObject()
+                            )?.getObject()
                 }
             }
         }
@@ -338,8 +338,8 @@ switch ( objectClass ) {
                     attribute 'userid', dataCollector.userid
                     attribute 'runas', dataCollector.runas
                     attribute 'operation', dataCollector.operation
-                    attribute 'subjectbefore', JsonValueUtil.fromJsonString(dataCollector.subjectbefore).getObject()
-                    attribute 'subjectafter', JsonValueUtil.fromJsonString(dataCollector.subjectafter).getObject()
+                    attribute 'subjectbefore', JsonValueUtil.fromJsonString(dataCollector.subjectbefore)?.getObject()
+                    attribute 'subjectafter', JsonValueUtil.fromJsonString(dataCollector.subjectafter)?.getObject()
                     attribute 'changedfields',
                             JsonValueUtil.fromJsonString(dataCollector.changedfields)?.getObject()
                     attribute 'passwordchanged', JsonValueUtil.booleanFromString(dataCollector.passwordchanged)
@@ -546,8 +546,8 @@ switch ( objectClass ) {
                     attribute 'userid', dataCollector.userid
                     attribute 'runas', dataCollector.runas
                     attribute 'operation', dataCollector.operation
-                    attribute 'beforeObject', JsonValueUtil.fromJsonString(dataCollector.subjectbefore).getObject()
-                    attribute 'afterObject', JsonValueUtil.fromJsonString(dataCollector.subjectafter).getObject()
+                    attribute 'beforeObject', JsonValueUtil.fromJsonString(dataCollector.subjectbefore)?.getObject()
+                    attribute 'afterObject', JsonValueUtil.fromJsonString(dataCollector.subjectafter)?.getObject()
                     attribute 'changedfields',
                             JsonValueUtil.fromJsonString(dataCollector.changedfields)?.getObject()
                     attribute 'rev', dataCollector.subjectrev
