@@ -80,6 +80,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
@@ -438,7 +439,10 @@ public class ServletConnectionFactory implements ConnectionFactory {
                 @Override
                 public boolean matches(final Context context, final Request request) {
                     try {
-                        return (Boolean) condition.getValue().getScript(context).eval();
+                        final Script script = condition.getValue().getScript(context);
+                        script.put("request", request);
+                        script.put("context", context);
+                        return (Boolean) script.eval();
                     } catch (ScriptException e) {
                         logger.warn("Failed to evaluate filter condition: ", e.getMessage(), e);
                     }
