@@ -4,7 +4,7 @@
     "connectorHostRef" : "dotnet",
     "connectorName" : "Org.ForgeRock.OpenICF.Connectors.MsPowerShell.MsPowerShellConnector",
     "bundleName" : "MsPowerShell.Connector",
-    "bundleVersion" : "1.4.1.0"
+    "bundleVersion" : "1.4.2.0"
   },
   "poolConfigOption" : {
     "maxObjects" : 10,
