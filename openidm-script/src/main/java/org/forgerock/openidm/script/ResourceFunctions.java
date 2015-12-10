@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -634,7 +634,7 @@ public final class ResourceFunctions {
                         JsonValue fields = params.get(name);
                         if (fields.isString()) {
                             try {
-                                qr.addSortKey(fields.asString().split(","));
+                                qr.addField(fields.asString().split(","));
                             } catch (final IllegalArgumentException e) {
                                 // FIXME: i18n.
                                 throw new BadRequestException(
@@ -645,7 +645,7 @@ public final class ResourceFunctions {
                                                 + "' could not be parsed as a comma separated list of JSON pointers");
                             }
                         } else if (fields.isList()) {
-                            qr.addSortKey(fields.asList().toArray(new String[fields.size()]));
+                            qr.addField(fields.asList().toArray(new String[fields.size()]));
                         }
                     } else if (name.equalsIgnoreCase("_sortKeys")) {
                         JsonValue sortKey = params.get(name);
