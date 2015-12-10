@@ -999,7 +999,7 @@ public abstract class RelationshipProvider {
                                         throws ResourceException {
                                     // Since the read failed, the sync can't happen, but we still want to proceed with
                                     // the request on the relationship.
-                                    logger.error("Unable to read '" + refToSync + "' so the sync will be skipped.", e);
+                                    logger.warn("Unable to read '{}', no sync will occur", refToSync);
                                     return invokeRequest(context, request);
                                 }
                             });
