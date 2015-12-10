@@ -1947,6 +1947,9 @@
                     },
                     "signatureInterval": {
                         "help": "Signature generation interval"
+                    },
+                    "keyStoreHandlerName": {
+                        "help": "Name of the keystore to use for tamper-evident logging"
                     }
                 },
                 "buffering": {
@@ -1997,6 +2000,9 @@
                     },
                     "poolName": {
                       "help": "Name of the connection pool"
+                    },
+                    "driverClassName": {
+                      "help": "Fully qualified JDBC driver class name"
                     }
                 },
                 "tableMappings": {
@@ -2103,6 +2109,9 @@
                 },
                 "maxNumberOfHistoryFiles": {
                     "help": "Maximum number of backup audit files allowed"
+                },
+                "rotationRetentionCheckInterval": {
+                    "help": "Interval for periodically checking file rotation and retention policies"
                 }
             }
         },
