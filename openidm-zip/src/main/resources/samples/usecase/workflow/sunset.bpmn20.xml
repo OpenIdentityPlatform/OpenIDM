@@ -1,58 +1,58 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:activiti="http://activiti.org/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:omgdc="http://www.omg.org/spec/DD/20100524/DC" xmlns:omgdi="http://www.omg.org/spec/DD/20100524/DI" typeLanguage="http://www.w3.org/2001/XMLSchema" expressionLanguage="http://www.w3.org/1999/XPath" targetNamespace="Examples" id="definitions" xsi:schemaLocation="              http://www.omg.org/spec/BPMN/20100524/MODEL http://local.openicf.forgerock.org/BPMN20.xsd">
-  <process id="sunset" name="Contract termination process" isExecutable="true">
-    <startEvent id="start" activiti:initiator="startUserId"></startEvent>
-    <sequenceFlow id="sequenceFlow-c3025a40-b960-4186-a4d4-3d423b773ee1" sourceRef="start" targetRef="fetchData"></sequenceFlow>
-    <scriptTask id="fetchData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
-      <script> 
-                user = openidm.read(userId)
+    <process id="sunset" name="Contract termination process" isExecutable="true">
+        <startEvent id="start" activiti:initiator="startUserId"></startEvent>
+        <sequenceFlow id="sequenceFlow-c3025a40-b960-4186-a4d4-3d423b773ee1" sourceRef="start" targetRef="fetchData"></sequenceFlow>
+        <scriptTask id="fetchData" name="Prepare Task" scriptFormat="groovy" activiti:autoStoreVariables="true">
+            <script>
+                user = openidm.read(userId, null, ["*", "manager"])
                 userName = user.userName
                 givenName = user.givenName
                 familyName = user.sn
                 department = user.department
                 endDate = user.sunset.date
                 employeeNumber = user.employeeNumber
-                manager = openidm.read(user.manager)._id
-          
+                manager = openidm.read(user.manager._ref).userName
+
             </script>
-    </scriptTask>
-    <sequenceFlow id="sequenceFlow-7511692d-5c5b-4143-a77d-468a7e43659e" sourceRef="fetchData" targetRef="decideApprovalTask"></sequenceFlow>
-    <userTask id="decideApprovalTask" name="Contract Termination" activiti:assignee="${manager}">
-      <extensionElements>
-        <activiti:formProperty id="userName" name="Username" type="string" writable="false" required="true"></activiti:formProperty>
-        <activiti:formProperty id="givenName" name="First Name" type="string" writable="false" required="true"></activiti:formProperty>
-        <activiti:formProperty id="familyName" name="Last Name" type="string" writable="false" required="true"></activiti:formProperty>
-        <activiti:formProperty id="department" name="Department" type="string" writable="false" required="true"></activiti:formProperty>
-        <activiti:formProperty id="endDate" name="End Date" type="string" datePattern="yyyy-MM-dd"></activiti:formProperty>
-        <activiti:formProperty id="employeeNumber" name="Employee number" type="string" writable="false" required="true"></activiti:formProperty>
-        <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
-          <activiti:value id="accept" name="Accept termination"></activiti:value>
-          <activiti:value id="modify" name="Modify date"></activiti:value>
-        </activiti:formProperty>
-      </extensionElements>
-    </userTask>
-    <sequenceFlow id="sequenceFlow-39bd383c-a72f-47ff-9b1a-f7212507ae50" sourceRef="decideApprovalTask" targetRef="decisionMadeGateway"></sequenceFlow>
-    <exclusiveGateway id="decisionMadeGateway" name="Decision Made"></exclusiveGateway>
-    <sequenceFlow id="sequenceFlow-8d6225f2-111d-46b9-94e9-78bf400e617e" sourceRef="decisionMadeGateway" targetRef="deactivateManagedUser">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='accept'}]]></conditionExpression>
-    </sequenceFlow>
-    <scriptTask id="deactivateManagedUser" name="Deactivate User" scriptFormat="groovy" activiti:autoStoreVariables="false">
-      <script>
+        </scriptTask>
+        <sequenceFlow id="sequenceFlow-7511692d-5c5b-4143-a77d-468a7e43659e" sourceRef="fetchData" targetRef="decideApprovalTask"></sequenceFlow>
+        <userTask id="decideApprovalTask" name="Contract Termination" activiti:assignee="${manager}">
+            <extensionElements>
+                <activiti:formProperty id="userName" name="Username" type="string" writable="false" required="true"></activiti:formProperty>
+                <activiti:formProperty id="givenName" name="First Name" type="string" writable="false" required="true"></activiti:formProperty>
+                <activiti:formProperty id="familyName" name="Last Name" type="string" writable="false" required="true"></activiti:formProperty>
+                <activiti:formProperty id="department" name="Department" type="string" writable="false" required="true"></activiti:formProperty>
+                <activiti:formProperty id="endDate" name="End Date" type="string" datePattern="yyyy-MM-dd"></activiti:formProperty>
+                <activiti:formProperty id="employeeNumber" name="Employee number" type="string" writable="false" required="true"></activiti:formProperty>
+                <activiti:formProperty id="decision" name="Decision" type="enum" required="true">
+                    <activiti:value id="accept" name="Accept termination"></activiti:value>
+                    <activiti:value id="modify" name="Modify date"></activiti:value>
+                </activiti:formProperty>
+            </extensionElements>
+        </userTask>
+        <sequenceFlow id="sequenceFlow-39bd383c-a72f-47ff-9b1a-f7212507ae50" sourceRef="decideApprovalTask" targetRef="decisionMadeGateway"></sequenceFlow>
+        <exclusiveGateway id="decisionMadeGateway" name="Decision Made"></exclusiveGateway>
+        <sequenceFlow id="sequenceFlow-8d6225f2-111d-46b9-94e9-78bf400e617e" sourceRef="decisionMadeGateway" targetRef="deactivateManagedUser">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='accept'}]]></conditionExpression>
+        </sequenceFlow>
+        <scriptTask id="deactivateManagedUser" name="Deactivate User" scriptFormat="groovy" activiti:autoStoreVariables="false">
+            <script>
                 params = [[operation:'replace', field:'accountStatus', value :'inactive'],
                 [operation:'add', field:'sunset/dateProcessed', value:endDate],
                 [operation:'remove', field:'sunset/date']]
-                
+
                 openidm.patch(userId, null, params)
-                
+
             </script>
-    </scriptTask>
-    <sequenceFlow id="sequenceFlow-77364922-f229-40e9-88a5-d4afe3e56438" sourceRef="deactivateManagedUser" targetRef="sendAcceptNotification"></sequenceFlow>
-    <scriptTask id="sendAcceptNotification" name="Accept Email" scriptFormat="groovy" activiti:autoStoreVariables="false">
-      <script>
-                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
-                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));     
+        </scriptTask>
+        <sequenceFlow id="sequenceFlow-77364922-f229-40e9-88a5-d4afe3e56438" sourceRef="deactivateManagedUser" targetRef="sendAcceptNotification"></sequenceFlow>
+        <scriptTask id="sendAcceptNotification" name="Accept Email" scriptFormat="groovy" activiti:autoStoreVariables="false">
+            <script>
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
                 requestDate = formatUTC.format(new Date());
-                
+
                 def newRequesterNotification = [
                 "receiverId": "hradmin",
                 "requesterId" : "",
@@ -62,31 +62,31 @@
                 "notificationSubtype" : "",
                 "message" : "The requested user " + userName + " was successfully inactivated"
                 ];
-                
+
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
             </script>
-    </scriptTask>
-    <sequenceFlow id="sequenceFlow-a7b36830-e6e6-4449-affb-2d39eeb8645c" sourceRef="sendAcceptNotification" targetRef="end"></sequenceFlow>
-    <sequenceFlow id="sequenceFlow-22da309f-5824-40eb-9d33-4f75d3535fab" sourceRef="decisionMadeGateway" targetRef="modifyDate">
-      <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='modify'}]]></conditionExpression>
-    </sequenceFlow>
-    <scriptTask id="modifyDate" name="Modify Date" scriptFormat="groovy" activiti:autoStoreVariables="false">
-      <script>
-                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");     
-                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC")); 
-                
-                java.text.SimpleDateFormat formatUTCDate = new java.text.SimpleDateFormat("yyyy-MM-dd");     
+        </scriptTask>
+        <sequenceFlow id="sequenceFlow-a7b36830-e6e6-4449-affb-2d39eeb8645c" sourceRef="sendAcceptNotification" targetRef="end"></sequenceFlow>
+        <sequenceFlow id="sequenceFlow-22da309f-5824-40eb-9d33-4f75d3535fab" sourceRef="decisionMadeGateway" targetRef="modifyDate">
+            <conditionExpression xsi:type="tFormalExpression"><![CDATA[${decision=='modify'}]]></conditionExpression>
+        </sequenceFlow>
+        <scriptTask id="modifyDate" name="Modify Date" scriptFormat="groovy" activiti:autoStoreVariables="false">
+            <script>
+                java.text.SimpleDateFormat formatUTC = new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.S'Z'");
+                formatUTC.setTimeZone(TimeZone.getTimeZone("UTC"));
+
+                java.text.SimpleDateFormat formatUTCDate = new java.text.SimpleDateFormat("yyyy-MM-dd");
                 formatUTCDate.setTimeZone(TimeZone.getTimeZone("UTC"));
-                
+
                 if (endDate != "") {
-                    endDateISO = formatUTC.format(formatUTCDate.parse(endDate))
-                    sunsetMap = [date:endDateISO.toString()]
-                    params = [[operation: 'replace', field:'sunset',value:sunsetMap]]
-                    openidm.patch(userId, null, params)
+                endDateISO = formatUTC.format(formatUTCDate.parse(endDate))
+                sunsetMap = [date:endDateISO.toString()]
+                params = [[operation: 'replace', field:'sunset',value:sunsetMap]]
+                openidm.patch(userId, null, params)
                 }
-                
+
                 requestDate = formatUTC.format(new Date());
-                
+
                 def newRequesterNotification = [
                 "receiverId": manager,
                 "requesterId" : "",
@@ -97,80 +97,80 @@
                 "message" : "Contract of " + user.userName + " was extended"
                 ];
                 openidm.create("repo/ui/notification/", null, newRequesterNotification)
-                
+
             </script>
-    </scriptTask>
-    <sequenceFlow id="sequenceFlow-6e60feb4-27ad-4b58-abdf-002367b60ed2" sourceRef="modifyDate" targetRef="end"></sequenceFlow>
-    <endEvent id="end"></endEvent>
-  </process>
-  <bpmndi:BPMNDiagram id="BPMNDiagram_sunset">
-    <bpmndi:BPMNPlane bpmnElement="sunset" id="BPMNPlane_sunset">
-      <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
-        <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="95.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="fetchData" id="BPMNShape_fetchData">
-        <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="80.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="decideApprovalTask" id="BPMNShape_decideApprovalTask">
-        <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="80.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="decisionMadeGateway" id="BPMNShape_decisionMadeGateway">
-        <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="90.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="deactivateManagedUser" id="BPMNShape_deactivateManagedUser">
-        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="160.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="sendAcceptNotification" id="BPMNShape_sendAcceptNotification">
-        <omgdc:Bounds height="60.0" width="100.0" x="620.0" y="130.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="modifyDate" id="BPMNShape_modifyDate">
-        <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="0.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
-        <omgdc:Bounds height="35.0" width="35.0" x="770.0" y="80.0"></omgdc:Bounds>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-c3025a40-b960-4186-a4d4-3d423b773ee1" id="BPMNEdge_sequenceFlow-c3025a40-b960-4186-a4d4-3d423b773ee1">
-        <omgdi:waypoint x="35.0" y="112.0"></omgdi:waypoint>
-        <omgdi:waypoint x="80.0" y="110.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-7511692d-5c5b-4143-a77d-468a7e43659e" id="BPMNEdge_sequenceFlow-7511692d-5c5b-4143-a77d-468a7e43659e">
-        <omgdi:waypoint x="180.0" y="110.0"></omgdi:waypoint>
-        <omgdi:waypoint x="230.0" y="110.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-39bd383c-a72f-47ff-9b1a-f7212507ae50" id="BPMNEdge_sequenceFlow-39bd383c-a72f-47ff-9b1a-f7212507ae50">
-        <omgdi:waypoint x="330.0" y="110.0"></omgdi:waypoint>
-        <omgdi:waypoint x="380.0" y="110.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-8d6225f2-111d-46b9-94e9-78bf400e617e" id="BPMNEdge_sequenceFlow-8d6225f2-111d-46b9-94e9-78bf400e617e">
-        <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
-        <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
-        <omgdi:waypoint x="432.0" y="190.0"></omgdi:waypoint>
-        <omgdi:waypoint x="470.0" y="190.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-77364922-f229-40e9-88a5-d4afe3e56438" id="BPMNEdge_sequenceFlow-77364922-f229-40e9-88a5-d4afe3e56438">
-        <omgdi:waypoint x="570.0" y="190.0"></omgdi:waypoint>
-        <omgdi:waypoint x="582.0" y="190.0"></omgdi:waypoint>
-        <omgdi:waypoint x="582.0" y="160.0"></omgdi:waypoint>
-        <omgdi:waypoint x="620.0" y="160.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a7b36830-e6e6-4449-affb-2d39eeb8645c" id="BPMNEdge_sequenceFlow-a7b36830-e6e6-4449-affb-2d39eeb8645c">
-        <omgdi:waypoint x="720.0" y="160.0"></omgdi:waypoint>
-        <omgdi:waypoint x="732.0" y="160.0"></omgdi:waypoint>
-        <omgdi:waypoint x="732.0" y="95.0"></omgdi:waypoint>
-        <omgdi:waypoint x="770.0" y="97.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-22da309f-5824-40eb-9d33-4f75d3535fab" id="BPMNEdge_sequenceFlow-22da309f-5824-40eb-9d33-4f75d3535fab">
-        <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
-        <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
-        <omgdi:waypoint x="432.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="470.0" y="30.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge bpmnElement="sequenceFlow-6e60feb4-27ad-4b58-abdf-002367b60ed2" id="BPMNEdge_sequenceFlow-6e60feb4-27ad-4b58-abdf-002367b60ed2">
-        <omgdi:waypoint x="570.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="582.0" y="30.0"></omgdi:waypoint>
-        <omgdi:waypoint x="582.0" y="95.0"></omgdi:waypoint>
-        <omgdi:waypoint x="770.0" y="97.0"></omgdi:waypoint>
-      </bpmndi:BPMNEdge>
-    </bpmndi:BPMNPlane>
-  </bpmndi:BPMNDiagram>
+        </scriptTask>
+        <sequenceFlow id="sequenceFlow-6e60feb4-27ad-4b58-abdf-002367b60ed2" sourceRef="modifyDate" targetRef="end"></sequenceFlow>
+        <endEvent id="end"></endEvent>
+    </process>
+    <bpmndi:BPMNDiagram id="BPMNDiagram_sunset">
+        <bpmndi:BPMNPlane bpmnElement="sunset" id="BPMNPlane_sunset">
+            <bpmndi:BPMNShape bpmnElement="start" id="BPMNShape_start">
+                <omgdc:Bounds height="35.0" width="35.0" x="0.0" y="95.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="fetchData" id="BPMNShape_fetchData">
+                <omgdc:Bounds height="60.0" width="100.0" x="80.0" y="80.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="decideApprovalTask" id="BPMNShape_decideApprovalTask">
+                <omgdc:Bounds height="60.0" width="100.0" x="230.0" y="80.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="decisionMadeGateway" id="BPMNShape_decisionMadeGateway">
+                <omgdc:Bounds height="40.0" width="40.0" x="380.0" y="90.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="deactivateManagedUser" id="BPMNShape_deactivateManagedUser">
+                <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="160.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="sendAcceptNotification" id="BPMNShape_sendAcceptNotification">
+                <omgdc:Bounds height="60.0" width="100.0" x="620.0" y="130.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="modifyDate" id="BPMNShape_modifyDate">
+                <omgdc:Bounds height="60.0" width="100.0" x="470.0" y="0.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNShape bpmnElement="end" id="BPMNShape_end">
+                <omgdc:Bounds height="35.0" width="35.0" x="770.0" y="80.0"></omgdc:Bounds>
+            </bpmndi:BPMNShape>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-c3025a40-b960-4186-a4d4-3d423b773ee1" id="BPMNEdge_sequenceFlow-c3025a40-b960-4186-a4d4-3d423b773ee1">
+                <omgdi:waypoint x="35.0" y="112.0"></omgdi:waypoint>
+                <omgdi:waypoint x="80.0" y="110.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-7511692d-5c5b-4143-a77d-468a7e43659e" id="BPMNEdge_sequenceFlow-7511692d-5c5b-4143-a77d-468a7e43659e">
+                <omgdi:waypoint x="180.0" y="110.0"></omgdi:waypoint>
+                <omgdi:waypoint x="230.0" y="110.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-39bd383c-a72f-47ff-9b1a-f7212507ae50" id="BPMNEdge_sequenceFlow-39bd383c-a72f-47ff-9b1a-f7212507ae50">
+                <omgdi:waypoint x="330.0" y="110.0"></omgdi:waypoint>
+                <omgdi:waypoint x="380.0" y="110.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-8d6225f2-111d-46b9-94e9-78bf400e617e" id="BPMNEdge_sequenceFlow-8d6225f2-111d-46b9-94e9-78bf400e617e">
+                <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
+                <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
+                <omgdi:waypoint x="432.0" y="190.0"></omgdi:waypoint>
+                <omgdi:waypoint x="470.0" y="190.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-77364922-f229-40e9-88a5-d4afe3e56438" id="BPMNEdge_sequenceFlow-77364922-f229-40e9-88a5-d4afe3e56438">
+                <omgdi:waypoint x="570.0" y="190.0"></omgdi:waypoint>
+                <omgdi:waypoint x="582.0" y="190.0"></omgdi:waypoint>
+                <omgdi:waypoint x="582.0" y="160.0"></omgdi:waypoint>
+                <omgdi:waypoint x="620.0" y="160.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-a7b36830-e6e6-4449-affb-2d39eeb8645c" id="BPMNEdge_sequenceFlow-a7b36830-e6e6-4449-affb-2d39eeb8645c">
+                <omgdi:waypoint x="720.0" y="160.0"></omgdi:waypoint>
+                <omgdi:waypoint x="732.0" y="160.0"></omgdi:waypoint>
+                <omgdi:waypoint x="732.0" y="95.0"></omgdi:waypoint>
+                <omgdi:waypoint x="770.0" y="97.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-22da309f-5824-40eb-9d33-4f75d3535fab" id="BPMNEdge_sequenceFlow-22da309f-5824-40eb-9d33-4f75d3535fab">
+                <omgdi:waypoint x="420.0" y="110.0"></omgdi:waypoint>
+                <omgdi:waypoint x="432.0" y="110.0"></omgdi:waypoint>
+                <omgdi:waypoint x="432.0" y="30.0"></omgdi:waypoint>
+                <omgdi:waypoint x="470.0" y="30.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+            <bpmndi:BPMNEdge bpmnElement="sequenceFlow-6e60feb4-27ad-4b58-abdf-002367b60ed2" id="BPMNEdge_sequenceFlow-6e60feb4-27ad-4b58-abdf-002367b60ed2">
+                <omgdi:waypoint x="570.0" y="30.0"></omgdi:waypoint>
+                <omgdi:waypoint x="582.0" y="30.0"></omgdi:waypoint>
+                <omgdi:waypoint x="582.0" y="95.0"></omgdi:waypoint>
+                <omgdi:waypoint x="770.0" y="97.0"></omgdi:waypoint>
+            </bpmndi:BPMNEdge>
+        </bpmndi:BPMNPlane>
+    </bpmndi:BPMNDiagram>
 </definitions>

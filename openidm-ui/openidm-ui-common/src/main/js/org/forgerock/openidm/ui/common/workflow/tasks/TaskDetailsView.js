@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
     "org/forgerock/openidm/ui/common/workflow/WorkflowDelegate",
     "org/forgerock/openidm/ui/common/workflow/FormManager",
     "org/forgerock/openidm/ui/common/workflow/tasks/TemplateTaskForm",
-    "org/forgerock/commons/ui/common/util/FormGenerationUtils"
+    "org/forgerock/openidm/ui/common/util/FormGenerationUtils"
 ], function(_, form2js, ModuleLoader, AbstractView, validatorsManager, eventManager, constants, workflowManager, tasksFormManager, templateTaskForm, formGenerationUtils) {
     var TaskDetailsView = AbstractView.extend({
         template: "templates/workflow/tasks/TaskDetailsTemplate.html",
@@ -90,6 +90,8 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
 
+                        this.$el.find("select").toggleClass("form-control", true);
+
                         if(callback) {
                             callback();
                         }
@@ -99,6 +101,8 @@ define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
                     templateTaskForm.render(task, category, formGenerationUtils.generateTemplateFromFormProperties({"formProperties": definition.formProperties.formPropertyHandlers}, task.formProperties), _.bind(function() {
                         validatorsManager.bindValidators(this.$el);
                         validatorsManager.validateAllFields(this.$el);
+
+                        this.$el.find("select").toggleClass("form-control", true);
 
                         if(callback) {
                             callback();

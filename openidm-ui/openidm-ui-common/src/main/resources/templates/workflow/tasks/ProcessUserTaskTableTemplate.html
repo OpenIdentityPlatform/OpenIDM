@@ -1,35 +1,37 @@
-{{#each tasks}}
-<li class="list-group-item">
-    <div class="media-left">
-        <div class="image circle bg-primary">
-            <i class="fa fa-check"></i>
+{{#each taskGroup}}
+    {{#each tasks}}
+    <li class="list-group-item">
+        <div class="media-left">
+            <div class="image circle bg-primary">
+                <i class="fa fa-check"></i>
+            </div>
         </div>
-    </div>
-    <div class="media-body media-middle">
-        <div class="media-title">
-            {{../taskName}}
+        <div class="media-body media-middle">
+            <div class="media-title">
+                {{../taskName}}
+            </div>
+            <div class="subtitle text-muted">
+                {{#if assignee}}
+                {{convertedTask.[3]}}
+                {{else}}
+                {{t "dashboard.notAssigned"}}
+                {{/if}}
+            </div>
         </div>
-        <div class="subtitle text-muted">
-            {{#if assignee}}
-            {{convertedTask.[3]}}
-            {{else}}
-            {{t "dashboard.notAssigned"}}
-            {{/if}}
-        </div>
-    </div>
-    <div class="media-right">
-        <div class="claim-item">
-            {{#unless assignee}}
-            <select name="assignedUser" value="null" class="form-control">
-                <option value="null">{{t "common.task.unassign"}}</option>
-                <option value="me">{{t "common.task.assignToMe"}}</option>
-            </select>
-            {{/unless}}
+        <div class="media-right">
+            <div class="claim-item">
+                {{#unless assignee}}
+                <select name="assignedUser" value="null" class="form-control">
+                    <option value="null">{{t "common.task.unassign"}}</option>
+                    <option value="me">{{t "common.task.assignToMe"}}</option>
+                </select>
+                {{/unless}}
 
-            <a href="#" class="details-link"><i class="fa fa-caret-right"></i>{{t "common.form.details"}}</a>
-            <input type="hidden" value="{{_id}}" name="taskId">
-            <input type="hidden" value="{{assignee}}" name="assignedUser">
+                <a href="#" class="details-link"><i class="fa fa-caret-right"></i>{{t "common.form.details"}}</a>
+                <input type="hidden" value="{{_id}}" name="taskId">
+                <input type="hidden" value="{{assignee}}" name="assignedUser">
+            </div>
         </div>
-    </div>
-</li>
+    </li>
+    {{/each}}
 {{/each}}
