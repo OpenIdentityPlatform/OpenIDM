@@ -96,6 +96,8 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
 
                     this.isGeneric = true;
 
+                    /*
+                        For now we will allow the schema to be generic with no restrictions
                     _.each(this.data.connectorDefaults.configurationProperties, function(value, key, obj) {
                         if(value === null) {
                             this.data.connectorDefaults.configurationProperties[key] = "";
@@ -110,6 +112,16 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
                                 type:"boolean",
                                 propertyOrder : orderCount
                             };
+                        } else if (_.isObject(value)){
+                            schema.properties[key] = {
+                                type:"object",
+                                propertyOrder : orderCount
+                            };
+                        } else if (_.isArray(value)) {
+                            schema.properties[key] = {
+                                type:"array",
+                                propertyOrder : orderCount
+                            };
                         } else {
                             schema.properties[key] = {
                                 type:"string",
@@ -118,7 +130,7 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
                         }
 
                         orderCount++;
-                    }, this);
+                    }, this);*/
 
                     this.editor = new JSONEditor(this.$el.find("#genericConnectorBody")[0], {
                         schema: schema
