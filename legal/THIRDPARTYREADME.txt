@@ -843,6 +843,7 @@ Copyright: Copyright 2015 ForgeRock AS.
 
 Version: forgerock-util-3.0.1.jar
 Copyright: Copyright 2015 ForgeRock AS.
+           Copyright © 2010–2011 ApexIdentity Inc. All rights reserved.
 
 Version: connector-framework-1.5.0.0.jar
 Copyright: Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
