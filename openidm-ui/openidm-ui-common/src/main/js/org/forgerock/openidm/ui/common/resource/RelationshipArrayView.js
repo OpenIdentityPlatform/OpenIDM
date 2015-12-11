@@ -271,7 +271,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                         var $target = $(e.target),
                             isInternal = this.model.attributes._ref.indexOf("repo/internal") === 0;
                         
-                        if (isInternal) {
+                        if (isInternal && !$target.is("input")) {
                             e.preventDefault();
                         }
 
