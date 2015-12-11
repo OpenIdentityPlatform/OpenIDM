@@ -320,6 +320,10 @@ Copyright: Copyright (c) 2011 Google Inc.
 Version: google-http-client-jackson2-1.19.0
 Copyright: Copyright (c) 2013 Google Inc.
 
+Version: groovy-connector-1.4.2.0.jar
+Copyright: Copyright (c) 2015 ForgeRock AS.
+           Copyright 2003-2013 the original author or authors. (Groovy)
+
 Version: handlebars-2.0.0.jar
 Copyright:  * Copyright (c) 2013 Tristan Burch
             * Copyright (c) 2012-2013 Edgar Espina
@@ -656,24 +660,232 @@ Version: opendj-ldap-sdk-2.6.9.jar
 Copyright: Copyright 2010 Sun Microsystems, Inc.,   
            Portions copyright 2010-2014 ForgeRock AS
 
-Version: ldap-connector-1.4.0.0.jar 
-Copyright: Copyright 2010 Sun Microsystems, Inc.,   
-           Portions copyright 2010-2014 ForgeRock AS
+Version: openidm-api-servlet-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
 
-Version: csv-connector-1.1.0.2.jar 
-Copyright: Copyright © 2011 ForgeRock AS. All rights reserved.
-           Portions Copyrighted 2011 Radovan Semancik
+Version: openidm-audit-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-authnfilter-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-cluster-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-config-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-core-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-crypto-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+           Copyright (c) 1998-2009 Mort Bay Consulting Pty. Ltd.
+
+Version: openidm-customendpoint-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-enhanced-config-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-external-email-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-external-rest-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-httpclient-fragment-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-httpcontext-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-infoservice-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-jetty-fragment-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-maintenance-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-policy-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-provisioner-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-provisioner-openicf-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-quartz-fragment-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+           Copyright 2005 - 2009 Terracotta, Inc.
+
+Version: openidm-repo-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-repo-jdbc-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-repo-orientdb-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-router-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-scheduler-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-script-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-security-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-security-jetty-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-selfservice-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-servlet-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-servlet-registrator-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-smartevent-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-system-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+           Copyright 2006-2010 Sun Microsystems, Inc.
+
+Version: openidm-ui-admin-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-ui-enduser-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: openidm-util-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+           Copyright 2006-2008 Sun Microsystems, Inc.
+
+Version: openidm-workflow-activiti-4.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-audit-core-3.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-audit-handler-csv-3.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-audit-json-3.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-guava-annotations-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-base-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-cache-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-collect-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-concurrent-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-escape-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-hash-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-io-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-math-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-net-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-guava-primitives-18.0.3.jar
+Copyright: Copyright 2010 The Guava Authors
+
+Version: forgerock-jaspi-iwa-module-3.1.3.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-jaspi-jwt-session-module-3.1.3.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-jaspi-openam-session-module-3.1.3.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-jaspi-openid-connect-module-3.1.3.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-jaspi-runtime-3.1.3.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-selfservice-core-1.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-selfservice-json-1.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-selfservice-stages-1.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: forgerock-util-3.0.1.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: connector-framework-1.5.0.0.jar
+Copyright: Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+           Copyright 2015 ForgeRock AS.
+           Copyright 2012 ConnId. All rights reserved.
+
+Version: connector-framework-internal-1.5.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+           Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+
+Version: connector-framework-protobuf-1.5.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+
+Version: connector-framework-rpc-1.5.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+           Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
+           Copyright 2010 Sun Microsystems, Inc.
+           Copyright (c) 2012-2015 Sonatype, Inc. All rights reserved.
+
+Version: connector-framework-server-1.5.0.0.jar
+Copyright: Copyright 2015 ForgeRock AS.
+           Copyright (c) 2012-2015 Sonatype, Inc. All rights reserved.
+
+Version: csvfile-connector-1.5.0.0.jar
+Copyright: Portions Copyright 2015 ForgeRock AS
+           Portions Copyright 2011 Viliam Repan
+           Portions Copyright 2011 Radovan Semancik
+
+Version: groovy-connector-1.4.2.0.jar
+Copyright: Copyright (c) 2015 ForgeRock AS.
+           Copyright 2003-2013 the original author or authors. (Groovy)
+
+Version: ldap-connector-1.4.1.0.jar
+Copyright: Copyright 2010 Sun Microsystems, Inc.,
+           Portions copyright 2010-2015 ForgeRock AS
+
+Version: xml-connector-1.1.0.2.jar
+Copyright: Copyright (c) 2010-2012 ForgeRock Inc.
 
 Version: databasetable-connector-1.1.0.1.jar
-Copyright: Copyright 2008-2009 Sun Microsystems, Inc.,   
+Copyright: Copyright 2008-2009 Sun Microsystems, Inc.,
            Portions copyright 2010-2014 ForgeRock AS
            Portions Copyrighted 2013 Radovan Semancik, Evolveum
-
-Version: connector-framework-1.4.1.0.jar
-Copyright: Copyright 2008-2009 Sun Microsystems, Inc. All rights reserved.
-           Portions copyright 2010-2014 ForgeRock AS
-           Portions Copyrighted 2013 ConnId
-
 
 ==================
 Full license text:
