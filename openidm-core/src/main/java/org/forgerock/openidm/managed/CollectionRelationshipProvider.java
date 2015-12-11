@@ -115,8 +115,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
         EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/collection/getRelationshipValueForResource"), resourceId, context);
 
         try {
-            final QueryRequest queryRequest = Requests.newQueryRequest("");
-            queryRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+            final QueryRequest queryRequest = Requests.newQueryRequest("")
+                    .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryCollection(new ManagedObjectContext(context), queryRequest, new QueryResourceHandler() {
@@ -195,14 +195,14 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 final List<Promise<ResourceResponse, ResourceException>> promises = new ArrayList<>();
 
                 for (JsonValue toUpdate : relationshipsToUpdate) {
-                    final UpdateRequest updateRequest = Requests.newUpdateRequest("", toUpdate);
-                    updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                    final UpdateRequest updateRequest = Requests.newUpdateRequest("", toUpdate)
+                            .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                     promises.add(updateInstance(context, toUpdate.get(FIELD_ID).asString(), updateRequest));
                 }
 
                 for (JsonValue toCreate : relationshipsToCreate) {
-                    final CreateRequest createRequest = Requests.newCreateRequest("", toCreate);
-                    createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                    final CreateRequest createRequest = Requests.newCreateRequest("", toCreate)
+                            .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                     promises.add(createInstance(context, createRequest));
                 }
 
@@ -247,8 +247,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
                         // Delete if we're not told to keep this id
                         if (!relationshipsToKeep.contains(id)) {
-                            final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id);
-                            deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                            final DeleteRequest deleteRequest = Requests.newDeleteRequest("", id)
+                                    .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                             promises.add(deleteInstance(context, id, deleteRequest));
                         }
                     }
@@ -286,10 +286,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     final List<Promise<ResourceResponse, ResourceException>> deleted = new ArrayList<>();
 
                     for (JsonValue relationship : existing) {
-                        final String id = relationship.get(FIELD_ID).asString();
-                        DeleteRequest deleteRequest = Requests.newDeleteRequest("");
-                        deleteRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
-                        deleted.add(deleteInstance(context, id, deleteRequest));
+                        final DeleteRequest deleteRequest = Requests.newDeleteRequest("")
+                                .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                        deleted.add(deleteInstance(context, relationship.get(FIELD_ID).asString(), deleteRequest));
                     }
 
                     return when(deleted).then(new Function<List<ResourceResponse>, JsonValue, ResourceException>() {
