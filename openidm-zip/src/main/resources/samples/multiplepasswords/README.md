@@ -339,10 +339,10 @@ in OpenDJ.
         $ ./bin/ldapsearch -D uid=jdoe,ou=People,dc=example,dc=com -w TTestw0rd -p 1389 -b dc=example,dc=com uid=jdoe
 
 
-9.  Now to show the password history policy in action, issue the following PATCH requests to fill the "ldapPassword" 
+8.  Now to show the password history policy in action, issue the following PATCH requests to fill the "ldapPassword" 
 field history.
 
-                $ curl --header "Content-Type: application/json" \
+        $ curl --header "Content-Type: application/json" \
         -u "openidm-admin:openidm-admin" \
         --header "If-Match: *" \
         --request PATCH \
@@ -353,7 +353,7 @@ field history.
          } ]' \
          "http://localhost:8080/openidm/managed/user/jdoe"
 
-                 $ curl --header "Content-Type: application/json" \
+        $ curl --header "Content-Type: application/json" \
         -u "openidm-admin:openidm-admin" \
         --header "If-Match: *" \
         --request PATCH \
@@ -364,7 +364,7 @@ field history.
          } ]' \
          "http://localhost:8080/openidm/managed/user/jdoe"
          
-                 $ curl --header "Content-Type: application/json" \
+        $ curl --header "Content-Type: application/json" \
         -u "openidm-admin:openidm-admin" \
         --header "If-Match: *" \
         --request PATCH \
@@ -378,7 +378,7 @@ field history.
 The user should now have a history of "ldapPassword" field values containing: "TTestw0rd3", "TTestw0rd2", "TTestw0rd1",
 and "TTestw0rd".
 
-10)  The history size for the "ldapPassword" policy is set to 2, so attempt to issue a PATCH request to change the
+9)  The history size for the "ldapPassword" policy is set to 2, so attempt to issue a PATCH request to change the
 password to a value that will fail the policy: "TTestw0rd2".
 
         $ curl --header "Content-Type: application/json" \
@@ -413,7 +413,7 @@ password to a value that will fail the policy: "TTestw0rd2".
         
 As we can see the request failed due to the is-new password policy.
 
-11)  Issue a PATCH request that contains a value that was not used in the last two updates: "TTestw0rd".
+10)  Issue a PATCH request that contains a value that was not used in the last two updates: "TTestw0rd".
 
         $ curl --header "Content-Type: application/json" \
         -u "openidm-admin:openidm-admin" \
