@@ -16,13 +16,18 @@
 
 package org.forgerock.openidm.auth.modules;
 
+import static org.forgerock.http.handler.HttpClientHandler.*;
+
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.http.apache.sync.SyncHttpClientProvider;
+import org.forgerock.http.spi.Loader;
 import org.forgerock.jaspi.modules.iwa.IWAModule;
 import org.forgerock.jaspi.modules.openid.OpenIdConnectModule;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.jaspi.modules.session.openam.OpenAMSessionModule;
 import org.forgerock.openidm.auth.Authenticator;
 import org.forgerock.openidm.auth.AuthenticatorFactory;
+import org.forgerock.util.Options;
 
 /**
  * Enum that represents all the core IDM Authentication modules.
@@ -40,7 +45,14 @@ public enum IDMAuthModule {
     OPENAM_SESSION {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
-            return new OpenAMSessionModule();
+            return new OpenAMSessionModule(
+                    Options.defaultOptions()
+                            .set(OPTION_LOADER, new Loader() {
+                                @Override
+                                public <S> S load(Class<S> service, Options options) {
+                                    return service.cast(new SyncHttpClientProvider());
+                                }
+                            }));
         }
     },
     /** Client-cert Auth Module. */
