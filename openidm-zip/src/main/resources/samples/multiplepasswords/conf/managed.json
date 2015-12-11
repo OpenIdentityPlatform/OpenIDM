@@ -244,7 +244,8 @@
                         "viewable" : false,
                         "searchable" : false,
                         "minLength" : 8,
-                        "userEditable" : true
+                        "userEditable" : true,
+                        "scope" : "private"
                     },
                     "kbaInfo" : {
                         "type" : "array",
