@@ -57,6 +57,11 @@
                 <exclude>**/usecase/workflow/newUserCreate.bpmn20.xml</exclude>
                 <exclude>**/usecase/workflow/nUC*.xhtml</exclude>
                 <exclude>**/workflow/workflow/*</exclude>
+
+                <!--
+                    Remove Sample7 from the resulting zip until it is redesigned.
+                -->
+                <exclude>**/sample7/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -387,7 +392,7 @@
             </includes>
             <outputDirectory>/openidm/samples/sample6</outputDirectory>
         </fileSet>
-        <!-- Setup Sample7  -->
+        <!-- Setup Sample7 
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -395,7 +400,7 @@
                 <include>script/**</include>
             </includes>
             <outputDirectory>/openidm/samples/sample7</outputDirectory>
-        </fileSet>
+        </fileSet-->
         <!-- Setup Sample8  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
