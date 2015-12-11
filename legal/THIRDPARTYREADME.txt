@@ -62,66 +62,103 @@ Copyright: Copyright 2002-2012 The Apache Software Foundation
 Version: commons-lang-2.4.jar
 Copyright: Copyright 2001-2008 The Apache Software Foundation
 
-Version: commons-lang3-3.2.jar
+Version: commons-lang-2.6.jar
+Copyright: Copyright 2001-2011 The Apache Software Foundation
+
+Version: commons-lang3-3.4.jar
 Copyright: Copyright 2001-2013 The Apache Software Foundation
 
-Version: groovy-all-2.2.2.jar
-Copyright: Copyright 2003-2013 The Codehaus. All rights reserved.
+Version: commons-beanutils-1.8.0.jar
+Copyright: Copyright 2000-2008 The Apache Software Foundation
 
-Version: httpasyncclient-osgi-4.0.2.jar
-Copyright: Copyright 2010-2012 The Apache Software Foundation
+Version: commons-collections-3.2.1.jar
+Copyright: Copyright 2001-2008 The Apache Software Foundation
 
-Version: httpclient-4.2.6.jar
+Version: commons-logging-1.1.1.jar
+Version: commons-logging-1.2.jar
+Copyright: Copyright 2001-2014 The Apache Software Foundation
+
+Version: commons-cli-1.2.jar
+Copyright: Copyright 2001-2009 The Apache Software Foundation
+
+Version: commons-configuration
+Copyright: Copyright 2001-2012 The Apache Software Foundation
+
+Version: fluent-hc-4.4.1.jar
+Copyright: Copyright 2005-2015 The Apache Software Foundation
+
+Version: httpasyncclient-osgi-4.1.jar
+Copyright: Copyright 2010-2015 The Apache Software Foundation
+
+Version: httpclient-4.4.1.jar
+Copyright: Copyright 2005-2015 The Apache Software Foundation
+
+Version: httpclient-cache-4.4.1.jar
+Copyright: Copyright 2005-2015 The Apache Software Foundation
+
+Version: httpcore-4.4.1.jar
 Copyright: Copyright 1999-2014 The Apache Software Foundation
 
-Version: httpcore-4.3.2.jar
+Version: httpcore-nio-4.4.1.jar
 Copyright: Copyright 1999-2014 The Apache Software Foundation
 
-Version: httpcore-nio-4.3.2.jar
-Copyright: Copyright 1999-2014 The Apache Software Foundation
+Version: httpclient-osgi-4.4.1.jar
+Version: httpclient-osgi-4.2.6.jar
+Copyright: Copyright 2005-2015 The Apache Software Foundation
 
-Version: httpclient-osgi-4.3.5.jar
-Copyright: Copyright 1999-2012 The Apache Software Foundation
-
-Version: httpcore-osgi-4.3.2.jar
+Version: httpcore-osgi-4.4.1.jar
 Copyright: Copyright 2005-2012 The Apache Software Foundation
            Copyright (c) 2005 Brian Goetz and Tim Peierls. See http://www.jcip.net
 
-Version: jackson-annotations-2.4.3.jar
+Version: httpmime-4.4.1.jar
+Copyright: Copyright 1999-2015 The Apache Software Foundation
+
+Version: jackson-annotations-2.6.3.jar
 Copyright: Copyright 2007-2012 The Apache Software Foundation
 
-Version: jackson-core-2.4.3.jar
+Version: jackson-core-2.6.3.jar
 Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 
-Version: jackson-core-asl-1.9.12.jar
+Version: jackson-core-asl-1.9.8/12.jar
 Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 
-Version: jackson-databind-2.4.3.jar
+Version: jackson-databind-2.6.3.jar
 Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 
-Version: jackson-mapper-asl-1.9.12.jar
+Version: jackson-mapper-asl-1.9.8/12.jar
 Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 
-Version: jackson-dataformat-xml-2.4.3.jar
+Version: jackson-dataformat-xml-2.6.3.jar
 Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 
 Version: jackson-module-afterburner-2.4.3.jar
 Copyright: Copyright 1999-2014 The Apache Software Foundation
 
-Version: jackson-module-jaxb-annotations-2.4.3.jar
-Copyright: Copyright 1999-2014 The Apache Software Foundation
+Version: jackson-module-jaxb-annotations-2.6.3.jar
+Copyright: Copyright 1999-2015 The Apache Software Foundation
+
+Version: jackson-module-jsonSchema-2.6.3.jar
+Copyright: Copyright 2009-2015 FasterXML, LLC.
+Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
+Jack Phelan, jphelan@andrew.cmu.edu: author (first version of core module)
 
 Version: joda-time-2.1.jar
 Copyright: Copyright 2001-2005 Stephen Colebourne
 
-Version: mybatis-3.1.1.jar
+Version: mybatis-3.2.5.jar
 Copyright: Copyright 2009-2012 The MyBatis Team
+           Copyright 2010 The Apache Software Foundation
 
 Version: disruptor-3.0.1.jar
 Copyright: Copyright 2011 LMAX Ltd.
 
-Version: ops4j-base-lang-1.4.0.jar
+Version: ops4j-base-lang-1.5.0.jar
 Copyright: Copyright 2006-2013 OPS4J - Open Participation Software for Java
+           Copyright 2005-2011 Niclas Hedhman, Harald Wellmann.
+
+Version: org.apache.felix.framework-4.2.1.jar (fragment)
+Copyright: Copyright 2006-2015 The Apache Software Foundation
+           Copyright (c) OSGi Alliance (2000, 2014). All Rights Reserved.
 
 Version: org.apache.felix.configadmin-1.8.0.jar
 Copyright: Copyright 2006-2012 The Apache Software Foundation
@@ -147,8 +184,8 @@ Copyright: Copyright 2006-2012 The Apache Software Foundation
 Version: org.apache.felix.shell.tui-1.4.1.jar
 Copyright: Copyright 2006-2009 The Apache Software Foundation
 
-Version: org.apache.felix.webconsole-4.0.0.jar
-Copyright: Copyright 2006-2012 The Apache Software Foundation
+Version: org.apache.felix.webconsole-4.2.12.jar
+Copyright: Copyright 2006-2015 The Apache Software Foundation
 
 Version: org.apache.felix.webconsole.plugins.ds-1.0.0.jar
 Copyright: Copyright 2006-2012 The Apache Software Foundation
@@ -165,51 +202,73 @@ Copyright: Copyright 2006-2012 The Apache Software Foundation
 Version: org.apache.felix.webconsole.plugins.packageadmin-1.0.0.jar
 Copyright: Copyright 2006-2012 The Apache Software Foundation
 
+Version: geronimo-jta_1.1_spec-1.1.1.jar
+Copyright: Copyright 2003-2008 The Apache Software Foundation
+
+Version: geronimo-j2ee-connector_1.5_spec-1.1.1.jar
+Copyright: Copyright 2003-2007 The Apache Software Foundation
+
 Version: org.apache.servicemix.bundles.quartz-1.8.6_1.jar
 Copyright: Copyright 2005-2011 The Apache Software Foundation
 
-Version: org.apache.servicemix.bundles.rhino-1.7R4_1.jar
+Version: org.apache.servicemix.bundles.javax-inject-1_2.jar
+Copyright: Copyright 2005-2012 The Apache Software Foundation
+Copyright (C) 2009 The JSR-330 Expert Group
+
+Version: org.apache.servicemix.bundles.commons-configuration:jar:1.9_1
 Copyright: Copyright 2005-2012 The Apache Software Foundation
 
 Version: org.apache.servicemix.transaction-1.2.0.jar
 Copyright: Copyright 2005-2010 The Apache Software Foundation
 
-Version: org.osgi.compendium-1.4.0.jar
+Version: org.osgi.compendium-4.2.0.jar
 Copyright: Copyright (c) OSGi Alliance (2000, 2009).
 
 Version: org.osgi.enterprise-4.2.0.jar
 Copyright: Copyright (c) OSGi Alliance (2009, 2010). All Rights Reserved.
 
-Version: orient-commons-1.7.8.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli--at--orientechnologies.com)
+Version: org.springframework:spring-beans:jar:2.5.6.SEC01
+         org.springframework:spring-core:jar:2.5.6.SEC01
+         org.springframework:spring-context:jar:2.5.6.SEC01
+Copyright:  Copyright 2002-2015 the original author or authors.
 
-Version: orientdb-client-1.7.8.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli--at--orientechnologies.com)
+Version: orient-commons-1.7.10.jar
+Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: orientdb-core-1.7.8.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli--at--orientechnologies.com)
+Version: orientdb-client-1.7.10.jar
+Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: orientdb-enterprise-1.7.8.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli--at--orientechnologies.com)
+Version: orientdb-core-1.7.10.jar
+Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: orientdb-server-1.7.8.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli--at--orientechnologies.com)
+Version: orientdb-enterprise-1.7.10.jar
+Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: orientdb-nativeos-1.7.8.jar
-Copyright: Copyright 2010-2012 Luca Garulli (l.garulli--at--orientechnologies.com)
+Version: orientdb-server-1.7.10.jar
+Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: pax-swissbox-extender-1.6.0.jar
-Copyright: Copyright 2008 Alin Dreghiciu.
+Version: orientdb-nativeos-1.7.10.jar
+Copyright: Copyright 2010-2012 Luca Garulli (l.garulli(at)orientechnologies.com)
 
-Version: pax-swissbox-lifecycle-1.6.0.jar
+Version: pax-swissbox-extender-1.8.0.jar
+Copyright: Copyright 2007-2008 Alin Dreghiciu.
+           Copyright 2012 Alin Dreghiciu, Harald Wellmann
+
+Version: pax-swissbox-lifecycle-1.8.0.jar
 Copyright: Copyright 2007 Alin Dreghiciu.
 
-Version: pax-web-jetty-bundle-3.0.0.jar
-Copyright: Copyright 2007-2009 Open Participation for Java (www.ops4j.org)
-           Copyright 2007 Niclas Hedhman
-           Copyright 2007 Alin Dreghiciu
+Version: pax-web-jetty-bundle-4.1.1.jar
+Copyright: Copyright 2009 Alin Dreghiciu.
+           Copyright 2007-2009 Open Participation for Java (www.ops4j.org)
+           Copyright (c) OSGi Alliance (2000, 2007).
 
-Version: super-csv-2.0.1.jar
+Version: pax-web-api-4.1.1.jar
+Copyright:  Copyright 2009 David Conde.
+            Copyright 2012 Harald Wellmann
+            Copyright 2007 Alin Dreghiciu.
+            Copyright 2012 Achim Nierbeck.
+
+Version: super-csv-2.4.0.jar
 Copyright: Copyright 2007 Kasper B. Graversen
 
 Version: saxon9he-9.4.0.1.jar
@@ -225,13 +284,13 @@ Copyright: Copyright 2006 The Apache Software Foundation.
             - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
             - software copyright (c) 2000 World Wide Web Consortium, http://www.w3.org
 
-Version: groovy-all.jar
-Copyright: Copyright 2003-2013 The Codehaus. All rights reserved.
+Version: groovy-all-2.2.2.jar
+Copyright: Copyright 2003-2014 The respective authors and developers
 
-Version: jackson-core-asl-1.9.3
+Version: jackson-core-asl-1.9.8
 Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 
-Version: jackson-mapper-asl-1.9.3
+Version: jackson-mapper-asl-1.9.8
 Copyright: Copyright (c) 2007- Tatu Saloranta, tatu.saloranta@iki.fi
 
 Version: guava-18.0
@@ -261,6 +320,10 @@ Copyright: Copyright (c) 2011 Google Inc.
 Version: google-http-client-jackson2-1.19.0
 Copyright: Copyright (c) 2013 Google Inc.
 
+Version: handlebars-2.0.0.jar
+Copyright:  * Copyright (c) 2013 Tristan Burch
+            * Copyright (c) 2012-2013 Edgar Espina
+
 Version: concurrentlinkedhashmap-lru-1.4
 Copyright: Copyright 2008, Ben Manes 
            Copyright 2010, Google Inc. 
@@ -281,26 +344,17 @@ Copyright: Copyright 2008-2011 Google Inc.
 Version: juli-7.0.39.2.jar
 Copyright: Copyright 2003-2013 The Apache Software Foundation
 
-Version: tomcat-juli-8.0.12.jar
-Copyright: Copyright 2008-2014 The Apache Software Foundation
-
-Version: tomcat-jdbc-8.0.12.jar
+Version: tomcat-juli-7.0.53.jar
 Copyright: Copyright 1999-2014 The Apache Software Foundation
 
-Version: snappy-java-1.1.0.1.jar
-Copyright: Copyright 2008 Taro L. Saito
+Version: tomcat-jdbc-7.0.53.jar
+Copyright: Copyright 1999-2014 The Apache Software Foundation
+
+Version: snappy-java-1.1.1.6.jar
+Copyright: Copyright 2011 Taro L. Saito
 
 Version: aalto-xml-0.9.9.jar
 Copyright: Copyright (c) 2006- Tatu Saloranta, tatu.saloranta@iki.fi
-
-Version: commons-beanutils-1.8.0.jar
-Copyright: Copyright 2000-2008 The Apache Software Foundation
-
-Version: commons-collections-3.2.1.jar
-Copyright: Copyright 2001-2008 The Apache Software Foundation
-
-Version: commons-logging-1.1.1.jar
-Copyright: Copyright 2001-2007 The Apache Software Foundation
 
 Version: ezmorph-1.0.6.jar
 Copyright: Copyright 2006-2007 the original author or authors.
@@ -341,6 +395,12 @@ Copyright: Copyright 2013-2014 The Apache Software Foundation
 Version: odata-commons-core-4.0.0-beta-01.jar
 Copyright: Copyright 2013-2014 The Apache Software Foundation
 
+Version: selectize-0.12.1-min.js/.css
+Copyright: Copyright 2013–2015 Brian Reavis
+
+Version: validation-api-1.1.0.Final.jar
+Copyright: Copyright © 2007-2013 Red Hat, Inc.
+
 Version: xercesImpl-2.9.1.jar
 Copyright: Copyright 1999-2010 The Apache Software Foundation
 
@@ -356,6 +416,12 @@ Copyright: Copyright 2006 The Apache Software Foundation
 
 Version: bonecp-0.7.1.RELEASE.jar 
 Copyright: Copyright 2010 Wallace Wadge
+
+Version: zip4j-1.3.2.jar
+Copyright: Copyright 2010 Srikanth Reddy Lingala
+
+Version: diffutils-1.3.0.jar
+Copyright: Copyright 2010 Dmitry Naumenko (dm.naumenko@gmail.com)
 
 ==================
 Full license text:
@@ -432,13 +498,42 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
+***************************************************************************
+The BSD 2-Clause License
+***************************************************************************
+
+Version: protobuf-java-3.0.0-alpha-3.1.jar
+Copyright: Copyright 2008 Google Inc.  All rights reserved.
+           https://developers.google.com/protocol-buffers/
+
+Version: titatoggle-1.2.6-min.css
+Copyright: Copyright (c) 2014, Jan Enning  https://github.com/kleinejan
+
+
+==================
+Full license text:
+==================
+
+Copyright (c) <YEAR>, <OWNER>
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+
 
 ***************************************************************************
 The BSD 3-Clause License
 ***************************************************************************
 
-Version: sinon-1.10.3.js
+Version: sinon-1.15.4.js
 Copyright: Copyright (c) 2010-2014, Christian Johansen
+           https://github.com/sinonjs/sinon/blob/v1.15.4/AUTHORS
 
 Version: jaxen-1.1.1.jar
 Copyright:Copyright 2003-2006 The Werken Company. All Rights Reserved.
@@ -464,6 +559,16 @@ Copyright: Copyright (c) 2005-2013, salesforce.com, inc. All rights reserved.
 
 Version: asm-all-3.3.1.jar
 Copyright: Copyright (c) 2000-2007 INRIA, France Telecom All rights reserved.
+
+Version: d3-3.5.5-min.js
+Copyright: Copyright (c) 2010-2015, Michael Bostock
+
+Version: antlr4-runtime-4.3.jar
+Copyright:  Copyright (c) 2012 Terence Parr, Sam Harwell
+            Copyright (c) 2011 Cay Horstmann
+
+Version: antlr4-annotations-4.3.jar
+Copyright: Copyright (c) 2012-2013 Terence Parr, Sam Harwell
 
 ==================
 Full license text:
@@ -494,7 +599,13 @@ Version: javax.transaction-3.1.1.jar
 Copyright: Copyright (c) 1997-2011 Oracle and/or its affiliates. All rights reserved.
 
 Version: javax.mail-1.5.1.jar
+Version: javax.mail-1.4.7.jar
+Version: javax.mail-1.4.1.jar
+Version: javax.mail-1.4.jar
 Copyright: Copyright (c) 1997-2013 Oracle and/or its affiliates. All rights reserved.
+
+Version: javax.annotation-api-1.2.jar
+Copyright: Copyright (c) 2005-2013 Oracle and/or its affiliates. All rights reserved.
 
 Version: mail-1.4.7.jar
 Copyright: Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights reserved.
@@ -537,9 +648,6 @@ Copyright: Copyright 2005-2011 Noelios Technologies.
 
 Version: class files from org.restlet.ext.jackson-2.0.10
 Copyright: Copyright 2005-2011 Noelios Technologies.
-
-Version: grizzly-framework-2.3.11.jar
-Copyright: Copyright (c) 2009-2013 Oracle and/or its affiliates. All rights reserved.
 
 Version: i18n-core-1.4.1.jar
 Copyright: Copyright 2009 Sun Microsystems, Inc 
@@ -701,6 +809,169 @@ This License represents the complete agreement concerning subject matter hereof.
 
 As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability.
 
+***************************************************************************
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL) Version 1.1
+***************************************************************************
+
+Version: grizzly-framework-2.3.22.jar
+Copyright: Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
+
+Version: grizzly-framework-2.3.22.jar
+Copyright: Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
+Version: grizzly-http-2.3.22.jar
+Copyright: Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
+
+Version: grizzly-http-server-2.3.22.jar
+Copyright: Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
+
+Version: grizzly-http-servlet-2.3.22.jar
+Copyright: Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
+
+Version: grizzly-websockets-2.3.22.jar
+Copyright: Copyright (c) 2013-2015 Oracle and/or its affiliates. All rights reserved.
+
+==================
+Full license text:
+==================
+COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)Version 1.1
+
+1. Definitions.
+
+    1.1. “Contributor” means each individual or entity that creates or contributes to the creation of Modifications.
+
+    1.2. “Contributor Version” means the combination of the Original Software, prior Modifications used by a Contributor (if any), and the Modifications made by that particular Contributor.
+
+    1.3. “Covered Software” means (a) the Original Software, or (b) Modifications, or (c) the combination of files containing Original Software with files containing Modifications, in each case including portions thereof.
+
+    1.4. “Executable” means the Covered Software in any form other than Source Code.
+
+    1.5. “Initial Developer” means the individual or entity that first makes Original Software available under this License.
+
+    1.6. “Larger Work” means a work which combines Covered Software or portions thereof with code not governed by the terms of this License.
+
+    1.7. “License” means this document.
+
+    1.8. “Licensable” means having the right to grant, to the maximum extent possible, whether at the time of the initial grant or subsequently acquired, any and all of the rights conveyed herein.
+
+    1.9. “Modifications” means the Source Code and Executable form of any of the following:
+
+    A. Any file that results from an addition to, deletion from or modification of the contents of a file containing Original Software or previous Modifications;
+
+    B. Any new file that contains any part of the Original Software or previous Modification; or
+
+    C. Any new file that is contributed or otherwise made available under the terms of this License.
+
+    1.10. “Original Software” means the Source Code and Executable form of computer software code that is originally released under this License.
+
+    1.11. “Patent Claims” means any patent claim(s), now owned or hereafter acquired, including without limitation, method, process, and apparatus claims, in any patent Licensable by grantor.
+
+    1.12. “Source Code” means (a) the common form of computer software code in which modifications are made and (b) associated documentation included in or with such code.
+
+    1.13. “You” (or “Your”) means an individual or a legal entity exercising rights under, and complying with all of the terms of, this License. For legal entities, “You” includes any entity which controls, is controlled by, or is under common control with You. For purposes of this definition, “control” means (a) the power, direct or indirect, to cause the direction or management of such entity, whether by contract or otherwise, or (b) ownership of more than fifty percent (50%) of the outstanding shares or beneficial ownership of such entity.
+
+2. License Grants.
+
+    2.1. The Initial Developer Grant.
+
+    Conditioned upon Your compliance with Section 3.1 below and subject to third party intellectual property claims, the Initial Developer hereby grants You a world-wide, royalty-free, non-exclusive license:
+
+    (a) under intellectual property rights (other than patent or trademark) Licensable by Initial Developer, to use, reproduce, modify, display, perform, sublicense and distribute the Original Software (or portions thereof), with or without Modifications, and/or as part of a Larger Work; and
+
+    (b) under Patent Claims infringed by the making, using or selling of Original Software, to make, have made, use, practice, sell, and offer for sale, and/or otherwise dispose of the Original Software (or portions thereof).
+
+    (c) The licenses granted in Sections 2.1(a) and (b) are effective on the date Initial Developer first distributes or otherwise makes the Original Software available to a third party under the terms of this License.
+
+    (d) Notwithstanding Section 2.1(b) above, no patent license is granted: (1) for code that You delete from the Original Software, or (2) for infringements caused by: (i) the modification of the Original Software, or (ii) the combination of the Original Software with other software or devices.
+
+    2.2. Contributor Grant.
+
+    Conditioned upon Your compliance with Section 3.1 below and subject to third party intellectual property claims, each Contributor hereby grants You a world-wide, royalty-free, non-exclusive license:
+
+    (a) under intellectual property rights (other than patent or trademark) Licensable by Contributor to use, reproduce, modify, display, perform, sublicense and distribute the Modifications created by such Contributor (or portions thereof), either on an unmodified basis, with other Modifications, as Covered Software and/or as part of a Larger Work; and
+
+    (b) under Patent Claims infringed by the making, using, or selling of Modifications made by that Contributor either alone and/or in combination with its Contributor Version (or portions of such combination), to make, use, sell, offer for sale, have made, and/or otherwise dispose of: (1) Modifications made by that Contributor (or portions thereof); and (2) the combination of Modifications made by that Contributor with its Contributor Version (or portions of such combination).
+
+    (c) The licenses granted in Sections 2.2(a) and 2.2(b) are effective on the date Contributor first distributes or otherwise makes the Modifications available to a third party.
+
+    (d) Notwithstanding Section 2.2(b) above, no patent license is granted: (1) for any code that Contributor has deleted from the Contributor Version; (2) for infringements caused by: (i) third party modifications of Contributor Version, or (ii) the combination of Modifications made by that Contributor with other software (except as part of the Contributor Version) or other devices; or (3) under Patent Claims infringed by Covered Software in the absence of Modifications made by that Contributor.
+
+3. Distribution Obligations.
+
+    3.1. Availability of Source Code.
+
+    Any Covered Software that You distribute or otherwise make available in Executable form must also be made available in Source Code form and that Source Code form must be distributed only under the terms of this License. You must include a copy of this License with every copy of the Source Code form of the Covered Software You distribute or otherwise make available. You must inform recipients of any such Covered Software in Executable form as to how they can obtain such Covered Software in Source Code form in a reasonable manner on or through a medium customarily used for software exchange.
+
+    3.2. Modifications.
+
+    The Modifications that You create or to which You contribute are governed by the terms of this License. You represent that You believe Your Modifications are Your original creation(s) and/or You have sufficient rights to grant the rights conveyed by this License.
+
+    3.3. Required Notices.
+
+    You must include a notice in each of Your Modifications that identifies You as the Contributor of the Modification. You may not remove or alter any copyright, patent or trademark notices contained within the Covered Software, or any notices of licensing or any descriptive text giving attribution to any Contributor or the Initial Developer.
+
+    3.4. Application of Additional Terms.
+
+    You may not offer or impose any terms on any Covered Software in Source Code form that alters or restricts the applicable version of this License or the recipients' rights hereunder. You may choose to offer, and to charge a fee for, warranty, support, indemnity or liability obligations to one or more recipients of Covered Software. However, you may do so only on Your own behalf, and not on behalf of the Initial Developer or any Contributor. You must make it absolutely clear that any such warranty, support, indemnity or liability obligation is offered by You alone, and You hereby agree to indemnify the Initial Developer and every Contributor for any liability incurred by the Initial Developer or such Contributor as a result of warranty, support, indemnity or liability terms You offer.
+
+    3.5. Distribution of Executable Versions.
+
+    You may distribute the Executable form of the Covered Software under the terms of this License or under the terms of a license of Your choice, which may contain terms different from this License, provided that You are in compliance with the terms of this License and that the license for the Executable form does not attempt to limit or alter the recipient's rights in the Source Code form from the rights set forth in this License. If You distribute the Covered Software in Executable form under a different license, You must make it absolutely clear that any terms which differ from this License are offered by You alone, not by the Initial Developer or Contributor. You hereby agree to indemnify the Initial Developer and every Contributor for any liability incurred by the Initial Developer or such Contributor as a result of any such terms You offer.
+
+    3.6. Larger Works.
+
+    You may create a Larger Work by combining Covered Software with other code not governed by the terms of this License and distribute the Larger Work as a single product. In such a case, You must make sure the requirements of this License are fulfilled for the Covered Software.
+
+4. Versions of the License.
+
+    4.1. New Versions.
+
+    Oracle is the initial license steward and may publish revised and/or new versions of this License from time to time. Each version will be given a distinguishing version number. Except as provided in Section 4.3, no one other than the license steward has the right to modify this License.
+
+    4.2. Effect of New Versions.
+
+    You may always continue to use, distribute or otherwise make the Covered Software available under the terms of the version of the License under which You originally received the Covered Software. If the Initial Developer includes a notice in the Original Software prohibiting it from being distributed or otherwise made available under any subsequent version of the License, You must distribute and make the Covered Software available under the terms of the version of the License under which You originally received the Covered Software. Otherwise, You may also choose to use, distribute or otherwise make the Covered Software available under the terms of any subsequent version of the License published by the license steward.
+
+    4.3. Modified Versions.
+
+    When You are an Initial Developer and You want to create a new license for Your Original Software, You may create and use a modified version of this License if You: (a) rename the license and remove any references to the name of the license steward (except to note that the license differs from this License); and (b) otherwise make it clear that the license contains terms which differ from this License.
+
+5. DISCLAIMER OF WARRANTY.
+
+    COVERED SOFTWARE IS PROVIDED UNDER THIS LICENSE ON AN “AS IS” BASIS, WITHOUT WARRANTY OF ANY KIND, EITHER EXPRESSED OR IMPLIED, INCLUDING, WITHOUT LIMITATION, WARRANTIES THAT THE COVERED SOFTWARE IS FREE OF DEFECTS, MERCHANTABLE, FIT FOR A PARTICULAR PURPOSE OR NON-INFRINGING. THE ENTIRE RISK AS TO THE QUALITY AND PERFORMANCE OF THE COVERED SOFTWARE IS WITH YOU. SHOULD ANY COVERED SOFTWARE PROVE DEFECTIVE IN ANY RESPECT, YOU (NOT THE INITIAL DEVELOPER OR ANY OTHER CONTRIBUTOR) ASSUME THE COST OF ANY NECESSARY SERVICING, REPAIR OR CORRECTION. THIS DISCLAIMER OF WARRANTY CONSTITUTES AN ESSENTIAL PART OF THIS LICENSE. NO USE OF ANY COVERED SOFTWARE IS AUTHORIZED HEREUNDER EXCEPT UNDER THIS DISCLAIMER.
+
+6. TERMINATION.
+
+    6.1. This License and the rights granted hereunder will terminate automatically if You fail to comply with terms herein and fail to cure such breach within 30 days of becoming aware of the breach. Provisions which, by their nature, must remain in effect beyond the termination of this License shall survive.
+
+    6.2. If You assert a patent infringement claim (excluding declaratory judgment actions) against Initial Developer or a Contributor (the Initial Developer or Contributor against whom You assert such claim is referred to as “Participant”) alleging that the Participant Software (meaning the Contributor Version where the Participant is a Contributor or the Original Software where the Participant is the Initial Developer) directly or indirectly infringes any patent, then any and all rights granted directly or indirectly to You by such Participant, the Initial Developer (if the Initial Developer is not the Participant) and all Contributors under Sections 2.1 and/or 2.2 of this License shall, upon 60 days notice from Participant terminate prospectively and automatically at the expiration of such 60 day notice period, unless if within such 60 day period You withdraw Your claim with respect to the Participant Software against such Participant either unilaterally or pursuant to a written agreement with Participant.
+
+    6.3. If You assert a patent infringement claim against Participant alleging that the Participant Software directly or indirectly infringes any patent where such claim is resolved (such as by license or settlement) prior to the initiation of patent infringement litigation, then the reasonable value of the licenses granted by such Participant under Sections 2.1 or 2.2 shall be taken into account in determining the amount or value of any payment or license.
+
+    6.4. In the event of termination under Sections 6.1 or 6.2 above, all end user licenses that have been validly granted by You or any distributor hereunder prior to termination (excluding licenses granted to You by any distributor) shall survive termination.
+
+7. LIMITATION OF LIABILITY.
+
+    UNDER NO CIRCUMSTANCES AND UNDER NO LEGAL THEORY, WHETHER TORT (INCLUDING NEGLIGENCE), CONTRACT, OR OTHERWISE, SHALL YOU, THE INITIAL DEVELOPER, ANY OTHER CONTRIBUTOR, OR ANY DISTRIBUTOR OF COVERED SOFTWARE, OR ANY SUPPLIER OF ANY OF SUCH PARTIES, BE LIABLE TO ANY PERSON FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES OF ANY CHARACTER INCLUDING, WITHOUT LIMITATION, DAMAGES FOR LOSS OF GOODWILL, WORK STOPPAGE, COMPUTER FAILURE OR MALFUNCTION, OR ANY AND ALL OTHER COMMERCIAL DAMAGES OR LOSSES, EVEN IF SUCH PARTY SHALL HAVE BEEN INFORMED OF THE POSSIBILITY OF SUCH DAMAGES. THIS LIMITATION OF LIABILITY SHALL NOT APPLY TO LIABILITY FOR DEATH OR PERSONAL INJURY RESULTING FROM SUCH PARTY'S NEGLIGENCE TO THE EXTENT APPLICABLE LAW PROHIBITS SUCH LIMITATION. SOME JURISDICTIONS DO NOT ALLOW THE EXCLUSION OR LIMITATION OF INCIDENTAL OR CONSEQUENTIAL DAMAGES, SO THIS EXCLUSION AND LIMITATION MAY NOT APPLY TO YOU.
+
+8. U.S. GOVERNMENT END USERS.
+
+    The Covered Software is a “commercial item,” as that term is defined in 48 C.F.R. 2.101 (Oct. 1995), consisting of “commercial computer software” (as that term is defined at 48 C.F.R. § 252.227-7014(a)(1)) and “commercial computer software documentation” as such terms are used in 48 C.F.R. 12.212 (Sept. 1995). Consistent with 48 C.F.R. 12.212 and 48 C.F.R. 227.7202-1 through 227.7202-4 (June 1995), all U.S. Government End Users acquire Covered Software with only those rights set forth herein. This U.S. Government Rights clause is in lieu of, and supersedes, any other FAR, DFAR, or other clause or provision that addresses Government rights in computer software under this License.
+
+9. MISCELLANEOUS.
+
+    This License represents the complete agreement concerning subject matter hereof. If any provision of this License is held to be unenforceable, such provision shall be reformed only to the extent necessary to make it enforceable. This License shall be governed by the law of the jurisdiction specified in a notice contained within the Original Software (except to the extent applicable law, if any, provides otherwise), excluding such jurisdiction's conflict-of-law provisions. Any litigation relating to this License shall be subject to the jurisdiction of the courts located in the jurisdiction and venue specified in a notice contained within the Original Software, with the losing party responsible for costs, including, without limitation, court costs and reasonable attorneys' fees and expenses. The application of the United Nations Convention on Contracts for the International Sale of Goods is expressly excluded. Any law or regulation which provides that the language of a contract shall be construed against the drafter shall not apply to this License. You agree that You alone are responsible for compliance with the United States export administration regulations (and the export control laws and regulation of any other countries) when You use, distribute or otherwise make available any Covered Software.
+
+10. RESPONSIBILITY FOR CLAIMS.
+
+    As between Initial Developer and the Contributors, each party is responsible for claims and damages arising, directly or indirectly, out of its utilization of rights under this License and You agree to work with Initial Developer and Contributors to distribute such responsibility on an equitable basis. Nothing herein is intended or shall be deemed to constitute any admission of liability.
+
+NOTICE PURSUANT TO SECTION 9 OF THE COMMON DEVELOPMENT AND DISTRIBUTION LICENSE (CDDL)
+
+The code released under the CDDL shall be governed by the laws of the State of California (excluding conflict-of-law provisions). Any litigation relating to this License shall be subject to the jurisdiction of the Federal Courts of the Northern District of California and the state courts of the State of California, with venue lying in Santa Clara County, California.
+
+
+
+
 
 ***************************************************************************
 Eclipse Public License, Version 1.0 (EPL-1.0)
@@ -794,26 +1065,56 @@ The MIT License (MIT)
 Version: backbone-1.1.2-min.js
 Copyright: Copyright (c) 2010-2014 Jeremy Ashkenas, DocumentCloud
 
-Version: contentflow.js
+Version: backbone-relational-0.9.0-min.js
+Copyright: Copyright (c) 2011-2014 Paul Uithol, http://progressivecompany.nl/
+
+Version: backbone.paginator.min-2.0.2-min.js
+Copyright: Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+
+Version: backgrid-filter.min-0.3.5-min.js
+Copyright: Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+
+Version: backgrid-paginator.min-0.3.5-min.js
+Copyright: Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+
+Version: backgrid-select-all-0.3.5-min.js
+Copyright: Copyright (c) 2013 Jimmy Yuen Ho Wong and contributors
+
+Version: backgrid.min-0.3.5-min.js
+Copyright: Copyright (c) 2014 Jimmy Yuen Ho Wong and contributors <wyuenho@gmail.com>
+
+Version: bootstrap-3.3.5-custom.js/.css
+Copyright: Copyright 2011-2015 Twitter, Inc.
+
+Version: bootstrap-dialog-1.34.4-min.js/.css
+Copyright: Copyright 2015 @nakupanda, @AndrewEastwood, @breity
+
+Version: bootstrap-tabdrop-1.0.js
+Copyright: Copyright 2012 Stefan Petre
+
+Version: contentflow.js (version 1.0.2)
 Copyright: (c) 2007 - 2010 Sebastian Kutsch
+
+Version: dimple-2.1.2-min.js
+Copyright: Copyright: 2014 PMSI-AlignAlytics
 
 Version: grid.locale-en.js
 Copyright: Copyright (c) Tony Tomov tony@trirand.com
 
+Version: fontawesome-iconpicker-1.0.0-min.js
+Copyright: Copyright (c) 2014 Javier Aguilar @mjolnic
+
 Version: form2js-2.0.js
 Copyright: Copyright (c) 2010 Maxim Vasiliev
 
-Version: handlebars-1.3.0-min.js
-Copyright: Copyright (C) 2011 by Yehuda Katz
+Version: handlebars-3.0.3-min.js
+Copyright: Copyright (C) 2011-2014 by Yehuda Katz
 
 Version: i18next-1.7.3-min.js
 Copyright: Copyright (c)2014 Jan Mühlemann (jamuhl).
 
-Version: jquery-1.11.1-min.js
-Copyright: (c) 2005, 2014 jQuery Foundation, Inc.
-
-Version: jquery-ui-1.11.1-min.js
-Copyright: (c) 2005, 2014 jQuery Foundation, Inc.
+Version: jquery-2.1.1-min.js
+Copyright:  (c) 2005, 2014 jQuery Foundation, Inc.
 
 Version: jquery.ba-dotimeout-1.0-min.js
 Copyright: Copyright (c) 2010 "Cowboy" Ben Alman
@@ -833,17 +1134,20 @@ Copyright: Copyright (c) 2010 Maxim Vasiliev
 Version: moment-2.8.1-min.js
 Copyright: Tim Wood, Iskren Chernev, Moment.js
 
-Version: lodash-2.4.1-min.js
-Copyright: Copyright 2012-2014 The Dojo Foundation
+Version: lodash-3.10.1-min.js
+Copyright: Copyright 2012-2015 The Dojo Foundation <http://dojofoundation.org/>
 
 Version: requirejs-2.1.14-min.js
 Copyright: Copyright (c) 2010-2014, The Dojo Foundation
 
 Version: spin-2.0.1-min.js
-Copyright: 
+Copyright: Copyright (c) 2011-2014 Felix Gnass
 
 Version: qunit-1.15.0.js
 Copyright: Copyright 2014 jQuery Foundation
+
+Version: qunit-1.15.0.css
+Copyright: Copyright 2006, 2014 jQuery Foundation and other contributors,
 
 Version: xdate-0.8-min.js
 Copyright: Copyright (c) 2011 Adam Shaw, http://arshaw.com/xdate/
@@ -851,11 +1155,11 @@ Copyright: Copyright (c) 2011 Adam Shaw, http://arshaw.com/xdate/
 Version: jsoneditor-0.7.9-min.js
 Copyright: Copyright (c) 2014 Jeremy Dorn
 
-Version: placeholder.js
-Copyright: copyright (c) by Marijn Haverbeke and others
+Version: jquery.placeholder-2.0.8.js
+Copyright: Copyright Mathias Bynens <http://mathiasbynens.be/>
 
 Version: codemirror.js
-Copyright: copyright (c) by Marijn Haverbeke and others
+Copyright: Copyright (C) 2015 by Marijn Haverbeke <marijnh@gmail.com> and others
 
 Version: groovy.js
 Copyright: copyright (c) by Marijn Haverbeke and others
@@ -879,6 +1183,9 @@ Version: jquery.json-2.2.min.js
 Copyright: Copyright 2009-2011 Brantley Harris
            Copyright 2010–2014 Timo Tijhof
 
+Version: jquery-sortable.js v0.9.12 (jquery-nestingSortable-0.9.12.js)
+Copyright: Copyright (c) 2012 Jonas von Andrian
+
 Version: jquery.tools.min.js
 Copyright: Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)
 
@@ -891,14 +1198,17 @@ Copyright: Copyright (c) 2002 Extreme! Lab, Indiana University.
            Copyright (c) 2001-2003, ThoughtWorks, Inc 
            Copyright (c) 2013 Kohsuke Kawaguchi and other contributors
 
-Version: jcl-over-slf4j-1.7.2.jar
-Copyright: Copyright © 2004-2013 QOS.ch
+Version: titatoggle-1.2.6-min.css
+Copyright:
 
-Version: jul-to-slf4j-1.7.5.jar
+Version: jcl-over-slf4j-1.7.12.jar
+Copyright: Copyright 2001-2004 The Apache Software Foundation.
+
+Version: jul-to-slf4j-1.7.12.jar
 Copyright: Copyright (c) 2004-2011 QOS.ch
 
-Version: slf4j-api-1.7.5.jar
-Copyright: Copyright (c) 2004-2011 QOS.ch. All rights reserved.
+Version: slf4j-api-1.7.12.jar
+Copyright: Copyright (c) 2004-2013 QOS.ch. All rights reserved.
 
 Version: slf4j-jdk14-1.7.5.jar
 Copyright: Copyright (c) 2004-2011 QOS.ch. All rights reserved.
@@ -914,6 +1224,7 @@ Copyright: Copyright (c) 2000 - 2013 The Legion of the Bouncy Castle Inc. (http:
 
 Version: kxml2-2.2.2.jar
 Copyright: Copyright (c) 2002,2003, Stefan Haustein, Oberhausen, Rhld., Germany
+
 
 ==================
 Full license text:
@@ -948,6 +1259,8 @@ Mozilla Public License 2.0
 
 Version: h2-1.3.171.jar
 Copyright: Copyright 2004-2014 H2 Group
+
+
 
 ==================
 Full license text:
@@ -1133,3 +1446,104 @@ You may add additional accurate notices of copyright ownership.
 Exhibit B - “Incompatible With Secondary Licenses” Notice
 
 This Source Code Form is “Incompatible With Secondary Licenses”, as defined by the Mozilla Public License, v. 2.0.
+
+
+***************************************************************************
+SIL Open Font License (OFL)
+***************************************************************************
+
+Version: font-awesome-4.3.0.zip
+Copyright: Attribution Font Awesome by Dave Gandy - http://fontawesome.io
+
+
+
+==================
+Full license text:
+==================
+
+ SIL OPEN FONT LICENSE
+
+Version 1.1 - 26 February 2007
+PREAMBLE
+
+The goals of the Open Font License (OFL) are to stimulate worldwide
+development of collaborative font projects, to support the font creation
+efforts of academic and linguistic communities, and to provide a free and
+open framework in which fonts may be shared and improved in partnership
+with others.
+
+The OFL allows the licensed fonts to be used, studied, modified and
+redistributed freely as long as they are not sold by themselves. The
+fonts, including any derivative works, can be bundled, embedded,
+redistributed and/or sold with any software provided that any reserved
+names are not used by derivative works. The fonts and derivatives,
+however, cannot be released under any other type of license. The
+requirement for fonts to remain under this license does not apply
+to any document created using the fonts or their derivatives.
+DEFINITIONS
+
+"Font Software" refers to the set of files released by the Copyright
+Holder(s) under this license and clearly marked as such. This may
+include source files, build scripts and documentation.
+
+"Reserved Font Name" refers to any names specified as such after the
+copyright statement(s).
+
+"Original Version" refers to the collection of Font Software components as
+distributed by the Copyright Holder(s).
+
+"Modified Version" refers to any derivative made by adding to, deleting,
+or substituting — in part or in whole — any of the components of the
+Original Version, by changing formats or by porting the Font Software to a
+new environment.
+
+"Author" refers to any designer, engineer, programmer, technical
+writer or other person who contributed to the Font Software.
+PERMISSION & CONDITIONS
+
+Permission is hereby granted, free of charge, to any person obtaining
+a copy of the Font Software, to use, study, copy, merge, embed, modify,
+redistribute, and sell modified and unmodified copies of the Font
+Software, subject to the following conditions:
+
+1) Neither the Font Software nor any of its individual components,
+in Original or Modified Versions, may be sold by itself.
+
+2) Original or Modified Versions of the Font Software may be bundled,
+redistributed and/or sold with any software, provided that each copy
+contains the above copyright notice and this license. These can be
+included either as stand-alone text files, human-readable headers or
+in the appropriate machine-readable metadata fields within text or
+binary files as long as those fields can be easily viewed by the user.
+
+3) No Modified Version of the Font Software may use the Reserved Font
+Name(s) unless explicit written permission is granted by the corresponding
+Copyright Holder. This restriction only applies to the primary font name as
+presented to the users.
+
+4) The name(s) of the Copyright Holder(s) or the Author(s) of the Font
+Software shall not be used to promote, endorse or advertise any
+Modified Version, except to acknowledge the contribution(s) of the
+Copyright Holder(s) and the Author(s) or with their explicit written
+permission.
+
+5) The Font Software, modified or unmodified, in part or in whole,
+must be distributed entirely under this license, and must not be
+distributed under any other license. The requirement for fonts to
+remain under this license does not apply to any document created
+using the Font Software.
+TERMINATION
+
+This license becomes null and void if any of the above conditions are
+not met.
+DISCLAIMER
+
+THE FONT SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO ANY WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT
+OF COPYRIGHT, PATENT, TRADEMARK, OR OTHER RIGHT. IN NO EVENT SHALL THE
+COPYRIGHT HOLDER BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY,
+INCLUDING ANY GENERAL, SPECIAL, INDIRECT, INCIDENTAL, OR CONSEQUENTIAL
+DAMAGES, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+FROM, OUT OF THE USE OR INABILITY TO USE THE FONT SOFTWARE OR FROM
+OTHER DEALINGS IN THE FONT SOFTWARE.
