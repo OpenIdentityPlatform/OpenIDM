@@ -684,43 +684,50 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
 
         //Returns the current provisioner based on a merged copy of the connector defaults and what was set in the template by the user
         getProvisioner: function() {
-            var connectorData,
+            var connectorData = {},
                 connDetails = this.connectorTypeRef.data.connectorDefaults,
                 mergedResult = {},
                 tempArrayObject,
                 tempKeys,
                 arrayComponents = $(".connector-array-component");
 
-            connectorData = form2js('connectorForm', '.', true);
-
             if(this.connectorTypeRef.getGenericState()) {
                 delete connectorData.root;
-                connectorData.configurationProperties = this.connectorTypeRef.getGenericConnector();
-            }
 
-            if (connectorData.enabled === "true") {
-                connectorData.enabled = true;
+                $.extend(true, mergedResult, connDetails);
+
+                mergedResult.configurationProperties = this.connectorTypeRef.getGenericConnector();
+                mergedResult.enabled = this.$el.find("#connectorEnabled").val();
             } else {
-                connectorData.enabled = false;
+                connectorData = form2js('connectorForm', '.', true);
+
+                delete connectorData.connectorType;
+
+                connectorData.configurationProperties.readSchema = false;
+                connectorData.objectTypes = {};
+
+                $.extend(true, mergedResult, connDetails, connectorData);
+
+                //Added logic to ensure array parts correctly add and delete what is set
+                _.each(arrayComponents, function (component) {
+                    tempArrayObject = form2js($(component).prop("id"), ".", false);
+
+                    _.each(tempArrayObject.configurationProperties, function(item, key) {
+                        mergedResult.configurationProperties[key] = item;
+
+                        //Need this check for when an array is saved with an empty string after containing data to properly remove it
+                        if(_.isArray(mergedResult.configurationProperties[key]) && mergedResult.configurationProperties[key].length === 1 && mergedResult.configurationProperties[key][0] === "") {
+                            delete mergedResult.configurationProperties[key];
+                        }
+                    });
+                }, this);
             }
 
-            delete connectorData.connectorType;
-
-            connectorData.configurationProperties.readSchema = false;
-            connectorData.objectTypes = {};
-
-            $.extend(true, mergedResult, connDetails, connectorData);
-
-            //Added logic to ensure array parts correctly add and delete what is set
-            _.each(arrayComponents, function(component){
-                tempArrayObject = form2js($(component).prop("id"), ".", true);
-                tempKeys = _.keys(tempArrayObject.configurationProperties);
-
-                if(tempKeys.length) {
-                    mergedResult.configurationProperties[tempKeys[0]] = tempArrayObject.configurationProperties[tempKeys[0]];
-                }
-
-            }, this);
+            if (mergedResult.enabled === "true") {
+                mergedResult.enabled = true;
+            } else {
+                mergedResult.enabled = false;
+            }
 
             mergedResult.objectTypes = this.userDefinedObjectTypes || this.data.objectTypes;
 
