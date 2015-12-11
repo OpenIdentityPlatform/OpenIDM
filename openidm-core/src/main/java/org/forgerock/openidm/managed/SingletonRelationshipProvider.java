@@ -122,10 +122,10 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     private Promise<ResourceResponse, ResourceException> queryRelationship(final Context context, 
             final String managedObjectId) {
         try {
-            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
+            final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH)
+                    .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, managedObjectId);
             final List<ResourceResponse> relationships = new ArrayList<>();
             final String resourceFullPath = resourceContainer.child(managedObjectId).toString();
-            queryRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, managedObjectId);
 
             final QueryFilter<JsonPointer> filter;
             if (schemaField.isReverseRelationship()) {
@@ -185,8 +185,8 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
 
                     // Update if we got an id, otherwise replace
                     if (id != null && id.isNotNull()) {
-                        final UpdateRequest updateRequest = Requests.newUpdateRequest("", value);
-                        updateRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                        final UpdateRequest updateRequest = Requests.newUpdateRequest("", value)
+                                .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                         return updateInstance(context, value.get(FIELD_ID).asString(), updateRequest)
                                 .then(new Function<ResourceResponse, JsonValue, ResourceException>() {
                                     @Override
@@ -199,8 +199,8 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                             clear(context, resourceId);
                         }
 
-                        final CreateRequest createRequest = Requests.newCreateRequest("", value);
-                        createRequest.setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                        final CreateRequest createRequest = Requests.newCreateRequest("", value)
+                                .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
                         return createInstance(context, createRequest).then(new Function<ResourceResponse, JsonValue, ResourceException>() {
                             @Override
                             public JsonValue apply(ResourceResponse resourceResponse) throws ResourceException {
@@ -233,7 +233,8 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                 @Override
                 public JsonValue apply(JsonValue relationship) throws ResourceException {
                     return deleteInstance(context, relationship.get(FIELD_ID).asString(),
-                            Requests.newDeleteRequest("")).getOrThrowUninterruptibly().getContent();
+                            Requests.newDeleteRequest("").setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId))
+                                .getOrThrowUninterruptibly().getContent();
                 }
             }).thenCatch(new Function<ResourceException, JsonValue, ResourceException>() {
                 @Override
