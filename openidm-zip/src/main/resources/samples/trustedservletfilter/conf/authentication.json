@@ -33,7 +33,7 @@
                 "properties" : {
                     "queryOnResource" : "managed/user",
                     "propertyMapping" : {
-                        "authenticationId" : "username",
+                        "authenticationId" : "userName",
                         "userRoles" : "authzRoles"
                     },
                     "defaultUserRoles" : [ ],
