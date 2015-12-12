@@ -153,7 +153,7 @@ COMMENT ON COLUMN auditauthentication.activitydate IS 'Date format: 2011-09-09T1
 
 PROMPT Creating PRIMARY KEY CONSTRAINT PRIMARY ON TABLE auditauthentication ...
 ALTER TABLE auditauthentication
-ADD CONSTRAINT PRIMARY PRIMARY KEY
+ADD CONSTRAINT pk_auditauthentication PRIMARY KEY
 (
   objectid
 )
@@ -1199,6 +1199,34 @@ BEGIN
    :new.id := v_newVal;
   END IF;
 END;
+
+/
+
+CREATE OR REPLACE TRIGGER relationships_id_TRG BEFORE INSERT ON relationships
+FOR EACH ROW
+  DECLARE
+    v_newVal NUMBER(12) := 0;
+    v_incval NUMBER(12) := 0;
+  BEGIN
+    IF INSERTING AND :new.id IS NULL THEN
+      SELECT  relationships_id_SEQ.NEXTVAL INTO v_newVal FROM DUAL;
+      -- If this is the first time this table have been inserted into (sequence == 1)
+      IF v_newVal = 1 THEN
+        --get the max indentity value from the table
+        SELECT NVL(max(id),0) INTO v_newVal FROM relationships;
+        v_newVal := v_newVal + 1;
+        --set the sequence to that value
+        LOOP
+          EXIT WHEN v_incval>=v_newVal;
+          SELECT relationships_id_SEQ.nextval INTO v_incval FROM dual;
+        END LOOP;
+      END IF;
+      --used to emulate LAST_INSERT_ID()
+      --mysql_utilities.identity := v_newVal;
+     -- assign the value from the sequence to emulate the identity column
+      :new.id := v_newVal;
+    END IF;
+  END;
 
 /
 
