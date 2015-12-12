@@ -2407,8 +2407,8 @@ class ObjectMapping {
                 if (sourceObject == null) {
                     throw new SynchronizationException("Source object " + getSourceObjectId() + " no longer exists");
                 }
-                Map<String, Object> queryScope = new HashMap<String, Object>();
-                queryScope.put("source", sourceObject.asMap());
+                Map<String, Object> scope = new HashMap<String, Object>();
+                scope.put("source", sourceObject.asMap());
 
                 try {
                     result = correlation.correlate(scope, getLinkQualifier());
