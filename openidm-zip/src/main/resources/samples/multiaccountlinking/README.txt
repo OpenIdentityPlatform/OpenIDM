@@ -26,7 +26,7 @@ It's designed for "single sourcing" with the published docs -->
   !      Copyright 2015 ForgeRock AS
   !
 -->
-<chapter xml:id='sample-multiaccount-linking'
+<chapter xml:id='chap-multiaccount-sample'
          xmlns='http://docbook.org/ns/docbook'
          version='5.0' xml:lang='en'
          xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'
@@ -43,7 +43,7 @@ The sample provided in the `samples/multiaccountlinking` directory illustrates h
 accounts to one identity.
 
 This sample is based on a common use case in the insurance industry, where a company (Example.com) employs agents to 
-sell policies to their customers. Most of their agents are also insured customers. These different roles are sometimes 
+sell policies to their insured customers. Most of their agents are also insured. These different roles are sometimes
 known as the multi-account linking conundrum.
 
 With minor changes, this sample works for other use cases. For example, you may have a hospital that employs doctors who 
@@ -134,10 +134,10 @@ Create New Roles for the Sample
 -------------------------------
 
 For this sample, to set up links for multiple accounts on OpenIDM, you need to set up roles. To do so, set up roles for 
-`Agent` and `Customer`. To create these roles in the Admin UI, navigate to `https://localhost:8443/admin` and click 
+`Agent` and `Insured`. To create these roles in the Admin UI, navigate to `https://localhost:8443/admin` and click
 Manage > Role > New Role.
 
-Alternatively, use the following REST calls to set up the `Agent` and `Customer` roles:
+Alternatively, use the following REST calls to set up the `Agent` and `Insured` roles:
 
 ++++
 
@@ -160,14 +160,14 @@ Alternatively, use the following REST calls to set up the `Agent` and `Customer`
 --header "X-OpenIDM-Password: openidm-admin" \
 --request POST \
 --data '{
-  "name" : "Customer",
+  "name" : "Insured",
   "description" : "Role assigned to insured customers."
 }' \
 "https://localhost:8443/openidm/managed/role?_action=create"</userinput></screen>
 
 ++++
 
-Do record the `_id` output for the Agent and Customer roles. You will use those numbers to assign desired roles for each 
+Do record the `_id` output for the `Agent` and `Insured` roles. You will use those numbers to assign desired roles for each
 user.
 
 NOTE: While you could use `PUT` to create roles with descriptive names, we recommend that you use `POST` to create roles 
@@ -177,7 +177,7 @@ with immutable IDs.
 Assign Roles to Appropriate Users
 ---------------------------------
 
-Now you can assign roles to appropriate users. To review, user `jdoe` is an `Agent` and user `bjensen` is a `Customer`.
+Now you can assign roles to appropriate users. To review, user `jdoe` is an `Agent` and user `bjensen` is `Insured`.
 
 You will need the `_id` value for each user. The `_id` values shown in the following commands are random; substitute the
 `_id` values that you collected when creating users.
@@ -204,20 +204,7 @@ The following command adds the `Agent` role to user `jdoe`, by their `_id` value
 "https://localhost:8443/openidm/managed/user/8fae84ed-1f30-4542-8087-e7fa6e89541c"</userinput></screen>
 ++++
 
-To confirm, you should see output that includes two roles for user `jdoe`. The following output includes a unique Agent 
-`_id` number; the number that you see will be different.
-
-++++
-<screen>"roles":[ {
-  "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34",
-    "_refProperties" : {
-      "_id" : "65a00c7a-fba2-42ba-9598-4b4633d039ae",
-      "_rev" : "1"
-    }
-  } ],</screen>
-++++
-
-And this next command adds the `Customer` role to user `bjensen`:
+And this next command adds the `Insured` role to user `bjensen`:
 
 ++++
 <screen>$ <userinput>curl \
@@ -239,19 +226,8 @@ And this next command adds the `Customer` role to user `bjensen`:
 "https://localhost:8443/openidm/managed/user/d0b79f30-946f-413a-b7d1-d813034fa345"</userinput></screen>
 ++++
 
-To confirm, you should see output that includes the `Customer` role for user `bjensen`, in this case:
-
-++++
-<screen>"roles":[ {
-  "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b",
-    "_refProperties" : {
-      "_id" : "459a90ab-ff01-4186-8749-cca9caf12454",
-      "_rev" : "1"
-    }
-  } ],</screen>
-++++
-
-Now assign the `customer` role to user `jdoe`, as that user is a customer and an agent:
+Now assign the `Insured` role to user `jdoe`, as that user is both an insured customer and
+an agent:
 
 ++++
 <screen>$ <userinput>curl \
@@ -273,21 +249,25 @@ Now assign the `customer` role to user `jdoe`, as that user is a customer and an
 "https://localhost:8443/openidm/managed/user/a3335177-7366-4656-a66c-8d6e77a5786f"</userinput></screen>
 ++++
 
-User `jdoe` should now have two roles:
+User `jdoe` should now have two managed roles:
 
 ++++
-<screen>"roles":[ {
-  "_ref" : "managed/role/287dc4b1-4b19-49ec-8b4c-28a6c12ede34",
-  ...
+<screen>...
+"effectiveRoles" : [ {
+  "_ref" : "managed/role/6aabe990-ec05-403e-bc5d-ff9b217ba571",
+  "_refProperties" : {
+    "_id" : "687714b8-5854-42c7-a190-c781ea5174c5",
+    "_rev" : "1"
+  }
 }, {
-  "_ref" : "managed/role/bb9302c4-5fc1-462c-8be2-b17c87175d1b",
-  ...
-} ],</screen>
+  "_ref" : "managed/role/844110ce-3686-43bb-aabf-46b17a14abaa"
+} ],
+...</screen>
 ++++
 
 [[multiaccount-background]]
-Background: Link Qualifiers, Agents, and Customers
---------------------------------------------------
+Background: Link Qualifiers, Agents, and Insured Customers
+----------------------------------------------------------
 
 This is a good moment to take a step back, to see how this sample works, based on custom options in the `sync.json` 
 configuration file.
@@ -296,7 +276,7 @@ OpenIDM defines mappings between source and target accounts in the `sync.json` f
 between one source entry and multiple target entries using a concept known as a "link qualifier," which enables 
 one-to-many relationships in mappings and policies.
 
-For more information on resource mappings and link qualifiers, see the following sections of the Integrator's Guide:]
+For more information on resource mappings and link qualifiers, see the following sections of the Integrator's Guide:
 
 http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#synchronization-mappings-file[Configuring the Synchronization Mapping]
 
@@ -304,12 +284,12 @@ http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#mapping-link-quali
 
 In this sample, we use two link qualifiers:
 
-* `insured` represents the customer accounts associated with Example.com, created under the following LDAP container: 
+* `insured` represents the insured customer accounts associated with Example.com, created under the following LDAP container:
     `ou=Customers,dc=example,dc=com`
 * `agent` represents agent accounts, considered independent contractors, and created under the following LDAP container:
     `ou=Contractors,dc=example,dc=com`
 
-Assume that agents and customers connect via two different portals. Each group gets access to different features, 
+Assume that agents and insured customers connect via two different portals. Each group gets access to different features,
 depending on the portal.
 
 Agents may have two different accounts; one each for professional and personal use. While the accounts are different, 
@@ -354,25 +334,32 @@ categories of users. The following excerpt of the `sync.json` file includes that
 
 The following validSource script looks through the effective roles of a user, with two objectives:
 
-* Determine whether the user has an `Agent` or `Insured` role.
-* Ensures that OpenIDM looks through the source *only* for the specified role.
+* Determine whether the user has an `Agent` or `Insured` role, and segregates accounts
+based on link qualfiers and roles.
+* Uses the `effectiveRoles` property to determine whether a user has an
+`Agent` or `Insured` role, based on the effective roles of that user.
 
 ++++
 <programlisting language="javascript">"validSource" : {
-        "type" : "text/javascript",
-        "globals" : { },
-        "source" : "var res = false;\nvar i=0;\n\nwhile
-          (!res &amp;&amp; i < source.effectiveRoles.length) {\n
-          var roleId = source.effectiveRoles[i];\n
-            if (roleId != null &amp;&amp; roleId.indexOf(\"/\") != -1) {\n
-              var roleInfo = openidm.read(roleId);\n
-                res = (((roleInfo.properties.name === 'Agent')\n
-                  &amp;&amp;(linkQualifier ==='agent'))\n
-                  || ((roleInfo.properties.name === 'Insured')\n
-                  &amp;&amp;(linkQualifier ==='insured')));\n
-                }\n
-              i++;\n}\n\nres"
-        }></programlisting>
+  "type" : "text/javascript",
+  "globals" : { },
+  "source" : "var res = false;
+    var i=0;
+
+    while (!res &amp;&amp; i &lt; source.effectiveRoles.length) {
+      var roleId = source.effectiveRoles[i];
+      if (roleId != null &amp;&amp; roleId.indexOf("/") != -1) {
+        var roleInfo = openidm.read(roleId);
+        logger.warn("Role Info : {}",roleInfo);
+        res = (((roleInfo.properties.name === 'Agent')
+          &amp;&amp;(linkQualifier ==='agent'))
+        || ((roleInfo.properties.name === 'Insured')
+          &amp;&amp;(linkQualifier ==='insured')));
+        }
+        i++;
+      }
+      res"
+}</programlisting>
 ++++
 
 You can see how correlation queries are configured in the `sync.json` file.
@@ -415,35 +402,6 @@ You can also leverage the expression builder in the UI. Review how the UI illust
 click Configure > Mapping > select a mapping > Association > Association Rules. Edit either link qualifier. You will see 
 how the expression builder is configured for this sample.
 
-The following code snippet shows how the `validSource` script segregates accounts based on link qualifiers and roles:
-
-++++
-<programlisting language="javascript">"validSource" : {
-  "type" : "text/javascript",
-  "globals" : { },
-  "source" : "var res = false;
-    var i=0;
-
-    while (!res &amp;&amp; i &lt; source.effectiveRoles.length) {
-      var roleId = source.effectiveRoles[i];
-      if (roleId != null &amp;&amp; roleId.indexOf("/") != -1) {
-        var roleInfo = openidm.read(roleId);
-        logger.warn("Role Info : {}",roleInfo);
-        res = (((roleInfo.properties.name === 'Agent')
-          &amp;&amp;(linkQualifier ==='agent'))
-        || ((roleInfo.properties.name === 'Insured')
-          &amp;&amp;(linkQualifier ==='insured')));
-        }
-        i++;
-      }
-
-      res"
-}</programlisting>
-++++
-
-The `validSource` script uses the effectiveRoles property to determine whether a user has the `Agent` or the `Insured` 
-role, based on that user's effective roles.
-
 [[multiaccount-roles-update]]
 Update Roles With Desired LDAP Attributes
 -----------------------------------------
@@ -452,16 +410,16 @@ This use case illustrates how accounts frequently have different functions on ta
 may be members of a Contractor group, insured customers may be part of a Chat Users group (possibly for access to 
 customer service).
 
-While an agent may also be an insured customer, you do not want other `customer` accounts to have the same properties 
+While an agent may also be an insured customer, you do not want other `insured` accounts to have the same properties
 (or memberships) as the `agent` account. In this sample, we ensure that OpenIDM limits role based assignments to the 
 correct account.
 
-With the following commands you will create two managed assignments which will be used by the `agent` and `customer` 
+With the following commands you will create two managed assignments which will be used by the `agent` and `insured`
 roles.
 
 Record the `_id` number for each user. You will use those numbers to assign desired roles for each user.
 
-The following command will create an Agent assignment.
+The following command will create an `agent` assignment.
 
 ++++
 <screen>$ <userinput>curl \
@@ -489,7 +447,7 @@ The following command will create an Agent assignment.
 "https://localhost:8443/openidm/managed/assignment?_action=create"</userinput></screen>
 ++++
 
-Now repeat the process for the Customer assignment, with the value set to the `Chat Users` group:
+Now repeat the process for the `insured` assignment, with the value set to the `Chat Users` group:
 
 ++++
 <screen>$ <userinput>curl \
@@ -512,14 +470,14 @@ Now repeat the process for the Customer assignment, with the value set to the `C
         "unassignmentOperation" : "removeFromTarget"
       }
     ],
-    "linkQualifiers": ["customer"]
+    "linkQualifiers": ["insured"]
   }' \
 "https://localhost:8443/openidm/managed/assignment?_action=create"</userinput></screen>
 ++++
 
 Now you can add the created assignments to their respective roles.
 
-Add the customer assignment to the customer role:
+Add the `insured` assignment to the insured customer role:
 
 ++++
 <screen>$ <userinput>curl \
@@ -594,10 +552,10 @@ Congratulations, you have just created accounts in two different areas of the LD
 Reviewing the Result
 --------------------
 
-You have already confirmed that user `bjensen` has a `customer` role, and user `jdoe` has both a `customer` and `agent` 
+You have already confirmed that user `bjensen` has a `insured` role, and user `jdoe` has both a `insured` and `agent`
 role. You can confirm the same result in the Admin UI:
 
-. Click Manage > Role. You should see both `Agent` and `Customer` in the Role List window that appears.
+. Click Manage > Role. You should see both Agent and Insured in the Role List window that appears.
 . Click Agent > Users. You should see that user `jdoe` is included as an Agent.
-. Click Back to Roles > Customer > Users. You should see that users `bjensen` and
-`jdoe` are included as Customers.
+. Click Back to Roles > Insured > Users. You should see that users `bjensen` and
+`jdoe` are included in the Insured role.
