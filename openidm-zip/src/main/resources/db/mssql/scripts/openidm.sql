@@ -420,7 +420,6 @@ CREATE  TABLE [openidm].[auditaccess] (
   trackingids NTEXT,
   server_ip NVARCHAR(40) ,
   server_port NVARCHAR(5) ,
-  client_host NVARCHAR(255) ,
   client_ip NVARCHAR(40) ,
   client_port NVARCHAR(5) ,
   request_protocol NVARCHAR(255) NULL ,
