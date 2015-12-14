@@ -43,9 +43,11 @@ import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
+import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.SecurityContext;
+import org.forgerock.services.context.TransactionIdContext;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
@@ -78,10 +80,11 @@ public class SchedulerServiceJob implements Job {
     }
 
     /**
-     * Builds the Context
+     * Builds the context chain. The chain consists of a {@link RootContext}, {@link TransactionIdContext},
+     * and a {@link SecurityContext}.
      * 
-     * @param id  The authentication id
-     * @return the SecurityContext for the scheduled job
+     * @param id  The authentication id.
+     * @return The context chain for the scheduled job.
      */
     private Context newScheduledContext(String id) {
         final Map<String, Object> authzid = new HashMap<String, Object>();
@@ -90,7 +93,7 @@ public class SchedulerServiceJob implements Job {
         roles.add("system");
         authzid.put(SecurityContext.AUTHZID_ROLES, roles);
         authzid.put(SecurityContext.AUTHZID_COMPONENT, "scheduler");
-        return new SecurityContext(new RootContext(), id, authzid);
+        return new SecurityContext(new TransactionIdContext(new RootContext(), new TransactionId()) , id, authzid);
     }
 
     public void execute(JobExecutionContext context) throws JobExecutionException {
