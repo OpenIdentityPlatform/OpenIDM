@@ -343,7 +343,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                         return ServiceInvoker.restCall(options).then(function (result) {
                             $(grid_id).find(".newLinkWarning").popover({
                                 content: function () { return $(this).attr("data-original-title");},
-                                trigger:'hover click',
+                                trigger:'hover',
                                 placement:'top',
                                 container: 'body',
                                 html: 'true',

@@ -405,7 +405,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             this.$el.find(".properties-badge").popover({
                 content: function () { return $(this).find(".tooltip-details").clone().show();},
-                trigger:'hover click',
+                trigger:'hover',
                 placement:'top',
                 container: 'body',
                 html: 'true',
