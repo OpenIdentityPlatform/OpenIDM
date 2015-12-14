@@ -16,7 +16,9 @@
 package org.forgerock.openidm.selfservice.impl;
 
 import static org.forgerock.http.handler.HttpClientHandler.*;
+import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.forgerock.json.resource.ResourcePath.*;
+import static org.forgerock.openidm.util.ContextUtil.createInternalContext;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -41,11 +43,15 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.sync.SyncHttpClientProvider;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.spi.Loader;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageProvider;
@@ -80,6 +86,9 @@ public class SelfService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfService.class);
 
+    /** the boot.properties property for the shared key alias */
+    private static final String SHARED_KEY_PROPERTY = "openidm.config.crypto.selfservice.sharedkey.alias";
+
     /** the registered parent router-path for self-service flows */
     static final String ROUTER_PREFIX = "selfservice";
 
@@ -105,6 +114,10 @@ public class SelfService {
     /** The KBA Configuration. */
     @Reference(policy = ReferencePolicy.STATIC)
     private KbaConfiguration kbaConfiguration;
+
+    /** CryptoService - not used directly, but added to make sure shared key gets created before use */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private CryptoService cryptoService;
 
     private Dictionary<String, Object> properties = null;
     private JsonValue config;
@@ -154,10 +167,19 @@ public class SelfService {
     private void amendConfig() throws ResourceException {
         for (JsonValue stageConfig : config.get(STAGE_CONFIGS)) {
             if (stageConfig.isDefined(KBA_CONFIG)) {
-                // overwrite kbaConfig with from KBA config service
+                // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
             }
         }
+
+        // pull the shared key in from the keystore
+        ResourceResponse result = connectionFactory.getConnection().read(createInternalContext(),
+                newReadRequest("security/keystore/privatekey/"
+                        + IdentityServer.getInstance().getProperty(SHARED_KEY_PROPERTY)));
+
+        config.put(new JsonPointer("/snapshotToken/sharedKey"),
+                result.getContent().get(new JsonPointer("/secret/encoded")).asString());
+
         // force storage type to stateless
         config.put("storage", "stateless");
     }

@@ -269,7 +269,7 @@ public class SecurityResourceProvider {
         if (key instanceof PrivateKey) {
             content.put("privateKey", getKeyMap(key));
         } else if (key instanceof SecretKey) {
-            content.put("secret", getKeyMap(key));
+            content.put("secret", getSecretKeyMap(key));
         }
         return content;
     }
@@ -286,6 +286,21 @@ public class SecurityResourceProvider {
         keyMap.put("algorithm", key.getAlgorithm());
         keyMap.put("format", key.getFormat());
         keyMap.put("encoded", toPem(key));
+        return keyMap;
+    }
+
+    /**
+     * Returns a JsonValue map representing key
+     *
+     * @param key  The key
+     * @return a JsonValue map representing the key
+     * @throws Exception
+     */
+    protected Map<String, Object> getSecretKeyMap(Key key) throws Exception {
+        Map<String, Object> keyMap = new HashMap<>();
+        keyMap.put("algorithm", key.getAlgorithm());
+        keyMap.put("format", key.getFormat());
+        keyMap.put("encoded", Base64.encode(key.getEncoded()));
         return keyMap;
     }
 

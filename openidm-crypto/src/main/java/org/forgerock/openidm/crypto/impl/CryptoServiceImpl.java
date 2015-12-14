@@ -129,25 +129,31 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
                 String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
                 String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
                 String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
-                String alias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
+                String[] configAliases = new String[] {
+                        IdentityServer.getInstance().getProperty("openidm.config.crypto.alias"),
+                        IdentityServer.getInstance().getProperty("openidm.config.crypto.selfservice.sharedkey.alias")
+                };
 
                 try {
                     logger.info(
                             "Activating cryptography service of type: {} provider: {} location: {}",
-                            new Object[] { type, provider, location });
-                    KeyStore ks =
-                            (provider == null || provider.trim().length() == 0 ? KeyStore
-                                    .getInstance(type) : KeyStore.getInstance(type, provider));
+                            type, provider, location);
+                    KeyStore ks = (provider == null || provider.trim().length() == 0)
+                            ? KeyStore.getInstance(type)
+                            : KeyStore.getInstance(type, provider);
                     InputStream in = openStream(location);
                     if (null != in) {
                         char[] clearPassword = Main.unfold(password);
                         ks.load(in, password == null ? null : clearPassword);
-                        if (instanceType.equals(ClusterUtils.TYPE_STANDALONE) || instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
-                            Key key = ks.getKey(alias, clearPassword);
-                            if (key == null) {
-                                // Initialize the keys
-                                logger.debug("Initializing secrety key entry in the keystore");
-                                generateDefaultKey(ks, alias, location, clearPassword);
+                        if (instanceType.equals(ClusterUtils.TYPE_STANDALONE)
+                                || instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
+                            for (String alias : configAliases) {
+                                Key key = ks.getKey(alias, clearPassword);
+                                if (key == null) {
+                                    // Initialize the keys
+                                    logger.debug("Initializing secret key entry {} in the keystore", alias);
+                                    generateDefaultKey(ks, alias, location, clearPassword);
+                                }
                             }
                         }
                         keySelector = new UpdatableKeyStoreSelector(ks, new String(clearPassword));
@@ -190,7 +196,8 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    private void generateDefaultKey(KeyStore ks, String alias, String location, char[] password) throws IOException, GeneralSecurityException {
+    private void generateDefaultKey(KeyStore ks, String alias, String location, char[] password)
+            throws IOException, GeneralSecurityException {
         SecretKey newKey = KeyGenerator.getInstance("AES").generateKey();
         ks.setEntry(alias, new SecretKeyEntry(newKey), new KeyStore.PasswordProtection(password));
         OutputStream out = new FileOutputStream(location);
