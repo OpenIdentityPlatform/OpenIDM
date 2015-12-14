@@ -88,7 +88,6 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 ],
                 "snapshotToken" : {
                     "type": "jwt",
-                    "sharedKey" : "!tHiSsOmEsHaReDkEy!",
                     "keyPairAlgorithm" : "RSA",
                     "keyPairSize" : 1024,
                     "jweAlgorithm" : "RSAES_PKCS1_V1_5",
