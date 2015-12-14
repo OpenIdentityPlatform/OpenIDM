@@ -126,7 +126,7 @@
                     "source" : "ldap2Password",
                     "condition" : {
                         "type" : "text/javascript",
-                        "source" : "object.ldap2password != null"
+                        "source" : "object.ldap2Password != null"
                     },
                     "transform" : {
                         "type" : "text/javascript",
