@@ -28,7 +28,8 @@
 
 /*global object */
 
-var directRoles = null, 
+var directRoles = null,
+    objectId = object._id,
     response;
 
 logger.debug("Invoked effectiveRoles script on property {}", propertyName);
@@ -39,10 +40,9 @@ if (rolesPropName === undefined) {
 }
 
 logger.trace("Configured rolesPropName: {}", rolesPropName);
-
-if (object[rolesPropName] === undefined) {
+if (object[rolesPropName] === undefined && objectId !== undefined && objectId !== null) {
     logger.trace("User's " + rolesPropName + " is not present so querying the roles", rolesPropName);
-    var path = org.forgerock.json.resource.ResourcePath.valueOf("managed/user").child(object._id).child(rolesPropName);
+    var path = org.forgerock.json.resource.ResourcePath.valueOf("managed/user").child(objectId).child(rolesPropName);
     response = openidm.query(path.toString(),  {"_queryFilter": "true"});
     directRoles = response.result;
 } else {
