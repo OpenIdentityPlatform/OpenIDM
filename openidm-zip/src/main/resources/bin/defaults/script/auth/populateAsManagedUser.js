@@ -46,76 +46,42 @@
         managedUserId,
         managedUser;
 
-    // This is needed to switch the context of an authenticated user from their original security context
-    // to a context that is based on the related managed/user account. This is helpful for UI interaction.
-    if (typeof properties.managedUserLink === "string" && properties.managedUserLink.length) {
 
-        userDetail = openidm.query(resource, { '_queryFilter' : userIdPropertyName + ' eq "' + security.authenticationId  + '"' });
+    managedUser = openidm.query("managed/user", { '_queryFilter' : '/userName eq "' + security.authenticationId  + '"' }, ["*","authzRoles"]);
 
-        if (!userDetail.result || userDetail.result.length === 0) {
-            throw {
-                "code" : 401,
-                "message" : "Access denied, no user detail could be retrieved"
-            };
-        }
-
-        if (userDetail.result.length > 1) {
-            throw {
-                "code" : 401,
-                "message" : "Access denied, user detail retrieved ambiguous"
-            };
-        }
-
-        managedUserId = openidm.query("repo/link", {
-            "_queryId": "links-for-firstId",
-            "linkType": properties.managedUserLink,
-            "firstId" : userDetail.result[0]._id
-        });
-
-        if (managedUserId.result.length !== 1) {
-            throw {
-                "code" : 401,
-                "message" : "Access denied, unable to find linked managed/user entry"
-            };
-        }
-
-        managedUser = openidm.read("managed/user/" + managedUserId.result[0].secondId);
-
-        if (managedUser === null) {
-            throw {
-                "code" : 401,
-                "message" : "Access denied, linked managed/user entry is MISSING"
-            };
-        }
-
-        if (managedUser.accountStatus === "inactive") {
-            throw {
-                "code" : 401,
-                "message" : "Access denied, user inactive"
-            };
-        }
-
-        security.authorization = {
-            "id": managedUser._id,
-            "component": "managed/user",
-            "roles": managedUser.authzRoles ?
-                         _.uniq(
-                             security.authorization.roles.concat(
-                                 _.chain(managedUser.authzRoles)
-                                     .filter(function (r) {
-                                         return org.forgerock.json.resource.ResourceName.valueOf(r._ref).startsWith("repo/internal/role");
-                                     })
-                                     .map(function (r) {
-                                         // appending empty string gets the value from java into a format more familiar to JS
-                                         return org.forgerock.json.resource.ResourceName.valueOf(r._ref).leaf() + "";
-                                     })
-                                     .value()
-                            )
-                        ) :
-                         security.authorization.roles
+    if (managedUser.result.length === 0) {
+        throw {
+            "code" : 401,
+            "message" : "Access denied, managed/user entry is not found"
         };
-
     }
+
+    if (managedUser.result[0].accountStatus === "inactive") {
+        throw {
+            "code" : 401,
+            "message" : "Access denied, user inactive"
+        };
+    }
+
+    security.authorization = {
+        "id": managedUser.result[0]._id,
+        "component": "managed/user",
+        "roles": managedUser.result[0].authzRoles ?
+                     _.uniq(
+                         security.authorization.roles.concat(
+                             _.chain(managedUser.result[0].authzRoles)
+                                 .filter(function (r) {
+                                     return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).startsWith("repo/internal/role");
+                                 })
+                                 .map(function (r) {
+                                     // appending empty string gets the value from java into a format more familiar to JS
+                                     return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).leaf() + "";
+                                 })
+                                 .value()
+                        )
+                    ) :
+                     security.authorization.roles
+    };
 
     return security;
 

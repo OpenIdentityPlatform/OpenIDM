@@ -409,7 +409,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
             newConfig.properties = {};
             newConfig.properties.propertyMapping = {};
 
-            if (newConfig.name.name === "OPENAM_SESSION") {
+            if (newConfig.name === "OPENAM_SESSION") {
                 amUISettingsProm = this.handleOpenAMUISettings(editorValues);
 
                 //remove amUIProperties
@@ -490,7 +490,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 OpenamProxyDelegate.serverinfo(editorValues.openamDeploymentUrl).then(_.bind(function(info){
                         if (info.cookieName) {
                             // Set openamSSOTokenCookieName for this module
-                            editorValues.properties.openamSSOTokenCookieName = info.cookieName;
+                            editorValues.openamSSOTokenCookieName = info.cookieName;
                             confirmed();
                         } else {
                             UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
