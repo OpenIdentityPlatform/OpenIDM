@@ -393,7 +393,6 @@ CREATE TABLE SOPENIDM.AUDITACCESS (
     trackingids CLOB(2M),
     server_ip VARCHAR(40) ,
     server_port VARCHAR(5) ,
-    client_host VARCHAR(255) ,
     client_ip VARCHAR(40) ,
     client_port VARCHAR(5) ,
     request_protocol VARCHAR(255) NULL ,

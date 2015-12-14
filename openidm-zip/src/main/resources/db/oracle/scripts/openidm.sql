@@ -96,7 +96,6 @@ CREATE TABLE auditaccess (
   trackingids CLOB,
   server_ip VARCHAR2(40 CHAR),
   server_port VARCHAR2(5 CHAR),
-  client_host VARCHAR2(255 CHAR),
   client_ip VARCHAR2(40 CHAR),
   client_port VARCHAR2(5 CHAR),
   request_protocol VARCHAR2(255 CHAR) NULL ,

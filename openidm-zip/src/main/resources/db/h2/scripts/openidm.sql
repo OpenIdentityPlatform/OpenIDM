@@ -282,7 +282,6 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `trackingids` TEXT NULL ,
   `server_ip` VARCHAR(40) ,
   `server_port` VARCHAR(5) ,
-  `client_host` VARCHAR(255) ,
   `client_ip` VARCHAR(40) ,
   `client_port` VARCHAR(5) ,
   `request_protocol` VARCHAR(255) NULL ,

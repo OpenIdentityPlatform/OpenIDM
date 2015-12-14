@@ -183,7 +183,6 @@ switch ( objectClass ) {
                             )?.getObject()
                     attribute 'client',
                             JsonValueUtil.fromEntries(
-                                field("host", dataCollector.client_host),
                                 field("ip", dataCollector.client_ip),
                                 field("port", dataCollector.client_port)
                             )?.getObject()
@@ -238,7 +237,6 @@ switch ( objectClass ) {
                     trackingids : row.trackingids,
                     server_ip : row.server_ip,
                     server_port : row.server_port,
-                    client_host : row.client_host,
                     client_ip : row.client_ip,
                     client_port : row.client_port,
                     request_protocol : row.request_protocol,

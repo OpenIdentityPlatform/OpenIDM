@@ -64,12 +64,12 @@ for (Attribute attribute : attributes) {
 switch ( objectClass ) {
     case auditaccess:
         sql.execute("INSERT INTO auditaccess " +
-                "(objectid, activitydate, eventname, transactionid, userid, trackingids, server_ip, server_port, client_host, " +
+                "(objectid, activitydate, eventname, transactionid, userid, trackingids, server_ip, server_port, " +
                 "client_ip, client_port, request_protocol, request_operation, request_detail, " +
                 "http_request_secure, http_request_method, http_request_path, http_request_queryparameters, " +
                 "http_request_headers, http_request_cookies, http_response_headers, response_status, " +
                 "response_statuscode, response_elapsedtime, response_elapsedtimeunits, roles" +
-                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                ") values (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                 [
                     id,
                     attributeMap.get("activitydate")?.getValue()?.get(0),
@@ -81,7 +81,6 @@ switch ( objectClass ) {
                             : null,
                     attributeMap.get("server")?.getValue()?.get(0)?.get("ip"),
                     attributeMap.get("server")?.getValue()?.get(0)?.get("port"),
-                    attributeMap.get("client")?.getValue()?.get(0)?.get("host"),
                     attributeMap.get("client")?.getValue()?.get(0)?.get("ip"),
                     attributeMap.get("client")?.getValue()?.get(0)?.get("port"),
                     attributeMap.get("request")?.getValue()?.get(0)?.get("protocol"),
