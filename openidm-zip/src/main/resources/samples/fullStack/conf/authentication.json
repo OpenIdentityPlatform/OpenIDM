@@ -48,7 +48,6 @@
                         "openidm-authorized"
                     ],
                     "groupComparisonMethod" : "ldap",
-                    "managedUserLink" : "systemLdapAccounts_managedUser",
                     "augmentSecurityContext" : {
                         "type" : "text/javascript",
                         "file" : "auth/populateAsManagedUser.js"
