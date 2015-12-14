@@ -70,7 +70,7 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/SingleRecordReconciliat
                 doLoad = _.bind(function() {
                     this.parentRender(_.bind(function () {
                         this.$el.find(".changed").popover({
-                            trigger:'hover click',
+                            trigger:'hover',
                             placement:'top',
                             container: 'body',
                             html: 'true',
