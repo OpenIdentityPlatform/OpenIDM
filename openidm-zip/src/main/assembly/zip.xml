@@ -967,6 +967,7 @@
 			<include>README.md</include>
             <include>conf/**</include>
             <include>script/**</include>
+            <include>data/**</include>
 		</includes>
 		<outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
 	</fileSet>

@@ -29,7 +29,9 @@ for (var index in historyFields) {
 
     // Get new and old field values
     newValue = object[field];
-    oldValue = openidm.decrypt(oldObject[field]);
+    oldValue = openidm.isEncrypted(oldObject[field])
+        ? openidm.decrypt(oldObject[field])
+        : oldObject[field];
     
     // Determine if a plain text value needs to be compared to a hashed value
     matchHashed = openidm.isHashed(oldValue) && !openidm.isHashed(newValue);
