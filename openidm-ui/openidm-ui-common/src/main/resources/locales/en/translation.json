@@ -1871,19 +1871,6 @@
                         "noProcesses": "No processes in your queue.",
                         "noDataRequired": "No data required"
                     }
-                },
-                "users" : {
-                    "UsersView" : {
-                        "display" : "Display",
-                        "perPage" : "per page"
-                    },
-                    "AdminUserProfileView" : {
-                        "profileOwnership" : "%s's profile",
-                        "profileWillBeDeleted" : "%s account will be deleted."
-                    },
-                    "ChangeUserPasswordDialog" : {
-                        "securityDataChangeForWhom" : "Security data change for %s"
-                    }
                 }
             },
             "apps" : {
