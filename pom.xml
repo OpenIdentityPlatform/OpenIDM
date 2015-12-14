@@ -219,7 +219,7 @@
         <commons.forgerock-bom.version>4.0.1</commons.forgerock-bom.version>
 
         <!-- Commons versions -->
-        <commons.forgerock-script.version>3.0.2</commons.forgerock-script.version>
+        <commons.forgerock-script.version>3.0.3</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
 
         <!-- Third party dependencies -->
