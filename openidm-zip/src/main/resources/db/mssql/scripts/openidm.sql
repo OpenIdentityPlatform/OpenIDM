@@ -95,7 +95,8 @@ CREATE  TABLE [openidm].[genericobjectproperties]
     ON UPDATE NO ACTION
 );
 CREATE INDEX fk_genericobjectproperties_genericobjects ON [openidm].[genericobjectproperties] (genericobjects_id ASC);
-CREATE INDEX idx_genericobjectproperties_prop ON [openidm].[genericobjectproperties] (propkey ASC, propvalue ASC);
+CREATE INDEX idx_genericobjectproperties_propkey ON [openidm].[genericobjectproperties] (propkey ASC);
+CREATE INDEX idx_genericobjectproperties_propvalue ON [openidm].[genericobjectproperties] (propvalue ASC);
 END
 
 
@@ -141,7 +142,8 @@ CREATE  TABLE [openidm].[managedobjectproperties]
     ON UPDATE NO ACTION
 );
 CREATE INDEX fk_managedobjectproperties_managedobjects ON [openidm].[managedobjectproperties] (managedobjects_id ASC);
-CREATE INDEX idx_managedobjectproperties_prop ON [openidm].[managedobjectproperties] (propkey ASC, propvalue ASC);
+CREATE INDEX idx_managedobjectproperties_propkey ON [openidm].[managedobjectproperties] (propkey ASC);
+CREATE INDEX idx_managedobjectproperties_propvalue ON [openidm].[managedobjectproperties] (propvalue ASC);
 END
 
 
@@ -186,7 +188,8 @@ CREATE  TABLE [openidm].[configobjectproperties] (
     ON UPDATE NO ACTION
 );
 CREATE INDEX fk_configobjectproperties_configobjects ON [openidm].[configobjectproperties] (configobjects_id ASC);
-CREATE INDEX idx_configobjectproperties_prop ON [openidm].[configobjectproperties] (propkey ASC, propvalue ASC);
+CREATE INDEX idx_configobjectproperties_propkey ON [openidm].[configobjectproperties] (propkey ASC);
+CREATE INDEX idx_configobjectproperties_propvalue ON [openidm].[configobjectproperties] (propvalue ASC);
 END
 
 
@@ -231,7 +234,8 @@ CREATE  TABLE [openidm].[relationshipproperties] (
     ON UPDATE NO ACTION
 );
 CREATE INDEX fk_relationshipproperties_relationships ON [openidm].[relationshipproperties] (relationships_id ASC);
-CREATE INDEX idx_relationshipproperties_prop ON [openidm].[relationshipproperties] (propkey ASC, propvalue ASC);
+CREATE INDEX idx_relationshipproperties_propkey ON [openidm].[relationshipproperties] (propkey ASC);
+CREATE INDEX idx_relationshipproperties_propvalue ON [openidm].[relationshipproperties] (propvalue ASC);
 END
 
 -- -----------------------------------------------------
@@ -531,7 +535,8 @@ CREATE  TABLE [openidm].[schedulerobjectproperties] (
     ON UPDATE NO ACTION
 );
 CREATE INDEX fk_schedulerobjectproperties_schedulerobjects ON [openidm].[schedulerobjectproperties] (schedulerobjects_id ASC);
-CREATE INDEX idx_schedulerobjectproperties_prop ON [openidm].[schedulerobjectproperties] (propkey ASC, propvalue ASC);
+CREATE INDEX idx_schedulerobjectproperties_propkey ON [openidm].[schedulerobjectproperties] (propkey ASC);
+CREATE INDEX idx_schedulerobjectproperties_propvalue ON [openidm].[schedulerobjectproperties] (propvalue ASC);
 END
 
 
@@ -576,7 +581,8 @@ CREATE  TABLE [openidm].[clusterobjectproperties] (
     ON UPDATE NO ACTION
 );
 CREATE INDEX fk_clusterobjectproperties_clusterobjects ON [openidm].[clusterobjectproperties] (clusterobjects_id ASC);
-CREATE INDEX idx_clusterobjectproperties_prop ON [openidm].[clusterobjectproperties] (propkey ASC, propvalue ASC);
+CREATE INDEX idx_clusterobjectproperties_propkey ON [openidm].[clusterobjectproperties] (propkey ASC);
+CREATE INDEX idx_clusterobjectproperties_propvalue ON [openidm].[clusterobjectproperties] (propvalue ASC);
 END
 
 
@@ -643,7 +649,8 @@ CREATE  TABLE [openidm].[updateobjectproperties]
     ON UPDATE NO ACTION
 );
 CREATE INDEX fk_updateobjectproperties_updateobjects ON [openidm].[updateobjectproperties] (updateobjects_id ASC);
-CREATE INDEX idx_updateobjectproperties_prop ON [openidm].[updateobjectproperties] (propkey ASC, propvalue ASC);
+CREATE INDEX idx_updateobjectproperties_propkey ON [openidm].[updateobjectproperties] (propkey ASC);
+CREATE INDEX idx_updateobjectproperties_propvalue ON [openidm].[updateobjectproperties] (propvalue ASC);
 END
 
 

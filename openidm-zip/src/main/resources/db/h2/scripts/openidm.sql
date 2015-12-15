@@ -39,7 +39,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
 CREATE INDEX  IF NOT EXISTS  `openidm`.`fk_genericobjectproperties_genericobjects` ON
 `openidm`.`genericobjectproperties` (`genericobjects_id` ASC);
 
-CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_genericobjectproperties_prop` ON `openidm`.`genericobjectproperties` (`propkey` ASC, `propvalue` ASC);
+CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_genericobjectproperties_propkey` ON `openidm`.`genericobjectproperties` (`propkey` ASC);
+CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_genericobjectproperties_propvalue` ON `openidm`.`genericobjectproperties` (`propvalue` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
@@ -69,8 +70,9 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
     ON DELETE CASCADE
     ON UPDATE NO ACTION);
 
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_managedobjectproperties_prop` ON `openidm`.`managedobjectproperties` (`propkey` ASC, `propvalue` ASC);
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_managedobjectproperties_managedobjects` ON `openidm`.`managedobjectproperties` (`managedobjects_id` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_managedobjectproperties_propkey` ON `openidm`.`managedobjectproperties` (`propkey` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_managedobjectproperties_propvalue` ON `openidm`.`managedobjectproperties` (`propvalue` ASC);
 
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`configobjects` (
@@ -103,7 +105,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_configobjectproperties_configobjects` ON `openidm`.`configobjectproperties`(`configobjects_id` ASC);
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_configobjectproperties_prop` ON `openidm`.`configobjectproperties`(`propkey` ASC, `propvalue` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_configobjectproperties_propkey` ON `openidm`.`configobjectproperties`(`propkey` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_configobjectproperties_propvalue` ON `openidm`.`configobjectproperties`(`propvalue` ASC);
 
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`relationships` (
@@ -136,7 +139,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`relationshipproperties` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_relationshipproperties_relationships` ON `openidm`.`relationshipproperties`(`relationships_id` ASC);
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_relationshipproperties_prop` ON `openidm`.`relationshipproperties`(`propkey` ASC, `propvalue` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_relationshipproperties_propkey` ON `openidm`.`relationshipproperties`(`propkey` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_relationshipproperties_propvalue` ON `openidm`.`relationshipproperties`(`propvalue` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   `objectid` VARCHAR(38) NOT NULL ,
@@ -266,7 +270,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `message` TEXT NULL,
   `status` VARCHAR(20) ,
   PRIMARY KEY (`objectid`));
-  
+
 CREATE INDEX IF NOT EXISTS `openidm`.`idx_auditactivity_transactionid` ON  `openidm`.`auditactivity`(`transactionid` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
@@ -339,7 +343,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `openidm`.`fk_schedulerobjectproperties_schedulerobjects` ON `openidm`.`schedulerobjectproperties`(`schedulerobjects_id` ASC);
-CREATE INDEX IF NOT EXISTS `openidm`.`idx_schedulerobjectproperties_prop` ON `openidm`.`schedulerobjectproperties`(`propkey` ASC, `propvalue` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_schedulerobjectproperties_propkey` ON `openidm`.`schedulerobjectproperties`(`propkey` ASC);
+CREATE INDEX IF NOT EXISTS `openidm`.`idx_schedulerobjectproperties_propvalue` ON `openidm`.`schedulerobjectproperties`(`propvalue` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjects` (
   `id` BIGINT UNSIGNED NOT NULL AUTO_INCREMENT ,
@@ -369,7 +374,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
     ON UPDATE NO ACTION);
 
 CREATE INDEX IF NOT EXISTS `fk_clusterobjectproperties_clusterobjects` ON `openidm`.`clusterobjectproperties`  (`clusterobjects_id` ASC);
-CREATE INDEX IF NOT EXiSTS `idx_clusterobjectproperties_prop` ON `openidm`.`clusterobjectproperties` (`propkey` ASC, `propvalue` ASC);
+CREATE INDEX IF NOT EXiSTS `idx_clusterobjectproperties_propkey` ON `openidm`.`clusterobjectproperties` (`propkey` ASC);
+CREATE INDEX IF NOT EXiSTS `idx_clusterobjectproperties_propvalue` ON `openidm`.`clusterobjectproperties` (`propvalue` ASC);
 
 CREATE  TABLE IF NOT EXISTS `openidm`.`uinotification` (
   `objectid` VARCHAR(38) NOT NULL ,
@@ -415,11 +421,12 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`updateobjectproperties` (
 CREATE INDEX  IF NOT EXISTS  `openidm`.`fk_updateobjectproperties_updateobjects` ON
 `openidm`.`updateobjectproperties` (`updateobjects_id` ASC);
 
-CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_updateobjectproperties_prop` ON `openidm`.`updateobjectproperties` (`propkey` ASC, `propvalue` ASC);
+CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_updateobjectproperties_propkey` ON `openidm`.`updateobjectproperties` (`propkey` ASC);
+CREATE INDEX  IF NOT EXISTS  `openidm`.`idx_updateobjectproperties_propvalue` ON `openidm`.`updateobjectproperties` (`propvalue` ASC);
 
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`)
-SELECT 'openidm-admin', '0', 'openidm-admin', '[ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]' 
+SELECT 'openidm-admin', '0', 'openidm-admin', '[ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]'
 WHERE NOT EXISTS (SELECT * FROM `openidm`.`internaluser` WHERE `objectid` = 'openidm-admin');
 
 INSERT INTO `openidm`.`internaluser` (`objectid`, `rev`, `pwd`, `roles`)

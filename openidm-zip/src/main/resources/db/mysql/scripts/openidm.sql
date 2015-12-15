@@ -45,7 +45,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`genericobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_genericobjectproperties_genericobjects` (`genericobjects_id` ASC) ,
-  INDEX `idx_genericobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  INDEX `idx_genericobjectproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_genericobjectproperties_propvalue` (`propvalue`(255) ASC) ,
   CONSTRAINT `fk_genericobjectproperties_genericobjects`
     FOREIGN KEY (`genericobjects_id` )
     REFERENCES `openidm`.`genericobjects` (`id` )
@@ -83,7 +84,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managedobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_managedobjectproperties_managedobjects` (`managedobjects_id` ASC) ,
-  INDEX `idx_managedobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  INDEX `idx_managedobjectproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_managedobjectproperties_propvalue` (`propvalue`(255) ASC) ,
   CONSTRAINT `fk_managedobjectproperties_managedobjects`
     FOREIGN KEY (`managedobjects_id` )
     REFERENCES `openidm`.`managedobjects` (`id` )
@@ -121,7 +123,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`configobjectproperties` (
   `proptype` VARCHAR(255) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_configobjectproperties_configobjects` (`configobjects_id` ASC) ,
-  INDEX `idx_configobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  INDEX `idx_configobjectproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_configobjectproperties_propvalue` (`propvalue`(255) ASC) ,
   CONSTRAINT `fk_configobjectproperties_configobjects`
     FOREIGN KEY (`configobjects_id` )
     REFERENCES `openidm`.`configobjects` (`id` )
@@ -159,7 +162,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`relationshipproperties` (
   `proptype` VARCHAR(255) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_relationshipproperties_relationships` (`relationships_id` ASC) ,
-  INDEX `idx_relationshipproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  INDEX `idx_relationshipproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_relationshipproperties_propvalue` (`propvalue`(255) ASC) ,
   CONSTRAINT `fk_relationshipproperties_relationships`
   FOREIGN KEY (`relationships_id` )
   REFERENCES `openidm`.`relationships` (`id` )
@@ -420,7 +424,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`schedulerobjectproperties` (
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_schedulerobjectproperties_schedulerobjects` (`schedulerobjects_id` ASC) ,
-  INDEX `idx_schedulerobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  INDEX `idx_schedulerobjectproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_schedulerobjectproperties_propvalue` (`propvalue`(255) ASC) ,
   CONSTRAINT `fk_schedulerobjectproperties_schedulerobjects`
     FOREIGN KEY (`schedulerobjects_id` )
     REFERENCES `openidm`.`schedulerobjects` (`id` )
@@ -474,7 +479,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`clusterobjectproperties` (
   `propkey` VARCHAR(255) NOT NULL ,
   `proptype` VARCHAR(32) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
-  INDEX `idx_clusterobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  INDEX `idx_clusterobjectproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_clusterobjectproperties_propvalue` (`propvalue`(255) ASC) ,
   INDEX `fk_clusterobjectproperties_clusterobjects` (`clusterobjects_id` ASC) ,
   CONSTRAINT `fk_clusterobjectproperties_clusterobjects`
     FOREIGN KEY (`clusterobjects_id` )
@@ -512,31 +518,14 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`updateobjectproperties` (
   `proptype` VARCHAR(255) NULL ,
   `propvalue` VARCHAR(2000) NULL ,
   INDEX `fk_updateobjectproperties_updateobjects` (`updateobjects_id` ASC) ,
-  INDEX `idx_updateobjectproperties_prop` (`propkey` ASC, `propvalue`(255) ASC) ,
+  INDEX `idx_updateobjectproperties_propkey` (`propkey` ASC) ,
+  INDEX `idx_updateobjectproperties_propvalue` (`propvalue`(255) ASC) ,
   CONSTRAINT `fk_updateobjectproperties_updateobjects`
     FOREIGN KEY (`updateobjects_id` )
     REFERENCES `openidm`.`updateobjects` (`id` )
     ON DELETE CASCADE
     ON UPDATE NO ACTION)
   ENGINE = InnoDB;
-
-delimiter //
-
-create procedure `openidm`.`getAllFromTable` (t_schema varchar(255), t_name varchar(255), order_by varchar(255), order_dir varchar(255), num_rows bigint, skip bigint, acceptable_order_by varchar(512))
-begin
-    set @num_rows = num_rows;
-    set @skip = skip;
-    select find_in_set(order_by, acceptable_order_by) into @order_by_ok;
-    select find_in_set(order_dir, 'asc,desc') into @order_dir_ok;
-    IF @order_by_ok != 0 && @order_dir_ok != 0 THEN
-        set @query = concat('select * from ', t_schema, '.', t_name ,' order by ', order_by ,' ', order_dir ,' limit ? offset ?');
-        prepare stmt from @query;
-        execute stmt using @num_rows, @skip;
-    END IF;
-end //
-
-delimiter ;
-
 
 SET SQL_MODE=@OLD_SQL_MODE;
 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS;
