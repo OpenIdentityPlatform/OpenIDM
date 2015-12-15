@@ -75,7 +75,7 @@ Setup the Database
 
 1. Copy the MySQL Connector/J .jar to the OpenIDM bundle/ directory.
 
-    $ cp mysql-connector-java-5.1.18-bin.jar /path/to/openidm/bundle/
+    $ cp mysql-connector-java-<version>-bin.jar /path/to/openidm/bundle/
 
 2. Set up MySQL to listen on localhost:3306, connecting as root:password.
 
