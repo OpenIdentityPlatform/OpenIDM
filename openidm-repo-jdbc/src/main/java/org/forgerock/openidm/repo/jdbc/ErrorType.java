@@ -29,5 +29,6 @@ package org.forgerock.openidm.repo.jdbc;
 public enum ErrorType  {
     CONNECTION_FAILURE,
     DUPLICATE_KEY,
-    DEADLOCK_OR_TIMEOUT
+    DEADLOCK_OR_TIMEOUT,
+    CANT_CHANGE_TX_ISOLATION
 }
