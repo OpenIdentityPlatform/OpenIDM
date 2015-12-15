@@ -48,9 +48,6 @@ Demonstrates failure compensation synchronization of two resources.
 ### Sample6
 Demonstrates live sync with OpenDJ.
 
-### Sample7
-A [SCIM](http://www.simplecloud.info) Schema Attributes sample.
-
 ### Sample8
 Demonstrates the use of logging in scripts for debugging.
 
