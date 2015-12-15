@@ -59,7 +59,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                 event.preventDefault();
             }
 
-            if (property.length) {
+            if (property && property.length) {
                 this.$el.empty();
 
                 mappingProperties.push({target: property});
@@ -110,7 +110,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                         create: false,
                         onChange: _.bind(function(value) {
                             if(value.length > 0) {
-                                this.model.dialog.$modalFooter.find("#scriptDialogUpdate").prop("disabled", false);
+                                this.model.dialog.$modalFooter.find("#scriptDialogUpdate").prop("disabled", false).focus();
                             } else {
                                 this.model.dialog.$modalFooter.find("#scriptDialogUpdate").prop("disabled", true);
                             }
@@ -135,9 +135,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDial
                         function () {
                             settings.postRender();
 
-                            _this.$el.find("#addPropertySelect");
-
-                            _this.$el.find("#addPropertySelect").focus();
+                            _this.model.dialog.$modalFooter.find("#scriptDialogUpdate").prop("disabled", false).focus();
 
                             if (callback) {
                                 callback();
