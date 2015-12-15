@@ -217,11 +217,11 @@ CREATE TABLE auditactivity (
   transactionid VARCHAR2(255 CHAR) NOT NULL,
   userid VARCHAR2(255 CHAR),
   trackingids CLOB,
-  runas VARCHAR2(255 CHAR),  
+  runas VARCHAR2(255 CHAR),
   activityobjectid VARCHAR2(255 CHAR) NULL ,
   operation VARCHAR2(255 CHAR) NULL ,
-  subjectbefore CLOB, 
-  subjectafter CLOB, 
+  subjectbefore CLOB,
+  subjectafter CLOB,
   changedfields VARCHAR2(255 CHAR),
   subjectrev VARCHAR2(255 CHAR),
   passwordchanged VARCHAR2(5 CHAR),
@@ -245,7 +245,7 @@ PROMPT Creating Index idx_auditactivity_transid on auditactivity ...
 CREATE INDEX idx_auditactivity_transid ON auditactivity
 (
   transactionid
-) 
+)
 ;
 
 -- DROP TABLE auditrecon CASCADE CONSTRAINTS;
@@ -350,7 +350,12 @@ CREATE INDEX fk_configobjectproperties_conf ON configobjectproperties
 PROMPT Creating Index idx_configobjectpropert_1 on configobjectproperties ...
 CREATE INDEX idx_configobjectpropert_1 ON configobjectproperties
 (
-  propkey,
+  propkey
+)
+;
+PROMPT Creating Index idx_configobjectpropert_2 on configobjectproperties ...
+CREATE INDEX idx_configobjectpropert_2 ON configobjectproperties
+(
   propvalue
 )
 ;
@@ -411,7 +416,12 @@ CREATE INDEX fk_relationshipproperties_conf ON relationshipproperties
 PROMPT Creating Index idx_relationshippropert_1 on relationshipproperties ...
 CREATE INDEX idx_relationshippropert_1 ON relationshipproperties
 (
-  propkey,
+  propkey
+)
+;
+PROMPT Creating Index idx_relationshippropert_2 on relationshipproperties ...
+CREATE INDEX idx_relationshippropert_2 ON relationshipproperties
+(
   propvalue
 )
 ;
@@ -470,10 +480,15 @@ CREATE INDEX fk_genericobjectproperties_gen ON genericobjectproperties
   genericobjects_id
 )
 ;
+PROMPT Creating Index idx_genericobjectproper_1 on genericobjectproperties ...
+CREATE INDEX idx_genericobjectproper_1 ON genericobjectproperties
+(
+  propkey
+)
+;
 PROMPT Creating Index idx_genericobjectproper_2 on genericobjectproperties ...
 CREATE INDEX idx_genericobjectproper_2 ON genericobjectproperties
 (
-  propkey,
   propvalue
 )
 ;
@@ -642,10 +657,15 @@ CREATE INDEX fk_managedobjectproperties_man ON managedobjectproperties
   managedobjects_id
 )
 ;
-PROMPT Creating Index idx_managedobjectproper_3 on managedobjectproperties ...
-CREATE INDEX idx_managedobjectproper_3 ON managedobjectproperties
+PROMPT Creating Index idx_managedobjectproper_1 on managedobjectproperties ...
+CREATE INDEX idx_managedobjectproper_1 ON managedobjectproperties
 (
-  propkey,
+  propkey
+)
+;
+PROMPT Creating Index idx_managedobjectproper_2 on managedobjectproperties ...
+CREATE INDEX idx_managedobjectproper_2 ON managedobjectproperties
+(
   propvalue
 )
 ;
@@ -703,10 +723,15 @@ CREATE INDEX fk_schedobjectproperties_man ON schedobjectproperties
   schedulerobjects_id
 )
 ;
-PROMPT Creating Index idx_schedobjectproperties_3 on schedobjectproperties ...
-CREATE INDEX idx_schedobjectproperties_3 ON schedobjectproperties
+PROMPT Creating Index idx_schedobjectproperties_1 on schedobjectproperties ...
+CREATE INDEX idx_schedobjectproperties_1 ON schedobjectproperties
 (
-  propkey,
+  propkey
+)
+;
+PROMPT Creating Index idx_schedobjectproperties_2 on schedobjectproperties ...
+CREATE INDEX idx_schedobjectproperties_2 ON schedobjectproperties
+(
   propvalue
 )
 ;
@@ -764,10 +789,15 @@ CREATE INDEX fk_clusterobjectproperties_man ON clusterobjectproperties
   clusterobjects_id
 )
 ;
-PROMPT Creating Index idx_clusterobjectproperties_3 on clusterobjectproperties ...
-CREATE INDEX idx_clusterobjectproperties_3 ON clusterobjectproperties
+PROMPT Creating Index idx_clusterobjectproperties_1 on clusterobjectproperties ...
+CREATE INDEX idx_clusterobjectproperties_1 ON clusterobjectproperties
 (
-  propkey,
+  propkey
+)
+;
+PROMPT Creating Index idx_clusterobjectproperties_2 on clusterobjectproperties ...
+CREATE INDEX idx_clusterobjectproperties_2 ON clusterobjectproperties
+(
   propvalue
 )
 ;
@@ -825,10 +855,15 @@ CREATE INDEX fk_updateobjectproperties_gen ON updateobjectproperties
   updateobjects_id
 )
 ;
+PROMPT Creating Index idx_updateobjectproper_1 on updateobjectproperties ...
+CREATE INDEX idx_updateobjectproper_1 ON updateobjectproperties
+(
+  propkey
+)
+;
 PROMPT Creating Index idx_updateobjectproper_2 on updateobjectproperties ...
 CREATE INDEX idx_updateobjectproper_2 ON updateobjectproperties
 (
-  propkey,
   propvalue
 )
 ;
