@@ -56,7 +56,7 @@
         };
     }
 
-    if (managedUser.result[0].accountStatus === "inactive") {
+    if (managedUser.result[0].accountStatus !== "active") {
         throw {
             "code" : 401,
             "message" : "Access denied, user inactive"
@@ -69,15 +69,10 @@
         "roles": managedUser.result[0].authzRoles ?
                      _.uniq(
                          security.authorization.roles.concat(
-                             _.chain(managedUser.result[0].authzRoles)
-                                 .filter(function (r) {
-                                     return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).startsWith("repo/internal/role");
-                                 })
-                                 .map(function (r) {
-                                     // appending empty string gets the value from java into a format more familiar to JS
-                                     return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).leaf() + "";
-                                 })
-                                 .value()
+                             _.map(managedUser.result[0].authzRoles, function (r) {
+                                 // appending empty string gets the value from java into a format more familiar to JS
+                                 return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).leaf() + "";
+                             })
                         )
                     ) :
                      security.authorization.roles
