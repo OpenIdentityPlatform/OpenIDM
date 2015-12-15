@@ -361,10 +361,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                         equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), schemaField.getName()));
                 if (request.getQueryFilter() != null) {
                     filter = or(
-                            and(firstFilter, 
-                                   and(firstFilter, asRelationshipQueryFilter(false, request.getQueryFilter()))),
-                            and(secondFilter, 
-                                   and(secondFilter, asRelationshipQueryFilter(true, request.getQueryFilter()))));
+                            and(firstFilter, asRelationshipQueryFilter(false, request.getQueryFilter())),
+                            and(secondFilter, asRelationshipQueryFilter(true, request.getQueryFilter())));
                 } else {
                     filter = or(firstFilter, secondFilter);
                 }       
