@@ -568,7 +568,7 @@ ADD CONSTRAINT PRIMARY_4 PRIMARY KEY
 ENABLE
 ;
 PROMPT Creating Index idx_links_first on links ...
-CREATE INDEX idx_links_first ON links
+CREATE UNIQUE INDEX idx_links_first ON links
 (
   linktype,
   linkqualifier,
@@ -576,7 +576,7 @@ CREATE INDEX idx_links_first ON links
 )
 ;
 PROMPT Creating Index idx_links_second on links ...
-CREATE INDEX idx_links_second ON links
+CREATE UNIQUE INDEX idx_links_second ON links
 (
   linktype,
   linkqualifier,
