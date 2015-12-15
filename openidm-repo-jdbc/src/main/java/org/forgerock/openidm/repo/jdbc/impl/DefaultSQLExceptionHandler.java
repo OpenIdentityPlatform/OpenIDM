@@ -50,7 +50,8 @@ public class DefaultSQLExceptionHandler implements SQLExceptionHandler {
      */
     public boolean isRetryable(SQLException ex, Connection connection) {
         // These are known re-tryable for MySQL. Other DBs may need specific sql exception handler defnitions.
-        if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)) {
+        if (isErrorType(ex, ErrorType.CONNECTION_FAILURE) || isErrorType(ex, ErrorType.DEADLOCK_OR_TIMEOUT)
+                || isErrorType(ex, ErrorType.CANT_CHANGE_TX_ISOLATION)) {
             return true;
         } else {
             return false;
