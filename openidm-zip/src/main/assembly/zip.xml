@@ -62,6 +62,7 @@
                     Remove Sample7 from the resulting zip until it is redesigned.
                 -->
                 <exclude>**/sample7/**</exclude>
+                <exclude>**/scriptedazure/**</exclude>
             </excludes>
         </fileSet>
         <fileSet>
@@ -310,7 +311,7 @@
             <outputDirectory>/openidm/samples/scriptedcrest2dj</outputDirectory>
         </fileSet>
         <!-- Setup scriptedazure  -->
-        <fileSet>
+        <!-- fileSet>
             <directory>${basedir}/src/main/resources/samples/provisioners</directory>
             <includes>
                 <include>provisioner.openicf-scriptedazure.json</include>
@@ -324,7 +325,7 @@
                 <include>script/**</include>
             </includes>
             <outputDirectory>/openidm/samples/scriptedazure</outputDirectory>
-        </fileSet>
+        </fileSet-->
         <!-- Setup Sample5  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
