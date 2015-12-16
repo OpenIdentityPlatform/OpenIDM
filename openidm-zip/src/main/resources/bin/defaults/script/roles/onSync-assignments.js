@@ -35,7 +35,8 @@
             var roles;
             var users=[];
             if (shouldSyncUsers(oldValue, newValue, ignoredProperties)) {
-                roles = openidm.query(resourceName.toString() + '/roles', {'_queryFilter': 'true'}, ['members']).result;
+                roles = openidm.query(resourceName.toString() + '/roles', 
+                        {"_queryId": "find-relationships-for-resource"}, ['members']).result;
                 _.each(roles, function (role) {
                     _.each(role.members, function (user) {
                         users.push(user._ref);

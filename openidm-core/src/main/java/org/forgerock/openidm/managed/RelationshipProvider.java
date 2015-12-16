@@ -44,6 +44,7 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
@@ -96,6 +97,15 @@ public abstract class RelationshipProvider {
 
     /** A {@link JsonPointer} to the property representing this relationship in the parent object. */
     protected final JsonPointer propertyPtr;
+
+    /** An optimized relationship query ID */
+    protected static final String RELATIONSHIP_QUERY_ID = "find-relationships-for-resource";
+    
+    /** A query field representing the full path of the managed object instance of this relationship field  */
+    protected static final String QUERY_FIELD_RESOURCE_PATH = "fullResourceId";
+    
+    /** A query field representing the field name of this relationship field  */
+    protected static final String QUERY_FIELD_FIELD_NAME = "resourceFieldName";
 
     /** The name of the firstId field in the repo */
     protected static final String REPO_FIELD_FIRST_ID = "firstId";

@@ -122,27 +122,14 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
     private Promise<ResourceResponse, ResourceException> queryRelationship(final Context context, 
             final String managedObjectId) {
         try {
+            final String resourceFullPath = resourceContainer.child(managedObjectId).toString();
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH)
+                    .setQueryId(RELATIONSHIP_QUERY_ID)
+                    .setAdditionalParameter(QUERY_FIELD_RESOURCE_PATH, resourceFullPath)
+                    .setAdditionalParameter(QUERY_FIELD_FIELD_NAME, schemaField.getName())
                     .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, managedObjectId);
             final List<ResourceResponse> relationships = new ArrayList<>();
-            final String resourceFullPath = resourceContainer.child(managedObjectId).toString();
-
-            final QueryFilter<JsonPointer> filter;
-            if (schemaField.isReverseRelationship()) {
-                filter = or(
-                        and(
-                                equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
-                                equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName())),
-                        and(
-                                equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourceFullPath),
-                                equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), schemaField.getName())));
-            } else {    
-                filter = and(
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourceFullPath),
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
-            }
             
-            queryRequest.setQueryFilter(filter);
             getConnection().query(context, queryRequest, relationships);
 
             if (relationships.isEmpty()) {
