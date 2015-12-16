@@ -633,11 +633,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                             if (countResult != null && !countResult.isEmpty()) {
                                 resultCount = countResult.get(0).getContent().get("total").asInteger();
                             } else {
-                                logger.warn("Count query {} failed", countQueryId);
+                                logger.debug("Count query {} failed", countQueryId);
                                 resultCount = NO_COUNT;
                             }
                         } else {
-                            logger.warn("Count query with id {} not found", countQueryId);
+                            logger.debug("Count query with id {} not found", countQueryId);
                             resultCount = NO_COUNT;
                         }
                         break;

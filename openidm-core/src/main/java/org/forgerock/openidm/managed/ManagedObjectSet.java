@@ -1288,7 +1288,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         promises.add(expandResource(context, fieldValue, fieldsList));
                     }
                 } else {
-                    logger.warn("Cannot expand a null relationship object");
+                    logger.debug("Cannot expand a null relationship object");
                 }
             } catch (ResourceException e) {
                 logger.error("Error expanding resource " + fieldToExpand + " with value " + fieldValue, e);

@@ -595,11 +595,11 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                             if (countResult != null && !countResult.isEmpty()) {
                                 resultCount = countResult.get(0).getContent().get("total").asInteger();
                             } else {
-                                logger.warn("Count query {} failed.", countQueryId);
+                                logger.debug("Count query {} failed.", countQueryId);
                                 resultCount = NO_COUNT;
                             }
                         } else {
-                            logger.warn("No count query found with id {}", countQueryId);
+                            logger.debug("No count query found with id {}", countQueryId);
                             resultCount = NO_COUNT;
                         }
                         break;
