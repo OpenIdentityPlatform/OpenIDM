@@ -57,7 +57,8 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 "OPENAM_SESSION": null,
                 "INTERNAL_USER": null,
                 "OPENID_CONNECT": null,
-                "PASSTHROUGH": null
+                "PASSTHROUGH": null,
+                "TRUSTED_ATTRIBUTE": null
             }
         },
 

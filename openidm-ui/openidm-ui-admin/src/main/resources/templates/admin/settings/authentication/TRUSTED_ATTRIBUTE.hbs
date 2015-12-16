@@ -1,5 +1,5 @@
 {
-    "templateName": "PASSTHROUGH",
+    "templateName": "TRUSTED_ATTRIBUTE",
     "mainSchema": {
         "title": "{{t "templates.auth.basicProperties"}}",
         "type": "object",
@@ -10,7 +10,11 @@
                 "required": true,
                 "default": true
             },
-
+            "authenticationIdAttribute": {
+                "title": "{{t "templates.auth.authenticationIdAttribute"}}",
+                "type": "string",
+                "required": true
+            },
             "queryOnResource": {
                 "title": "{{t "templates.auth.queryOnResource"}}",
                 "type": "string",
