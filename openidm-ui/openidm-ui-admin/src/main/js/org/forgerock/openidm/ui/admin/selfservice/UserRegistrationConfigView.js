@@ -129,13 +129,27 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
 
             this.selfServiceRender(args, callback);
         },
+        setKBAEnabled: function () {
+            var kbaEnabled = !!_.find(this.model.saveConfig.stageConfigs, function (stage) {
+                return stage.name === "kbaSecurityAnswerDefinitionStage";
+            });
+            if (kbaEnabled !== this.model.uiConfig.configuration.kbaEnabled) {
+                this.model.uiConfig.configuration.kbaEnabled = kbaEnabled;
+            }
+        },
+        createConfig: function () {
+            this.setKBAEnabled();
+            return AbstractSelfServiceView.prototype.createConfig.call(this);
+        },
+        deleteConfig: function () {
+            this.setKBAEnabled();
+            return AbstractSelfServiceView.prototype.deleteConfig.call(this);
+        },
         saveConfig: function () {
             return AbstractSelfServiceView.prototype.saveConfig.call(this).then(_.bind(function () {
-                var kbaEnabled = !!_.find(this.model.saveConfig.stageConfigs, function (stage) {
-                    return stage.name === "kbaSecurityAnswerDefinitionStage";
-                });
-                if (kbaEnabled !== this.model.uiConfig.configuration.kbaEnabled) {
-                    this.model.uiConfig.configuration.kbaEnabled = kbaEnabled;
+                var kbaCurrentlyEnabled = this.model.uiConfig.configuration.kbaEnabled;
+                this.setKBAEnabled();
+                if (kbaCurrentlyEnabled !== this.model.uiConfig.configuration.kbaEnabled) {
                     return ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig);
                 }
             }, this));

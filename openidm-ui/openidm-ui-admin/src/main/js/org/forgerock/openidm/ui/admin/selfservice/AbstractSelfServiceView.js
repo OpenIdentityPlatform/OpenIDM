@@ -103,6 +103,18 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             textField.val(textValue).focus();
 
         },
+        createConfig: function () {
+            return $.when(
+                ConfigDelegate.createEntity(this.model.configUrl, this.orderCheck()),
+                ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
+            );
+        },
+        deleteConfig: function () {
+            return $.when(
+                ConfigDelegate.deleteEntity(this.model.configUrl),
+                ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
+            );
+        },
         controlAllSwitch: function(event) {
             var check = $(event.target),
                 tempConfig;
@@ -132,10 +144,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = true;
 
-                $.when(
-                    ConfigDelegate.createEntity(this.model.configUrl, this.orderCheck()),
-                    ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
-                ).then(_.bind(function() {
+                this.createConfig().then(_.bind(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
                 }, this));
             } else {
@@ -146,10 +155,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 this.model.surpressSave = false;
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = false;
 
-                $.when(
-                    ConfigDelegate.deleteEntity(this.model.configUrl),
-                    ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
-                ).then(_.bind(function() {
+                this.deleteConfig().then(_.bind(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Delete");
                 }, this));
             }
