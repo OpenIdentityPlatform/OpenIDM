@@ -59,10 +59,11 @@
                 <exclude>**/workflow/workflow/*</exclude>
 
                 <!--
-                    Remove Sample7 from the resulting zip until it is redesigned.
+                    Remove Sample7 and scriptedazure from the resulting zip until they are redesigned.
                 -->
                 <exclude>**/sample7/**</exclude>
                 <exclude>**/scriptedazure/**</exclude>
+                <exclude>**/provisioners/provisioner.openicf-scriptedazure.json</exclude>
             </excludes>
         </fileSet>
         <fileSet>

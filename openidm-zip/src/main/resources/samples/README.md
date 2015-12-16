@@ -63,9 +63,6 @@ Demonstrates the PowerShell connector using Active Directory.
 ### workflow
 Demonstrates a typical use case of a workflow for provisioning.
 
-### scriptedazure
-A Microsoft Azure Connector using the Groovy Connector Framework.
-
 ### scriptedcrest2dj
 A OpenDJ Connector using the Groovy ScriptedCREST Connector Framework.
 
