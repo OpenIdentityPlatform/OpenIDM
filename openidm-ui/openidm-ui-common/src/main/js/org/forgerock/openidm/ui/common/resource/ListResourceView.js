@@ -134,7 +134,7 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                                     "name": colName,
                                                     "label": col.title || colName,
                                                     "headerCell": BackgridUtils.FilterHeaderCell,
-                                                    "cell": "string",
+                                                    "cell": BackgridUtils.escapedStringCell(colName),
                                                     "sortable": true,
                                                     "editable": false,
                                                     "sortType": "toggle"

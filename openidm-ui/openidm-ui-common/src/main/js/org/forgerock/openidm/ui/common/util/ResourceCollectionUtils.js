@@ -38,7 +38,7 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                 return (p && !p.length) || !eval("item." + p);
             }),
             txt = _.map(validDisplayProps, function(p){
-                return eval("item." + p);
+                return _.escape(eval("item." + p));
             }).join(obj.displayTextDelimiter);
 
         if(!obj.resourceCollectionCache[resourceKey]) {
