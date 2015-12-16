@@ -1040,6 +1040,10 @@
                 "PASSTHROUGH": {
                   "name": "Passthrough",
                   "msg": "Queries an external system for authentication"
+                },
+                "TRUSTED_ATTRIBUTE": {
+                  "name": "Trusted Attribute",
+                  "msg": "Uses a trusted request attribute to determine username. Designed to pair with an external auth filter."
                 }
             },
 
@@ -1126,7 +1130,8 @@
             "wellKnown": "Well Known",
             "managedUserLink": "Managed User Link",
             "moduleType": "Module Type",
-            "select": "Select a Module"
+            "select": "Select a Module",
+            "authenticationIdAttribute": "Authentication ID attribute for the User ID"
         },
         "selfService": {
             "title": "Self-Service UI",
