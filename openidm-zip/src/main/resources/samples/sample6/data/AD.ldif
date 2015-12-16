@@ -1,11 +1,6 @@
 dn: dc=fakead,dc=com
 objectClass: domain
 objectClass: top
-dc: com
-
-dn: dc=fakead,dc=com
-objectClass: domain
-objectClass: top
 dc: fakead
 
 dn: ou=People,dc=fakead,dc=com
@@ -13,16 +8,30 @@ ou: People
 description: people
 objectclass: organizationalunit
 
-dn: uid=jdoe,ou=People,dc=fakead,dc=com
+dn: uid=bobf,ou=People,dc=fakead,dc=com
 objectClass: person
 objectClass: organizationalPerson
 objectClass: inetOrgPerson
 objectClass: top
-givenName: Johnny
-uid: jdoe
-cn: Johnny Doe
-telephoneNumber: 1-555-444-3333
-sn: Doe
-mail: jdoe@exampleAD.com
+givenName: Bob
+uid: bobf
+cn: Bob Fleming
+telephoneNumber: 1-555-444-4444
+sn: Fleming
+mail: bobf@exampleAD.com
+description: Fake Active Directory User
+userPassword: password
+
+dn: uid=stony,ou=People,dc=fakead,dc=com
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+objectClass: top
+givenName: Swiss
+uid: stony
+cn: Swiss Tony
+telephoneNumber: 1-555-444-5555
+sn: Tony
+mail: stony@exampleAD.com
 description: Fake Active Directory User
 userPassword: password
