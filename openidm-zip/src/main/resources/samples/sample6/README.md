@@ -47,7 +47,7 @@ Setup OpenDJ
 
 3.  Load the Example.ldif file supplied in the data folder into OpenDJ.
 
-        $ opendj/bin/ldapmodify --bindDN "cn=Directory Manager" \
+        $ opendj/bin/ldapmodify -a --bindDN "cn=Directory Manager" \
         --bindPassword password --hostname localhost \
         --port 1389 --filename \
         /path/to/openidm/samples/sample6/data/Example.ldif
@@ -96,7 +96,7 @@ server that you installed above, but uses a different base DN for the "AD" users
 
 1.  Load the AD.ldif supplied in the data folder into OpenDJ.
 
-        $ opendj/bin/ldapmodify --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
+        $ opendj/bin/ldapmodify -a --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
         --port 1389 --filename /path/to/openidm/samples/sample6/data/AD.ldif
 
 2.  Setup Replication on OpenDJ for fake ad.
@@ -131,6 +131,8 @@ To run the sample in OpenIDM, follow these steps.
 
         $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
         "https://localhost:8443/openidm/recon?_action=recon&mapping=systemAdAccounts_managedUser"
+
+	It should return something like:
         {"_id":"d88ca423-d5f2-4eb5-a451-a229399f92af","state":"ACTIVE"}
 
 3. Check that the users from Active Directory were added to OpenDJ:
