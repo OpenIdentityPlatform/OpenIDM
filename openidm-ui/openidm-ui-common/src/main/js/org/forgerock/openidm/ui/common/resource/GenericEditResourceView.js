@@ -516,7 +516,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                                 }
                         };
                         
-                        if ($(e.target).attr("id") === buttonId) {
+                        if ($(e.target).attr("id") === buttonId || $(e.target).closest(".updateRelationshipButton").attr("id") === buttonId) {
                             e.preventDefault();
                             ResourceCollectionSearchDialog.render(opts);
                         }
