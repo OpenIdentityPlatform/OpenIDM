@@ -19,9 +19,10 @@
 define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
     "underscore",
     "backbone",
+    "org/forgerock/commons/ui/common/backgrid/Backgrid",
     "org/forgerock/commons/ui/common/util/BackgridUtils"
 
-], function (_, Backbone, commonBackgridUtils) {
+], function (_, Backbone, Backgrid, commonBackgridUtils) {
     var obj = _.extend({}, commonBackgridUtils);
 
     obj.queryFilter = function (data) {
@@ -75,6 +76,19 @@ define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
             _.extend(state, data);
         }
         return state;
+    };
+    
+    obj.escapedStringCell = function (prop) {
+        return Backgrid.Cell.extend({
+            render: function () {
+                if (this.model.get(prop)) {
+                    this.$el.html(this.model.escape(prop));
+                } else {
+                    this.$el.html("");
+                }
+                return this;
+            }
+        });
     };
     
     return obj;

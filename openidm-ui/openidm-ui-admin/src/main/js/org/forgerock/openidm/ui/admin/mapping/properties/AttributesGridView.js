@@ -277,7 +277,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                     previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.sample + ')</div>');
                                 }
 
-                                this.$el.html(previewElement);
+                                this.$el.html(previewElement.text());
                                 this.delegateEvents();
 
                                 return this;
@@ -361,7 +361,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                     }
                                 }
 
-                                this.$el.html(previewElement);
+                                this.$el.html(previewElement.text());
                                 this.delegateEvents();
 
                                 return this;
