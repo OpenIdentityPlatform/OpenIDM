@@ -17,7 +17,9 @@
 
             "query-cluster-failed-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'timestamp') <= ${timestamp} AND json_extract_path_text(fullobject, 'state') IN ('1','2')",
             "query-cluster-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'state'",
-            "query-cluster-events" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'event' AND json_extract_path_text(fullobject, 'instanceId') = ${instanceId}"
+            "query-cluster-events" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'event' AND json_extract_path_text(fullobject, 'instanceId') = ${instanceId}",
+            
+            "find-relationships-for-resource" : "SELECT fullobject::text FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id AND objtype.objecttype = 'relationships' WHERE (((json_extract_path_text(obj.fullobject, '/firstId') = (${fullResourceId})) AND (json_extract_path_text(obj.fullobject, '/firstPropertyName') = (${resourceFieldName})))) OR (((json_extract_path_text(obj.fullobject, '/secondId') = (${fullResourceId})) AND (json_extract_path_text(obj.fullobject, '/secondPropertyName') = (${resourceFieldName}))))"
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",

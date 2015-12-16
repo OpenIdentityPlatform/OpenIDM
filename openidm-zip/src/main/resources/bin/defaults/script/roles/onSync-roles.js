@@ -34,7 +34,8 @@
             logger.debug("onSync-roles script invoked for {}", resourceName.toString());
             var members;
             if (shouldSyncUsers(oldValue, newValue, ignoredProperties)) {
-                members = openidm.query(resourceName.toString() + '/members', {'_queryFilter': 'true'}).result;
+                members = openidm.query(resourceName.toString() + '/members', 
+                        {"_queryId": "find-relationships-for-resource"}).result;
                 _.each(members, function (user) {
                     logger.debug("onSync-roles will call triggerSyncCheck for {}", user._ref);
                     // Issue triggerSyncCheck action and set fields to "*" to indicate all default fields plus any

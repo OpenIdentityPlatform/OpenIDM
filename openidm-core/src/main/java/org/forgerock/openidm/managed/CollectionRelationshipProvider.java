@@ -116,7 +116,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest("")
-                    .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId);
+                    .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId)
+                    .setQueryId(RELATIONSHIP_QUERY_ID);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
             queryCollection(new ManagedObjectContext(context), queryRequest, new QueryResourceHandler() {
@@ -316,7 +317,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
     /** {@inheritDoc} */
     @Override
-    public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, final QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request, 
+            final QueryResourceHandler handler) {
         try {
             if (request.getQueryExpression() != null) {
                 return new BadRequestException(HttpUtils.PARAM_QUERY_EXPRESSION + " not supported").asPromise();
@@ -324,23 +326,28 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
             /*
              * Create new request copying all attributes but fields.
-             * This must be done so field filtering can be handled by CREST externally on
-             * the transformed resource response.
+             * This must be done so field filtering can be handled by CREST externally on the transformed response.
              */
+            ResourcePath resourcePath = firstResourcePath(context, request);
+            
             final QueryRequest queryRequest = Requests.newQueryRequest(REPO_RESOURCE_PATH);
             final boolean queryAllIds = ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId());
 
             if (request.getQueryId() != null) {
-                request.setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
-                if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
-                    // This should be the only field ever set on queryRequest
-                    request.addField(FIELD_ID);
-                } else if (!"query-all".equals(request.getQueryId())) {
-                    return new BadRequestException("Invalid " + HttpUtils.PARAM_QUERY_ID + ": only query-all and query-all-ids supported").asPromise();
+                if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId()) 
+                        || "query-all".equals(request.getQueryId())) {
+                    // Do nothing, the queryFilter generated below will return all
+                } else if (RELATIONSHIP_QUERY_ID.equals(request.getQueryId())) {
+                    // Optimized query
+                    queryRequest.setQueryId(RELATIONSHIP_QUERY_ID)
+                        .setAdditionalParameter(QUERY_FIELD_RESOURCE_PATH, resourcePath.toString())
+                        .setAdditionalParameter(QUERY_FIELD_FIELD_NAME, schemaField.getName());
+                } else {
+                    return new BadRequestException("Invalid " + HttpUtils.PARAM_QUERY_ID 
+                            + ": only query-all and query-all-ids supported").asPromise();
                 }
             }
 
-            queryRequest.setQueryFilter(request.getQueryFilter());
             queryRequest.setPageSize(request.getPageSize());
             queryRequest.setPagedResultsOffset(request.getPagedResultsOffset());
             queryRequest.setPagedResultsCookie(request.getPagedResultsCookie());
@@ -350,33 +357,41 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 queryRequest.setAdditionalParameter(key, request.getAdditionalParameter(key));
             }
             
-            QueryFilter<JsonPointer> filter;
-            ResourcePath resourcePath = firstResourcePath(context, request);
-            if (schemaField.isReverseRelationship()) {
-                QueryFilter<JsonPointer> firstFilter = and(
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
-                QueryFilter<JsonPointer> secondFilter = and(
-                        equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourcePath),
-                        equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), schemaField.getName()));
-                if (request.getQueryFilter() != null) {
-                    filter = or(
-                            and(firstFilter, asRelationshipQueryFilter(false, request.getQueryFilter())),
-                            and(secondFilter, asRelationshipQueryFilter(true, request.getQueryFilter())));
+            // Check if using a queryId, if not build up the queryFilter
+            if (queryRequest.getQueryId() == null) {
+                QueryFilter<JsonPointer> filter;
+                if (schemaField.isReverseRelationship()) {
+                    // Reverse relationship requires a queryFilter that matches both cases where the managed object's 
+                    // resource path and schema field match the firstId/firstPropertyName or the 
+                    // secondId/secondPropertyName.
+                    QueryFilter<JsonPointer> firstFilter = and(
+                            equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
+                            equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
+                    QueryFilter<JsonPointer> secondFilter = and(
+                            equalTo(new JsonPointer(REPO_FIELD_SECOND_ID), resourcePath),
+                            equalTo(new JsonPointer(REPO_FIELD_SECOND_PROPERTY_NAME), schemaField.getName()));
+                    if (request.getQueryFilter() != null) {
+                        // AND the supplied queryFilter to both of the above generated filters and then OR them 
+                        filter = or(and(firstFilter, asRelationshipQueryFilter(false, request.getQueryFilter())),
+                                and(secondFilter, asRelationshipQueryFilter(true, request.getQueryFilter())));
+                    } else {
+                        // OR the filters together
+                        filter = or(firstFilter, secondFilter);
+                    }
                 } else {
-                    filter = or(firstFilter, secondFilter);
-                }       
-            } else {    
-                filter = and(
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
-                        equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
-                if (request.getQueryFilter() != null) {
-                    filter = and(filter, asRelationshipQueryFilter(schemaField.isReverseRelationship(), request.getQueryFilter()));
+                    // A direct relationship requires a queryFilter that matches only the case where the managed 
+                    // object's resource path and schema field match the firstId/firstPropertyName.
+                    filter = and(equalTo(new JsonPointer(REPO_FIELD_FIRST_ID), resourcePath),
+                            equalTo(new JsonPointer(REPO_FIELD_FIRST_PROPERTY_NAME), schemaField.getName()));
+                    if (request.getQueryFilter() != null) {
+                        filter = and(filter, asRelationshipQueryFilter(schemaField.isReverseRelationship(),
+                                request.getQueryFilter()));
+                    }
                 }
+                queryRequest.setQueryFilter(filter);
             }
-
-            queryRequest.setQueryFilter(filter);
             
+            // Issue the query and handle the response
             final Promise<QueryResponse, ResourceException> response = getConnection().queryAsync(context, queryRequest, 
                     new QueryResourceHandler() {
                 @Override
