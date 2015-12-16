@@ -106,13 +106,19 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
                 this.parentRender(_.bind(function () {
                     var mapProps = this.model.mappingProperties || this.getCurrentMapping().properties,
-                        sampleSource = conf.globalData.sampleSource || {},
+                        sampleSource = {},
                         autocompleteProps = _.pluck(this.mapping.properties,"source").slice(0,this.getNumRepresentativeProps());
+
+
+                    if(conf.globalData.sampleSource && conf.globalData.sampleSource.IDMSampleMappingName === this.mapping.name) {
+                        sampleSource = conf.globalData.sampleSource;
+                    }
 
                     this.data.mapProps = mapProps;
                     this.gridFromMapProps(mapProps);
 
                     mappingUtils.setupSampleSearch($("#findSampleSource",this.$el), this.mapping, autocompleteProps, _.bind(function(item) {
+                        item.IDMSampleMappingName = this.mapping.name;
                         conf.globalData.sampleSource = item;
                         sampleSource = item;
 
@@ -238,7 +244,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                     tempResults = null;
                 }
 
-                if(conf.globalData.sampleSource !== undefined && conf.globalData.sampleSource[attribute.source]) {
+                if(conf.globalData.sampleSource !== undefined && conf.globalData.sampleSource.IDMSampleMappingName === this.mapping.name && conf.globalData.sampleSource[attribute.source]) {
                     tempSample = conf.globalData.sampleSource[attribute.source];
                 } else {
                     tempSample = null;
