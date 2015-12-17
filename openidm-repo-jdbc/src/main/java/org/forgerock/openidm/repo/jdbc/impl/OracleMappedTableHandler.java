@@ -60,9 +60,7 @@ public class OracleMappedTableHandler extends MappedTableHandler {
         final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
         // Check for sort keys and build up order-by syntax
         if (sortKeys != null && sortKeys.size() > 0) {
-            List<String> keys = new ArrayList<String>();
-            prepareSortKeyStatements(sortKeys, keys, replacementTokens);
-            keysClause = StringUtils.join(keys, ", ");
+            keysClause = StringUtils.join(prepareSortKeyStatements(sortKeys), ", ");
         } else {
             keysClause = "objectid DESC";
         }

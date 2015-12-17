@@ -533,38 +533,32 @@ public class MappedTableHandler implements TableHandler {
         final List<SortKey> sortKeys = new JsonValue(params).get(SORT_KEYS).asList(SortKey.class);
         // Check for sort keys and build up order-by syntax
         if (sortKeys != null && sortKeys.size() > 0) {
-            List<String> keys = new ArrayList<String>();
-            for (int i = 0; i < sortKeys.size(); i++) {
-                SortKey sortKey = sortKeys.get(i);
-                String tokenName = "sortKey" + i;
-                keys.add("${" + tokenName + "}" + (sortKey.isAscendingOrder() ? " ASC" : " DESC"));
-                replacementTokens.put(tokenName, sortKey.getField().toString().substring(1));
-            }
-            pageClause = " ORDER BY " + StringUtils.join(keys, ", ") + pageClause;
+            pageClause = " ORDER BY " + StringUtils.join(prepareSortKeyStatements(sortKeys), ", ") + pageClause;
         }
-        
+
         return "SELECT obj.* FROM ${_dbSchema}.${_mainTable} obj"
                 + getFilterString(filter, replacementTokens)
                 + pageClause;
     }
-    
+
     /**
      * Loops through sort keys constructing the key statements.
-     * 
+     *
      * @param sortKeys  a {@link List} of sort keys
-     * @param keys a {@link List} to store ORDER BY keys
-     * @param replacementTokens a {@link Map} containing replacement tokens for the {@link PreparedStatement}
+     * @return a {@link List} to store ORDER BY keys
      */
-    protected void prepareSortKeyStatements(List<SortKey> sortKeys, List<String> keys, Map<String, Object> replacementTokens) {
+    protected List<String> prepareSortKeyStatements(List<SortKey> sortKeys) {
+        List<String> keys = new ArrayList<String>();
         for (int i = 0; i < sortKeys.size(); i++) {
             SortKey sortKey = sortKeys.get(i);
             keys.add(explicitMapping.getDbColumnName(sortKey.getField()) + (sortKey.isAscendingOrder() ? " ASC" : " DESC"));
         }
+        return keys;
     }
-    
+
     /**
      * Returns a query string representing the supplied filter.
-     * 
+     *
      * @param filter the {@link QueryFilter} object
      * @param replacementTokens replacement tokens for the query string
      * @return a query string
@@ -707,8 +701,8 @@ class ColumnMapping {
     public static final String TYPE_STRING = "STRING";
     public static final String TYPE_JSON_MAP = "JSON_MAP";
     public static final String TYPE_JSON_LIST = "JSON_LIST";
-   
-    
+
+
     public JsonPointer objectColPointer;
     public String objectColName; // String representation of the column
                                  // name/path
