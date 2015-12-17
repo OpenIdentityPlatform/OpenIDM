@@ -31,6 +31,8 @@
         "query-cluster-instances" : "SELECT * FROM cluster_states",
         "query-cluster-events" : "SELECT * FROM cluster_events WHERE instanceId = ${instanceId}",
 
+        "find-relationships-for-resource" : "SELECT * FROM relationships WHERE ((firstId = ${fullResourceId}) AND (firstPropertyName = ${resourceFieldName})) OR ((secondId = ${fullResourceId}) AND (secondPropertyName = ${resourceFieldName})))",
+
         "audit-by-mapping" : "select * FROM audit_recon WHERE mapping = ${mappingName}",
         "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
         "audit-by-recon-id-type" : "select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",

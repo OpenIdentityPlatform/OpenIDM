@@ -1,5 +1,6 @@
 {
     "dbType" : "SQLSERVER",
+    "useDataSource" : "default",
     "maxBatchSize" : 100,
     "maxTxRetry" : 5,
     "queries" : {
@@ -7,8 +8,8 @@
             "credential-query" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${username} AND objtype.objecttype = ${_resource}",
             "find-by-id" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE obj.objectid = ${id} AND objtype.objecttype = ${_resource}",
             "get-by-field-value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/' + ${field} AND prop.propvalue = ${value} AND objtype.objecttype = ${_resource}",
-            "query-all-ids" : "SELECT obj.objectid FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
-            "query-all" : "SELECT obj.fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
+            "query-all-ids" : "SELECT objectid FROM (SELECT obj.objectid, row_number() OVER (ORDER BY obj.id) AS row_next FROM ${_dbSchema}.${_mainTable} obj , ${_dbSchema}.objecttypes o WHERE obj.objecttypes_id = o.id AND o.objecttype = ${_resource}) AS query_all_id_temp WHERE row_next BETWEEN ${int:_pagedResultsOffset} + 1 AND ${int:_pagedResultsOffset} + ${int:_pageSize}",
+            "query-all" : "SELECT fullobject FROM (SELECT obj.fullobject, row_number() OVER (ORDER BY obj.id) AS row_next FROM ${_dbSchema}.${_mainTable} obj , ${_dbSchema}.objecttypes o WHERE obj.objecttypes_id = o.id AND o.objecttype = ${_resource}) AS query_all_id_temp WHERE row_next BETWEEN ${int:_pagedResultsOffset} + 1 AND ${int:_pagedResultsOffset} + ${int:_pageSize}",
             "query-all-ids-count" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "query-all-count" : "SELECT COUNT(obj.fullobject) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "for-userName" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE prop.propkey='/userName' AND prop.propvalue = ${uid} AND objtype.objecttype = ${_resource}",
@@ -17,7 +18,9 @@
 
             "query-cluster-failed-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))",
             "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id WHERE (prop.propkey = '/type' AND prop.propvalue = 'state')",
-            "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})"
+            "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})",
+
+            "find-relationships-for-resource" : "SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.objecttypes objecttypes ON (obj.objecttypes_id = objecttypes.id AND objecttypes.objecttype = 'relationships') INNER JOIN ${_dbSchema}.relationshipproperties firstId ON (firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' AND firstId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON (firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' AND firstPropertyName.propvalue = ${resourceFieldName}) UNION ALL SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.objecttypes objecttypes ON (obj.objecttypes_id = objecttypes.id AND objecttypes.objecttype = 'relationships') INNER JOIN ${_dbSchema}.relationshipproperties secondId ON (secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' AND secondId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON (secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' AND secondPropertyName.propvalue = ${resourceFieldName}) "
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
@@ -33,7 +36,13 @@
 
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
 
-            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}"
+            "audit-by-mapping" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE mapping = ${mappingName}",
+            "audit-by-recon-id" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId}",
+            "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND entrytype = ${entryType}",
+            "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconid = ${reconId} AND situation = ${situation}",
+            "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentactionid = ${parentActionId}",
+            "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
+            "get-recons" : "SELECT reconid, activitydate, mapping, message FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entrytype = 'summary' ORDER BY activitydate DESC"
         }
     },
     "commands" : {
@@ -109,6 +118,11 @@
                 "mainTable" : "relationships",
                 "propertiesTable" : "relationshipproperties",
                 "searchableDefault" : true
+            },
+            "updates" : {
+                "mainTable" : "updateobjects",
+                "propertiesTable" : "updateobjectproperties",
+                "searchableDefault" : true
             }
         },
         "explicitMapping" : {
@@ -144,6 +158,14 @@
                     "_rev" : "rev",
                     "password" : "pwd",
                     "roles" : { "column" : "roles", "type" : "JSON_LIST" }
+                }
+            },
+            "internal/role" : {
+                "table" : "internalrole",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "description" : "description"
                 }
             },
             "audit/authentication" : {
@@ -210,7 +232,8 @@
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
-                    "authentication/id" : "userid",
+                    "userId" : "userid",
+                    "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
                     "action" : "activity",
                     "exception" : "exceptiondetail",
                     "linkQualifier": "linkqualifier",
@@ -235,7 +258,8 @@
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
-                    "authentication/id" : "userid",
+                    "userId" : "userid",
+                    "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
                     "action" : "activity",
                     "exception" : "exceptiondetail",
                     "linkQualifier": "linkqualifier",
@@ -259,7 +283,6 @@
                     "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
                     "server/ip" : "server_ip",
                     "server/port" : "server_port",
-                    "client/host" : "client_host",
                     "client/ip" : "client_ip",
                     "client/port" : "client_port",
                     "request/protocol" : "request_protocol",
