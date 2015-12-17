@@ -206,7 +206,6 @@ public class HealthService
         "org.forgerock.openidm.enhanced-config",
         "org.forgerock.openidm.external-email",
         "org.forgerock.openidm.external-rest",
-        "org.forgerock.openidm.httpclient-fragment",
         "org.forgerock.openidm.httpcontext",
         "org.forgerock.openidm.infoservice",
         "org.forgerock.openidm.jetty-fragment",
