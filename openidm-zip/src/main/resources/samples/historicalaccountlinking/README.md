@@ -55,11 +55,21 @@ Setup OpenDJ
 
 1.  Extract OpenDJ to a folder called opendj.
 
-2.  Run the following command to initialize OpenDJ.
+2.  Run the following command to initialize OpenDJ and import the LDIF data for the sample.
 
-        $ opendj/setup --cli --hostname localhost --ldapPort 1389 --rootUserDN "cn=Directory Manager" \
-        --rootUserPassword password --adminConnectorPort 4444 --baseDN dc=com --acceptLicense --addBaseEntry \
-        --no-prompt --quiet
+        $ opendj/setup --cli \
+          --hostname localhost \
+          --ldapPort 1389 \
+          --rootUserDN "cn=Directory Manager" \
+          --rootUserPassword password \
+          --adminConnectorPort 4444 \
+          --baseDN dc=com \
+          --ldifFile /path/to/openidm/samples/historicalaccountlinking/data/Example.ldif \
+          --acceptLicense \
+          --no-prompt
+
+After you import the data, ou=People,dc=example,dc=com contains two user entries. Although all attributes to synchronize 
+can be multi-valued in LDAP, this sample defines only mail as a multi-valued attribute in OpenIDM.
 
 3.  Enable replication on the OpenDJ server.
     Although there is only one LDAP server in this example, you must enable replication so that the server has an 
@@ -75,14 +85,6 @@ Setup OpenDJ
           --provider-name "Multimaster Synchronization" --set base-dn:dc=example,dc=com \
           --set replication-server:localhost:8989 --set server-id:3 \
           --type generic --domain-name example_com
-
-4.  Load the Example.ldif file supplied in the data folder into OpenDJ.
-
-        $ opendj/bin/ldapmodify -a -c --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
-        --port 1389 --filename /path/to/openidm/samples/historicalaccountlinking/data/Example.ldif
-
-After you import the data, ou=People,dc=example,dc=com contains two user entries. Although all attributes to synchronize 
-can be multi-valued in LDAP, this sample defines only mail as a multi-valued attribute in OpenIDM.
 
 This sample includes the script script/ldapBackCorrelationQuery.js which correlates entries in the directory with 
 identities in OpenIDM.
