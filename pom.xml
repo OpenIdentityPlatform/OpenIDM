@@ -221,6 +221,7 @@
         <!-- Commons versions -->
         <commons.forgerock-script.version>3.0.2</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
+        <commons.forgerock-launcher.version>1.2.0</commons.forgerock-launcher.version>
 
         <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -437,6 +438,17 @@
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>i18n-core</artifactId>
                 <version>${commons.forgerock-i18n.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>launcher</artifactId>
+                <version>${commons.forgerock-launcher.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>launcher-zip</artifactId>
+                <version>${commons.forgerock-launcher.version}</version>
+                <type>zip</type>
             </dependency>
 
             <!-- Commons -->
