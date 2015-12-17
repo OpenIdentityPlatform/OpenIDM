@@ -42,7 +42,7 @@
         <connection>scm:svn:https://svn.forgerock.org/openidm/trunk/tools/custom-scripted-connector-bundler</connection>
         <developerConnection>scm:svn:https://svn.forgerock.org/openidm/trunk/tools/custom-scripted-connector-bundler</developerConnection>
         <url>http://sources.forgerock.org/browse/openidm/trunk/tools/custom-scripted-connector-bundler</url>
-      <tag>HEAD</tag>
+      <tag>4.0.0</tag>
   </scm>
     <issueManagement>
         <system>jira</system>
