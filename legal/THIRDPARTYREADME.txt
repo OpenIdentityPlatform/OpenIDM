@@ -149,6 +149,10 @@ Version: mybatis-3.2.5.jar
 Copyright: Copyright 2009-2012 The MyBatis Team
            Copyright 2010 The Apache Software Foundation
 
+Version: checksum-maven-plugin-1.3.0-SNAPSHOT
+Copyright : Copyright 2010-2012 Julien Nicoulaud <julien.nicoulaud@gmail.com>
+            Portions copyright 2015 ForgeRock AS
+            
 Version: disruptor-3.0.1.jar
 Copyright: Copyright 2011 LMAX Ltd.
 
