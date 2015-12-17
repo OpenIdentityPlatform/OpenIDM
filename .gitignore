@@ -96,3 +96,6 @@ node_modules
 
 # OSX Finder garbage
 .DS_Store
+
+# ctags index
+tags
