@@ -1,5 +1,6 @@
 {
     "dbType" : "MYSQL",
+    "useDataSource" : "default",
     "maxBatchSize" : 100,
     "maxTxRetry" : 5,
     "queries" : {
@@ -17,7 +18,9 @@
 
             "query-cluster-failed-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} state ON obj.id = state.${_mainTable}_id WHERE (prop.propkey = '/timestamp' AND prop.propvalue <= ${timestamp}) AND (state.propkey = '/state' AND (state.propvalue = '1' OR state.propvalue = '2'))",
             "query-cluster-instances" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id WHERE (prop.propkey = '/type' AND prop.propvalue = 'state')",
-            "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})"
+            "query-cluster-events" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop1 ON obj.id = prop1.${_mainTable}_id INNER JOIN ${_dbSchema}.${_propTable} prop2 ON obj.id = prop2.${_mainTable}_id WHERE (prop1.propkey = '/type' AND prop1.propvalue = 'event') AND (prop2.propkey = '/instanceId' AND prop2.propvalue = ${instanceId})",
+
+            "find-relationships-for-resource" : "SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.objecttypes objecttypes ON (obj.objecttypes_id = objecttypes.id AND objecttypes.objecttype = 'relationships') INNER JOIN ${_dbSchema}.relationshipproperties firstId ON (firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' AND firstId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON (firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' AND firstPropertyName.propvalue = ${resourceFieldName}) UNION ALL SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.objecttypes objecttypes ON (obj.objecttypes_id = objecttypes.id AND objecttypes.objecttype = 'relationships') INNER JOIN ${_dbSchema}.relationshipproperties secondId ON (secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' AND secondId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON (secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' AND secondPropertyName.propvalue = ${resourceFieldName}) "
         },
         "explicitTables" : {
             "query-all-ids" : "SELECT objectid FROM ${_dbSchema}.${_table}",
@@ -80,6 +83,9 @@
                     "/roles" : {
                         "searchable" : true
                     },
+                    "/sunset" : {
+                        "searchable" : true
+                    },
                     "/title" : {
                         "searchable" : true
                     },
@@ -87,9 +93,6 @@
                         "searchable" : true
                     },
                     "/sunrise" : {
-                        "searchable" : true
-                    },
-                    "/sunset" : {
                         "searchable" : true
                     },
                     "/lastPasswordSet" : {
@@ -110,6 +113,11 @@
             "relationship" : {
                 "mainTable" : "relationships",
                 "propertiesTable" : "relationshipproperties",
+                "searchableDefault" : true
+            },
+            "updates" : {
+                "mainTable" : "updateobjects",
+                "propertiesTable" : "updateobjectproperties",
                 "searchableDefault" : true
             }
         },
@@ -146,6 +154,14 @@
                     "_rev" : "rev",
                     "password" : "pwd",
                     "roles" : { "column" : "roles", "type" : "JSON_LIST" }
+                }
+            },
+            "internal/role" : {
+                "table" : "internalrole",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "description" : "description"
                 }
             },
             "audit/authentication" : {
@@ -212,7 +228,8 @@
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
-                    "authentication/id" : "userid",
+                    "userId" : "userid",
+                    "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
                     "action" : "activity",
                     "exception" : "exceptiondetail",
                     "linkQualifier": "linkqualifier",
@@ -237,7 +254,8 @@
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
-                    "authentication/id" : "userid",
+                    "userId" : "userid",
+                    "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
                     "action" : "activity",
                     "exception" : "exceptiondetail",
                     "linkQualifier": "linkqualifier",
@@ -261,7 +279,6 @@
                     "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
                     "server/ip" : "server_ip",
                     "server/port" : "server_port",
-                    "client/host" : "client_host",
                     "client/ip" : "client_ip",
                     "client/port" : "client_port",
                     "request/protocol" : "request_protocol",
