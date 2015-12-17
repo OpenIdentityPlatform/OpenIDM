@@ -769,7 +769,7 @@
             <plugin>
                 <groupId>org.forgerock.maven.plugins</groupId>
                 <artifactId>checksum-maven-plugin</artifactId>
-                <version>1.3-SNAPSHOT</version>
+                <version>1.3.0</version>
                 <executions>
                     <execution>
                         <id>generate-checksums</id>
