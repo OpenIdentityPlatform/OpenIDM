@@ -214,11 +214,6 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-httpclient-fragment</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.forgerock.openidm.tools</groupId>
             <artifactId>custom-scripted-connector-bundler</artifactId>
             <version>${project.version}</version>
