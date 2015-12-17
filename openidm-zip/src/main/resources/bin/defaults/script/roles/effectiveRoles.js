@@ -43,7 +43,7 @@ logger.trace("Configured rolesPropName: {}", rolesPropName);
 if (object[rolesPropName] === undefined && objectId !== undefined && objectId !== null) {
     logger.trace("User's " + rolesPropName + " is not present so querying the roles", rolesPropName);
     var path = org.forgerock.json.resource.ResourcePath.valueOf("managed/user").child(objectId).child(rolesPropName);
-    response = openidm.query(path.toString(),  {"_queryId": "find-relationships-for-resource"});
+    response = openidm.query(path.toString(), {"_queryId": "find-relationships-for-resource"});
     directRoles = response.result;
 } else {
     directRoles = object[rolesPropName];
