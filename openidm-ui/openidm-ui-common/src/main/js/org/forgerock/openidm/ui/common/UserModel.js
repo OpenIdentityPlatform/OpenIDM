@@ -102,6 +102,7 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                 // usually password won't be included in the response, but it will for openidm-admin
                 delete response.password;
             }
+            this.getValidationRules();
             return response;
         },
         login: function (username, password) {
@@ -132,7 +133,7 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                 this.component = sessionDetails.authorization.component;
                 this.baseEntity = this.component + "/" + this.id;
                 this.uiroles = this.getUIRoles(sessionDetails.authorization.roles);
-                return $.when(this.fetch(), this.getValidationRules()).then(_.bind(function () {
+                return this.fetch().then(_.bind(function () {
                     return this;
                 }, this));
             }, this));
