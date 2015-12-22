@@ -713,6 +713,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             return e.asPromise();
         } catch (ScriptCompilationException e) {
             return new BadRequestException(e.getMessage(), e).asPromise();
+        } catch (ScriptThrownException e) {
+            return e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()).asPromise();
         } catch (IllegalArgumentException e) { // from getActionAsEnum
             return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
