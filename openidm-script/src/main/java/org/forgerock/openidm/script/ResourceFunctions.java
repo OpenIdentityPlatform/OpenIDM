@@ -37,7 +37,10 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.script.scope.Function;import org.forgerock.script.scope.FunctionFactory;import org.forgerock.script.scope.Parameter;import org.forgerock.services.context.Context;
+import org.forgerock.script.scope.Function;
+import org.forgerock.script.scope.FunctionFactory;
+import org.forgerock.script.scope.Parameter;
+import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
