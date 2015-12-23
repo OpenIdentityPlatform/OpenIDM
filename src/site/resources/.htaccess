@@ -27,3 +27,9 @@ RedirectMatch 301 ^/doc/OpenIDM-Release-Notes.rtf         http://openidm.forgero
 RedirectMatch 301 ^/doc/webhelp/integrators-guide/(.*)    http://openidm.forgerock.org/doc/bootstrap/integrators-guide/
 RedirectMatch 301 ^/doc/webhelp/install-guide/(.*)        http://openidm.forgerock.org/doc/bootstrap/install-guide/
 RedirectMatch 301 ^/doc/webhelp/release-notes/(.*)        http://openidm.forgerock.org/doc/bootstrap/release-notes/
+
+# PDF
+RedirectMatch 301 ^/doc/OpenIDM-Integrators-Guide.pdf     http://openidm.forgerock.org/doc/bootstrap/integrators-guide/
+RedirectMatch 301 ^/doc/OpenIDM-Install-Guide.pdf         http://openidm.forgerock.org/doc/bootstrap/install-guide/
+RedirectMatch 301 ^/doc/OpenIDM-Release-Notes.pdf         http://openidm.forgerock.org/doc/bootstrap/release-notes/
+RedirectMatch 301 ^/doc/OpenIDM-Getting-Started.pdf       http://openidm.forgerock.org/doc/bootstrap/getting-started/
