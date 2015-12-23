@@ -16,34 +16,22 @@
 
 package org.forgerock.openidm.security;
 
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.forgerock.openidm.jetty.Param;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
-
-import java.security.Security;
-
-
 
 public class Activator implements BundleActivator {
 
     @Override
     public void start(BundleContext bundleContext) throws Exception {
-
-        Security.addProvider(new BouncyCastleProvider());
-
-        // Set System properties
-        if (System.getProperty("javax.net.ssl.keyStore") == null) {
-            System.setProperty("javax.net.ssl.keyStore", Param.getKeystoreLocation());
-            System.setProperty("javax.net.ssl.keyStorePassword", Param.getKeystorePassword(false));
-            System.setProperty("javax.net.ssl.keyStoreType", Param.getKeystoreType());
-        }
-        if (System.getProperty("javax.net.ssl.trustStore") == null) {
-            System.setProperty("javax.net.ssl.trustStore", Param.getTruststoreLocation());
-            System.setProperty("javax.net.ssl.trustStorePassword", Param.getTruststorePassword(false));
-            System.setProperty("javax.net.ssl.trustStoreType", Param.getTruststoreType());
-        }
-
+        
+        /* Initialize the SecurityManager using the local on disk keystore as
+         * soon as the bundle is activated.  This is required in order to ensure
+         * that the local OpenIDM keystore and truststore files are picked up
+         * by the Repository Bootstrap Service. The SecurityManager will be
+         * reloaded once the SecurityManager service is activated.
+         */
+        SecurityManager sm = new SecurityManager();
+        sm.reload();
     }
 
     @Override
