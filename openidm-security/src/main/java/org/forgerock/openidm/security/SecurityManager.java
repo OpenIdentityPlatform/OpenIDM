@@ -27,12 +27,15 @@ package org.forgerock.openidm.security;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
 import java.security.Security;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509KeyManager;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -70,6 +73,7 @@ import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.impl.CertificateResourceProvider;
 import org.forgerock.openidm.security.impl.EntryResourceProvider;
+import org.forgerock.openidm.security.impl.MappedAliasKeyManager;
 import org.forgerock.openidm.security.impl.JcaKeyStoreHandler;
 import org.forgerock.openidm.security.impl.KeystoreResourceProvider;
 import org.forgerock.openidm.security.impl.PrivateKeyResourceProvider;
@@ -109,20 +113,29 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
     
     private KeyStoreHandler trustStoreHandler = null;
     private KeyStoreHandler keyStoreHandler = null;
+    
+    private final String keyStoreType;
+    private final String keyStoreLocation;
+    private final String keyStorePassword; 
 
-    @Activate
-    void activate(ComponentContext compContext) throws Exception {
-        logger.debug("Activating Security Management Service {}", compContext);
-        // Add the Bouncy Castle provider
+    private final String trustStoreType;
+    private final String trustStoreLocation;
+    private final String trustStorePassword;
+    
+    private final String keyStoreHostAliases;
+    
+    private static final String HOST_ALIAS_MAPPING_REGEX = ", *(?![^\\[\\]]*\\])";
+        
+    public SecurityManager() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         
-        String keyStoreType = Param.getKeystoreType();
-        String keyStoreLocation = Param.getKeystoreLocation();
-        String keyStorePassword = Param.getKeystorePassword(false); 
-        
-        String trustStoreType = Param.getTruststoreType();
-        String trustStoreLocation = Param.getTruststoreLocation();
-        String trustStorePassword = Param.getTruststorePassword(false);
+        this.keyStoreHostAliases = Param.getProperty("openidm.ssl.host.aliases");
+        this.trustStorePassword = Param.getTruststorePassword(false);
+        this.trustStoreLocation = Param.getTruststoreLocation();
+        this.trustStoreType = Param.getTruststoreType();
+        this.keyStorePassword = Param.getKeystorePassword(false);
+        this.keyStoreLocation = Param.getKeystoreLocation();
+        this.keyStoreType = Param.getKeystoreType();
 
         // Set System properties
         if (System.getProperty("javax.net.ssl.keyStore") == null) {
@@ -136,7 +149,14 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
             System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
         }
         
-        keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
+        this.trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
+        this.keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
+    }
+
+    @Activate
+    void activate(ComponentContext compContext) throws Exception {
+        logger.debug("Activating Security Management Service {}", compContext);               
+        
         KeystoreResourceProvider keystoreProvider =
                 new KeystoreResourceProvider("keystore", keyStoreHandler, this, repoService);
         EntryResourceProvider keystoreCertProvider =
@@ -148,7 +168,6 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         router.addRoute(uriTemplate("/keystore/cert"), keystoreCertProvider);
         router.addRoute(uriTemplate("/keystore/privatekey"), privateKeyProvider);
 
-        trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
         KeystoreResourceProvider truststoreProvider =
                 new KeystoreResourceProvider("truststore", trustStoreHandler, this, repoService);
         EntryResourceProvider truststoreCertProvider =
@@ -226,6 +245,7 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
     
     // ----- Implementation of KeyStoreManager interface
     
+    @Override
     public void reload() throws Exception {
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(trustStoreHandler.getStore());
@@ -234,13 +254,44 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         KeyManagerFactory kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
         kmf.init(keyStoreHandler.getStore(), keyStoreHandler.getPassword().toCharArray());
         KeyManager [] keyManagers = kmf.getKeyManagers();
-
+        
+        // Override the default X509KeyManager with our own MappedAliasKeyManager.
+        // This allows for mapping hosts to specific key aliases within the keystore.
+        for (int i = 0; i < keyManagers.length; i++) {
+            if (keyManagers[i] instanceof X509KeyManager) {
+                keyManagers[i] = new MappedAliasKeyManager( (X509KeyManager)keyManagers[i], 
+                        getHostAliasMappings(keyStoreHostAliases)
+                );
+            }
+        }
         
         SSLContext context = SSLContext.getInstance("SSL");
         context.init(keyManagers, trustManagers, null);
         SSLContext.setDefault(context);
     }
 
+    /**
+     * Parses a string of comma separated key-value pairs into a map.
+     * For example: "localhost=my-key-alias, service.forgerock.com=fr-client"
+     * 
+     * @param mappings The comma-separated string of key-value pairs to parse
+     * @return A map containing the key value pairs
+     */
+    private Map<String, String> getHostAliasMappings(String mappings) {
+        Map<String, String> map = new HashMap<String, String>();
+        if (mappings != null) {
+            for (String pair : mappings.split(HOST_ALIAS_MAPPING_REGEX)) {
+                String[] parts = pair.split("=");
+                if (parts.length == 2) {
+                    map.put(parts[0].toUpperCase(), parts[1]);
+                } else if (parts.length == 1) {
+                    map.put(parts[0].toUpperCase(), null);
+                }
+            }
+        }
+        return map;
+    }
+    
     // ----- Implementation of RequestHandler interface
 
     @Override
