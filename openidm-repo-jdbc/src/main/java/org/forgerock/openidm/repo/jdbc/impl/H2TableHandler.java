@@ -53,6 +53,7 @@ public class H2TableHandler extends GenericTableHandler {
         String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
         String propertyTable = dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
 
+        result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " WHERE (SELECT objtype.objecttype FROM " + typeTable + " objtype WHERE " + mainTable + ".objecttypes_id = objtype.id) = ? AND " + mainTable + ".objectid = ? AND " + mainTable + ".rev = ?");
         result.put(QueryDefinition.PROPDELETEQUERYSTR, "DELETE FROM " + propertyTable + " WHERE " + mainTableName + "_id IN (SELECT obj.id FROM " + mainTable + " obj INNER JOIN " + typeTable + " objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ? AND obj.objectid = ?)");
         return result;
     }
