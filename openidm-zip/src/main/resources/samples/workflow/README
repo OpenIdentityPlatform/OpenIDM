@@ -34,7 +34,6 @@ Here is the walk-through to demonstrate the sample:
 After starting this sample, open the OpenIDM Admin UI in your browser: https://localhost:8443/admin
 
 Login with the default credentials : openidm-admin / openidm-admin
- - You will be prompted to change your password upon login. It is a good idea to do so, but not required.
 
 There are several actions to take in the Admin UI:
 1) Configure the connection to your email server. This is used to send the password-reset email at the end of the exercise.
