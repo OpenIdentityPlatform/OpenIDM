@@ -32,7 +32,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/FilterEvaluator",
-    "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
     "org/forgerock/openidm/ui/admin/mapping/properties/AddPropertyMappingDialog",
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
@@ -53,7 +52,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             LinkQualifierUtil,
             ScriptDelegate,
             FilterEvaluator,
-            QueryFilterUtils,
             QueryFilterEditor,
             AddPropertyMappingDialog,
             EditPropertyMappingDialog,
@@ -504,40 +502,50 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
         sampleEvalCheck: function(sampleDetails, globals) {
             var samplePromise = $.Deferred(),
                 filterCheck,
-                sampleSource = conf.globalData.sampleSource || {},
-                qfe = new QueryFilterEditor();
+                sampleSource = conf.globalData.sampleSource || {};
 
             if (sampleDetails.hasCondition) {
                 if (_.isString(sampleDetails.condition)) {
-                    filterCheck = FilterEvaluator.evaluate(qfe.transform(QueryFilterUtils.convertFrom(sampleDetails.condition)), { "linkQualifier": globals.linkQualifier, "object": sampleSource});
-
-                    if (filterCheck) {
-                        if (sampleDetails.hasTransform) {
-                            ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {
+                    ScriptDelegate.parseQueryFilter(sampleDetails.condition)
+                    .then(function (queryFilterTree) {
+                        var qfe = new QueryFilterEditor();
+                        return FilterEvaluator.evaluate(
+                                qfe.transform(queryFilterTree),
+                                {
+                                    "linkQualifier": globals.linkQualifier,
+                                    "object": sampleSource
+                                }
+                        );
+                    })
+                    .then(function (filterCheck) {
+                        if (filterCheck) {
+                            if (sampleDetails.hasTransform) {
+                                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {
+                                    samplePromise.resolve({
+                                        conditionResults: {
+                                            result: true
+                                        },
+                                        transformResults: transformResults
+                                    });
+                                }, function(e) {
+                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                                });
+                            } else {
                                 samplePromise.resolve({
                                     conditionResults: {
                                         result: true
-                                    },
-                                    transformResults: transformResults
+                                    }
                                 });
-                            }, function(e) {
-                                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
-                            });
+                            }
                         } else {
                             samplePromise.resolve({
                                 conditionResults: {
-                                    result: true
-                                }
+                                    result: false
+                                },
+                                transformResults: ""
                             });
                         }
-                    } else {
-                        samplePromise.resolve({
-                            conditionResults: {
-                                result: false
-                            },
-                            transformResults: ""
-                        });
-                    }
+                    });
                 } else {
                     ScriptDelegate.evalScript(sampleDetails.condition, { "linkQualifier": globals.linkQualifier, "object": sampleSource}).then(function(conditionResults) {
                             if (sampleDetails.hasTransform && conditionResults === true) {

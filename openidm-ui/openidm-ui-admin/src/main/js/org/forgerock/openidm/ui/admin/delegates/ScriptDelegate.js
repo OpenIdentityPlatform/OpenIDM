@@ -53,5 +53,15 @@ define("org/forgerock/openidm/ui/admin/delegates/ScriptDelegate", [
         return obj.evalScript(script);
     };
 
+    obj.parseQueryFilter = function (filterString) {
+        return obj.evalScript({
+            "type" : "text/javascript",
+            "source" : "org.forgerock.json.resource.QueryFilters.parse(queryFilter).accept(new org.forgerock.util.query.MapFilterVisitor(), null);",
+            "globals": {
+                "queryFilter": filterString
+            }
+        });
+    };
+
     return obj;
 });
