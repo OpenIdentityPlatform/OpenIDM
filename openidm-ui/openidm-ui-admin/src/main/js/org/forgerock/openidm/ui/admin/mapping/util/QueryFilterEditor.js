@@ -20,8 +20,8 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/util/FilterEditor",
-    "org/forgerock/openidm/ui/admin/util/QueryFilterUtils"
-], function ($, _, FilterEditor, queryFitlerUtils) {
+    "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate"
+], function ($, _, FilterEditor, ScriptDelegate) {
     var tagMap = {
                     "equalityMatch" : "eq",
                     "greaterOrEqual" : "ge",
@@ -31,24 +31,17 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
         invertedTagMap = _.invert(tagMap),
         QueryFilterEditor = FilterEditor.extend({
             transform: function (queryFilterTree) {
-                if (_.isArray(queryFilterTree)) {
-                    if (queryFilterTree.length === 1) {
-                        return {
-                            "op": "and",
-                            "children": [this.transform(queryFilterTree[0])]
-                        };
-                    } else {
-                        return {
-                            "op" : queryFilterTree[1],
-                            "children" :   _.chain(queryFilterTree)
-                                            .filter(function (n) {
-                                                return typeof n === "object";
-                                            })
-                                            .map(this.transform, this)
-                                            .value()
-                        };
-                    }
-                } else if (_.isObject(queryFilterTree)) {
+                if (_.has(queryFilterTree, "subfilters")) {
+                    return {
+                        "op" : queryFilterTree.operator,
+                        "children" : _.map(queryFilterTree.subfilters, this.transform, this)
+                    };
+                } else if (_.has(queryFilterTree, "subfilter")) {
+                    return {
+                        "op" : queryFilterTree.operator === "!" ? "not" : queryFilterTree.operator,
+                        "children" : [this.transform(queryFilterTree.subfilter)]
+                    };
+                } else {
                     return {
                         "name" : queryFilterTree.field,
                         "op" : "expr",
@@ -65,6 +58,8 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
                         } else {
                             return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
                         }
+                    case "not":
+                        return "!(" + this.serialize(node.children[0]) + ")";
                     case "none":
                         return "";
                     default:
@@ -82,11 +77,12 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
                         ops: [
                             "and",
                             "or",
+                            "not",
                             "expr"
                         ],
                         tags: [
+                            "pr",
                             "equalityMatch",
-                            "ne",
                             "approxMatch",
                             "co",
                             "greaterOrEqual",
@@ -100,19 +96,17 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
 
                 this.data.filterString = args.queryFilter;
                 if (this.data.filterString !== "") {
-                    this.data.queryFilterTree = queryFitlerUtils.convertFrom(this.data.filterString);
-                    if (_.isArray(this.data.queryFilterTree) && this.data.queryFilterTree.length === 1) {
-                        this.data.filter = this.transform(this.data.queryFilterTree[0]);
-                    } else {
+                    ScriptDelegate.parseQueryFilter(this.data.filterString).then(_.bind(function (queryFilterTree) {
+                        this.data.queryFilterTree = queryFilterTree;
                         this.data.filter = this.transform(this.data.queryFilterTree);
-                    }
+                        this.delegateEvents(this.events);
+                        this.renderExpressionTree();
+                    }, this));
                 } else {
                     this.data.filter = { "op": "none", "children": []};
+                    this.delegateEvents(this.events);
+                    this.renderExpressionTree();
                 }
-
-                this.delegateEvents(this.events);
-
-                this.renderExpressionTree();
             }
         });
 

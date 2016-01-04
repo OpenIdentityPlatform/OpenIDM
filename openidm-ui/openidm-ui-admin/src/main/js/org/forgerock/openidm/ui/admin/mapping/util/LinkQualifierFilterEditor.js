@@ -20,11 +20,11 @@ define("org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor", 
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
-    "org/forgerock/openidm/ui/admin/util/QueryFilterUtils",
+    "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils"
 ], function ($, _,
              QueryFilterEditor,
-             QueryFilterUtils,
+             ScriptDelegate,
              LinkQualifierUtils) {
 
     var LinkQualifierFilterEditor = QueryFilterEditor.extend({
@@ -49,12 +49,12 @@ define("org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor", 
                     ops: [
                         "and",
                         "or",
+                        "not",
                         "expr"
                     ],
                     tags: [
                         "pr",
                         "equalityMatch",
-                        "ne",
                         "approxMatch",
                         "co",
                         "greaterOrEqual",
@@ -67,22 +67,23 @@ define("org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor", 
             };
 
             this.data.filterString = args.queryFilter;
+
             if (this.data.filterString !== "") {
-                this.data.queryFilterTree = QueryFilterUtils.convertFrom(this.data.filterString);
-                if (_.isArray(this.data.queryFilterTree) && this.data.queryFilterTree.length === 1) {
-                    this.data.filter = this.transform(this.data.queryFilterTree[0]);
-                } else {
+                ScriptDelegate.parseQueryFilter(this.data.filterString).then(_.bind(function (queryFilterTree) {
+                    this.data.queryFilterTree = queryFilterTree;
                     this.data.filter = this.transform(this.data.queryFilterTree);
-                }
+                    this.delegateEvents(this.events);
+                    this.renderExpressionTree(_.bind(function() {
+                        this.changeToDropdown();
+                    }, this));
+                }, this));
             } else {
                 this.data.filter = { "op": "none", "children": []};
+                this.delegateEvents(this.events);
+                this.renderExpressionTree(_.bind(function() {
+                    this.changeToDropdown();
+                }, this));
             }
-
-            this.delegateEvents(this.events);
-
-            this.renderExpressionTree(_.bind(function() {
-                this.changeToDropdown();
-            }, this));
 
             $(".bootstrap-dialog").removeAttr("tabindex");
         },
