@@ -362,7 +362,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.validEmailAddressFormat = function(fullObject, value, params, property) {
-        var pattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/,
+        var pattern = /.+@.+\..+/i,
             isRequired = _.find(this.failedPolicyRequirements, function (fpr) {
                 return fpr.policyRequirement === "REQUIRED";
             }),
