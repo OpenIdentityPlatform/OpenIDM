@@ -33,13 +33,13 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
     "backgrid-paginator",
     "backgrid-selectall"
 ], function(
-        $, 
-        _, 
-        AbstractView, 
-        constants, 
-        Backgrid, 
+        $,
+        _,
+        AbstractView,
+        constants,
+        Backgrid,
         BackgridUtils,
-        resourceDelegate, 
+        resourceDelegate,
         messagesManager,
         AbstractCollection,
         resourceCollectionUtils,
@@ -63,15 +63,15 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             if (event) {
                 event.preventDefault();
             }
-            
+
             if (this.data.showChart) {
                 this.data.showChart = false;
-                
+
                 this.$el.find('.relationshipListContainer').show();
                 this.$el.find('.relationshipGraphContainer').hide();
             } else {
                 this.data.showChart = true;
-                
+
                 this.$el.find('.relationshipListContainer').hide();
                 this.$el.find('.relationshipGraphContainer').show();
             }
@@ -81,7 +81,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             if (event) {
                 event.preventDefault();
             }
-            
+
             this.render(this.args);
             this.$el.find('.clear-filters-btn').prop('disabled', true);
         },
@@ -89,21 +89,21 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             if (e) {
                 e.preventDefault();
             }
-            
+
             this.openResourceCollectionDialog();
         },
         removeRelationships: function (e) {
             if (e) {
                 e.preventDefault();
             }
-            
+
             uiUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDeleteSelected"),  "danger", _.bind(function(){
                 var promArr = [];
-                
+
                 _.each(this.data.selectedItems, _.bind(function(relationship) {
                     promArr.push(this.deleteRelationship(relationship));
                 }, this));
-                
+
                 $.when.apply($,promArr).then(_.bind(function(proms){
                     this.reloadGrid(null, _.bind(function() {
                         messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSelectedSuccess")});
@@ -111,7 +111,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 },this));
             }, this));
         },
-        
+
         reloadGrid: function(event, callback){
             if(event) {
                 event.preventDefault();
@@ -134,9 +134,9 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 cols = [],
                 relationshipPropName = this.data.prop.propName,
                 relationshipProp = this.schema.properties[this.data.prop.propName].items;
-            
+
             this.hasRefProperties = _.toArray(relationshipProp.properties._refProperties.properties).length > 1;
-            
+
             cols.push({
                 "name": "details",
                 "label": $.t("templates.admin.ResourceEdit.details"),
@@ -146,9 +146,9 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                             resourceCollectionIndex = resourceCollectionUtils.getResourceCollectionIndex(_this.schema, propertyValuePath, _this.data.prop.propName),
                             txt = resourceCollectionUtils.getDisplayText(_this.data.prop, this.model.attributes, resourceCollectionIndex),
                             link = '<a class="resourceEditLink" href="#resource/' + propertyValuePath + '/edit/' + this.model.attributes._id + '">' + txt + '</a>';
-                        
+
                         this.$el.html(link);
-                        
+
                         return this;
                     }
                 }),
@@ -167,24 +167,24 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                             }).join(" "),
                             relationshipProp = (_this.data.prop.items) ? _this.data.prop.items : _this.data.prop,
                             resourceCollection = _.findWhere(relationshipProp.resourceCollection,{ path: propertyValuePath });
-                        
+
                         if (resourceCollection && resourceCollection.label) {
                             txt = resourceCollection.label;
                         }
-                        
+
                         this.$el.html(txt);
-                        
+
                         return this;
                     }
                 }),
                 sortable: false,
                 editable: false
             });
-            
+
             if (this.hasRefProperties) {
                 this.$el.find('.clear-filters-btn').show();
             }
-            
+
             _.each(relationshipProp.properties._refProperties.properties, _.bind(function(col,colName){
                 if(colName !== "_id"){
                     cols.push(
@@ -200,7 +200,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                     );
                 }
             }, this));
-            
+
             cols.unshift(selectCol);
 
             return cols;
@@ -225,11 +225,11 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
             this.grid_id_selector = "#" + this.data.grid_id;
             this.data.selectedItems = [];
             this.data.showChart = args.showChart || false;
-            
+
             this.parentRender(function() {
-                
+
                 this.buildRelationshipArrayGrid(this.getCols());
-                
+
                 if(callback) {
                     callback();
                 }
@@ -250,9 +250,9 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 }),
                 relationshipGrid,
                 paginator;
-            
+
             this.model.relationships = new RelationshipCollection();
-            
+
             relationshipGrid = new Backgrid.Grid({
                 className: "backgrid table table-hover",
                 emptyText: $.t("templates.admin.ResourceList.noData"),
@@ -262,7 +262,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                     callback: function(e) {
                         var $target = $(e.target),
                             isInternal = this.model.attributes._ref.indexOf("repo/internal") === 0;
-                        
+
                         if (isInternal && !$target.is("input")) {
                             e.preventDefault();
                         }
@@ -270,7 +270,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                         if ($target.is("input") || $target.is(".select-row-cell") || $target.hasClass("resourceEditLink")) {
                             return;
                         }
-                        
+
                         if (_this.hasRefProperties || isInternal) {
                             _this.openResourceCollectionDialog(this.model.attributes);
                         } else {
@@ -302,18 +302,18 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 this.data.selectedItems = _.without(this.data.selectedItems, model.id);
             }
             this.toggleActions();
-            
+
         },
 
         bindDefaultHandlers: function () {
             var _this = this;
-            
+
             this.model.relationships.on("backgrid:selected", _.bind(function (model, selected) {
                 this.onRowSelect(model, selected);
             }, this));
 
             this.model.relationships.on("backgrid:sort", BackgridUtils.doubleSortFix);
-            
+
             this.model.relationships.on("sync", _.bind(function (collection) {
                 var hasFilters = false;
                 _.each(collection.state.filters, function (filter) {
@@ -327,7 +327,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 } else {
                     this.$el.find('.clear-filters-btn').prop('disabled', true);
                 }
-                
+
                 if (collection.models.length) {
                     this.loadChart(collection.models);
                     this.$el.find(".toggle-chart-buttons").show();
@@ -337,10 +337,10 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 }
             }, this));
         },
-        
+
         deleteRelationship: function (value) {
             var deleteUrl = "/" + constants.context + "/" + this.data.prop.relationshipUrl;
-            
+
             return resourceDelegate.deleteResource(deleteUrl, value._refProperties._id);
         },
         createRelationship: function (value) {
@@ -350,20 +350,16 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 },
                 patchUrl = "/" + constants.context + "/",
                 patchUrlArray = this.data.prop.relationshipUrl.split("/");
-            
+
             patchUrlArray.pop();
-            
+
             patchUrl += patchUrlArray.join("/");
-            
+
             return resourceDelegate.serviceCall({
                 serviceUrl: patchUrl,
-                url: "", 
-                type: "PATCH",
-                data: JSON.stringify([{
-                    "operation": "add",
-                    "field": "/" + this.data.prop.propName + "/-",
-                    "value": newVal
-                }]),
+                url: "/" + this.data.prop.propName + "?_action=create",
+                type: "POST",
+                data: JSON.stringify(newVal),
                 errorsHandlers : {
                         "error": {
                             status: "400"
@@ -385,7 +381,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 propertyValue: propertyValue,
                 schema: _this.schema
             };
-            
+
             if (!propertyValue) {
                 opts.onChange = function (value, newText) {
                     _this.createRelationship(value).then(function () {
@@ -402,7 +398,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                     });
                 };
             }
-            
+
             resourceCollectionSearchDialog.render(opts);
         },
         loadChart: function(models) {
