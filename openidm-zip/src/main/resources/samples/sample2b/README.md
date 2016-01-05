@@ -73,9 +73,6 @@ After you import the data, ou=People,dc=example,dc=com contains two user entries
 all attributes to synchronize can be multi-valued in LDAP, this sample defines only mail as a multi-valued attribute
 in OpenIDM.
 
-This sample includes the script script/ldapBackCorrelationQuery.js which 
-correlates entries in the directory with identities in OpenIDM.
-
 Run The Sample In OpenIDM
 -------------------------
 
