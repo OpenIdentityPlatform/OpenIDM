@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -1205,14 +1205,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * 
      * @param context the current ServerContext
      * @param resource the Resource to prepare
-     * @param fields a list of fields to return specified in the request
+     * @param requestFields a list of fields to return specified in the request
      * @return the prepared Resource object
      * @throws ResourceException 
      */
-    private ResourceResponse prepareResponse(Context context, ResourceResponse resource, List<JsonPointer> fields) {
+    private ResourceResponse prepareResponse(Context context, ResourceResponse resource,
+            final List<JsonPointer> requestFields) {
         Map<JsonPointer, SchemaField> fieldsToRemove = new HashMap<>(schema.getHiddenByDefaultFields());
         Map<JsonPointer, List<JsonPointer>> resourceExpansionMap = new HashMap<>();
-        if (fields != null && fields.size() > 0) {
+        List<JsonPointer> fields = new ArrayList<>();
+        if (requestFields != null && requestFields.size() > 0) {
+            fields.addAll(requestFields);
             for (JsonPointer field : new ArrayList<>(fields)) {
                 if (field.equals(SchemaField.FIELD_ALL_RELATIONSHIPS)) {
                     // Return all relationship fields, so remove them from fieldsToRemove map
@@ -1313,7 +1316,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
         
         // Update the list of fields in the response
-        if (fields != null && fields.size() > 0) {
+        if (fields.size() > 0) {
         	resource.addField(fields.toArray(new JsonPointer[fields.size()]));
         }
         
