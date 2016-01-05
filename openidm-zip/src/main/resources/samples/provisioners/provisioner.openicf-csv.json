@@ -2,7 +2,7 @@
     "name" : "csv",
     "connectorRef" : {
         "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
-        "bundleVersion" : "1.1.0.2",
+        "bundleVersion" : "1.5.0.0",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     "poolConfigOption" : {
@@ -47,7 +47,7 @@
                     "nativeName" : "employeeNumber",
                     "nativeType" : "string"
                 },
-                "mail" : {
+                "email" : {
                     "type" : "string",
                     "nativeName" : "email",
                     "nativeType" : "string"
@@ -64,7 +64,7 @@
                     "nativeName" : "lastName",
                     "nativeType" : "string"
                 },
-                "givenName" : {
+                "firstName" : {
                     "type" : "string",
                     "nativeName" : "firstName",
                     "nativeType" : "string"
