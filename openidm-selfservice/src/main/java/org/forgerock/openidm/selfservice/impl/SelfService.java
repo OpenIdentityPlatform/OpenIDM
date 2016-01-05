@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.selfservice.impl;
 
@@ -86,8 +86,18 @@ public class SelfService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfService.class);
 
-    /** the boot.properties property for the shared key alias */
+    /** the boot.properties property for the self-service shared key alias */
     private static final String SHARED_KEY_PROPERTY = "openidm.config.crypto.selfservice.sharedkey.alias";
+
+    /** the default self-service shared key alias */
+    private static final String DEFAULT_SHARED_KEY_ALIAS = "openidm-selfservice-key";
+
+    /** the router path to read the shared key */
+    private static final String SHARED_KEY_ROUTER_PATH = "security/keystore/privatekey/"
+            + IdentityServer.getInstance().getProperty(SHARED_KEY_PROPERTY, DEFAULT_SHARED_KEY_ALIAS);
+
+    /** the JsonPointer location in the read-response for the encoded shared secret key */
+    private static final JsonPointer ENCODED_SECRET_PTR = new JsonPointer("/secret/encoded");
 
     /** the registered parent router-path for self-service flows */
     static final String ROUTER_PREFIX = "selfservice";
@@ -172,14 +182,6 @@ public class SelfService {
             }
         }
 
-        // pull the shared key in from the keystore
-        ResourceResponse result = connectionFactory.getConnection().read(createInternalContext(),
-                newReadRequest("security/keystore/privatekey/"
-                        + IdentityServer.getInstance().getProperty(SHARED_KEY_PROPERTY)));
-
-        config.put(new JsonPointer("/snapshotToken/sharedKey"),
-                result.getContent().get(new JsonPointer("/secret/encoded")).asString());
-
         // force storage type to stateless
         config.put("storage", "stateless");
     }
@@ -247,33 +249,74 @@ public class SelfService {
             public SnapshotTokenHandler get(SnapshotTokenConfig snapshotTokenConfig) {
                 switch (snapshotTokenConfig.getType()) {
                     case JwtTokenHandlerConfig.TYPE:
-                        return createJwtTokenHandler((JwtTokenHandlerConfig) snapshotTokenConfig);
+                        return new LazyJwtTokenHandler((JwtTokenHandlerConfig) snapshotTokenConfig);
                     default:
                         throw new IllegalArgumentException("Unknown type " + snapshotTokenConfig.getType());
                 }
             }
+        };
+    }
 
-            private SnapshotTokenHandler createJwtTokenHandler(JwtTokenHandlerConfig config) {
+    /**
+     * A SnapshotTokenHandler that lazily initializes the decorated JwtTokenHandler.  This delays
+     * the router call to fetch the shared key from the security manager until the system is fully started.
+     */
+    private class LazyJwtTokenHandler implements SnapshotTokenHandler {
+        private final JwtTokenHandlerConfig config;
+        private SnapshotTokenHandler handler;
+
+        LazyJwtTokenHandler(JwtTokenHandlerConfig config) {
+            this.config = config;
+        }
+
+        private SnapshotTokenHandler getHandler() {
+            if (handler == null) {
                 try {
+                    // pull the shared key in from the keystore
+                    JsonValue sharedKey = connectionFactory.getConnection()
+                            .read(createInternalContext(), newReadRequest(SHARED_KEY_ROUTER_PATH))
+                            .getContent()
+                            .get(ENCODED_SECRET_PTR);
+                    if (sharedKey == null) {
+                        throw new RuntimeException("Selfservice shared key does not exist");
+                    }
                     SigningManager signingManager = new SigningManager();
-                    SigningHandler signingHandler = signingManager.newHmacSigningHandler(config.getSharedKey());
+                    SigningHandler signingHandler = signingManager.newHmacSigningHandler(
+                            sharedKey.asString().getBytes());
 
                     KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(config.getKeyPairAlgorithm());
                     keyPairGen.initialize(config.getKeyPairSize());
 
-                    return new JwtTokenHandler(
+                    handler = new JwtTokenHandler(
                             config.getJweAlgorithm(),
                             config.getEncryptionMethod(),
                             keyPairGen.generateKeyPair(),
                             config.getJwsAlgorithm(),
                             signingHandler,
                             config.getTokenLifeTimeInSeconds());
-
+                } catch (ResourceException e) {
+                    throw new RuntimeException("Unable to read selfservice shared key", e);
                 } catch (NoSuchAlgorithmException nsaE) {
                     throw new RuntimeException("Unable to create key pair for encryption", nsaE);
                 }
             }
-        };
+            return handler;
+        }
+
+        @Override
+        public String generate(JsonValue jsonValue) throws ResourceException {
+            return getHandler().generate(jsonValue);
+        }
+
+        @Override
+        public void validate(String s) throws ResourceException {
+            getHandler().validate(s);
+        }
+
+        @Override
+        public JsonValue validateAndExtractState(String s) throws ResourceException {
+            return getHandler().validateAndExtractState(s);
+        }
     }
 
     private ProcessStore newProcessStore() {
