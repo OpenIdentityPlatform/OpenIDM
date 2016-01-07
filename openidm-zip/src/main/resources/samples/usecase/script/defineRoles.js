@@ -2,12 +2,12 @@
 
 (function () {
     var roles = [ {
-        "_ref" : "repo/internal/roles/openidm-authorized"
+        "_ref" : "repo/internal/role/openidm-authorized"
     } ];
 
     if (source !== undefined && 'manager' === source) {
         roles.push({
-            "_ref" : "repo/internal/roles/openidm-admin"
+            "_ref" : "repo/internal/role/openidm-admin"
         });
     }
 
