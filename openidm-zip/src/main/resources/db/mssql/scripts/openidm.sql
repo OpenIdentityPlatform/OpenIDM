@@ -18,7 +18,7 @@ GO
 -- Login openidm
 -- -----------------------------------------------------
 IF (NOT EXISTS (select loginname from master.dbo.syslogins where name = N'openidm' and dbname = N'openidm'))
-CREATE LOGIN [openidm] WITH PASSWORD=N'Passw0rd', DEFAULT_DATABASE=[openidm], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
+CREATE LOGIN [openidm] WITH PASSWORD=N'openidm', DEFAULT_DATABASE=[openidm], CHECK_EXPIRATION=OFF, CHECK_POLICY=OFF
 GO
 
 -- -----------------------------------------------------
