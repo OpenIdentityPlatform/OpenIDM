@@ -1417,10 +1417,11 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 } else if (request.getQueryExpression() != null) {
                     filter = QueryFilters.parse(request.getQueryExpression()).accept(
                             RESOURCE_FILTER, objectClassInfoHelper);
-
                 } else if (request.getQueryFilter() != null) {
                     // No filtering or query by filter.
-                    filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
+                    if (!request.getQueryFilter().toString().equals("true")) {
+                        filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
+                    }
                 } else {
                     throw new BadRequestException("One of _queryId, _queryExpression, or _queryFilter is required.");
                 }
