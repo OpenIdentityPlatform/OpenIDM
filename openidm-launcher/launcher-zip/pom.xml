@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock.commons</groupId>
         <artifactId>forgerock-launcher</artifactId>
-        <version>1.2.1</version>
+        <version>1.2.2-SNAPSHOT</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>launcher-zip</artifactId>
