@@ -1419,9 +1419,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                             RESOURCE_FILTER, objectClassInfoHelper);
                 } else if (request.getQueryFilter() != null) {
                     // No filtering or query by filter.
-                    if (!request.getQueryFilter().toString().equals("true")) {
-                        filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
-                    }
+                    filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
                 } else {
                     throw new BadRequestException("One of _queryId, _queryExpression, or _queryFilter is required.");
                 }
@@ -1809,26 +1807,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 }
 
                 @Override
-                public Filter visitBooleanLiteralFilter(final ObjectClassInfoHelper helper,
-                        final boolean value) {
-                    return new Filter() {
-                        public boolean accept(ConnectorObject obj) {
-                            return value;
-                        }
-                        public <R extends Object, P extends Object> R accept(
-                                org.identityconnectors.framework.common.objects.filter.FilterVisitor<R,P> v, P p) {
-                            // OpenICF team explained that
-                            // return v.visitExtendedFilter(p, this);
-                            // would not yet (1.4) work with all connectors and/or remotely.
-                            // Instead the return null evaluates to always true.       
-                            if (value) {
-                                return null; // OpenICF contract evaluates null return to always true
-                            } else {
-                                throw new UnsupportedOperationException(
-                                        "visitBooleanLiteralFilter only supported for literal true, not false");
-                            }
-                        }
-                    };
+                public Filter visitBooleanLiteralFilter(final ObjectClassInfoHelper helper, final boolean value) {
+                    if (value) {
+                        return null;
+                    }
+                    throw new UnsupportedOperationException(
+                            "visitBooleanLiteralFilter only supported for literal true, not false");
                 }
                 
                 @Override
