@@ -184,41 +184,16 @@
                     },
                     "roles" : {
                         "description" : "",
-                        "title" : "Managed Roles",
+                        "title" : "Provisioning Roles",
                         "viewable" : true,
                         "userEditable" : false,
                         "returnByDefault" : true,
                         "type" : "array",
                         "items" : {
                             "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "members",
                             "validate" : true,
-                            "properties" : {
-                                "_ref" : { "type" : "string" },
-                                "_refProperties": {
-                                    "type": "object",
-                                    "properties": {
-                                        "_id": { "type": "string" }
-                                    }
-                                }
-                            },
-                            "resourceCollection" : {
-                                "path" : "managed/role",
-                                "query" : {
-                                    "queryFilter" : "true",
-                                    "fields" : ["name"],
-                                    "sortKeys" : ["name"]
-                                }
-                            }
-                        }
-                    },
-                    "authzRoles" : {
-                        "description" : "",
-                        "title" : "OpenIDM Roles",
-                        "viewable" : true,
-                        "type" : "array",
-                        "userEditable" : false,
-                        "items" : {
-                            "type" : "relationship",
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -232,19 +207,121 @@
                                     }
                                 }
                             },
-                            "resourceCollection" : {
-                                "path" : "repo/internal/role",
-                                "query" : {
-                                    "queryFilter" : "true",
-                                    "fields" : [
-                                        "_id",
-                                        "description"
-                                    ],
-                                    "sortKeys" : [
-                                        "_id"
-                                    ]
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/role",
+                                    "label": "Role",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "name"
+                                        ],
+                                        "sortKeys" : [
+                                            "name"
+                                        ]
+                                    }
                                 }
-                            }
+                            ]
+                        }
+                    },
+                    "authzRoles" : {
+                        "description" : "",
+                        "title" : "Authorization Roles",
+                        "viewable" : true,
+                        "type" : "array",
+                        "userEditable" : false,
+                        "returnByDefault" : false,
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "authzMembers",
+                            "validate" : true,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : [
+                                {
+                                    "path" : "repo/internal/role",
+                                    "label": "Internal Role",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "_id",
+                                            "description"
+                                        ],
+                                        "sortKeys" : [
+                                            "_id"
+                                        ]
+                                    }
+                                },
+                                {
+                                    "path" : "managed/role",
+                                    "label": "Role",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "name"
+                                        ],
+                                        "sortKeys" : [
+                                            "name"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "reports" : {
+                        "description" : "",
+                        "title" : "Direct Reports",
+                        "viewable" : true,
+                        "userEditable" : false,
+                        "type" : "array",
+                        "returnByDefault" : false,
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "manager",
+                            "validate" : true,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/user",
+                                    "label" : "User",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "userName",
+                                            "givenName",
+                                            "sn"
+                                        ],
+                                        "sortKeys" : [
+                                            "userName"
+                                        ]
+                                    }
+                                }
+                            ]
                         }
                     },
                     "effectiveRoles" : {
