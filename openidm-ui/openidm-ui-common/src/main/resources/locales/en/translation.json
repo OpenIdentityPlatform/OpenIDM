@@ -60,6 +60,10 @@
             "noManagedObjectTitle" : "No managed objects have been added.",
             "noManagedObjectMessage" : "Configure data objects to be managed by OpenIDM.",
             "newManagedObject" : "New Managed Object"
+        },
+        "relationshipWidget" : {
+            "selectAUser" : "Select a User",
+            "relationshipTitle" : "Identity Relationships"
         }
     },
     "config" : {

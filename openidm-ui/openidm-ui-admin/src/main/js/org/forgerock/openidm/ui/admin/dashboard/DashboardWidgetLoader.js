@@ -28,7 +28,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
     "org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget",
-    "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget"
+    "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget",
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/UserRelationshipWidget"
 ], function($, _,
             AdminAbstractView,
             eventManager,
@@ -39,7 +40,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
             FullHealthWidget,
             MappingReconResultsWidget,
             ResourceListWidget,
-            QuickStartWidget) {
+            QuickStartWidget,
+            UserRelationshipWidget) {
     var dwlInstance = {},
         DashboardWidgetLoader = AdminAbstractView.extend({
             template: "templates/dashboard/DashboardWidgetLoaderTemplate.html",
@@ -61,6 +63,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
              barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
              resourceList - Displays the top 4 resources for connectors, mappings, and managed objects
              quickStart - Widget displaying quick start cards to help users get started with core functionality
+             userRelationship - Widget to display a users relationships throughout the system
              */
             render: function(args, callback) {
                 this.element = args.element;
@@ -89,6 +92,9 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                     },
                     quickStart: {
                         name: $.t("dashboard.quickStart.quickStartTitle")
+                    },
+                    userRelationship : {
+                        name: $.t("dashboard.relationshipWidget.relationshipTitle")
                     }
                 };
 
@@ -119,6 +125,9 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                             args.icons = args.widget.icons;
 
                             this.model.widget = QuickStartWidget.generateWidget(args, callback);
+                            break;
+                        case "userRelationship":
+                            this.model.widget = UserRelationshipWidget.generateWidget(args, callback);
                             break;
                     }
                 }, this));
