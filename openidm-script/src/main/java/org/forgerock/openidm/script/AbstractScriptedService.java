@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2013-2016 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -26,6 +26,8 @@ package org.forgerock.openidm.script;
 
 import java.util.Dictionary;
 import java.util.EnumSet;
+import java.util.Enumeration;
+import java.util.Hashtable;
 
 import javax.script.Bindings;
 import javax.script.ScriptException;
@@ -131,7 +133,14 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
     }
 
     protected void setProperties(Dictionary<String, Object> properties) {
-        this.properties = properties;
+        // make a copy of the properties as the argument is [often] unmodifiable 
+        // and we may need to add other properties
+        this.properties = new Hashtable<>(properties.size());
+        Enumeration<String> enumeration = properties.keys();
+        while (enumeration.hasMoreElements()) {
+            String key = enumeration.nextElement();
+            this.properties.put(key, properties.get(key));
+        }
     }
 
     protected Scope activate(final BundleContext context, final String factoryPid,

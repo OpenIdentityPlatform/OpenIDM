@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -332,9 +332,9 @@ public class ActivitiServiceImpl implements RequestHandler {
                         if (null != configurationAdmin) {
                             try {
                                 barInstallerConfiguration = configurationAdmin.createFactoryConfiguration("org.apache.felix.fileinstall", null);
-                                Dictionary<String, String> props = barInstallerConfiguration.getProperties();
+                                Dictionary<String, Object> props = barInstallerConfiguration.getProperties();
                                 if (props == null) {
-                                    props = new Hashtable<String, String>();
+                                    props = new Hashtable<String, Object>();
                                 }
                                 props.put("felix.fileinstall.poll", "2000");
                                 props.put("felix.fileinstall.noInitialDelay", "true");
