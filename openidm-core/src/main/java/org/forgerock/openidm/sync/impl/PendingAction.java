@@ -11,11 +11,10 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -50,7 +49,7 @@ class PendingAction {
      * @param targetObject the full target object
      * @throws SynchronizationException if the action failed
      */
-    public static void handlePendingActions(Context context, ReconAction action, ArrayList<ObjectMapping> mappings,
+    public static void handlePendingActions(Context context, ReconAction action, Mappings mappings,
             String resourceContainer, String resourceId, JsonValue targetObject) throws SynchronizationException {
         // Detect if there is a pending action matching the supplied action
         PendingActionContext pendingActionContext = null;
@@ -91,7 +90,6 @@ class PendingAction {
      * @param context the context to use as the parent context 
      * @param action the pending action
      * @param mappingName The name of the object mapping
-     * @param sourceId the source ID
      * @param sourceObject the source Object
      * @param reconId the reconciliation ID
      * @param situation the original situation

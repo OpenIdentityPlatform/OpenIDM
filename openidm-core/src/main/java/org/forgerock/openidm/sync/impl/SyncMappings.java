@@ -33,6 +33,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 
@@ -53,7 +54,7 @@ public class SyncMappings implements Mappings {
     public static final String PID = "org.forgerock.openidm.sync";
 
     /** Object mappings. Order of mappings evaluated during synchronization is significant. */
-    private volatile ArrayList<ObjectMapping> mappings = null;
+    private volatile List<ObjectMapping> mappings = new ArrayList<>();
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -61,48 +62,66 @@ public class SyncMappings implements Mappings {
 
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC)
-    protected IDMConnectionFactory connectionFactory;
+    private IDMConnectionFactory connectionFactory;
 
+    /** Script Registry service. */
+    @Reference(
+            policy = ReferencePolicy.DYNAMIC,
+            bind = "bindScriptRegistry",
+            unbind = "unbindScriptRegistry")
+    private volatile ScriptRegistry scriptRegistry;
+
+    protected void bindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = service;
+        Scripts.init(service);
+    }
+
+    protected void unbindScriptRegistry(final ScriptRegistry service) {
+        scriptRegistry = null;
+        Scripts.init(null);
+    }
+
+    /**
+     * Activate/modify the component.  Because the List of ObjectMappings is re-assigned based on the updated
+     * configuration, this method is safe for both activation and modification.
+     *
+     * @param context the ComponentContext
+     */
     @Activate
+    @Modified
     protected void activate(ComponentContext context) {
         JsonValue config = new JsonValue(enhancedConfig.getConfiguration(context));
         try {
-            mappings = new ArrayList<>();
-            initMappings(mappings, config);
+            mappings = initMappings(config);
         } catch (JsonValueException jve) {
             throw new ComponentException("Configuration error: " + jve.getMessage(), jve);
         }
     }
 
+    /**
+     * Deactivate the component.
+     *
+     * @param context the ComponentContext
+     */
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        mappings = null;
+        mappings = new ArrayList<>();
     }
 
-    @Modified
-    protected void modified(ComponentContext context) {
-        JsonValue config = new JsonValue(enhancedConfig.getConfiguration(context));
-        ArrayList<ObjectMapping> newMappings = new ArrayList<>();
-        try {
-            initMappings(newMappings, config);
-            mappings = newMappings;
-        } catch (JsonValueException jve) {
-            throw new ComponentException("Configuration error: " + jve.getMessage(), jve);
-        }
-    }
-
-    @Override
-    public Iterator<ObjectMapping> iterator() {
-        return mappings.iterator();
-    }
-
-    private void initMappings(ArrayList<ObjectMapping> mappingList, JsonValue config) {
+    private List<ObjectMapping> initMappings(JsonValue config) {
+        final List<ObjectMapping> mappingList = new ArrayList<>();
         for (JsonValue jv : config.get("mappings").expect(List.class)) {
             mappingList.add(new ObjectMapping(connectionFactory, jv)); // throws JsonValueException
         }
         for (ObjectMapping mapping : mappingList) {
             mapping.initRelationships(mappingList);
         }
+        return mappingList;
+    }
+
+    @Override
+    public Iterator<ObjectMapping> iterator() {
+        return mappings.iterator();
     }
 
     /**
@@ -112,6 +131,7 @@ public class SyncMappings implements Mappings {
      * @return the ObjectMapping
      * @throws SynchronizationException if no mapping exists by the given name.
      */
+    @Override
     public ObjectMapping getMapping(String name) throws SynchronizationException {
         for (ObjectMapping mapping : mappings) {
             if (mapping.getName().equals(name)) {
@@ -127,6 +147,7 @@ public class SyncMappings implements Mappings {
      * @param mappingConfig the mapping configuration
      * @return the created ObjectMapping
      */
+    @Override
     public ObjectMapping createMapping(JsonValue mappingConfig) {
         ObjectMapping createdMapping = new ObjectMapping(connectionFactory, mappingConfig);
         List<ObjectMapping> augmentedMappings = new ArrayList<>(mappings);

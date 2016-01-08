@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -20,7 +20,7 @@ import org.forgerock.json.JsonValue;
 /**
  * Interface to manage and access mappings
  */
-public interface Mappings {
+public interface Mappings extends Iterable<ObjectMapping> {
     /**
      * Get a mapping by name
      * @param name the mapping name

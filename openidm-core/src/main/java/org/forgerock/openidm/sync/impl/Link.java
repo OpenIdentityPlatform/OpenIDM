@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_FILTER;
+import static org.forgerock.json.resource.Requests.*;
 
 
 // Java Standard Edition
@@ -38,7 +39,6 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
@@ -133,11 +133,11 @@ class Link {
     /**
      * Queries a single link and populates the object with its settings
      *
-     * @param The query parameters
+     * @param query the query parameters
      * @throws SynchronizationException if getting and initializing the link details fail
      */
     private void getLink(JsonValue query) throws SynchronizationException {
-        JsonValue results = linkQuery(mapping.getService().getContext(), mapping.getService().getConnectionFactory(), query);
+        JsonValue results = linkQuery(mapping.getConnectionFactory(), ObjectSetContext.get(), query);
         if (results.size() == 1) {
             fromJsonValue(results.get(0));
         } else if (results.size() > 1) { // shouldn't happen if index is unique
@@ -154,7 +154,7 @@ class Link {
      * @return The query results
      * @throws SynchronizationException if getting and initializing the link details fail
      */
-    private static JsonValue linkQuery(Context context, ConnectionFactory connectionFactory, JsonValue query)
+    private static JsonValue linkQuery(ConnectionFactory connectionFactory, Context context, JsonValue query)
             throws SynchronizationException {
         JsonValue results = null;
         try {
@@ -180,19 +180,19 @@ class Link {
      * TODO: Description.
      *
      * @param value TODO.
-     * @throws org.forgerock.json.fluent.JsonValueException
+     * @throws org.forgerock.json.JsonValueException
      */
-    private void fromJsonValue(JsonValue jv) throws JsonValueException {
-        _id = jv.get("_id").required().asString();
-        _rev = jv.get("_rev").asString(); // optional
+    private void fromJsonValue(JsonValue value) throws JsonValueException {
+        _id = value.get("_id").required().asString();
+        _rev = value.get("_rev").asString(); // optional
         if (mapping.getLinkType().useReverse()) {
-            sourceId = jv.get("secondId").required().asString();
-            targetId = jv.get("firstId").required().asString();
+            sourceId = value.get("secondId").required().asString();
+            targetId = value.get("firstId").required().asString();
         } else {
-            sourceId = jv.get("firstId").required().asString();
-            targetId = jv.get("secondId").required().asString();
+            sourceId = value.get("firstId").required().asString();
+            targetId = value.get("secondId").required().asString();
         }
-        linkQualifier = jv.get("linkQualifier").asString();
+        linkQualifier = value.get("linkQualifier").asString();
         sourceId = mapping.getLinkType().normalizeSourceId(sourceId);
         targetId = mapping.getLinkType().normalizeTargetId(targetId);
         initialized = true;
@@ -272,7 +272,7 @@ class Link {
     /**
      * Gets the link for a given object mapping source
      *
-     * @param targetId the object mapping target system identifier
+     * @param aTargetId the object mapping target system identifier
      * @throws SynchronizationException if the query could not be performed.
      */
     void getLinkForTarget(String aTargetId) throws SynchronizationException {
@@ -290,7 +290,7 @@ class Link {
      * This method expects a {@code "links-for-targetId"} defined with a parameter of
      * {@code "targetId"}.
      *
-     * @param targetId TODO.
+     * @param id TODO.
      * @throws SynchronizationException TODO.
      */
     void getLinkFromSecond(String id) throws SynchronizationException {
@@ -326,7 +326,7 @@ class Link {
                             QueryFilter.equalTo("/linkType", mapping.getLinkType().getName()),
                             QueryFilter.equalTo("/linkQualifier", linkQualifier)))
                             .toString());
-            JsonValue queryResults = linkQuery(mapping.getService().getContext(), mapping.getService().getConnectionFactory(), query);
+            JsonValue queryResults = linkQuery(mapping.getConnectionFactory(), ObjectSetContext.get(), query);
             for (JsonValue entry : queryResults) {
                 Link link = new Link(mapping);
                 link.fromJsonValue(entry);
@@ -356,13 +356,13 @@ class Link {
      *
      * @throws SynchronizationException TODO.
      */
-    void create() throws SynchronizationException {
+    void create(Context context) throws SynchronizationException {
         _id = UUID.randomUUID().toString(); // client-assigned identifier
         JsonValue jv = toJsonValue();
         try {
-            CreateRequest r = Requests.newCreateRequest(linkId(null), _id, jv);
-            ResourceResponse resource = 
-            		mapping.getService().getConnectionFactory().getConnection().create(mapping.getService().getContext(), r);
+            CreateRequest request = newCreateRequest(linkId(null), _id, jv);
+            ResourceResponse resource =
+            		mapping.getConnectionFactory().getConnection().create(context, request);
             this._id = resource.getId();
             this._rev = resource.getRevision();
             this.initialized = true;
@@ -377,12 +377,12 @@ class Link {
      *
      * @throws SynchronizationException TODO.
      */
-    void delete() throws SynchronizationException {
+    void delete(Context context) throws SynchronizationException {
         if (_id != null) { // forgiving delete
             try {
-                DeleteRequest r = Requests.newDeleteRequest(linkId(_id));
-                r.setRevision(_rev);
-                mapping.getService().getConnectionFactory().getConnection().delete(mapping.getService().getContext(),r);
+                DeleteRequest request = newDeleteRequest(linkId(_id))
+                        .setRevision(_rev);
+                mapping.getConnectionFactory().getConnection().delete(context, request);
             } catch (ResourceException ose) {
                 LOGGER.warn("Failed to delete link", ose);
                 throw new SynchronizationException(ose);
@@ -396,15 +396,16 @@ class Link {
      *
      * @throws SynchronizationException if updating link fails
      */
-    void update() throws SynchronizationException {
+    void update(Context context) throws SynchronizationException {
         if (_id == null) {
             throw new SynchronizationException("Attempt to update non-existent link");
         }
         JsonValue jv = toJsonValue();
         try {
-            UpdateRequest r = Requests.newUpdateRequest(linkId(_id), jv);
-            r.setRevision(_rev);
-            ResourceResponse resource = mapping.getService().getConnectionFactory().getConnection().update(mapping.getService().getContext(),r);
+            UpdateRequest request = newUpdateRequest(linkId(_id), jv)
+                    .setRevision(_rev);
+            ResourceResponse resource =
+                    mapping.getConnectionFactory().getConnection().update(context, request);
             _rev =  resource.getRevision();
         } catch (ResourceException ose) {
             LOGGER.warn("Failed to update link", ose);

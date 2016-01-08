@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -19,6 +19,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Requests.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -32,6 +33,7 @@ import java.util.concurrent.Callable;
 
 import javax.script.ScriptException;
 
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -42,7 +44,6 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.SecurityContext;
@@ -223,8 +224,8 @@ class ObjectMapping {
     /** The number of initial tasks the ReconFeeder should submit to executors */
     private int feedSize;
 
-    /** a reference to the {@link SynchronizationService} */
-    private final SynchronizationService service;
+    /** a reference to the {@link ConnectionFactory} */
+    private final ConnectionFactory connectionFactory;
 
     /** Whether synchronization (automatic propagation of changes as they are detected) is enabled on that mapping */
     private final Boolean syncEnabled;
@@ -232,12 +233,12 @@ class ObjectMapping {
     /**
      * Create an instance of a mapping between source and target
      *
-     * @param service The associated synchronization service
+     * @param connectionFactory The ConnectionFactory
      * @param config The configuration for this mapping
      * @throws JsonValueException if there is an issue initializing based on the configuration.
      */
-    public ObjectMapping(SynchronizationService service, JsonValue config) throws JsonValueException {
-        this.service = service;
+    public ObjectMapping(ConnectionFactory connectionFactory, JsonValue config) throws JsonValueException {
+        this.connectionFactory = connectionFactory;
         this.config = config;
         name = config.get("name").required().asString();
         linkTypeName = config.get("links").defaultTo(name).asString();
@@ -321,18 +322,18 @@ class ObjectMapping {
      * Mappings can share the same link tables.
      * Establish the relationship between the mappings and determine the proper
      * link type to use
-     * @param syncSvc the associated synchronization service
+     *
      * @param allMappings The list of all existing mappings
      */
-    public void initRelationships(SynchronizationService syncSvc, List<ObjectMapping> allMappings) {
+    public void initRelationships(List<ObjectMapping> allMappings) {
         linkType = LinkType.getLinkType(this, allMappings);
     }
 
     /**
      * @return the associated synchronization service
      */
-    SynchronizationService getService() {
-        return service;
+    ConnectionFactory getConnectionFactory() {
+        return connectionFactory;
     }
 
     /**
@@ -474,12 +475,12 @@ class ObjectMapping {
 
         LazyObjectAccessor sourceObjectAccessor = null;
         if (sourceDeleted) {
-            sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, null);
+            sourceObjectAccessor = new LazyObjectAccessor(connectionFactory, sourceObjectSet, resourceId, null);
         } else if (value != null) {
             value.put("_id", resourceId); // unqualified
-            sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId, value);
+            sourceObjectAccessor = new LazyObjectAccessor(connectionFactory, sourceObjectSet, resourceId, value);
         } else {
-            sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, resourceId);
+            sourceObjectAccessor = new LazyObjectAccessor(connectionFactory, sourceObjectSet, resourceId);
         }
                 
         // Loop over correlation queries, performing a sync for each linkQualifier
@@ -530,7 +531,7 @@ class ObjectMapping {
             result.put(QueryResponse.FIELD_RESULT, list);
 
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(targetObjectSet, queryParameters);
-            service.getConnectionFactory().getConnection().query(service.getContext(), request,
+            connectionFactory.getConnection().query(ObjectSetContext.get(), request,
                     new QueryResourceHandler() {
                         @Override
                         public boolean handleResource(ResourceResponse resource) {
@@ -556,10 +557,9 @@ class ObjectMapping {
         LazyObjectAccessor targetObject = null;
         LOGGER.trace("Create target object {}/{}", targetObjectSet, target.get("_id").asString());
         try {
-            CreateRequest createRequest =
-                    Requests.newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
-            ResourceResponse resource =  service.getConnectionFactory().getConnection().create(context, createRequest);
-            targetObject = new LazyObjectAccessor(service, targetObjectSet, resource.getId(), resource.getContent());
+            CreateRequest request = newCreateRequest(targetObjectSet, target.get("_id").asString(), target);
+            ResourceResponse resource =  connectionFactory.getConnection().create(context, request);
+            targetObject = new LazyObjectAccessor(connectionFactory, targetObjectSet, resource.getId(), resource.getContent());
             measure.setResult(target);
         } catch (JsonValueException jve) {
             throw new SynchronizationException(jve);
@@ -588,9 +588,9 @@ class ObjectMapping {
                 throw new SynchronizationException("target '_id' has changed");
             }
             LOGGER.trace("Update target object {}", fullId);
-            UpdateRequest ur = Requests.newUpdateRequest(fullId, target);
-            ur.setRevision(target.get("_rev").asString());
-            service.getConnectionFactory().getConnection().update(context, ur);
+            UpdateRequest request = newUpdateRequest(fullId, target)
+                    .setRevision(target.get("_rev").asString());
+            connectionFactory.getConnection().update(context, request);
             measure.setResult(target);
         } catch (SynchronizationException se) {
             throw se;
@@ -615,10 +615,10 @@ class ObjectMapping {
         if (target != null && target.get("_id").isString()) { // forgiving delete
             EventEntry measure = Publisher.start(EVENT_DELETE_TARGET, target, null);
             try {
-                DeleteRequest ur = Requests.newDeleteRequest(targetObjectSet, target.get("_id").required().asString());
-                ur.setRevision(target.get("_rev").asString());
-                LOGGER.trace("Delete target object {}", ur.getResourcePath());
-                service.getConnectionFactory().getConnection().delete(context, ur);
+                DeleteRequest request = newDeleteRequest(targetObjectSet, target.get("_id").required().asString())
+                        .setRevision(target.get("_rev").asString());
+                LOGGER.trace("Delete target object {}", request.getResourcePath());
+                connectionFactory.getConnection().delete(context, request);
             } catch (JsonValueException jve) {
                 throw new SynchronizationException(jve);
             } catch (NotFoundException nfe) {
@@ -710,8 +710,7 @@ class ObjectMapping {
         if (isSourceObject(resourceContainer, resourceId)) {
             if (value == null || value.getObject() == null) {
                 // notification without the actual value
-                value = LazyObjectAccessor.rawReadObject(
-                        service.getContext(), service.getConnectionFactory(), resourceContainer, resourceId);
+                value = LazyObjectAccessor.rawReadObject(connectionFactory, context, resourceContainer, resourceId);
             }
             return doSourceSync(context, resourceId, value); // synchronous for now
         }
@@ -732,8 +731,7 @@ class ObjectMapping {
             throws SynchronizationException {
         if (isSourceObject(resourceContainer, resourceId)) {
         	if (newValue == null || newValue.getObject() == null) { // notification without the actual value
-                newValue = LazyObjectAccessor.rawReadObject(
-                        service.getContext(), service.getConnectionFactory(), resourceContainer, resourceId);
+                newValue = LazyObjectAccessor.rawReadObject(connectionFactory, context, resourceContainer, resourceId);
             }
 
             if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
@@ -819,7 +817,7 @@ class ObjectMapping {
                     //TODO blank check
                     String targetId = params.get("targetId").asString();
                     if (null != targetId){
-                        op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetId);
+                        op.targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, targetId);
                         if (null == sop.getTargetObject()) {
                             throw new SynchronizationException("Target object " + targetId + " does not exist");
                         }
@@ -837,7 +835,7 @@ class ObjectMapping {
                     String targetObjectId = LazyObjectAccessor.qualifiedId(targetObjectSet, targetId);
                     event.setTargetObjectId(targetObjectId);
 
-                    top.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetId);
+                    top.targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, targetId);
                     if (null == top.getTargetObject()) {
                         throw new SynchronizationException("Target object " + targetObjectId + " does not exist");
                     }
@@ -1151,8 +1149,8 @@ class ObjectMapping {
                 throws SynchronizationException {
             reconContext.checkCanceled();
             LazyObjectAccessor sourceObjectAccessor = objectEntry == null 
-                    ? new LazyObjectAccessor(service, sourceObjectSet, id) // Load source detail on demand
-                    : new LazyObjectAccessor(service, sourceObjectSet, id, objectEntry); // Pre-queried source detail
+                    ? new LazyObjectAccessor(connectionFactory, sourceObjectSet, id) // Load source detail on demand
+                    : new LazyObjectAccessor(connectionFactory, sourceObjectSet, id, objectEntry); // Pre-queried source detail
             Status status = Status.SUCCESS;
 
             for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), null, false)) {
@@ -1234,10 +1232,10 @@ class ObjectMapping {
                 
                 if (objectEntry == null) {
                     // Load target detail on demand
-                    op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id);
+                    op.targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, id);
                 } else {
                     // Pre-queried target detail
-                    op.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, id, objectEntry);
+                    op.targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, id, objectEntry);
                 }
                 event.setTargetObjectId(LazyObjectAccessor.qualifiedId(targetObjectSet, id));
                 op.reconId = reconContext.getReconId();
@@ -1347,9 +1345,9 @@ class ObjectMapping {
      */
     private void logEntry(AbstractSyncAuditEventLogger entry) throws SynchronizationException {
         try {
-            entry.log(service.getConnectionFactory());
-        } catch (ResourceException ose) {
-            throw new SynchronizationException(ose);
+            entry.log(connectionFactory);
+        } catch (ResourceException e) {
+            throw new SynchronizationException(e);
         }
     }
 
@@ -1763,7 +1761,7 @@ class ObjectMapping {
                                 }
                                 JsonValue createTargetObject = json(object());
                                 applyMappings(getSourceObject(), oldValue, createTargetObject, json(null), linkObject.linkQualifier); // apply property mappings to target
-                                targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, createTargetObject.get("_id").asString(), createTargetObject);
+                                targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, createTargetObject.get("_id").asString(), createTargetObject);
                                 execScript("onCreate", onCreateScript);
 
                                 // Allow the early link creation as soon as the target identifier is known
@@ -1803,7 +1801,7 @@ class ObjectMapping {
 
                                 if (isLinkingEnabled() && linkObject._id == null) {
                                     try {
-                                        createLink(getSourceObjectId(), targetId, reconId);
+                                        createLink(context, getSourceObjectId(), targetId, reconId);
                                         linkCreated = true;
                                     } catch (SynchronizationException ex) {
                                         // Allow for link to have been created in the meantime, e.g. programmatically
@@ -1821,7 +1819,7 @@ class ObjectMapping {
                                 }
                                 if (isLinkingEnabled() && linkObject._id != null && !linkObject.targetEquals(targetId)) {
                                     linkObject.targetId = targetId;
-                                    linkObject.update();
+                                    linkObject.update(context);
                                 }
                                 // TODO: Detect change of source id, and update link accordingly.
                                 if (action == ReconAction.CREATE || action == ReconAction.LINK) {
@@ -1844,7 +1842,7 @@ class ObjectMapping {
                                     execScript("onDelete", onDeleteScript);
                                     deleteTargetObject(context, getTargetObject());
                                     // Represent as not existing anymore so it gets removed from processed targets
-                                    targetObjectAccessor = new LazyObjectAccessor(service,
+                                    targetObjectAccessor = new LazyObjectAccessor(connectionFactory,
                                             targetObjectSet, getTargetObjectId(), null);
                                 }
                                 boolean wasUnlinked = PendingAction.wasPerformed(context, ReconAction.UNLINK);
@@ -1859,7 +1857,7 @@ class ObjectMapping {
                             case UNLINK:
                                 if (linkObject._id != null) { // forgiving; does nothing if no link exists
                                     execScript("onUnlink", onUnlinkScript);
-                                    linkObject.delete();
+                                    linkObject.delete(context);
                                 }
                                 break; // terminate DELETE and UNLINK
                             case EXCEPTION:
@@ -1900,15 +1898,15 @@ class ObjectMapping {
             }
         }
 
-        protected void createLink(String sourceId, String targetId, String reconId) throws SynchronizationException {
+        protected void createLink(Context context, String sourceId, String targetId, String reconId) throws SynchronizationException {
             Link linkObject = new Link(ObjectMapping.this);
             linkObject.setLinkQualifier(this.linkObject.linkQualifier);
             execScript("onLink", onLinkScript);
             linkObject.sourceId = sourceId;
             linkObject.targetId = targetId;
-            linkObject.create();
+            linkObject.create(context);
             initializeLink(linkObject);
-            LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", new Object[] {sourceId, targetId, reconId});
+            LOGGER.debug("Established link sourceId: {} targetId: {} in reconId: {}", sourceId, targetId, reconId);
         }
         
         /**
@@ -2097,8 +2095,8 @@ class ObjectMapping {
         public void init(JsonValue sourceObject, JsonValue targetObject, Situation situation, ReconAction action, String reconId) {
             String sourceObjectId = getObjectId(sourceObject);
             String targetObjectId = getObjectId(targetObject);
-            this.sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, sourceObjectId, sourceObject);
-            this.targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, targetObjectId, targetObject);
+            this.sourceObjectAccessor = new LazyObjectAccessor(connectionFactory, sourceObjectSet, sourceObjectId, sourceObject);
+            this.targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, targetObjectId, targetObject);
             this.reconId = reconId;
             this.situation = situation;
             this.action = action;
@@ -2219,7 +2217,7 @@ class ObjectMapping {
 
         public void fromJsonValue(JsonValue params) {
             reconId = params.get("reconId").asString();
-            sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, params.get("sourceId").required().asString());
+            sourceObjectAccessor = new LazyObjectAccessor(connectionFactory, sourceObjectSet, params.get("sourceId").required().asString());
             ignorePostAction = params.get("ignorePostAction").defaultTo(false).asBoolean();
             linkObject.setLinkQualifier(params.get("linkQualifier").defaultTo(Link.DEFAULT_LINK_QUALIFIER).asString());
         }
@@ -2252,9 +2250,9 @@ class ObjectMapping {
                     }
                 }
                 if (preloaded != null) {
-                    targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, linkObject.targetId, preloaded);
+                    targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, linkObject.targetId, preloaded);
                 } else {
-                    targetObjectAccessor = new LazyObjectAccessor(service, targetObjectSet, linkObject.targetId);
+                    targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, linkObject.targetId);
                 }
             }
 
@@ -2430,9 +2428,9 @@ class ObjectMapping {
             // TODO: Optimize to get the entire object with one query if it's sufficient
             LazyObjectAccessor fullObj = null;
             if (hasNonSpecialAttribute(resultValue.keys())) { //Assume this is a full object
-                fullObj = new LazyObjectAccessor(service, targetObjectSet, resultValue.get("_id").required().asString(), resultValue);
+                fullObj = new LazyObjectAccessor(connectionFactory, targetObjectSet, resultValue.get("_id").required().asString(), resultValue);
             } else {
-                fullObj = new LazyObjectAccessor(service, targetObjectSet, resultValue.get("_id").required().asString());
+                fullObj = new LazyObjectAccessor(connectionFactory, targetObjectSet, resultValue.get("_id").required().asString());
                 //fullObj.getObject();
             }
             return fullObj;
@@ -2665,7 +2663,7 @@ class ObjectMapping {
             if (linkObject._id == null || linkObject.sourceId == null) {
                 situation = Situation.UNASSIGNED;
             } else {
-                sourceObjectAccessor = new LazyObjectAccessor(service, sourceObjectSet, linkObject.sourceId);
+                sourceObjectAccessor = new LazyObjectAccessor(connectionFactory, sourceObjectSet, linkObject.sourceId);
                 if (getSourceObject() == null) { // force load to double check
                     situation = Situation.SOURCE_MISSING;
                 } else if (!isSourceValid()) {
