@@ -82,7 +82,7 @@ if not ""%1"" == """" (
 shift
 :noServiceName
 set MAIN_CLASS=org.forgerock.commons.launcher.Main
-"%LAUNCHER_SERVER_HOME%\bin\%ARCH%\prunsrv.exe" //IS//%SERVICE_NAME% --Install="%LAUNCHER_SERVER_HOME%\bin\%ARCH%\prunsrv.exe" --Description="ForgeRock OSGi Java Server" --Jvm=%JAVA_DLL% --Classpath=%CP% --JvmOptions=%JAVA_OPTS_SERVICE%%JAVA_OPTS_PARAM% --StartPath="%LAUNCHER_SERVER_HOME%" --StartMode=jvm --StartClass=%MAIN_CLASS% --StartMethod=start --StartParams="%SERVER_START_PARAMS%" --StopMode=jvm --StopClass=%MAIN_CLASS% --StopMethod=stop --LogPath="%LAUNCHER_SERVER_HOME%\logs" --LogPrefix=launcher --StdOutput=auto --StdError=auto --LogLevel=INFO
+"%LAUNCHER_SERVER_HOME%\bin\%ARCH%\prunsrv.exe" //IS//%SERVICE_NAME% --Install="%LAUNCHER_SERVER_HOME%\bin\%ARCH%\prunsrv.exe" --Description="ForgeRock OSGi Java Server" --Jvm=%JAVA_DLL% --Classpath=%CP% --JvmOptions=%JAVA_OPTS_SERVICE%%JAVA_OPTS_PARAM% --StartPath="%LAUNCHER_SERVER_HOME%" --StartMode=jvm --StartClass=%MAIN_CLASS% --StartMethod=start --StartParams="%LAUNCHER_START_PARAMS%" --StopMode=jvm --StopClass=%MAIN_CLASS% --StopMethod=stop --LogPath="%LAUNCHER_SERVER_HOME%\logs" --LogPrefix=launcher --StdOutput=auto --StdError=auto --LogLevel=INFO
 echo ForgeRock Launcher Java Service successfully installed as "%SERVICE_NAME%" service
 goto :EOF
 
