@@ -54,6 +54,7 @@ function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsMan
 
         tabHeader.attr("id", "tabHeader_password");
         tabHeader.find("a").attr("href","#password").text($.t('common.user.password'));
+        tabHeader.show();
 
         this.$el.find("#resourceDetailsTabHeader").after(tabHeader);
         this.$el.find("#resource-details").after(tabContent);
