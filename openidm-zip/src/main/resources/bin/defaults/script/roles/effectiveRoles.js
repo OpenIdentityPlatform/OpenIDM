@@ -49,7 +49,11 @@ if (object[rolesPropName] === undefined && objectId !== undefined && objectId !=
     directRoles = object[rolesPropName];
 }
 
-var effectiveRoles = directRoles == null ? [] : directRoles;
+var effectiveRoles = directRoles == null 
+        ? [] 
+        : directRoles.map(function(role) { 
+                return { "_ref" : role._ref };
+            });
 
 // This is the location to expand to dynamic roles, 
 // project role script return values can then be added via
