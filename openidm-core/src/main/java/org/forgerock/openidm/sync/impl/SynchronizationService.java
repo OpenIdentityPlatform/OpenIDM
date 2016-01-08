@@ -1,5 +1,4 @@
 /*
-/*
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -12,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -75,27 +74,23 @@ import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.forgerock.util.query.QueryFilter;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The resource provider for requests on /sync.  Describes the synchronization mappings and dispatches
- * actions to synchronize between source and targets listed in the synchronization mappings described
- * by the sync.json configuration file.  Also supports invocation as a {@link ScheduledService}.
+ * The resource provider for requests on /sync.  Dispatches actions to synchronize between source
+ * and targets listed in the synchronization mappings described by the injected Mappings.
+ * Also supports invocation as a {@link ScheduledService}.
  */
-@Component(
-    name = "org.forgerock.openidm.sync",
-    policy = ConfigurationPolicy.OPTIONAL,
-    immediate = true
-)
+@Component(name = SynchronizationService.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
 @Properties({
     @Property(name = "service.description", value = "OpenIDM object synchronization service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
     @Property(name = "openidm.router.prefix", value = "/sync/*")
 })
 @Service
-public class SynchronizationService implements SingletonResourceProvider, Mappings, ScheduledService {
+public class SynchronizationService implements SingletonResourceProvider, ScheduledService {
+    public static final String PID = "org.forgerock.openidm.synchronization";
 
     /** Actions supported by this service. */
     public enum SyncServiceAction {
@@ -111,9 +106,6 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     public static final String ACTION_PARAM_RESOURCE_ID = "resourceId";
     /** The resource name action parameter. */
     public static final String ACTION_PARAM_RESOURCE_NAME = "resourceName";
-
-    /** Object mappings. Order of mappings evaluated during synchronization is significant. */
-    private volatile ArrayList<ObjectMapping> mappings = null;
 
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC)
@@ -131,21 +123,8 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
     @Reference
     Reconcile reconService;
 
-    /** Script Registry service. */
-    @Reference(
-            policy = ReferencePolicy.DYNAMIC,
-            bind = "bindScriptRegistry",
-            unbind = "unbindScriptRegistry")
-    volatile ScriptRegistry scriptRegistry;
-    
-    protected void bindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = service;
-        Scripts.init(service);
-    }
-
-    protected void unbindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = null;
-    }
+    @Reference
+    Mappings mappings;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -153,78 +132,14 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     @Activate
     protected void activate(ComponentContext context) {
-        JsonValue config = new JsonValue(enhancedConfig.getConfiguration(context));
-        try {
-            mappings = new ArrayList<ObjectMapping>();
-            initMappings(mappings, config);
-        } catch (JsonValueException jve) {
-            throw new ComponentException("Configuration error: " + jve.getMessage(), jve);
-        }
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        mappings = null;
     }
 
     @Modified
     protected void modified(ComponentContext context) {
-        JsonValue config = new JsonValue(enhancedConfig.getConfiguration(context));
-        ArrayList<ObjectMapping> newMappings = new ArrayList<ObjectMapping>();
-        try {
-            initMappings(newMappings, config);
-            mappings = newMappings;
-        } catch (JsonValueException jve) {
-            throw new ComponentException("Configuration error: " + jve.getMessage(), jve);
-        }
-    }
-
-    private void initMappings(ArrayList<ObjectMapping> mappingList, JsonValue config) {
-        for (JsonValue jv : config.get("mappings").expect(List.class)) {
-            mappingList.add(new ObjectMapping(this, jv)); // throws JsonValueException
-        }
-        for (ObjectMapping mapping : mappingList) {
-            mapping.initRelationships(this, mappingList);
-        }
-    }
-
-    /**
-     * Return the {@link ObjectMapping} for a the mapping {@code name}.
-     *
-     * @param name the mapping name
-     * @return the ObjectMapping
-     * @throws SynchronizationException if no mapping exists by the given name.
-     */
-    public ObjectMapping getMapping(String name) throws SynchronizationException {
-        for (ObjectMapping mapping : mappings) {
-            if (mapping.getName().equals(name)) {
-                return mapping;
-            }
-        }
-        throw new SynchronizationException("No such mapping: " + name);
-    }
-
-    /**
-     * Instantiate an {@link ObjectMapping} with the given config
-     *
-     * @param mappingConfig the mapping configuration
-     * @return the created ObjectMapping
-     */
-    public ObjectMapping createMapping(JsonValue mappingConfig) {
-        ObjectMapping createdMapping = new ObjectMapping(this, mappingConfig);
-        List<ObjectMapping> augmentedMappings = new ArrayList<ObjectMapping>(mappings);
-        augmentedMappings.add(createdMapping);
-        createdMapping.initRelationships(this, augmentedMappings);
-        return createdMapping;
-    }
-
-    /**
-     * Retrieves the current {@link Context}.
-     *
-     * @return a {@link Context}
-     */
-    Context getContext() {
-        return ObjectSetContext.get();
     }
 
     /**
@@ -433,7 +348,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
                     return newActionResponse(result).asPromise();
                 case performAction:
                     logger.debug("Synchronization action=performAction, params={}", _params);
-                    ObjectMapping objectMapping = getMapping(_params.get("mapping").required().asString());
+                    ObjectMapping objectMapping = mappings.getMapping(_params.get("mapping").required().asString());
                     objectMapping.performAction(_params);
                     //result.put("status", performAction(_params));
                     return newActionResponse(json(object())).asPromise();

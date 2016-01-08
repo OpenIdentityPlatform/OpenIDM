@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions copyright 2014-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -29,6 +29,7 @@ import java.util.Map;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.impl.ObjectMapping.SyncOperation;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.Assert;
@@ -93,8 +94,8 @@ public class ObjectMappingTest {
     
     class TestObjectMapping extends ObjectMapping {
 
-        public TestObjectMapping(SynchronizationService service, JsonValue config) throws JsonValueException {
-            super(service, config);
+        public TestObjectMapping(ConnectionFactory connectionFactory, JsonValue config) throws JsonValueException {
+            super(connectionFactory, config);
         }
 
         public TestSyncOperation getSyncOperation() throws Exception {

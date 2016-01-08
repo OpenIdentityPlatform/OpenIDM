@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2015 ForgeRock AS.
+ * Portions copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -92,15 +92,13 @@ public class LinkTest {
     @Test
     public void createTest() throws ResourceException {
 
-        SynchronizationService synchronizationServiceMock = mock(SynchronizationService.class);
-        ConnectionFactory connectionFactorymock = mock(ConnectionFactory.class);
+        ConnectionFactory connectionFactoryMock = mock(ConnectionFactory.class);
         Connection connectionMock = mock(Connection.class);
         LinkType linkTypeMock = mock(LinkType.class);
 
-        when(synchronizationServiceMock.getConnectionFactory()).thenReturn(connectionFactorymock);
-        when(connectionFactorymock.getConnection()).thenReturn(connectionMock);
+        when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
 
-        objectMapping = new ObjectMapping(synchronizationServiceMock, mappingConfig);
+        objectMapping = new ObjectMapping(connectionFactoryMock, mappingConfig);
         Link link = new Link(objectMapping);
         objectMapping.linkType = linkTypeMock;
         link.setLinkQualifier("default");
@@ -110,30 +108,26 @@ public class LinkTest {
         when(linkTypeMock.getName()).thenReturn("linkType");
         when(linkTypeMock.useReverse()).thenReturn(true);
 
-        when(objectMapping.getService().getContext()).thenReturn(new RootContext());
         when(connectionMock.create(any(Context.class), any(CreateRequest.class)))
                 .thenReturn(newResourceResponse("testId", "testRevision", new JsonValue("testObject")));
 
-        link.create();
+        link.create(new RootContext());
 
         assertEquals(link.linkQualifier, "default");
         assertEquals(link._rev, "testRevision");
         assertEquals(link._id, "testId");
         assertEquals(link.initialized, true);
-
     }
 
     @Test
     public void updateTest() throws ResourceException {
-        SynchronizationService synchronizationServiceMock = mock(SynchronizationService.class);
-        ConnectionFactory connectionFactorymock = mock(ConnectionFactory.class);
+        ConnectionFactory connectionFactoryMock = mock(ConnectionFactory.class);
         Connection connectionMock = mock(Connection.class);
         LinkType linkTypeMock = mock(LinkType.class);
 
-        when(synchronizationServiceMock.getConnectionFactory()).thenReturn(connectionFactorymock);
-        when(connectionFactorymock.getConnection()).thenReturn(connectionMock);
+        when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
 
-        objectMapping = new ObjectMapping(synchronizationServiceMock, mappingConfig);
+        objectMapping = new ObjectMapping(connectionFactoryMock, mappingConfig);
         Link link = new Link(objectMapping);
         objectMapping.linkType = linkTypeMock;
         link.setLinkQualifier("default");
@@ -143,11 +137,10 @@ public class LinkTest {
         when(linkTypeMock.getName()).thenReturn("linkType");
         when(linkTypeMock.useReverse()).thenReturn(true);
 
-        when(objectMapping.getService().getContext()).thenReturn(new RootContext());
         doReturn(newResourceResponse("testId", "testRevision", new JsonValue("testObject")))
                 .when(connectionMock).update(any(Context.class), any(UpdateRequest.class));
         link._id = "testId";
-        link.update();
+        link.update(new RootContext());
 
         assertEquals(link.linkQualifier, "default");
         assertEquals(link._rev, "testRevision");
@@ -157,24 +150,21 @@ public class LinkTest {
 
     @Test
     public void deleteTest() throws ResourceException {
-        SynchronizationService synchronizationServiceMock = mock(SynchronizationService.class);
-        ConnectionFactory connectionFactorymock = mock(ConnectionFactory.class);
+        ConnectionFactory connectionFactoryMock = mock(ConnectionFactory.class);
         Connection connectionMock = mock(Connection.class);
         LinkType linkTypeMock = mock(LinkType.class);
 
-        when(synchronizationServiceMock.getConnectionFactory()).thenReturn(connectionFactorymock);
-        when(connectionFactorymock.getConnection()).thenReturn(connectionMock);
+        when(connectionFactoryMock.getConnection()).thenReturn(connectionMock);
 
-        objectMapping = new ObjectMapping(synchronizationServiceMock, mappingConfig);
+        objectMapping = new ObjectMapping(connectionFactoryMock, mappingConfig);
         Link link = new Link(objectMapping);
         objectMapping.linkType = linkTypeMock;
         link.setLinkQualifier("default");
         link._id = UUID.randomUUID().toString();
 
-        when(objectMapping.getService().getContext()).thenReturn(new RootContext());
         doReturn(newResourceResponse("testId", "testRevision", new JsonValue("testObject")))
                 .when(connectionMock).delete(any(Context.class), any(DeleteRequest.class));
-        link.delete();
+        link.delete(new RootContext());
 
         // make sure that _id has been set to null
         assertEquals(link._id, null);

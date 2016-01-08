@@ -11,13 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
 import java.util.Map;
 
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
@@ -27,11 +26,12 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.services.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Loads and caches the object only once on demand.
+ * Loads and caches the object only once on demandt
  * This class is not thread safe.
  *
  */
@@ -40,7 +40,7 @@ public class LazyObjectAccessor {
 
     public static final Name EVENT_READ_OBJ = Name.get("openidm/internal/discovery-engine/sync/read-object");
 
-    private SynchronizationService service;
+    private ConnectionFactory connectionFactory;
     private JsonValue object = null;       // The object once loaded, or null if not found
     private boolean loaded = false;        // Whether it considers its state as loaded/initialized
     private final String componentContext; // The qualifier for the id
@@ -48,14 +48,14 @@ public class LazyObjectAccessor {
 
     /**
      * Construct with a known value of the object. The object is considered loaded.
-     * @param service the sync service
+     * @param connectionFactory the ConnectionFactory
      * @param componentContext the component qualifier of the object id
      * @param localId the unqualified part of the object id
      * @param value the object value
      */
-    public LazyObjectAccessor(SynchronizationService service, String componentContext,
-                              String localId, JsonValue value) {
-        this.service = service;
+    public LazyObjectAccessor(ConnectionFactory connectionFactory, String componentContext, String localId,
+            JsonValue value) {
+        this.connectionFactory = connectionFactory;
         this.object = value;
         this.componentContext = componentContext;
         this.localId = localId;
@@ -64,13 +64,12 @@ public class LazyObjectAccessor {
 
     /**
      * Construct with just the identifier of the object. The object is not yet considered loaded.
-     * @param service the sync service
+     * @param connectionFactory the ConnectionFactory
      * @param componentContext the component qualifier of the object id
      * @param localId the unqualified part of the object id
      */
-    public LazyObjectAccessor(SynchronizationService service, String componentContext,
-                              String localId) {
-        this.service = service;
+    public LazyObjectAccessor(ConnectionFactory connectionFactory, String componentContext, String localId) {
+        this.connectionFactory = connectionFactory;
         this.componentContext = componentContext;
         this.localId = localId;
     }
@@ -87,7 +86,7 @@ public class LazyObjectAccessor {
         if (!loaded) {
             try {
                 // If not found, the object will be null
-                object = rawReadObject(service.getContext(), service.getConnectionFactory(), componentContext, localId);
+                object = rawReadObject(connectionFactory, ObjectSetContext.get(), componentContext, localId);
             } catch (SynchronizationException ex) {
                 throw ex; // being explicit that this would not be considered loaded
             }
@@ -132,14 +131,16 @@ public class LazyObjectAccessor {
      * @throws SynchronizationException if retrieving the object failed
      * @return the object value if found, null if not found
      */
-    public static JsonValue rawReadObject(Context router, ConnectionFactory connectionFactory, String resourceContainer, String resourceId) throws SynchronizationException {
+    public static JsonValue rawReadObject(ConnectionFactory connectionFactory, Context context,
+            String resourceContainer, String resourceId)
+            throws SynchronizationException {
         if (resourceId == null) {
             throw new NullPointerException("Identifier passed to readObject is null");
         }
         EventEntry measure = Publisher.start(EVENT_READ_OBJ, null, resourceId);
         try {
-            ReadRequest r = Requests.newReadRequest(resourceContainer, resourceId);
-            JsonValue result = connectionFactory.getConnection().read(router,r).getContent();
+            ReadRequest request = Requests.newReadRequest(resourceContainer, resourceId);
+            JsonValue result = connectionFactory.getConnection().read(context, request).getContent();
             measure.setResult(result);
             return result;
         } catch (NotFoundException nfe) { // target not found results in null
