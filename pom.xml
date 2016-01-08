@@ -216,7 +216,7 @@
 
     <properties>
         <!-- Version management -->
-        <commons.forgerock-bom.version>4.1.0</commons.forgerock-bom.version>
+        <commons.forgerock-bom.version>4.1.1</commons.forgerock-bom.version>
 
         <!-- Commons versions -->
         <commons.forgerock-script.version>3.0.2</commons.forgerock-script.version>
