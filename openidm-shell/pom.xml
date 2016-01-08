@@ -34,7 +34,7 @@
     <packaging>bundle</packaging>
     <properties>
         <openidm.osgi.import.defaults>
-            !org.apache.felix.gogo.shell,!org.apache.felix.gogo.runtime*,org.apache.felix.service.command;version="[0.10.0,1)";status=provisional;mandatory:=status
+            !org.apache.felix.gogo.shell,!org.apache.felix.gogo.runtime*,org.apache.felix.service.command;version="[0.12.0,1)";status=provisional;mandatory:=status
         </openidm.osgi.import.defaults>
     </properties>
     <dependencies>
@@ -58,23 +58,13 @@
             <artifactId>org.restlet.ext.jackson</artifactId>
         </dependency>
         <dependency>
+            <groupId>org.restlet.osgi</groupId>
+            <artifactId>org.restlet</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.gogo.shell</artifactId>
-            <version>0.10.0</version>
-            <!-- The spring repository currently serves up a pom with false dependency on this file. Remove it. -->
-            <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.osgi</groupId>
-                    <artifactId>org.eclipse.osgi</artifactId>
-                </exclusion>
-            </exclusions>
         </dependency>
-        <!--dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.gogo.command</artifactId>
-            <version>0.12.0</version>
-            <scope>provided</scope>
-        </dependency-->
         <dependency>
             <groupId>asm</groupId>
             <artifactId>asm-all</artifactId>
@@ -85,7 +75,7 @@
         <!-- Provided OSGi Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.core</artifactId>
+            <artifactId>osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
@@ -96,7 +86,7 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
+            <artifactId>osgi.cmpn</artifactId>
             <scope>provided</scope>
         </dependency>
 

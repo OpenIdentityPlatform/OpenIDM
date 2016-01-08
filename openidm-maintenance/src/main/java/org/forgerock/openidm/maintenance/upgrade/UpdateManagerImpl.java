@@ -101,8 +101,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Basic manager to initiate the product maintenance and upgrade mechanisms.
  */
-@Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, metatype = false,
-        description = "OpenIDM Update Manager", immediate = true)
+@Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, immediate = true,
+    description = "OpenIDM Update Manager", metatype = false)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -148,7 +148,7 @@ public class UpdateManagerImpl implements UpdateManager {
     private ComponentContext context;
 
     /** Listener for repo service used by {@link #getDbDirName()} */
-    private ServiceTracker repoServiceTracker = null;
+    private ServiceTracker<RepoBootService, RepoBootService> repoServiceTracker = null;
 
     public enum UpdateStatus {
         IN_PROGRESS,
@@ -166,19 +166,19 @@ public class UpdateManagerImpl implements UpdateManager {
         BundleContext bundleContext = compContext.getBundleContext();
         Filter osgiFrameworkFilter = bundleContext
                 .createFilter("(" + Constants.OBJECTCLASS + "=org.forgerock.commons.launcher.OSGiFramework)");
-        ServiceTracker serviceTracker = new ServiceTracker(bundleContext, osgiFrameworkFilter, null);
+        ServiceTracker<OSGiFrameworkService, OSGiFrameworkService> serviceTracker =
+                new ServiceTracker<>(bundleContext, osgiFrameworkFilter, null);
         serviceTracker.open(true);
-        this.osgiFrameworkService = (OSGiFrameworkService) serviceTracker.getService();
-        this.context = compContext;
-
-        repoServiceTracker = new ServiceTracker(bundleContext, RepoBootService.class.getName(), null);
-        repoServiceTracker.open(true);
+        this.osgiFrameworkService = serviceTracker.getService();
 
         if (osgiFrameworkService != null) {
             logger.debug("Obtained OSGiFrameworkService", compContext.getProperties());
         } else {
             throw new InternalServerErrorException("Cannot instantiate service without OSGiFrameworkService");
         }
+
+        repoServiceTracker = new ServiceTracker<>(bundleContext, RepoBootService.class.getName(), null);
+        repoServiceTracker.open(true);
     }
 
     @Deactivate

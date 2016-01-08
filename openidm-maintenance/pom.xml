@@ -65,7 +65,7 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
+            <artifactId>osgi.cmpn</artifactId>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -150,27 +150,18 @@
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.configadmin</artifactId>
-                                    <version>1.6.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.log</artifactId>
-                                    <version>1.0.1</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.fileinstall</artifactId>
-                                    <version>3.2.6</version>
-                                </artifactItem>
-                                <artifactItem>
-                                    <groupId>org.osgi</groupId>
-                                    <artifactId>org.osgi.compendium</artifactId>
-                                    <version>4.2.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.scr</artifactId>
-                                    <version>1.6.0</version>
                                 </artifactItem>
                             </artifactItems>
                             <outputDirectory>${project.build.directory}/osgi/bundle</outputDirectory>
@@ -198,7 +189,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Import-Package>org.forgerock.commons.launcher;version="[0,1]",*</Import-Package>
+                        <!-- this version range must include 0 because of the way the launcher is deployed -->
+                        <Import-Package>org.forgerock.commons.launcher;version="[0,3)",*</Import-Package>
                         <Export-Package>
                             org.forgerock.openidm.maintenance;version="${project.version}"
                         </Export-Package>
