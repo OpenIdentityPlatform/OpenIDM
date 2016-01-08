@@ -135,9 +135,12 @@
                         "type" : "string",
                         "searchable" : true,
                         "userEditable" : true,
-                        "pattern" : ".+@.+"
-                    },
-                    "sn" : {
+                        "policies" : [
+                            {
+                                "policyId" : "valid-email-address-format"
+                            }
+                        ]
+                    },                    "sn" : {
                         "title" : "Last Name",
                         "viewable" : true,
                         "type" : "string",
@@ -181,6 +184,42 @@
                         "type" : "string",
                         "searchable" : true,
                         "userEditable" : false
+                    },
+                    "employeeNumber" : {
+                        "title" : "Employee Number",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true,
+                        "userEditable" : false
+                    },
+                    "displayName" : {
+                        "title" : "Display Name",
+                        "viewable" : true,
+                        "type" : "string",
+                        "searchable" : true,
+                        "userEditable" : false
+                    },
+                    "startDate" : {
+                        "type" : "string",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "userEditable" : false,
+                        "policies" : [
+                            {
+                                "policyId" : "valid-date"
+                            }
+                        ]
+                    },
+                    "endDate" : {
+                        "type" : "string",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "userEditable" : false,
+                        "policies" : [
+                            {
+                                "policyId" : "valid-date"
+                            }
+                        ]
                     },
                     "roles" : {
                         "description" : "",
@@ -433,7 +472,9 @@
                     "userName",
                     "givenName",
                     "sn",
-                    "mail"
+                    "mail",
+                    "employeeNumber",
+                    "displayName"
                 ]
             }
         },
