@@ -329,9 +329,9 @@ public class ActivitiServiceImpl implements RequestHandler {
                     if (null != configurationAdmin) {
                         try {
                             barInstallerConfiguration = configurationAdmin.createFactoryConfiguration("org.apache.felix.fileinstall", null);
-                            Dictionary<String, String> props = barInstallerConfiguration.getProperties();
+                            Dictionary<String, Object> props = barInstallerConfiguration.getProperties();
                             if (props == null) {
-                                props = new Hashtable<String, String>();
+                                props = new Hashtable<String, Object>();
                             }
                             props.put("felix.fileinstall.poll", "2000");
                             props.put("felix.fileinstall.noInitialDelay", "true");

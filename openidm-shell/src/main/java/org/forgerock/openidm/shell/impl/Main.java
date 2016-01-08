@@ -27,6 +27,7 @@ package org.forgerock.openidm.shell.impl;
 import org.apache.felix.gogo.runtime.CommandProcessorImpl;
 import org.apache.felix.gogo.runtime.threadio.ThreadIOImpl;
 import org.apache.felix.gogo.shell.Console;
+import org.apache.felix.gogo.shell.History;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Converter;
 import org.apache.felix.service.command.Function;
@@ -59,7 +60,7 @@ public final class Main {
         session.put("_cwd", IdentityServer.getFileForPath("."));
         // start shell
         if (args.length == 0) {
-            Thread thread = new Thread(new Console(session), "OpenIDM shell");
+            Thread thread = new Thread(new Console(session, new History()), "OpenIDM shell");
             thread.start();
         } else {
             processor.eval(session, args);
