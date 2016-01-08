@@ -394,7 +394,7 @@
             </includes>
             <outputDirectory>/openidm/samples/sample6</outputDirectory>
         </fileSet>
-        <!-- Setup Sample7 
+        <!-- Setup Sample7
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
@@ -577,7 +577,6 @@
             </includes>
             <excludes>
                 <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
                 <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
             </excludes>
@@ -587,7 +586,6 @@
             <directory>${basedir}/src/main/resources/samples/usecase</directory>
             <includes>
                 <include>conf/managed.json</include>
-                <include>conf/policy.json</include>
                 <include>conf/repo.orientdb.json</include>
                 <include>conf/sync.json</include>
                 <include>conf/system.properties</include>
@@ -607,7 +605,6 @@
             </includes>
             <excludes>
                 <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
                 <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
@@ -620,7 +617,6 @@
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
                 <include>conf/managed.json</include>
-                <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
                 <include>conf/repo.orientdb.json</include>
                 <include>conf/schedule-taskscan_sun*.json</include>
@@ -653,7 +649,6 @@
             </includes>
             <excludes>
                 <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
                 <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
@@ -667,7 +662,6 @@
                 <include>conf/endpoint-getusermanager.json</include>
                 <include>conf/external.email.json</include>
                 <include>conf/managed.json</include>
-                <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
                 <include>conf/repo.orientdb.json</include>
                 <include>conf/system.properties</include>
@@ -687,7 +681,6 @@
             </includes>
             <excludes>
                 <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
                 <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
@@ -700,7 +693,6 @@
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
                 <include>conf/managed.json</include>
-                <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
                 <include>conf/provisioner.openicf-BusinessCSV.json</include>
                 <include>conf/repo.orientdb.json</include>
@@ -734,7 +726,6 @@
             </includes>
             <excludes>
                 <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
                 <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
@@ -747,7 +738,6 @@
             <includes>
                 <include>conf/endpoint-getusermanager.json</include>
                 <include>conf/managed.json</include>
-                <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
                 <include>conf/repo.orientdb.json</include>
                 <include>conf/schedule-certification.json</include>
@@ -780,7 +770,6 @@
             </includes>
             <excludes>
                 <exclude>conf/managed.json</exclude>
-                <exclude>conf/policy.json</exclude>
                 <exclude>conf/process-access.json</exclude>
                 <exclude>conf/repo.orientdb.json</exclude>
                 <exclude>conf/system.properties</exclude>
@@ -794,7 +783,6 @@
                 <include>conf/endpoint-getusermanager.json</include>
                 <include>conf/external.email.json</include>
                 <include>conf/managed.json</include>
-                <include>conf/policy.json</include>
                 <include>conf/process-access.json</include>
                 <include>conf/repo.orientdb.json</include>
                 <include>conf/schedule-taskscan_passwordchange.json</include>
