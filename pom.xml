@@ -298,7 +298,6 @@
         <module>openidm-ui</module>
         <module>openidm-util</module>
         <module>openidm-workflow-activiti</module>
-        <module>openidm-patch-base</module>
         <module>openidm-maintenance</module>
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
