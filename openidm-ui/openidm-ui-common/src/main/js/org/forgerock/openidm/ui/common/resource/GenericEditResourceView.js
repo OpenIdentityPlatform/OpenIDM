@@ -210,6 +210,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 this.editor.on('change', _.bind(function() {
                     this.showPendingChanges();
                 }, this));
+                
+                this.$el.find(".json-editor-btn-collapse").prop("disabled", true);
             }, this));
             
             if (this.data.isSystemResource) {
