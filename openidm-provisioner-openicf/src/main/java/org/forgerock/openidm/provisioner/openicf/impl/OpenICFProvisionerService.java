@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -22,18 +22,6 @@ import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.and;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.contains;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.containsAllValues;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.endsWith;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.equalTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThan;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.greaterThanOrEqualTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThan;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.lessThanOrEqualTo;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.not;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.or;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.startsWith;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -44,7 +32,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -76,7 +63,6 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -129,7 +115,6 @@ import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
@@ -1762,132 +1747,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     }
 
     private static final QueryFilterVisitor<Filter, ObjectClassInfoHelper, JsonPointer> RESOURCE_FILTER =
-            new QueryFilterVisitor<Filter, ObjectClassInfoHelper, JsonPointer>() {
-
-                @Override
-                public Filter visitAndFilter(final ObjectClassInfoHelper helper,
-                        List<QueryFilter<JsonPointer>> subFilters) {
-                    final Iterator<QueryFilter<JsonPointer>> iterator = subFilters.iterator();
-                    if (iterator.hasNext()) {
-                        return buildAnd(helper, iterator.next(), iterator);
-                    } else {
-                        throw new IllegalArgumentException("cannot parse 'and' QueryFilter with zero operands");
-                    }
-                }
-
-                private Filter buildAnd(final ObjectClassInfoHelper helper, final QueryFilter<JsonPointer> left,
-                        final Iterator<QueryFilter<JsonPointer>> iterator) {
-                    if (iterator.hasNext()) {
-                        final QueryFilter<JsonPointer> right = iterator.next();
-                        return and(left.accept(this, helper), buildAnd(helper, right, iterator));
-                    } else {
-                        return left.accept(this, helper);
-                    }
-                }
-
-                @Override
-                public Filter visitOrFilter(ObjectClassInfoHelper helper,
-                        List<QueryFilter<JsonPointer>> subFilters) {
-                    final Iterator<QueryFilter<JsonPointer>> iterator = subFilters.iterator();
-                    if (iterator.hasNext()) {
-                        return buildOr(helper, iterator.next(), iterator);
-                    } else {
-                        throw new IllegalArgumentException("cannot parse 'or' QueryFilter with zero operands");
-                    }
-                }
-
-                private Filter buildOr(final ObjectClassInfoHelper helper, final QueryFilter<JsonPointer> left,
-                        final Iterator<QueryFilter<JsonPointer>> iterator) {
-                    if (iterator.hasNext()) {
-                        final QueryFilter<JsonPointer> right = iterator.next();
-                        return or(left.accept(this, helper), buildOr(helper, right, iterator));
-                    } else {
-                        return left.accept(this, helper);
-                    }
-                }
-
-                @Override
-                public Filter visitBooleanLiteralFilter(final ObjectClassInfoHelper helper, final boolean value) {
-                    if (value) {
-                        return null;
-                    }
-                    throw new UnsupportedOperationException(
-                            "visitBooleanLiteralFilter only supported for literal true, not false");
-                }
-                
-                @Override
-                public Filter visitContainsFilter(ObjectClassInfoHelper helper, JsonPointer field,
-                        Object valueAssertion) {
-                    return contains(helper.filterAttribute(field, valueAssertion));
-                }
-
-                @Override
-                public Filter visitEqualsFilter(ObjectClassInfoHelper helper, JsonPointer field,
-                        Object valueAssertion) {
-                    return equalTo(helper.filterAttribute(field, valueAssertion));
-                }
-
-                /**
-                 * EndsWith filter
-                 */
-                private static final String EW = "ew";
-                /**
-                 * ContainsAll filter
-                 */
-                private static final String CA = "ca";
-
-                @Override
-                public Filter visitExtendedMatchFilter(ObjectClassInfoHelper helper,
-                        JsonPointer field, String matchingRuleId, Object valueAssertion) {
-                    if (EW.equals(matchingRuleId)) {
-                        return endsWith(helper.filterAttribute(field, valueAssertion));
-                    } else if (CA.equals(matchingRuleId)) {
-                        return containsAllValues(helper.filterAttribute(field, valueAssertion));
-                    }
-                    throw new IllegalArgumentException("ExtendedMatchFilter is not supported");
-                }
-
-                @Override
-                public Filter visitGreaterThanFilter(ObjectClassInfoHelper helper,
-                        JsonPointer field, Object valueAssertion) {
-                    return greaterThan(helper.filterAttribute(field, valueAssertion));
-                }
-
-                @Override
-                public Filter visitGreaterThanOrEqualToFilter(ObjectClassInfoHelper helper,
-                        JsonPointer field, Object valueAssertion) {
-                    return greaterThanOrEqualTo(helper.filterAttribute(field, valueAssertion));
-                }
-
-                @Override
-                public Filter visitLessThanFilter(ObjectClassInfoHelper helper, JsonPointer field,
-                        Object valueAssertion) {
-                    return lessThan(helper.filterAttribute(field, valueAssertion));
-                }
-
-                @Override
-                public Filter visitLessThanOrEqualToFilter(ObjectClassInfoHelper helper,
-                        JsonPointer field, Object valueAssertion) {
-                    return lessThanOrEqualTo(helper.filterAttribute(field, valueAssertion));
-                }
-
-                @Override
-                public Filter visitNotFilter(ObjectClassInfoHelper helper, QueryFilter<JsonPointer> subFilter) {
-                    return not(subFilter.accept(this, helper));
-                }
-
-                @Override
-                public Filter visitPresentFilter(ObjectClassInfoHelper helper, JsonPointer field) {
-                    throw new IllegalArgumentException("PresentFilter is not supported");
-                }
-
-                @Override
-                public Filter visitStartsWithFilter(ObjectClassInfoHelper helper,
-                        JsonPointer field, Object valueAssertion) {
-                    return startsWith(helper.filterAttribute(field, valueAssertion));
-                }
-            };
-
+            new OpenICFFilterAdapter();
 
     /**
      * Gets the unique {@link org.forgerock.openidm.provisioner.SystemIdentifier} of this instance.

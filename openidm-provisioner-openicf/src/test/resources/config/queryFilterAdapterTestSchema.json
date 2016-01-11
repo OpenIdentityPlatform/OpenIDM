@@ -1,0 +1,20 @@
+{
+    "__ACCOUNT__": {
+        "$schema": "http://json-schema.org/draft-03/schema",
+        "id": "__ACCOUNT__",
+        "type": "object",
+        "nativeType": "__ACCOUNT__",
+        "properties": {
+            "email": {
+                "type": "string",
+                "nativeName": "email",
+                "nativeType": "string"
+            },
+            "sortKey": {
+                "type": "integer",
+                "nativeName": "sortKey",
+                "nativeType": "integer"
+            }
+        }
+    }
+}
