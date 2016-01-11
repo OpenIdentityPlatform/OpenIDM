@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -103,7 +103,7 @@ public class ObjectClassInfoHelperFactory {
      * @return a new {@link ObjectClassInfoHelper}.
      * @throws SchemaException when schema is invalid.
      */
-    static ObjectClassInfoHelper createObjectClassInfoHelper(JsonValue schema) throws SchemaException {
+    public static ObjectClassInfoHelper createObjectClassInfoHelper(JsonValue schema) throws SchemaException {
         ObjectClass objectClass = new ObjectClass(schema.get(ConnectorUtil.OPENICF_OBJECT_CLASS).required().asString());
         return factory.containsKey(objectClass)
                 ? factory.get(objectClass).apply(schema)
