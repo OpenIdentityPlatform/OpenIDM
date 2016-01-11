@@ -91,7 +91,7 @@
             <directory>${project.build.directory}</directory>
             <outputDirectory>/openidm/legal-notices</outputDirectory>
             <includes>
-                <include>license.txt</include>
+                <include>Forgerock_License.txt</include>
             </includes>
         </fileSet>
         <fileSet>
