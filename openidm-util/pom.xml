@@ -100,12 +100,6 @@
             <artifactId>osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- TODO Remove org.apache.felix.framework with Compendium 4.3 -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.cmpn</artifactId>

@@ -78,12 +78,6 @@
             <artifactId>osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
-        <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
-        <dependency>
-            <groupId>org.apache.felix</groupId>
-            <artifactId>org.apache.felix.framework</artifactId>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.cmpn</artifactId>
