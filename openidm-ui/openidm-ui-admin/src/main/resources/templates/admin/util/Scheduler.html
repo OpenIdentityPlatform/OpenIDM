@@ -57,6 +57,29 @@
             </span>
         </div>
     </div>
+    <div class="form-inline">
+        <div class="group-field-block-inline no-validation-block">
+            <label class="light">
+                <input type="checkbox" value="true" class="enabled"/>
+                {{t "templates.scheduler.enabled"}}
+            </label>
+        </div>
+
+        <div class="group-field-block-inline no-validation-block">
+            <label class="light">
+                <input type="checkbox" value="false" class="persisted"/>
+                {{t "templates.scheduler.persisted"}}
+            </label>
+        </div>
+
+        <div style="display:none;" class="group-field-block-inline misfirePolicyBlock no-validation-block">
+            <label class="light">{{t "templates.scheduler.misfirePolicy"}}</label>
+            <select class="misfirePolicy form-control">
+                <option value="fireAndProceed">{{t "templates.scheduler.fireAndProceed"}}</option>
+                <option value="doNothing" selected>{{t "templates.scheduler.doNothing"}}</option>
+            </select>
+        </div>
+    </div>
     {{/if}}
 
     <div class="clearfix">
