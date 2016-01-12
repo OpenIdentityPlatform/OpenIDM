@@ -208,6 +208,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     private static final int UNAUTHORIZED_ERROR_CODE = 401;
 
+    private static final QueryFilterVisitor<Filter, ObjectClassInfoHelper, JsonPointer> RESOURCE_FILTER =
+            new OpenICFFilterAdapter();
+
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
     private Promise<ConnectorInfo, RuntimeException> connectorFacadeCallback = null;
@@ -1465,15 +1468,14 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 // TODO-crest3- fix contract for remainingPagedResults
                 return newResultPromise(
                         newQueryResponse(searchResult != null ? searchResult.getPagedResultsCookie() : null));
+            } catch (EmptyResultSetException e) {
+                // cause an empty-result to be returned
+                return newResultPromise(newQueryResponse());
             } catch (ResourceException e) {
                 return e.asPromise();
             } catch (ConnectorException e) {
                 return adaptConnectorException(context, request, e, null, null, null, null, activityLogger).asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (AttributeMissingException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (IllegalArgumentException e) {
+            } catch (IllegalArgumentException | JsonValueException e) {
                 return new BadRequestException(e.getMessage(), e).asPromise();
             } catch (Exception e) {
                 return new InternalServerErrorException(e.getMessage(), e).asPromise();
@@ -1745,9 +1747,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             this.throwable = throwable;
         }
     }
-
-    private static final QueryFilterVisitor<Filter, ObjectClassInfoHelper, JsonPointer> RESOURCE_FILTER =
-            new OpenICFFilterAdapter();
 
     /**
      * Gets the unique {@link org.forgerock.openidm.provisioner.SystemIdentifier} of this instance.
