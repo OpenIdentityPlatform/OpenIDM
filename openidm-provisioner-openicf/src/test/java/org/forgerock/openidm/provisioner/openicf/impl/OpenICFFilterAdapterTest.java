@@ -35,13 +35,13 @@ import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.util.query.QueryFilter;
 import org.identityconnectors.framework.common.objects.Attribute;
 import org.identityconnectors.framework.common.objects.AttributeBuilder;
-import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
 import org.identityconnectors.framework.common.objects.filter.AttributeFilter;
 import org.identityconnectors.framework.common.objects.filter.CompositeFilter;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.common.objects.filter.FilterBuilder;
 import org.identityconnectors.framework.common.objects.filter.NotFilter;
+import org.identityconnectors.framework.common.objects.filter.PresenceFilter;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
@@ -56,17 +56,18 @@ import static org.forgerock.util.query.QueryFilter.*;
 public class OpenICFFilterAdapterTest {
     private static final String OBJECT_TYPES = "objectTypes";
 
+    private static final JsonPointer DOES_NOT_EXIST_PTR = new JsonPointer("/doesNotExist");
+
     private static final String STRING_VALUE = "a@b.com";
-    private static final Attribute STRING_ATTR = AttributeBuilder.build("email", STRING_VALUE);
-    private static final JsonPointer STRING_PTR = new JsonPointer("/" + STRING_ATTR.getName());
+    private static final Attribute STRING_ATTR = AttributeBuilder.build("__NAME__", STRING_VALUE);
+    private static final JsonPointer STRING_PTR = new JsonPointer("/name");
 
     private static final Integer NUMBER_VALUE = 123;
     private static final Attribute NUMBER_ATTR = AttributeBuilder.build("sortKey", NUMBER_VALUE);
-    private static final JsonPointer NUMBER_PTR = new JsonPointer("/" + NUMBER_ATTR.getName());
+    private static final JsonPointer NUMBER_PTR = new JsonPointer("/sortKey");
 
     private final ObjectClassInfoHelper helper;
     private final OpenICFFilterAdapter filterAdapter;
-    private final JsonPointer namePointer;
 
     public OpenICFFilterAdapterTest() throws URISyntaxException, IOException {
         final JsonValue schema = new JsonValue(new HashMap<String, Object>());
@@ -77,7 +78,6 @@ public class OpenICFFilterAdapterTest {
         helper = ObjectClassInfoHelperFactory.createObjectClassInfoHelper(
                 schema.get(OBJECT_TYPES).get(ObjectClass.ACCOUNT_NAME));
         filterAdapter = new OpenICFFilterAdapter();
-        namePointer = new JsonPointer(new String[]{Name.NAME});
     }
 
     /**
@@ -102,6 +102,7 @@ public class OpenICFFilterAdapterTest {
                         FilterBuilder.endsWith(STRING_ATTR) },
                 { extendedMatch(STRING_PTR, OpenICFFilterAdapter.CA, STRING_VALUE),
                         FilterBuilder.containsAllValues(STRING_ATTR) },
+                { present(STRING_PTR), FilterBuilder.present(STRING_ATTR.getName()) },
                 { alwaysTrue(), null }
         };
     }
@@ -139,6 +140,9 @@ public class OpenICFFilterAdapterTest {
             final Filter expectedNot = ((NotFilter) expectedFilter).getFilter();
             final Filter actualNot = ((NotFilter) actualFilter).getFilter();
             assertEquals((AttributeFilter) expectedNot, (AttributeFilter) actualNot);
+        } else if (expectedFilter instanceof PresenceFilter) {
+            assertThat(((PresenceFilter) expectedFilter).getName())
+                    .isEqualTo(((PresenceFilter) actualFilter).getName());
         } else {
             throw new UnsupportedOperationException(
                     "expectedFilter not recognised: " + actualFilter.getClass().getCanonicalName());
@@ -147,21 +151,20 @@ public class OpenICFFilterAdapterTest {
 
     /**
      * Test that {@link OpenICFFilterAdapter#visitPresentFilter(ObjectClassInfoHelper, JsonPointer)}
-     * <b>always</b> throws an {@code Exception}, because it is not implemented
+     * throws an {@link EmptyResultSetException} when a requested field is not present
      */
-    @Test(expectedExceptions = IllegalArgumentException.class)
+    @Test(expectedExceptions = EmptyResultSetException.class)
     public void testVisitPresentFilterException() {
-        filterAdapter.visitPresentFilter(helper, namePointer);
+        filterAdapter.visitPresentFilter(helper, DOES_NOT_EXIST_PTR);
     }
 
     /**
      * Test that {@link OpenICFFilterAdapter#visitExtendedMatchFilter(ObjectClassInfoHelper, JsonPointer, String,
-     * Object)}
-     * throws an {@code Exception} when an unsupported {@code matchingRuleId} argument is passed in
+     * Object)} throws an {@code Exception} when an unsupported {@code matchingRuleId} argument is passed in
      */
     @Test(expectedExceptions = IllegalArgumentException.class)
     public void testVisitExtendedMatchFilterException() {
-        filterAdapter.visitExtendedMatchFilter(helper, STRING_PTR, "doesNotExist", namePointer);
+        filterAdapter.visitExtendedMatchFilter(helper, STRING_PTR, "doesNotExist", STRING_VALUE);
     }
 
     /**
@@ -184,10 +187,10 @@ public class OpenICFFilterAdapterTest {
 
     /**
      * Test that {@link OpenICFFilterAdapter#visitBooleanLiteralFilter(ObjectClassInfoHelper, boolean)}
-     * throws an {@code Exception} when literal {@code false} is the {@code value} argument
+     * throws an {@link EmptyResultSetException} when literal {@code false} is the {@code value} argument
      */
-    @Test(expectedExceptions = UnsupportedOperationException.class)
-    public void testVisitPresentFilterWithFalse() {
+    @Test(expectedExceptions = EmptyResultSetException.class)
+    public void testVisitBooleanFilterWithFalse() {
         filterAdapter.visitBooleanLiteralFilter(helper, false);
     }
 

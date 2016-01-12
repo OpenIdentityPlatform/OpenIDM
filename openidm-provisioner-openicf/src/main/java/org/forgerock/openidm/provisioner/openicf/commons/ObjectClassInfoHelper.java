@@ -147,6 +147,41 @@ public class ObjectClassInfoHelper {
         return returnResource;
     }
 
+    /**
+     * Extracts attribute-name from {@link JsonPointer} and performs any necessary normalization
+     *
+     * @param field Single-level {@link JsonPointer} which is the CREST attribute-name
+     * @return ICF attribute-name
+     */
+    protected String extractAttributeName(JsonPointer field) {
+        if (field.size() != 1) {
+            throw new IllegalArgumentException("Only one level JsonPointer supported");
+        }
+        final String attributeName = field.leaf();
+
+        // OPENIDM-2385 - map _id to the Uid attribute containing valueAssertion
+        if (ResourceResponse.FIELD_CONTENT_ID.equals(attributeName)) {
+            return Uid.NAME;
+        }
+        return attributeName;
+    }
+
+    /**
+     * Finds a ICF attribute-name, given a CREST attribute-name
+     *
+     * @param field Single-level {@link JsonPointer} which is the CREST attribute-name
+     * @return ICF attribute-name or {@code null} if not present
+     */
+    public String getAttributeName(JsonPointer field) {
+        final String attributeName = extractAttributeName(field);
+
+        for (final AttributeInfoHelper ai: attributes){
+            if (ai.getName().equals(attributeName)) {
+                return ai.getAttributeInfo().getName();
+            }
+        }
+        return null;
+    }
 
     public Attribute filterAttribute(JsonPointer field, Object valueAssertion) {
         if (field.size() != 1) {

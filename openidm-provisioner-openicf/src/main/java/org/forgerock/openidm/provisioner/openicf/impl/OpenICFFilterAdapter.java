@@ -27,11 +27,23 @@ import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 import org.identityconnectors.framework.common.objects.filter.Filter;
+import org.identityconnectors.framework.common.objects.filter.PresenceFilter;
 
 /**
- * Converts CREST {@link QueryFilter}s to ICF {@link Filter}s. This class is thread-safe.
+ * Converts CREST {@link QueryFilter}s to ICF {@link Filter}s. Callers should catch, but not log,
+ * {@link EmptyResultSetException}s and do what is necessary to return an empty-result representation.
+ * This class is thread-safe.
  */
 class OpenICFFilterAdapter implements QueryFilterVisitor<Filter, ObjectClassInfoHelper, JsonPointer> {
+
+    private static final EmptyResultSetException EMPTY_RESULT_SET_EXCEPTION =
+            new EmptyResultSetException("Empty query result from " + OpenICFFilterAdapter.class.getCanonicalName());
+
+    static {
+        // preallocate stack trace, for best performance, because this exception is used for flow-control
+        EMPTY_RESULT_SET_EXCEPTION.setStackTrace(new StackTraceElement[0]);
+    }
+
     @Override
     public Filter visitAndFilter(final ObjectClassInfoHelper helper,
             List<QueryFilter<JsonPointer>> subFilters) {
@@ -74,13 +86,20 @@ class OpenICFFilterAdapter implements QueryFilterVisitor<Filter, ObjectClassInfo
         }
     }
 
+    /**
+     * Visits a boolean literal filter.
+     *
+     * @param helper Helper for attribute name/value lookup on the data model
+     * @param value The boolean literal value.
+     * @return Returns {@code null} when {@code value} is {@code true}, which matches all possible results
+     * @throws EmptyResultSetException Indicates that {@code value} is {@code false}, which matches an empty-result
+     */
     @Override
     public Filter visitBooleanLiteralFilter(final ObjectClassInfoHelper helper, final boolean value) {
         if (value) {
             return null;
         }
-        throw new UnsupportedOperationException(
-                "visitBooleanLiteralFilter only supported for literal true, not false");
+        throw EMPTY_RESULT_SET_EXCEPTION;
     }
 
     @Override
@@ -145,9 +164,21 @@ class OpenICFFilterAdapter implements QueryFilterVisitor<Filter, ObjectClassInfo
         return not(subFilter.accept(this, helper));
     }
 
+    /**
+     * Visits a {@code present} filter.
+     *
+     * @param helper Helper for attribute name/value lookup on the data model
+     * @param field Single-level {@link JsonPointer} which is the CREST attribute-name
+     * @return Returns a new {@link PresenceFilter} instance <i>only</i> when attribute is present
+     * @throws EmptyResultSetException Indicates that an attribute is <i>not</i> present, which matches an empty-result
+     */
     @Override
     public Filter visitPresentFilter(ObjectClassInfoHelper helper, JsonPointer field) {
-        throw new IllegalArgumentException("PresentFilter is not supported");
+        String attributeName = helper.getAttributeName(field);
+        if (attributeName != null) {
+            return present(attributeName);
+        }
+        throw EMPTY_RESULT_SET_EXCEPTION;
     }
 
     @Override
