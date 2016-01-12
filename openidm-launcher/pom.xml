@@ -94,7 +94,7 @@
 
     <issueManagement>
         <system>jira</system>
-        <url>https://bugster.forgerock.org/jira/browse/CLAUNCHER</url>
+        <url>https://bugster.forgerock.org/jira/browse/LAUNCHER</url>
     </issueManagement>
 
     <ciManagement>
@@ -103,6 +103,9 @@
     </ciManagement>
 
     <properties>
+        <!-- Version management -->
+        <commons.forgerock-bom.version>4.1.1</commons.forgerock-bom.version>
+
         <!-- Documentation and site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-launcher</siteDistributionURL>
         <docTargetVersion>1.0.0</docTargetVersion>
@@ -125,15 +128,17 @@
     <dependencyManagement>
         <dependencies>
             <dependency>
-                <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.core</artifactId>
-                <version>4.3.1</version>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-bom</artifactId>
+                <version>${commons.forgerock-bom.version}</version>
+                <scope>import</scope>
+                <type>pom</type>
             </dependency>
-            <!--dependency>
+            <dependency>
                 <groupId>org.osgi</groupId>
-                <artifactId>org.osgi.compendium</artifactId>
-                <version>4.3.0</version>
-            </dependency-->
+                <artifactId>osgi.core</artifactId>
+                <version>6.0.0</version>
+            </dependency>
 
             <!-- Test Dependencies -->
             <dependency>
