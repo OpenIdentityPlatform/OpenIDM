@@ -20,7 +20,6 @@ define([
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
@@ -32,12 +31,11 @@ define([
     "org/forgerock/openidm/ui/admin/util/ReconDetailsView",
     "bootstrap-tabdrop",
     "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
-    "org/forgerock/commons/ui/common/util/UIUtils"
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils"
 ], function($, _,
             MappingAdminAbstractView,
             eventManager,
             validatorsManager,
-            configDelegate,
             router,
             constants,
             ModuleLoader,
@@ -49,7 +47,7 @@ define([
             ReconDetailsView,
             tabdrop,
             LinkQualifierUtil,
-            UIUtils) {
+            mappingUtils) {
 
     var MappingBaseView = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/MappingTemplate.html",
@@ -94,17 +92,11 @@ define([
         deleteMapping: function(event) {
             event.preventDefault();
 
-            UIUtils.confirmDialog($.t("templates.mapping.confirmDeleteMapping", {"mappingName": this.data.mapping.name}), "danger", _.bind(function(){
-                this.data.syncConfig.mappings = _.filter(this.data.syncConfig.mappings, function(mapping) {
-                    return mapping.name !== this.data.mapping.name;
-                }, this);
+            mappingUtils.confirmDeleteMapping(this.data.mapping.name, this.data.syncConfig.mappings, function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingDeleted");
 
-                configDelegate.updateEntity("sync", {"mappings":this.data.syncConfig.mappings}).then(_.bind(function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingDeleted");
-
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.mappingListView});
-                }, this));
-            }, this));
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.mappingListView});
+            });
         },
         runningReconProgress: function(onReady){
             reconDelegate.waitForAll([this.data.recon._id], true, _.bind(function (reconStatus) {

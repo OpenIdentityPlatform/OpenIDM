@@ -19,11 +19,25 @@ define([
     "underscore",
     "handlebars",
     "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
-    "selectize"
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "selectize",
+    "org/forgerock/openidm/ui/admin/util/AdminUtils",
+    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate"
 ], function($, _,
              Handlebars,
              searchDelegate,
-             selectize) {
+             configDelegate,
+             resourceDelegate,
+             UIUtils,
+             router,
+             constants,
+             selectize,
+             AdminUtils,
+             schedulerDelegate) {
 
     var obj = {};
 
@@ -107,6 +121,134 @@ define([
         return _.reduce(policies, function(memo, val){
             return memo && val.action === "ASYNC";
         }, true);
+    };
+    /**
+    * This function gathers child info about a mapping then pops up a confirmDialog
+    * with a list of any associated managed/assignments or scheduledTasks to be
+    * deleted if the process is continued.
+    *
+    * @param mappingName {string}
+    * @param syncMappings {object} - the current state of sync.json mappings property
+    * @param successCallback {function} - action to take after the delete process has been completed
+    */
+    obj.confirmDeleteMapping = function(mappingName, syncConfig, successCallback) {
+        obj.getMappingChildren(mappingName).then(_.bind(function (mappingChildren) {
+            var dialogText = $("<div>").append($.t("templates.mapping.confirmDeleteMapping", {"mappingName": mappingName, "mappingChildren": mappingChildren.display }));
+
+            AdminUtils.confirmDeleteDialog(dialogText, _.bind(function(){
+                obj.deleteMapping(mappingName, mappingChildren, syncConfig).then(() => {
+                    successCallback();
+                });
+            }, this));
+        }, this));
+    };
+    /**
+    * This function deletes a mapping and it's child data
+    *
+    * @param mappingName {string}
+    * @param mappingChildren {array}
+    * @param syncConfigMappings {object} - current sync.json mappings array
+    */
+    obj.deleteMapping = function(mappingName, mappingChildren, syncConfigMappings) {
+        var newSyncConfigMappings = _.filter(syncConfigMappings, function(mapping) {
+            /*
+                if there are other mappings with this mapping set as the "links"
+                property remove the "links" property of those mappings
+                essentially disassociating them with the mapping being deleted
+            */
+            if (mapping.links && mapping.links === mappingName) {
+                delete mapping.links;
+            }
+            return mapping.name !== mappingName;
+        }, this);
+
+        return obj.deleteMappingChildren(mappingName, mappingChildren).then(function () {
+            return configDelegate.updateEntity("sync", {"mappings": newSyncConfigMappings});
+        });
+    };
+    /**
+    * This function takes a mappingName, finds all managed/assigments and scheduled tasks
+    * associated with that mapping, builds a display list of these items to be used in a
+    * confirmDialog, and returns an object :
+    *   {
+    *       scheduledTasks : resultsOfScheduledTasksQuery
+    *       assigments : resultsOfAssignmentsQuery
+    *       display : htmlStringListingAssignmentsAndScheduledTasks
+    *   }
+    *
+    * @param mappingName {string}
+    * @returns {object}
+    */
+    obj.getMappingChildren = function (mappingName) {
+        var scheduleQuery = schedulerDelegate.getReconSchedulesByMappingName(mappingName),
+            assignmentQuery = resourceDelegate.searchResource(encodeURIComponent('mapping eq "' + mappingName + '"'), "managed/assignment"),
+            scheduledTasksPartialPromise = UIUtils.preloadPartial("partials/mapping/_mappingScheduledTasks.html"),
+            mappingAssignmentsPartialPromise = UIUtils.preloadPartial("partials/mapping/_mappingAssignments.html");
+
+        return $.when(scheduleQuery,assignmentQuery, scheduledTasksPartialPromise, mappingAssignmentsPartialPromise).then((scheduledTasks, assignments) => {
+            var mappingChildren = {
+                scheduledTasks : scheduledTasks,
+                assignments : assignments[0].result,
+                display: ""
+            };
+
+            mappingChildren.display += "<div class='well'>";
+            mappingChildren.display += Handlebars.compile("{{> mapping/_mappingScheduledTasks}}")({ scheduledTasks : mappingChildren.scheduledTasks });
+            mappingChildren.display += Handlebars.compile("{{> mapping/_mappingAssignments}}")({ assignments : mappingChildren.assignments });
+            mappingChildren.display += "</div>";
+
+            return mappingChildren;
+        });
+    };
+    /**
+    * This function deletes a mapping's managed/assignments, scheduledTasks, and links
+    *
+    * @param mappingName {string}
+    * @param mappingChildren {object}
+    * @returns {promise}
+    */
+    obj.deleteMappingChildren = function (mappingName, mappingChildren) {
+        var promise,
+            scheduledTasksPromise = (schedule) => {
+                return schedulerDelegate.deleteSchedule(schedule._id);
+            },
+            assignmentsPromise = (assignment) => {
+                return resourceDelegate.deleteResource("/" + constants.context + "/managed/assignment", assignment._id);
+            },
+            concatPromise = (action) => {
+                if (!promise) {
+                    //no promise exists so create it
+                    promise = action();
+                } else {
+                    //promise exists now "concat" a new "then" onto the original promise
+                    promise = promise.then(() => {
+                        return action();
+                    });
+                }
+            };
+
+        //delete this mapping's scheduleTasks
+        _.each(mappingChildren.scheduledTasks, function (schedule) {
+            concatPromise(() => {
+                return scheduledTasksPromise(schedule);
+            });
+        });
+        //delete this mapping's assignments
+        _.each(mappingChildren.assignments, function (assignment) {
+            concatPromise(() => {
+                return assignmentsPromise(assignment);
+            });
+        });
+        //delete this mapping's links
+        concatPromise(() => {
+            return resourceDelegate.serviceCall({
+                "type": "POST",
+                "serviceUrl": "/openidm/repo/links",
+                "url":  "?_action=command&commandId=delete-mapping-links&mapping=" + mappingName
+            });
+        });
+
+        return promise;
     };
 
     return obj;

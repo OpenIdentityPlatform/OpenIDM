@@ -15,11 +15,28 @@
  */
 
 define([
+    "lodash",
+    "jquery",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function(constants, AbstractDelegate) {
+], function(_, $, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/scheduler");
+    var obj = new AbstractDelegate(constants.host + "/openidm/scheduler"),
+        queryAllSchedules = function () {
+            // Get all schedule IDS
+            return obj.availableSchedules().then(_.bind(function (schedules) {
+                var schedulerPromises = [];
+
+                _.each(schedules.result, function (index) {
+                    // Get the schedule of each ID
+                    schedulerPromises.push(obj.specificSchedule(index._id));
+                }, this);
+
+                return $.when.apply($, schedulerPromises).then(_.bind(function () {
+                    return _.toArray(arguments);
+                }, this));
+            }, this));
+        };
 
     obj.availableSchedules = function() {
         return obj.serviceCall({
@@ -32,7 +49,7 @@ define([
         return obj.serviceCall({
             url: "/" + scheduleId,
             type: "GET"
-        });
+        }).then((resp) => resp);
     };
 
     obj.saveSchedule = function(scheduleId, schedule) {
@@ -76,6 +93,35 @@ define([
         return obj.serviceCall({
             url: "?_action=listCurrentlyExecutingJobs",
             type: "POST"
+        });
+    };
+
+    obj.getReconSchedulesByMappingName = function (mappingName) {
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //                                                                                              //
+        // TODO: Use queryFilters to avoid having to pull back all schedules and sifting through them.  //
+        //                                                                                              //
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        return queryAllSchedules().then((scheduledTasks) => {
+            return _.filter(scheduledTasks, function (sched) {
+                return sched.invokeContext && sched.invokeContext.mapping && sched.invokeContext.mapping === mappingName;
+            });
+        });
+    };
+
+    obj.getLiveSyncSchedulesByConnectorName = function (connectorName) {
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        //                                                                                              //
+        // TODO: Use queryFilters to avoid having to pull back all schedules and sifting through them.  //
+        //                                                                                              //
+        //////////////////////////////////////////////////////////////////////////////////////////////////
+        return queryAllSchedules().then((scheduledTasks) => {
+            return _.filter(scheduledTasks, function (sched) {
+                var nameFilter = sched.invokeContext && sched.invokeContext.source && sched.invokeContext.source.split("/")[1] === connectorName,
+                    liveSyncFilter = sched.invokeContext && sched.invokeContext.action && sched.invokeContext.action === "liveSync";
+
+                return nameFilter && liveSyncFilter;
+            });
         });
     };
 

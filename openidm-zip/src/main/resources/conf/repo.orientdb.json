@@ -22,7 +22,8 @@
     },
     "commands" : {
         "purge-by-recon-expired" : "DELETE FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND timestamp < ${timestamp}",
-        "purge-by-recon-ids-to-keep" : "DELETE FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconId NOT IN [${list:reconIds}]"
+        "purge-by-recon-ids-to-keep" : "DELETE FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconId NOT IN [${list:reconIds}]",
+        "delete-mapping-links" : "DELETE FROM link WHERE linkType = ${mapping}"
     },
     "dbStructure" : {
         "orientdbClass" : {

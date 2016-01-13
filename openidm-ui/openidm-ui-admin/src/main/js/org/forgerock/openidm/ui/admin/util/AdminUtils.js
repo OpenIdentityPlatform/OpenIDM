@@ -20,12 +20,14 @@ define([
     "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
 ], function ($, _,
              Handlebars,
              AbstractConfigurationAware,
              ConfigDelegate,
-             ConnectorDelegate) {
+             ConnectorDelegate,
+             ModuleLoader) {
 
     var obj = {};
 
@@ -129,6 +131,48 @@ define([
         }
 
         return propertiesPromise;
+    };
+    
+    /**
+     * @param {string} message The text provided in the main body of the dialog
+     * @param {Function} confirmCallback Fired when the delete button is clicked
+     *
+     * @example
+     *  AdminUtils.confirmDeleteDialog($.t("templates.admin.ResourceEdit.confirmDelete"), _.bind(function(){
+     *      //Useful stuff here
+     *  }, this));
+     */
+    obj.confirmDeleteDialog = function(message, confirmCallback){
+        ModuleLoader.load("bootstrap-dialog").then(function (BootstrapDialog) {
+            var btnType = "btn-danger";
+
+            BootstrapDialog.show({
+                title: $.t('common.form.confirm') + " " + $.t('common.form.delete'),
+                type: "type-danger",
+                message: message,
+                id: "frConfirmationDialog",
+                buttons: [
+                    {
+                        label: $.t('common.form.cancel'),
+                        id: "frConfirmationDialogBtnClose",
+                        action: function(dialog){
+                            dialog.close();
+                        }
+                    },
+                    {
+                        label: $.t('common.form.delete'),
+                        cssClass: btnType,
+                        id: "frConfirmationDialogBtnDelete",
+                        action: function(dialog) {
+                            if(confirmCallback) {
+                                confirmCallback();
+                            }
+                            dialog.close();
+                        }
+                    }
+                ]
+            });
+        });
     };
 
     /**

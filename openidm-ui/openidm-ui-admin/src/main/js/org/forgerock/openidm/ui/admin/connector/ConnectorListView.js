@@ -220,7 +220,9 @@ define([
         deleteConnections: function(event) {
             var selectedItem = $(event.currentTarget).parents(".card-spacer"),
                 alternateItem,
-                tempConnector = _.clone(this.data.currentConnectors);
+                tempConnector = _.clone(this.data.currentConnectors),
+                connectorPath,
+                connectorIndex;
 
             if(selectedItem.length > 0) {
                 _.each(this.$el.find(".backgrid tbody tr"), function(row) {
@@ -238,28 +240,18 @@ define([
                 });
             }
 
-            UIUtils.confirmDialog($.t("templates.connector.connectorDelete"), "danger", _.bind(function(){
-                var url;
+            _.each(tempConnector, function(connectorObject, index){
+                if(connectorObject.cleanUrlName === selectedItem.attr("data-connector-title")) {
+                    connectorPath = this.data.currentConnectors[index].config;
+                    connectorIndex = index;
+                }
+            }, this);
 
-                _.each(tempConnector, function(connectorObject, index){
-                    if(connectorObject.cleanUrlName === selectedItem.attr("data-connector-title")) {
-                        url = this.data.currentConnectors[index].config.split("/");
-
-                        this.data.currentConnectors.splice(index, 1);
-                    }
-                }, this);
-
-                ConfigDelegate.deleteEntity(url[1] +"/" +url[2]).then(
-                    function(){
-                        ConnectorDelegate.deleteCurrentConnectorsCache();
-                        selectedItem.remove();
-                        alternateItem.remove();
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
-                    },
-                    function(){
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
-                    });
-            }, this));
+            connectorUtils.deleteConnector(connectorPath, () => {
+                this.data.currentConnectors.splice(connectorIndex, 1);
+                selectedItem.remove();
+                alternateItem.remove();
+            });
         },
 
         toggleButtonChange: function(event) {

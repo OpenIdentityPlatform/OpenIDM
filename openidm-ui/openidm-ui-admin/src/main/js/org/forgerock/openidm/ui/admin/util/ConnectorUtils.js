@@ -17,8 +17,16 @@
 define([
     "jquery",
     "underscore",
-    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
-], function ($, _, ConnectorDelegate) {
+    "handlebars",
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils",
+    "org/forgerock/commons/ui/common/main/EventManager",
+    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/admin/util/AdminUtils"
+], function ($, _, Handlebars, ConnectorDelegate, ConfigDelegate, UIUtils, MappingUtils, eventManager, ResourceDelegate, constants, AdminUtils) {
 
     var obj = {},
         iconMapping = {
@@ -86,6 +94,91 @@ define([
         return {
             "iconClass": iconClass
         };
+    };
+
+    obj.deleteConnector = function(connectorPath, successCallback) {
+        var connectorName = connectorPath.split("/")[2],
+            partialPromise = UIUtils.preloadPartial("partials/connector/_connectorMappings.html"),
+            connectorMappingsPromise = obj.getConnectorMappings(connectorName);
+
+
+        $.when(connectorMappingsPromise, partialPromise).then((connectorMappings) => {
+            var connectorMappingsDisplay = Handlebars.compile("{{> connector/_connectorMappings}}")({ connectorMappings: connectorMappings }),
+                dialogText = $("<div>").append($.t("templates.connector.connectorDelete", {"connectorName": connectorName, "connectorChildren": connectorMappingsDisplay}));
+
+            AdminUtils.confirmDeleteDialog(dialogText, () => {
+                var promise;
+
+                if (connectorMappings.length) {
+                    //delete all the connector's mappings
+                    _.each(connectorMappings, (mapping) => {
+                        if (!promise) {
+                            //no promise exists so create it
+                            promise = obj.deleteConnectorMapping(mapping);
+                        } else {
+                            //promise exists now "concat" a new "then" onto the original promise
+                            promise = promise.then(() => {
+                                return obj.deleteConnectorMapping(mapping);
+                            });
+                        }
+                    });
+                } else {
+                    promise = $.Deferred().resolve();
+                }
+
+                promise.then(function () {
+                    var url = connectorPath.split("/");
+
+                    ConfigDelegate.deleteEntity(url[1] +"/" +url[2]).then(function(){
+                        ConnectorDelegate.deleteCurrentConnectorsCache();
+
+                        if (successCallback) {
+                            successCallback();
+                        }
+
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
+                    },
+                    function(){
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
+                    });
+                });
+            });
+        });
+    };
+
+    obj.deleteConnectorMapping = function(mapping) {
+        return ConfigDelegate.readEntity("sync").then(function (syncConfig) {
+            return MappingUtils.deleteMapping(mapping.name, mapping.children, syncConfig.mappings);
+        });
+    };
+
+    obj.getConnectorMappings = function (connectorName) {
+        return ConfigDelegate.readEntity("sync").then(function (syncConfig) {
+            var promArray = [],
+                connectorMappings = _.filter(syncConfig.mappings, function (mapping) {
+                    var target = mapping.target.split("/"),
+                        source = mapping.source.split("/"),
+                        sourceMatch = source[0] === "system" && source[1] === connectorName,
+                        targetMatch = target[0] === "system" && target[1] === connectorName;
+
+                    return targetMatch || sourceMatch;
+                });
+
+            _.each(connectorMappings, function (mapping) {
+                promArray.push(
+                    MappingUtils.getMappingChildren(mapping.name).then( function (mappingChildren) {
+                        return {
+                            name: mapping.name,
+                            children: mappingChildren
+                        };
+                    })
+                );
+            });
+
+            return $.when.apply($, promArray).then(function () {
+                return _.toArray(arguments);
+            });
+        });
     };
 
     return obj;
