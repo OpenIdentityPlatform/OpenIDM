@@ -1,0 +1,10 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<h5>{{ t "templates.mapping.scheduledTasks" }}:</h5>
+<ul>
+{{#each scheduledTasks}}
+<li>{{_id}}</li>
+{{else}}
+<li>{{ t "templates.mapping.noAssociated" }} {{ t "templates.mapping.scheduledTasks" }}</li>
+{{/each}}
+</ul>

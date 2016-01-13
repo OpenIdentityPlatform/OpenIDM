@@ -15,7 +15,7 @@
             "query-cluster-failed-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'timestamp') <= ${timestamp} AND json_extract_path_text(fullobject, 'state') IN ('1','2')",
             "query-cluster-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'state'",
             "query-cluster-events" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'event' AND json_extract_path_text(fullobject, 'instanceId') = ${instanceId}",
-            
+
             "find-relationships-for-resource" : "SELECT fullobject::text FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id AND objtype.objecttype = 'relationships' WHERE (((json_extract_path_text(obj.fullobject, 'firstId') = (${fullResourceId})) AND (json_extract_path_text(obj.fullobject, 'firstPropertyName') = (${resourceFieldName})))) OR (((json_extract_path_text(obj.fullobject, 'secondId') = (${fullResourceId})) AND (json_extract_path_text(obj.fullobject, 'secondPropertyName') = (${resourceFieldName}))))"
         },
         "explicitTables" : {
@@ -39,7 +39,8 @@
         "genericTables" : { },
         "explicitTables" : {
             "purge-by-recon-ids-to-keep" : "DELETE FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconId NOT IN (${list:reconIds})",
-            "purge-by-recon-expired" : "DELETE FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp}"
+            "purge-by-recon-expired" : "DELETE FROM ${_dbSchema}.auditrecon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp}",
+            "delete-mapping-links" : "DELETE FROM ${_dbSchema}.links WHERE linktype = ${mapping}"
         }
     },
     "resourceMapping" : {

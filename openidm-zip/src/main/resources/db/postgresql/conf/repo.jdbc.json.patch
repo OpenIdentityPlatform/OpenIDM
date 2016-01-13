@@ -1,0 +1,7 @@
+[
+    {
+        "operation" : "add",
+        "field" : "/commands/explicitTables/delete-mapping-links",
+        "value" : "DELETE FROM ${_dbSchema}.links WHERE linktype = ${mapping}"
+    }
+]

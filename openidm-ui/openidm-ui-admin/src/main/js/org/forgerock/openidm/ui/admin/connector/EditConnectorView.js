@@ -335,21 +335,13 @@ define([
         },
 
         deleteResource: function(event) {
+            var connectorPath = "config/" + this.data.systemType +"/" +this.data.connectorId;
+
             event.preventDefault();
 
-            UIUtils.confirmDialog($.t("templates.connector.connectorDelete"), "danger", _.bind(function(){
-                ConfigDelegate.deleteEntity(this.data.systemType +"/" +this.data.connectorId).then(
-                    function(){
-                        ConnectorDelegate.deleteCurrentConnectorsCache();
-
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorListView});
-
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorSuccess");
-                    },
-                    function(){
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
-                    });
-            }, this));
+            connectorUtils.deleteConnector(connectorPath, () => {
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorListView});
+            });
         },
 
         advancedFormSubmit: function(event) {
@@ -527,62 +519,36 @@ define([
 
             this.updateLiveSyncObjects();
 
-            // Get all schedule IDS
-            SchedulerDelegate.availableSchedules().then(_.bind(function (schedules) {
-                var schedulerPromises = [];
+            SchedulerDelegate.getLiveSyncSchedulesByConnectorName(this.connectorDetails.name).then((schedules) => {
+                _.each(schedules, (schedule) => {
+                    this.$el.find(".sources option[value='" + schedule.invokeContext.source + "']").remove();
 
-                _.each(schedules.result, function (index) {
-                    // Get the schedule of each ID
-                    schedulerPromises.push(SchedulerDelegate.specificSchedule(index._id));
-                }, this);
+                    this.$el.find("#schedules").append("<div class='liveSyncScheduleContainer'></div>");
+                    Scheduler.generateScheduler({
+                        "element": this.$el.find("#schedules .liveSyncScheduleContainer").last(),
+                        "defaults": {
+                            enabled: schedule.enabled,
+                            schedule: schedule.schedule,
+                            persisted: schedule.persisted,
+                            misfirePolicy: schedule.misfirePolicy,
+                            liveSyncSeconds: schedule.schedule
+                        },
+                        "onDelete": _.bind(this.removeSchedule, this),
+                        "invokeService": schedule.invokeService,
+                        "source": schedule.invokeContext.source,
+                        "scheduleId": schedule._id
+                    });
+                    this.addedLiveSyncSchedules.push(schedule.invokeContext.source);
+                });
 
-                $.when.apply($, schedulerPromises).then(_.bind(function () {
-                    _.each(arguments, function (schedule) {
-                        schedule = schedule[0];
-
-                        //////////////////////////////////////////////////////////////////////////////////////////////////
-                        //                                                                                              //
-                        // TODO: Use queryFilters to avoid having to pull back all schedules and sifting through them.  //
-                        //                                                                                              //
-                        //////////////////////////////////////////////////////////////////////////////////////////////////
-                        if (schedule && schedule.invokeContext.action === "liveSync") {
-
-                            sourcePieces = schedule.invokeContext.source.split("/");
-                            
-                            if(sourcePieces[1] === this.connectorDetails.name) {
-                                this.$el.find(".sources option[value='" + schedule.invokeContext.source + "']").remove();
-
-                                this.$el.find("#schedules").append("<div class='liveSyncScheduleContainer'></div>");
-                                Scheduler.generateScheduler({
-                                    "element": this.$el.find("#schedules .liveSyncScheduleContainer").last(),
-                                    "defaults": {
-                                        enabled: schedule.enabled,
-                                        schedule: schedule.schedule,
-                                        persisted: schedule.persisted,
-                                        misfirePolicy: schedule.misfirePolicy,
-                                        liveSyncSeconds: schedule.schedule
-                                    },
-                                    "onDelete": _.bind(this.removeSchedule, this),
-                                    "invokeService": schedule.invokeService,
-                                    "source": schedule.invokeContext.source,
-                                    "scheduleId": schedule._id
-                                });
-                                this.addedLiveSyncSchedules.push(schedule.invokeContext.source);
-                            }
-                        }
-
-                    }, this);
-
-                    if (this.$el.find(".sources option").length === 0) {
-                        this.$el.find(".addLiveSync").prop('disabled', true);
-                        this.$el.find(".sources").prop('disabled', true);
-                    } else {
-                        this.$el.find(".addLiveSync").prop('disabled', false);
-                        this.$el.find(".sources").prop('disabled', false);
-                    }
-
-                }, this));
-            }, this));
+                if (this.$el.find(".sources option").length === 0) {
+                    this.$el.find(".addLiveSync").prop('disabled', true);
+                    this.$el.find(".sources").prop('disabled', true);
+                } else {
+                    this.$el.find(".addLiveSync").prop('disabled', false);
+                    this.$el.find(".sources").prop('disabled', false);
+                }
+            });
 
             if (!this.postActionBlockScript) {
                 this.postActionBlockScript = InlineScriptEditor.generateScriptEditor({

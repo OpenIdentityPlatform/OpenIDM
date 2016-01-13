@@ -44,6 +44,10 @@ define([
         return obj.serviceCall({ url:"", type: "GET", success: successCallback, error: errorCallback});
     };
 
+    obj.configQuery = function(queryFilter, successCallback, errorCallback) {
+        return obj.serviceCall({ url:"?_queryFilter=" + encodeURIComponent(queryFilter), type: "GET", success: successCallback, error: errorCallback});
+    };
+
     obj.readEntity = function (id, successCallback, errorCallback) {
         var promise = $.Deferred(),
             clone;

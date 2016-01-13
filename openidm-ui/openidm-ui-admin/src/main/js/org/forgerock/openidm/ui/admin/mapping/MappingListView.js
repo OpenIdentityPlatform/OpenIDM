@@ -31,7 +31,8 @@ define([
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/commons/ui/common/util/AutoScroll",
-    "dragula"
+    "dragula",
+    "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils"
 ], function($, _, handlebars,
             Backbone,
             AdminAbstractView,
@@ -46,7 +47,8 @@ define([
             Backgrid,
             BackgridUtils,
             AutoScroll,
-            dragula) {
+            dragula,
+            mappingUtils) {
 
     var MappingListView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingListTemplate.html",
@@ -365,14 +367,14 @@ define([
                 });
             }
 
-            UIUtils.confirmDialog($.t("templates.mapping.confirmDeleteMapping", {"mappingName": this.cleanConfig[index].name}), "danger", _.bind(function(){
-                this.cleanConfig.splice(index, 1);
+            mappingUtils.confirmDeleteMapping(this.cleanConfig[index].name, this.cleanConfig, _.bind(function() {
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingDeleted");
 
-                configDelegate.updateEntity("sync", {"mappings":this.cleanConfig}).then(_.bind(function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingDeleted");
+                if(this.cleanConfig.length === 0) {
+                    this.$el.find("#noMappingsDefined").show();
+                }
 
-                    this.render();
-                }, this));
+                selectedEl.remove();
             }, this));
         },
         showSyncStatus: function(isOnPageLoad){
