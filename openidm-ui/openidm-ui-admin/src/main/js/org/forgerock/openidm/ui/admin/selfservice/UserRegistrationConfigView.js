@@ -129,30 +129,23 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
 
             this.selfServiceRender(args, callback);
         },
-        setKBAEnabled: function () {
-            var kbaEnabled = !!_.find(this.model.saveConfig.stageConfigs, function (stage) {
-                return stage.name === "kbaSecurityAnswerDefinitionStage";
-            });
-            if (kbaEnabled !== this.model.uiConfig.configuration.kbaEnabled) {
-                this.model.uiConfig.configuration.kbaEnabled = kbaEnabled;
-            }
+        setKBADefinitionEnabled: function () {
+            this.model.uiConfig.configuration.kbaDefinitionEnabled =
+                !!_.find(this.model.saveConfig.stageConfigs, function (stage) {
+                    return stage.name === "kbaSecurityAnswerDefinitionStage";
+                });
         },
         createConfig: function () {
-            this.setKBAEnabled();
+            this.setKBADefinitionEnabled();
             return AbstractSelfServiceView.prototype.createConfig.call(this);
         },
         deleteConfig: function () {
-            this.setKBAEnabled();
+            this.setKBADefinitionEnabled();
             return AbstractSelfServiceView.prototype.deleteConfig.call(this);
         },
         saveConfig: function () {
-            return AbstractSelfServiceView.prototype.saveConfig.call(this).then(_.bind(function () {
-                var kbaCurrentlyEnabled = this.model.uiConfig.configuration.kbaEnabled;
-                this.setKBAEnabled();
-                if (kbaCurrentlyEnabled !== this.model.uiConfig.configuration.kbaEnabled) {
-                    return ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig);
-                }
-            }, this));
+            this.setKBADefinitionEnabled();
+            return AbstractSelfServiceView.prototype.saveConfig.call(this);
         }
     });
 
