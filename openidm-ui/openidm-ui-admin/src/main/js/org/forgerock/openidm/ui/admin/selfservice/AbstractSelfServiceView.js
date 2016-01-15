@@ -104,12 +104,14 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
         },
         createConfig: function () {
+            this.setKBAEnabled();
             return $.when(
                 ConfigDelegate.createEntity(this.model.configUrl, this.orderCheck()),
                 ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
             );
         },
         deleteConfig: function () {
+            this.setKBAEnabled();
             return $.when(
                 ConfigDelegate.deleteEntity(this.model.configUrl),
                 ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
@@ -426,10 +428,18 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 saveData = {};
 
             $.extend(true, saveData, this.model.saveConfig, formData);
-
-            return ConfigDelegate.updateEntity(this.model.configUrl, saveData).then(_.bind(function() {
+            this.setKBAEnabled();
+            return $.when(
+                ConfigDelegate.updateEntity(this.model.configUrl, saveData),
+                ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
+            ).then(_.bind(function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
             }, this));
+        },
+        setKBAEnabled: function () {
+            this.model.uiConfig.configuration.kbaEnabled =
+                !!this.model.uiConfig.configuration.kbaDefinitionEnabled ||
+                !!this.model.uiConfig.configuration.kbaVerificationEnabled;
         },
         preventTab: function(event) {
             event.preventDefault();
