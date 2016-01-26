@@ -114,7 +114,7 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String JSON_EXT = ".json";
     private static final String PATCH_EXT = ".patch";
     private static final Path ARCHIVE_PATH = Paths.get("bin/update");
-    private static final String LICENSE_PATH = "legal-notices/license.txt";
+    private static final String LICENSE_PATH = "legal-notices/Forgerock_License.txt";
 
     // Archive manifest keys
     private static final String PROP_PRODUCT = "product";
