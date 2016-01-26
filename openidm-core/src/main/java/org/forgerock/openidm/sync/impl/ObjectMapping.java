@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -957,16 +957,14 @@ class ObjectMapping {
             }
 
             // If we will handle a target phase, pre-load all relevant target identifiers
-            Collection<String> remainingTargetIds = null;
+            Collection<String> remainingTargetIds = new ArrayList<String>();
             ResultIterable targetIterable = null;
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 reconContext.getStatistics().targetQueryStart();
                 targetIterable = reconContext.queryTarget();
-                remainingTargetIds = targetIterable.getAllIds();
+                remainingTargetIds.addAll(targetIterable.getAllIds());
                 reconContext.getStatistics().targetQueryEnd();
-            } else {
-                remainingTargetIds = new ArrayList<String>();
-            }
+            }            
 
             // Optionally get all links up front as well
             Map<String, Map<String, Link>> allLinks = null;
@@ -1017,7 +1015,7 @@ class ObjectMapping {
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
                 reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);       
-                targetIterable.removeNotMatchingEntries(remainingTargetIds);
+                targetIterable = targetIterable.removeNotMatchingEntries(remainingTargetIds);
                 reconContext.getStatistics().targetPhaseStart();
                 ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context,
                         allLinks, null, targetRecon);
