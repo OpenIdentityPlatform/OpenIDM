@@ -55,7 +55,7 @@ public class ScheduleConfigService {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     @Reference
     SchedulerService schedulerService;

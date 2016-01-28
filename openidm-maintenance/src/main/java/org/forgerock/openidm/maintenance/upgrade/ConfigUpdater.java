@@ -43,8 +43,8 @@ import org.osgi.framework.Constants;
 /**
  * Config object patching utility.
  */
-@Component(name = ConfigUpdater.PID, policy = ConfigurationPolicy.IGNORE, metatype = false,
-        description = "OpenIDM Config Update", immediate = true)
+@Component(name = ConfigUpdater.PID, policy = ConfigurationPolicy.IGNORE, immediate = true,
+    description = "OpenIDM Config Update", metatype = false)
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Config Update")

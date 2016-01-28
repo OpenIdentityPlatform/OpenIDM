@@ -849,11 +849,7 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <!--<version>1.10.0</version>-->
-                    <version>1.15.0</version>
-                    <!--<configuration>
-                        <generateAccessors>false</generateAccessors>
-                    </configuration>-->
+                    <version>1.22.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>

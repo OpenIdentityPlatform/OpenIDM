@@ -69,7 +69,7 @@ public class PolicyService extends AbstractScriptedService {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     private ComponentContext context;
     

@@ -101,7 +101,7 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig = null;
+    private volatile EnhancedConfig enhancedConfig = null;
 
     /**
      * We define 4 filters that are "statically" defined:

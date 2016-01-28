@@ -130,7 +130,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     @Activate
     protected void activate(ComponentContext context) {

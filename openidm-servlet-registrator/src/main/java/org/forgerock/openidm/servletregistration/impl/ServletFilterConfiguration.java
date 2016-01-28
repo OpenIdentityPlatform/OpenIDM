@@ -63,11 +63,11 @@ public class ServletFilterConfiguration {
             policy = ReferencePolicy.DYNAMIC,
             cardinality = ReferenceCardinality.MANDATORY_UNARY
     )
-    private ServletRegistration servletFilterRegistration;
+    private volatile ServletRegistration servletFilterRegistration;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     /**
      * Parses the servlet filter configuration and registers a servlet filter in OSGi.

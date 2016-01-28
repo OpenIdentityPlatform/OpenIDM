@@ -53,12 +53,11 @@ import org.slf4j.LoggerFactory;
  * A service to handle enhanced configuration, including nested lists and maps
  * to represent JSON based structures.
  */
-@Component(
-        name = JSONEnhancedConfig.PID,
+@Component(name = JSONEnhancedConfig.PID,
         policy = ConfigurationPolicy.IGNORE,
         description = "OpenIDM Enhanced Config Service",
         immediate = true,
-        metatype = true)
+        metatype = false)
 @Service
 public class JSONEnhancedConfig implements EnhancedConfig {
 
