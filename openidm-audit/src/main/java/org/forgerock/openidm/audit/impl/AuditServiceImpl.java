@@ -156,7 +156,7 @@ public class AuditServiceImpl implements AuditService {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     /** the script to execute to format exceptions */
     private static ScriptEntry exceptionFormatterScript = null;

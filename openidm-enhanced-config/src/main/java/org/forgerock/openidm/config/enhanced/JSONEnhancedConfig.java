@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
         policy = ConfigurationPolicy.IGNORE,
         description = "OpenIDM Enhanced Config Service",
         immediate = true,
-        metatype = true)
+        metatype = false)
 @Service
 public class JSONEnhancedConfig implements EnhancedConfig {
 

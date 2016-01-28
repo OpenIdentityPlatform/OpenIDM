@@ -49,7 +49,7 @@ import org.slf4j.LoggerFactory;
  * customize the system
  *
  */
-@Component(name = EndpointsService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
+@Component(name = EndpointsService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = false,
         description = "OpenIDM Custom Endpoints Service", immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -67,7 +67,7 @@ public class EndpointsService extends AbstractScriptedService {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     private ComponentContext context;
 
