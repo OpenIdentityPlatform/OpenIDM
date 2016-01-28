@@ -102,7 +102,7 @@ public class ServletComponent implements EventHandler {
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private ScriptRegistry scriptRegistry;
+    protected volatile ScriptRegistry scriptRegistry;
 
     // Optional scripts to augment/populate the security context
     private List<ScriptEntry> augmentSecurityScripts = new CopyOnWriteArrayList<>();

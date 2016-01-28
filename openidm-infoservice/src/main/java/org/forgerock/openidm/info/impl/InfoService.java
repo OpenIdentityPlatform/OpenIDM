@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * A system information service to provide an external and internal API to query
  * OpenIDM state and status.
  */
-@Component(name = InfoService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = true,
+@Component(name = InfoService.PID, policy = ConfigurationPolicy.REQUIRE, metatype = false,
         description = "OpenIDM Info Service", immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -66,11 +66,11 @@ public class InfoService extends AbstractScriptedService {
 
     /** HealthInfo service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private HealthInfo healthInfoSvc;
+    private volatile HealthInfo healthInfoSvc;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC)

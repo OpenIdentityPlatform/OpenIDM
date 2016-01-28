@@ -138,7 +138,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     /**
      * A list of listeners to notify when an instance fails

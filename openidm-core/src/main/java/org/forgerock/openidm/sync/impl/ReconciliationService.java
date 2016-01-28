@@ -134,7 +134,7 @@ public class ReconciliationService
             cardinality = ReferenceCardinality.OPTIONAL_UNARY,
             policy = ReferencePolicy.DYNAMIC
     )
-    Mappings mappings;
+    volatile Mappings mappings;
 
     /**
      * The thread pool for executing full reconciliation runs.

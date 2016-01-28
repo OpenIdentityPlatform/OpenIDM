@@ -131,7 +131,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     private ODatabaseDocumentPool pool;
 

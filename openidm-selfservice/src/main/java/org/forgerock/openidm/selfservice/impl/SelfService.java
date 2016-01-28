@@ -118,7 +118,7 @@ public class SelfService {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     /** The KBA Configuration. */
     @Reference(policy = ReferencePolicy.STATIC)
@@ -126,7 +126,7 @@ public class SelfService {
 
     /** CryptoService - not used directly, but added to make sure shared key gets created before use */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private CryptoService cryptoService;
+    private volatile CryptoService cryptoService;
 
     private Dictionary<String, Object> properties = null;
     private JsonValue config;
