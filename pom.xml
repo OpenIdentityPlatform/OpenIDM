@@ -218,6 +218,9 @@
         <!-- Version management -->
         <commons.forgerock-bom.version>4.1.1</commons.forgerock-bom.version>
 
+        <!-- TODO remove before merge -->
+        <forgerock-audit.version>4.1.2-SNAPSHOT</forgerock-audit.version>
+
         <!-- Commons versions -->
         <commons.forgerock-script.version>3.0.2</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
@@ -412,6 +415,13 @@
               <version>${commons.forgerock-bom.version}</version>
               <scope>import</scope>
               <type>pom</type>
+            </dependency>
+
+            <!-- TODO remove before merge -->
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
+                <version>${forgerock-audit.version}</version>
             </dependency>
 
             <!-- Non-BOM ForgeRock Commons artifacts -->

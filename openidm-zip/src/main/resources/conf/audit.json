@@ -2,6 +2,7 @@
     "auditServiceConfig" : {
         "handlerForQueries" : "repo",
         "availableAuditEventHandlers" : [
+            "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
             "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
