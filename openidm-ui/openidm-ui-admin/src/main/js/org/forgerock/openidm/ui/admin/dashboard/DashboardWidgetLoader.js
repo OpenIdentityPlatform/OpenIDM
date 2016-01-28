@@ -29,6 +29,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
     "org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget",
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/UserRelationshipWidget"
 ], function($, _,
             AdminAbstractView,
@@ -41,6 +42,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
             MappingReconResultsWidget,
             ResourceListWidget,
             QuickStartWidget,
+            FrameWidget,
             UserRelationshipWidget) {
     var dwlInstance = {},
         DashboardWidgetLoader = AdminAbstractView.extend({
@@ -93,13 +95,27 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                     quickStart: {
                         name: $.t("dashboard.quickStart.quickStartTitle")
                     },
+                    frame: {
+                        name : $.t("dashboard.frameWidget.frameWidgetTitle")
+                    },
                     userRelationship : {
                         name: $.t("dashboard.relationshipWidget.relationshipTitle")
                     }
                 };
 
+                if(args.widget.type === "frame") {
+
+                }
+
                 this.data.widgetType = args.widget.type;
-                this.data.widget = this.model.widgetList[args.widget.type];
+
+                if(args.widget.type === "frame" && args.widget.title) {
+                    this.data.widget = {
+                        name : args.widget.title
+                    };
+                } else {
+                    this.data.widget = this.model.widgetList[args.widget.type];
+                }
 
                 this.parentRender(_.bind(function(){
                     args.element = this.$el.find(".widget-body");
@@ -125,6 +141,13 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                             args.icons = args.widget.icons;
 
                             this.model.widget = QuickStartWidget.generateWidget(args, callback);
+                            break;
+                        case "frame":
+                            args.frameUrl = args.widget.frameUrl;
+                            args.height = args.widget.height;
+                            args.width = args.widget.width;
+
+                            this.model.widget = FrameWidget.generateWidget(args, callback);
                             break;
                         case "userRelationship":
                             this.model.widget = UserRelationshipWidget.generateWidget(args, callback);

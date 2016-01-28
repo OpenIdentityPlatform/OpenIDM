@@ -64,6 +64,9 @@
         "relationshipWidget" : {
             "selectAUser" : "Select a User",
             "relationshipTitle" : "Identity Relationships"
+        },
+        "frameWidget" : {
+            "frameWidgetTitle" : "Frame Widget"
         }
     },
     "config" : {
