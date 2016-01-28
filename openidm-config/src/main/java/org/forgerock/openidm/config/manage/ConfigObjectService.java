@@ -115,7 +115,7 @@ import org.slf4j.LoggerFactory;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/config*")
 })
-@Service
+@Service(value = { RequestHandler.class })
 public class ConfigObjectService implements RequestHandler, ClusterEventListener {
 
     final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
