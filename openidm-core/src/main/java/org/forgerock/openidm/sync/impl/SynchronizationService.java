@@ -136,7 +136,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
             policy = ReferencePolicy.DYNAMIC,
             bind = "bindScriptRegistry",
             unbind = "unbindScriptRegistry")
-    ScriptRegistry scriptRegistry;
+    volatile ScriptRegistry scriptRegistry;
     
     protected void bindScriptRegistry(final ScriptRegistry service) {
         scriptRegistry = service;
@@ -149,7 +149,7 @@ public class SynchronizationService implements SingletonResourceProvider, Mappin
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     @Activate
     protected void activate(ComponentContext context) {

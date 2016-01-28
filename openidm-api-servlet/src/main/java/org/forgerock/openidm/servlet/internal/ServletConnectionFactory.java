@@ -125,14 +125,14 @@ public class ServletConnectionFactory implements ConnectionFactory {
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private ScriptRegistry scriptRegistry = null;
+    private volatile ScriptRegistry scriptRegistry = null;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig = null;
+    private volatile EnhancedConfig enhancedConfig = null;
 
     @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.maintenance)")
-    private Filter maintenanceFilter = null;
+    private volatile Filter maintenanceFilter = null;
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {

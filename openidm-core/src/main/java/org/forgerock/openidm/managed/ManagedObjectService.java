@@ -94,11 +94,11 @@ public class ManagedObjectService implements RequestHandler {
 
     /** Cryptographic service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected CryptoService cryptoService;
+    protected volatile CryptoService cryptoService;
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected ScriptRegistry scriptRegistry;
+    protected volatile ScriptRegistry scriptRegistry;
 
     /**
      * Route service on "sync" endpoint.  An aspect of CRUDPAQ on managed objects is to synchronize their
@@ -130,7 +130,7 @@ public class ManagedObjectService implements RequestHandler {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     private final ConcurrentMap<String, RouteMatcher<Request>> managedRoutes = new ConcurrentHashMap<String, RouteMatcher<Request>>();
 

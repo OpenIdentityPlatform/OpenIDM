@@ -856,16 +856,12 @@
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-scr-plugin</artifactId>
-                    <!--<version>1.10.0</version>-->
-                    <version>1.15.0</version>
-                    <!--<configuration>
-                        <generateAccessors>false</generateAccessors>
-                    </configuration>-->
+                    <version>1.21.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.felix</groupId>
                     <artifactId>maven-bundle-plugin</artifactId>
-                    <version>2.4.0</version>
+                    <version>3.0.1</version>
                     <extensions>true</extensions>
                     <configuration>
                         <instructions>

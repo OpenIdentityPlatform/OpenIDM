@@ -89,7 +89,7 @@ public class ServletComponent implements EventHandler {
 
     /** The (external) ConnectionFactory */
     @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.router)")
-    protected ConnectionFactory connectionFactory;
+    protected volatile ConnectionFactory connectionFactory;
 
     @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.auth.config)")
     private Filter authFilter;
@@ -99,7 +99,7 @@ public class ServletComponent implements EventHandler {
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected ScriptRegistry scriptRegistry;
+    protected volatile ScriptRegistry scriptRegistry;
 
     // Optional scripts to augment/populate the security context
     private List<ScriptEntry> augmentSecurityScripts = new CopyOnWriteArrayList<ScriptEntry>();

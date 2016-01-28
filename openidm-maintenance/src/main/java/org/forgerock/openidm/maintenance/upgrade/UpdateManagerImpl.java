@@ -94,7 +94,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Basic manager to initiate the product maintenance and upgrade mechanisms.
  */
-@Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
+@Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, metatype = false,
         description = "OpenIDM Update Manager", immediate = true)
 @Service
 @org.apache.felix.scr.annotations.Properties({

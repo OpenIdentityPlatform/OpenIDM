@@ -30,7 +30,7 @@ import org.forgerock.script.ScriptRegistry;
  */
 @Component(name = SyncFailureHandlerFactoryImpl.PID,
         policy = ConfigurationPolicy.IGNORE,
-        metatype = true,
+        metatype = false,
         description = "OpenIDM Sync Failure Handler Factory Service",
         immediate = true
 )
@@ -47,7 +47,7 @@ public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory 
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected ScriptRegistry scriptRegistry;
+    protected volatile ScriptRegistry scriptRegistry;
 
     private void bindScriptRegistry(final ScriptRegistry service) {
         scriptRegistry = service;
