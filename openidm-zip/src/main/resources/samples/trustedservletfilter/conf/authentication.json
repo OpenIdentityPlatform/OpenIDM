@@ -3,7 +3,7 @@
         "sessionModule" : {
             "name" : "JWT_SESSION",
             "properties" : {
-                "keyAlias" : "openidm-localhost",
+                "keyAlias" : "&{openidm.https.keystore.cert.alias}",
                 "privateKeyPassword" : "&{openidm.keystore.password}",
                 "keystoreType" : "&{openidm.keystore.type}",
                 "keystoreFile" : "&{openidm.keystore.location}",
