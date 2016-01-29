@@ -63,50 +63,50 @@
     </div>
     <div id="scriptHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptHolder" aria-expanded="true">
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedSQLConnector.createScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedShared.createScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedSQLConnector.testScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedShared.testScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedSQLConnector.searchScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedShared.searchScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedSQLConnector.authenticateScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedShared.authenticateScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedSQLConnector.deleteScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedShared.deleteScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedSQLConnector.updateScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedShared.updateScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedSQLConnector.syncScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedShared.syncScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" />
             </div>
         </div>
 
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedSQLConnector.schemaScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedShared.schemaScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" />
             </div>
@@ -117,19 +117,19 @@
 <div class="panel panel-default panel-collapse">
     <div class="panel-heading" role="tab" id="classpathHolderHeading">
         <h4 class="panel-title">
-            <a data-toggle="collapse" href="#classpathHolder" aria-expanded="true" aria-controls="classpathHolderHeading" class="">{{t "templates.connector.scriptedSQLConnector.classpath"}}</a>
+            <a data-toggle="collapse" href="#classpathHolder" aria-expanded="true" aria-controls="classpathHolderHeading" class="">{{t "templates.connector.scriptedShared.classpath"}}</a>
         </h4>
     </div>
     <div id="classpathHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="classpathHolder" aria-expanded="true">
         <div class="panel-body connector-array-component" id="classpathWrapper">
             <div>
-                <button type="button" field_type="classpath" id="addClasspathButton" name="addClasspathButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedSQLConnector.addClasspath"}}</span><i class="fa fa-plus"></i></button>
+                <button type="button" field_type="classpath" id="addClasspathButton" name="addClasspathButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedShared.addClasspath"}}</span><i class="fa fa-plus"></i></button>
             </div>
 
             {{#if connectorDefaults.configurationProperties.classpath.length}}
             {{#each_with_index connectorDefaults.configurationProperties.classpath}}
             <div class="form-group field">
-                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedShared.classpath"}}</label>
                 <div class="input-group col-sm-8">
                     <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value="{{value}}"  />
                     <div class="input-group-addon">
@@ -140,7 +140,7 @@
             {{/each_with_index}}
             {{else}}
             <div class="form-group field">
-                <label class="control-label col-sm-3">{{t "templates.connector.scriptedSQLConnector.classpath"}}</label>
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedShared.classpath"}}</label>
                 <div class="input-group col-sm-8">
                     <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="jar:file:/path/to/jar!/path/to/directory" value=""  />
                     <div class="input-group-addon">
