@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -153,6 +153,15 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
         }
 
         return foundIcon;
+    };
+
+    obj.toggleValue = function(e) {
+        var toggle = this.$el.find(e.target);
+        if (toggle.val() === "true") {
+            toggle.val(false);
+        } else {
+            toggle.val(true);
+        }
     };
 
     return obj;
