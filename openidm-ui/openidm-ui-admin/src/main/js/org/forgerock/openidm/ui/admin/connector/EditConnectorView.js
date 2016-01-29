@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -71,7 +71,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             "change .postRetryAction": "postRetryActionChange",
             "change #connectorForm :input" : "connectorChangesCheck",
             "keypress #connectorForm :input" : "connectorFlowCheck",
-            "paste #connectorForm :input" : "connectorFlowCheck"
+            "paste #connectorForm :input" : "connectorFlowCheck",
+            "change .toggleBoolean" : connectorUtils.toggleValue
         },
         data: {
 

@@ -1,5 +1,5 @@
-<!-- Copyright 2015 ForgeRock AS.
-	License terms: https://forgerock.org/cddlv1-0/ -->
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
 <section>
     <div class="back-bar">
         <div class="container">
@@ -72,12 +72,12 @@
                                 <div class="form-group">
                                     <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorEnabled"}}</label>
                                     <div class="col-sm-8">
-                                        <select class="form-control" data-validator="required" data-validator-event="changed" id="connectorEnabled" name="enabled">
-                                            {{#staticSelect enabled}}
-                                            <option value="true">{{t "common.form.true"}}</option>
-                                            <option value="false">{{t "common.form.false"}}</option>
-                                            {{/staticSelect}}
-                                        </select>
+                                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                            <label>
+                                                <input class="toggleBoolean" id="connectorEnabled" type="checkbox" name="enabled" value="true" checked>
+                                                <span></span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
 

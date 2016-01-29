@@ -1321,13 +1321,18 @@
                 "quoteCharacter" : "Quote Character",
                 "fieldDelimiter" : "Field Delimiter",
                 "newlineString" : "Newline String",
-                "syncFileRetentionCount" : "Sync Retention Count"
+                "syncFileRetentionCount" : "Sync Retention Count",
+                "resourcePath" : "Path to external resource data file",
+                "primaryKey" : "Primary search key"
             },
             "xmlConnector" : {
                 "xsdicfFilePath" : "XSD ICF File Path",
                 "xsdFilePath" : "XSD File Path",
                 "xmlFilePath" : "XML File Path",
-                "createIfNotExists" : "Create file if it does not exist."
+                "createIfNotExists" : "Create file if it does not exist",
+                "xmlBaseSchema" : "Base XML schema definition",
+                "xmlCustomSchema" : "Custom XML schema definition",
+                "xmlAccountDB" : "Account database in XML format"
             },
             "scriptedSQLConnector" : {
                 "host" : "Host",
@@ -1356,12 +1361,12 @@
                 "scriptFiles": "Script Files"
             },
             "databaseTableConnector" : {
-                "quoting" : "Quoting",
+                "quoting" : "Quote Characters",
                 "host" : "Host",
                 "port" : "Port",
-                "user" : "User",
+                "user" : "Username",
                 "password" : "Password",
-                "database" : "Database",
+                "database" : "Database Name",
                 "table" : "Table",
                 "keyColumn" : "Key Column",
                 "passwordColumn" : "Password Column",
@@ -1374,7 +1379,21 @@
                 "validConnectionQuery" : "Valid Connection Query",
                 "changeLogColumn" : "Change Log Column",
                 "dataSource" : "Data Source",
-                "jndiProperties" : "JNDI Properties"
+                "jndiProperties" : "JNDI Properties",
+                "dbHostnameOrIP" : "Database hostname or IP address",
+                "dbUsername" : "Database username",
+                "tableNameWithAccounts" : "Table name with accounts",
+                "uidForTableRows" : "Unique identifier for table rows",
+                "jdbcDriverHelp" : "JDBC Driver class name",
+                "jdbcUrlTemplateHelp" : "Connection URL template of the JDBC Driver",
+                "emptyStringHelp" : "Allows empty strings instead of null values, except for OracleSQL",
+                "rethrowSqlHelp" : "If true, show SQL Exceptions with code = 0",
+                "nativeTimestampsHelp" : "Retrieves timestamp data",
+                "allNativeHelp" : "Retrieves in a database native format",
+                "validConnectionQueryHelp" : "SQL statement to validate the connection",
+                "dbChangeTime" : "Latest database change time",
+                "jdbcPath" : "JDBC path, ‘jdbc/SampleDataSourceName’",
+                "jndiPropertiesHelp" : "Java Naming Directory Interface context factory, in key = value format"
             },
             "ldapConnector" : {
                 "noFilter": "No user filter added...",
@@ -1397,7 +1416,7 @@
                 "accountUserNameAttributes": "Attribute used for login",
                 "baseContextTitle":"Base Context",
                 "baseContext": "Enter your base DN",
-                "baseContextNote": "Be sure to add base contexts which include both your users and your groups.",
+                "baseContextNote": "Be sure to add base contexts which include both your users and your groups",
                 "baseContextAdd":"Add Base Context",
                 "accountObjectClasses" : "Object Classes for users",
                 "addAccountObjectClasses" : "Add Object Class",
@@ -1415,6 +1434,9 @@
                 "hideCert": "Hide certificate",
                 "showCert": "Show certificate",
                 "filterTitle": "Update __type__",
+                "loginAccountDN" : "Login Account DN",
+                "filterLdapAttr" : "Filter by LDAP attribute",
+                "groupFilter" : "Group Filter",
                 "errorMessages": {
                     "unknownHost" : "Unknown Host",
                     "portOutOfRange" : "Port Out of Range",
