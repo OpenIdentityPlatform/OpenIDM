@@ -3,7 +3,7 @@
 {{#if mapping}}
     {{#if recon}}
     <div class="recon-widget-header clearfix">
-        <div class="title text-primary">
+        <div class="title {{#if showPopover}} selectable-title {{/if}} text-primary">
             <i class="fa fa-map-marker"></i>{{mapping.name}}{{#if showPopover}}<i class="fa fa-caret-down"></i>{{/if}}
         </div>
         <div class="timestamp">

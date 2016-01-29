@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 /*global define, window */
@@ -29,9 +29,9 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget", [
             template: "templates/admin/dashboard/widgets/FrameWidgetTemplate.html",
             render: function(args, callback) {
                 this.element = args.element;
-                this.data.frameUrl = args.frameUrl;
-                this.data.height = args.height;
-                this.data.width = args.width;
+                this.data.frameUrl = args.widget.frameUrl;
+                this.data.height = args.widget.height;
+                this.data.width = args.widget.width;
 
                 this.parentRender(_.bind(function(){
                     if(callback) {

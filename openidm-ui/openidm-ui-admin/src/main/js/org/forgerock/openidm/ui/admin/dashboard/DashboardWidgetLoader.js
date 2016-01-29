@@ -71,41 +71,43 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                 this.element = args.element;
 
                 this.model.widgetList = {
-                    lifeCycleMemoryBoth: {
-                        name : $.t("dashboard.memoryUsageBoth")
-                    },
                     lifeCycleMemoryHeap: {
-                        name : $.t("dashboard.memoryUsageHeap")
+                        name : $.t("dashboard.memoryUsageHeap"),
+                        widget : MemoryUsageWidget
                     },
                     lifeCycleMemoryNonHeap: {
-                        name : $.t("dashboard.memoryUsageNonHeap")
+                        name : $.t("dashboard.memoryUsageNonHeap"),
+                        widget : MemoryUsageWidget
                     },
                     systemHealthFull : {
-                        name : $.t("dashboard.systemHealth")
+                        name : $.t("dashboard.systemHealth"),
+                        widget : FullHealthWidget
                     },
                     cpuUsage: {
-                        name: $.t("dashboard.cpuUsage")
+                        name: $.t("dashboard.cpuUsage"),
+                        widget : CPUUsageWidget
                     },
                     lastRecon : {
-                        name : $.t("dashboard.lastReconciliation")
+                        name : $.t("dashboard.lastReconciliation"),
+                        widget : MappingReconResultsWidget
                     },
                     resourceList : {
-                        name : $.t("dashboard.resources")
+                        name : $.t("dashboard.resources"),
+                        widget : ResourceListWidget
                     },
                     quickStart: {
-                        name: $.t("dashboard.quickStart.quickStartTitle")
+                        name: $.t("dashboard.quickStart.quickStartTitle"),
+                        widget : QuickStartWidget
                     },
                     frame: {
-                        name : $.t("dashboard.frameWidget.frameWidgetTitle")
+                        name : $.t("dashboard.frameWidget.frameWidgetTitle"),
+                        widget : FrameWidget
                     },
                     userRelationship : {
-                        name: $.t("dashboard.relationshipWidget.relationshipTitle")
+                        name: $.t("dashboard.relationshipWidget.relationshipTitle"),
+                        widget : UserRelationshipWidget
                     }
                 };
-
-                if(args.widget.type === "frame") {
-
-                }
 
                 this.data.widgetType = args.widget.type;
 
@@ -120,39 +122,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                 this.parentRender(_.bind(function(){
                     args.element = this.$el.find(".widget-body");
 
-                    switch(args.widget.type) {
-                        case "lifeCycleMemoryHeap":
-                        case "lifeCycleMemoryNonHeap":
-                            this.model.widget = MemoryUsageWidget.generateWidget(args, callback);
-                            break;
-                        case "cpuUsage":
-                            this.model.widget = CPUUsageWidget.generateWidget(args, callback);
-                            break;
-                        case "systemHealthFull":
-                            this.model.widget = FullHealthWidget.generateWidget(args, callback);
-                            break;
-                        case "lastRecon":
-                            this.model.widget = MappingReconResultsWidget.generateWidget(args, callback);
-                            break;
-                        case "resourceList":
-                            this.model.widget = ResourceListWidget.generateWidget(args, callback);
-                            break;
-                        case "quickStart":
-                            args.icons = args.widget.icons;
+                    this.model.widget = this.model.widgetList[this.data.widgetType].widget.generateWidget(args, callback);
 
-                            this.model.widget = QuickStartWidget.generateWidget(args, callback);
-                            break;
-                        case "frame":
-                            args.frameUrl = args.widget.frameUrl;
-                            args.height = args.widget.height;
-                            args.width = args.widget.width;
-
-                            this.model.widget = FrameWidget.generateWidget(args, callback);
-                            break;
-                        case "userRelationship":
-                            this.model.widget = UserRelationshipWidget.generateWidget(args, callback);
-                            break;
-                    }
                 }, this));
             }
         });

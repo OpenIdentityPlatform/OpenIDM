@@ -1,6 +1,1 @@
-<style>
-    iframe {
-        border:none;
-    }
-</style>
-<iframe src="{{frameUrl}}" {{#if height}} height="{{height}}" {{else}} height="600" {{/if}} {{#if width}} width="{{width}}" {{else}} width="100%" {{/if}}></iframe>
+<iframe src="{{frameUrl}}" style="{{#if height}} height:{{height}}; {{else}} height:600px; {{/if}}{{#if width}} width:{{width}}; {{else}} width:100%; {{/if}}"></iframe>
