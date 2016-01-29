@@ -291,61 +291,61 @@
     </div>
     <div id="scriptHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptHolder" aria-expanded="true">
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedCrest.createScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedShared.createScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedCrest.testScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedShared.testScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedCrest.searchScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedShared.searchScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedCrest.authenticateScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedShared.authenticateScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedCrest.deleteScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedShared.deleteScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedCrest.updateScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedShared.updateScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedCrest.syncScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedShared.syncScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedCrest.schemaScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedShared.schemaScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}"  />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="scriptBaseClass">{{t "templates.connector.scriptedCrest.scriptBaseClass"}}</label>
+            <label class="col-sm-3 control-label" for="scriptBaseClass">{{t "templates.connector.scriptedShared.scriptBaseClass"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="scriptBaseClass" name="configurationProperties.scriptBaseClass" value="{{connectorDefaults.configurationProperties.scriptBaseClass}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="customizerScriptFileName">{{t "templates.connector.scriptedCrest.customizerScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="customizerScriptFileName">{{t "templates.connector.scriptedShared.customizerScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="customizerScriptFileName" name="configurationProperties.customizerScriptFileName" value="{{connectorDefaults.configurationProperties.customizerScriptFileName}}" />
             </div>
