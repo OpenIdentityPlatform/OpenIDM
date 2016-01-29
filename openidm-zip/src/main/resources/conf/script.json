@@ -2,7 +2,8 @@
     "properties" : { },
     "ECMAScript" : {
         "#javascript.debug" : "transport=socket,suspend=y,address=9888,trace=true",
-        "javascript.recompile.minimumInterval" : "60000"
+        "javascript.recompile.minimumInterval" : "60000",
+        "javascript.exception.debug.info" : true
     },
     "Groovy" : {
         "#groovy.warnings" : "likely errors #othere values [none,likely,possible,paranoia]",
