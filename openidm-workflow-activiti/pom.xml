@@ -106,7 +106,21 @@
             <artifactId>activiti-osgi</artifactId>
             <version>5.15</version>
         </dependency>
-
+        <dependency>
+            <groupId>org.apache.aries.blueprint</groupId>
+            <artifactId>org.apache.aries.blueprint</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries.proxy</groupId>
+            <artifactId>org.apache.aries.proxy</artifactId>
+            <version>1.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.aries</groupId>
+            <artifactId>org.apache.aries.util</artifactId>
+            <version>1.1.1</version>
+        </dependency>
 
         <!-- This enhances the felix system bundle with the full javax.transaction 1.1 classes to remedy the split package issue that would occur otherwise. Must be installed before the use of the package, e.g. the transaction manager -->
         <dependency>
@@ -181,6 +195,7 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>osgi.enterprise</artifactId>
+            <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
