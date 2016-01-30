@@ -25,6 +25,7 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/components/Navigation"
+
 ], function($, _, AbstractDelegate, conf, commonSiteConfigurationDelegate, eventManager, Constants, Navigation) {
 
     var SiteConfigurationDelegate = function (url) {
@@ -41,6 +42,16 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
             config.selfRegistration = false;
             config.forgotUsername = false;
             successCallback(config);
+        });
+    };
+
+    SiteConfigurationDelegate.prototype.updateConfiguration = function (callback) {
+        this.getConfiguration(function(result) {
+            conf.globalData = result;
+
+            if (callback) {
+                callback();
+            }
         });
     };
 

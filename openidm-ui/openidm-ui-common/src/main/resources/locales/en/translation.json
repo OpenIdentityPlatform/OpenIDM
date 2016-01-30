@@ -1,5 +1,35 @@
 {
     "dashboard" : {
+        "new": {
+            "title": "Create New Dashboard",
+            "name": "Name",
+            "default": "Default",
+            "defaultDesc": "The default dashboard is the landing page.",
+            "submit": "Create Dashboard"
+        },
+        "duplicateOf": "Duplicate of ",
+        "addWidgets": "Add Widgets",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "setAsDefault": "Set as Default",
+        "rename": "Rename",
+        "duplicateTitle": "Duplicate Dashboard Name",
+        "renameTitle": "Rename Dashboard",
+        "renameDesc": "Enter a unique dashboard name.",
+        "newName": "Dashboard Name",
+        "noWidgets": "Add widget(s) to customize your dashboard.",
+        "addAWidget": "Add a widget",
+        "widgetDescriptions": {
+            "lifeCycleMemoryHeap": "Storage for Java Objects",
+            "lifeCycleMemoryNonHeap": "Storage for loaded classes and related meta-data",
+            "systemHealthFull": "JVM life cycle memory usage and CPU load",
+            "cpuUsage": "Load relative to a single CPU",
+            "lastRecon" : "Reconciliation statistics",
+            "resourceList": "Connectors, Mappings, and Managed Objects",
+            "quickStart": "Links to common tasks",
+            "frame": "Add external content",
+            "userRelationship": "Links between accounts"
+        },
         "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
         "memoryUsageHeap" : "Memory Usage (JVM Heap)",
         "memoryUsageNonHeap" : "Memory Usage (JVM NonHeap)",
@@ -66,7 +96,7 @@
             "relationshipTitle" : "Identity Relationships"
         },
         "frameWidget" : {
-            "frameWidgetTitle" : "Frame Widget"
+            "frameWidgetTitle" : "Embed Web Page"
         }
     },
     "config" : {
@@ -77,6 +107,14 @@
             "dayNamesShort" : "Sun. , Mon., Tue., Wed., Thu., Fri., Sat."
         },
         "messages" : {
+            "dashboardMessages": {
+                "newDashboardCreated": "New dashboard created",
+                "dashboardDeleted": "Existing dashboard deleted",
+                "dashboardDefaulted": "Current dashboard is now the default",
+                "dashboardDuplicated": "Current dashboard duplicated",
+                "dashboardRenamed": "Current dashboard renamed",
+                "dashboardWidgetAdded": "Widget added to dashboard"
+            },
             "WorkflowMessages" : {
                 "cancelActiveProcess" : "Workflow Process canceled."
             },
@@ -191,7 +229,8 @@
         "AppConfiguration" : {
             "Navigation" : {
                 "links" : {
-                    "dashboard" : "Dashboard",
+                    "dashboard" : "Dashboards",
+                    "newDashboard": "New Dashboard",
                     "systemPref" : "System Preferences",
                     "managedObjects" : "Managed Objects",
                     "manage" : "Manage",

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 /*global define  */
@@ -24,34 +24,6 @@ define("config/process/CommonIDMConfig", [
 ], function($, _, constants, eventManager) {
     var ignorePassword = false,
         obj = [
-            {
-                startEvent: constants.EVENT_HANDLE_DEFAULT_ROUTE,
-                description: "",
-                override: true,
-                dependencies: [
-                    "org/forgerock/commons/ui/common/main/Router",
-                    "org/forgerock/commons/ui/common/main/Configuration",
-                    "org/forgerock/commons/ui/common/util/ModuleLoader",
-                    "org/forgerock/commons/ui/common/SiteConfigurator"
-                ],
-                processDescription: function(event, router, conf, ModuleLoader, SiteConfigurator) {
-                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
-                    /* if (conf.loggedUser.has("needsResetPassword") && !ignorePassword) {
-                        ModuleLoader.load(SiteConfigurator.configuration.delegate).then(function (configurationDelegate) {
-                            if (typeof configurationDelegate.checkForDifferences === "function") {
-                                configurationDelegate.checkForDifferences();
-                            }
-
-                            eventManager.sendEvent(constants.EVENT_SHOW_DIALOG, { route: router.configuration.routes.mandatoryPasswordChangeDialog, base: router.configuration.routes.mandatoryPasswordChangeDialog.base });
-                            ignorePassword = true;
-                        });
-
-                    } else {
-                        eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
-                    }*/
-                }
-            },
-
             {
                 startEvent: constants.EVENT_POLICY_FAILURE,
                 description: "Failure to save record due to policy validation",
