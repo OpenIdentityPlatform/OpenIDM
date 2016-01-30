@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -22,6 +22,17 @@ define("config/process/IDMConfig", [
     "org/forgerock/commons/ui/common/main/EventManager"
 ], function(_, constants, eventManager) {
     var obj = [
+        {
+            startEvent: constants.EVENT_HANDLE_DEFAULT_ROUTE,
+            description: "",
+            override: true,
+            dependencies: [
+                "org/forgerock/commons/ui/common/main/Router"
+            ],
+            processDescription: function(event, router) {
+                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
+            }
+        },
         {
             startEvent: constants.EVENT_NOTIFICATION_DELETE_FAILED,
             description: "Error in deleting notification",

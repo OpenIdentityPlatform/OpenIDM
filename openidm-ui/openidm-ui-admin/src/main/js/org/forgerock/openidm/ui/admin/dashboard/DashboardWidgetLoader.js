@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 /*global define */
@@ -45,15 +45,68 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
             FrameWidget,
             UserRelationshipWidget) {
     var dwlInstance = {},
+        widgetList = {
+            lifeCycleMemoryHeap: {
+                name : $.t("dashboard.memoryUsageHeap"),
+                widget : MemoryUsageWidget,
+                desc : $.t("dashboard.widgetDescriptions.lifeCycleMemoryHeap"),
+                defaultSize: "small"
+            },
+            lifeCycleMemoryNonHeap: {
+                name : $.t("dashboard.memoryUsageNonHeap"),
+                widget : MemoryUsageWidget,
+                desc : $.t("dashboard.widgetDescriptions.lifeCycleMemoryNonHeap"),
+                defaultSize: "small"
+            },
+            systemHealthFull : {
+                name : $.t("dashboard.systemHealth"),
+                widget : FullHealthWidget,
+                desc : $.t("dashboard.widgetDescriptions.systemHealthFull"),
+                defaultSize: "large"
+            },
+            cpuUsage: {
+                name: $.t("dashboard.cpuUsage"),
+                widget : CPUUsageWidget,
+                desc : $.t("dashboard.widgetDescriptions.cpuUsage"),
+                defaultSize: "small"
+            },
+            lastRecon : {
+                name : $.t("dashboard.lastReconciliation"),
+                widget : MappingReconResultsWidget,
+                desc : $.t("dashboard.widgetDescriptions.lastRecon"),
+                defaultSize: "large"
+            },
+            resourceList : {
+                name : $.t("dashboard.resources"),
+                widget : ResourceListWidget,
+                desc : $.t("dashboard.widgetDescriptions.resourceList"),
+                defaultSize: "large"
+            },
+            quickStart: {
+                name: $.t("dashboard.quickStart.quickStartTitle"),
+                widget : QuickStartWidget,
+                desc : $.t("dashboard.widgetDescriptions.quickStart"),
+                defaultSize: "large"
+            },
+            frame: {
+                name : $.t("dashboard.frameWidget.frameWidgetTitle"),
+                widget : FrameWidget,
+                desc : $.t("dashboard.widgetDescriptions.frame"),
+                defaultSize: "large"
+            },
+            userRelationship : {
+                name: $.t("dashboard.relationshipWidget.relationshipTitle"),
+                widget : UserRelationshipWidget,
+                desc : $.t("dashboard.widgetDescriptions.userRelationship"),
+                defaultSize: "large"
+            }
+        },
         DashboardWidgetLoader = AdminAbstractView.extend({
             template: "templates/dashboard/DashboardWidgetLoaderTemplate.html",
             noBaseTemplate: true,
-            model: {
+            model: {},
+            data: {},
 
-            },
-            data: {
-
-            },
             /*
              Available Widgets:
              lifeCycleMemoryHeap - Current heap memory
@@ -65,57 +118,19 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
              barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
              resourceList - Displays the top 4 resources for connectors, mappings, and managed objects
              quickStart - Widget displaying quick start cards to help users get started with core functionality
+             frame - Iframe widget that provide an iframe for you to point to any URL
              userRelationship - Widget to display a users relationships throughout the system
              */
             render: function(args, callback) {
                 this.element = args.element;
 
-                this.model.widgetList = {
-                    lifeCycleMemoryHeap: {
-                        name : $.t("dashboard.memoryUsageHeap"),
-                        widget : MemoryUsageWidget
-                    },
-                    lifeCycleMemoryNonHeap: {
-                        name : $.t("dashboard.memoryUsageNonHeap"),
-                        widget : MemoryUsageWidget
-                    },
-                    systemHealthFull : {
-                        name : $.t("dashboard.systemHealth"),
-                        widget : FullHealthWidget
-                    },
-                    cpuUsage: {
-                        name: $.t("dashboard.cpuUsage"),
-                        widget : CPUUsageWidget
-                    },
-                    lastRecon : {
-                        name : $.t("dashboard.lastReconciliation"),
-                        widget : MappingReconResultsWidget
-                    },
-                    resourceList : {
-                        name : $.t("dashboard.resources"),
-                        widget : ResourceListWidget
-                    },
-                    quickStart: {
-                        name: $.t("dashboard.quickStart.quickStartTitle"),
-                        widget : QuickStartWidget
-                    },
-                    frame: {
-                        name : $.t("dashboard.frameWidget.frameWidgetTitle"),
-                        widget : FrameWidget
-                    },
-                    userRelationship : {
-                        name: $.t("dashboard.relationshipWidget.relationshipTitle"),
-                        widget : UserRelationshipWidget
-                    }
-                };
-
                 this.data.widgetType = args.widget.type;
-                this.data.widget = this.model.widgetList[args.widget.type];
+                this.data.widget = widgetList[args.widget.type];
 
                 this.parentRender(_.bind(function(){
                     args.element = this.$el.find(".widget-body");
 
-                    this.model.widget = this.model.widgetList[this.data.widgetType].widget.generateWidget(args, callback);
+                    this.model.widget = widgetList[this.data.widgetType].widget.generateWidget(args, callback);
 
                 }, this));
             }
@@ -129,6 +144,10 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
         widget.render(loadingObject, callback);
 
         return widget;
+    };
+
+    dwlInstance.getWidgetList = function() {
+        return widgetList;
     };
 
     return dwlInstance;

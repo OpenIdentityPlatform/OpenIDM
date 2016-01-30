@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 /*global define, window */
@@ -66,8 +66,6 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                     percentClass = "text-primary";
 
                 if(percent !== "N/A") {
-                    percent = percent + "%";
-
                     if(percent > this.model.dangerThreshold) {
                         color =  this.model.dangerChartColor;
                         percentClass = "danger";
@@ -75,6 +73,8 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                         color =  this.model.warningChartColor;
                         percentClass = "warning";
                     }
+
+                    percent = percent + "%";
                 }
 
                 //widget-header

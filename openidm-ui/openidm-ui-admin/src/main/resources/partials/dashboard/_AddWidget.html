@@ -1,0 +1,19 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form-inline" id="AddWidgetDialog">
+    <ul class="list-group">
+
+        {{#each widgets}}
+        <li class="list-group-item">
+            <div class="media">
+                <div class="media-body">
+                    <button type="button" class="btn btn-primary add-widget pull-right" data-widget-id="{{@key}}">{{t "common.form.add"}}</button>
+                    <h4 class="text-primary">{{name}}</h4>
+                    <p>{{desc}}</p>
+                </div>
+            </div>
+        </li>
+        {{/each}}
+
+    </ul>
+</form>

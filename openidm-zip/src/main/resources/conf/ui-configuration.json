@@ -47,68 +47,72 @@
                 }
             ]
         },
-        "adminDashboard" : {
-            "widgets" : [
-                {
-                    "type" : "quickStart",
-                    "size" : "large",
-                    "cards" : [
-                        {
-                            "name" : "dashboard.quickStart.addANewConnector",
-                            "icon" : "fa-database",
-                            "href" : "#connectors/add/"
-                        },
-                        {
-                            "name" : "dashboard.quickStart.createANewMapping",
-                            "icon" : "fa-map-marker",
-                            "href" : "#mapping/add/"
-                        },
-                        {
-                            "name" : "dashboard.quickStart.manageRole",
-                            "icon" : "fa-check-square-o",
-                            "href" : "#resource/managed/role/list/"
-                        },
-                        {
-                            "name" : "dashboard.quickStart.addANewDevice",
-                            "icon" : "fa-tablet",
-                            "href" : "#managed/add/"
-                        },
-                        {
-                            "name" : "dashboard.quickStart.setupRegistration",
-                            "icon" : "fa-gear",
-                            "href" : "#selfservice/userregistration/"
-                        },
-                        {
-                            "name" : "dashboard.quickStart.setupPasswordReset",
-                            "icon" : "fa-gear",
-                            "href" : "#selfservice/passwordreset/"
-                        },
-                        {
-                            "name" : "dashboard.quickStart.manageUser",
-                            "icon" : "fa-user",
-                            "href" : "#resource/managed/user/list/"
-                        },
-                        {
-                            "name" : "dashboard.quickStart.setupSystem",
-                            "icon" : "fa-user",
-                            "href" : "#settings/"
-                        }
-                    ]
-                },
-                {
-                    "type" : "lastRecon",
-                    "size" : "large",
-                    "barchart" : false
-                },
-                {
-                    "type" : "systemHealthFull",
-                    "size" : "large"
-                },
-                {
-                    "type" : "resourceList",
-                    "size" : "large"
-                }
-            ]
-        }
+        "adminDashboards" : [
+            {
+                "name" : "Reconciliation Dashboard",
+                "isDefault" : true,
+                "widgets" : [
+                    {
+                        "type" : "quickStart",
+                        "size" : "large",
+                        "cards" : [
+                            {
+                                "name" : "dashboard.quickStart.addANewConnector",
+                                "icon" : "fa-database",
+                                "href" : "#connectors/add/"
+                            },
+                            {
+                                "name" : "dashboard.quickStart.createANewMapping",
+                                "icon" : "fa-map-marker",
+                                "href" : "#mapping/add/"
+                            },
+                            {
+                                "name" : "dashboard.quickStart.manageRole",
+                                "icon" : "fa-check-square-o",
+                                "href" : "#resource/managed/role/list/"
+                            },
+                            {
+                                "name" : "dashboard.quickStart.addANewDevice",
+                                "icon" : "fa-tablet",
+                                "href" : "#managed/add/"
+                            },
+                            {
+                                "name" : "dashboard.quickStart.setupRegistration",
+                                "icon" : "fa-gear",
+                                "href" : "#selfservice/userregistration/"
+                            },
+                            {
+                                "name" : "dashboard.quickStart.setupPasswordReset",
+                                "icon" : "fa-gear",
+                                "href" : "#selfservice/passwordreset/"
+                            },
+                            {
+                                "name" : "dashboard.quickStart.manageUser",
+                                "icon" : "fa-user",
+                                "href" : "#resource/managed/user/list/"
+                            },
+                            {
+                                "name" : "dashboard.quickStart.setupSystem",
+                                "icon" : "fa-user",
+                                "href" : "#settings/"
+                            }
+                        ]
+                    },
+                    {
+                        "type" : "lastRecon",
+                        "size" : "large",
+                        "barchart" : false
+                    },
+                    {
+                        "type" : "systemHealthFull",
+                        "size" : "large"
+                    },
+                    {
+                        "type" : "resourceList",
+                        "size" : "large"
+                    }
+                ]
+            }
+        ]
     }
 }
