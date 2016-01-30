@@ -26,7 +26,6 @@ import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
 import java.util.Dictionary;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -48,10 +47,10 @@ import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.osgi.ComponentContextUtil;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageProvider;
@@ -151,16 +150,15 @@ public class SelfService {
                     .build();
 
             // begin service registration prep
-            properties = context.getProperties();
-            if (null == properties) {
-                properties = new Hashtable<>();
-            }
 
             String factoryPid = enhancedConfig.getConfigurationFactoryPid(context);
             if (StringUtils.isBlank(factoryPid)) {
                 throw new IllegalArgumentException("Configuration must have property: "
                         + ServerConstants.CONFIG_FACTORY_PID);
             }
+
+            // context.getProperties() is unmodifiable, so make a copy to add router prefix
+            properties = ComponentContextUtil.getModifiableProperties(context);
             properties.put(ServerConstants.ROUTER_PREFIX,
                     resourcePath(ROUTER_PREFIX).concat(resourcePath(factoryPid)).toString());
 
