@@ -229,8 +229,10 @@
         <restlet.version>2.1.2</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.1</joda-time.version>
-        <paxweb.version>4.1.1</paxweb.version>
+        <paxweb.version>4.2.4</paxweb.version>
         <javax.inject.version>1_2</javax.inject.version>
+        <xbean.version>4.5</xbean.version>
+        <asm.version>5.0.4</asm.version>
 
         <!-- OSGi bundles properties -->
         <openidm.osgi.import.before.defaults />
