@@ -257,16 +257,37 @@ Copyright: Copyright 2007-2008 Alin Dreghiciu.
 Version: pax-swissbox-lifecycle-1.8.0.jar
 Copyright: Copyright 2007 Alin Dreghiciu.
 
-Version: pax-web-jetty-bundle-4.1.1.jar
+Version: pax-web-jetty-bundle-4.2.4.jar
 Copyright: Copyright 2009 Alin Dreghiciu.
            Copyright 2007-2009 Open Participation for Java (www.ops4j.org)
            Copyright (c) OSGi Alliance (2000, 2007).
 
-Version: pax-web-api-4.1.1.jar
-Copyright:  Copyright 2009 David Conde.
-            Copyright 2012 Harald Wellmann
-            Copyright 2007 Alin Dreghiciu.
-            Copyright 2012 Achim Nierbeck.
+Version: pax-web-api-4.2.4.jar
+Copyright: Copyright 2009 David Conde.
+           Copyright 2012 Harald Wellmann
+           Copyright 2007 Alin Dreghiciu.
+           Copyright 2012 Achim Nierbeck.
+
+Version: pax-web-spi-4.2.4.jar
+Copyright: Copyright 2007-2009 Alin Dreghiciu
+           Copyright 2010-2011 Achim Nierbeck
+           Copyright 2012 Harald Wellmann
+           Copyright 2013 Achim Nierbeck, Harald Wellmann
+
+Version: xbean-finder-4.5.jar
+Copyright: Copyright 2005-2025 The Apache Software Foundation
+
+Version: xbean-bundleutils.4.5.jar
+Copyright: Copyright 2005-2015 The Apache Software Foundation
+
+Version: asm-5.0.4.jar
+Copyright: Copyright (c) 2000-2011 INRIA, France Telecom
+
+Version: asm-commons-5.0.4.jar
+Copyright: Copyright (c) 2000-2011 INRIA, France Telecom
+
+Version: asm-tree-5.0.4.jar
+Copyright: Copyright (c) 2000-2011 INRIA, France Telecom
 
 Version: super-csv-2.4.0.jar
 Copyright: Copyright 2007 Kasper B. Graversen
