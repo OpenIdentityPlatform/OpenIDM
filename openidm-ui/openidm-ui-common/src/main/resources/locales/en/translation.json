@@ -33,6 +33,7 @@
         "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
         "memoryUsageHeap" : "Memory Usage (JVM Heap)",
         "memoryUsageNonHeap" : "Memory Usage (JVM NonHeap)",
+        "widgetDelete" : "Are you sure you want to delete this widget?",
         "reconProcesses" : "Recon Processes",
         "cpuUsage" : "CPU Usage",
         "resources" : "Resources",
@@ -45,6 +46,12 @@
         "pause" : "Pause",
         "start" : "Start",
         "refresh" : "Refresh",
+        "generalConfig" : {
+            "small" : "Small",
+            "medium" : "Medium",
+            "large" : "Large",
+            "widgetSize" : "Widget Size"
+        },
         "quickStart" : {
             "addANewConnector" : "Add Connector",
             "createANewMapping" : "Create Mapping",
@@ -96,7 +103,11 @@
             "relationshipTitle" : "Identity Relationships"
         },
         "frameWidget" : {
-            "frameWidgetTitle" : "Embed Web Page"
+            "frameWidgetTitle" : "Embed Web Page",
+            "url" : "URL",
+            "height" : "Height",
+            "width" : "Width",
+            "title" : "Title"
         }
     },
     "config" : {

@@ -1,16 +1,38 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015-2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div style="display:none;" class="dashboard-loading-message">{{t "dashboard.loading"}}</div>
-<div style="display:none;" class="dashboard-details">
-    <div class="widget-header">
+{{#unless simpleWidget}}
+{{> dashboard/_widgetHeader}}
+<div class="panel-body widget-body">
+    <div style="display:none;" class="dashboard-loading-message">{{t "dashboard.loading"}}</div>
+    <div style="display:none;" class="dashboard-details">
+        <div class="widget-header">
 
-    </div>
-    <div class="widget-chart">
-
-    </div>
-    {{#if widgetTitle}}
-        <div class="widget-title">
-            {{widgetTitle}}
         </div>
-    {{/if}}
+        <div class="widget-chart">
+
+        </div>
+
+        {{#if widgetTextDetails}}
+        <div class="widget-title">
+            {{widgetTextDetails}}
+        </div>
+        {{/if}}
+    </div>
 </div>
+{{else}}
+    <div style="display:none;" class="dashboard-loading-message">{{t "dashboard.loading"}}</div>
+    <div style="display:none;" class="dashboard-details">
+        <div class="widget-header">
+
+        </div>
+        <div class="widget-chart">
+
+        </div>
+
+        {{#if widgetTextDetails}}
+            <div class="widget-title">
+                {{widgetTextDetails}}
+            </div>
+        {{/if}}
+    </div>
+{{/unless}}

@@ -18,16 +18,17 @@ module.exports = {
         .assert.containsText("h1", "Test Dashboard 1");
     },
 
-    "Add a widget": function(client) {
+    "Add a widget dashboard 1": function(client) {
         // Add a Frame widget, use top button to add widgets
         client.click("#dashboardWidgets .open-add-widget-dialog")
         .waitForElementPresent("button[data-widget-id='frame']", 2000)
         .click("button[data-widget-id='frame']")
-        .waitForElementPresent(".widget-holder .page-header", 2000)
-        .assert.containsText(".widget-holder .page-header", "EMBED WEB PAGE")
+        .waitForElementPresent(".widget .widget-title", 2000)
+        .assert.containsText(".widget .widget-title", "EMBED WEB PAGE")
         .assert.elementPresent("#AddWidgetDialog")
+        .waitForElementPresent(".bootstrap-dialog-footer-buttons button", 2000)
         .click(".bootstrap-dialog-footer-buttons button")
-        .waitForElementNotPresent("#AddWidgetDialog", 2000);
+        .waitForElementNotPresent("#AddWidgetDialog", 3000);
     },
 
     "Attempt to add a dashboard with a used name": function(client) {
@@ -53,25 +54,40 @@ module.exports = {
         client.click(".active .dropdown-toggle");
     },
 
-    "Add some widgets": function(client) {
+    "Add some widgets to dashboard 2": function(client) {
         // Add a System Health widget, use well button to add widget
         client.click("#dashboardWidgets button")
         .waitForElementPresent("button[data-widget-id='frame']", 2000)
-        .click("button[data-widget-id='systemHealthFull']")
-        .waitForElementPresent(".widget-holder .page-header", 2000)
-        .assert.containsText(".widget-holder .page-header", "SYSTEM HEALTH")
+        .click("button[data-widget-id='frame']")
+        .waitForElementPresent(".widget .widget-title", 2000)
+        .assert.containsText(".widget .widget-title", "EMBED WEB PAGE")
 
         // Add a Resources Widget
+        .waitForElementPresent("button[data-widget-id='resourceList']", 2000)
         .click("button[data-widget-id='resourceList']")
-        .waitForElementPresent(".resource-widget", 2000)
+        .waitForElementPresent(".resource-widget", 3000)
         .assert.elementPresent("#AddWidgetDialog")
         .click(".bootstrap-dialog-footer-buttons button")
-        .waitForElementNotPresent("#AddWidgetDialog", 2000);
+        .waitForElementNotPresent("#AddWidgetDialog", 3000);
+    },
+
+    'Frame widget is configurable': function (client) {
+        client.click(".btn-link")
+        .waitForElementPresent(".dropdown-menu", 2000)
+        .assert.elementPresent(".widget-settings")
+        .click(".widget-settings")
+        .waitForElementPresent("#widgetConfigForm", 3000)
+        .assert.elementPresent("input[name='title']")
+        .setValue("input[name='title']", "WIDGET TITLE")
+        .click("#saveUserConfig")
+        .pause(2000)
+        .waitForElementPresent(".widget .widget-title", 2000)
+        .assert.containsText(".widget .widget-title", "WIDGET TITLE")
     },
 
     "Logo takes you to default dashboard": function(client) {
         // Navigating to a different view and clicking the log returns you to the default "Test Dashboard 2"
-        client.click(".navbar-admin.navbar-nav>li:nth-child(2")
+        client.click(".navbar-admin.navbar-nav>li:nth-child(2)")
         .click("a[title=Mappings]")
         .waitForElementPresent("#navbarBrand", 2000)
         .click("#navbarBrand")
@@ -167,32 +183,6 @@ module.exports = {
         .assert.containsText("h1", "Create New Dashboard");
     },
 
-    //'Load dashboard': function (client) {
-    //    //must login first at the beginning of a session
-    //    //client must already have frame widget added
-    //    /*
-    //     {
-    //         "type" : "frame",
-    //         "size" : "small",
-    //         "frameUrl" : "http://localhost:5601/#/visualize/create?embed&type=area&indexPattern=ba*&_g=()&_a=(filters:!(),linked:!f,query:(query_string:(analyze_wildcard:!t,query:'*')),vis:(aggs:!((id:'1',params:(),schema:metric,type:count),(id:'2',params:(extended_bounds:(),field:account_number,interval:500),schema:segment,type:histogram)),listeners:(),params:(addLegend:!t,addTimeMarker:!f,addTooltip:!t,defaultYExtents:!f,interpolate:linear,mode:stacked,scale:linear,setYExtents:!f,shareYAxis:!t,smoothLines:!f,times:!(),yAxis:()),type:area))",
-    //         "title" : "Balance Pie",
-    //         "height" : "550px",
-    //         "width" : "100%"
-    //     }
-    //     */
-    //    client.globals.login.helpers.login(client);
-    //
-    //    client.waitForElementPresent('#dashboardWidgets', 2000)
-    //        .assert.elementPresent(".widget-holder");
-    //},
-    //
-    //'Frame widget present': function (client) {
-    //    //Check frame widget displays and basic properties from ui config work
-    //    client.assert.elementPresent(".widget-holder iframe");
-    //    client.assert.cssProperty(".widget-holder iframe", "height", "550px");
-    //    client.expect.element(".widget-holder .widget-section-title").text.to.equal("BALANCE PIE");
-    //
-    //}
     "cleanup": function(client) {
         //Re-add the recon dashboard and set it as default
         client.setValue("#DashboardName", "Reconciliation Dashboard")
@@ -201,4 +191,5 @@ module.exports = {
         .click("input[type=submit]")
         .end();
     }
+
 };

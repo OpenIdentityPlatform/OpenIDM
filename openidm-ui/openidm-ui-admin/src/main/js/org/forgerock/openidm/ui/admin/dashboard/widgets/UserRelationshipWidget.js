@@ -22,38 +22,21 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/UserRelationshipWidget"
     "bootstrap",
     "selectize",
     "d3",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate"
 ], function($, _, bootstrap,
             selectize,
             d3,
-            AbstractView,
+            AbstractWidget,
             ResourceDelegate) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/admin/dashboard/widgets/UserRelationshipWidgetTemplate.html",
-            model: {},
-            events: {
-                "click .toggle-view-btn": "toggleButtonChange"
-            },
-            toggleButtonChange: function(event) {
-                var target = $(event.target);
 
-                if(target.hasClass("fa")) {
-                    target = target.parents(".btn");
-                }
-
-                this.$el.find(".toggle-view-btn").toggleClass("active", false);
-                target.toggleClass("active", true);
-            },
-
-            render: function(args, callback) {
+            widgetRender: function(args, callback) {
                 var searchList,
                     _this = this;
 
-                this.element = args.element;
-                this.model = {};
 
                 this.parentRender(_.bind(function(){
                     this.$el.find("#findUserRelationship").selectize({

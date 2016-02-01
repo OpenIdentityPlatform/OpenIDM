@@ -20,21 +20,20 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
     "jquery",
     "underscore",
     "dimple",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate"
 ], function($, _,
             dimple,
-            AbstractView,
+            AbstractWidget,
             eventManager,
             constants,
             conf,
             SystemHealthDelegate) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template : "templates/dashboard/widget/DashboardSingleWidgetTemplate.html",
             model: {
                 heapChart: null,
@@ -52,14 +51,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                 dangerChartColor: "#a94442",
                 defaultChartColor: "#519387"
             },
-            data: {
 
-            },
-            render: function(args, callback) {
-                this.element = args.element;
-                this.data.widgetType = args.widget.type;
-                this.memoryUsageWidget(callback);
-            },
             drawChart: function(svg, data, percent) {
                 var ring,
                     color = this.model.defaultChartColor,
@@ -97,13 +89,28 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
 
                 this.model.chart.draw();
             },
-            memoryUsageWidget: function(callback) {
+
+            widgetRender: function(args, callback) {
                 this.model.currentData = [];
 
+                this.events["click .refresh-health-info"] = "refresh";
+
+                if(args.widget.simpleWidget) {
+                    this.data.simpleWidget = true;
+                } else {
+                    this.data.simpleWidget = false;
+                }
+
+                this.data.menuItems = [{
+                    "icon" : "fa-refresh",
+                    "menuClass" : "refresh-health-info",
+                    "title" : "Refresh"
+                }];
+
                 if (this.data.widgetType === "lifeCycleMemoryHeap") {
-                    this.data.widgetTitle = $.t("dashboard.memoryUsageHeap");
+                    this.data.widgetTextDetails = $.t("dashboard.memoryUsageHeap");
                 } else if (this.data.widgetType === "lifeCycleMemoryNonHeap") {
-                    this.data.widgetTitle = $.t("dashboard.memoryUsageNonHeap");
+                    this.data.widgetTextDetails = $.t("dashboard.memoryUsageNonHeap");
                 }
 
                 $(window).unbind("resize." +this.data.widgetType);
@@ -169,7 +176,11 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                 }
             },
 
-            refresh: function() {
+            refresh: function(event) {
+                if(event) {
+                    event.preventDefault();
+                }
+
                 SystemHealthDelegate.getMemoryHealth().then(_.bind(function(widgetData) {
                     var percent,
                         usedCpu = this.$el.find(".used-memory");
@@ -227,6 +238,8 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
                         } else {
                             usedCpu.attr("fill", this.model.defaultChartColor);
                             usedCpu.css("fill", this.model.defaultChartColor);
+
+                            this.$el.find(".percent").toggleClass("text-primary", true);
                         }
 
                     }

@@ -20,25 +20,23 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget", [
     "jquery",
     "underscore",
     "bootstrap",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils"
 ], function($, _, bootstrap,
-            AbstractView,
+            AbstractWidget,
             SyncDelegate,
             ConnectorDelegate,
             ConfigDelegate,
             ConnectorUtils) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/admin/dashboard/widgets/ResourceListWidgetTemplate.html",
-            render: function(args, callback) {
-                var tempIconClass;
 
-                this.element = args.element;
+            widgetRender: function(args, callback) {
+                var tempIconClass;
 
                 $.when(SyncDelegate.mappingDetails(),
                     ConnectorDelegate.currentConnectors(),

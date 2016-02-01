@@ -29,8 +29,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate"
-
+    "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils"
 ], function($, _,
             BootstrapDialog,
             Handlebars,
@@ -42,8 +42,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             EventManager,
             Constants,
             ValidatorsManager,
-            SiteConfigurationDelegate) {
-
+            SiteConfigurationDelegate,
+            UIUtils) {
     var DashboardView = AdminAbstractView.extend({
         template: "templates/admin/dashboard/DashboardTemplate.html",
         events: {
@@ -54,7 +54,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             "click .add-widget": "addWidget",
             "click .open-add-widget-dialog": "openAddWidgetDialog",
             "onValidate": "onValidate",
-            "customValidate": "customValidate"
+            "customValidate": "customValidate",
+            "click .widget-delete" : "deleteWidget" //This event relies on child views creating the correct HTML menu item
         },
         partials : [
             "partials/dashboard/_DuplicateDashboard.html",
@@ -70,6 +71,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             var counter = 0,
                 holderList = null;
 
+            this.data.dashboard = Configuration.globalData.adminDashboard;
             this.model.uiConf = Configuration.globalData;
 
             if (_.has(this.model.uiConf, "adminDashboards")) {
@@ -313,6 +315,25 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
                         callback();
                     }
                 }, this));
+            }, this));
+        },
+        deleteWidget: function(event) {
+            event.preventDefault();
+
+            var currentConf = Configuration.globalData,
+                currentWidget = $(event.target).parents(".widget-holder"),
+                widgetLocation = this.$el.find(".widget-holder").index(currentWidget);
+
+            currentConf.adminDashboard.widgets.splice(widgetLocation, 1);
+
+            UIUtils.confirmDialog($.t("dashboard.widgetDelete"), "danger", _.bind(function(){
+                 ConfigDelegate.updateEntity("ui/configuration", {"configuration": currentConf}).then(_.bind(function() {
+
+                     currentWidget.remove();
+
+                     SiteConfigurationDelegate.updateConfiguration();
+
+                 }, this));
             }, this));
         }
     });

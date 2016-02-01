@@ -25,8 +25,13 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/components/Navigation"
-
-], function($, _, AbstractDelegate, conf, commonSiteConfigurationDelegate, eventManager, Constants, Navigation) {
+], function($, _,
+            AbstractDelegate,
+            conf,
+            commonSiteConfigurationDelegate,
+            eventManager,
+            Constants,
+            Navigation) {
 
     var SiteConfigurationDelegate = function (url) {
         AbstractDelegate.call(this, url);
