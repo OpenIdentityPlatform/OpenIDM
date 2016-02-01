@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define, require */
@@ -21,7 +21,9 @@ define("org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager"
-], function(Constants, AbstractDelegate, configuration, eventManager) {
+], function(Constants,
+            AbstractDelegate,
+            configuration) {
 
     var obj = new AbstractDelegate(Constants.host + "/" + Constants.context + "/config/ui/configuration");
 

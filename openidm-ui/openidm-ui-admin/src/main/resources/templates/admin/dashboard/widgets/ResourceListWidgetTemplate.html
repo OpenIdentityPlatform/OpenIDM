@@ -1,42 +1,44 @@
 <!-- Copyright 2015 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="row resource-widget">
-    <div class="col-sm-4">
-        <ul class="list-group resource-group">
-            <li class="list-group-item clearfix list-title">
-                <span class="title">{{t "dashboard.resourceWidget.connectors"}}</span>
-                <a class="view-all" href="#connectors/">{{t "dashboard.resourceWidget.viewAll"}}</a>
-            </li>
-            {{#if connectors}}
+{{> dashboard/_widgetHeader}}
+<div class="panel-body widget-body">
+    <div class="row resource-widget">
+        <div class="col-sm-4">
+            <ul class="list-group resource-group">
+                <li class="list-group-item clearfix list-title">
+                    <span class="title">{{t "dashboard.resourceWidget.connectors"}}</span>
+                    <a class="view-all" href="#connectors/">{{t "dashboard.resourceWidget.viewAll"}}</a>
+                </li>
+                {{#if connectors}}
                 {{#each connectors}}
-                    <li class="list-group-item">
-                        <div class="clearfix">
-                            <div class="resource-details">
-                                <p class="resource-name">
-                                    <span class="resource-circle bg-primary"><i class="{{iconClass}}"></i></span>
-                                    <span>{{name}}</span>
-                                </p>
-                                <p class="resounce-type">{{displayName}}</p>
-                            </div>
+                <li class="list-group-item">
+                    <div class="clearfix">
+                        <div class="resource-details">
+                            <p class="resource-name">
+                                <span class="resource-circle bg-primary"><i class="{{iconClass}}"></i></span>
+                                <span>{{name}}</span>
+                            </p>
+                            <p class="resounce-type">{{displayName}}</p>
                         </div>
-                    </li>
+                    </div>
+                </li>
                 {{/each}}
-            {{else}}
+                {{else}}
                 <li class="list-group-item no-resource">
                     <p class="title text-primary">{{t "dashboard.resourceWidget.noConnectorsTitle"}}</p>
                     <p class="message">{{t "dashboard.resourceWidget.noConnectorsMessage"}}</p>
                 </li>
-            {{/if}}
-        </ul>
-        <a href="#connectors/add/"><button class="btn btn-default btn-transparent"><i class="fa fa-plus"></i>{{t "dashboard.resourceWidget.newConnector"}}</button></a>
-    </div>
-    <div class="col-sm-4">
-        <ul class="list-group resource-group">
-            <li class="list-group-item clearfix list-title">
-                <span class="title">{{t "dashboard.resourceWidget.mappings"}}</span>
-                <a class="view-all" href="#mapping/">{{t "dashboard.resourceWidget.viewAll"}}</a>
-            </li>
-            {{#if mappings}}
+                {{/if}}
+            </ul>
+            <a href="#connectors/add/"><button class="btn btn-default"><i class="fa fa-plus"></i>{{t "dashboard.resourceWidget.newConnector"}}</button></a>
+        </div>
+        <div class="col-sm-4">
+            <ul class="list-group resource-group">
+                <li class="list-group-item clearfix list-title">
+                    <span class="title">{{t "dashboard.resourceWidget.mappings"}}</span>
+                    <a class="view-all" href="#mapping/">{{t "dashboard.resourceWidget.viewAll"}}</a>
+                </li>
+                {{#if mappings}}
                 {{#each mappings}}
                 <li class="list-group-item">
                     <div class="clearfix">
@@ -49,41 +51,42 @@
                     </div>
                 </li>
                 {{/each}}
-            {{else}}
+                {{else}}
                 <li class="list-group-item no-resource">
                     <p class="title text-primary">{{t "dashboard.resourceWidget.noMappingTitle"}}</p>
                     <p class="message">{{t "dashboard.resourceWidget.noMappingMessage"}}</p>
                 </li>
-            {{/if}}
-        </ul>
-        <a href="#mapping/add/"><button class="btn btn-default btn-transparent"><i class="fa fa-plus"></i>{{t "dashboard.resourceWidget.newMapping"}}</button></a>
-    </div>
-    <div class="col-sm-4">
-        <ul class="list-group resource-group">
-            <li class="list-group-item clearfix list-title">
-                <span class="title">{{t "dashboard.resourceWidget.managedObjects"}}</span>
-                <a class="view-all" href="#managed/">{{t "dashboard.resourceWidget.viewAll"}}</a>
-            </li>
-            {{#if managedObjects}}
+                {{/if}}
+            </ul>
+            <a href="#mapping/add/"><button class="btn btn-default"><i class="fa fa-plus"></i>{{t "dashboard.resourceWidget.newMapping"}}</button></a>
+        </div>
+        <div class="col-sm-4">
+            <ul class="list-group resource-group">
+                <li class="list-group-item clearfix list-title">
+                    <span class="title">{{t "dashboard.resourceWidget.managedObjects"}}</span>
+                    <a class="view-all" href="#managed/">{{t "dashboard.resourceWidget.viewAll"}}</a>
+                </li>
+                {{#if managedObjects}}
                 {{#each managedObjects}}
-                    <li class="list-group-item">
-                        <div class="clearfix">
-                            <div class="resource-details">
-                                <p class="resource-name">
-                                    <span class="resource-circle bg-primary"><i class="fa {{#if schema.icon}} fa {{schema.icon}} {{else}} icon-database {{/if}}"></i></span>
-                                    <span>{{name}}</span>
-                                </p>
-                            </div>
+                <li class="list-group-item">
+                    <div class="clearfix">
+                        <div class="resource-details">
+                            <p class="resource-name">
+                                <span class="resource-circle bg-primary"><i class="fa {{#if schema.icon}} fa {{schema.icon}} {{else}} icon-database {{/if}}"></i></span>
+                                <span>{{name}}</span>
+                            </p>
                         </div>
-                    </li>
+                    </div>
+                </li>
                 {{/each}}
-            {{else}}
+                {{else}}
                 <li class="list-group-item no-resource">
                     <p class="title text-primary">{{t "dashboard.resourceWidget.noManagedObjectTitle"}}</p>
                     <p class="message">{{t "dashboard.resourceWidget.noManagedObjectMessage"}}</p>
                 </li>
-            {{/if}}
-        </ul>
-        <a href="#managed/add/"><button class="btn btn-default btn-transparent"><i class="fa fa-plus"></i>{{t "dashboard.resourceWidget.newManagedObject"}}</button></a>
+                {{/if}}
+            </ul>
+            <a href="#managed/add/"><button class="btn btn-default"><i class="fa fa-plus"></i>{{t "dashboard.resourceWidget.newManagedObject"}}</button></a>
+        </div>
     </div>
 </div>

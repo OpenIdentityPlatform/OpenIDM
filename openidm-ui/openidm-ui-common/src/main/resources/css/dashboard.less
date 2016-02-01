@@ -24,10 +24,24 @@
 }
 
 .widget-section-title {
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 13px;
-  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+  padding:15px;
+
+  .widget-title {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  button {
+    padding:0px;
+    color: #777;
+  }
+
+  button:hover {
+    color: #3f7269;
+  }
 }
 
 .page-header.widget-section-title {
@@ -57,6 +71,15 @@
 /*
   Workflow
 */
+
+#dashboardWorkflow {
+  .panel-heading {
+    .widget-section-title {
+      border-bottom: none;
+      padding: 0px;
+    }
+  }
+}
 
 #taskDetails {
   padding-top:15px;
@@ -129,7 +152,7 @@
 */
 .widget-header.donut-header {
   position: absolute;
-  top: 120px;
+  top: 122px;
   left: 50%;
   margin-left: -100px;
   width: 200px;
@@ -169,20 +192,6 @@
   top: 50px;
 }
 
-/*
-  Health Widget
-*/
-
-.refresh-health-info {
-  cursor:pointer;
-  opacity: .7;
-  float:right;
-  margin-right:35px;
-}
-
-.refresh-health-info:hover {
-  opacity: 1;
-}
 /*
   Recon Widget
 */
@@ -390,10 +399,6 @@
 #dashboardWidgets {
   margin-bottom: 50px;
 
-  .panel-body .card-container {
-    margin-bottom: 0px;
-  }
-
   iframe {
     border:none;
   }
@@ -414,10 +419,6 @@
         float: none;
       }
     }
-  }
-
-  .widget-header.donut-header {
-    top: 105px;
   }
 }
 

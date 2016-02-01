@@ -20,21 +20,25 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget", [
     "jquery",
     "underscore",
     "bootstrap",
-    "org/forgerock/commons/ui/common/main/AbstractView"
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget"
 ], function($, _, bootstrap,
-            AbstractView) {
+            AbstractWidget) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/admin/dashboard/widgets/FrameWidgetTemplate.html",
-            render: function(args, callback) {
-                this.element = args.element;
-                this.data.frameUrl = args.widget.frameUrl;
+            model : {
+                "overrideTemplate" : "dashboard/widget/_frameConfig"
+            },
+
+            widgetRender: function(args, callback) {
                 this.data.height = args.widget.height;
                 this.data.width = args.widget.width;
+                this.data.frameUrl = args.widget.frameUrl;
+
+                this.partials.push("partials/dashboard/widget/_frameConfig.html");
 
                 this.parentRender(_.bind(function(){
-                    this.$el.parent().find(".widget-section-title").text(args.widget.title);
+                    this.$el.parent().find(".widget-section-title .widget-title").text(args.widget.title);
 
                     if(callback) {
                         callback();

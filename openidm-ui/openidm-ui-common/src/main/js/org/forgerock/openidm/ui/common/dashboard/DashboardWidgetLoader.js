@@ -93,7 +93,9 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
                 this.data.widget = this.model.widgetList[args.widget.type];
 
                 this.parentRender(_.bind(function(){
-                    args.element = this.$el.find(".widget-body");
+                    args.element = this.$el.find(".widget");
+                    args.title = this.data.widget.name;
+                    args.showConfigButton = false;
 
                     this.model.widget = this.model.widgetList[this.data.widgetType].widget.generateWidget(args, callback);
                 }, this));

@@ -1,12 +1,10 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015-2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="row">
-    <div class="widget-icons">
-        {{#each icons}}
-            <i class="{{iconClass}} fa {{icon}}"></i>
-        {{/each}}
+{{> dashboard/_widgetHeader}}
+<div class="panel-body widget-body">
+    <div class="row">
+        <div class="col-sm-4 left-chart"></div>
+        <div class="col-sm-4 center-chart"></div>
+        <div class="col-sm-4 right-chart"></div>
     </div>
-    <div class="col-sm-4 left-chart"></div>
-    <div class="col-sm-4 center-chart"></div>
-    <div class="col-sm-4 right-chart"></div>
 </div>

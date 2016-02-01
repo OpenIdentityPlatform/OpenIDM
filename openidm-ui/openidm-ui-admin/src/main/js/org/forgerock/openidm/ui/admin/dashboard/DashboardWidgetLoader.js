@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -106,7 +106,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
             noBaseTemplate: true,
             model: {},
             data: {},
-
+            
             /*
              Available Widgets:
              lifeCycleMemoryHeap - Current heap memory
@@ -115,11 +115,11 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
              reconUsage - Displays current recons in process. Polls every few seconds with updated information.
              cpuUsage - Shows current CPU usage of the system
              lastRecon - Widget to display the last recon per mapping
-             barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
+                - barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
              resourceList - Displays the top 4 resources for connectors, mappings, and managed objects
              quickStart - Widget displaying quick start cards to help users get started with core functionality
+             identityRelationship - Widget to display a users relationships throughout the system
              frame - Iframe widget that provide an iframe for you to point to any URL
-             userRelationship - Widget to display a users relationships throughout the system
              */
             render: function(args, callback) {
                 this.element = args.element;
@@ -128,10 +128,11 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                 this.data.widget = widgetList[args.widget.type];
 
                 this.parentRender(_.bind(function(){
-                    args.element = this.$el.find(".widget-body");
+                    args.element = this.$el.find(".widget");
+                    args.title = this.data.widget.name;
+                    args.showConfigButton = true;
 
                     this.model.widget = widgetList[this.data.widgetType].widget.generateWidget(args, callback);
-
                 }, this));
             }
         });

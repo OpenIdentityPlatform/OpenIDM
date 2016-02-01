@@ -271,17 +271,18 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                             render: function () {
                                 var previewElement = $('<i class="dragToSort fa fa-arrows pull-left"></i> <div class="property-container-parent"><div class="property-container"></div></div>');
 
+                                //TODO convert to partial
                                 if(this.model.attributes.attribute.source) {
-                                    previewElement.find(".property-container").append('<div class="title">' + this.model.attributes.attribute.source + '</div>');
+                                    previewElement.find(".property-container").append('<div class="title">' + Handlebars.Utils.escapeExpression(this.model.attributes.attribute.source) + '</div>');
                                 } else {
                                     previewElement.find(".property-container").append('<div class="title"></div>');
                                 }
 
                                 if (this.model.attributes.sample !== null) {
-                                    previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.sample + ')</div>');
+                                    previewElement.find(".property-container").append('<div class="text-muted">(' +  Handlebars.Utils.escapeExpression(this.model.attributes.sample) + ')</div>');
                                 }
 
-                                this.$el.html(previewElement.text());
+                                this.$el.html(previewElement);
                                 this.delegateEvents();
 
                                 return this;
@@ -344,8 +345,9 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                             render: function () {
                                 var previewElement = $('<div class="property-container-parent"><div class="property-container"></div></div>');
 
+                                //TODO Convert to partial
                                 if(this.model.attributes.attribute.target) {
-                                    previewElement.find(".property-container").append('<div class="title">' + this.model.attributes.attribute.target + '</div>');
+                                    previewElement.find(".property-container").append('<div class="title">' +  Handlebars.Utils.escapeExpression(this.model.attributes.attribute.target) + '</div>');
                                 } else {
                                     previewElement.find(".property-container").append('<div class="title"></div>');
                                 }
@@ -356,16 +358,16 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                                 } else {
                                     if (this.model.attributes.sample !== null) {
                                         if(this.model.attributes.evalResult && this.model.attributes.evalResult.transformResults) {
-                                            previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.evalResult.transformResults + ')</div>');
+                                            previewElement.find(".property-container").append('<div class="text-muted">(' + Handlebars.Utils.escapeExpression(this.model.attributes.evalResult.transformResults) + ')</div>');
                                         } else {
-                                            previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.sample + ')</div>');
+                                            previewElement.find(".property-container").append('<div class="text-muted">(' + Handlebars.Utils.escapeExpression(this.model.attributes.sample) + ')</div>');
                                         }
                                     } else if (this.model.attributes.attribute["default"]) {
-                                        previewElement.find(".property-container").append('<div class="text-muted">(' + this.model.attributes.attribute["default"] + ')</div>');
+                                        previewElement.find(".property-container").append('<div class="text-muted">(' + Handlebars.Utils.escapeExpression(this.model.attributes.attribute["default"]) + ')</div>');
                                     }
                                 }
 
-                                this.$el.html(previewElement.text());
+                                this.$el.html(previewElement);
                                 this.delegateEvents();
 
                                 return this;

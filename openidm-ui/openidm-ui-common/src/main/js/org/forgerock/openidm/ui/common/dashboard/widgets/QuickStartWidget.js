@@ -19,25 +19,16 @@
 define("org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget", [
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/main/AbstractView",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Configuration"
-], function($, _, AbstractView, eventManager, constants, conf) {
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function($, _,
+            AbstractWidget,
+            eventManager) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/dashboard/widget/QuickStartWidgetTemplate.html",
-            model: {
-            },
-            events: {
 
-            },
-            data: {
-
-            },
-            render: function(args, callback) {
-                this.element = args.element;
+            widgetRender: function(args, callback) {
                 this.data.cards = args.widget.cards;
 
                 _.each(this.data.cards, function(card) {
