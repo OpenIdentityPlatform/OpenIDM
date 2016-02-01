@@ -27,8 +27,6 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
-    "org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "selectize"
 
@@ -41,8 +39,6 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
             ConfigDelegate,
             InlineScriptEditor,
             ConnectorDelegate,
-            SiteConfigurationDelegate,
-            OpenamProxyDelegate,
             UIUtils) {
 
     var AuthenticationModuleDialogView = AuthenticationAbstractView.extend({
@@ -71,15 +67,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                         {"name": "openidm-cert"},
                         {"name": "openidm-reg"},
                         {"name": "openidm-task-manager"}
-                    ],
-                    amUIProperties: [
-                        "openamLoginUrl",
-                        "openamLoginLinkText",
-                        "openamUseExclusively"
-                    ],
-                    amTruststoreType : "&{openidm.truststore.type}",
-                    amTruststoreFile : "&{openidm.truststore.location}",
-                    amTruststorePassword : "&{openidm.truststore.password}"
+                    ]
                 },
                 configs
             );
@@ -302,14 +290,6 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
             jsonEditorBasicFormat.enabled = this.model.config.enabled;
             jsonEditorAdvancedFormat.customProperties = [];
 
-            if (this.model.config.name === "OPENAM_SESSION"){
-                //add amUIProperties
-                this.model.config.properties = _.extend(
-                    this.model.config.properties,
-                    _.pick(Conf.globalData, this.model.amUIProperties)
-                );
-            }
-
             _.each(this.model.config.properties, function(value, key) {
                 if (_.has(jsonEditorBasicFormat, key)) {
                     _.bind(addProperty, this)(jsonEditorBasicFormat, value, key);
@@ -356,7 +336,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
 
                 // Unbinding here so that this function does not get bound multiple times
                 openamDeploymentUrl.unbind("blur").blur(_.bind(function() {
-                    advancedEditor.getEditor('root.openamLoginUrl').setValue(
+                    this.model.advancedEditor.getEditor('root.openamLoginUrl').setValue(
                         openamLoginUrl.val().replace(openamDeploymentUrl.attr("beforeValue"), openamDeploymentUrl.val())
                     );
                 },this));
@@ -393,25 +373,12 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
         // Creates an Authentication JSON based off of the object the page was loaded with and any new or changed values
         getConfig: function(e) {
             var editorValues = _.extend(this.model.basicEditor.getValue(), this.model.advancedEditor.getValue()),
-                newConfig = {},
-                amUISettingsProm;
+                newConfig = {};
 
             newConfig.name = this.model.config.name;
             newConfig.enabled = editorValues.enabled;
             newConfig.properties = {};
             newConfig.properties.propertyMapping = {};
-
-            if (newConfig.name === "OPENAM_SESSION") {
-                amUISettingsProm = this.handleOpenAMUISettings(editorValues);
-
-                //remove amUIProperties
-                editorValues = _.omit(editorValues, this.model.amUIProperties);
-                editorValues.truststoreType = this.model.amTruststoreType;
-                editorValues.truststoreFile = this.model.amTruststoreFile;
-                editorValues.truststorePassword = this.model.amTruststorePassword;
-            } else {
-                amUISettingsProm = $.Deferred().resolve();
-            }
 
             // Set root level properties that are not objects
             _.each(_.omit(editorValues, ["authModule", "customProperties", "propertyMapping", "enabled", "augmentSecurityContext", "defaultUserRoles"]), function (property, key) {
@@ -458,44 +425,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 delete newConfig.properties.propertyMapping;
             }
 
-            amUISettingsProm.then(_.bind(function() {
-                this.model.saveCallback(newConfig);
-            }, this));
-        },
-
-        handleOpenAMUISettings: function(editorValues){
-            var prom = $.Deferred(),
-                amSettings = _.pick(editorValues, this.model.amUIProperties, "enabled"),
-                confirmed = function(){
-                    SiteConfigurationDelegate.getConfiguration().then(function(uiConfig){
-                        ConfigDelegate.updateEntity("ui/configuration", { configuration: _.extend(uiConfig, amSettings) }).then(function() {
-                            prom.resolve();
-                        });
-                    });
-                };
-
-            amSettings.openamAuthEnabled = amSettings.enabled;
-            delete amSettings.enabled;
-
-            if (amSettings.openamAuthEnabled) {
-                // Validate openamDeploymentUrl
-                OpenamProxyDelegate.serverinfo(editorValues.openamDeploymentUrl).then(_.bind(function(info){
-                        if (info.cookieName) {
-                            // Set openamSSOTokenCookieName for this module
-                            editorValues.openamSSOTokenCookieName = info.cookieName;
-                            confirmed();
-                        } else {
-                            UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
-                        }
-                    },this),
-                    _.bind(function(){
-                        UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
-                    },this));
-            } else {
-                confirmed();
-            }
-
-            return prom;
+            this.model.saveCallback(newConfig);
         }
     });
 

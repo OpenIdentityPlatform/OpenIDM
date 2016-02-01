@@ -50,7 +50,8 @@ define("org/forgerock/openidm/ui/common/delegates/OpenAMProxyDelegate", [
                 "method": "GET",
                 "url": openamDeploymentUrl + "/json/serverinfo/*"
             }),
-            errorsHandlers: {"Bad Request": {status: 404}}
+            errorsHandlers: {"Bad Request": {status: 404}},
+            suppressEvents: true
         });
     };
 
