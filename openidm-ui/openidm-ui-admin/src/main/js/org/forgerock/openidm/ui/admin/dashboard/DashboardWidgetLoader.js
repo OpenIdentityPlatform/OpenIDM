@@ -110,14 +110,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                 };
 
                 this.data.widgetType = args.widget.type;
-
-                if(args.widget.type === "frame" && args.widget.title) {
-                    this.data.widget = {
-                        name : args.widget.title
-                    };
-                } else {
-                    this.data.widget = this.model.widgetList[args.widget.type];
-                }
+                this.data.widget = this.model.widgetList[args.widget.type];
 
                 this.parentRender(_.bind(function(){
                     args.element = this.$el.find(".widget-body");

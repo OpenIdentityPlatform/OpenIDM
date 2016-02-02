@@ -34,6 +34,9 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget", [
                 this.data.width = args.widget.width;
 
                 this.parentRender(_.bind(function(){
+                    console.log(this.$el.parent().find(".widget-section-title"));
+                    this.$el.parent().find(".widget-section-title").text(args.widget.title);
+
                     if(callback) {
                         callback();
                     }

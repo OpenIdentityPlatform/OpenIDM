@@ -1652,7 +1652,7 @@
             "reset" : "Reset",
             "confirm": "Confirm",
             "ok": "Ok",
-            "copyright" : "Copyright 2010-15 ForgeRock AS.",
+            "copyright" : "Copyright 2010-16 ForgeRock AS.",
             "sessionExpired" : "Session Expired",
             "enableCookies" : "Cookies must be enabled to login",
             "reloadGrid" : "Reload Grid",
