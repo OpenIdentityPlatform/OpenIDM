@@ -145,8 +145,8 @@ CREATE INDEX IF NOT EXISTS `openidm`.`idx_relationshipproperties_propvalue` ON `
 CREATE  TABLE IF NOT EXISTS `openidm`.`links` (
   `objectid` VARCHAR(38) NOT NULL ,
   `rev` VARCHAR(38) NOT NULL ,
-  `linktype` VARCHAR(255) NOT NULL ,
-  `linkqualifier` VARCHAR(255) NOT NULL ,
+  `linktype` VARCHAR(50) NOT NULL ,
+  `linkqualifier` VARCHAR(50) NOT NULL ,
   `firstid` VARCHAR(255) NOT NULL ,
   `secondid` VARCHAR(255) NOT NULL ,
   UNIQUE INDEX `idx_links_first` (`linktype` ASC, `linkqualifier` ASC, `firstid` ASC) ,
