@@ -2,7 +2,8 @@ module.exports = {
   "src_folders" : [
     "tests/login",
     "tests/connector",
-    "tests/managed"
+    "tests/managed",
+    "tests/dashboard"
   ],
   "output_folder" : "reports",
   "custom_commands_path" : "",
@@ -12,7 +13,7 @@ module.exports = {
 
   "selenium" : {
     "start_process" : true,
-    "server_path" : "selenium/selenium-server-standalone-2.48.2.jar",
+    "server_path" : "selenium/selenium-server-standalone-2.50.0.jar",
     "log_path" : "reports",
     "host" : "127.0.0.1",
     "port" : 4445,
