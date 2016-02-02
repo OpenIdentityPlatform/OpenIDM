@@ -209,8 +209,8 @@ CREATE TABLESPACE SOIDM07 MANAGED BY AUTOMATIC STORAGE;
 CREATE TABLE SOPENIDM.LINKS (
     objectid                   VARCHAR(38)    NOT NULL,
     rev                        VARCHAR(38)    NOT NULL,
-    linktype                   VARCHAR(255)   NOT NULL,
-    linkqualifier              VARCHAR(255)   NOT NULL,
+    linktype                   VARCHAR(50)   NOT NULL,
+    linkqualifier              VARCHAR(50)   NOT NULL,
     firstid                    VARCHAR(255)   NOT NULL,
     secondid                   VARCHAR(255)   NOT NULL,
     PRIMARY KEY (OBJECTID)

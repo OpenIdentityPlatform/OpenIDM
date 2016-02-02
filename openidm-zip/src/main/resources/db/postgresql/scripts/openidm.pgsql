@@ -161,8 +161,8 @@ CREATE INDEX idx_relationshipproperties_prop ON openidm.relationshipproperties (
 CREATE TABLE openidm.links (
   objectid VARCHAR(38) NOT NULL,
   rev VARCHAR(38) NOT NULL,
-  linktype VARCHAR(510) NOT NULL,
-  linkqualifier VARCHAR(255) NOT NULL,
+  linktype VARCHAR(50) NOT NULL,
+  linkqualifier VARCHAR(50) NOT NULL,
   firstid VARCHAR(255) NOT NULL,
   secondid VARCHAR(255) NOT NULL,
   PRIMARY KEY (objectid)

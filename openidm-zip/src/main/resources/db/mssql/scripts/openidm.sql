@@ -247,8 +247,8 @@ CREATE  TABLE  [openidm].[links]
 (
   objectid NVARCHAR(38) NOT NULL ,
   rev NVARCHAR(38) NOT NULL ,
-  linktype NVARCHAR(195) NOT NULL ,
-  linkqualifier NVARCHAR(255) NOT NULL ,
+  linktype NVARCHAR(50) NOT NULL ,
+  linkqualifier NVARCHAR(50) NOT NULL ,
   firstid NVARCHAR(255) NOT NULL ,
   secondid NVARCHAR(255) NOT NULL ,
   PRIMARY KEY CLUSTERED (objectid)
