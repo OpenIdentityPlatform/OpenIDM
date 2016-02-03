@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2015 ForgeRock AS
+  !      Copyright 2011-2016 ForgeRock AS
   !    
 -->
 <project name="${project.name}"
@@ -31,7 +31,7 @@
  <skin>
   <groupId>org.forgerock.commons</groupId>
   <artifactId>forgerock-community-skin</artifactId>
-  <version>1.0.0</version>
+  <version>1.1.0-SNAPSHOT</version>
  </skin>
  <publishDate position="right" format="yyyy.MM.dd" />
  <version position="right" />
@@ -58,11 +58,12 @@
   </menu>
 
   <menu name="Released Documentation">
-   <item name="OpenIDM 3.1.0" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=3.1.0" />
-   <item name="OpenIDM 3.0.0" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=3.0.0" />
-   <item name="OpenIDM 2.1.0" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=2.1.0" />
-   <item name="OpenIDM 2.0.3" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=2.0.3" />
-   <item name="OpenIDM 2.0.2" href="http://docs.forgerock.org/en/index.html?product=openidm&amp;version=2.0.2" />
+   <item name="OpenIDM 4.0.0" href="https://backstage.forgerock.com/#!/docs/openidm/4" />
+   <item name="OpenIDM 3.1.0" href="https://backstage.forgerock.com/#!/docs/openidm/3.1.0" />
+   <item name="OpenIDM 3.0.0" href="https://backstage.forgerock.com/#!/docs/openidm/3.0.0" />
+   <item name="OpenIDM 2.1.0" href="https://backstage.forgerock.com/#!/docs/openidm/2.1.0" />
+   <item name="OpenIDM 2.0.3" href="https://backstage.forgerock.com/#!/docs/openidm/2.0.3" />
+   <item name="OpenIDM 2.0.2" href="https://backstage.forgerock.com/#!/docs/openidm/2.0.2" />
   </menu>
 
   <menu name="OpenIDM Docs (in progress)">
@@ -86,7 +87,7 @@
   <googleAnalytics>UA-23412190-9</googleAnalytics>
   <openproject>
    <href>http://openidm.forgerock.org/</href>
-   <src>./images/openidm-tagline-200x65.png</src>
+   <src>./images/FR_plogo_org_FC_openIDM-300x72.png</src>
    <alt>OpenIDM</alt>
   </openproject>
   <siteSearchFQDN>forgerock.org</siteSearchFQDN>

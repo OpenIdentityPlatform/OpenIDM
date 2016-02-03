@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2015 ForgeRock AS
+  !      Copyright 2011-2016 ForgeRock AS
   !    
 -->
 <document
@@ -33,6 +33,10 @@
  </properties>
  <body>
   <section name="New Releases">
+
+   <p>Jan 25, 2016. OpenIDM 4.0.0 is now available. See the
+    <a href="https://backstage.forgerock.com/#!/docs/openidm/4.0.0/release-notes">release
+    notes</a> for more information.</p>
 
    <p>Jan 29, 2015. OpenIDM 2.1.2 sustaining release is available. See the
     <a href="https://backstage.forgerock.com/#!/docs/openidm/2.1.2/release-notes">release
