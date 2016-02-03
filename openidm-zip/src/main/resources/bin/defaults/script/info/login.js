@@ -25,7 +25,11 @@
 (function () {
     // Get the current session's user information
     if (request.method === "read") {
-        return context.security;
+        return {
+            _id: "login",
+            authorization: context.security.authorization,
+            authenticationId: context.security.authenticationId
+        };
     } else {
         throw "Unsupported operation on info login service: " + request.method;
     }
