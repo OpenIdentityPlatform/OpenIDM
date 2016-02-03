@@ -218,7 +218,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     }
 
                     if (this.model.onChange) {
-                        this.$el.find("input:radio, .scriptFilePath").bind("change", _.bind(function () {
+                        this.$el.on("change", "input:radio, .scriptFilePath, .event-select, .passed-variables-holder :input", _.bind(function () {
                             this.model.onChange();
                         }, this));
                     }
@@ -226,14 +226,6 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     if (this.model.onBlur) {
                         this.$el.find("input:radio, .scriptFilePath").bind("blur", _.bind(function () {
                             this.model.onBlur();
-                        }, this));
-                    }
-
-                    if (this.model.onChange){
-                        this.$el.find(".event-select").bind("change", _.bind(function(){
-
-                            this.model.onChange();
-
                         }, this));
                     }
 
@@ -534,6 +526,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 editor.on('change', _.bind(function () {
                     this.$el.find(".compactJSON div.form-control>:input").addClass("form-control");
+                    if (this.model.onChange) {
+                        this.model.onChange();
+                    }
                 }, this));
 
                 if(value) {
@@ -562,6 +557,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 if (this.model.onDeletePassedVariable) {
                     this.model.onDeletePassedVariable();
+                }
+                if (this.model.onChange) {
+                    this.model.onChange();
                 }
             }
         });
