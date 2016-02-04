@@ -6,8 +6,8 @@
         "lang" : "en",
         "passwordResetLink" : "",
         "roles" : {
-            "openidm-authorized": "ui-user",
-            "openidm-admin": "ui-admin"
+            "openidm-authorized" : "ui-user",
+            "openidm-admin" : "ui-admin"
         },
         "notificationTypes" : {
             "info" : {
