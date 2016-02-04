@@ -1,7 +1,7 @@
 {
     "type" : "text/javascript",
     "file" : "policy.js",
-    "additionalFiles": [ ],
+    "additionalFiles" : [ ],
     "resources" : [
         {
             "resource" : "repo/internal/user/*",
@@ -12,7 +12,9 @@
                         {
                             "policyId" : "cannot-contain-characters",
                             "params" : {
-                                "forbiddenChars" : ["/"]
+                                "forbiddenChars" : [
+                                    "/"
+                                ]
                             }
                         }
                     ]

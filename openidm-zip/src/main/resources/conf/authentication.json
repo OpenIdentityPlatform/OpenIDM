@@ -20,7 +20,9 @@
                     "queryOnResource" : "repo/internal/user",
                     "username" : "anonymous",
                     "password" : "anonymous",
-                    "defaultUserRoles" : [ "openidm-reg" ]
+                    "defaultUserRoles" : [
+                        "openidm-reg"
+                    ]
                 },
                 "enabled" : true
             },
@@ -52,10 +54,13 @@
                 },
                 "enabled" : true
             },
-            {   "name" : "CLIENT_CERT",
+            {
+                "name" : "CLIENT_CERT",
                 "properties" : {
                     "queryOnResource" : "security/truststore",
-                    "defaultUserRoles" : [ "openidm-cert" ],
+                    "defaultUserRoles" : [
+                        "openidm-cert"
+                    ],
                     "allowedAuthenticationIdPatterns" : [ ]
                 },
                 "enabled" : true

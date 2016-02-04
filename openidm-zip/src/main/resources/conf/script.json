@@ -1,38 +1,38 @@
 {
-    "properties": {},
-    "ECMAScript": {
-        "#javascript.debug": "transport=socket,suspend=y,address=9888,trace=true",
-        "javascript.recompile.minimumInterval": "60000"
+    "properties" : { },
+    "ECMAScript" : {
+        "#javascript.debug" : "transport=socket,suspend=y,address=9888,trace=true",
+        "javascript.recompile.minimumInterval" : "60000"
     },
-    "Groovy": {
-        "#groovy.warnings": "likely errors #othere values [none,likely,possible,paranoia]",
-        "#groovy.source.encoding": "utf-8 #default US-ASCII",
-        "groovy.source.encoding": "UTF-8",
-        "groovy.target.directory": "&{launcher.install.location}/classes",
-        "#groovy.target.bytecode": "1.5",
-        "groovy.classpath": "&{launcher.install.location}/lib",
-        "#groovy.output.verbose": "false",
-        "#groovy.output.debug": "false",
-        "#groovy.errors.tolerance": "10",
-        "#groovy.script.extension": ".groovy",
-        "#groovy.script.base": "#any class extends groovy.lang.Script",
-        "groovy.recompile": "true",
-        "groovy.recompile.minimumInterval": "60000",
-        "#groovy.target.indy" : "true"               ,
+    "Groovy" : {
+        "#groovy.warnings" : "likely errors #othere values [none,likely,possible,paranoia]",
+        "#groovy.source.encoding" : "utf-8 #default US-ASCII",
+        "groovy.source.encoding" : "UTF-8",
+        "groovy.target.directory" : "&{launcher.install.location}/classes",
+        "#groovy.target.bytecode" : "1.5",
+        "groovy.classpath" : "&{launcher.install.location}/lib",
+        "#groovy.output.verbose" : "false",
+        "#groovy.output.debug" : "false",
+        "#groovy.errors.tolerance" : "10",
+        "#groovy.script.extension" : ".groovy",
+        "#groovy.script.base" : "#any class extends groovy.lang.Script",
+        "groovy.recompile" : "true",
+        "groovy.recompile.minimumInterval" : "60000",
+        "#groovy.target.indy" : "true",
         "#groovy.disabled.global.ast.transformations" : ""
     },
-    "sources": {
-        "default": {
-            "directory": "&{launcher.install.location}/bin/defaults/script"
+    "sources" : {
+        "default" : {
+            "directory" : "&{launcher.install.location}/bin/defaults/script"
         },
-        "install": {
-            "directory": "&{launcher.install.location}"
+        "install" : {
+            "directory" : "&{launcher.install.location}"
         },
-        "project": {
-            "directory": "&{launcher.project.location}"
+        "project" : {
+            "directory" : "&{launcher.project.location}"
         },
-        "project-script": {
-            "directory": "&{launcher.project.location}/script"
+        "project-script" : {
+            "directory" : "&{launcher.project.location}/script"
         }
     }
 }
