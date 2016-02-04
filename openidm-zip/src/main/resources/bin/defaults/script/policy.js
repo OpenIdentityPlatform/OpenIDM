@@ -58,6 +58,11 @@ var _ = require('lib/lodash'),
             "policyRequirements" : ["MATCH_REGEXP"]
         },
         {
+            "policyId" : "valid-type",
+            "policyExec" : "validType",
+            "policyRequirements": ["VALID_TYPE"]
+        },
+        {
             "policyId" : "valid-date",
             "policyExec" : "validDate",
             "clientValidation": true,
@@ -178,6 +183,26 @@ policyImpl = (function (){
             return [ {"policyRequirement": "MATCH_REGEXP", "regexp": params.regexp, params: params, "flags": params.flags}];
         }
 
+        return [];
+    };
+    
+    policyFunctions.validType = function(fullObject, value, params, property) {
+        var type = _.isNull(value) 
+                ? "null" 
+                : (Array.isArray(value) || Object.prototype.toString.call(value) === "[object ScriptableList]") 
+                        ? "array" 
+                        : typeof(value);
+        if (value !== undefined && !_.contains(params.types, type)) {
+            return [ 
+                { 
+                    "policyRequirement" : "VALID_TYPE", 
+                    "params" : { 
+                        "invalidType" : type, 
+                        "validTypes" : params.types 
+                    } 
+                } 
+            ];
+        }
         return [];
     };
 
@@ -765,7 +790,8 @@ policyProcessor = (function (policyConfig,policyImpl){
                         var customPolicies = _.map(pair[1].policies), // will always result in a standard array
                             conditionalPoliciesx = pair[1].conditionalPolicies,
                             fallbackPoliciesx = pair[1].fallbackPolicies,
-                            standardPolicies = [];
+                            standardPolicies = [],
+                            types = [];
 
                         if (_.contains(obj.schema.required, pair[0])) {
                             standardPolicies.push({
@@ -801,6 +827,23 @@ policyProcessor = (function (policyConfig,policyImpl){
                             }
 
                         }
+                        
+                        if (_.isArray(pair[1].type)) {
+                            types = _.map(pair[1].type, function (type) {
+                                if (type === "relationship") {
+                                    return "object"; // treat a relationship type as an object
+                                }
+                                return type;
+                            })
+                        } else {
+                            types.push(pair[1].type);
+                        }
+                        standardPolicies.push({
+                            "policyId" : "valid-type",
+                            "params" : {
+                                "types" : types
+                            }
+                        })
 
                         return {
                             name: pair[0],
