@@ -1,6 +1,7 @@
 module.exports = {
   "src_folders" : [
     "tests/login",
+    "tests/audit",
     "tests/connector",
     "tests/managed",
     "tests/dashboard",
