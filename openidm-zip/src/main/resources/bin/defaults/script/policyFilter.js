@@ -1,7 +1,7 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2014 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2016 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -22,32 +22,73 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-var fullResourcePath,
-    result,
-    enforce;
+/*globals request */
 
-enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true);
+/**
+ * Used to enable automatic policy evaluation during router processing of any
+ * given resource.
+ * @module policyFilter
+ * @see policy
+ */
 
-if (request.resourcePath.indexOf("policy/") !== 0 && enforce !== "false") {
-    if (request.method === "create") {
-        if (request.resourcePath === "") {
-            fullResourcePath = request.newResourceId !== null ? request.newResourceId : "*";
+(function () {
+
+    /**
+     * Translates different request details into a single path which can have
+     * policy checked for it.
+     * @param {string} method Either create or update
+     * @param {string} basePath Path to resource (e.g. managed/user or managed/user/1)
+     * @param {string} id The identifier for the new resource, for creates
+     * @returns {string} The full path to use for policy evaluation
+     */
+    exports.getFullResourcePath = function (method, basePath, uncodedId) {
+        var fullResourcePath;
+        var id = org.forgerock.http.util.Uris.urlEncodePathElement(uncodedId);
+
+        if (method === "create") {
+            if (basePath === "") {
+                fullResourcePath = id !== null ? id : "*";
+            } else {
+                fullResourcePath = basePath + "/" + (id !== null ? id : "*");
+            }
         } else {
-            fullResourcePath = request.resourcePath + "/" + (request.newResourceId !== null ? request.newResourceId : "*");
+            fullResourcePath = basePath;
         }
-    } else {
-        fullResourcePath = request.resourcePath;
-    }
+        return fullResourcePath;
+    };
 
-    result = openidm.action("policy/" + fullResourcePath, "validateObject", request.content, { "external" : "true" });
+    /**
+     * @param {string} path The full path to use for policy evaluation
+     * @param {Object} content Content of the resource to be evaluated
+     * @returns {Array} List of all failing policies, with details
+     */
+    exports.evaluatePolicy = function(path, content) {
+        //var openidm = require("openidm");
+        return openidm.action("policy/" + path, "validateObject", content, { "external" : "true" });
+    };
 
-    if (!result.result) {
-        throw {
-            "code" : 403,
-            "message" : "Policy validation failed",
-            "detail" : result
-        };
-    }
-}
+    /**
+     * Method intended to be called from router filter context, for implicit evaluation of a resource.
+     * Throws an error when policy fails, with the failure details included.
+     */
+    exports.runFilter = function () {
+        //var identityServer = require("identityServer");
+        var enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true),
+            fullResourcePath = this.getFullResourcePath(request.method, request.resourcePath, request.newResourceId);
 
+        if (fullResourcePath.indexOf("policy/") !== 0 && enforce !== "false") {
 
+            result = this.evaluatePolicy(fullResourcePath, request.content);
+
+            if (!result.result) {
+                throw {
+                    "code" : 403,
+                    "message" : "Policy validation failed",
+                    "detail" : result
+                };
+            }
+        }
+
+    };
+
+}());
