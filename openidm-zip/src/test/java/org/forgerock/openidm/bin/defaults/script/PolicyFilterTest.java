@@ -1,4 +1,3 @@
-
 /*
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
@@ -12,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 package org.forgerock.openidm.bin.defaults.script;
 
@@ -109,7 +108,7 @@ public class PolicyFilterTest  {
     }
 
     @Test(dataProvider = "resourcePaths")
-    public void testPolicyFilter(String method, String resourcePath, String resourceId, String expectedFullResourcePath)
+    public void testGetFullResourcePath(String method, String resourcePath, String resourceId, String expectedFullResourcePath)
             throws ScriptException {
         JsonValue scriptName = new JsonValue(new LinkedHashMap<String, Object>());
         scriptName.put("type", "text/javascript");
