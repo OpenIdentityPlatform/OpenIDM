@@ -1,7 +1,7 @@
 /*! @license
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2016 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -828,16 +828,20 @@ policyProcessor = (function (policyConfig,policyImpl){
 
                         }
                         
-                        if (_.isArray(pair[1].type)) {
-                            types = _.map(pair[1].type, function (type) {
-                                if (type === "relationship") {
-                                    return "object"; // treat a relationship type as an object
-                                }
-                                return type;
-                            })
-                        } else {
+                        if (_.isString(pair[1].type)) {
                             types.push(pair[1].type);
+                        } else {
+                            for (var index in pair[1].type) {
+                                types.push(pair[1].type[index]);
+                            }
                         }
+                        // treat a relationship type as an object
+                        types = _.map(types, function (type) {
+                            if (type === "relationship") {
+                                return "object";
+                            }
+                            return type;
+                        });
                         standardPolicies.push({
                             "policyId" : "valid-type",
                             "params" : {
