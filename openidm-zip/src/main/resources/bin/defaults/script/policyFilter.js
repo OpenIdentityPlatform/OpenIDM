@@ -63,7 +63,6 @@
      * @returns {Array} List of all failing policies, with details
      */
     exports.evaluatePolicy = function(path, content) {
-        //var openidm = require("openidm");
         return openidm.action("policy/" + path, "validateObject", content, { "external" : "true" });
     };
 
@@ -72,7 +71,6 @@
      * Throws an error when policy fails, with the failure details included.
      */
     exports.runFilter = function () {
-        //var identityServer = require("identityServer");
         var enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true),
             fullResourcePath = this.getFullResourcePath(request.method, request.resourcePath, request.newResourceId);
 
