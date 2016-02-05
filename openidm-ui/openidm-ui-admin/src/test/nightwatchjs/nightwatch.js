@@ -5,7 +5,9 @@ module.exports = {
     "tests/connector",
     "tests/managed",
     "tests/dashboard",
-    "tests/scriptWidget"
+    "tests/scriptWidget",
+    "tests/mapping",
+    "tests/system"
   ],
   "output_folder" : "reports",
   "custom_commands_path" : "",
