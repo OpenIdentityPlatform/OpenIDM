@@ -176,6 +176,17 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                             delete schema.properties.enabled;
                         }
 
+                        // default value for signatureInterval
+                        if (_.has(schema, "properties.security.properties.signatureInterval") &&
+                                (
+                                    !_.has(this.data.eventHandler.config, "security.signatureInterval") ||
+                                    !this.data.eventHandler.config.security.signatureInterval
+                                )
+                        ) {
+                            this.data.eventHandler.config.security = this.data.eventHandler.config.security || {};
+                            this.data.eventHandler.config.security.signatureInterval = "1 hour";
+                        }
+
                         this.translateDescriptions(schema);
                         this.data.schemaEditor = new JSONEditor(this.$el.find("#auditEventHandlerConfig")[0], {
                             "schema": schema,
