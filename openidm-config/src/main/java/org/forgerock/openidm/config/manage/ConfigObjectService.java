@@ -447,6 +447,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         ", can not update the configuration.").asPromise();
             }
 
+            // Strip the _rev and _id properties from the config
+            obj.remove(ResourceResponse.FIELD_CONTENT_ID);
+            obj.remove(ResourceResponse.FIELD_CONTENT_REVISION);
+
             JsonValue before = enhancedConfig.getConfiguration(config.getProperties(), resourcePath.toString(), false);
             existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig,
                     obj);

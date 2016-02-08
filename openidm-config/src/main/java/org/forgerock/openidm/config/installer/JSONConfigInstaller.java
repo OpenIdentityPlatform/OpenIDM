@@ -38,11 +38,15 @@ import java.util.Set;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.patch.JsonPatch;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.framework.ServiceReference;
@@ -189,7 +193,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                             boolean isUpToDate = false;
                             if (file.exists()) {
                                 Hashtable existingCfg = loadConfigFile(file);
-                                isUpToDate = isConfigSame(dict, existingCfg);
+                                isUpToDate = isConfigSame(dict, existingCfg, true);
                             }
                             if (isUpToDate) {
                                 logger.debug("Config file is up-to-date: {}", fileName);
@@ -321,7 +325,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], true);
 
         Dictionary props = config.getProperties();
-        if (!isConfigSame(ht, props)) {
+        if (!isConfigSame(ht, props, false)) {
             try {
                 ht = configCrypto.encrypt(pid[0], pid[1], ht);
                 ht.put(DirectoryWatcher.FILENAME, toConfigKey(f));
@@ -399,30 +403,36 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     }
 
     /**
-     * Whether the JSON configuration is the same (Including formatting)
+     * Whether the JSON configuration is the same
      * Ignores meta-data such as whether factory pid has been assigned yet
      * 
      * @param newCfg
      * @param oldCfg
+     * @param strict Whether to compare the _id and _rev attributes
      * @return true if the JSON config is the same
      */
-    boolean isConfigSame(Dictionary newCfg, Dictionary oldCfg) {
+    boolean isConfigSame(Dictionary newCfg, Dictionary oldCfg, boolean strict) {
         if (newCfg == null || oldCfg == null) {
             return oldCfg == newCfg;
         }
+        
         Dictionary newCompare = new Hashtable(new DictionaryAsMap(newCfg));
-        newCompare.remove( DirectoryWatcher.FILENAME );
-        newCompare.remove( Constants.SERVICE_PID );
-        newCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        newCompare.remove( SERVICE_FACTORY_PID_ALIAS );
+        String newPropVal = (String)newCompare.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
+        JsonValue newJsonConfig = JsonUtil.parseStringified(newPropVal);
 
         Dictionary oldCompare = new Hashtable(new DictionaryAsMap(oldCfg));
-        oldCompare.remove( DirectoryWatcher.FILENAME );
-        oldCompare.remove( Constants.SERVICE_PID );
-        oldCompare.remove( ConfigurationAdmin.SERVICE_FACTORYPID );
-        oldCompare.remove( SERVICE_FACTORY_PID_ALIAS );
-
-        return newCompare.equals(oldCompare);
+        String oldPropVal = (String)oldCompare.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
+        JsonValue oldJsonConfig = JsonUtil.parseStringified(oldPropVal);
+        
+        if (!strict) {
+            // Remove the '_id' and '_rev' attributes if present
+            newJsonConfig.remove(ResourceResponse.FIELD_CONTENT_ID);
+            newJsonConfig.remove(ResourceResponse.FIELD_CONTENT_REVISION);
+            oldJsonConfig.remove(ResourceResponse.FIELD_CONTENT_ID);
+            oldJsonConfig.remove(ResourceResponse.FIELD_CONTENT_REVISION);
+        }
+        
+        return JsonPatch.diff(oldJsonConfig, newJsonConfig).size() == 0;
     }
 
     Configuration getConfiguration(String fileName, String pid, String factoryPid, boolean addIfNew) throws Exception {

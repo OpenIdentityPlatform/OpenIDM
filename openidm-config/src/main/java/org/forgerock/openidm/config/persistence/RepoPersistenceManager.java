@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2014 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -204,6 +204,9 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 ResourceResponse existing = repo.read(readRequest);
                 Map<String, Object> existingConfig = existing.getContent().asMap();
                 Object configMap = existingConfig.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
+                if (configMap != null) {
+                    ((Map)configMap).remove(ResourceResponse.FIELD_CONTENT_ID);
+                }
                 String configString = serializeConfig(configMap);
                 existingConfig.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, configString);
                 logger.debug("Config loaded {} {}", pid, existing);
