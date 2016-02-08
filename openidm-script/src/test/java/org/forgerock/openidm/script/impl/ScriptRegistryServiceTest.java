@@ -11,11 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.script.impl;
 
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -26,14 +27,42 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.forgerock.audit.events.AuditEvent;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.script.ScriptEntry;
+import org.forgerock.script.groovy.GroovyScriptEngineFactory;
+import org.forgerock.script.javascript.RhinoScriptEngineFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.mockito.ArgumentCaptor;
+import org.testng.Assert;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 public class ScriptRegistryServiceTest {
+
+    @DataProvider(name = "languages")
+    public Object[][] getLanguages() throws Exception {
+        return new Object[][]{
+                {GroovyScriptEngineFactory.LANGUAGE_NAME},
+                {RhinoScriptEngineFactory.LANGUAGE_NAME}
+        };
+    }
+
+    @Test(dataProvider = "languages")
+    public void testTakeScriptGlobals(String language) throws Exception {
+        ScriptRegistryService scriptRegistryService = new ScriptRegistryService();
+        JsonValue jsonScript = json(object(
+                field("type", language),
+                field("source", "test source"),
+                field("simpleKey", "simpleValue"),
+                field("globals", json(object(field("globalKey", "globalValue"))))));
+        ScriptEntry scriptEntry = scriptRegistryService.takeScript(jsonScript);
+        Assert.assertEquals("simpleValue", scriptEntry.get("simpleKey"));
+        Assert.assertEquals("globalValue", scriptEntry.get("globalKey"));
+        Assert.assertEquals(String.class, scriptEntry.get("globalKey").getClass());
+    }
 
     @Test
     public void testAuditScheduledService() throws Exception {
