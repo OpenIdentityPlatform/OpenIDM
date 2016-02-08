@@ -36,7 +36,7 @@
             ],
             "onCreate" : {
                 "type" : "text/javascript",
-                "source" : "target._id = source.name;"
+                "source" : "if(source.name !== undefined) { target._id = source.name; }"
             }
         },
         {
