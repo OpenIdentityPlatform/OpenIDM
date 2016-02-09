@@ -20,21 +20,24 @@ module.exports = {
                 setSession: function (client, callback) {
                     var data = client.globals;
                     client.url(data.baseUrl)
-                        .pause(200)
+                        .waitForElementPresent("#login", 2000)
                         .timeoutsAsyncScript(2000)
                         .executeAsync(
                             function (args, done) {
                                 var eventManager = require("org/forgerock/commons/ui/common/main/EventManager"),
                                     constants = require("org/forgerock/commons/ui/common/util/Constants");
-                                
-                                eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {userName: "openidm-admin", password: "openidm-admin"}).then(function () {
+
+                                eventManager.sendEvent(constants.EVENT_LOGIN_REQUEST, {
+                                    userName: args.username,
+                                    password: args.password
+                                }).then(function () {
                                     done();
                                 });
                             },
-                            ['mustBeAValueHere'],//bug with nightwatch--must be a value in at least one arg passed to execute func (https://github.com/nightwatchjs/nightwatch/issues/616)
+                            [data.login],
                             function (result) {
-                                client.pause(100);
-                                
+                                client.waitForElementVisible(".open-add-widget-dialog", 2000);
+
                                 callback();
                             }
                         );
