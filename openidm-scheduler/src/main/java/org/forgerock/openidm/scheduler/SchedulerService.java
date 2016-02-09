@@ -180,6 +180,15 @@ public class SchedulerService implements RequestHandler {
             target = "(" + ServerConstants.ROUTER_PREFIX + "=/policy*)")
     protected RouteService policy;
 
+    /*
+    The RepoJobStore will attempt to get/create trigger group names by making calls on the router - see
+    RepoJobStore#getTriggerGroupNames, which is ultimately called when this service is activated. This reference insures
+    that the repo service implementation has been registered with the router prior to the activation of this service.
+     */
+    @Reference(name = "ref_SchedulerService_RepoService",
+            target = "(" + ServerConstants.ROUTER_PREFIX + "=/repo/*)")
+    protected RouteService repoService;
+
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig;
