@@ -24,6 +24,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
     "form2js",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -36,6 +37,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             form2js,
             AdminAbstractView,
             ConfigDelegate,
+            SiteConfigurationDelegate,
             UiUtils,
             EventManager,
             Constants,
@@ -108,14 +110,22 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             return $.when(
                 ConfigDelegate.createEntity(this.model.configUrl, this.orderCheck()),
                 ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
-            );
+            ).then(function () {
+                SiteConfigurationDelegate.updateConfiguration(function () {
+                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                });
+            });
         },
         deleteConfig: function () {
             this.setKBAEnabled();
             return $.when(
                 ConfigDelegate.deleteEntity(this.model.configUrl),
                 ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
-            );
+            ).then(function () {
+                SiteConfigurationDelegate.updateConfiguration(function () {
+                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                });
+            });
         },
         controlAllSwitch: function(event) {
             var check = $(event.target),
@@ -433,6 +443,9 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 ConfigDelegate.updateEntity(this.model.configUrl, saveData),
                 ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
             ).then(_.bind(function() {
+                SiteConfigurationDelegate.updateConfiguration(function () {
+                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                });
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
             }, this));
         },

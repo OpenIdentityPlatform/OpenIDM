@@ -142,7 +142,47 @@ define("config/process/AdminIDMConfig", [
                     completedCallback = event.callback;
                 }
 
-                ConfigDelegate.readEntity("managed").then(function(managedConfig) {
+                $.when(
+                    ConfigDelegate.readEntity("managed"),
+                    ConfigDelegate.readEntity("ui/configuration")
+                ).then(function(managedConfig, uiConfig) {
+                    // used to reflect the state of self-service features in the navigation
+                    var selfServiceOptions = [
+                        {
+                            href: "#selfservice/userregistration/",
+                            confKey: "selfRegistration"
+                        },
+                        {
+                            href: "#selfservice/passwordreset/",
+                            confKey: "passwordReset"
+                        },
+                        {
+                            href: "#selfservice/forgotUsername/",
+                            confKey: "forgotUsername"
+                        }
+                    ];
+
+                    _.each(selfServiceOptions, function (option) {
+                        var toggleClass,
+                            toggleChar,
+                            navItem = _.find(Navigation.configuration.links.admin.urls.configuration.urls, {url: option.href});
+
+                        if (navItem) {
+                            if (uiConfig.configuration[option.confKey]) {
+                                toggleClass = "fa-toggle-on text-success";
+                            } else {
+                                toggleClass = "fa-toggle-off text-danger";
+                            }
+
+                            // remove all classes from the icon list which start with either fa-* or text-*
+                            navItem.icon = _.reject(navItem.icon.split(" "), function (cssClass) {
+                                return  cssClass.indexOf("fa-") !== -1 ||
+                                        cssClass.indexOf("text-") !== -1;
+                            }).join(" ");
+                            navItem.icon += " " + toggleClass;
+
+                        }
+                    });
 
                     // Updates the Dashboards dropdown values
                     Navigation.configuration.links.admin.urls.dashboard.urls = [];
