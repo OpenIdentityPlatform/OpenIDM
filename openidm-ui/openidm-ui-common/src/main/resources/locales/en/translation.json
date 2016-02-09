@@ -882,6 +882,11 @@
                 "dialog": {
                     "add": "Add Audit Event Handler",
                     "edit": "Edit Audit Event Handler"
+                },
+                "endOfLineSymbols": {
+                    "linefeed": "Linefeed (\\n)",
+                    "carriageReturn": "Carriage Return (\\r)",
+                    "carriageReturnLinefeed": "Carriage Return + Linefeed (\\r\\n)"
                 }
             },
             "events": {

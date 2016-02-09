@@ -34,11 +34,17 @@ module.exports = {
         'Delete OPENAM_SESSION module': function (client) {
             client
                 .waitForElementPresent('#authModuleGrid', 2000)
-                .click('#authModuleGrid tr:last-of-type .fa-times')
+                .waitForElementVisible('#authModuleGrid tr:last-of-type td:first-of-type', 2000)
                 .pause(1000)
-                .click('#submitAuth')
-                .waitForElementVisible('#authModuleGrid tr:last-of-type td:first-of-type', 'Client Cert')
                 .assert.containsText('#authModuleGrid tr:last-of-type td:first-of-type', 'OpenAM Session');
+            
+            client
+                .click('#authModuleGrid tr:last-of-type td:nth-child(2) .fa-times')
+                .waitForElementPresent('#submitAuth', 2000)
+                .click('#submitAuth')
+                .pause(2000)
+                .waitForElementVisible('#authModuleGrid tr:last-of-type td:first-of-type', 2000)
+                .assert.containsText('#authModuleGrid tr:last-of-type td:first-of-type', 'Client Cert');
             
             client.end();
         }

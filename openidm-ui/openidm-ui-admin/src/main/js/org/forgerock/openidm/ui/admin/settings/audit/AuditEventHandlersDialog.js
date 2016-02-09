@@ -158,9 +158,27 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                 _.extend({}, conf.globalData, data),
                 _.bind(function(data) {
                     var schema = {};
+                    
                     if (_.has(this.data.handler, "config")) {
                         schema = this.data.handler.config;
+
+                        //override the endOfLineSymbols in the csv handler
+                        if (schema.properties && schema.properties.formatting && schema.properties.formatting.properties && schema.properties.formatting.properties.endOfLineSymbols) {
+                            schema.properties.formatting.properties.endOfLineSymbols.enum = [
+                                String.fromCharCode(10),
+                                String.fromCharCode(13),
+                                String.fromCharCode(13) + String.fromCharCode(10)
+                            ];
+                            schema.properties.formatting.properties.endOfLineSymbols.options = {
+                                "enum_titles": [
+                                    $.t("templates.audit.eventHandlers.endOfLineSymbols.linefeed"),
+                                    $.t("templates.audit.eventHandlers.endOfLineSymbols.carriageReturn"),
+                                    $.t("templates.audit.eventHandlers.endOfLineSymbols.carriageReturnLinefeed")
+                                ]
+                            };
+                        }
                     }
+                    
                     validatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
                     validatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
 
