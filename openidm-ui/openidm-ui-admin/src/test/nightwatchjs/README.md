@@ -1,5 +1,8 @@
 ### install nightwatch (if you have not already) the following command will install nightwatch globally on your system:
     > npm install nightwatch -g
+    
+### install lodash (if you have not already) the following command will install lodash globally on your system:
+    > npm install lodash -g
 
 ### download selenium-server-standalone-{version}.jar from http://selenium-release.storage.googleapis.com/index.html
 ### copy selenium-server-standalone-{version}.jar to test/nightwatchjs/selenium or whereever you want to put it

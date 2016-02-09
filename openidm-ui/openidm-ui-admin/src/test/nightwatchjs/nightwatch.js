@@ -1,16 +1,9 @@
 module.exports = {
   "src_folders" : [
-    "tests/login",
-    "tests/audit",
-    "tests/connector",
-    "tests/managed",
-    "tests/dashboard",
-    "tests/scriptWidget",
-    "tests/mapping",
-    "tests/system"
+    "tests"
   ],
   "output_folder" : "reports",
-  "custom_commands_path" : "",
+  "custom_commands_path" : "custom/commands",
   "custom_assertions_path" : "",
   "page_objects_path" : "pages",
   "globals_path" : "",
