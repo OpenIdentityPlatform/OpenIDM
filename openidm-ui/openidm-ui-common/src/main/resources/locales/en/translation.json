@@ -2150,6 +2150,48 @@
                 "rotationRetentionCheckInterval": {
                     "help": "Interval for periodically checking file rotation and retention policies"
                 }
+            },
+            "elasticsearch": {
+                "connection": {
+                    "help": "Elasticsearch audit event handler",
+                    "useSSL": {
+                        "help": "Use SSL/TLS to connect to Elasticsearch"
+                    },
+                    "host": {
+                        "help": "Hostname or IP address of Elasticsearch (default: localhost)"
+                    },
+                    "port": {
+                        "help": "Port used by Elasticsearch (default: 9200)"
+                    },
+                    "username": {
+                        "help": "Username when Basic Authentication is enabled via Elasticsearch Shield"
+                    },
+                    "password": {
+                        "help": "Password when Basic Authentication is enabled via Elasticsearch Shield"
+                    }
+                },
+                "indexMapping": {
+                    "help": "",
+                    "indexName": {
+                        "help": "Index Name (default: audit) for events. Change if 'audit' conflicts with an existing Elasticsearch index"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for buffering events and sending in batches (increases write-throughput)",
+                    "enabled": {
+                        "help": "Fixed maximum number of events that can be buffered (default: 10000)"
+                    },
+                    "maxSize": {
+                        "help": "Max buffer size before flushing"
+                    },
+                    "writeInterval": {
+                        "help": "Interval (default: 1 s) at which buffered events are written to Elasticsearch (units of 'ms' or 's' are recommended)"
+                    },
+                    "maxBatchedEvents": {
+                        "help": "Maximum number of events per batch-write to Elasticsearch for each Write Interval (default: 500)"
+                    }
+
+                }
             }
         },
         "service": {
