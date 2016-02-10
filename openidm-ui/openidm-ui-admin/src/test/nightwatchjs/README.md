@@ -19,6 +19,8 @@
 ### to run tests in Chrome run:
     > nightwatch -c ./nightwatch.js --env chrome
 
+### to run tests in both Firefox and Chrome run:
+    > nightwatch -c ./nightwatch.js -e default,chrome
 
 ### for api documentation check out http://nightwatchjs.org/api
 
