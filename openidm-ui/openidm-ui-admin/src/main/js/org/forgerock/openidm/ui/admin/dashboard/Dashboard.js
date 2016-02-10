@@ -324,15 +324,14 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
                 currentWidget = $(event.target).parents(".widget-holder"),
                 widgetLocation = this.$el.find(".widget-holder").index(currentWidget);
 
-            currentConf.adminDashboard.widgets.splice(widgetLocation, 1);
+            currentConf.adminDashboards[this.model.dashboardIndex].widgets.splice(widgetLocation, 1);
 
             UIUtils.confirmDialog($.t("dashboard.widgetDelete"), "danger", _.bind(function(){
                  ConfigDelegate.updateEntity("ui/configuration", {"configuration": currentConf}).then(_.bind(function() {
-
-                     currentWidget.remove();
-
-                     SiteConfigurationDelegate.updateConfiguration();
-
+                     SiteConfigurationDelegate.updateConfiguration(_.bind(function() {
+                             this.render();
+                         }, this)
+                     );
                  }, this));
             }, this));
         }
