@@ -421,6 +421,21 @@
                 <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
                 <version>${forgerock-audit.version}</version>
             </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-csv</artifactId>
+                <version>${forgerock-audit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-core</artifactId>
+                <version>${forgerock-audit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-json</artifactId>
+                <version>${forgerock-audit.version}</version>
+            </dependency>
 
             <!-- Non-BOM ForgeRock Commons artifacts -->
             <dependency>
