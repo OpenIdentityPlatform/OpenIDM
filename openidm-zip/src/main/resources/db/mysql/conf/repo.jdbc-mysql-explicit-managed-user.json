@@ -32,11 +32,6 @@
 
             "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
 
-            "audit-by-mapping" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE mapping = ${mappingName}",
-            "audit-by-recon-id" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId}",
-            "audit-by-recon-id-type" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND entryType = ${entryType}",
-            "audit-by-recon-id-situation" : "SELECT * FROM ${_dbSchema}.auditrecon WHERE reconId = ${reconId} AND situation = ${situation}",
-            "audit-by-activity-parent-action" : "SELECT * FROM ${_dbSchema}.auditactivity WHERE parentactionid = ${parentActionId}",
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
             "get-recons" : "SELECT reconId, timestamp, mapping, message FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY timestamp DESC"
         }

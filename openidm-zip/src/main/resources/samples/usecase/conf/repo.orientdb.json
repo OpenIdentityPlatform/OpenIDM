@@ -23,11 +23,6 @@
 
         "find-relationships-for-resource" : "SELECT * FROM relationships WHERE ((firstId = ${fullResourceId}) AND (firstPropertyName = ${resourceFieldName})) OR ((secondId = ${fullResourceId}) AND (secondPropertyName = ${resourceFieldName})))",
 
-        "audit-by-mapping" : "select * FROM audit_recon WHERE mapping = ${mappingName}",
-        "audit-by-recon-id" : "select * FROM audit_recon WHERE reconId = ${reconId}",
-        "audit-by-recon-id-type" : "select * FROM audit_recon WHERE reconId = ${reconId} AND entryType = ${entryType}",
-        "audit-by-recon-id-situation" : "select * FROM audit_recon WHERE reconId = ${reconId} AND situation = ${situation}",
-        "audit-by-activity-parent-action" : "select * FROM audit_activity WHERE parentActionId = ${parentActionId}",
         "get-recons" : "SELECT reconId, timestamp, mapping, message FROM audit_recon WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entryType = 'summary' ORDER BY timestamp DESC"
     },
     "commands" : {
