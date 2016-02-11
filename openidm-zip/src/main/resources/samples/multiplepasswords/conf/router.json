@@ -41,7 +41,7 @@
             "pattern" : "^(managed|system|repo/internal)($|(/.+))",
             "onRequest" : {
                 "type" : "text/javascript",
-                "file" : "policyFilter.js"
+                "source" : "require('policyFilter').runFilter()"
             },
             "methods" : [
                 "create",
