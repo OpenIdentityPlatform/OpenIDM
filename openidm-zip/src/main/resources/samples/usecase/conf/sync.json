@@ -84,6 +84,7 @@
                 {
                     "source" : "manager",
                     "target" : "manager",
+                    "condition" : "/object/manager pr",
                     "transform" : {
                         "type" : "text/javascript",
                         "file" : "script/transformHRManager.js"
