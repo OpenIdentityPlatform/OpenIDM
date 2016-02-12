@@ -58,7 +58,8 @@ require.config({
         jsonEditor: "libs/jsoneditor-0.7.9-min",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min",
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
-        dimple : "libs/dimple-2.1.2-min"
+        dimple : "libs/dimple-2.1.2-min",
+        sinon : "libs/sinon-1.15.4"
     },
 
     shim: {
@@ -133,6 +134,9 @@ require.config({
         },
         d3: {
             exports: "d3"
+        },
+        sinon: {
+            exports: "sinon"
         },
         dimple: {
             exports: "dimple",

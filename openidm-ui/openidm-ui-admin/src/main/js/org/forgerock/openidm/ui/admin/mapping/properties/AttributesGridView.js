@@ -659,6 +659,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
             var mapping = this.getCurrentMapping();
 
+            if(mapping.recon) {
+                delete mapping.recon;
+            }
+
             if (this.model.mappingProperties) {
                 mapping.properties = this.model.mappingProperties;
                 this.model.mappingProperties = null;
