@@ -52,16 +52,14 @@ import org.apache.felix.scr.annotations.References;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.script.CryptoFunctions;
 import org.forgerock.openidm.script.ResourceFunctions;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.json.crypto.JsonCrypto;
-import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ForbiddenException;
@@ -96,8 +94,6 @@ import org.forgerock.script.scope.Parameter;
 import org.forgerock.script.source.DirectoryContainer;
 import org.forgerock.script.source.SourceUnit;
 import org.forgerock.util.promise.Promise;
-import org.ops4j.pax.swissbox.extender.BundleWatcher;
-import org.ops4j.pax.swissbox.extender.ManifestEntry;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -115,12 +111,6 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Script Registry Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/script*") })
 @References({
-    @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
-            bind = "bindCryptoService", unbind = "unbindCryptoService",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
-    @Reference(name = "IDMConnectionFactoryReference", referenceInterface = IDMConnectionFactory.class,
-            bind = "setConnectionFactory", unbind = "unsetConnectionFactory",
-            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC),
     @Reference(name = "ScriptEngineFactoryReference",
             referenceInterface = ScriptEngineFactory.class, bind = "addingEntries",
             unbind = "removingEntries", cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE,
@@ -160,8 +150,6 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     // Public Constants
     public static final String PID = "org.forgerock.openidm.script";
 
-    private ConnectionFactory connectionFactory = null;
-
     /**
      * Setup logging for the {@link ScriptRegistryService}.
      */
@@ -183,15 +171,97 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
 
+    @Reference(name = "IDMConnectionFactoryReference", referenceInterface = IDMConnectionFactory.class,
+            bind = "setConnectionFactory", unbind = "unsetConnectionFactory",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
+    private volatile IDMConnectionFactory connectionFactory = null;
 
-    private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
-    private static final ConcurrentMap<String, Object> propertiesCache = new ConcurrentHashMap<String, Object>();
+    @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
+            bind = "bindCryptoService", unbind = "unbindCryptoService",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
+    private volatile CryptoService cryptoService = null;
+
+    private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Object> propertiesCache = new ConcurrentHashMap<>();
 
     private enum Action {
         compile, eval
     }
-    
-    private BundleWatcher<ManifestEntry> manifestWatcher;
+
+    private enum IdentityServerFunctions implements Function<Object> {
+        getProperty {
+            public Object call(Parameter scope, Function<?> callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                boolean useCache = false;
+                if (arguments.length < 1 || arguments.length > 3) {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
+                }
+                if (arguments.length == 3) {
+                    useCache = (Boolean) arguments[2];
+                }
+                if (arguments[0] instanceof String) {
+                    String name = (String) arguments[0];
+                    Object result = null;
+                    if (useCache) {
+                        result = propertiesCache.get(name);
+                    }
+                    if (null == result) {
+                        Object defaultValue = arguments.length == 2 ? arguments[1] : null;
+                        result = IdentityServer.getInstance().getProperty(name, defaultValue, Object.class);
+                        propertiesCache.putIfAbsent(name, result);
+                    }
+                    return result;
+                } else {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
+                }
+            }
+        },
+
+        getWorkingLocation {
+            public Object call(Parameter scope, Function callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                if (arguments.length != 0) {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
+                }
+                return IdentityServer.getInstance().getWorkingLocation().getAbsolutePath();
+            }
+        },
+
+        getProjectLocation {
+            public Object call(Parameter scope, Function callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                if (arguments.length != 0) {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this
+                            .name(), arguments));
+                }
+                return IdentityServer.getInstance().getProjectLocation().getAbsolutePath();
+            }
+        },
+        getInstallLocation {
+            public Object call(Parameter scope, Function callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                if (arguments.length != 0) {
+                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this
+                            .name(), arguments));
+                }
+                return IdentityServer.getInstance().getInstallLocation().getAbsolutePath();
+            }
+        };
+        static final long serialVersionUID = 1L;
+
+        /**
+         * Return a map of Functions described by the name of each function.
+         *
+         * @return a map of IdentityServer Functions.
+         */
+        static Map<String, Object> getFunctions() {
+            Map<String, Object> functions = new HashMap<>(values().length);
+            for (IdentityServerFunctions f : values()) {
+                functions.put(f.name(), f);
+            }
+            return functions;
+        }
+    }
 
     @Activate
     protected void activate(ComponentContext context) throws Exception {
@@ -199,24 +269,10 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
         setConfiguration(configuration.required().asMap());
 
-        HashMap<String, Object> identityServer = new HashMap<String, Object>();
-        for (IdentityServerFunctions f : IdentityServerFunctions.values()) {
-            identityServer.put(f.name(), f);
-        }
-        Map<String, Object> console = new HashMap<String, Object>();
-        console.put("log", new Function<Void>() {
-            @Override
-            public Void call(Parameter scope, Function<?> callback, Object... arguments) throws ResourceException, NoSuchMethodException {
-                if (arguments.length > 0) {
-                    if (arguments[0] instanceof String) {
-                        System.out.println((String) arguments[0]);
-                    }
-                }
-                return null;
-            }
-        });
-        put(PROP_IDENTITY_SERVER, identityServer);
+        Map<String, Object> console = new HashMap<>();
+        console.put("log", newLogFunction());
         put(PROP_CONSOLE, console);
+        put(PROP_IDENTITY_SERVER, IdentityServerFunctions.getFunctions());
         put(PROP_OPENIDM, openidm);
         JsonValue properties = configuration.get("properties");
         if (properties.isMap()) {
@@ -306,9 +362,6 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
-        if (null != manifestWatcher) {
-            manifestWatcher.stop();
-        }
         propertiesCache.clear();
         openidm.clear();
         setBindings(null);
@@ -340,169 +393,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     }
 
     protected void bindCryptoService(final CryptoService cryptoService) {
-        // hash(any value, string algorithm)
-        openidm.put("hash", new Function<JsonValue>() {
-
-            static final long serialVersionUID = 1L;
-
-            public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments.length == 2) {
-                    JsonValue value = null;
-                    String algorithm = null;
-                    if (arguments[0] instanceof Map
-                            || arguments[0] instanceof List
-                            || arguments[0] instanceof String
-                            || arguments[0] instanceof Number
-                            || arguments[0] instanceof Boolean) {
-                        value = new JsonValue(arguments[0]);
-                    } else if (arguments[0] instanceof JsonValue) {
-                        value = (JsonValue) arguments[0];
-                    } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage( "hash", arguments));
-                    }
-                    if (arguments[1] instanceof String) {
-                        algorithm = (String) arguments[1];
-                    } else if (arguments[1] == null) {
-                        algorithm = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_HASHING_ALGORITHM;
-                    } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage( "hash", arguments));
-                    }
-
-                    try {
-                        return cryptoService.hash(value, algorithm);
-                    } catch (JsonCryptoException e) {
-                        throw new InternalServerErrorException(e.getMessage(), e);
-                    }
-                } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage( "hash", arguments));
-                }
-            }
-        });
-        // encrypt(any value, string cipher, string alias)
-        openidm.put("encrypt", new Function<JsonValue>() {
-
-            static final long serialVersionUID = 1L;
-
-            public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments.length == 3) {
-                    JsonValue value = null;
-                    String cipher = null;
-                    String alias = null;
-                    if (arguments[0] instanceof Map
-                            || arguments[0] instanceof List
-                            || arguments[0] instanceof String
-                            || arguments[0] instanceof Number
-                            || arguments[0] instanceof Boolean) {
-                        value = new JsonValue(arguments[0]);
-                    } else if (arguments[0] instanceof JsonValue) {
-                        value = (JsonValue) arguments[0];
-                    } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
-                    }
-                    if (arguments[1] instanceof String) {
-                        cipher = (String) arguments[1];
-                    } else if (arguments[1] == null) {
-                        cipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
-                    } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
-                    }
-
-                    if (arguments[2] instanceof String) {
-                        alias = (String) arguments[2];
-                    } else {
-                        throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
-                    }
-                    try {
-                        return cryptoService.encrypt(value, cipher, alias);
-                    } catch (JsonCryptoException e) {
-                        throw new InternalServerErrorException(e.getMessage(), e);
-                    }
-                } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage("encrypt", arguments));
-                }
-            }
-        });
-        // decrypt(any value)
-        openidm.put("decrypt", new Function<JsonValue>() {
-
-            static final long serialVersionUID = 1L;
-
-            public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments.length == 1
-                        && (arguments[0] instanceof Map || arguments[0] instanceof JsonValue)) {
-                    return cryptoService
-                            .decrypt(arguments[0] instanceof JsonValue ? (JsonValue) arguments[0]
-                                    : new JsonValue(arguments[0]));
-                } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                            "decrypt", arguments));
-                }
-            }
-        });
-        // isEncrypted(any value)
-        openidm.put("isEncrypted", new Function<Boolean>() {
-
-            static final long serialVersionUID = 1L;
-
-            public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments == null || arguments.length == 0) {
-                    return false;
-                } else if (arguments.length == 1) {
-                    return JsonCrypto.isJsonCrypto(arguments[0] instanceof JsonValue
-                        ? (JsonValue) arguments[0] 
-                        : new JsonValue(arguments[0]));
-                } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                            "isEncrypted", arguments));
-                }
-            }
-        });
-        // isHashed(any value)
-        openidm.put("isHashed", new Function<Boolean>() {
-
-            static final long serialVersionUID = 1L;
-
-            public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments == null || arguments.length == 0) {
-                    return false;
-                } else if (arguments.length == 1) {
-                    return cryptoService.isHashed(arguments[0] instanceof JsonValue
-                        ? (JsonValue) arguments[0] 
-                        : new JsonValue(arguments[0]));
-                } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                            "isHashed", arguments));
-                }
-            }
-        });
-        // matches(String plaintext, any value)
-        openidm.put("matches", new Function<Boolean>() {
-
-            static final long serialVersionUID = 1L;
-
-            public Boolean call(Parameter scope, Function<?> callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments == null || arguments.length == 0 || arguments.length == 1) {
-                    return false;
-                } else if (arguments.length == 2) {
-                    try {
-                        return cryptoService.matches(arguments[0].toString(), arguments[1] instanceof JsonValue
-                                ? (JsonValue) arguments[1] 
-                                : new JsonValue(arguments[1]));
-                    } catch (JsonCryptoException e) {
-                        throw new InternalServerErrorException(e.getMessage(), e);
-                    }
-                } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(
-                            "matches", arguments));
-                }
-            }
-        });
+        openidm.put("hash", CryptoFunctions.newHashFunction(cryptoService));
+        openidm.put("encrypt", CryptoFunctions.newEncryptFunction(cryptoService));
+        openidm.put("decrypt", CryptoFunctions.newDecryptFunction(cryptoService));
+        openidm.put("isEncrypted", CryptoFunctions.newIsEncryptedFunction());
+        openidm.put("isHashed", CryptoFunctions.newIsHashedFunction(cryptoService));
+        openidm.put("matches", CryptoFunctions.newMatchesFunction(cryptoService));
+        this.cryptoService = cryptoService;
         logger.info("Crypto functions are enabled");
     }
 
@@ -579,68 +476,6 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             }
         }
         return scriptEntry;
-    }
-    
-    private static enum IdentityServerFunctions implements Function<Object> {
-        getProperty {
-            public Object call(Parameter scope, Function<?> callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                boolean useCache = false;
-                if (arguments.length < 1 || arguments.length > 3) {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
-                }
-                if (arguments.length == 3) {
-                    useCache = (Boolean) arguments[2];
-                }
-                if (arguments[0] instanceof String) {
-                    String name = (String) arguments[0];
-                    Object result = null;
-                    if (useCache) {
-                        result = propertiesCache.get(name);
-                    }
-                    if (null == result) {
-                        Object defaultValue = arguments.length == 2 ? arguments[1] : null;
-                        result = IdentityServer.getInstance().getProperty(name, defaultValue, Object.class);
-                        propertiesCache.putIfAbsent(name, result);
-                    }
-                    return result;
-                } else {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
-                }
-            }
-        },
-
-        getWorkingLocation {
-            public Object call(Parameter scope, Function callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments.length != 0) {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this.name(), arguments));
-                }
-                return IdentityServer.getInstance().getWorkingLocation().getAbsolutePath();
-            }
-        },
-
-        getProjectLocation {
-            public Object call(Parameter scope, Function callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments.length != 0) {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this
-                            .name(), arguments));
-                }
-                return IdentityServer.getInstance().getProjectLocation().getAbsolutePath();
-            }
-        },
-        getInstallLocation {
-            public Object call(Parameter scope, Function callback, Object... arguments)
-                    throws ResourceException, NoSuchMethodException {
-                if (arguments.length != 0) {
-                    throw new NoSuchMethodException(FunctionFactory.getNoSuchMethodMessage(this
-                            .name(), arguments));
-                }
-                return IdentityServer.getInstance().getInstallLocation().getAbsolutePath();
-            }
-        };
-        static final long serialVersionUID = 1L;
     }
     
     private boolean isSourceUnit(String name) {
@@ -802,5 +637,25 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 throw new InternalServerErrorException("script encountered exception", se);
             }
         }
+    }
+
+    /**
+     * logging function
+     *
+     * @return a Function that outputs logs to the console.
+     */
+    private static Function<Void> newLogFunction() {
+        return new Function<Void>() {
+            @Override
+            public Void call(Parameter scope, Function<?> callback, Object... arguments)
+                    throws ResourceException, NoSuchMethodException {
+                if (arguments.length > 0) {
+                    if (arguments[0] instanceof String) {
+                        System.out.println((String) arguments[0]);
+                    }
+                }
+                return null;
+            }
+        };
     }
 }
