@@ -87,7 +87,7 @@ UI Endpoints for Update Process
 		"files" : [
 			{
 				"filePath" : "bin/defaults/script/access.js",
-				"fileState" : "UNEXPECTED" (states from FileState.java),
+				"fileState" : "UNEXPECTED" (states from Post-Update File States below),
 				"backup" : "bin/defaults/script/access.js.<update id>"
 			},
 			...
@@ -152,8 +152,6 @@ FileState States:
     DELETED,
     /** The file on disk has been changed since the original deployment in a read-only directory. */
     DIFFERS,
-    /** The file on disk has been changed in a user-modifiable directory. */
-    PRESERVED,
     /** The file is unchanged from the original distribution. */
     UNCHANGED
 
@@ -167,6 +165,14 @@ Update Stati:
     Note that it is possible an update could remain in IN_PROGRESS or FAILED state forever if the thread/process
     died before the update could reach COMPLETE or REVERTED, the two "terminal states".  Updates are not reentrant
     at this time.
+
+Post-Update File States:
+
+    REPLACED        Original file was replaced with new file. If original file had user changes it was renamed with
+                    a -old extension.
+    PRESERVED       Original file contained user changes and was preserved. New file added with -new extension.
+    APPLIED         A patch was applied to the configuration of the same name.
+
 
 
 Other
