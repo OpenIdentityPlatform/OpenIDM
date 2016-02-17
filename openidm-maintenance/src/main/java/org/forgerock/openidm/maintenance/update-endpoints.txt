@@ -87,7 +87,7 @@ UI Endpoints for Update Process
 		"files" : [
 			{
 				"filePath" : "bin/defaults/script/access.js",
-				"fileState" : "UNEXPECTED" (states from Post-Update File States below),
+				"fileState" : "REPLACED" (see Post-Update File States below),
 				"backup" : "bin/defaults/script/access.js.<update id>"
 			},
 			...
