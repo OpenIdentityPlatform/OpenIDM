@@ -16,8 +16,6 @@
 
 package org.forgerock.openidm.script.impl;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
@@ -58,6 +56,7 @@ import org.forgerock.openidm.script.CryptoFunctions;
 import org.forgerock.openidm.script.ResourceFunctions;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -122,15 +121,10 @@ import org.slf4j.LoggerFactory;
             target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)") })
 public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService {
 
-    // Public Constants
-    public static final String PID = "org.forgerock.openidm.script";
-    public static final String SCRIPT_NAME = "org.forgerock.openidm.script.name";
-
-    /** Reserved script functions */
     public static final Set<String> reservedNames;
 
     static {
-        Set<String> _reservedNames = new HashSet<>(16);
+        Set<String> _reservedNames = new HashSet<String>(15);
         _reservedNames.add("create");
         _reservedNames.add("read");
         _reservedNames.add("update");
@@ -149,6 +143,12 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
         reservedNames = Collections.unmodifiableSet(_reservedNames);
     }
+
+    // TODO Move to public package
+    public static final String SCRIPT_NAME = "org.forgerock.openidm.script.name";
+
+    // Public Constants
+    public static final String PID = "org.forgerock.openidm.script";
 
     /**
      * Setup logging for the {@link ScriptRegistryService}.
@@ -171,13 +171,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile EnhancedConfig enhancedConfig;
 
-    /** ConnectionFactory reference. */
     @Reference(name = "IDMConnectionFactoryReference", referenceInterface = IDMConnectionFactory.class,
             bind = "setConnectionFactory", unbind = "unsetConnectionFactory",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
     private volatile IDMConnectionFactory connectionFactory = null;
 
-    /** CrytoService reference. */
     @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
             bind = "bindCryptoService", unbind = "unbindCryptoService",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
@@ -292,7 +290,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             JsonValue sources = configuration.get("sources");
             if (!sources.isNull()) {
                 // Must reverse default-first config since ScriptRegistryImpl loads scripts from the first dir it hits.
-                List<String> keys = new ArrayList<>(sources.keys());
+                List<String> keys = new ArrayList(sources.keys());
                 Collections.reverse(keys);
 
                 for (String key : keys) {
@@ -323,6 +321,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         // bundled as an OSGI-Fragment attached to this bundle will be "seen" by scripts.
         setRegistryLevelScriptClassLoader(this.getClass().getClassLoader());
 
+        /*
+         * manifestWatcher = new BundleWatcher<ManifestEntry>(context, new
+         * ScriptEngineManifestScanner(), null); manifestWatcher.start();
+         */
+
         logger.info("OpenIDM Script Service component is activated.");
     }
 
@@ -331,9 +334,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         setConfiguration(configuration.required().asMap());
         propertiesCache.clear();
-        Set<String> keys = null != getBindings()
-                ? new HashSet<>(getBindings().keySet())
-                : Collections.<String> emptySet();
+        Set<String> keys =
+                null != getBindings() ? new HashSet<String>(getBindings().keySet()) : Collections
+                        .<String> emptySet();
         keys.remove(PROP_OPENIDM);
         keys.remove(PROP_IDENTITY_SERVER);
         keys.remove(PROP_CONSOLE);
@@ -406,15 +409,13 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         openidm.remove("isEncrypted");
         openidm.remove("isHashed");
         openidm.remove("matches");
-        this.cryptoService = null;
         logger.info("Crypto functions are disabled");
     }
 
     protected void bindFunction(final Function function, Map properties) {
         Object name = properties.get(SCRIPT_NAME);
-        if (name instanceof String
-                && StringUtils.isNotBlank((String) name)
-                && !reservedNames.contains(name)) {
+        if (name instanceof String && StringUtils.isNotBlank((String) name)
+                && !reservedNames.contains((String) name)) {
             openidm.put((String) name, function);
             logger.info("openidm.{} function is enabled", name);
         }
@@ -422,9 +423,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     protected void unbindFunction(final Function function, Map properties) {
         Object name = properties.get(SCRIPT_NAME);
-        if (name instanceof String
-                && StringUtils.isNotBlank((String) name)
-                && !reservedNames.contains(name)) {
+        if (name instanceof String && StringUtils.isNotBlank((String) name)
+                && !reservedNames.contains((String) name)) {
             openidm.remove(name, function);
             logger.info("openidm.{} function is disabled", name);
         }
@@ -477,16 +477,19 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
         return scriptEntry;
     }
-
+    
     private boolean isSourceUnit(String name) {
-        return SourceUnit.ATTR_NAME.equals(name)
-                || SourceUnit.ATTR_REVISION.equals(name)
-                || SourceUnit.ATTR_SOURCE.equals(name)
-                || SourceUnit.ATTR_TYPE.equals(name)
-                || SourceUnit.ATTR_VISIBILITY.equals(name)
-                || SourceUnit.AUTO_DETECT.equals(name)
-                || SOURCE_FILE.equals(name)
-                || SOURCE_GLOBALS.equals(name);
+        if (SourceUnit.ATTR_NAME.equals(name) ||
+                SourceUnit.ATTR_REVISION.equals(name) ||
+                SourceUnit.ATTR_SOURCE.equals(name) ||
+                SourceUnit.ATTR_TYPE.equals(name) ||
+                SourceUnit.ATTR_VISIBILITY.equals(name) ||
+                SourceUnit.AUTO_DETECT.equals(name) ||
+                SOURCE_FILE.equals(name) ||
+                SOURCE_GLOBALS.equals(name)) {
+            return true;
+        }
+        return false;
     }
 
     // ----- Implementation of RequestHandler interface
@@ -494,9 +497,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         String resourcePath = request.getResourcePath();
         JsonValue content = request.getContent();
-        Map<String, Object> bindings = new HashMap<>();
-        JsonValue config = json(object());
-        ScriptEntry scriptEntry;
+        Map<String, Object> bindings = new HashMap<String, Object>();
+        JsonValue config = new JsonValue(new HashMap<String, Object>());
+        ScriptEntry scriptEntry = null;
         try {
             if (resourcePath == null || "".equals(resourcePath)) {
                 for (String key : content.keys()) {
@@ -579,17 +582,18 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     
     @Override
     public void execute(Context context, Map<String, Object> scheduledContext) throws ExecutionException {
+        
         try {
             String scriptName = (String) scheduledContext.get(CONFIG_NAME);
             JsonValue params = new JsonValue(scheduledContext).get(CONFIGURED_INVOKE_CONTEXT);
             JsonValue scriptValue = params.get("script").expect(Map.class).clone();
-
+            
             if (scriptValue.get(SourceUnit.ATTR_NAME).isNull()) {
                 if (!scriptValue.get(SOURCE_FILE).isNull()) {
                     scriptValue.put(SourceUnit.ATTR_NAME, scriptValue.get(SOURCE_FILE).getObject());
                 }
             }
-
+            
             if (!scriptValue.isNull()) {
                 ScriptEntry entry = takeScript(scriptValue);
                 JsonValue input = params.get("input");
@@ -597,7 +601,11 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             } else {
                 throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
             }
-        } catch (ScriptException | ForbiddenException | InternalServerErrorException e) {
+        } catch (JsonValueException jve) {
+            throw new ExecutionException(jve);
+        } catch (ScriptException e) {
+            throw new ExecutionException(e);
+        } catch (ResourceException e) {
             throw new ExecutionException(e);
         }
     }
