@@ -181,7 +181,7 @@ public class RemoteCommandScope extends CustomCommandScope {
             final String logFilePath,
 
             @Descriptor("Log only to the log file.")
-            @Parameter(names = {"-Q", "--Quiet"}, presentValue = "true", absentValue = "false")
+            @Parameter(names = {"-Q", "--quiet"}, presentValue = "true", absentValue = "false")
             final boolean quietMode,
 
             @Descriptor("Filename of the Update archive within bin/update.")
