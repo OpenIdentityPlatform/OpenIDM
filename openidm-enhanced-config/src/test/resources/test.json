@@ -1,0 +1,16 @@
+{
+  "attr1": "&{property1}",
+  "attr2": "pre &{property2}-post",
+  "attr3": "&{not-available}",
+  "attr4": {
+    "subattr1": "nested &{env.&{environment}.variable}",
+    "subattr2": "nested &{env.&{system.environment}.variable}"
+  },
+  "attr5": "&{not-&{property1}",
+  "attr6": "esc\\&{not-&{property1}}",
+  "attr7": "not-&{property1}}",
+  "attr8": "&{&{env-key}.DEMO.&{variable-key}}",
+  "attr9": "&{&{env-key}.PROD.&{variable-key}}",
+  "attr10": "&{&{inst-key}.DEMO.&{variable-key}}",
+  "keyAlias": "&{openidm.https.keystore.cert.alias}"
+}

@@ -27,6 +27,8 @@ package org.forgerock.openidm.config.enhanced;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 
+import java.io.File;
+import java.net.URL;
 import java.net.URLDecoder;
 import java.util.Dictionary;
 import java.util.Hashtable;
@@ -35,6 +37,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.core.SystemPropertyAccessor;
+import org.forgerock.openidm.util.FileUtil;
 import org.testng.annotations.Test;
 
 /**
@@ -42,6 +45,8 @@ import org.testng.annotations.Test;
  *
  */
 public class JSONEnhancedConfigTest {
+    public static final String TEST_JSON_FILE = "/test.json";
+
     @Test
     public void testGetConfiguration() throws Exception {
 
@@ -63,10 +68,12 @@ public class JSONEnhancedConfigTest {
          * "not-&{property1}}","attr8" :
          * "&{&{env-key}.DEMO.&{variable-key}}","attr9" :
          * "&{&{env-key}.PROD.&{variable-key}}","attr10" :
-         * "&{&{inst-key}.DEMO.&{variable-key}}"}
+         * "&{&{inst-key}.DEMO.&{variable-key}}", "keyAlias" :
+         * "&{openidm.https.keystore.cert.alias}"}
          */
-        String jsonConfigProperty =
-                "{\"attr1\" : \"&{property1}\",\"attr2\" : \"pre &{property2}-post\",\"attr3\" : \"&{not-available}\",\"attr4\":{\"subattr1\" : \"nested &{env.&{environment}.variable}\",\"subattr2\" : \"nested &{env.&{system.environment}.variable}\"},\"attr5\" : \"&{not-&{property1}\",\"attr6\" : \"esc\\\\&{not-&{property1}}\",\"attr7\" : \"not-&{property1}}\",\"attr8\" : \"&{&{env-key}.DEMO.&{variable-key}}\",\"attr9\" : \"&{&{env-key}.PROD.&{variable-key}}\",\"attr10\" : \"&{&{inst-key}.DEMO.&{variable-key}}\"}";
+        URL testFile = JSONEnhancedConfigTest.class.getResource(TEST_JSON_FILE);
+        File textFile = new File(testFile.toURI());
+        String jsonConfigProperty = FileUtil.readFile(textFile);
 
         JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
@@ -92,5 +99,7 @@ public class JSONEnhancedConfigTest {
         assertEquals(configuration.get("attr9").required().asString(), "&{env.PROD.variable}");
         assertEquals(configuration.get("attr10").required().asString(),
                 "&{&{inst-key}.DEMO.variable}");
+
+        assertEquals(configuration.get("keyAlias").required().asString(), "openidm-localhost");
     }
 }
