@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.patch;
@@ -19,23 +19,21 @@ package org.forgerock.openidm.patch;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
-import org.forgerock.json.resource.ResourceException;
 
 /**
- * This interface provides a method to retrieve a value to be used in a patch operation
- * based on any criteria using any available means.
+ * A NullTransformer class doesn't transform.
+ *
+ * Used by callers that do not need the facility to execute transform scripts.
  */
-public interface PatchValueTransformer {
-    /**
-     * Return the value to be used for a given patch operation.
-     *
-     * @param patch The patch operation.
-     * @param subject The patch subject document.  Subject is unused by default, made available
-     *               for use by custom transforms.
-     * @return JsonValue to be used for a given patch operation
-     * @return subject on patch null or empty
-     * @throws BadRequestException on null subject, null scriptConfig
-     * @throws ResourceException on script execution error
-     */
-    JsonValue getTransformedValue(PatchOperation patch, JsonValue subject) throws ResourceException;
+public class NullTransformer implements PatchValueTransformer {
+    /** a singleton instance of the NullTransfomer */
+    public static final PatchValueTransformer NULL_TRANSFORMER = new NullTransformer();
+
+    private NullTransformer() {
+    }
+
+    @Override
+    public JsonValue getTransformedValue(PatchOperation patch, JsonValue subject) throws BadRequestException {
+        return subject;
+    }
 }

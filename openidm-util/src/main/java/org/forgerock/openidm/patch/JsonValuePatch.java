@@ -1,39 +1,28 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
+
 package org.forgerock.openidm.patch;
+
+import java.util.List;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
-
-import org.mozilla.javascript.Context;
-import org.mozilla.javascript.Scriptable;
-
-import java.util.List;
 
 /**
  */
@@ -158,12 +147,12 @@ public class JsonValuePatch {
     }
 
     /** Apply a transform patch operation */
-    private static boolean transform(JsonValue subject, PatchOperation operation, PatchValueTransformer transformer) throws BadRequestException {
+    private static boolean transform(JsonValue subject, PatchOperation operation, PatchValueTransformer transformer) throws ResourceException {
         if (!operation.isTransform()) {
             throw new BadRequestException("Operation is a " + operation.getOperation() + ", not a transform!");
         }
 
-        Object value = transformer.getTransformedValue(operation, subject);
+        JsonValue value = transformer.getTransformedValue(operation, subject);
         if (value == null) {
             subject.remove(operation.getField());
         } else {
@@ -178,42 +167,15 @@ public class JsonValuePatch {
         throw new BadRequestException("Operation " + operation.getOperation() + " is not supported");
     }
 
-    private static final PatchValueTransformer DEFAULT_TRANSFORMER = new PatchValueTransformer() {
-        @Override
-        public Object getTransformedValue(PatchOperation patch, JsonValue subject) throws JsonValueException {
-            if (patch.getValue() != null) {
-                return evalScript(subject, patch.getValue());
-            }
-            throw new JsonValueException(patch.toJsonValue(), "expecting a value member");
-        }
-
-        private String evalScript(JsonValue content, JsonValue script) {
-            if (script == null || script.getObject() == null || !script.isString()) {
-                return null;
-            }
-            Context cx = Context.enter();
-            try {
-                Scriptable scope = cx.initStandardObjects();
-                String finalScript = "var content = " + content.toString() + "; " + script.getObject();
-                Object result = cx.evaluateString(scope, finalScript, "script", 1, null);
-                return Context.toString(result);
-            } catch (Exception e) {
-                throw new JsonValueException(script, "failed to eval script", e);
-            } finally {
-                Context.exit();
-            }
-        }
-    };
-
     /**
-     * Apply a list of PatchOperations.
+     * Apply a list of PatchOperations for callers that do not need the facility to execute transform scripts.
      *
      * @param subject the JsonValue to which to apply the patch operation(s).
      * @return whether the subject was modified.
      * @throws ResourceException on failure to apply PatchOperation.
      */
-    public static boolean apply(JsonValue subject, List<PatchOperation> operations) throws BadRequestException {
-        return apply(subject, operations, DEFAULT_TRANSFORMER);
+    public static boolean apply(JsonValue subject, List<PatchOperation> operations) throws ResourceException {
+        return apply(subject, operations, NullTransformer.NULL_TRANSFORMER);
     }
 
     /**
@@ -225,7 +187,7 @@ public class JsonValuePatch {
      * @throws ResourceException on failure to apply PatchOperation.
      */
     public static boolean apply(JsonValue subject, List<PatchOperation> operations, PatchValueTransformer transformer)
-            throws BadRequestException {
+            throws ResourceException {
 
         boolean isModified = false;
 
@@ -246,4 +208,3 @@ public class JsonValuePatch {
         return isModified;
     }
 }
-

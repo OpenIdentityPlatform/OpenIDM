@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.patch;
@@ -22,20 +22,28 @@ import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
 
 /**
- * This interface provides a method to retrieve a value to be used in a patch operation
- * based on any criteria using any available means.
+ * An abstract implementation for scripted transforms.
  */
-public interface PatchValueTransformer {
+public abstract class ScriptedPatchValueTransformer implements PatchValueTransformer {
+    private static final String CONFIG_SCRIPT = "script";
+
+    @Override
+    public JsonValue getTransformedValue(PatchOperation patch, JsonValue subject) throws ResourceException {
+        if (patch.getValue().get(CONFIG_SCRIPT).isNotNull()) {
+            return evalScript(subject, patch.getValue().get(CONFIG_SCRIPT));
+        }
+        throw new BadRequestException("Expecting a " + CONFIG_SCRIPT + " member");
+    }
+
     /**
-     * Return the value to be used for a given patch operation.
+     * Given subject and script
+     * Returns a transformed value.
      *
-     * @param patch The patch operation.
-     * @param subject The patch subject document.  Subject is unused by default, made available
-     *               for use by custom transforms.
-     * @return JsonValue to be used for a given patch operation
-     * @return subject on patch null or empty
+     * @param subject The JsonValue to which to apply the patch operation(s).
+     * @param scriptConfig The script config.
+     * @return A transformed JsonValue.
      * @throws BadRequestException on null subject, null scriptConfig
      * @throws ResourceException on script execution error
      */
-    JsonValue getTransformedValue(PatchOperation patch, JsonValue subject) throws ResourceException;
+    public abstract JsonValue evalScript(JsonValue subject, JsonValue scriptConfig) throws ResourceException;
 }
