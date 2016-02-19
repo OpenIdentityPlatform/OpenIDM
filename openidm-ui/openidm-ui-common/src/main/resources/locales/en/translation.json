@@ -2184,10 +2184,10 @@
                 "buffering": {
                     "help": "Configuration for buffering events and sending in batches (increases write-throughput)",
                     "enabled": {
-                        "help": "Fixed maximum number of events that can be buffered (default: 10000)"
+                        "help": "Use event buffering (recommended)"
                     },
                     "maxSize": {
-                        "help": "Max buffer size before flushing"
+                        "help": "Fixed maximum number of events that can be buffered (default: 10000)"
                     },
                     "writeInterval": {
                         "help": "Interval (default: 1 s) at which buffered events are written to Elasticsearch (units of 'ms' or 's' are recommended)"
