@@ -702,9 +702,10 @@ public class UpdateManagerImpl implements UpdateManager {
                             }
                         }
 
-                        if (fileEntry.getStockFile() != null || fileEntry.getBackupFile() != null) {
-                            logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                        if (fileEntry.getStockFile() == null && fileEntry.getBackupFile() == null) {
+                            fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
                         }
+                        logUpdate(updateEntry.addFile(fileEntry.toJson()));
                     }
                     logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
                             .setStatusMessage("Processed " + path.getFileName().toString()));

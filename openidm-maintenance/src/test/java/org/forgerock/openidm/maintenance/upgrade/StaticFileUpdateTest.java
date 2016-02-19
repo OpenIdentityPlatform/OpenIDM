@@ -143,8 +143,7 @@ public class StaticFileUpdateTest {
     }
 
     /**
-     * Test keeping a file with no differences.  This should throw an exception as there are no differences
-     * to keep.
+     * Test keeping a file with no differences.  This should simply write the new file.
      */
     @Test
     public void testKeepIsUnchanged() throws IOException {
@@ -153,6 +152,7 @@ public class StaticFileUpdateTest {
         when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.UNCHANGED);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         assertThat(update.keep(tempFile)).isNull();
+        assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
     }
 
     /**
