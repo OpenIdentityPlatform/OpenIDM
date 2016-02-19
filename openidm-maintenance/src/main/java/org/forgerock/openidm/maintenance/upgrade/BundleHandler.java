@@ -208,6 +208,9 @@ public class BundleHandler {
     public void installBundle(Path path) throws UpdateException {
         try {
             if (systemBundleContext.getBundles().length > 1) {
+                /* Resolve the path of the new file against the first non-system bundle.  The system bundle
+                    has no parent and cannot be used for this.
+                 */
                 Files.copy(path,
                         getBundlePath(systemBundleContext.getBundles()[1]).getParent().resolve(path.getFileName()),
                         StandardCopyOption.REPLACE_EXISTING);

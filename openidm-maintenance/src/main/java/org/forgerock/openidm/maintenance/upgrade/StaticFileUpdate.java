@@ -72,6 +72,7 @@ class StaticFileUpdate {
      * <em>&lt;filepath&gt;-.old-version</em>.  Supports copying fresh file for one that is missing.
      *
      * @param path the path to replace/copy
+     * @return the altered path of the original file, null if the original was not moved
      * @throws IOException
      */
     Path replace(final Path path) throws IOException {
@@ -110,6 +111,7 @@ class StaticFileUpdate {
      * Keep the static file that already exists.  Install the new file as <em>&lt;filepath&gt;-.new-version</em>.
      *
      * @param path the path to keep/copy
+     * @return the altered path of the original file, null if the original was not moved
      * @throws IOException
      */
     Path keep(final Path path) throws IOException {
