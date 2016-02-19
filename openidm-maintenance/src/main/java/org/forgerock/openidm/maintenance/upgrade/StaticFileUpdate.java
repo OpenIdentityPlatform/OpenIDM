@@ -113,22 +113,23 @@ class StaticFileUpdate {
      * @throws IOException
      */
     Path keep(final Path path) throws IOException {
-        if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
-            final Path destination = root.resolve(path.toString() + NEW_SUFFIX + timestamp);
-            archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
-                @Override
-                public Void apply(InputStream inputStream) throws IOException {
-                    Files.copy(inputStream,
-                            destination,
-                            StandardCopyOption.REPLACE_EXISTING);
-                    return null;
-                }
-            });
+        boolean changed = CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path));
+        final Path destination = root.resolve(changed
+                ? path.toString() + NEW_SUFFIX + timestamp
+                : path.toString());
 
-            fileStateChecker.updateState(path);
+        archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
+            @Override
+            public Void apply(InputStream inputStream) throws IOException {
+                Files.copy(inputStream,
+                        destination,
+                        StandardCopyOption.REPLACE_EXISTING);
+                return null;
+            }
+        });
 
-            return destination;
-        }
-        return null;
+        fileStateChecker.updateState(path);
+
+        return changed ? destination : null;
     }
 }
