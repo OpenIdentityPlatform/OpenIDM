@@ -11,9 +11,8 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
-
 package org.forgerock.openidm.servlet.internal;
 
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
@@ -43,7 +42,6 @@ import org.forgerock.http.Filter;
 import org.forgerock.http.Handler;
 import org.forgerock.http.HttpApplication;
 import org.forgerock.http.HttpApplicationException;
-import org.forgerock.http.filter.TransactionIdInboundFilter;
 import org.forgerock.http.handler.Handlers;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.servlet.HttpFrameworkServlet;
@@ -66,12 +64,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * A NAME does ...
- * 
+ * A component to create and register the "API" Servlet; that is, the CHF Servlet that
+ *
+ * 1) listens on /openidm,
+ * 2) dispatches to the HttpApplication, that is composed of
+ *    a) the auth filter
+ *    b) the JSON resource HTTP Handler, that
+ *       i) converts CHF Requests to CREST requests, and
+ *       ii) routes them on the CREST router using the external ConnectionFactory.
+ *
  */
-@Component(name = "org.forgerock.openidm.api-servlet",
-        immediate = true,
-        policy = ConfigurationPolicy.IGNORE)
+@Component(name = ServletComponent.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -80,7 +83,7 @@ import org.slf4j.LoggerFactory;
 })
 public class ServletComponent implements EventHandler {
 
-    public static final String PID = "org.forgerock.openidm.router";
+    static final String PID = "org.forgerock.openidm.api-servlet";
 
     private static final String SERVLET_ALIAS = "/openidm";
 
@@ -88,8 +91,8 @@ public class ServletComponent implements EventHandler {
     private final static Logger logger = LoggerFactory.getLogger(ServletComponent.class);
 
     /** The (external) ConnectionFactory */
-    @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.router)")
-    protected ConnectionFactory connectionFactory;
+    @Reference(policy = ReferencePolicy.DYNAMIC, target = ServerConstants.EXTERNAL_ROUTER_SERVICE_PID_FILTER)
+    protected volatile ConnectionFactory connectionFactory;
 
     @Reference(policy = ReferencePolicy.STATIC, target = "(service.pid=org.forgerock.openidm.auth.config)")
     private Filter authFilter;
@@ -99,10 +102,10 @@ public class ServletComponent implements EventHandler {
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected ScriptRegistry scriptRegistry;
+    private ScriptRegistry scriptRegistry;
 
     // Optional scripts to augment/populate the security context
-    private List<ScriptEntry> augmentSecurityScripts = new CopyOnWriteArrayList<ScriptEntry>();
+    private List<ScriptEntry> augmentSecurityScripts = new CopyOnWriteArrayList<>();
 
     // Register script extensions configured
     @Reference(
@@ -114,8 +117,7 @@ public class ServletComponent implements EventHandler {
             policy = ReferencePolicy.DYNAMIC,
             strategy = ReferenceStrategy.EVENT
     )
-    protected Map<ServletFilterRegistrator, ScriptEntry> filterRegistratorMap =
-            new HashMap<ServletFilterRegistrator, ScriptEntry>();
+    private Map<ServletFilterRegistrator, ScriptEntry> filterRegistratorMap = new HashMap<>();
 
     protected synchronized void bindRegistrator(ServletFilterRegistrator registrator, Map<String, Object> properties) {
         JsonValue scriptConfig = registrator.getConfiguration()
@@ -145,7 +147,7 @@ public class ServletComponent implements EventHandler {
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
-        logger.debug("Try registering servlet at {}", SERVLET_ALIAS);
+        logger.debug("Registering servlet at {}", SERVLET_ALIAS);
         final Handler handler = CrestHttp.newHttpHandler(
                 connectionFactory, new IDMSecurityContextFactory(augmentSecurityScripts));
         servlet = new HttpFrameworkServlet(

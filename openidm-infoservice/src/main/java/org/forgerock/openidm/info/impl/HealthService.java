@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.info.impl;
 
@@ -261,15 +261,15 @@ public class HealthService
             "org.forgerock.openidm.config.manage",
             "org.forgerock.openidm.crypto",
             "org.forgerock.openidm.external.rest",
-            "org.forgerock.openidm.internal",
             "org.forgerock.openidm.maintenance",
             "org.forgerock.openidm.managed",
             "org.forgerock.openidm.policy",            
             "org.forgerock.openidm.provisioner",
             "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
             "org.forgerock.openidm.repo.(orientdb|jdbc)",
-            "org.forgerock.openidm.router",
-            "org.forgerock.openidm.scheduler",            
+            "org.forgerock.openidm.router.internal",
+            "org.forgerock.openidm.router.servlet",
+            "org.forgerock.openidm.scheduler",
             "org.forgerock.openidm.script",
             "org.forgerock.openidm.security",
             "org.forgerock.openidm.servletfilter.registrator"

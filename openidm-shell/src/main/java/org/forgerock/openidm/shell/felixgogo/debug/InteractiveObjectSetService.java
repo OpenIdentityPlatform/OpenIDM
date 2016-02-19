@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.shell.felixgogo.debug;
@@ -39,6 +31,7 @@ import org.apache.felix.service.command.CommandSession;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.framework.ServiceEvent;
@@ -54,7 +47,6 @@ class InteractiveObjectSetService implements /* RequestHandler, */ServiceListene
 
     private final static Logger TRACE = LoggerFactory.getLogger(InteractiveObjectSetService.class);
 
-    public static final String ROUTER_SERVICE_FILTER = "(service.pid=org.forgerock.openidm.router)";
 
     private ConnectionFactory router = null;
 
@@ -70,8 +62,8 @@ class InteractiveObjectSetService implements /* RequestHandler, */ServiceListene
         this.context = context;
         this.session = session;
         try {
-            ServiceReference<?>[] ref =
-                    context.getServiceReferences(ConnectionFactory.class.getName(), ROUTER_SERVICE_FILTER);
+            ServiceReference<?>[] ref = context.getServiceReferences(
+                    ConnectionFactory.class.getName(), ServerConstants.EXTERNAL_ROUTER_SERVICE_PID_FILTER);
             if (null != ref && ref.length > 0) {
                 router = (ConnectionFactory) context.getService(ref[0]);
             }

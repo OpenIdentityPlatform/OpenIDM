@@ -20,11 +20,16 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.FAILED;
 import static org.forgerock.audit.events.AccessAuditEventBuilder.ResponseStatus.SUCCESSFUL;
 import static org.forgerock.json.resource.Requests.newCreateRequest;
-import static org.forgerock.services.context.ClientContext.newInternalClientContext;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.List;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -43,6 +48,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.SecurityContext;
@@ -51,24 +57,30 @@ import org.forgerock.util.Reject;
 import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * A router {@link Filter} to log external CREST requests as access events.
  */
+@Component(name = AuditFilter.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
+@Service
+@Properties({
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Audit Router Filter")
+})
 public class AuditFilter implements Filter {
+    static final String PID = "org.forgerock.openidm.audit.filter";
 
     private static final Logger logger = LoggerFactory.getLogger(AuditFilter.class);
-    private ConnectionFactory connectionFactory;
 
-    public AuditFilter(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
-    }
-
-    public void setConnectionFactory(ConnectionFactory connectionFactory) {
-        this.connectionFactory = connectionFactory;
-    }
+    /**
+     * Static dependency on the internal ConnectionFactory.  If it goes away this component will be
+     * deactivated and unregistered.  Consumers will need to properly handle the AuditFilter "going away".
+     */
+    @Reference(target = "(service.pid=org.forgerock.openidm.router.internal)")
+    private ConnectionFactory connectionFactory = null;
 
     /**
      * {@inheritDoc}
@@ -234,10 +246,7 @@ public class AuditFilter implements Filter {
                         @Override
                         public void run() {
                             try {
-                                // wrap the context in a new internal context since we are using the external connection
-                                // factory
-                                connectionFactory.getConnection().create(
-                                        newInternalClientContext(context),
+                                connectionFactory.getConnection().create(context,
                                         newCreateRequest("audit/access", accessAuditEventBuilder.toEvent().getValue()));
                             } catch (ResourceException e) {
                                 logger.error("Failed to log audit access entry", e);

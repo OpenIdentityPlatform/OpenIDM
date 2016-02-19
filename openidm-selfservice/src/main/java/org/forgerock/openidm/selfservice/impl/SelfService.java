@@ -113,7 +113,7 @@ public class SelfService {
      * Use the external servlet connection factory so that self-service requests are subject to authz rules
      * as "external" requests.
      */
-    @Reference(policy = ReferencePolicy.STATIC, target="(service.pid=org.forgerock.openidm.router)")
+    @Reference(policy = ReferencePolicy.STATIC, target = ServerConstants.EXTERNAL_ROUTER_SERVICE_PID_FILTER)
     private ConnectionFactory connectionFactory;
 
     /** Enhanced configuration service. */
