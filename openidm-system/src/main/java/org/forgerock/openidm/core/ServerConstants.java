@@ -23,7 +23,7 @@
  *
  *
  *      Copyright 2006-2010 Sun Microsystems, Inc.
- *      Portions Copyright 2010-2015 ForgeRock AS
+ *      Portions Copyright 2010-2016 ForgeRock AS
  */
 package org.forgerock.openidm.core;
 
@@ -220,7 +220,20 @@ public final class ServerConstants {
         MAX_LINE_WIDTH = columns - 1;
     }
 
+    /**
+     * The Felix SCR property name used to identify the route on which a RequestHandler should be registered.
+     */
     public static final String ROUTER_PREFIX = "openidm.router.prefix";
+
+    /**
+     * The "external" router/ConnectionFactory serivce PID.
+     */
+    public static final String EXTERNAL_ROUTER_SERVICE_PID = "org.forgerock.openidm.router.servlet";
+
+    /**
+     * A Felix SCR service PID filter for the external router.
+     */
+    public static final String EXTERNAL_ROUTER_SERVICE_PID_FILTER = "(service.pid=" + EXTERNAL_ROUTER_SERVICE_PID + ")";
 
     /**
      * Query input value for the QUERY_ID input key.

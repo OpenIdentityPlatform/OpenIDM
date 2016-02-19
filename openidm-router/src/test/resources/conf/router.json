@@ -1,0 +1,39 @@
+{
+   "filters" :
+      [
+         {
+            "pattern" : ".*",
+            "methods" :
+               [
+                  "create"
+               ],
+            "condition" :
+               {
+                  "type" : "groovy",
+                  "source" : "request.resourcePath==request.resourcePath"
+               },
+            "onRequest" :
+               {
+                  "type" : "groovy",
+                  "source" : "request.content.put('password','removed'); println 'Before: ' + request.requestType + '\\nId: ' + request.resourcePath"
+               },
+            "onResponse" :
+               {
+                  "type" : "groovy",
+                  "source" : "println 'After: ' + request.requestType + '\\nId: ' + request.resourcePath"
+               }
+         },
+         {
+            "pattern" : "^managed/user/.*",
+            "methods" :
+               [
+                  "create",
+                  "update",
+                  "read",
+                  "delete",
+                  "query",
+                  "action"
+               ]
+         }
+      ]
+}
