@@ -73,7 +73,7 @@ class StaticFileUpdate {
      *
      * @param path the path to replace/copy
      * @return the altered path of the original file, null if the original was not moved
-     * @throws IOException
+     * @throws IOException if the new or old file cannot be accessed
      */
     Path replace(final Path path) throws IOException {
         Path destination = null;
@@ -112,7 +112,7 @@ class StaticFileUpdate {
      *
      * @param path the path to keep/copy
      * @return the altered path of the original file, null if the original was not moved
-     * @throws IOException
+     * @throws IOException if the new or old file cannot be accessed
      */
     Path keep(final Path path) throws IOException {
         boolean changed = CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path));
