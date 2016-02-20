@@ -142,7 +142,7 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
                 }
 
             }, this);
-
+            
             return mergedResult;
         },
 

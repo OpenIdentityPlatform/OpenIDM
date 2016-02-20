@@ -57,17 +57,44 @@ module.exports = {
             elements: {
                 csvFile: {
                     selector: '#csvFile'
+                },
+                uid: {
+                    selector: '#headerUid'
+                },
+                username: {
+                    selector: '#headerName'
                 }
             }
         },
         dbTableDetails: {
             selector: '#forDatabaseTableConnector',
             elements: {
+                host: {
+                    selector: '#host'
+                },
+                port: {
+                    selector: '#port'
+                },
+                username: {
+                    selector: '#user'
+                },
+                password: {
+                    selector: '#password'
+                },
+                dbName: {
+                    selector: '#database'
+                },
                 table: {
                     selector: '#table'
                 },
                 keyColumn: {
                     selector: '#keyColumn'
+                },
+                jdbcDriver: {
+                    selector: '#jdbcDriver'
+                },
+                jdbcUrl: {
+                    selector: '#jdbcUrlTemplate'
                 },
                 emptyStringToggle: {
                     selector: 'label #enableEmptyString'
@@ -84,14 +111,34 @@ module.exports = {
             }
         },
         ldapDetails: {
-            selector: '#forLdapConnector',
+            selector: '#connectorDetails',
             elements: {
-
+                hostName: {
+                    selector: '#ldapHost'
+                },
+                port: {
+                    selector: '#port'
+                },
+                accountDN: {
+                    selector: '#ldapPrincipal'
+                },
+                password: {
+                    selector: '#credentials'
+                },
+                baseDN: {
+                    selector: '#baseDN'
+                }
             }
         },
         xmlDetails: {
             selector: '#forXMLConnector',
             elements: {
+                xsdPath: {
+                    selector: '#xmlxsdFilePath'
+                },
+                xmlPath: {
+                    selector: '#xmlFilePath'
+                },
                 createIfToggle: {
                     selector: '#xmlCreateIfNotExists'
                 }
