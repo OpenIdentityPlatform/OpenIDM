@@ -49,24 +49,6 @@ define("config/validators/AdminValidators", [
                 callback();
             }
         },
-        "whitespace": {
-            "name": "No whitespace allowed.",
-            "dependencies": [
-            ],
-            "validator": function(el, input, callback) {
-                if (/\s/.test($(input).val())) {
-                    callback(["Cannot contain spaces"]);
-                    return;
-                }
-
-                if ($(input).val().length === 0) {
-                    callback(["Required"]);
-                    return;
-                }
-
-                callback();
-            }
-        },
         "certificate": {
             "name": "Valid Certificate String",
             "dependencies": [
@@ -122,15 +104,11 @@ define("config/validators/AdminValidators", [
             ],
             "validator": function(el, input, callback) {
                 var v = input.val();
-                if (!v || v === "") {
-                    callback([$.t("common.form.validation.required")]);
-                    return;
-                }
-                else if (v.indexOf(' ') !== -1) {
+                if (!v || v === "" || v.indexOf(' ') !== -1) {
                     callback([$.t("common.form.validation.spaceNotAllowed")]);
                     return;
                 }
-
+                
                 callback();
             }
         },

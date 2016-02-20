@@ -1,10 +1,10 @@
 module.exports = {
     url: function() {
-        return this.api.globals.baseUrl + "#dashboard/";
+        return this.api.globals.baseUrl + "#dashboard/0";
     },
     elements: {
         addConnector: {
-            selector: '#AddConnector'
+            selector: 'a[href="#connectors/add/"]'
         }
     },
     sections: {

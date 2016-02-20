@@ -17,33 +17,38 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="host">{{t "templates.connector.databaseTableConnector.host"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="host" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" />
+                    <input class="form-control" type="text" id="host" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.dbHostnameOrIP"}}</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="port">{{t "templates.connector.databaseTableConnector.port"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="port" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
+                    <input class="form-control" type="text" id="port" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="user">{{t "templates.connector.databaseTableConnector.user"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="user" name="configurationProperties.user" value="{{connectorDefaults.configurationProperties.user}}" />
+                    <input class="form-control" type="text" id="user" name="configurationProperties.user" value="{{connectorDefaults.configurationProperties.user}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.dbUsername"}}</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="password">{{t "templates.connector.databaseTableConnector.password"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" />
+                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="database">{{t "templates.connector.databaseTableConnector.database"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="database" name="configurationProperties.database" value="{{connectorDefaults.configurationProperties.database}}" />
+                    <input class="form-control" type="text" id="database" name="configurationProperties.database" value="{{connectorDefaults.configurationProperties.database}}" data-validator-event="keyup blur" data-validator="required"  />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
             <div class="form-group has-feedback has-error">
@@ -57,7 +62,7 @@
             <div class="form-group has-feedback has-error">
                 <label class="col-sm-3 control-label" for="keyColumn">{{t "templates.connector.databaseTableConnector.keyColumn"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="keyColumn" name="configurationProperties.keyColumn" value="{{connectorDefaults.configurationProperties.keyColumn}}" data-validator-event="keyup blur" data-validator="required"/>
+                    <input class="form-control" type="text" id="keyColumn" name="configurationProperties.keyColumn" value="{{connectorDefaults.configurationProperties.keyColumn}}" data-validator-event="keyup blur" data-validator="required" />
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.uidForTableRows"}}</span>
                 </div>
@@ -71,15 +76,24 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="jdbcDriver">{{t "templates.connector.databaseTableConnector.jdbcDriver"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdbcDriver" name="configurationProperties.jdbcDriver" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" />
+                    <input class="form-control" type="text" id="jdbcDriver" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" data-validator="required" value={{t "templates.connector.databaseTableConnector.jdbcDefaultDriver"}} />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcDriverHelp"}}</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="jdbcUrlTemplate">{{t "templates.connector.databaseTableConnector.jdbcUrlTemplate"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdbcUrlTemplate" name="configurationProperties.jdbcUrlTemplate" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" />
+                    <input class="form-control" type="text" id="jdbcUrlTemplate" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" data-validator="required" value={{t "templates.connector.databaseTableConnector.jdbcDefaultUrl"}} />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcUrlTemplateHelp"}}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="dataSource">{{t "templates.connector.databaseTableConnector.dataSource"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="dataSource" name="configurationProperties.dataSource" value="{{connectorDefaults.configurationProperties.dataSource}}" />
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcPath"}}</span>
                 </div>
             </div>
             <div class="form-group">
@@ -142,13 +156,6 @@
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="changeLogColumn" name="configurationProperties.changeLogColumn" value="{{connectorDefaults.configurationProperties.changeLogColumn}}" />
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.dbChangeTime"}}</span>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label" for="dataSource">{{t "templates.connector.databaseTableConnector.dataSource"}}</label>
-                <div class="col-sm-8">
-                    <input class="form-control" type="text" id="dataSource" name="configurationProperties.dataSource" value="{{connectorDefaults.configurationProperties.dataSource}}" />
-                    <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcPath"}}</span>
                 </div>
             </div>
            <div class="form-group">

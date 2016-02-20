@@ -1365,14 +1365,15 @@
                 "passwordAttribute" : "Password Attribute",
                 "csvFile" : "CSV File",
                 "headerUid" : "Header UID",
-                "headerName" : "Header Name",
+                "headerName" : "Header Username",
                 "headerPassword" : "Header Password",
                 "quoteCharacter" : "Quote Character",
                 "fieldDelimiter" : "Field Delimiter",
                 "newlineString" : "Newline String",
                 "syncFileRetentionCount" : "Sync Retention Count",
-                "resourcePath" : "Path to external resource data file",
-                "primaryKey" : "Primary search key"
+                "resourcePath" : "Full path to external resource data file",
+                "headerHelpText": "Column name in CSV file",
+                "primaryKey" : "Column name in CSV file, primary search key"
             },
             "xmlConnector" : {
                 "xsdicfFilePath" : "XSD ICF File Path",
@@ -1401,7 +1402,7 @@
                 "allNative" : "All Native",
                 "validConnectionQuery" : "Valid Connection Query",
                 "changeLogColumn" : "Change Log Column",
-                "dataSource" : "Data Source",
+                "dataSource" : "JDBC Data Source",
                 "jndiProperties" : "JNDI Properties",
                 "dbHostnameOrIP" : "Database hostname or IP address",
                 "dbUsername" : "Database username",
@@ -1410,13 +1411,15 @@
                 "jdbcDriverHelp" : "JDBC Driver class name",
                 "jdbcUrlTemplateHelp" : "Connection URL template of the JDBC Driver",
                 "emptyStringHelp" : "Allows empty strings instead of null values, except for OracleSQL",
-                "rethrowSqlHelp" : "If true, show SQL Exceptions with code = 0",
+                "rethrowSqlHelp" : "If enabled, show SQL Exceptions with code = 0",
                 "nativeTimestampsHelp" : "Retrieves timestamp data",
                 "allNativeHelp" : "Retrieves in a database native format",
                 "validConnectionQueryHelp" : "SQL statement to validate the connection",
                 "dbChangeTime" : "Latest database change time",
                 "jdbcPath" : "JDBC path, ‘jdbc/SampleDataSourceName’",
-                "jndiPropertiesHelp" : "Java Naming Directory Interface context factory, in key = value format"
+                "jndiPropertiesHelp" : "Java Naming Directory Interface context factory, in key = value format",
+                "jdbcDefaultDriver" : "com.mysql.jdbc.Driver",
+                "jdbcDefaultUrl" : "jdbc:mysql:@%h:%p:%d"
             },
             "ldapConnector" : {
                 "noFilter": "No user filter added...",
@@ -1438,7 +1441,7 @@
                 "password": "Password",
                 "accountUserNameAttributes": "Attribute used for login",
                 "baseContextTitle":"Base Context",
-                "baseContext": "Enter your base DN",
+                "baseContext": "Base DN",
                 "baseContextNote": "Be sure to add base contexts which include both your users and your groups",
                 "baseContextAdd":"Add Base Context",
                 "accountObjectClasses" : "Object Classes for users",
@@ -1460,6 +1463,8 @@
                 "loginAccountDN" : "Login Account DN",
                 "filterLdapAttr" : "Filter by LDAP attribute",
                 "groupFilter" : "Group Filter",
+                "defaultPort" : "1389",
+                "baseDN" : "cn=Users,dc=company,dc=com",
                 "errorMessages": {
                     "unknownHost" : "Unknown Host",
                     "portOutOfRange" : "Port Out of Range",
