@@ -695,6 +695,13 @@
                                 }
                             ]
                         }
+                    },
+                    "condition" : {
+                        "description" : "A conditional filter for this role",
+                        "title" : "Condition",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "type" : "string"
                     }
                 },
                 "required" : [
