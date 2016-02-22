@@ -5,20 +5,46 @@ UI Endpoints for Update Process
 	ACTION openidm/maintenance/update?_action=available
 
 	returns:
-	[
-        {
-            "archive" : "OpenIDM-4.5.0.zip",
-            "fileSize" : 84372957,
-            "fileDate" : "2015-12-31T23:59:59",
-            "version" : "OpenIDM v4.5.0",
-            "checksum" : "bleeblooblah",
-            "description" : "Full product installation",
-            "resource" : "<url for online docs>",
-            "restartRequired" : true | false
-        }, {
-            ...
+    {
+        "updates":
+            [
+                {
+                    "archive" : "OpenIDM-4.5.0.zip",
+                    "fileSize" : 84372957,
+                    "fileDate" : "2015-12-31T23:59:59",
+                    "version" : "OpenIDM v4.5.0",
+                    "checksum" : "bleeblooblah",
+                    "description" : "Full product installation",
+                    "resource" : "<url for online docs>",
+                    "restartRequired" : true | false
+                }, {
+                    ...
+                }
+	        ],
+        "rejects":
+            [
+                {
+                  "archive": "update.xyz",
+                  "reason": "File does not have '.zip' extension."
+                },
+                {
+                  "archive": "update.zip",
+                  "reason": "The archive update.zip can be used only to upgrade version '8.8.8' and you are running
+                  version 4.1.0-SNAPSHOT"
+                },
+                {
+                  "archive": "update_bad.zip",
+                  "reason": "Unable to read or find package.properties within update_bad.zip",
+                  "errorMessage": "Possible exception message."
+                },
+                {
+                  "archive": "update_XXX.zip",
+                  "reason": "The archive update_XXX.zip can be used only to upgrade product 'OpenXXX' and you are
+                  running product OpenIDM"
+                }
+            ]
         }
-	]
+    }
 
 2. Get list of file changes for a given update archive:
 

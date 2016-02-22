@@ -11,14 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -117,15 +114,16 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String LICENSE_PATH = "legal-notices/Forgerock_License.txt";
 
     // Archive manifest keys
-    private static final String PROP_PRODUCT = "product";
-    private static final String PROP_VERSION = "version";
-    private static final String PROP_UPGRADESPRODUCT = "upgradesProduct";
-    private static final String PROP_UPGRADESVERSION = "upgradesVersion";
-    private static final String PROP_DESCRIPTION = "description";
-    private static final String PROP_RESOURCE = "resource";
-    private static final String PROP_RESTARTREQUIRED = "restartRequired";
+    static final String PROP_PRODUCT = "product";
+    static final String PROP_VERSION = "version";
+    static final String PROP_UPGRADESPRODUCT = "upgradesProduct";
+    static final String PROP_UPGRADESVERSION = "upgradesVersion";
+    static final String PROP_DESCRIPTION = "description";
+    static final String PROP_RESOURCE = "resource";
+    static final String PROP_RESTARTREQUIRED = "restartRequired";
 
     private static final String BUNDLE_BACKUP_EXT = ".old-";
+    static final String PRODUCT_NAME = "OpenIDM";
 
     protected final AtomicBoolean restartImmediately = new AtomicBoolean(false);
     private UpdateThread updateThread = null;
@@ -204,7 +202,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
             // get the file set from the upgrade dist checksum file
             try {
-                filePaths = new ChecksumFile(upgradeRoot.resolve(CHECKSUMS_FILE)).getFilePaths();
+                filePaths = resolveChecksumFile(upgradeRoot).getFilePaths();
             } catch (Exception e) {
                 throw new ArchiveException("Archive doesn't appear to contain checksums file - invalid archive?", e);
             }
@@ -317,7 +315,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     public R apply(Path tempUnzipDir) throws UpdateException {
                         try {
                             final ZipArchive archive = new ZipArchive(archiveFile, tempUnzipDir);
-                            final ChecksumFile checksumFile = new ChecksumFile(installDir.resolve(CHECKSUMS_FILE));
+                            final ChecksumFile checksumFile = resolveChecksumFile(installDir);
                             final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
 
                             return upgradeAction.invoke(archive, fileStateChecker);
@@ -333,42 +331,137 @@ public class UpdateManagerImpl implements UpdateManager {
      */
     @Override
     public JsonValue listAvailableUpdates() throws UpdateException {
+        final JsonValue rejects = json(array());
         final JsonValue updates = json(array());
 
-        final ChecksumFile checksumFile;
-        try {
-            checksumFile = new ChecksumFile(Paths.get(".").resolve(CHECKSUMS_FILE));
-        } catch (IOException | NoSuchAlgorithmException e) {
-            throw new UpdateException("Failed to load checksum file from archive.", e);
-        } catch (NullPointerException e) {
-            throw new UpdateException("Archive directory does not exist?", e);
-        }
+        final ChecksumFile checksumFile = resolveChecksumFile(Paths.get("."));
 
-        for (final File file : ARCHIVE_PATH.toFile().listFiles()) {
-            if (file.getName().endsWith(".zip")) {
-                try {
-                    Properties prop = readProperties(file);
-                    if ("OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT)) &&
-                            ServerConstants.getVersion().equals(prop.getProperty(PROP_UPGRADESVERSION))) {
-                        updates.add(object(
-                                field("archive", file.getName()),
-                                field("fileSize", file.length()),
-                                field("fileDate", file.lastModified()),
-                                field("checksum", checksumFile.getCurrentDigest(file.toPath())),
-                                field("version", prop.getProperty(PROP_PRODUCT) + " v" +
-                                        prop.getProperty(PROP_VERSION)),
-                                field("description", prop.getProperty(PROP_DESCRIPTION)),
-                                field("resource", prop.getProperty(PROP_RESOURCE)),
-                                field("restartRequired", prop.getProperty(PROP_RESTARTREQUIRED))
-                        ));
-                    }
-                } catch (Exception e) {
-                    // skip file, it does not contain a manifest or digest could not be calculated
-                }
+        for (final File file : getUpdateFiles()) {
+            try {
+                validateFileName(file);
+                Properties prop = readProperties(file);
+                validateCorrectProduct(prop, file);
+                validateCorrectVersion(prop, file);
+
+                updates.add(validArchive(file, prop, getArchiveDigest(checksumFile, file)).getObject());
+            } catch (InvalidArchiveUpdateException e) {
+                rejects.add(e.toJsonValue().getObject());
             }
         }
 
-        return updates;
+        return json(object(
+                field("updates", updates.getObject()),
+                field("rejects", rejects.getObject())
+        ));
+    }
+
+    /**
+     * Constructs the json object that holds the properties of the validated archive file.
+     *
+     * @param archiveFile the handle to the valid archive file.
+     * @param prop The properties from within the archive.
+     * @param archiveDigest The checksum digest for the archive file.
+     */
+    private JsonValue validArchive(File archiveFile, Properties prop, String archiveDigest) {
+        return json(object(
+                field("archive", archiveFile.getName()),
+                field("fileSize", archiveFile.length()),
+                field("fileDate", archiveFile.lastModified()),
+                field("checksum", archiveDigest),
+                field("version", prop.getProperty(PROP_PRODUCT) + " v" + prop.getProperty(PROP_VERSION)),
+                field("description", prop.getProperty(PROP_DESCRIPTION)),
+                field("resource", prop.getProperty(PROP_RESOURCE)),
+                field("restartRequired", prop.getProperty(PROP_RESTARTREQUIRED))
+        ));
+    }
+
+    /**
+     * Returns the current digest of the archiveFile from the checksumFile.
+     *
+     * @param checksumFile Checksum file for the archive.
+     * @param archiveFile The file to get the digest for.
+     * @return The current digest of the archiveFile from the checksumFile.
+     * @throws InvalidArchiveUpdateException
+     * @see ChecksumFile#getCurrentDigest(Path)
+     */
+    private String getArchiveDigest(ChecksumFile checksumFile, File archiveFile) throws InvalidArchiveUpdateException {
+        try {
+            return checksumFile.getCurrentDigest(archiveFile.toPath());
+        } catch (IOException e) {
+            throw new InvalidArchiveUpdateException(archiveFile.getName(),
+                    "Unable to get checksum digest for archive " + archiveFile.getName(), e);
+        }
+    }
+
+    /**
+     * Check if the file is for the correct version.
+     *
+     * @param prop Properties of the archive.
+     * @param updateFile the update archive file.
+     * @throws InvalidArchiveUpdateException
+     * @see ServerConstants#getVersion()
+     */
+    private void validateCorrectVersion(Properties prop, File updateFile) throws InvalidArchiveUpdateException {
+        if (!ServerConstants.getVersion().equals(prop.getProperty(PROP_UPGRADESVERSION))) {
+            throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName() +
+                    " can be used only to update version '" + prop.getProperty(PROP_UPGRADESVERSION) +
+                    "' and you are running version " + ServerConstants.getVersion());
+        }
+    }
+
+    /**
+     * Check if the file is for the correct product.
+     *
+     * @param prop Properties of the archive.
+     * @param updateFile the update archive file.
+     * @throws InvalidArchiveUpdateException if the archive is not for the correct product.
+     */
+    private void validateCorrectProduct(Properties prop, File updateFile) throws InvalidArchiveUpdateException {
+        if (!PRODUCT_NAME.equals(prop.getProperty(PROP_UPGRADESPRODUCT))) {
+            throw new InvalidArchiveUpdateException(updateFile.getName(),
+                    "The archive " + updateFile.getName() + " can be used only to update '" +
+                            prop.getProperty(PROP_UPGRADESPRODUCT) + "' and you are running " + PRODUCT_NAME);
+        }
+    }
+
+    /**
+     * Tests if the file's name is a zip file.
+     *
+     * @param archiveFile the File to test the name to end with '.zip'.
+     * @throws InvalidArchiveUpdateException If the fileName is not ending with '.zip'.
+     */
+    private void validateFileName(File archiveFile) throws InvalidArchiveUpdateException {
+        if (!archiveFile.getName().endsWith(".zip")) {
+            throw new InvalidArchiveUpdateException(archiveFile.getName(),
+                    archiveFile.getName() + " does not have '.zip' extension.");
+        }
+    }
+
+    /**
+     * Returns a new instance of a ChecksumFile that is resolved from the passed in path.
+     *
+     * @param path Location to expect to find the checksum file.
+     * @return The resolved checksum file
+     * @throws UpdateException When there is trouble resolving the checksum file from within the path.
+     */
+    ChecksumFile resolveChecksumFile(Path path) throws UpdateException {
+        try {
+            return new ChecksumFile(path.resolve(CHECKSUMS_FILE));
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new UpdateException("Failed to load checksum file from archive.", e);
+        } catch (NullPointerException e) {
+            throw new UpdateException("Archive directory does not exist", e);
+        }
+    }
+
+    /**
+     * Gathers all files in the archive path. Added to support unit testing.
+     *
+     * @return List of files found in the ARCHIVE_PATH
+     * @see #ARCHIVE_PATH
+     */
+    File[] getUpdateFiles() {
+        return ARCHIVE_PATH.toFile().listFiles();
     }
 
     /**
@@ -459,7 +552,7 @@ public class UpdateManagerImpl implements UpdateManager {
             throws UpdateException {
 
         final Properties prop = readProperties(archiveFile.toFile());
-        if (!"OpenIDM".equals(prop.getProperty(PROP_UPGRADESPRODUCT)) ||
+        if (!PRODUCT_NAME.equals(prop.getProperty(PROP_UPGRADESPRODUCT)) ||
                 !ServerConstants.getVersion().equals(prop.getProperty(PROP_UPGRADESVERSION))) {
             throw new UpdateException("Update archive does not apply to the installed product.");
         }
@@ -469,7 +562,7 @@ public class UpdateManagerImpl implements UpdateManager {
             tempUnzipDir = Files.createTempDirectory("openidm-upgrade-");
             try {
                 final ZipArchive archive = new ZipArchive(archiveFile, tempUnzipDir);
-                final ChecksumFile checksumFile = new ChecksumFile(installDir.resolve(CHECKSUMS_FILE));
+                final ChecksumFile checksumFile = resolveChecksumFile(installDir);
                 final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
 
                 // perform upgrade
@@ -794,7 +887,7 @@ public class UpdateManagerImpl implements UpdateManager {
         return formatter.format(new Date());
     }
 
-    private Properties readProperties(File file) throws UpdateException {
+    Properties readProperties(File file) throws InvalidArchiveUpdateException {
         Properties prop = new Properties();
         try {
             ZipFile zip = new ZipFile(file);
@@ -804,12 +897,12 @@ public class UpdateManagerImpl implements UpdateManager {
                 prop.load(inp);
                 return prop;
             } catch (IOException e) {
-                throw new UpdateException("Unable to load package properties.", e);
+                throw new InvalidArchiveUpdateException(file.getName(), "Unable to load package properties.", e);
             } finally {
                 new File(tmpDir.toString() + "/openidm/package.properties").delete();
             }
         } catch (IOException | ZipException e) {
-            throw new UpdateException("Unable to load package properties.", e);
+            throw new InvalidArchiveUpdateException(file.getName(), "Unable to load package properties.", e);
         }
     }
 

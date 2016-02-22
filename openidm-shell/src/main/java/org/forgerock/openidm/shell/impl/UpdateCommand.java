@@ -11,20 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.shell.impl;
 
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.ACCEPT_LICENSE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.ENABLE_SCHEDULER;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.ENTER_MAINTENANCE_MODE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.EXIT_MAINTENANCE_MODE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.FORCE_RESTART;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.INSTALL_ARCHIVE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.PAUSING_SCHEDULER;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.PREVIEW_ARCHIVE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.WAIT_FOR_INSTALL_DONE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.WAIT_FOR_JOBS_TO_COMPLETE;
+import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.*;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -33,6 +24,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 
@@ -318,13 +310,25 @@ public class UpdateCommand {
                 ActionResponse response = resource.action(context,
                         Requests.newActionRequest(UPDATE_ROUTE, UPDATE_ACTION_AVAIL));
                 String updateArchive = config.getUpdateArchive();
-                for (JsonValue archiveData : response.getJsonContent()) {
+                JsonValue responseData = response.getJsonContent();
+                for (JsonValue archiveData : responseData.get("updates")) {
                     if (updateArchive.equals(archiveData.get("archive").asString())) {
                         state.setArchiveData(archiveData);
                         return true;
                     }
                 }
-                log("Archive was not found in the bin/update directory. Requested filename was = " + updateArchive);
+                log("A valid archive was not found in the bin/update directory. Requested filename was = " +
+                        updateArchive);
+                JsonValue rejects = responseData.get("rejects");
+                if (!rejects.asList().isEmpty()) {
+                    log("Invalid archive(s) were found:");
+                    for (JsonValue reject : rejects) {
+                        log(reject.get("archive").asString() + ": " + reject.get("reason").asString() + " " +
+                                (reject.get("error").isNull()
+                                        ? "" :
+                                        " error=" + reject.get("error").asString()));
+                    }
+                }
                 return false;
             } catch (ResourceException e) {
                 log("The attempt to lookup the archive meta-data failed.", e);
