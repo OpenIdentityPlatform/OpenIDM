@@ -185,6 +185,25 @@ UI Endpoints for Update Process
         "lastUpdateId" : "<value>"
     }
 
+8. Fetch a summary list of all installed updates
+
+    POST openidm/maintenance/update?_action=installed
+
+    returns:
+    [
+      {
+        "archive": "OpenIDM-4.1.0.zip",
+        "status": "FAILED",
+        "completedTasks": 523,
+        "totalTasks": 2821,
+        "startDate": "2016-02-23T12:46:30.8-08:00",
+        "endDate": "2016-02-23T12:46:56.478-08:00",
+        "userName": "openidm-admin",
+        "statusMessage": "Update failed."
+      }, {
+        ...
+      }
+    ]
 
 
 FileState States:
