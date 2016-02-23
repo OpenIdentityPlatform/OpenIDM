@@ -11,9 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
-package org.forgerock.openidm.maintenance.impl;
+package org.forgerock.openidm.filter;
 
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -33,48 +33,48 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
- * Passthrough filter passes all requests through verbatim.
+ * Passthrough filter forwards all requests to the next handler unchanged.
  */
-class PassthroughFilter implements Filter {
+public class PassthroughFilter implements Filter {
     @Override
     public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
-            RequestHandler requestHandler) {
-        return requestHandler.handleAction(context, actionRequest);
+            RequestHandler handler) {
+        return handler.handleAction(context, actionRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest createRequest,
-            RequestHandler requestHandler) {
-        return requestHandler.handleCreate(context, createRequest);
+            RequestHandler handler) {
+        return handler.handleCreate(context, createRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest deleteRequest,
-            RequestHandler requestHandler) {
-        return requestHandler.handleDelete(context, deleteRequest);
+            RequestHandler handler) {
+        return handler.handleDelete(context, deleteRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest patchRequest,
-            RequestHandler requestHandler) {
-        return requestHandler.handlePatch(context, patchRequest);
+            RequestHandler handler) {
+        return handler.handlePatch(context, patchRequest);
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest queryRequest,
-            QueryResourceHandler queryResourceHandler, RequestHandler requestHandler) {
-        return requestHandler.handleQuery(context, queryRequest, queryResourceHandler);
+            QueryResourceHandler queryResourceHandler, RequestHandler handler) {
+        return handler.handleQuery(context, queryRequest, queryResourceHandler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest readRequest,
-            RequestHandler requestHandler) {
-        return requestHandler.handleRead(context, readRequest);
+            RequestHandler handler) {
+        return handler.handleRead(context, readRequest);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest updateRequest,
-            RequestHandler requestHandler) {
-        return requestHandler.handleUpdate(context, updateRequest);
+            RequestHandler handler) {
+        return handler.handleUpdate(context, updateRequest);
     }
 }
