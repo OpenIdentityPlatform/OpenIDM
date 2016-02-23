@@ -76,6 +76,7 @@ import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.openidm.sync.SyncContext;
 import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.RelationshipUtil;
@@ -1400,6 +1401,12 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         // will get set again.
         if (null == syncRoute.get()) {
             logger.warn("Sync service was not available.");
+            return;
+        }
+        if (context.containsContext(SyncContext.class)
+                && !context.asContext(SyncContext.class).isSyncEnabled()) {
+            // Do not try to sync if sync has been disabled
+            logger.debug("Sync has been disabled. {} ", context.asContext(SyncContext.class));
             return;
         }
 

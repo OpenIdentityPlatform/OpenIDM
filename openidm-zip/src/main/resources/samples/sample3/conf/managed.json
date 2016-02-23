@@ -36,6 +36,7 @@
                     "reports",
                     "effectiveRoles",
                     "effectiveAssignments",
+                    "lastSync",
                     "kbaInfo",
                     "cars"
                 ],
@@ -465,6 +466,21 @@
                                 "make",
                                 "model"
                             ]
+                        }
+                    }
+                },
+                "lastSync" : {
+                    "type" : "object",
+                    "scope" : "private",
+                    "viewable" : false,
+                    "searchable" : false,
+                    "properties" : {
+                        "effectiveAssignments" : {
+                            "type" : "array",
+                            "items" : "object"
+                        },
+                        "timestamp" : {
+                            "type" : "string"
                         }
                     }
                 },

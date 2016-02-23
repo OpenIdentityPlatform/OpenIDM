@@ -34,6 +34,7 @@ import java.util.concurrent.Callable;
 import javax.script.ScriptException;
 
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.openidm.sync.SyncContext;
 import org.forgerock.openidm.condition.Conditions;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
@@ -199,6 +200,9 @@ class ObjectMapping {
     /** a script to execute on each mapping event regardless of the operation */
     private Script resultScript;
 
+    /** a script to execute when sync has been performed on managed/user object */
+    private Script postMapping;
+
     /** an additional set of key-value conditions to be met for a source object to be valid to be mapped */
     private Condition sourceCondition;
 
@@ -290,6 +294,9 @@ class ObjectMapping {
         onLinkScript = Scripts.newScript(config.get("onLink"));
         onUnlinkScript = Scripts.newScript(config.get("onUnlink"));
         resultScript = Scripts.newScript(config.get("result"));
+        postMapping = Scripts.newScript(config.get("postMapping").defaultTo(
+                json(object(field(SourceUnit.ATTR_TYPE, "groovy"),
+                        field(SourceUnit.ATTR_NAME, "roles/defaultPostMapping.groovy")))));
         prefetchLinks = config.get("prefetchLinks").defaultTo(Boolean.TRUE).asBoolean();
         taskThreads = config.get("taskThreads").defaultTo(DEFAULT_TASK_THREADS).asInteger();
         feedSize = config.get("feedSize").defaultTo(ReconFeeder.DEFAULT_FEED_SIZE).asInteger();
@@ -492,8 +499,7 @@ class ObjectMapping {
         // Loop over correlation queries, performing a sync for each linkQualifier
         for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), oldValue, false, context)) {
             // TODO: one day bifurcate this for synchronous and asynchronous source operation
-            SourceSyncOperation op = new SourceSyncOperation();
-            op.context = context;
+            SourceSyncOperation op = new SourceSyncOperation(context);
             op.oldValue = oldValue;
             op.setLinkQualifier(linkQualifier);
             op.sourceObjectAccessor = sourceObjectAccessor;
@@ -823,8 +829,7 @@ class ObjectMapping {
             Status status = Status.SUCCESS;
             try {
                 if (params.get("target").isNull()) {
-                    SourceSyncOperation sop = new SourceSyncOperation();
-                    sop.context = context;
+                    SourceSyncOperation sop = new SourceSyncOperation(context);
                     op = sop;
                     sop.fromJsonValue(params);
 
@@ -845,8 +850,7 @@ class ObjectMapping {
                     }
                     sop.assessSituation();
                 } else {
-                    TargetSyncOperation top = new TargetSyncOperation();
-                    top.context = context;
+                    TargetSyncOperation top = new TargetSyncOperation(context);
                     op = top;
                     top.fromJsonValue(params);
                     String targetId = params.get("targetId").required().asString();
@@ -1175,8 +1179,7 @@ class ObjectMapping {
             Status status = Status.SUCCESS;
 
             for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), null, false, context)) {
-                SourceSyncOperation op = new SourceSyncOperation();
-                op.context = context;
+                SourceSyncOperation op = new SourceSyncOperation(context);
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
 
@@ -1243,8 +1246,7 @@ class ObjectMapping {
                 Map<String, Link>> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
             reconContext.checkCanceled();
             for (String linkQualifier : getAllLinkQualifiers(context)) {
-                TargetSyncOperation op = new TargetSyncOperation();
-                op.context = context;
+                TargetSyncOperation op = new TargetSyncOperation(context);
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
 
@@ -1452,7 +1454,7 @@ class ObjectMapping {
     public void explicitOp(Context context, JsonValue sourceObject, JsonValue targetObject, Situation situation, 
             ReconAction action, String reconId) throws SynchronizationException {
         for (String linkQualifier : getLinkQualifiers(sourceObject, null, false, context)) {
-            ExplicitSyncOperation linkOp = new ExplicitSyncOperation();
+            ExplicitSyncOperation linkOp = new ExplicitSyncOperation(context);
             linkOp.setLinkQualifier(linkQualifier);
             linkOp.init(sourceObject, targetObject, situation, action, reconId);
             linkOp.sync();
@@ -1477,15 +1479,18 @@ class ObjectMapping {
      */
     abstract class SyncOperation {
 
-        /** 
+        public SyncOperation(Context context) {
+            this.context = new SyncContext(context, name);
+        }
+        /**
          * A reconciliation ID 
          */
         public String reconId;
-        
+
         /**
          * The request context of this sync operation
          */
-        public Context context;
+        private Context context;
         
         /** 
          * An optional reconciliation context 
@@ -1802,6 +1807,8 @@ class ObjectMapping {
 
                                 if (!isLinkingEnabled()) {
                                     LOGGER.debug("Linking disabled for {} during {}, skipping additional link processing", sourceId, reconId);
+                                    // execute the post defaultPostMapping script to add lastSync attribute to managed user
+                                    execScript("postMapping", postMapping);
                                     break;
                                 }
 
@@ -1809,6 +1816,8 @@ class ObjectMapping {
                                 if (wasLinked) {
                                     linkCreated = true;
                                     LOGGER.debug("Pending link for {} during {} has already been created, skipping additional link processing", sourceId, reconId);
+                                    // execute the post defaultPostMapping script to add lastSync attribute to managed user
+                                    execScript("postMapping", postMapping);
                                     break;
                                 } else {
                                     LOGGER.debug("Pending link for {} during {} not yet resolved, proceed to link processing", sourceId, reconId);
@@ -1861,6 +1870,8 @@ class ObjectMapping {
                                         updateTargetObject(context, getTargetObject(), targetId);
                                     }
                                 }
+                                // execute the defaultPostMapping script to add lastSync attribute to managed user
+                                execScript("postMapping", postMapping);
                                 break; // terminate UPDATE
                             case DELETE:
                                 if (isLinkingEnabled()) {
@@ -1897,6 +1908,8 @@ class ObjectMapping {
                         }
                     } catch (JsonValueException jve) {
                         throw new SynchronizationException(jve);
+                    } catch (ResourceException e) {
+                        throw new SynchronizationException(e);
                     }
                 case REPORT:
                 case NOREPORT:
@@ -2100,6 +2113,10 @@ class ObjectMapping {
             }
         }
 
+        protected Context getContext() {
+            return context;
+        }
+
         public JsonValue toJsonValue() {
             return json(object(
                     field("reconId", reconId),
@@ -2120,6 +2137,10 @@ class ObjectMapping {
      * policy to decide the action
      */
     private class ExplicitSyncOperation extends SyncOperation {
+
+        public ExplicitSyncOperation(Context context) {
+            super(context);
+        }
 
         protected boolean isSourceToTarget() {
             //TODO: detect by the source id match
@@ -2169,6 +2190,10 @@ class ObjectMapping {
         // If it can not uniquely identify a target, the list of ambiguous target ids
         public List<String> ambiguousTargetIds;
 
+        public SourceSyncOperation(Context context) {
+            super(context);
+        }
+
         @Override
         @SuppressWarnings("fallthrough")
         public JsonValue sync() throws SynchronizationException {
@@ -2187,7 +2212,7 @@ class ObjectMapping {
                 boolean linkExisted = (getLinkId() != null);
 
                 try {
-                    determineAction(context);
+                    determineAction(getContext());
                 } finally {
                     measureDetermine.end();
                 }
@@ -2443,7 +2468,7 @@ class ObjectMapping {
                 scope.put("source", sourceObject.asMap());
 
                 try {
-                    result = correlation.correlate(scope, getLinkQualifier(), context);
+                    result = correlation.correlate(scope, getLinkQualifier(), getContext());
                 } finally {
                     measure.end();
                 }
@@ -2616,6 +2641,10 @@ class ObjectMapping {
      */
     class TargetSyncOperation extends SyncOperation {
 
+        public TargetSyncOperation(Context context) {
+            super(context);
+        }
+
         @Override
         public JsonValue sync() throws SynchronizationException {
             try {
@@ -2629,7 +2658,7 @@ class ObjectMapping {
 
                 EventEntry measureDetermine = Publisher.start(EVENT_TARGET_DETERMINE_ACTION, targetObjectAccessor, null);
                 try {
-                    determineAction(context);
+                    determineAction(getContext());
                 } finally {
                     measureDetermine.end();
                 }
