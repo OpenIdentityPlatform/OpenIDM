@@ -38,7 +38,8 @@
                     "stateProvince",
                     "roles",
                     "manager",
-                    "authzRoles"
+                    "authzRoles",
+                    "lastSync"
                 ],
                 "properties" : {
                     "_id" : {
@@ -465,6 +466,21 @@
                             }
                         },
                         "userEditable" : false
+                    }
+                },
+                "lastSync" : {
+                    "type" : "object",
+                    "scope" : "private",
+                    "viewable" : false,
+                    "searchable" : false,
+                    "properties" : {
+                        "effectiveAssignments" : {
+                            "type" : "array",
+                            "items" : "object"
+                        },
+                        "timestamp" : {
+                            "type" : "string"
+                        }
                     }
                 },
                 "type" : "object",

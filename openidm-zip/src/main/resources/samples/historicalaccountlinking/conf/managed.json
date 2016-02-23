@@ -36,7 +36,8 @@
                     "authzRoles",
                     "reports",
                     "effectiveRoles",
-                    "effectiveAssignments"
+                    "effectiveAssignments",
+                    "lastSync"
                 ],
                 "properties" : {
                     "_id" : {
@@ -443,6 +444,21 @@
                                     }
                                 }
                             }
+                        }
+                    }
+                },
+                "lastSync" : {
+                    "type" : "object",
+                    "scope" : "private",
+                    "viewable" : false,
+                    "searchable" : false,
+                    "properties" : {
+                        "effectiveAssignments" : {
+                            "type" : "array",
+                            "items" : "object"
+                        },
+                        "timestamp" : {
+                            "type" : "string"
                         }
                     }
                 },

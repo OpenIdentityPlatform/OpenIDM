@@ -1,7 +1,7 @@
 /** 
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2016 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -124,8 +124,8 @@ function findAssignment(assignment, listOfAssignments) {
 }
 
 // Check for any assignments that have been removed or modified
-if (typeof oldSource !== 'undefined' && oldSource !== null) {
-    var oldAssignments = oldSource.effectiveAssignments; // Assignments from the old source value
+if (typeof source.lastSync !== 'undefined' && source.lastSync !== null) {
+    var oldAssignments = source.lastSync.effectiveAssignments; // Assignments from the last syncd snapshot
     var currentAssignments = source.effectiveAssignments; // Assignments from the current source value
     var unassigned = [];
     // Loop through old assignments
