@@ -11,62 +11,95 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.impl;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.filter.PassthroughFilter;
+import org.forgerock.openidm.filter.SwitchableFilterDecorator;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
+import org.osgi.framework.Constants;
 
 /**
- * Maintenance filter disables CREST write operations.
+ * Maintenance filter to disable CREST write operations while in maintenance mode.
  */
-class MaintenanceFilter extends PassthroughFilter {
-    @Override
-    public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
-            RequestHandler requestHandler) {
-        if (actionRequest.getResourcePath().startsWith("maintenance")) {
-            return requestHandler.handleAction(context, actionRequest);
+@Component(name = MaintenanceFilter.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
+@Service({ Filter.class, MaintenanceFilter.class })
+@Properties({
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Maintenance Filter")
+})
+public class MaintenanceFilter extends SwitchableFilterDecorator {
+
+    static final String PID = "org.forgerock.openidm.maintenance.filter";
+
+    /** passthrough filter when not in maintenance mode */
+    private static Filter PASSTHROUGH_FILTER = new PassthroughFilter();
+
+    /** maintenance filter that prevents modification via CREST endpoints during maintenance mode */
+    private static Filter MAINTENANCE_FILTER = new PassthroughFilter() {
+        @Override
+        public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
+                RequestHandler requestHandler) {
+            if (actionRequest.getResourcePath().startsWith("maintenance")) {
+                return requestHandler.handleAction(context, actionRequest);
+            }
+            return new ServiceUnavailableException("Unable to perform action on " + actionRequest.getResourcePath() +
+                    " in maintenance mode.").asPromise();
         }
-        return new ServiceUnavailableException("Unable to perform action on " + actionRequest.getResourcePath() +
-                " in maintenance mode.").asPromise();
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest createRequest,
+                RequestHandler requestHandler) {
+            return new ServiceUnavailableException("Unable to create on " + createRequest.getResourcePath() +
+                    " in maintenance mode.").asPromise();
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest deleteRequest,
+                RequestHandler requestHandler) {
+            return new ServiceUnavailableException("Unable to delete on " + deleteRequest.getResourcePath() +
+                    " in maintenance mode.").asPromise();
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest patchRequest,
+                RequestHandler requestHandler) {
+            return new ServiceUnavailableException("Unable to patch on " + patchRequest.getResourcePath() +
+                    " in maintenance mode.").asPromise();
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest updateRequest,
+                RequestHandler requestHandler) {
+            return new ServiceUnavailableException("Unable to update on " + updateRequest.getResourcePath() +
+                    " in maintenance mode.").asPromise();
+        }
+    };
+
+    void enableMaintenanceMode() {
+        setDelegate(MAINTENANCE_FILTER);
     }
 
-    @Override
-    public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest createRequest,
-            RequestHandler requestHandler) {
-        return new ServiceUnavailableException("Unable to create on " + createRequest.getResourcePath() +
-                " in maintenance mode.").asPromise();
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest deleteRequest,
-            RequestHandler requestHandler) {
-        return new ServiceUnavailableException("Unable to delete on " + deleteRequest.getResourcePath() +
-                " in maintenance mode.").asPromise();
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest patchRequest,
-            RequestHandler requestHandler) {
-        return new ServiceUnavailableException("Unable to patch on " + patchRequest.getResourcePath() +
-                " in maintenance mode.").asPromise();
-    }
-
-    @Override
-    public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest updateRequest,
-            RequestHandler requestHandler) {
-        return new ServiceUnavailableException("Unable to update on " + updateRequest.getResourcePath() +
-                " in maintenance mode.").asPromise();
+    void disableMaintenanceMode() {
+        setDelegate(PASSTHROUGH_FILTER);
     }
 }
