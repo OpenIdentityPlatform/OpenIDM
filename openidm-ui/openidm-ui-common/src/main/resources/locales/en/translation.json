@@ -28,7 +28,8 @@
             "resourceList": "Connectors, Mappings, and Managed Objects",
             "quickStart": "Links to common tasks",
             "frame": "Add external content",
-            "userRelationship": "Links between accounts"
+            "userRelationship": "Links between accounts",
+            "relationship": "Links between objects"
         },
         "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
         "memoryUsageHeap" : "Memory Usage (JVM Heap)",
@@ -100,7 +101,17 @@
         },
         "relationshipWidget" : {
             "selectAUser" : "Select a User",
-            "relationshipTitle" : "Identity Relationships"
+            "relationshipTitle" : "Identity Relationships",
+            "relationshipsChart": "Relationships Chart",
+            "links" : "Links",
+            "title" : "Title",
+            "defaultObject" : "Default Object",
+            "searchProperty" : "Display/Search Property",
+            "configureWidget": "Widget not yet configured",
+            "displaySubRelationships": "Display sub-relationships",
+            "findA" : "Find a",
+            "inTheSearchFieldAbove" : "in the search field above",
+            "gatheringRelationshipData" : "Gathering relationship data"
         },
         "frameWidget" : {
             "frameWidgetTitle" : "Embed Web Page",

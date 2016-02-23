@@ -149,6 +149,25 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             type: "GET"
         });
     };
+    
+    obj.queryStringForSearchableFields = function (searchFields, query) {
+        var queryFilter = "",
+            queryFilterArr = [];
+        /*
+         * build up the queryFilterArr based on searchFields
+         */
+        _.each(searchFields, function (field) {
+            queryFilterArr.push(field + " sw \"" + query + "\"");
+        });
+        
+        queryFilter = queryFilterArr.join(" or ") + "&_pageSize=10&_fields=*";
+        
+        return queryFilter;
+    };
 
+    obj.getResource = function (url) {
+        return obj.serviceCall({ url: url });
+    };
+    
     return obj;
 });
