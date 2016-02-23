@@ -573,6 +573,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 // perform upgrade
                 UpdateLogEntry updateEntry = new UpdateLogEntry();
                 updateEntry.setStatus(UpdateStatus.IN_PROGRESS)
+                        .setArchive(archiveFile.getFileName().toString())
                         .setStatusMessage("Initializing update")
                         .setTotalTasks(archive.getFiles().size())
                         .setStartDate(getDateString())

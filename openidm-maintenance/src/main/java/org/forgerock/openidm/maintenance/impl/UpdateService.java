@@ -15,9 +15,7 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
 import java.nio.file.Paths;
@@ -32,6 +30,9 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.maintenance.upgrade.UpdateException;
 import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
 import org.forgerock.openidm.router.IDMConnectionFactory;
@@ -58,6 +59,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -115,7 +117,8 @@ public class UpdateService implements RequestHandler {
         update,
         getLicense,
         restart,
-        lastUpdateId
+        lastUpdateId,
+        installed
     }
 
     /**
@@ -139,6 +142,8 @@ public class UpdateService implements RequestHandler {
             case lastUpdateId:
                 return newActionResponse(json(object(field("lastUpdateId", updateManager.getLastUpdateId()))))
                         .asPromise();
+            case installed:
+                return handleGetInstalledUpdates(context);
             default:
                 return new NotSupportedException(request.getAction() + " is not supported").asPromise();
         }
@@ -199,6 +204,36 @@ public class UpdateService implements RequestHandler {
                             parameters.get(ARCHIVE_NAME)))).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        }
+    }
+
+    private Promise<ActionResponse, ResourceException> handleGetInstalledUpdates(Context context) {
+        try {
+            QueryRequest query = Requests.newQueryRequest("repo/updates")
+                    .setQueryFilter(QueryFilter.<JsonPointer>alwaysTrue());
+
+            final JsonValue results = json(array());
+            connectionFactory.getConnection().query(
+                    context, query, new QueryResourceHandler() {
+                        @Override
+                        public boolean handleResource(ResourceResponse resource) {
+                            results.add(object(
+                                    field("archive", resource.getContent().get("archive").asString()),
+                                    field("status", resource.getContent().get("status").asString()),
+                                    field("completedTasks", resource.getContent().get("completedTasks").asInteger()),
+                                    field("totalTasks", resource.getContent().get("totalTasks").asInteger()),
+                                    field("startDate", resource.getContent().get("startDate").asString()),
+                                    field("endDate", resource.getContent().get("endDate").asString()),
+                                    field("userName", resource.getContent().get("userName").asString()),
+                                    field("statusMessage", resource.getContent().get("statusMessage").asString())
+                            ));
+                            return true;
+                        }
+                    });
+
+            return Responses.newActionResponse(results).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         }
     }
 

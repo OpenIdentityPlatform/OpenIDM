@@ -29,6 +29,7 @@ import java.util.List;
  */
 public class UpdateLogEntry {
     private String id;
+    private String archive;
     private UpdateManagerImpl.UpdateStatus status;
     private String statusMessage;
     private int completedTasks;
@@ -54,6 +55,24 @@ public class UpdateLogEntry {
      */
     public UpdateLogEntry setId(String id) {
         this.id = id;
+        return this;
+    }
+
+    /**
+     * Return this entry's update archive
+     * @return the update archive
+     */
+    public String getArchive() {
+        return archive;
+    }
+
+    /**
+     * Set this entry's update archive
+     * @param archive the update archive
+     * @return this entry
+     */
+    public UpdateLogEntry setArchive(String archive) {
+        this.archive = archive;
         return this;
     }
 
@@ -235,6 +254,7 @@ public class UpdateLogEntry {
     public JsonValue toJson() {
         JsonValue ret = json(object(
                 field("_id", getId()),
+                field("archive", getArchive()),
                 field("status", getStatus().toString()),
                 field("completedTasks", getCompletedTasks()),
                 field("totalTasks", getTotalTasks()),
