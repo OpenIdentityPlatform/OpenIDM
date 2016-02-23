@@ -30,7 +30,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
     "org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget",
-    "org/forgerock/openidm/ui/admin/dashboard/widgets/UserRelationshipWidget"
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/RelationshipWidget"
 ], function($, _,
             AdminAbstractView,
             eventManager,
@@ -43,7 +43,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
             ResourceListWidget,
             QuickStartWidget,
             FrameWidget,
-            UserRelationshipWidget) {
+            RelationshipWidget) {
     var dwlInstance = {},
         widgetList = {
             lifeCycleMemoryHeap: {
@@ -94,10 +94,10 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                 desc : $.t("dashboard.widgetDescriptions.frame"),
                 defaultSize: "large"
             },
-            userRelationship : {
+            relationship : {
                 name: $.t("dashboard.relationshipWidget.relationshipTitle"),
-                widget : UserRelationshipWidget,
-                desc : $.t("dashboard.widgetDescriptions.userRelationship"),
+                widget : RelationshipWidget,
+                desc : $.t("dashboard.widgetDescriptions.relationship"),
                 defaultSize: "large"
             }
         },
@@ -118,7 +118,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/DashboardWidgetLoader", [
                 - barChart - Variable for last recon to turn on and off the barchart showing detailed recon results
              resourceList - Displays the top 4 resources for connectors, mappings, and managed objects
              quickStart - Widget displaying quick start cards to help users get started with core functionality
-             identityRelationship - Widget to display a users relationships throughout the system
+             relationship - Widget to display a any resource's relationships throughout the system
              frame - Iframe widget that provide an iframe for you to point to any URL
              */
             render: function(args, callback) {

@@ -32,6 +32,8 @@ exports.command = function (configId, callback) {
              */
             [configId],
             function (result) {
+                var _ = require('lodash');
+                
                 //check for existence of configCache in globals
                 if (!this.globals.configCache) {
                     this.globals.configCache = {};
@@ -40,7 +42,7 @@ exports.command = function (configId, callback) {
                 //check for existence of configCache for this configId
                 //if not there set it...this is the original version to be used when reset is called
                 if (!this.globals.configCache[configId]) {
-                    this.globals.configCache[configId] = result.value;
+                    this.globals.configCache[configId] = _.cloneDeep(result.value);
                 }
 
                 if (callback) {

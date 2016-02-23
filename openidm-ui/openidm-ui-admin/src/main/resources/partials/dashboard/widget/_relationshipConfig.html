@@ -1,0 +1,40 @@
+<!-- Copyright 2015 ForgeRock AS.
+License terms: https://forgerock.org/cddlv1-0/ -->
+<form id="widgetConfigForm" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="widgetSize">{{t "dashboard.generalConfig.widgetSize"}}</label>
+        <div class="col-sm-8">
+            <select id="widgetSize" class="form-control" name="size" required>
+                {{#staticSelect size}}
+                <option value="small">{{t "dashboard.generalConfig.small"}}</option>
+                <option value="medium">{{t "dashboard.generalConfig.medium"}}</option>
+                <option value="large">{{t "dashboard.generalConfig.large"}}</option>
+                {{/staticSelect}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="defaultObject">{{t "dashboard.relationshipWidget.defaultObject"}}</label>
+        <div class="col-sm-8">
+            <input class="form-control" type="text" id="relationshipWidgetDefaultObject" name="defaultObject" value="{{defaultObject}}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="searchProperty">{{t "dashboard.relationshipWidget.searchProperty"}}</label>
+        <div class="col-sm-8">
+            <input class="form-control" type="text" id="relationshipWidgetSearchProperty" name="searchProperty" value="{{searchProperty}}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="searchProperty">{{t "dashboard.relationshipWidget.displaySubRelationships"}}</label>
+        <div class="col-sm-8">
+             <input id="displaySubRelationships" type="hidden" name="displaySubRelationships" value="{{#equals displaySubRelationships "true"}}true{{else}}false{{/equals}}">
+             <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                 <label>
+                     <input class="toggleBoolean" type="checkbox" value="true" {{#equals displaySubRelationships "true"}}checked{{/equals}}>
+                     <span></span>
+                 </label>
+             </div>
+         </div>
+    </div>
+</form>
