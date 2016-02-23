@@ -4,7 +4,11 @@
             "name" : "user",
             "onCreate" : {
                 "type" : "text/javascript",
-                "file" : "ui/onCreate-user-set-default-fields.js"
+                "source" : "require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
             },
             "onDelete" : {
                 "type" : "text/javascript",
@@ -441,6 +445,14 @@
             "onSync" : {
                 "type" : "text/javascript",
                 "source" : "require('roles/onSync-roles').syncUsersOfRoles(resourceName, oldObject, newObject, ['members']);"
+            },
+            "onCreate" : {
+                "type" : "text/javascript",
+                "source" : "require('roles/conditionalRoles').roleCreate(object);"
+            },
+            "onUpdate" : {
+                "type" : "text/javascript",
+                "source" : "require('roles/conditionalRoles').roleUpdate(oldObject, object);"
             },
             "schema" : {
                 "$schema" : "http://forgerock.org/json-schema#",
