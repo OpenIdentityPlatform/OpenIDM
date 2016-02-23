@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.security.impl;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import org.forgerock.services.context.Context;
@@ -127,7 +129,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
                 manager.reload();
                 // Save the store to the repo (if clustered)
                 saveStore();
-                return newResourceResponse(resourceId, null, new JsonValue(null)).asPromise();
+                return newResourceResponse(resourceId, null, json(object())).asPromise();
             }
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
