@@ -84,7 +84,7 @@ public final class ResourceServlet extends HttpServlet {
 
     /**vn comEnhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {

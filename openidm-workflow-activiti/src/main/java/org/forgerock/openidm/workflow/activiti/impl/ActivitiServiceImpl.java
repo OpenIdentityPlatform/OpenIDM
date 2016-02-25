@@ -175,14 +175,14 @@ public class ActivitiServiceImpl implements RequestHandler {
 
     @Reference(policy = ReferencePolicy.DYNAMIC,
             bind = "bindCryptoService", unbind = "unbindCryptoService")
-    volatile CryptoService cryptoService;
+    CryptoService cryptoService;
 
     @Reference(policy = ReferencePolicy.STATIC)
     IDMConnectionFactory connectionFactory;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     private final OpenIDMExpressionManager expressionManager = new OpenIDMExpressionManager();
     private final SharedIdentityService identityService = new SharedIdentityService();

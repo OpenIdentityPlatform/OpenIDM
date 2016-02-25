@@ -147,7 +147,7 @@ public class AuthenticationService implements SingletonResourceProvider {
     // ----- Declarative Service Implementation
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    volatile CryptoService cryptoService;
+    CryptoService cryptoService;
 
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC)
@@ -155,15 +155,15 @@ public class AuthenticationService implements SingletonResourceProvider {
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected volatile ScriptRegistry scriptRegistry;
+    protected ScriptRegistry scriptRegistry;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     /** The CHF filter to wrap the CAF filter */
     @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.auth.config)")
-    private volatile AuthFilterWrapper authFilterWrapper;
+    private AuthFilterWrapper authFilterWrapper;
 
     /** An on-demand Provider for the ConnectionFactory */
     private final Provider<ConnectionFactory> connectionFactoryProvider =

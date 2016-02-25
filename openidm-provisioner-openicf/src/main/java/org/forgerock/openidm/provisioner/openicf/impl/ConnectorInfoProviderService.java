@@ -116,7 +116,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = ConnectorInfoProviderService.PID,
         policy = ConfigurationPolicy.OPTIONAL,
-        metatype = false,
+        metatype = true,
         description = "OpenICF Connector Info Service",
         immediate = true)
 @Service
@@ -157,19 +157,19 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
      */
     @Reference(referenceInterface = ConnectorFrameworkFactory.class,
             cardinality = ReferenceCardinality.MANDATORY_UNARY, policy = ReferencePolicy.DYNAMIC)
-    protected volatile ConnectorFrameworkFactory connectorFrameworkFactory = null;
+    protected ConnectorFrameworkFactory connectorFrameworkFactory = null;
 
     /**
      * Cryptographic service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected volatile CryptoService cryptoService = null;
+    protected CryptoService cryptoService = null;
 
     /**
      * Enhanced configuration service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     @Activate
     public void activate(ComponentContext context) {

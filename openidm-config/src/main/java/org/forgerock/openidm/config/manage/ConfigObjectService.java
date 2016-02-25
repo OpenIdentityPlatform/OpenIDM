@@ -142,7 +142,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * The ClusterManagementService used for sending and receiving cluster events
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    volatile ClusterManagementService clusterManagementService;
+    ClusterManagementService clusterManagementService;
 
     public void bindClusterManagementService(final ClusterManagementService clusterManagementService) {
         this.clusterManagementService = clusterManagementService;
@@ -164,7 +164,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     protected void bindEnhancedConfig(EnhancedConfig enhancedConfig) {
     	this.enhancedConfig = enhancedConfig;

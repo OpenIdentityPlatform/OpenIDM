@@ -183,7 +183,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = OpenICFProvisionerService.PID,
         policy = ConfigurationPolicy.REQUIRE,
-        metatype = false,
+        metatype = true,
         description = "OpenIDM OpenICF Provisioner Service",
         immediate = true)
 @Service(value = {ProvisionerService.class})
@@ -271,7 +271,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * ConnectorInfoProvider service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected volatile ConnectorInfoProvider connectorInfoProvider = null;
+    protected ConnectorInfoProvider connectorInfoProvider = null;
 
     /**
      * RouterRegistryService service.
@@ -283,7 +283,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * Cryptographic service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected volatile CryptoService cryptoService = null;
+    protected CryptoService cryptoService = null;
 
     /**
      * SyncFailureHandlerFactory service.
@@ -295,7 +295,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * Enhanced configuration service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     /**
      * Reference to the ThreadSafe {@code ConnectorFacade} instance.

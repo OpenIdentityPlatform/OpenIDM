@@ -79,7 +79,7 @@ public class JDBCDataSourceService implements DataSourceService {
      * Enhanced configuration service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     /**
      * Populate and return a DataSourceService that can be used before the config service is available.

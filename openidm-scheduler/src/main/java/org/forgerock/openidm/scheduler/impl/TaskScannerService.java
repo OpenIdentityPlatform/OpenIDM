@@ -101,7 +101,7 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile ScriptRegistry scriptRegistry;
+    private ScriptRegistry scriptRegistry;
 
     @Activate
     public void activate(ComponentContext context) {

@@ -191,7 +191,7 @@ public class SchedulerService implements RequestHandler {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
     
     protected void bindEnhancedConfig(EnhancedConfig enhancedConfig) {
     	this.enhancedConfig = enhancedConfig;

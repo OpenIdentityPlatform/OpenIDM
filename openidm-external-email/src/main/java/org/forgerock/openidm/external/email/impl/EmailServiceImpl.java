@@ -73,7 +73,7 @@ public class EmailServiceImpl implements SingletonResourceProvider {
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     EmailClient emailClient;
 

@@ -132,7 +132,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
      * Enhanced configuration service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
     private DataSourceService dataSourceService;
 
