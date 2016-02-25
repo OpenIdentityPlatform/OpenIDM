@@ -37,6 +37,7 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.util.Scripts;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;

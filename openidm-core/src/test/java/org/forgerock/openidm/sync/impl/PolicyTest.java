@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2014-2015 ForgeRock AS.
+ * Portions copyright 2014-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -36,8 +36,10 @@ import java.util.Map;
 import javax.script.Bindings;
 
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.sync.ReconAction;
+import org.forgerock.openidm.util.Scripts;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
@@ -90,29 +92,29 @@ public class PolicyTest {
         assertEquals(policies.size(), 8);
 
         assertTrue(getPolicy(Situation.CONFIRMED).getCondition()
-                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER))), new RootContext()));
 
         assertTrue(getPolicy(Situation.FOUND).getCondition()
-                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER))), new RootContext()));
 
         assertEquals((policies.get(Situation.ABSENT.toString())).size(), 2);
         assertTrue(getPolicy(Situation.ABSENT).getCondition()
-                .evaluate(json(object(field("linkQualifier", "user")))));
+                .evaluate(json(object(field("linkQualifier", "user"))), new RootContext()));
 
         assertTrue(getPolicy(Situation.AMBIGUOUS).getCondition()
-                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER))), new RootContext()));
 
         assertTrue(getPolicy(Situation.MISSING).getCondition()
-                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER))), new RootContext()));
 
         assertTrue(getPolicy(Situation.SOURCE_MISSING).getCondition()
-                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER))), new RootContext()));
 
         assertTrue(getPolicy(Situation.UNQUALIFIED).getCondition()
-                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER))), new RootContext()));
 
         assertTrue(getPolicy(Situation.UNASSIGNED).getCondition()
-                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER)))));
+                .evaluate(json(object(field("linkQualifier", Link.DEFAULT_LINK_QUALIFIER))), new RootContext()));
     }
     
     @Test
@@ -187,56 +189,64 @@ public class PolicyTest {
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
         assertEquals(ReconAction.IGNORE, 
                 getPolicy(Situation.FOUND)
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
         assertEquals(ReconAction.IGNORE, 
                 getPolicy(Situation.ABSENT)
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
         assertEquals(ReconAction.IGNORE, 
                 getPolicy(Situation.AMBIGUOUS)
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
         assertEquals(ReconAction.IGNORE, 
                 getPolicy(Situation.MISSING)
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
         assertEquals(ReconAction.IGNORE, 
                 getPolicy(Situation.SOURCE_MISSING)
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
         assertEquals(ReconAction.IGNORE, 
                 getPolicy(Situation.UNQUALIFIED)
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
         assertEquals(ReconAction.IGNORE, 
                 getPolicy(Situation.UNASSIGNED)
                         .getAction(lazyObjectAccessorSourceMock,
                                 lazyObjectAccessorTargetMock,
                                 syncOperationMock,
-                                Link.DEFAULT_LINK_QUALIFIER));
+                                Link.DEFAULT_LINK_QUALIFIER, 
+                                new RootContext()));
 
 
     }
@@ -275,8 +285,8 @@ public class PolicyTest {
         ObjectMapping.SyncOperation syncOperationMock = mock(ObjectMapping.SyncOperation.class);
         when(syncOperationMock.toJsonValue()).thenReturn(json(object()));
 
-        ReconAction absentAction = pAbsent.getAction(lazyObjectAccessorSourceMock, 
-                lazyObjectAccessorTargetMock,syncOperationMock, Link.DEFAULT_LINK_QUALIFIER);
+        ReconAction absentAction = pAbsent.getAction(lazyObjectAccessorSourceMock, lazyObjectAccessorTargetMock, 
+                syncOperationMock, Link.DEFAULT_LINK_QUALIFIER, new RootContext());
 
         pAbsent.evaluatePostAction(
                     lazyObjectAccessorSourceMock,
@@ -284,7 +294,8 @@ public class PolicyTest {
                     absentAction,
                     true,
                     Link.DEFAULT_LINK_QUALIFIER,
-                    "reconId");
+                    "reconId", 
+                    new RootContext());
 
     }
 }

@@ -33,6 +33,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.util.Scripts;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -65,21 +66,8 @@ public class SyncMappings implements Mappings {
     private IDMConnectionFactory connectionFactory;
 
     /** Script Registry service. */
-    @Reference(
-            policy = ReferencePolicy.DYNAMIC,
-            bind = "bindScriptRegistry",
-            unbind = "unbindScriptRegistry")
+    @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile ScriptRegistry scriptRegistry;
-
-    protected void bindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = service;
-        Scripts.init(service);
-    }
-
-    protected void unbindScriptRegistry(final ScriptRegistry service) {
-        scriptRegistry = null;
-        Scripts.init(null);
-    }
 
     /**
      * Activate/modify the component.  Because the List of ObjectMappings is re-assigned based on the updated

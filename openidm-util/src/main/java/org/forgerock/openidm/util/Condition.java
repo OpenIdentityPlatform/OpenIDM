@@ -11,21 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2015 ForgeRock AS.
+ * Portions copyright 2015-2016 ForgeRock AS.
  */
-package org.forgerock.openidm.sync.impl;
-
-import javax.script.ScriptException;
-
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
-import org.forgerock.json.resource.QueryFilters;
-import org.forgerock.openidm.sync.impl.Scripts.Script;
-import org.forgerock.util.query.QueryFilter;
-import org.forgerock.util.query.QueryFilterVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+package org.forgerock.openidm.util;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,10 +21,23 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import javax.script.ScriptException;
+
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.json.resource.QueryFilters;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.query.QueryFilterVisitor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Represents a condition on which a property mapping may be applied, or a policy may be enforced.
  */
-class Condition {
+public class Condition {
     
     /** 
      * Logger 
@@ -87,7 +88,7 @@ class Condition {
         } else if (config.isString()) {
             init(Type.QUERY_FILTER, QueryFilters.parse(config.asString()), null);
         } else {
-            init(Type.SCRIPTED, null, Scripts.newInstance(config));
+            init(Type.SCRIPTED, null, Scripts.newScript(config));
         }
     }
     
@@ -109,10 +110,21 @@ class Condition {
      * 
      * @param params parameters to use during evaluation.
      * @return true if the condition is met, false otherwise.
-     * @throws SynchronizationException if errors are encountered.
+     * @throws JsonValueException if errors are encountered.
      */
-    public boolean evaluate(JsonValue params)
-            throws SynchronizationException {
+    public boolean evaluate(Object params) throws JsonValueException {
+        return evaluate(new JsonValue(params), new RootContext());
+    }
+    
+    /**
+     * Evaluates the condition.  Returns true if the condition is met, false otherwise.
+     * 
+     * @param params parameters to use during evaluation.
+     * @param context the {@link Context} associated with this evaluation.
+     * @return true if the condition is met, false otherwise.
+     * @throws JsonValueException if errors are encountered.
+     */
+    public boolean evaluate(JsonValue params, Context context) throws JsonValueException {
         switch (type) {
         case TRUE:
             return true;
@@ -124,17 +136,14 @@ class Condition {
                 if (params.isMap()) {
                     scope.putAll(params.asMap());
                 }
-                Object o = script.exec(scope);
+                Object o = script.exec(scope, context);
                 if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
                     return false; // property mapping is not applicable; do not apply
                 }
                 return true;
-            } catch (JsonValueException jve) {
-                LOGGER.warn("Unexpected JSON value exception while evaluating condition", jve);
-                throw new SynchronizationException(jve);
             } catch (ScriptException se) {
                 LOGGER.warn("Script encountered exception while evaluating condition", se);
-                throw new SynchronizationException(se);
+                throw new JsonValueException(params, se);
             }
         default:
             return false;

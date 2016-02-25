@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -20,7 +20,10 @@ package org.forgerock.openidm.sync.impl;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.sync.ReconAction;
-import org.forgerock.openidm.sync.impl.Scripts.Script;
+import org.forgerock.openidm.util.Script;
+import org.forgerock.openidm.util.Scripts;
+import org.forgerock.services.context.Context;
+import org.forgerock.openidm.util.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -78,11 +81,11 @@ class Policy {
         } else {
             this.action = null;
             // Scripts.newInstance will copy the scope variables from action
-            this.script = Scripts.newInstance(action);
+            this.script = Scripts.newScript(action);
         }
         JsonValue pAction = config.get("postAction");
         if (!pAction.isNull()) {
-            this.postAction = Scripts.newInstance(pAction);
+            this.postAction = Scripts.newScript(pAction);
         }
     }
 
@@ -112,13 +115,15 @@ class Policy {
      * @param target a {@link LazyObjectAccessor} representing the target object
      * @param syncOperation the parent {@link ObjectMapping.SyncOperation} instance
      * @param linkQualifier the linkQualifier for the policy
+     * @param context a {@link Context} associated with this call
      * @return a {@link ReconAction} object representing the action for this policy
      * @throws SynchronizationException TODO.
      */
     public ReconAction getAction(LazyObjectAccessor source, 
                                  LazyObjectAccessor target, 
                                  final ObjectMapping.SyncOperation syncOperation, 
-                                 String linkQualifier) throws SynchronizationException {
+                                 String linkQualifier,
+                                 Context context) throws SynchronizationException {
         if (action != null) { // static action specified
             return action;
         }
@@ -139,7 +144,7 @@ class Policy {
                 scope.put("target", target.asMap());
             }
             try {
-                return ReconAction.valueOf(script.exec(scope).toString());
+                return ReconAction.valueOf(script.exec(scope, context).toString());
             } catch (NullPointerException npe) {
                 throw new SynchronizationException("action script returned null value");
             } catch (IllegalArgumentException iae) {
@@ -160,6 +165,8 @@ class Policy {
      * @param action the {@link ReconAction} that was performed
      * @param linkQualifier the linkQualifier               
      * @param sourceAction true if this is a source sync operation, false if it is a target sync operation
+     * @param reconId a {@link String} representing the ID of the reconciliation
+     * @param context a {@link Context} associated with this call
      * @throws SynchronizationException
      */
     public void evaluatePostAction(LazyObjectAccessor source, 
@@ -167,7 +174,8 @@ class Policy {
                                    ReconAction action, 
                                    boolean sourceAction, 
                                    String linkQualifier,
-                                   String reconId) throws SynchronizationException {
+                                   String reconId,
+                                   Context context) throws SynchronizationException {
         if (postAction != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("linkQualifier", linkQualifier);
@@ -182,7 +190,7 @@ class Policy {
                 scope.put("target", target.asMap());
             }
             try {
-                postAction.exec(scope);
+                postAction.exec(scope, context);
             } catch (ScriptException se) {
                 LOGGER.debug("action script encountered exception", se);
                 throw new SynchronizationException(se);

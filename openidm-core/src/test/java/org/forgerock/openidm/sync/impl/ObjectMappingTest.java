@@ -31,6 +31,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.impl.ObjectMapping.SyncOperation;
+import org.forgerock.openidm.util.Scripts;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.Assert;
 import org.testng.annotations.AfterMethod;

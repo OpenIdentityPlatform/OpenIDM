@@ -13,7 +13,7 @@
  *
  * Portions copyright 2014-2015 ForgeRock AS.
  */
-package org.forgerock.openidm.sync.impl;
+package org.forgerock.openidm.util;
 
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
@@ -21,15 +21,21 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.services.context.RootContext;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
- * Test the Condition class.
+ * Test the Conditions class.
  *
  * Currently only the filter visitor is tested.
  */
-public class ConditionTest {
+public class ConditionsTest {
+    
+    /**
+     * A test object used to evaluate conditions against.
+     */
     private static JsonValue testObject = json(object(
             field("object", object(
                 field("name", "alice"),
@@ -40,6 +46,12 @@ public class ConditionTest {
             ),
             field("linkQualifier", "test")));
 
+    /**
+     * Returns an array of filter data.  Each element in the array is an array containing a condition filter string and
+     * a boolean representing the result of the filter applied to the test object.
+     * 
+     * @return an array of filter data.
+     */
     @DataProvider
     public Object[][] filterData() {
         return new Object[][] {
@@ -69,8 +81,8 @@ public class ConditionTest {
     }
 
     @Test(dataProvider = "filterData")
-    public void testEvaluate(String filter, Boolean state) throws SynchronizationException {
-        Condition testCondition = new Condition(json(filter));
-        assertThat(testCondition.evaluate(testObject)).isEqualTo(state);
+    public void testEvaluateCondition(String filter, Boolean state) throws JsonValueException {
+        assertThat(Conditions.newCondition(json(filter)).evaluate(testObject, new RootContext())).isEqualTo(state);
+        assertThat(Conditions.newCondition(json(filter)).evaluate(testObject)).isEqualTo(state);
     }
 }
