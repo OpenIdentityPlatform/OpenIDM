@@ -81,6 +81,11 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget", [
                 type: BootstrapDialog.TYPE_DEFAULT,
                 size: BootstrapDialog.SIZE_WIDE,
                 message: $(handlebars.compile("{{>"  +currentTemplate +"}}")(currentConf.adminDashboards[currentDashboard].widgets[widgetLocation])),
+                onshown: function (dialogRef) {
+                    if(self.customSettingsLoad) {
+                        self.customSettingsLoad(dialogRef);
+                    }
+                },
                 buttons: [
                     {
                         label: $.t("common.form.close"),
@@ -93,13 +98,17 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget", [
                         cssClass: "btn-primary",
                         id: "saveUserConfig",
                         action: function (dialogRef) {
-                            var formData = form2js("widgetConfigForm", ".", true);
+                            if(_.isUndefined(self.customSettingsSave)) {
+                                var formData = form2js("widgetConfigForm", ".", true);
 
-                            _.extend(currentConf.adminDashboards[currentDashboard].widgets[widgetLocation], formData);
+                                _.extend(currentConf.adminDashboards[currentDashboard].widgets[widgetLocation], formData);
 
-                            self.saveWidgetConfiguration(currentConf);
+                                self.saveWidgetConfiguration(currentConf);
 
-                            dialogRef.close();
+                                dialogRef.close();
+                            } else {
+                                self.customSettingsSave(dialogRef, currentConf, currentDashboard, widgetLocation);
+                            }
                         }
                     }
                 ]
@@ -110,6 +119,8 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget", [
 
             ConfigDelegate.updateEntity("ui/configuration", {"configuration": currentConfig}).then(_.bind(function() {
                 this.updateConfiguration(function() {
+                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "dashboardWidgetConfigurationSaved");
+
                     EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: {
                         view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
                         role: "ui-admin",
