@@ -21,14 +21,33 @@ module.exports = {
     "Add a widget dashboard 1": function(client) {
         // Add a Frame widget, use top button to add widgets
         client.click("#dashboardWidgets .open-add-widget-dialog")
-        .waitForElementPresent("button[data-widget-id='frame']", 2000)
-        .click("button[data-widget-id='frame']")
+        .waitForElementPresent("button[data-widget-id='quickStart']", 2000)
+        .click("button[data-widget-id='quickStart']")
         .waitForElementPresent(".widget .widget-title", 2000)
-        .assert.containsText(".widget .widget-title", "EMBED WEB PAGE")
+        .assert.containsText(".widget .widget-title", "QUICK START")
         .assert.elementPresent("#AddWidgetDialog")
         .waitForElementPresent(".bootstrap-dialog-footer-buttons button", 2000)
         .click(".bootstrap-dialog-footer-buttons button")
         .waitForElementNotPresent("#AddWidgetDialog", 3000);
+    },
+
+    "Configure Quick Start" : function(client) {
+        client.waitForElementPresent("#dashboardWidgets", 2000)
+        .click(".widget-section-title .dropdown-toggle")
+        .waitForElementPresent(".widget-settings", 1000)
+        .click(".widget-settings")
+        .waitForElementPresent("#widgetConfigForm", 2000)
+        .click("#addQuickLink")
+        .waitForElementPresent("#quickLinkAddHolder", 2000)
+        .setValue("#quickLinkName", "test")
+        .setValue("#quickLinkHref", "test")
+        .setValue("#quickLinkIcon", "fa-link")
+        .click("#createQuickLink")
+        .waitForElementPresent(".backgrid tbody tr", 1000)
+        .click("#saveUserConfig")
+        .waitForElementPresent("#dashboardWidgets .card-container", 2000)
+        .assert.elementPresent(".card-container")
+        .assert.cssClassPresent(".card .circle i", "fa-link")
     },
 
     "Attempt to add a dashboard with a used name": function(client) {
@@ -191,5 +210,4 @@ module.exports = {
         .click("input[type=submit]")
         .end();
     }
-
 };

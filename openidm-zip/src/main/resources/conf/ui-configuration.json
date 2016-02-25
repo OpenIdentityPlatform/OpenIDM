@@ -57,42 +57,42 @@
                         "size" : "large",
                         "cards" : [
                             {
-                                "name" : "dashboard.quickStart.addANewConnector",
+                                "name" : "Add New Connector",
                                 "icon" : "fa-database",
                                 "href" : "#connectors/add/"
                             },
                             {
-                                "name" : "dashboard.quickStart.createANewMapping",
+                                "name" : "Add New Mapping",
                                 "icon" : "fa-map-marker",
                                 "href" : "#mapping/add/"
                             },
                             {
-                                "name" : "dashboard.quickStart.manageRole",
+                                "name" : "Managed Role",
                                 "icon" : "fa-check-square-o",
                                 "href" : "#resource/managed/role/list/"
                             },
                             {
-                                "name" : "dashboard.quickStart.addANewDevice",
+                                "name" : "Add New Device",
                                 "icon" : "fa-tablet",
                                 "href" : "#managed/add/"
                             },
                             {
-                                "name" : "dashboard.quickStart.setupRegistration",
+                                "name" : "Set up Registration",
                                 "icon" : "fa-gear",
                                 "href" : "#selfservice/userregistration/"
                             },
                             {
-                                "name" : "dashboard.quickStart.setupPasswordReset",
+                                "name" : "Set up Password Reset",
                                 "icon" : "fa-gear",
                                 "href" : "#selfservice/passwordreset/"
                             },
                             {
-                                "name" : "dashboard.quickStart.manageUser",
+                                "name" : "Manage User",
                                 "icon" : "fa-user",
                                 "href" : "#resource/managed/user/list/"
                             },
                             {
-                                "name" : "dashboard.quickStart.setupSystem",
+                                "name" : "Set up System",
                                 "icon" : "fa-user",
                                 "href" : "#settings/"
                             }

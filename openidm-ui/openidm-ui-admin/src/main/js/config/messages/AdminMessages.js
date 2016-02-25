@@ -52,6 +52,10 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.dashboardMessages.dashboardWidgetAdded",
             type: "info"
         },
+        "dashboardWidgetConfigurationSaved": {
+            msg: "config.messages.dashboardMessages.dashboardWidgetConfigurationSaved",
+            type: "info"
+        },
         "objectTypeSaved": {
             msg: "config.messages.ConnectorMessages.objectTypeSaved",
             type: "info"

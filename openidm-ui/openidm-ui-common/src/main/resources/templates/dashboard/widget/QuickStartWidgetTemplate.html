@@ -3,13 +3,14 @@
 {{> dashboard/_widgetHeader}}
 <div class="panel-body widget-body">
     <div class="list-grid">
+        {{#if cards}}
         <div class="row">
             {{#each cards}}
             <div class="col-sm-6 col-md-3">
                 <div class="card-container card-container-sm">
                     <div class="card">
                         <div class="card-body">
-                            <a {{#if href}}href="{{href}}"{{else}} href="#"{{/if}} id="{{uid}}">
+                            <a {{#if href}}href="{{href}}"{{else}} href="#"{{/if}}>
                             <div class="image circle circle-sm">
                                 <i class="fa {{icon}}"></i>
                             </div>
@@ -25,5 +26,14 @@
             </div>
             {{/each}}
         </div>
+        {{else}}
+        <div class="well recon-message">
+            <div class="message-icon text-primary"><i class="fa fa-link"></i></div>
+            <h3>{{t 'dashboard.quickStart.quickStartEmpty'}}</h3>
+            <p>
+                {{t 'dashboard.quickStart.quickStartEmptyText'}}
+            </p>
+        </div>
+        {{/if}}
     </div>
 </div>
