@@ -31,6 +31,8 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.impl.ObjectMapping.SyncOperation;
+import org.forgerock.openidm.sync.ReconAction;
+import org.forgerock.openidm.sync.ReconContext;
 import org.forgerock.openidm.util.Scripts;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
@@ -93,6 +95,28 @@ public class ObjectMappingTest {
         testSyncOperation.sourceObjectAccessor.getObject().get("json").get("pointer").put("key", "bar");
         assertFalse(testSyncOperation.checkSourceConditions("default"));
         
+    }
+    
+    @Test
+    public void testUpdateActionWithNullTargetObject() throws Exception {
+        ObjectSetContext.push(new ReconContext(new RootContext("test_id"), testMapping.getName()));
+        SyncOperation testSyncOperation = testMapping.getSyncOperation();
+        testSyncOperation.situation = Situation.CONFIRMED;
+        testSyncOperation.action = ReconAction.UPDATE;
+        testSyncOperation.sourceObjectAccessor = new LazyObjectAccessor(null, null, "source1", json(null));
+        testSyncOperation.targetObjectAccessor = new LazyObjectAccessor(null, null, "target1", null);
+        testMapping.linkType = mock(LinkType.class);
+        
+        Link link = new Link(testMapping);
+        link._id = "testId";
+        link._rev = "testRev";
+        link.setLinkQualifier("default");
+        link.sourceId = testSyncOperation.sourceObjectAccessor.getLocalId();
+        link.targetId = testSyncOperation.targetObjectAccessor.getLocalId();
+        testSyncOperation.initializeLink(link);
+        
+        // Test that UPDATE action does not throw a NPE if targetObject == null
+        testSyncOperation.performAction();
     }
     
     class TestObjectMapping extends ObjectMapping {
