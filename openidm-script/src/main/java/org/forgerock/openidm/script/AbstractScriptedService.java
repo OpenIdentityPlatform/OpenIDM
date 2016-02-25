@@ -66,7 +66,7 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile ScriptRegistry scriptRegistry;
+    private ScriptRegistry scriptRegistry;
 
     protected void bindScriptRegistry(final ScriptRegistry service) {
         scriptRegistry = service;

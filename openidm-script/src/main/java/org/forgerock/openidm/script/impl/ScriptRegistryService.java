@@ -181,7 +181,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
+    private EnhancedConfig enhancedConfig;
 
 
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
