@@ -38,7 +38,7 @@
         <!-- Provided OSGi Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.core</artifactId>
+            <artifactId>org.osgi.core</artifactId>
             <scope>provided</scope>
         </dependency>
         <!-- TODO Remove org.apache.felix.framework with Compendium 4.3 -->
@@ -49,7 +49,7 @@
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>osgi.cmpn</artifactId>
+            <artifactId>org.osgi.compendium</artifactId>
             <scope>provided</scope>
         </dependency>
 

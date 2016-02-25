@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2015-2016 ForgeRock AS.
+ * Portions copyright 2015 ForgeRock AS.
  */
 package org.forgerock.openidm.scheduler;
 
@@ -108,7 +108,7 @@ public class SchedulerServiceTest {
     private ComponentContext getMockedContext() {
         ComponentContext mockedContext = mock(ComponentContext.class);
         BundleContext mockedBundleContext = mock(BundleContext.class);
-        Dictionary<String, Object> compContextProperties = new Hashtable();
+        Dictionary<String, String> compContextProperties = new Hashtable<String, String>();
         //compContextProperties.put("config.factory-pid", null);
         when(mockedContext.getProperties()).thenReturn(compContextProperties);
         when(mockedContext.getBundleContext()).thenReturn(mockedBundleContext);

@@ -993,10 +993,10 @@
             <scope>runtime</scope>
             <excludes>
                 <exclude>org.apache.felix:org.apache.felix.framework</exclude>
-                <exclude>org.osgi:osgi.core</exclude>
-                <exclude>org.osgi:osgi.cmpn</exclude>
-                <exclude>org.apache.felix:osgi.core</exclude>
-                <exclude>org.apache.felix:osgi.cmpn</exclude>
+                <exclude>org.osgi:org.osgi.core</exclude>
+                <exclude>org.osgi:org.osgi.compendium</exclude>
+                <exclude>org.apache.felix:org.osgi.core</exclude>
+                <exclude>org.apache.felix:org.osgi.compendium</exclude>
                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>org.apache.felix:javax.servlet</exclude>
                 <exclude>org.forgerock.openicf.connectors:*</exclude>
