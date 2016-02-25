@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -36,7 +36,10 @@ import org.forgerock.json.JsonPointer;
 
 import javax.script.ScriptException;
 
-import org.forgerock.openidm.sync.impl.Scripts.Script;
+import org.forgerock.openidm.util.Script;
+import org.forgerock.openidm.util.Scripts;
+import org.forgerock.services.context.Context;
+import org.forgerock.openidm.util.Condition;
 
 /**
  * This class contains the necessary logic to map an attribute from the source object to an attribute
@@ -72,7 +75,7 @@ class PropertyMapping {
         condition = new Condition(config.get("condition"));
         targetPointer = config.get("target").required().asPointer();
         sourcePointer = config.get("source").asPointer(); // optional
-        transform = Scripts.newInstance(config.get("transform"));
+        transform = Scripts.newScript(config.get("transform"));
         defaultValue = config.get("default").getObject();
     }
 
@@ -110,19 +113,22 @@ class PropertyMapping {
     }
 
     /**
-     * Applies this property mapping on the supplied source and target objects if no link qualifier has been 
-     * configured, or the supplied link qualifier matches the configure one.  This may execute condition and 
-     * transform scripts if any are configured.
+     * Applies this property mapping on the supplied source and target objects if no link qualifier has been configured,
+     * or the supplied link qualifier matches the configure one.  This may execute condition and transform scripts if 
+     * any are configured.
      *
      * @param sourceObject Current specified source property/object to map from
-     * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, 
-     * null if not provided
+     * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, null
+     * if not provided
      * @param targetObject Current specified target property/object to modify
      * @param linkQualifier the link qualifier associated with the current sync
+     * @param context a {@link Context} associated with this call
      * @throws SynchronizationException if errors are encountered.
      */
-    public void apply(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, String linkQualifier) throws SynchronizationException {
-        if (!evaluateCondition(sourceObject, oldSource, targetObject, linkQualifier)) { // optional property mapping condition
+    public void apply(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, String linkQualifier,
+            Context context) throws SynchronizationException {
+        // optional property mapping condition
+        if (!evaluateCondition(sourceObject, oldSource, targetObject, linkQualifier, context)) {
             return;
         }
         Object result = null;
@@ -137,10 +143,11 @@ class PropertyMapping {
             scope.put("source", result);
             scope.put("linkQualifier", linkQualifier);
             try {
-                result = transform.exec(scope); // script yields transformation result
+                result = transform.exec(scope, context); // script yields transformation result
             } catch (ScriptException se) {
                 LOGGER.warn("Property mapping " + targetPointer + " transformation script encountered exception", se);
-                throw new SynchronizationException("Transformation script error :  " + se.getMessage() + " for attribute '" + targetPointer + "'");
+                throw new SynchronizationException("Transformation script error :  " + se.getMessage() + 
+                        " for attribute '" + targetPointer + "'");
             }
         }
         if (result == null) {
@@ -153,19 +160,20 @@ class PropertyMapping {
      * Evaluates a property mapping condition.  Returns true if the condition passes, false otherwise.
      * 
      * @param sourceObject Current specified source property/object to map from
-     * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, 
-     * null if not provided
+     * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, null
+     * if not provided
      * @param targetObject Current specified target property/object to modify
      * @param linkQualifier the link qualifier associated with the current sync
+     * @param context a {@link Context} associated with this call
      * @return true if the condition passes, false otherwise.
      * @throws SynchronizationException if errors are encountered.
      */
-    public boolean evaluateCondition(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, String linkQualifier) 
-            throws SynchronizationException {
+    public boolean evaluateCondition(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, 
+            String linkQualifier, Context context) throws SynchronizationException {
         JsonValue params = json(object(field("object", sourceObject), field("linkQualifier", linkQualifier)));
         if (oldSource != null) {
             params.put("oldSource", oldSource);
         }
-        return condition.evaluate(params);
+        return condition.evaluate(params, context);
     }
 }

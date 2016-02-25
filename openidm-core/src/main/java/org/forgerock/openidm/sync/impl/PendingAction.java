@@ -73,7 +73,7 @@ class PendingAction {
                 if (mapping.getName().equals(mappingName) && resourceContainer.equals(mapping.getTargetObjectSet())) {
                     logger.debug("Matching mapping {} found for pending action {} to {}", mappingName, action.toString(), 
                             resourceContainer + "/" + resourceId);
-                    mapping.explicitOp(sourceObject, targetObject, situation, action, reconId);
+                    mapping.explicitOp(context, sourceObject, targetObject, situation, action, reconId);
                     pendingActionContext.clear();
                     logger.debug("Pending action {} for mapping {} on resource {} performed", 
                             new Object[] {action.toString(), mappingName, resourceContainer + "/" + resourceId});

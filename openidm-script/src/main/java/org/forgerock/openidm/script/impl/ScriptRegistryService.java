@@ -53,6 +53,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ResourceFunctions;
+import org.forgerock.openidm.util.Scripts;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -269,6 +270,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
          * manifestWatcher = new BundleWatcher<ManifestEntry>(context, new
          * ScriptEngineManifestScanner(), null); manifestWatcher.start();
          */
+        
+        // Initialize the registry in ScriptUtil
+        Scripts.init(this);
 
         logger.info("OpenIDM Script Service component is activated.");
     }
@@ -277,6 +281,10 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     protected void modified(ComponentContext context) {
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         setConfiguration(configuration.required().asMap());
+        
+        // Clear the registry in ScriptUtil
+        Scripts.init(null);
+        
         propertiesCache.clear();
         Set<String> keys =
                 null != getBindings() ? new HashSet<String>(getBindings().keySet()) : Collections
@@ -301,11 +309,18 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 getBindings().remove(name);
             }
         }
+        
+        // Initialize the registry in ScriptUtil
+        Scripts.init(this);
+        
         logger.info("OpenIDM Script Service component is modified.");
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        // Clear the registry in ScriptUtil
+        Scripts.init(null);
+        
         if (null != manifestWatcher) {
             manifestWatcher.stop();
         }

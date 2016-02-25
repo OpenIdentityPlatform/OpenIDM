@@ -11,55 +11,47 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
-package org.forgerock.openidm.sync.impl;
+package org.forgerock.openidm.util;
 
-import java.util.Map;
-
-import javax.script.Bindings;
 import javax.script.ScriptException;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 
 /**
- * A NAME does ...
- *
+ * A singleton utility class that provides static methods for retrieving scripts from the {@link ScriptRegistry}.
  */
 public class Scripts {
 
-    private static Scripts instance = null;
+    private static volatile Scripts instance = null;
 
     private final ScriptRegistry registry;
-
-    public static class Script {
-
-        private final ScriptEntry entry;
-
-        private Script(ScriptEntry e) {
-            entry = e;
-        }
-
-        Object exec(Map<String, Object> scope) throws ScriptException {
-            org.forgerock.script.Script s = entry.getScript(ObjectSetContext.get());
-            Bindings b = s.createBindings();
-            b.putAll(scope);
-            return s.eval(b);
-        };
-    }
-
-    static void init(ScriptRegistry registry) {
-        instance = new Scripts(registry);
-    }
 
     private Scripts(ScriptRegistry registry) {
         this.registry = registry;
     }
 
-    public static Script newInstance(JsonValue config) throws JsonValueException {
+    /**
+     * Initializes the {@link ScriptRegistry} service.
+     * 
+     * @param registry the {@link ScriptRegistry} service.
+     */
+    public static void init(ScriptRegistry registry) {
+        instance = new Scripts(registry);
+    }
+
+    /**
+     * Returns a new {@link Script} object representing a {@link ScriptEntry} from the {@link ScriptRegistry} service 
+     * based on the passed in script configuration.  Returns null if the passed is script configuration is null.
+     * 
+     * @param config a script configuration.
+     * @return a {@link Script} object representing a {@link ScriptEntry} from the {@link ScriptRegistry} service.
+     * @throws JsonValueException
+     */
+    public static Script newScript(JsonValue config) throws JsonValueException {
         if (config == null || config.isNull()) {
             return null;
         }
