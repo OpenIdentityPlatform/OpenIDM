@@ -16,6 +16,7 @@
 package org.forgerock.openidm.security.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.util.Files.temporaryFolder;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.PatchOperation.add;
@@ -43,7 +44,6 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.assertj.core.util.Files;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionResponse;
@@ -77,8 +77,9 @@ public class EntryResourceProviderTest {
     private static final String KEY_STORE_PASSWORD = "password";
     private static final String ENTRY_ID = "entry";
     private static final String RESOURCE_CONTAINER = "test";
-    private static final String[] expectedKeys = {"_id", "privateKey"};
+    private static final String[] EXPECTED_KEYS = {"_id", "privateKey"};
     private static final JsonValue EMPTY_JSON_OBJECT = json(object());
+    private static final String CLASS_NAME = EntryResourceProvider.class.getCanonicalName();
 
     @BeforeClass
     public void setUp() {
@@ -132,7 +133,7 @@ public class EntryResourceProviderTest {
         final ResourceResponse resourceResponse = promise.get();
         assertThat(resourceResponse.getId()).isEqualTo(ENTRY_ID);
         assertThat(resourceResponse.getRevision()).isEqualTo(null);
-        assertThat(resourceResponse.getContent().asMap()).containsKeys(expectedKeys);
+        assertThat(resourceResponse.getContent().asMap()).containsKeys(EXPECTED_KEYS);
     }
 
     @Test
@@ -363,7 +364,7 @@ public class EntryResourceProviderTest {
 
     private File createTemporaryKeyStore()
             throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException {
-        final File keystoreFile = Files.newTemporaryFile();
+        final File keystoreFile = File.createTempFile(CLASS_NAME, null, temporaryFolder());
         keystoreFile.deleteOnExit();
         KeyStore ks = KeyStore.getInstance(KEY_STORE_TYPE);
 
