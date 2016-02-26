@@ -54,6 +54,7 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ResourceFunctions;
 import org.forgerock.openidm.util.Scripts;
+import org.forgerock.openidm.script.ScriptExecutor;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -104,7 +105,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  *
  */
@@ -130,7 +130,7 @@ import org.slf4j.LoggerFactory;
             bind = "bindFunction", unbind = "unbindFunction",
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)") })
-public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService {
+public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService, ScriptExecutor {
 
     public static final Set<String> reservedNames;
 
@@ -182,7 +182,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
 
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
@@ -776,8 +776,10 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             
             if (!scriptValue.isNull()) {
                 ScriptEntry entry = takeScript(scriptValue);
-                JsonValue input = params.get("input");
-                execScript(context, entry, input);
+                // a map of bindings
+                Map<String, Object> bindings = new HashMap<>();
+                bindings.put("object", params.get("input").getObject());
+                execScript(context, entry, bindings);
             } else {
                 throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
             }
@@ -804,18 +806,38 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
     }
 
-    private void execScript(Context context, ScriptEntry script, JsonValue value)
-            throws ForbiddenException, InternalServerErrorException {
+    /**
+     * Executes the given script with the provided bindings.
+     *
+     * @param context The request context
+     * @param script The script
+     * @param bindings The bindings
+     * @return JsonValue to be used for a given patch operation
+     * @throws ForbiddenException on script execution error
+     * @throws InternalServerErrorException on script execution error
+     * @throws BadRequestException on script null or inactive
+     */
+    public JsonValue execScript(Context context, ScriptEntry script, Map<String, Object> bindings)
+            throws ForbiddenException, InternalServerErrorException, BadRequestException {
         if (null != script && script.isActive()) {
             Script executable = script.getScript(context);
-            executable.put("object", value.getObject());
+            for (Map.Entry<String, Object> entry : bindings.entrySet()) {
+                executable.put(entry.getKey(), entry.getValue());
+            }
             try {
-                executable.eval(); // allows direct modification to the object
+                Object result = executable.eval(); // allows direct modification to the object
+                if (result instanceof JsonValue) {
+                    return (JsonValue) result;
+                } else {
+                    return new JsonValue(result);
+                }
             } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString());
             } catch (ScriptException se) {
-                throw new InternalServerErrorException("script encountered exception", se);
+                throw new InternalServerErrorException("Script encountered exception.", se);
             }
+        } else {
+            throw new BadRequestException("Script is null or inactive.");
         }
     }
 }
