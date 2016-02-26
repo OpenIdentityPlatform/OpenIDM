@@ -30,7 +30,6 @@
         <artifactId>openidm-project</artifactId>
         <version>4.1.0-SNAPSHOT</version>
     </parent>
-    <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-api-servlet</artifactId>
     <packaging>bundle</packaging>
 
