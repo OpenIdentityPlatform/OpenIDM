@@ -311,6 +311,11 @@ public class UpdateManagerImpl implements UpdateManager {
     private <R> R usingArchive(final Path archiveFile, final Path installDir, final UpgradeAction<R> upgradeAction)
             throws UpdateException {
 
+        validateFileName(archiveFile.toFile());
+        final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
+        validateCorrectProduct(updateConfig, archiveFile.toFile());
+        validateCorrectVersion(updateConfig, archiveFile.toFile());
+
         return withTempDirectory("openidm-upgrade-",
                 new Function<Path, R, UpdateException>() {
                     @Override
@@ -475,7 +480,6 @@ public class UpdateManagerImpl implements UpdateManager {
     @Override
     public JsonValue report(final Path archiveFile, final Path installDir)
             throws UpdateException {
-
         return usingArchive(archiveFile, installDir,
                 new UpgradeAction<JsonValue>() {
                     @Override
@@ -504,8 +508,8 @@ public class UpdateManagerImpl implements UpdateManager {
      * {@inheritDoc}
      */
     @Override
-    public JsonValue diff(final Path archiveFile, final Path installDir, final String filename) throws UpdateException {
-
+    public JsonValue diff(final Path archiveFile, final Path installDir, final String filename)
+            throws UpdateException {
         return usingArchive(archiveFile, installDir,
                 new UpgradeAction<JsonValue>() {
                     // Helper function for get the file content
@@ -556,11 +560,10 @@ public class UpdateManagerImpl implements UpdateManager {
     public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName)
             throws UpdateException {
 
+        validateFileName(archiveFile.toFile());
         final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
-        if (!"OpenIDM".equals(updateConfig.get(ORIGIN_PRODUCT).asString()) ||
-                !updateConfig.get(ORIGIN_VERSION).asList().contains(ServerConstants.getVersion())) {
-            throw new UpdateException("Update archive does not apply to the installed product.");
-        }
+        validateCorrectProduct(updateConfig, archiveFile.toFile());
+        validateCorrectVersion(updateConfig, archiveFile.toFile());
 
         Path tempUnzipDir = null;
         try {
@@ -602,9 +605,14 @@ public class UpdateManagerImpl implements UpdateManager {
      * {@inheritDoc}
      */
     @Override
-    public JsonValue getLicense(Path archive) throws UpdateException {
+    public JsonValue getLicense(Path archiveFile) throws UpdateException {
+        validateFileName(archiveFile.toFile());
+        final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
+        validateCorrectProduct(updateConfig, archiveFile.toFile());
+        validateCorrectVersion(updateConfig, archiveFile.toFile());
+
         try {
-            ZipFile zip = new ZipFile(archive.toFile());
+            ZipFile zip = new ZipFile(archiveFile.toFile());
             Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
             zip.extractFile("openidm/" + LICENSE_PATH, tmpDir.toString());
             File file = new File(tmpDir.toString() + "/openidm/" + LICENSE_PATH);
