@@ -33,13 +33,13 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
- * A CREST {@link Filter} decorator that allows the wrapped delegate implementation (delegate) to be switched
+ * A CREST {@link Filter} decorator that allows the decorated implementation (delegate) to be changed
  * at runtime.  Initially, this decorator wraps a {@link PassthroughFilter}.
  */
-public class SwitchableFilterDecorator implements Filter {
+public class MutableFilterDecorator implements Filter {
 
     /** the delegate filter */
-    private volatile Filter delegate = new PassthroughFilter();
+    private volatile Filter delegate = PassthroughFilter.PASSTHROUGH_FILTER;
 
     /**
      * Set the delegate delegate to the given {@link Filter}.
