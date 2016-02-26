@@ -839,6 +839,10 @@ public class UpdateManagerImpl implements UpdateManager {
                 }
             }
 
+            // Reset the last update ID so it will be repopulated next time it is requested
+            lastUpdateId = null;
+
+            // Restart if necessary
             if (updateConfig.get(UPDATE_RESTARTREQUIRED).asBoolean()) {
                 try {
                     restart();
