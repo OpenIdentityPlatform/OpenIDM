@@ -987,7 +987,7 @@
             "preview": {
                 "ready": "Ready to update",
                 "versionIsReady": "You're ready to update to",
-                "releaseNotes": "View release notes",
+                "releaseNotes": "More details",
                 "header": "Installation Preview",
                 "description": "Review files to be replaced below. OpenIDM will save customized files for future access.",
                 "installUpdateBtn": "Install Update",
