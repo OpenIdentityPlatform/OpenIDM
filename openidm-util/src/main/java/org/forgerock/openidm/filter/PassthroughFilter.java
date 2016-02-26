@@ -36,6 +36,14 @@ import org.forgerock.util.promise.Promise;
  * Passthrough filter forwards all requests to the next handler unchanged.
  */
 public class PassthroughFilter implements Filter {
+
+    /** Singleton instance of the PassthroughFilter */
+    public static final Filter PASSTHROUGH_FILTER = new PassthroughFilter();
+
+    private PassthroughFilter() {
+        // prevent direct instantiation - use the singleton constant instead
+    }
+
     @Override
     public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
             RequestHandler handler) {

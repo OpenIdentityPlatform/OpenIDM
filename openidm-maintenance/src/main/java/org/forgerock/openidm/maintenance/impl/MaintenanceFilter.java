@@ -26,6 +26,10 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -33,7 +37,7 @@ import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.filter.PassthroughFilter;
-import org.forgerock.openidm.filter.SwitchableFilterDecorator;
+import org.forgerock.openidm.filter.MutableFilterDecorator;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
@@ -47,15 +51,12 @@ import org.osgi.framework.Constants;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Maintenance Filter")
 })
-public class MaintenanceFilter extends SwitchableFilterDecorator {
+public class MaintenanceFilter extends MutableFilterDecorator {
 
     static final String PID = "org.forgerock.openidm.maintenance.filter";
 
-    /** passthrough filter when not in maintenance mode */
-    private static Filter PASSTHROUGH_FILTER = new PassthroughFilter();
-
     /** maintenance filter that prevents modification via CREST endpoints during maintenance mode */
-    private static Filter MAINTENANCE_FILTER = new PassthroughFilter() {
+    private static Filter MAINTENANCE_FILTER = new Filter() {
         @Override
         public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
                 RequestHandler requestHandler) {
@@ -88,6 +89,18 @@ public class MaintenanceFilter extends SwitchableFilterDecorator {
         }
 
         @Override
+        public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest queryRequest,
+                QueryResourceHandler handler, RequestHandler requestHandler) {
+            return requestHandler.handleQuery(context, queryRequest, handler);
+        }
+
+        @Override
+        public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest readRequest,
+                RequestHandler requestHandler) {
+            return requestHandler.handleRead(context, readRequest);
+        }
+
+        @Override
         public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest updateRequest,
                 RequestHandler requestHandler) {
             return new ServiceUnavailableException("Unable to update on " + updateRequest.getResourcePath() +
@@ -100,6 +113,6 @@ public class MaintenanceFilter extends SwitchableFilterDecorator {
     }
 
     void disableMaintenanceMode() {
-        setDelegate(PASSTHROUGH_FILTER);
+        setDelegate(PassthroughFilter.PASSTHROUGH_FILTER);
     }
 }
