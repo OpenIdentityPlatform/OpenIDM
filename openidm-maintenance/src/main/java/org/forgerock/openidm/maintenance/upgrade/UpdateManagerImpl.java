@@ -557,7 +557,7 @@ public class UpdateManagerImpl implements UpdateManager {
             throws UpdateException {
 
         final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
-        if (!"OpenIDM".equals(updateConfig.get(ORIGIN_PRODUCT)) ||
+        if (!"OpenIDM".equals(updateConfig.get(ORIGIN_PRODUCT).asString()) ||
                 !updateConfig.get(ORIGIN_VERSION).asList().contains(ServerConstants.getVersion())) {
             throw new UpdateException("Update archive does not apply to the installed product.");
         }
