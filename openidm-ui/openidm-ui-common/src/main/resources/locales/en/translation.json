@@ -1046,7 +1046,7 @@
             "review": {
                 "noFilesError": "There are no files to report on.",
                 "successHeader": "Installation complete.",
-                "successMsg": "You have successfully update OpenIDM to version",
+                "successMsg": "You have successfully updated OpenIDM to version",
                 "header": "Installation Report",
                 "desc": "All files were successfully installed. Modified files were backed up to locations specified below.  You will need to refresh your browser to see any UI changes.",
                 "expand": "Expand All",
