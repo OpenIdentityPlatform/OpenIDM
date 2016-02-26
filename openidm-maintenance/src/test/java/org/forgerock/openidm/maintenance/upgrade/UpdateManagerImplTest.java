@@ -15,20 +15,19 @@
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
+import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 import java.io.File;
 import java.nio.file.Path;
-import java.util.Properties;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
@@ -39,7 +38,7 @@ import org.testng.annotations.Test;
 public class UpdateManagerImplTest {
     private final static Logger logger = LoggerFactory.getLogger(UpdateManagerImplTest.class);
     private UpdateManagerImpl updateManager;
-    private Properties testProperties = new Properties();
+    private JsonValue testConfig = json(object());
     private File archiveFile;
 
     @BeforeMethod
@@ -52,8 +51,8 @@ public class UpdateManagerImplTest {
         when(updateManager.listAvailableUpdates()).thenCallRealMethod();
 
         // Setup update properties for further tests.
-        testProperties.clear();
-        when(updateManager.readProperties(any(File.class))).thenReturn(testProperties);
+        testConfig.clear();
+        when(updateManager.readUpdateConfig(any(File.class))).thenReturn(testConfig);
     }
 
     @Test
@@ -71,7 +70,7 @@ public class UpdateManagerImplTest {
 
     @Test
     public void testListAvailableUpdatesBadProperties() throws Exception {
-        when(updateManager.readProperties(any(File.class))).thenThrow(
+        when(updateManager.readUpdateConfig(any(File.class))).thenThrow(
                 new InvalidArchiveUpdateException("test.zip", "bad properties"));
 
         // Test when properties file isn't found in the archive.
@@ -86,7 +85,9 @@ public class UpdateManagerImplTest {
     @Test
     public void testListAvailableUpdatesDifferentProducts() throws Exception {
         // Test when update is for different product.
-        testProperties.put(UpdateManagerImpl.PROP_UPGRADESPRODUCT, "OTHER_PRODUCT");
+        testConfig.add("origin", object(
+                field("product", "OTHER_PRODUCT")
+                ));
 
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
@@ -99,8 +100,10 @@ public class UpdateManagerImplTest {
     @Test
     public void testListAvailableUpdatesDifferentVersion() throws Exception {
         // Test when update is for different version.
-        testProperties.put(UpdateManagerImpl.PROP_UPGRADESPRODUCT, UpdateManagerImpl.PRODUCT_NAME);
-        testProperties.put(UpdateManagerImpl.PROP_UPGRADESVERSION, "X.X.X");
+        testConfig.add("origin", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", array("X.X.X"))
+                ));
 
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
@@ -113,8 +116,19 @@ public class UpdateManagerImplTest {
     @Test
     public void testListAvailableUpdatesIsValid() throws Exception {
         // Test when update should be valid.
-        testProperties.put(UpdateManagerImpl.PROP_UPGRADESPRODUCT, UpdateManagerImpl.PRODUCT_NAME);
-        testProperties.put(UpdateManagerImpl.PROP_UPGRADESVERSION, ServerConstants.getVersion());
+        testConfig.add("origin", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", array(ServerConstants.getVersion()))
+                ));
+        testConfig.add("destination", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", ServerConstants.getVersion())
+                ));
+        testConfig.add("update", object(
+                field("description", "description"),
+                field("resource", "url"),
+                field("restartRequired", false)
+                ));
 
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());

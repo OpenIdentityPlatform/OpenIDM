@@ -25,6 +25,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -55,6 +55,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
@@ -76,6 +77,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.forgerock.util.query.QueryFilter;
@@ -93,7 +95,7 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
 @Service
-@org.apache.felix.scr.annotations.Properties({
+@Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Manager")
 })
@@ -104,6 +106,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
     private final static Logger logger = LoggerFactory.getLogger(UpdateManagerImpl.class);
 
+    private static final String UPDATE_CONFIG_FILE = "openidm/update.json";
     private static final Path CHECKSUMS_FILE = Paths.get(".checksums.csv");
     private static final Path BUNDLE_PATH = Paths.get("bundle");
     private static final Path CONF_PATH = Paths.get("conf");
@@ -111,18 +114,17 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final String PATCH_EXT = ".patch";
     private static final Path ARCHIVE_PATH = Paths.get("bin/update");
     private static final String LICENSE_PATH = "legal-notices/Forgerock_License.txt";
-
-    // Archive manifest keys
-    static final String PROP_PRODUCT = "product";
-    static final String PROP_VERSION = "version";
-    static final String PROP_UPGRADESPRODUCT = "upgradesProduct";
-    static final String PROP_UPGRADESVERSION = "upgradesVersion";
-    static final String PROP_DESCRIPTION = "description";
-    static final String PROP_RESOURCE = "resource";
-    static final String PROP_RESTARTREQUIRED = "restartRequired";
-
     private static final String BUNDLE_BACKUP_EXT = ".old-";
     static final String PRODUCT_NAME = "OpenIDM";
+
+    static final JsonPointer ORIGIN_PRODUCT = new JsonPointer("/origin/product");
+    static final JsonPointer ORIGIN_VERSION = new JsonPointer("/origin/version");
+    static final JsonPointer DESTINATION_PRODUCT = new JsonPointer("/destination/product");
+    static final JsonPointer DESTINATION_VERSION = new JsonPointer("/destination/version");
+    static final JsonPointer UPDATE_DESCRIPTION = new JsonPointer("/update/description");
+    static final JsonPointer UPDATE_RESOURCE = new JsonPointer("/update/resource");
+    static final JsonPointer UPDATE_RESTARTREQUIRED = new JsonPointer("/update/restartRequired");
+    static final JsonPointer REMOVEFILE = new JsonPointer("/removeFile");
 
     protected final AtomicBoolean restartImmediately = new AtomicBoolean(false);
     private UpdateThread updateThread = null;
@@ -339,11 +341,11 @@ public class UpdateManagerImpl implements UpdateManager {
         for (final File file : getUpdateFiles()) {
             try {
                 validateFileName(file);
-                Properties prop = readProperties(file);
-                validateCorrectProduct(prop, file);
-                validateCorrectVersion(prop, file);
+                JsonValue updateConfig = readUpdateConfig(file);
+                validateCorrectProduct(updateConfig, file);
+                validateCorrectVersion(updateConfig, file);
 
-                updates.add(validArchive(file, prop, getArchiveDigest(checksumFile, file)).getObject());
+                updates.add(validArchive(file, updateConfig, getArchiveDigest(checksumFile, file)).getObject());
             } catch (InvalidArchiveUpdateException e) {
                 rejects.add(e.toJsonValue().getObject());
             }
@@ -359,19 +361,22 @@ public class UpdateManagerImpl implements UpdateManager {
      * Constructs the json object that holds the properties of the validated archive file.
      *
      * @param archiveFile the handle to the valid archive file.
-     * @param prop The properties from within the archive.
+     * @param updateConfig The configuration for the update archive.
      * @param archiveDigest The checksum digest for the archive file.
      */
-    private JsonValue validArchive(File archiveFile, Properties prop, String archiveDigest) {
+    private JsonValue validArchive(File archiveFile, JsonValue updateConfig, String archiveDigest) {
         return json(object(
                 field("archive", archiveFile.getName()),
                 field("fileSize", archiveFile.length()),
-                field("fileDate", archiveFile.lastModified()),
+                field("fileDate", getDateString(new Date(archiveFile.lastModified()))),
                 field("checksum", archiveDigest),
-                field("version", prop.getProperty(PROP_PRODUCT) + " v" + prop.getProperty(PROP_VERSION)),
-                field("description", prop.getProperty(PROP_DESCRIPTION)),
-                field("resource", prop.getProperty(PROP_RESOURCE)),
-                field("restartRequired", prop.getProperty(PROP_RESTARTREQUIRED))
+                field("fromProduct", updateConfig.get(ORIGIN_PRODUCT).asString()),
+                field("fromVersion", updateConfig.get(ORIGIN_VERSION).asList()),
+                field("toProduct", updateConfig.get(DESTINATION_PRODUCT).asString()),
+                field("toVersion", updateConfig.get(DESTINATION_VERSION).asString()),
+                field("description", updateConfig.get(UPDATE_DESCRIPTION).asString()),
+                field("resource", updateConfig.get(UPDATE_RESOURCE).asString()),
+                field("restartRequired", updateConfig.get(UPDATE_RESTARTREQUIRED).asBoolean())
         ));
     }
 
@@ -396,15 +401,15 @@ public class UpdateManagerImpl implements UpdateManager {
     /**
      * Check if the file is for the correct version.
      *
-     * @param prop Properties of the archive.
+     * @param updateConfig Configuration for the archive.
      * @param updateFile the update archive file.
      * @throws InvalidArchiveUpdateException
      * @see ServerConstants#getVersion()
      */
-    private void validateCorrectVersion(Properties prop, File updateFile) throws InvalidArchiveUpdateException {
-        if (!ServerConstants.getVersion().equals(prop.getProperty(PROP_UPGRADESVERSION))) {
+    private void validateCorrectVersion(JsonValue updateConfig, File updateFile) throws InvalidArchiveUpdateException {
+        if (!updateConfig.get(ORIGIN_VERSION).asList().contains(ServerConstants.getVersion())) {
             throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName() +
-                    " can be used only to update version '" + prop.getProperty(PROP_UPGRADESVERSION) +
+                    " can be used only to update version '" + updateConfig.get(ORIGIN_VERSION).asList() +
                     "' and you are running version " + ServerConstants.getVersion());
         }
     }
@@ -412,15 +417,15 @@ public class UpdateManagerImpl implements UpdateManager {
     /**
      * Check if the file is for the correct product.
      *
-     * @param prop Properties of the archive.
+     * @param updateConfig Configuration for the archive.
      * @param updateFile the update archive file.
      * @throws InvalidArchiveUpdateException if the archive is not for the correct product.
      */
-    private void validateCorrectProduct(Properties prop, File updateFile) throws InvalidArchiveUpdateException {
-        if (!PRODUCT_NAME.equals(prop.getProperty(PROP_UPGRADESPRODUCT))) {
+    private void validateCorrectProduct(JsonValue updateConfig, File updateFile) throws InvalidArchiveUpdateException {
+        if (!PRODUCT_NAME.equals(updateConfig.get(ORIGIN_PRODUCT).asString())) {
             throw new InvalidArchiveUpdateException(updateFile.getName(),
                     "The archive " + updateFile.getName() + " can be used only to update '" +
-                            prop.getProperty(PROP_UPGRADESPRODUCT) + "' and you are running " + PRODUCT_NAME);
+                            updateConfig.get(ORIGIN_PRODUCT).asString() + "' and you are running " + PRODUCT_NAME);
         }
     }
 
@@ -551,9 +556,9 @@ public class UpdateManagerImpl implements UpdateManager {
     public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName)
             throws UpdateException {
 
-        final Properties prop = readProperties(archiveFile.toFile());
-        if (!PRODUCT_NAME.equals(prop.getProperty(PROP_UPGRADESPRODUCT)) ||
-                !ServerConstants.getVersion().equals(prop.getProperty(PROP_UPGRADESVERSION))) {
+        final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
+        if (!"OpenIDM".equals(updateConfig.get(ORIGIN_PRODUCT)) ||
+                !updateConfig.get(ORIGIN_VERSION).asList().contains(ServerConstants.getVersion())) {
             throw new UpdateException("Update archive does not apply to the installed product.");
         }
 
@@ -579,7 +584,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     throw new UpdateException("Unable to log update.", e);
                 }
 
-                updateThread = new UpdateThread(updateEntry, archive, fileStateChecker, installDir, prop,
+                updateThread = new UpdateThread(updateEntry, archive, fileStateChecker, installDir, updateConfig,
                         tempUnzipDir);
                 updateThread.start();
 
@@ -678,7 +683,7 @@ public class UpdateManagerImpl implements UpdateManager {
         private final Archive archive;
         private final FileStateChecker fileStateChecker;
         private final StaticFileUpdate staticFileUpdate;
-        private final Properties updateProperties;
+        private final JsonValue updateConfig;
         private final Path tempDirectory;
         private final long timestamp = new Date().getTime();
 
@@ -687,16 +692,16 @@ public class UpdateManagerImpl implements UpdateManager {
             this.archive = null;
             this.fileStateChecker = null;
             this.staticFileUpdate = null;
-            this.updateProperties = null;
+            this.updateConfig = null;
             this.tempDirectory = null;
         }
 
         public UpdateThread(UpdateLogEntry updateEntry, Archive archive, FileStateChecker fileStateChecker,
-                Path installDir, Properties updateProperties, Path tempDirectory) {
+                Path installDir, JsonValue updateConfig, Path tempDirectory) {
             this.updateEntry = updateEntry;
             this.archive = archive;
             this.fileStateChecker = fileStateChecker;
-            this.updateProperties = updateProperties;
+            this.updateConfig = updateConfig;
             this.tempDirectory = tempDirectory;
 
             this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
@@ -713,6 +718,14 @@ public class UpdateManagerImpl implements UpdateManager {
                 String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 final String installDir = IdentityServer.getInstance().getInstallLocation().toString();
 
+                // Start by removing all files we no longer need
+                for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
+                    Files.delete(Paths.get(installDir, file));
+                }
+
+                // Iterate over the checksums.csv "manifest" in the new update archive and process each file
+                // based on location and type of file.  Note that the old checksums.csv in the installed copy
+                // of IDM is used only to compare checksums with the existing files.
                 BundleHandler bundleHandler = new BundleHandler(
                         osgiFrameworkService.getSystemBundle().getBundleContext(), BUNDLE_BACKUP_EXT + timestamp,
                         new LogHandler() {
@@ -825,7 +838,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 }
             }
 
-            if (Boolean.valueOf(updateProperties.getProperty(PROP_RESTARTREQUIRED).toUpperCase())) {
+            if (updateConfig.get(UPDATE_RESTARTREQUIRED).asBoolean()) {
                 try {
                     restart();
                 } catch (BundleException e) {
@@ -882,27 +895,37 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     private String getDateString() {
-        // Ex: 2011-09-09T14:58:17.654+02:00
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SXXX");
-        return formatter.format(new Date());
+        return getDateString(new Date());
     }
 
-    Properties readProperties(File file) throws InvalidArchiveUpdateException {
-        Properties prop = new Properties();
+    private String getDateString(Date date) {
+        // Ex: 2011-09-09T14:58:17.654+02:00
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ss.SXXX");
+        return formatter.format(date);
+    }
+
+    JsonValue readUpdateConfig(File file) throws UpdateException {
         try {
             ZipFile zip = new ZipFile(file);
             Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
-            zip.extractFile("openidm/package.properties", tmpDir.toString());
-            try (InputStream inp = new FileInputStream(tmpDir.toString() + "/openidm/package.properties")) {
-                prop.load(inp);
-                return prop;
+            zip.extractFile(UPDATE_CONFIG_FILE, tmpDir.toString());
+            try (InputStream inp = new FileInputStream(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE)) {
+                StringBuilder sb = new StringBuilder();
+                Reader reader = new InputStreamReader(inp, "UTF-8");
+                char[] buf = new char[1024];
+                int chr = reader.read(buf);
+                while(chr > 0) {
+                    sb.append(buf, 0, chr);
+                    chr = reader.read(buf);
+                }
+                return JsonUtil.parseStringified(sb.toString());
             } catch (IOException e) {
-                throw new InvalidArchiveUpdateException(file.getName(), "Unable to load package properties.", e);
+                throw new UpdateException("Unable to load " + UPDATE_CONFIG_FILE + ".", e);
             } finally {
-                new File(tmpDir.toString() + "/openidm/package.properties").delete();
+                new File(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE).delete();
             }
         } catch (IOException | ZipException e) {
-            throw new InvalidArchiveUpdateException(file.getName(), "Unable to load package properties.", e);
+            throw new UpdateException("Unable to load " + UPDATE_CONFIG_FILE + ".", e);
         }
     }
 
