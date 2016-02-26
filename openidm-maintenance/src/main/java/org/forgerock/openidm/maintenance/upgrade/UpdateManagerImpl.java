@@ -93,7 +93,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Basic manager to initiate the product maintenance and upgrade mechanisms.
  */
-@Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
+@Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, metatype = false,
+        description = "OpenIDM Update Manager", immediate = true)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -145,10 +146,9 @@ public class UpdateManagerImpl implements UpdateManager {
         BundleContext bundleContext = compContext.getBundleContext();
         Filter filter = bundleContext
                 .createFilter("(" + Constants.OBJECTCLASS + "=org.forgerock.commons.launcher.OSGiFramework)");
-        ServiceTracker<OSGiFrameworkService, OSGiFrameworkService> serviceTracker =
-                new ServiceTracker<>(bundleContext, filter, null);
+        ServiceTracker serviceTracker = new ServiceTracker(bundleContext, filter, null);
         serviceTracker.open(true);
-        this.osgiFrameworkService = serviceTracker.getService();
+        this.osgiFrameworkService = (OSGiFrameworkService) serviceTracker.getService();
 
         if (osgiFrameworkService != null) {
             logger.debug("Obtained OSGiFrameworkService", compContext.getProperties());
