@@ -59,7 +59,8 @@ require.config({
         "ldapjs-filter": "libs/ldapjs-filter-2253-min",
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
         dimple : "libs/dimple-2.1.2-min",
-        sinon : "libs/sinon-1.15.4"
+        sinon : "libs/sinon-1.15.4",
+        dragula : "libs/dragula-3.6.7-min"
     },
 
     shim: {
