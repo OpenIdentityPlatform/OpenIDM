@@ -30,7 +30,8 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
-    "org/forgerock/commons/ui/common/util/UIUtils"
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "dragula"
 ], function($, _,
             BootstrapDialog,
             Handlebars,
@@ -43,7 +44,9 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             Constants,
             ValidatorsManager,
             SiteConfigurationDelegate,
-            UIUtils) {
+            UIUtils,
+            dragula) {
+
     var DashboardView = AdminAbstractView.extend({
         template: "templates/admin/dashboard/DashboardTemplate.html",
         events: {
@@ -68,8 +71,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             dashboardIndex: 0
         },
         render: function(args, callback) {
-            var counter = 0,
-                holderList = null;
+            var holderList = null;
 
             this.data.dashboard = Configuration.globalData.adminDashboard;
             this.model.uiConf = Configuration.globalData;
@@ -92,17 +94,27 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
 
             this.parentRender(_.bind(function() {
                 $(window).unbind("resize.dashboardResize");
+                var renderedWidgetCount = 0;
 
                 if (!_.isUndefined(this.data.dashboard.widgets) && this.data.dashboard.widgets.length > 0) {
                     holderList = this.$el.find(".widget-holder");
 
-                    _.each(this.data.dashboard.widgets, function (widget) {
-                        this.model.loadedWidgets.push(DashboardWidgetLoader.generateWidget({
-                            "element" : holderList[counter],
-                            "widget" : widget
-                        }));
+                    _.each(this.data.dashboard.widgets, function (widget, index) {
+                        this.model.loadedWidgets.push(DashboardWidgetLoader.generateWidget(
+                            {
+                                "element" : holderList[index],
+                                "widget" : widget
+                            },
+                            // This callback is used to make sure every widget has been rendered before initiating the
+                            // drag and drop utility.
+                            _.bind(function() {
+                                renderedWidgetCount ++;
+                                if (renderedWidgetCount === this.data.dashboard.widgets.length) {
+                                    this.initDragDrop();
+                                }
+                            }, this))
+                        );
 
-                        counter++;
                     }, this);
                 }
 
@@ -117,11 +129,37 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
                             }
                         }, this);
                     }
+                    this.initDragDrop();
+
                 }, this));
 
-                if(callback){
+                if (callback) {
                     callback();
                 }
+            }, this));
+        },
+
+        initDragDrop: function() {
+            var start,
+                dragDropInstance = dragula([this.$el.find("#dashboardWidgets")[0]], {
+                    moves: function (el, container, handle) {
+
+                        return handle.className.indexOf("fa-arrows") > -1 || handle.className.indexOf("btn-move") > -1;
+                    }
+                });
+
+            dragDropInstance.on("drag", _.bind(function(el, container) {
+                start = _.indexOf($(container).find(".widget-holder"), el);
+            }, this));
+
+            dragDropInstance.on("drop", _.bind(function(el, container) {
+                var widgetCopy = this.data.dashboard.widgets[start],
+                    stop = _.indexOf($(container).find(".widget-holder"), el);
+
+                this.data.dashboard.widgets.splice(start, 1);
+                this.data.dashboard.widgets.splice(stop, 0, widgetCopy);
+
+                this.saveChanges("dashboardWidgetsRearranged", false);
             }, this));
         },
 
@@ -258,8 +296,6 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
                     }
                 ]
             });
-
-
         },
 
         defaultDashboard: function(e) {
@@ -317,6 +353,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
                 }, this));
             }, this));
         },
+
         deleteWidget: function(event) {
             event.preventDefault();
 

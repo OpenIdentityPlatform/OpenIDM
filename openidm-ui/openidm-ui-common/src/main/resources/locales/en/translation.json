@@ -47,6 +47,7 @@
         "start" : "Start",
         "refresh" : "Refresh",
         "generalConfig" : {
+            "xsmall" : "Extra-Small",
             "small" : "Small",
             "medium" : "Medium",
             "large" : "Large",
@@ -121,6 +122,7 @@
                 "dashboardDefaulted": "Current dashboard is now the default",
                 "dashboardDuplicated": "Current dashboard duplicated",
                 "dashboardRenamed": "Current dashboard renamed",
+                "dashboardWidgetsRearranged": "Widgets Rearranged"
                 "dashboardWidgetAdded": "Widget added to dashboard",
                 "dashboardWidgetConfigurationSaved": "Widget configuration saved"
             },
