@@ -229,7 +229,7 @@ public class UpdateCommandTest {
                                 field("updates",
                                         array(object(
                                                 field("archive", "test.zip"),
-                                                field("restartRequired", "false")
+                                                field("restartRequired", false)
                                         ))
                                 ),
                                 field("rejects", array())
@@ -272,7 +272,7 @@ public class UpdateCommandTest {
                                 field("updates",
                                         array(object(
                                                 field("archive", "test.zip"),
-                                                field("restartRequired", "false")
+                                                field("restartRequired", false)
                                         ))
                                 ),
                                 field("rejects", array())
@@ -324,7 +324,7 @@ public class UpdateCommandTest {
                                 field("updates",
                                         array(object(
                                                 field("archive", "test.zip"),
-                                                field("restartRequired", "false")
+                                                field("restartRequired", false)
                                         ))
                                 ),
                                 field("rejects", array())
@@ -381,7 +381,7 @@ public class UpdateCommandTest {
                                 field("updates",
                                         array(object(
                                                 field("archive", "test.zip"),
-                                                field("restartRequired", "false")
+                                                field("restartRequired", false)
                                         ))
                                 ),
                                 field("rejects", array())
@@ -441,7 +441,7 @@ public class UpdateCommandTest {
                                 field("updates",
                                         array(object(
                                                 field("archive", "test.zip"),
-                                                field("restartRequired", "true")
+                                                field("restartRequired", true)
                                         ))
                                 ),
                                 field("rejects", array())
