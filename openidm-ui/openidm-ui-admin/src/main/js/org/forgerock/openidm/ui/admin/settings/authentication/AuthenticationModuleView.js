@@ -85,7 +85,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 configs,
                 this.getAuthenticationData()
             );
-            
+
             this.addOpenAMUISettings();
 
             // this.model.authModules should not be altered until a save is done.  Use this.model.changes for the local copy.
@@ -163,7 +163,6 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                     content: function () {
                         return $(this).attr("data-title");
                     },
-                    trigger: 'hover click',
                     placement: 'top',
                     container: 'body',
                     html: 'true',
@@ -285,26 +284,26 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
 
             return index;
         },
-        
+
         handleOpenAMUISettings: function (config) {
             var prom = $.Deferred(),
                 amAuthIndex = _.findIndex(this.model.changes, { name: "OPENAM_SESSION" }),
                 amSettings = _.pick(config.properties, this.data.amUIProperties, "openamDeploymentUrl");
-            
+
             amSettings.openamAuthEnabled = config.enabled;
             delete amSettings.enabled;
-            
+
             this.model.amSettings = amSettings;
-            
+
             //before saving these properties need to be changed back to the untranslated versions
             this.model.changes[amAuthIndex].properties.truststoreType = this.data.amTruststoreType;
             this.model.changes[amAuthIndex].properties.truststoreFile = this.data.amTruststoreFile;
             this.model.changes[amAuthIndex].properties.truststorePassword = this.data.amTruststorePassword;
         },
-        
+
         addOpenAMUISettings: function () {
             var amAuthIndex = _.findIndex(this.model.authModules, { name: "OPENAM_SESSION" });
-            
+
             if (!this.model.changes && amAuthIndex >= 0) {
                 //add amUIProperties
                 this.model.authModules[amAuthIndex].properties = _.extend(

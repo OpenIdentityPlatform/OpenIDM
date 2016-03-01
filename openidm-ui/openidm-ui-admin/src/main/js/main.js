@@ -144,7 +144,11 @@ require.config({
             deps: ["d3"]
         },
         bootstrap: {
-            deps: ["jquery"]
+            deps: ["jquery"],
+            init: function ($) {
+                $.fn.popover.Constructor.DEFAULTS.trigger = 'hover focus';
+                return this.bootstrap;
+            }
         },
         placeholder: {
             deps: ["jquery"]
