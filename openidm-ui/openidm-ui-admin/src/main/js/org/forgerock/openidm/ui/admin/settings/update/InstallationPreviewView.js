@@ -106,7 +106,6 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
                         SpinnerManager.hideSpinner();
 
                         this.$el.find('[data-toggle="popover"]').popover({
-                            trigger: 'hover click',
                             placement: 'top',
                             container: 'body',
                             title: ''

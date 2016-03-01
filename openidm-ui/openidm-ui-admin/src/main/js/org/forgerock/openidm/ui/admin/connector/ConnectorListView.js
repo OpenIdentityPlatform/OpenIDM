@@ -160,7 +160,6 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                             content: function () {
                                 return '<span class="text-danger">' +$(this).attr("data-title") +'</span>';
                             },
-                            trigger:'hover',
                             placement:'top',
                             container: 'body',
                             html: 'true',
@@ -173,7 +172,6 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                             content: function () {
                                 return '<span class="text-warning">' +$(this).attr("data-title") +'</span>';
                             },
-                            trigger:'hover',
                             placement:'top',
                             container: 'body',
                             html: 'true',

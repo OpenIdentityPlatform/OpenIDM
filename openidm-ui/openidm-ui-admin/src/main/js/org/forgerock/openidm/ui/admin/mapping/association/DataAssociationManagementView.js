@@ -170,7 +170,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                 totalRecords = recon.statusSummary.FAILURE + recon.statusSummary.SUCCESS,
                 renderGrid = _.bind(function (container, callback) {
                     var situations = selectedSituation || $("#situationSelection",this.$el).val().split(",");
-                    
+
                     this.buildAnalysisGrid(situations, totalRecords);
                 }, this);
 
@@ -209,11 +209,11 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
         },
         getCols: function () {
             var _this = this;
-            
+
             return [
                     {
-                        "name": "sourceObjectDisplay", 
-                        "label": $.t("templates.mapping.source"), 
+                        "name": "sourceObjectDisplay",
+                        "label": $.t("templates.mapping.source"),
                         "sortable": false,
                         "editable": false,
                         "headerCell": BackgridUtils.FilterHeaderCell,
@@ -226,7 +226,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                                 if (sourceObject) {
                                     translatedObject= syncDelegate.translateToTarget(sourceObject, _this.mapping);
                                     txt =  mappingUtils.buildObjectRepresentation(translatedObject, _this.data.targetProps);
-    
+
                                     if (_.contains(_this.data.newLinkIds,sourceObject._id)) {
                                         txt = "<span class='newLinkWarning errorMessage fa fa-exclamation-triangle' title='" + $.t("templates.mapping.analysis.newLinkCreated") + "'></span> " + txt;
                                     }
@@ -243,15 +243,15 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                         })
                     },
                     {
-                        "name":"linkQualifier", 
-                        "label": $.t("templates.mapping.linkQualifier"), 
+                        "name":"linkQualifier",
+                        "label": $.t("templates.mapping.linkQualifier"),
                         "sortable": false,
                         "editable": false,
                         "cell": "string"
                     },
                     {
-                        "name": "targetObjectDisplay", 
-                        "label": $.t("templates.mapping.target"), 
+                        "name": "targetObjectDisplay",
+                        "label": $.t("templates.mapping.target"),
                         "sortable": false,
                         "editable": false,
                         "headerCell": BackgridUtils.FilterHeaderCell,
@@ -303,7 +303,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                     },
                     sync: function (method, collection, options) {
                         var params = [];
-                        
+
                         _.forIn(options.data, function (val, key) {
                                 switch(key) {
                                     case "per_page":
@@ -331,17 +331,16 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                                 response: response
                             });
                         };
-                        
+
                         return ServiceInvoker.restCall(options).then(function (result) {
                             $(grid_id).find(".newLinkWarning").popover({
                                 content: function () { return $(this).attr("data-original-title");},
-                                trigger:'hover',
                                 placement:'top',
                                 container: 'body',
                                 html: 'true',
                                 title: ''
                             });
-                            
+
                             _this.$el.find(".actionButton").prop('disabled',true);
                         });
                     },
@@ -354,9 +353,9 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                 }),
                 reconGrid,
                 paginator;
-            
+
             this.model.recons = new ReconCollection();
-            
+
             reconGrid = new Backgrid.Grid({
                 className: "backgrid table table-hover",
                 emptyText: $.t("templates.admin.ResourceList.noData"),
@@ -395,12 +394,12 @@ define("org/forgerock/openidm/ui/admin/mapping/association/DataAssociationManage
                 this.data.selectedItems = _.without(this.data.selectedItems, model.id);
             }
             this.toggleActions();
-            
+
         },
 
         bindDefaultHandlers: function () {
             var _this = this;
-            
+
             this.model.recons.on("backgrid:selected", _.bind(function (model, selected) {
                 this.onRowSelect(model, selected);
             }, this));

@@ -43,7 +43,6 @@ define("org/forgerock/openidm/ui/admin/util/ReconDetailsView", [
             this.parentRender(_.bind(function () {
                 this.$el.find(".fa-info-circle").popover({
                     content: function () { return $(this).attr("data-title");},
-                    trigger:'hover',
                     container: 'body',
                     placement:'top',
                     html: 'true',

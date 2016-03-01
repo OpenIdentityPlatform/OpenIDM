@@ -1,31 +1,36 @@
 /*
  * @param callback {function}
- * 
+ *
  * example of how to use this command in tests:
- * 
+ *
  * client.config.resetAll(function() {
  *     whateverYouWantToHappenAfterAllTheConfigFilesAreReturnedToTheirOriginalState();
  * });
- * 
+ *
  */
 exports.command = function (callback) {
-    var _ = require("lodash"),
-        promCount = 0,
-        configCount;
-    
+    var _ = require("lodash");
+
     if (this.globals.configCache) {
-        configCount = _.keys(this.globals.configCache).length;
-        _.each(this.globals.configCache, _.bind(function (val,key) {
-            promCount++;
-            this.config.reset(key, _.bind(function () {
-                if (promCount === configCount) {
-                    callback();
-                }
-            }, this));
-        }, this));
+        Promise.all(
+            _.map(_.keys(this.globals.configCache), _.bind(function (key) {
+                return this.config.reset(key);
+            }, this))
+        )
+        .then(function() {
+
+            if (callback) {
+                callback();
+            }
+
+            return this;
+        });
     } else {
-        callback();
+
+        if (callback) {
+            callback();
+        }
+        
+        return this;
     }
-    
-    return this;
-}
+};
