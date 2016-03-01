@@ -472,7 +472,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                         .attr("text-anchor", function(data) {
                             return data.children || data._children ? "end" : "start";
                         })
-                        .html(function(data) { return data.name; })
+                        .text(function(data) { return data.name; })
                         .style("fill-opacity", 1);
 
                     //Generate the paths
