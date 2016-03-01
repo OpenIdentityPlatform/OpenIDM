@@ -107,8 +107,9 @@ public class UpdateManagerImpl implements UpdateManager {
 
     private final static Logger logger = LoggerFactory.getLogger(UpdateManagerImpl.class);
 
-    private static final String UPDATE_CONFIG_FILE = "openidm/update.json";
+    private static final String UPDATE_CONFIG_FILE = "update.json";
     private static final Path CHECKSUMS_FILE = Paths.get(".checksums.csv");
+    private static final Path CHECKSUMS_FILE_IN_OPENIDM = Paths.get("openidm/.checksums.csv");
     private static final Path BUNDLE_PATH = Paths.get("bundle");
     private static final Path CONF_PATH = Paths.get("conf");
     private static final String JSON_EXT = ".json";
@@ -315,6 +316,7 @@ public class UpdateManagerImpl implements UpdateManager {
         final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
         validateCorrectProduct(updateConfig, archiveFile.toFile());
         validateCorrectVersion(updateConfig, archiveFile.toFile());
+        validateHasChecksumFile(archiveFile.toFile());
 
         return withTempDirectory("openidm-upgrade-",
                 new Function<Path, R, UpdateException>() {
@@ -349,6 +351,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 JsonValue updateConfig = readUpdateConfig(file);
                 validateCorrectProduct(updateConfig, file);
                 validateCorrectVersion(updateConfig, file);
+                validateHasChecksumFile(file);
 
                 updates.add(validArchive(file, updateConfig, getArchiveDigest(checksumFile, file)).getObject());
             } catch (InvalidArchiveUpdateException e) {
@@ -444,6 +447,22 @@ public class UpdateManagerImpl implements UpdateManager {
         if (!archiveFile.getName().endsWith(".zip")) {
             throw new InvalidArchiveUpdateException(archiveFile.getName(),
                     archiveFile.getName() + " does not have '.zip' extension.");
+        }
+    }
+
+    /**
+     * Check if the checksums file in the zip file is present and can be resolved.
+     *
+     * @param updateFile the update archive file.
+     * @throws InvalidArchiveUpdateException
+     */
+    private void validateHasChecksumFile(File updateFile) throws InvalidArchiveUpdateException {
+        try {
+            resolveChecksumFile(
+                    extractFileToDirectory(updateFile, CHECKSUMS_FILE_IN_OPENIDM));
+        } catch (Exception e) {
+            throw new InvalidArchiveUpdateException(updateFile.getName(),
+                    "Archive doesn't appear to contain checksums file.", e);
         }
     }
 
@@ -564,6 +583,7 @@ public class UpdateManagerImpl implements UpdateManager {
         final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
         validateCorrectProduct(updateConfig, archiveFile.toFile());
         validateCorrectVersion(updateConfig, archiveFile.toFile());
+        validateHasChecksumFile(archiveFile.toFile());
 
         Path tempUnzipDir = null;
         try {
@@ -610,6 +630,7 @@ public class UpdateManagerImpl implements UpdateManager {
         final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
         validateCorrectProduct(updateConfig, archiveFile.toFile());
         validateCorrectVersion(updateConfig, archiveFile.toFile());
+        validateHasChecksumFile(archiveFile.toFile());
 
         try {
             ZipFile zip = new ZipFile(archiveFile.toFile());
@@ -928,28 +949,46 @@ public class UpdateManagerImpl implements UpdateManager {
         return formatter.format(date);
     }
 
-    JsonValue readUpdateConfig(File file) throws UpdateException {
+    /**
+     * Given a zip file, this will extract the specified file into the returned directory.
+     * @param zipFile the zip file given
+     * @param fileToExtract the path to the file to extract from the zipFile
+     * @return the directory that holds the file to be extracted
+     * @throws UpdateException
+     */
+    Path extractFileToDirectory(File zipFile, Path fileToExtract) throws UpdateException {
         try {
-            ZipFile zip = new ZipFile(file);
+            ZipFile zip = new ZipFile(zipFile);
             Path tmpDir = Files.createTempDirectory(UUID.randomUUID().toString());
-            zip.extractFile(UPDATE_CONFIG_FILE, tmpDir.toString());
-            try (InputStream inp = new FileInputStream(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE)) {
-                StringBuilder sb = new StringBuilder();
-                Reader reader = new InputStreamReader(inp, "UTF-8");
-                char[] buf = new char[1024];
-                int chr = reader.read(buf);
-                while(chr > 0) {
-                    sb.append(buf, 0, chr);
-                    chr = reader.read(buf);
-                }
-                return JsonUtil.parseStringified(sb.toString());
-            } catch (IOException e) {
-                throw new UpdateException("Unable to load " + UPDATE_CONFIG_FILE + ".", e);
-            } finally {
-                new File(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE).delete();
-            }
+            zip.extractFile(fileToExtract.toString(), tmpDir.toString());
+            return tmpDir.resolve(fileToExtract).getParent();
         } catch (IOException | ZipException e) {
+            throw new UpdateException("Unable to load " + fileToExtract + ".", e);
+        }
+    }
+
+    /**
+     * Given a zip file, this will read data in UPDATE_CONFIG_FILE.
+     * @param file the zip file given
+     * @return jsonValue that holds data read from UPDATE_CONFIG_FILE.
+     * @throws UpdateException
+     */
+    JsonValue readUpdateConfig(File file) throws UpdateException {
+        Path tmpDir = extractFileToDirectory(file, Paths.get("openidm/" + UPDATE_CONFIG_FILE));
+        try (InputStream inp = new FileInputStream(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE)) {
+            StringBuilder sb = new StringBuilder();
+            Reader reader = new InputStreamReader(inp, "UTF-8");
+            char[] buf = new char[1024];
+            int chr = reader.read(buf);
+            while(chr > 0) {
+                sb.append(buf, 0, chr);
+                chr = reader.read(buf);
+            }
+            return JsonUtil.parseStringified(sb.toString());
+        } catch (IOException e) {
             throw new UpdateException("Unable to load " + UPDATE_CONFIG_FILE + ".", e);
+        } finally {
+            new File(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE).delete();
         }
     }
 
