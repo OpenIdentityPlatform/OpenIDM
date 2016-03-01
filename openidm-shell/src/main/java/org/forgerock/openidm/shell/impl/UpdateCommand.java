@@ -257,7 +257,7 @@ public class UpdateCommand {
      */
     private static boolean isRestartRequired(UpdateExecutionState state) {
         JsonValue archiveData = state.getArchiveData();
-        return (null != archiveData && archiveData.get("restartRequired").defaultTo("false").asBoolean());
+        return (null != archiveData && archiveData.get("restartRequired").defaultTo(false).asBoolean());
     }
 
     /**
