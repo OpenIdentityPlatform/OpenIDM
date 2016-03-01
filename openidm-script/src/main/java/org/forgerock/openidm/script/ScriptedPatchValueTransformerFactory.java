@@ -14,7 +14,7 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-package org.forgerock.openidm.script.impl;
+package org.forgerock.openidm.script;
 
 import java.util.HashMap;
 import java.util.Map;
