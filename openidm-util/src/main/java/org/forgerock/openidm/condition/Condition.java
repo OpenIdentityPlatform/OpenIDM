@@ -11,27 +11,26 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2016 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
-package org.forgerock.openidm.util;
+package org.forgerock.openidm.condition;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 
 /**
- * A class that provides static methods for instantiating {@link Condition} objects.
+ * Represents a condition on which a property mapping may be applied, or a policy may be enforced.
  */
-public class Conditions {
-    
+public interface Condition {
+
     /**
-     * Creates a new {@link Condition} object based on the supplied configuration.  Currently a condition configuration
-     * can represent a filter string or a script configuration.
+     * Evaluates the condition.  Returns true if the condition is met, false otherwise.
      * 
-     * @param config An Object representing a condition configuration.
-     * @return
+     * @param params parameters to use during evaluation.
+     * @param context the {@link Context} associated with this evaluation.
+     * @return true if the condition is met, false otherwise.
+     * @throws JsonValueException if errors are encountered.
      */
-    public static Condition newCondition(Object config) {
-        return new Condition(new JsonValue(config));
-    };
+    boolean evaluate(JsonValue params, Context context) throws JsonValueException;
 }

@@ -11,11 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2014-2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.openidm.util;
+package org.forgerock.openidm.condition;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -83,6 +83,5 @@ public class ConditionsTest {
     @Test(dataProvider = "filterData")
     public void testEvaluateCondition(String filter, Boolean state) throws JsonValueException {
         assertThat(Conditions.newCondition(json(filter)).evaluate(testObject, new RootContext())).isEqualTo(state);
-        assertThat(Conditions.newCondition(json(filter)).evaluate(testObject)).isEqualTo(state);
     }
 }

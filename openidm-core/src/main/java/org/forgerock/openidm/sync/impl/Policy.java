@@ -20,10 +20,11 @@ package org.forgerock.openidm.sync.impl;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.sync.ReconAction;
+import org.forgerock.openidm.condition.Conditions;
 import org.forgerock.openidm.util.Script;
 import org.forgerock.openidm.util.Scripts;
 import org.forgerock.services.context.Context;
-import org.forgerock.openidm.util.Condition;
+import org.forgerock.openidm.condition.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -74,7 +75,7 @@ class Policy {
     public Policy(JsonValue config) {
         situation = config.get("situation").required().asEnum(Situation.class);
         JsonValue action = config.get("action").required();
-        condition =  new Condition(config.get("condition"));
+        condition =  Conditions.newCondition(config.get("condition"));
         if (action.isString()) {
             this.action = action.asEnum(ReconAction.class);
             this.script = null;

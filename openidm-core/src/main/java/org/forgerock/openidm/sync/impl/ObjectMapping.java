@@ -34,6 +34,7 @@ import java.util.concurrent.Callable;
 import javax.script.ScriptException;
 
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.openidm.condition.Conditions;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -55,7 +56,7 @@ import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.TriggerContext;
-import org.forgerock.openidm.util.Condition;
+import org.forgerock.openidm.condition.Condition;
 import org.forgerock.openidm.util.RequestUtil;
 import org.forgerock.openidm.util.Script;
 import org.forgerock.openidm.util.Scripts;
@@ -250,7 +251,7 @@ class ObjectMapping {
         targetIdsCaseSensitive = config.get("targetIdsCaseSensitive").defaultTo(Boolean.TRUE).asBoolean();
         validSource = Scripts.newScript(config.get("validSource"));
         validTarget = Scripts.newScript(config.get("validTarget"));
-        sourceCondition = new Condition(config.get("sourceCondition"));
+        sourceCondition = Conditions.newCondition(config.get("sourceCondition"));
         correlation = new Correlation(config);
         JsonValue linkQualifiersValue = config.get("linkQualifiers");
         if (linkQualifiersValue.isNull()) {
