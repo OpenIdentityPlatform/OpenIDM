@@ -46,7 +46,7 @@ exports.command = function (configId, callback) {
                 if (callback) {
                     callback(result.value);
                 }
-                
+
                 return this;
             }
         );
