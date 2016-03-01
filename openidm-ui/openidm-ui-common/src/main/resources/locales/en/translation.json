@@ -432,7 +432,13 @@
                 "type": "Type",
                 "showChart": "Show Chart",
                 "showList": "Show List",
-                "conflictWithExistingRelationship": "Conflict with Existing Relationship"
+                "conflictWithExistingRelationship": "Conflict with Existing Relationship",
+                "condition": "Condition",
+                "enableCondition": "Enable Condition",
+                "query": "Query"
+            },
+            "RoleEdit": {
+                "conditionTabDescription" : "Dynamically assign members to this role based on a query filter."
             },
             "ResourceList":
             {
