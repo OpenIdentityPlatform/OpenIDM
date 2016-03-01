@@ -11,143 +11,43 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.openidm.util;
+package org.forgerock.openidm.condition;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
-
-import javax.script.ScriptException;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
- * Represents a condition on which a property mapping may be applied, or a policy may be enforced.
+ * A Condition evaluated as a QueryFilter.
  */
-public class Condition {
-    
-    /** 
-     * Logger 
-     */
-    private final static Logger LOGGER = LoggerFactory.getLogger(Condition.class);
-    
-    /**
-     * The types of conditions.
-     */
-    private enum Type {
-        /**
-         * A condition evaluated by a script.
-         */
-        SCRIPTED,
-        /**
-         * A condition evaluated by a matching "queryFilter".
-         */
-        QUERY_FILTER,
-        /**
-         * A condition which always passes. This is used if a null configuration is passed in.
-         */
-        TRUE
-    }
+class QueryFilterCondition implements Condition {
+
+    /** the query filter to evaluate */
+    private final QueryFilter<JsonPointer> queryFilter;
 
     /**
-     * This condition's type
+     * Construct the condition from a query filter.
+     *
+     * @param queryFilter the query filter to evaluate
      */
-    private Type type;
-    
-    /**
-     * The query filter if configured
-     */
-    private QueryFilter<JsonPointer> queryFilter;
-    
-    /**
-     * The condition script if configured
-     */
-    private Script script;
-    
-    /**
-     * The constructor.
-     * 
-     * @param config the condition configuration
-     */
-    public Condition(JsonValue config) {
-        if (config.isNull()) {
-            init(Type.TRUE, null, null);
-        } else if (config.isString()) {
-            init(Type.QUERY_FILTER, QueryFilters.parse(config.asString()), null);
-        } else {
-            init(Type.SCRIPTED, null, Scripts.newScript(config));
-        }
-    }
-    
-    /**
-     * Initializes the condition fields.
-     * 
-     * @param type the conditions type.
-     * @param queryFilter the query filter.
-     * @param script the condition script.
-     */
-    private void init(Type type, QueryFilter<JsonPointer> queryFilter, Script script) {
-        this.type = type;
+    QueryFilterCondition(QueryFilter<JsonPointer> queryFilter) {
         this.queryFilter = queryFilter;
-        this.script = script;
     }
-    
-    /**
-     * Evaluates the condition.  Returns true if the condition is met, false otherwise.
-     * 
-     * @param params parameters to use during evaluation.
-     * @return true if the condition is met, false otherwise.
-     * @throws JsonValueException if errors are encountered.
-     */
-    public boolean evaluate(Object params) throws JsonValueException {
-        return evaluate(new JsonValue(params), new RootContext());
-    }
-    
-    /**
-     * Evaluates the condition.  Returns true if the condition is met, false otherwise.
-     * 
-     * @param params parameters to use during evaluation.
-     * @param context the {@link Context} associated with this evaluation.
-     * @return true if the condition is met, false otherwise.
-     * @throws JsonValueException if errors are encountered.
-     */
+
+    @Override
     public boolean evaluate(JsonValue params, Context context) throws JsonValueException {
-        switch (type) {
-        case TRUE:
-            return true;
-        case QUERY_FILTER:
-            return queryFilter == null ? false : queryFilter.accept(JSONVALUE_FILTER_VISITOR, params);
-        case SCRIPTED:
-            Map<String, Object> scope = new HashMap<String, Object>();
-            try {
-                if (params.isMap()) {
-                    scope.putAll(params.asMap());
-                }
-                Object o = script.exec(scope, context);
-                if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
-                    return false; // property mapping is not applicable; do not apply
-                }
-                return true;
-            } catch (ScriptException se) {
-                LOGGER.warn("Script encountered exception while evaluating condition", se);
-                throw new JsonValueException(params, se);
-            }
-        default:
-            return false;
-        }
+        return queryFilter == null
+                ? false
+                : queryFilter.accept(JSONVALUE_FILTER_VISITOR, params);
     }
 
     /**
@@ -157,7 +57,6 @@ public class Condition {
      */
     private static final QueryFilterVisitor<Boolean, JsonValue, JsonPointer> JSONVALUE_FILTER_VISITOR =
             new QueryFilterVisitor<Boolean, JsonValue, JsonPointer>() {
-
                 @Override
                 public Boolean visitAndFilter(final JsonValue p, final List<QueryFilter<JsonPointer>> subFilters) {
                     for (final QueryFilter<JsonPointer> subFilter : subFilters) {
@@ -175,7 +74,7 @@ public class Condition {
 
                 @Override
                 public Boolean visitContainsFilter(final JsonValue p, final JsonPointer field,
-                                                   final Object valueAssertion) {
+                        final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)) {
                             if (valueAssertion instanceof String) {
@@ -197,7 +96,7 @@ public class Condition {
 
                 @Override
                 public Boolean visitEqualsFilter(final JsonValue p, final JsonPointer field,
-                                                 final Object valueAssertion) {
+                        final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) == 0) {
                             return Boolean.TRUE;
@@ -208,14 +107,14 @@ public class Condition {
 
                 @Override
                 public Boolean visitExtendedMatchFilter(final JsonValue p, final JsonPointer field,
-                                                        final String matchingRuleId, final Object valueAssertion) {
+                        final String matchingRuleId, final Object valueAssertion) {
                     // Extended filters are not supported
                     return Boolean.FALSE;
                 }
 
                 @Override
                 public Boolean visitGreaterThanFilter(final JsonValue p, final JsonPointer field,
-                                                      final Object valueAssertion) {
+                        final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) > 0) {
                             return Boolean.TRUE;
@@ -226,7 +125,7 @@ public class Condition {
 
                 @Override
                 public Boolean visitGreaterThanOrEqualToFilter(final JsonValue p, final JsonPointer field,
-                                                               final Object valueAssertion) {
+                        final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) >= 0) {
                             return Boolean.TRUE;
@@ -237,7 +136,7 @@ public class Condition {
 
                 @Override
                 public Boolean visitLessThanFilter(final JsonValue p, final JsonPointer field,
-                                                   final Object valueAssertion) {
+                        final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) < 0) {
                             return Boolean.TRUE;
@@ -248,7 +147,7 @@ public class Condition {
 
                 @Override
                 public Boolean visitLessThanOrEqualToFilter(final JsonValue p, final JsonPointer field,
-                                                            final Object valueAssertion) {
+                        final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) <= 0) {
                             return Boolean.TRUE;
@@ -280,7 +179,7 @@ public class Condition {
 
                 @Override
                 public Boolean visitStartsWithFilter(final JsonValue p, final JsonPointer field,
-                                                     final Object valueAssertion) {
+                        final Object valueAssertion) {
                     for (final Object value : getValues(p, field)) {
                         if (isCompatible(valueAssertion, value)) {
                             if (valueAssertion instanceof String) {
@@ -311,31 +210,30 @@ public class Condition {
                     }
                 }
 
+                private int compareValues(final Object v1, final Object v2) {
+                    if (v1 instanceof String && v2 instanceof String) {
+                        final String s1 = (String) v1;
+                        final String s2 = (String) v2;
+                        return s1.compareToIgnoreCase(s2);
+                    } else if (v1 instanceof Number && v2 instanceof Number) {
+                        final Double n1 = ((Number) v1).doubleValue();
+                        final Double n2 = ((Number) v2).doubleValue();
+                        return n1.compareTo(n2);
+                    } else if (v1 instanceof Boolean && v2 instanceof Boolean) {
+                        final Boolean b1 = (Boolean) v1;
+                        final Boolean b2 = (Boolean) v2;
+                        return b1.compareTo(b2);
+                    } else {
+                        // Different types: we need to ensure predictable ordering,
+                        // so use class name as secondary key.
+                        return v1.getClass().getName().compareTo(v2.getClass().getName());
+                    }
+                }
+
+                private boolean isCompatible(final Object v1, final Object v2) {
+                    return (v1 instanceof String && v2 instanceof String)
+                            || (v1 instanceof Number && v2 instanceof Number)
+                            || (v1 instanceof Boolean && v2 instanceof Boolean);
+                }
             };
-
-    private static int compareValues(final Object v1, final Object v2) {
-        if (v1 instanceof String && v2 instanceof String) {
-            final String s1 = (String) v1;
-            final String s2 = (String) v2;
-            return s1.compareToIgnoreCase(s2);
-        } else if (v1 instanceof Number && v2 instanceof Number) {
-            final Double n1 = ((Number) v1).doubleValue();
-            final Double n2 = ((Number) v2).doubleValue();
-            return n1.compareTo(n2);
-        } else if (v1 instanceof Boolean && v2 instanceof Boolean) {
-            final Boolean b1 = (Boolean) v1;
-            final Boolean b2 = (Boolean) v2;
-            return b1.compareTo(b2);
-        } else {
-            // Different types: we need to ensure predictable ordering,
-            // so use class name as secondary key.
-            return v1.getClass().getName().compareTo(v2.getClass().getName());
-        }
-    }
-
-    private static boolean isCompatible(final Object v1, final Object v2) {
-        return (v1 instanceof String && v2 instanceof String)
-                || (v1 instanceof Number && v2 instanceof Number)
-                || (v1 instanceof Boolean && v2 instanceof Boolean);
-    }
 }
