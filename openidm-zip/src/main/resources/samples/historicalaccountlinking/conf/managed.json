@@ -595,7 +595,7 @@
                     "condition" : {
                         "description" : "A conditional filter for this role",
                         "title" : "Condition",
-                        "viewable" : true,
+                        "viewable" : false,
                         "searchable" : false,
                         "type" : "string"
                     }
@@ -609,7 +609,8 @@
                     "name",
                     "description",
                     "assignments",
-                    "members"
+                    "members",
+                    "condition"
                 ]
             }
         },

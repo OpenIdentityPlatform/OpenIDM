@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
             getFilterString: function () {
                 return this.serialize(this.data.filter);
             },
-            render: function (args) {
+            render: function (args, callback) {
                 this.setElement(args.element);
 
                 this.data = {
@@ -106,6 +106,10 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
                     this.data.filter = { "op": "none", "children": []};
                     this.delegateEvents(this.events);
                     this.renderExpressionTree();
+                }
+                
+                if (callback) {
+                    callback();
                 }
             }
         });
