@@ -121,6 +121,7 @@ module.exports = {
             client
                 .config.read("sync", function (sync) {
                     client.assert.equal(sync.mappings[0].recon, undefined,'Recon data successfully filtered out of sync json save');
+                    client.assert.equal(sync.mappings[0].properties.source, undefined,'Successfully saved empty mapping source');
                 });
         },
         'Check grid and filter': function (client) {
