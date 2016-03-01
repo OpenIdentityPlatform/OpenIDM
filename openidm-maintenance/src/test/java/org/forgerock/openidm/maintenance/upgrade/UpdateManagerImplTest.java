@@ -129,11 +129,29 @@ public class UpdateManagerImplTest {
                 field("resource", "url"),
                 field("restartRequired", false)
                 ));
-
+        when(updateManager.extractFileToDirectory(any(File.class), any(Path.class))).thenReturn(mock(Path.class));
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
         assertTrue(responseJson.get("rejects").asList().isEmpty(), "Archive should not be rejected.");
         assertTrue(responseJson.get("updates").get(0).get("archive").asString().equals("test.zip"),
                 "The archive should match our test filename.");
+    }
+
+    @Test
+    public void testListAvailableUpdatesMissingChecksum() throws Exception {
+        testConfig.add("origin", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", array(ServerConstants.getVersion()))
+        ));
+        when(updateManager.extractFileToDirectory(any(File.class), any(Path.class))).thenThrow(
+                new UpdateException("missing checksum file"));
+        JsonValue responseJson = updateManager.listAvailableUpdates();
+        logger.info("response json is {}", responseJson.toString());
+        assertFalse(responseJson.get("rejects").asList().isEmpty(),
+                "Rejects should be populated as checksum file is missing.");
+        assertTrue(responseJson.get("rejects").get(0).get("archive").asString().equals("test.zip"),
+                "The archive should match our test filename.");
+        assertTrue(responseJson.get("rejects").get(0).get("reason").asString().equals("Archive doesn't appear to contain checksums file."));
+        assertTrue(responseJson.get("rejects").get(0).get("errorMessage").asString().equals("missing checksum file"));
     }
 }
