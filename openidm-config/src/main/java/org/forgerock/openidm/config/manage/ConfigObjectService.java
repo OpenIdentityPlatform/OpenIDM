@@ -44,7 +44,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.script.impl.ScriptedPatchValueTransformerFactory;
+import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
