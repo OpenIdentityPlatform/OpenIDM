@@ -121,9 +121,6 @@ module.exports = {
                 },
                 dragHandle: {
                     selector: '.dragToSort'
-                },
-                sourceProperty: {
-                    selector: '.property-container:first .title'
                 }
             }
         },
