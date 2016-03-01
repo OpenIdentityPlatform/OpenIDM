@@ -64,7 +64,9 @@
             "icon" : "Icon",
             "noQuickStartLinks" : "No Quick Start Links",
             "updateQuicklink" : "Update Quick Link",
-            "addQuicklink" : "Add Quick Link"
+            "addQuicklink" : "Add Quick Link",
+            "viewProfile" : "View Profile",
+            "changePassword" : "Change Password"
         },
         "reconWidget" : {
             "editMapping" : "Edit Mapping",

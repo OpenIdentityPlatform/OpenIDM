@@ -50,6 +50,10 @@ require.config({
         moment: "libs/moment-2.8.1-min",
         contentflow: "libs/contentflow",
         selectize : "libs/selectize-0.12.1-min",
+        "backgrid": "libs/backgrid.min-0.3.5-min",
+        "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
+        "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
+        faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
         d3 : "libs/d3-3.5.5-min",
         dimple : "libs/dimple-2.1.2-min",
         jsonEditor: "libs/jsoneditor-0.7.9-min"
@@ -116,6 +120,16 @@ require.config({
         },
         placeholder: {
             deps: ["jquery"]
+        },
+        "backgrid": {
+            deps: ["jquery", "underscore", "backbone"],
+            exports: "Backgrid"
+        },
+        "backgrid-filter": {
+            deps: ["backgrid"]
+        },
+        "backgrid-paginator": {
+            deps: ["backgrid", "backbone.paginator"]
         }
     }
 });

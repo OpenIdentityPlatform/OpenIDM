@@ -23,7 +23,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget", [
     "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/commons/ui/common/main/EventManager",
     "backgrid",
-    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
+    "org/forgerock/commons/ui/common/util/BackgridUtils",
     "faiconpicker"
 ], function($, _, Backbone,
             AbstractWidget,
@@ -44,6 +44,8 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget", [
                 this.partials.push("partials/dashboard/widget/_quickStartConfig.html");
 
                 _.each(this.data.cards, function(card) {
+                    card.name = $.t(card.name);
+
                     if(card.event) {
                         this.events["click #" + card.uid] = function(e) {
                             e.preventDefault();
