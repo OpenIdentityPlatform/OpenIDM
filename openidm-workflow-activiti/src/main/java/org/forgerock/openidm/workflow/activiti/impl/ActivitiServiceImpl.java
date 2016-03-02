@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
@@ -268,7 +268,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                             JdbcDataSource jdbcDataSource = new org.h2.jdbcx.JdbcDataSource();
                             File root = IdentityServer.getFileForWorkingPath("db/activiti/database");
                             jdbcDataSource.setURL("jdbc:h2:file:" + URLDecoder.decode(root.getPath(), "UTF-8")
-                                    + ";DB_CLOSE_ON_EXIT=FALSE;DB_CLOSE_DELAY=1000");
+                                    + ";MVCC=FALSE;DB_CLOSE_DELAY=1000");
                             jdbcDataSource.setUser("sa");
                             configuration.setDatabaseType("h2");
                             configuration.setDataSource(jdbcDataSource);
@@ -381,7 +381,10 @@ public class ActivitiServiceImpl implements RequestHandler {
             }
             barInstallerConfiguration = null;
         }
-        if (processEngine != null && "h2".equals(((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDatabaseType() )) {
+        if (processEngine != null
+                && "h2".equals(((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDatabaseType())
+                && !dataSourceServices.containsKey(useDataSource)) {
+            // H2 is NOT the system-wide datastore, so we can shut it down here
             DataSource h2DdataSource = ((ProcessEngineImpl)processEngine).getProcessEngineConfiguration().getDataSource();
             java.sql.Connection conn = null;
             try {
