@@ -14,7 +14,7 @@
  * Copyright 2013-2016 ForgeRock AS.
  */
 
-package org.forgerock.openidm.servlet.internal;
+package org.forgerock.openidm.filter;
 
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
