@@ -73,7 +73,7 @@
                 "DisplayName" : {
                     "type" : "string",
                     "required" : true,
-                    "nativeName" : "DisplayName",
+                    "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
                 "GroupType" : {
@@ -84,12 +84,6 @@
                 "Description" : {
                     "type" : "string",
                     "nativeName" : "Description",
-                    "nativeType" : "string"
-                },
-                "__NAME__" : {
-                    "type" : "string",
-                    "required" : true,
-                    "nativeName" : "__NAME__",
                     "nativeType" : "string"
                 },
                 "LastDirSyncTime" : {
