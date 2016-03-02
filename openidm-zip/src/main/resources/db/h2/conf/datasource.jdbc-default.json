@@ -1,6 +1,6 @@
 {
     "driverClass" : "org.h2.Driver",
-    "jdbcUrl" : "jdbc:h2:&{launcher.working.location}/db/openidm;MODE=MySQL",
+    "jdbcUrl" : "jdbc:h2:&{launcher.working.location}/db/openidm;MODE=MySQL;MVCC=FALSE",
     "databaseName" : "openidm",
     "username" : "sa",
     "password" : "",
