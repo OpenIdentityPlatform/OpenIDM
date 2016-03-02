@@ -660,7 +660,7 @@ class ObjectMapping {
         EventEntry measure = Publisher.start(getObjectMappingEventName(), source, null);
         try {
             for (PropertyMapping property : properties) {
-                property.apply(source, oldSource, target, linkQualifier, context);
+                property.apply(source, oldSource, target, existingTarget, linkQualifier, context);
             }
             // Apply default mapping, if configured
             applyDefaultMappings(context, source, oldSource, target, existingTarget, linkQualifier);

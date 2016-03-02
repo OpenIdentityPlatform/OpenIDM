@@ -122,14 +122,15 @@ class PropertyMapping {
      * @param oldSource oldSource an optional previous source object before the change(s) that triggered the sync, null
      * if not provided
      * @param targetObject Current specified target property/object to modify
+     * @param oldTarget Existing, unmodified, target object
      * @param linkQualifier the link qualifier associated with the current sync
      * @param context a {@link Context} associated with this call
      * @throws SynchronizationException if errors are encountered.
      */
-    public void apply(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, String linkQualifier,
+    public void apply(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, JsonValue oldTarget, String linkQualifier,
             Context context) throws SynchronizationException {
         // optional property mapping condition
-        if (!evaluateCondition(sourceObject, oldSource, targetObject, linkQualifier, context)) {
+        if (!evaluateCondition(sourceObject, oldSource, targetObject, oldTarget, linkQualifier, context)) {
             return;
         }
         Object result = null;
@@ -169,11 +170,14 @@ class PropertyMapping {
      * @return true if the condition passes, false otherwise.
      * @throws SynchronizationException if errors are encountered.
      */
-    public boolean evaluateCondition(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, 
+    public boolean evaluateCondition(JsonValue sourceObject, JsonValue oldSource, JsonValue targetObject, JsonValue oldTarget,
             String linkQualifier, Context context) throws SynchronizationException {
-        JsonValue params = json(object(field("object", sourceObject), field("linkQualifier", linkQualifier)));
+        JsonValue params = json(object(field("object", sourceObject), field("target", targetObject), field("linkQualifier", linkQualifier)));
         if (oldSource != null) {
             params.put("oldSource", oldSource);
+        }
+        if (oldTarget != null) {
+            params.put("oldTarget", oldTarget);
         }
         return condition.evaluate(params, context);
     }
