@@ -81,7 +81,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
 
                 if (this.model.archiveModel && !this.model.runningID) {
 
-                    this.model.version = this.model.archiveModel.get("version");
+                    this.model.version = this.model.archiveModel.get("toVersion");
 
                     MaintenanceDelegate.update(this.model.archiveModel.get("archive")).then(_.bind(function(response) {
                         this.model.runningID = response._id;

@@ -84,7 +84,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
 
                     this.data = _.extend(this.data, _.pick(this.model, ["modifiedFilesExist", "all", "treeGrid"]));
                     this.data.link = this.model.archiveModel.get("resource");
-                    this.data.version = this.model.archiveModel.get("version");
+                    this.data.version = this.model.archiveModel.get("toVersion");
 
                     if (this.data.all && _.has(this.model, "allTreeGrid")) {
                         this.data.treeGrid = this.model.allTreeGrid;
