@@ -69,6 +69,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.filter.AuditFilter;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.filter.ScriptedFilter;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
