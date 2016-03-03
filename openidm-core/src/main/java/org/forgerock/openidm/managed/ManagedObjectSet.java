@@ -509,7 +509,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
                 decryptedOld, responseContent);
 
-        return response;
+        return connectionFactory.getConnection().read(context, Requests.newReadRequest(repoId(resourceId)));
     }
 
     /**
@@ -669,8 +669,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             // Sync any targets after managed object is created
             performSyncAction(managedContext, request, resourceId, SynchronizationService.SyncServiceAction.notifyCreate,
                     new JsonValue(null), content);
+
+            ResourceResponse readResponse =
+                    connectionFactory.getConnection().read(managedContext, Requests.newReadRequest(repoId(resourceId)));
             
-            return prepareResponse(managedContext, createResponse, request.getFields()).asPromise();
+            return prepareResponse(managedContext, readResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -856,7 +859,10 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             performSyncAction(managedContext, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
 
-            return prepareResponse(managedContext, resource, request.getFields()).asPromise();
+            ResourceResponse readResponse =
+                    connectionFactory.getConnection().read(managedContext, Requests.newReadRequest(repoId(resourceId)));
+
+            return prepareResponse(managedContext, readResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -1419,7 +1425,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     .setAdditionalParameter(SynchronizationService.ACTION_PARAM_RESOURCE_ID, resourceId)
                     .setContent(content);
 
-            final ResourceException[] syncScriptError = new ResourceException[] { null };
             JsonValue details;
             boolean success = false;
             try {
@@ -1436,8 +1441,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             
             try {
             	// Execute the sync script
-                JsonValue scriptBindings = prepareScriptBindings(context, request, resourceId, oldValue, newValue);
-                Map<String,Object> syncResults = new HashMap<String,Object>();
+                ResourceResponse readResponse =
+                        connectionFactory.getConnection().read(context, Requests.newReadRequest(repoId(resourceId)));
+                JsonValue scriptBindings = prepareScriptBindings(context, request, resourceId, oldValue,
+                        readResponse.getContent());
+                Map<String,Object> syncResults = new HashMap<>();
                 syncResults.put("success", success);
                 syncResults.put("action", action.name());
                 syncResults.put("syncDetails", details.getObject());
@@ -1447,9 +1455,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 logger.warn("Failed executing onSync script on {} {}:{}",
                         syncRequest.getAction(), name, syncRequest.getResourcePath(), e);
             	throw e;
-            }
-            if (syncScriptError[0] != null) {
-                throw syncScriptError[0];
             }
         } catch (NotFoundException e) {
             logger.error("Failed to sync {} {}:{}", action.name(), name, resourceId, e);

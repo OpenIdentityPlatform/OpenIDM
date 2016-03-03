@@ -15,32 +15,42 @@
  */
 package bin.defaults.script.roles
 
-import org.forgerock.http.util.Json
-
-import static org.forgerock.json.JsonValue.json
 import static org.forgerock.json.JsonValue.object
 import static org.forgerock.json.JsonValue.field
+import static org.forgerock.json.resource.ResourcePath.resourcePath
 
 import org.forgerock.openidm.util.DateUtil
 import org.forgerock.json.JsonValue
-import org.forgerock.openidm.sync.SyncContext;
+import org.forgerock.openidm.sync.SyncContext
 
-def syncContext = context.containsContext(SyncContext.class) ? context.asContext(SyncContext.class) : null;
+def syncContext = context.containsContext(SyncContext.class) \
+    ? context.asContext(SyncContext.class)
+    : null;
+
 def mappingSource = mappingConfig.source.getObject() as String
 def sourceObject = source as JsonValue
+def oldSource = oldSource as JsonValue
 
 try {
-    if (mappingSource.equals("managed/user") && syncContext != null) {
-        JsonValue lastSyncEffectiveAssignments = sourceObject.get("lastSync").get("effectiveAssignments");
-        JsonValue sourceObjectEffectiveAssignments = sourceObject.get("effectiveAssignments");
-        if (cacheEffectiveAssignments(lastSyncEffectiveAssignments, sourceObjectEffectiveAssignments)) {
-            sourceObject.put("lastSync", json(object(
-                    field("effectiveAssignments", sourceObjectEffectiveAssignments),
-                    field("timestamp", DateUtil.getDateUtil().now()))));
-            syncContext.disableSync()
-            openidm.update(mappingSource + "/" + sourceObject.get("_id").asString(),
-                    sourceObject.get("_rev").asString(), sourceObject)
-        }
+    if (!mappingSource.equals("managed/user") && syncContext == null) {
+        return;
+    }
+
+    JsonValue lastSyncEffectiveAssignments = oldSource != null \
+        ? oldSource.get("lastSync").get("effectiveAssignments")
+        : sourceObject.get("lastSync").get("effectiveAssignments");
+    JsonValue sourceObjectEffectiveAssignments = sourceObject.get("effectiveAssignments");
+
+    if (cacheEffectiveAssignments(lastSyncEffectiveAssignments, sourceObjectEffectiveAssignments)) {
+        def patch = [["operation" : "replace",
+                      "field" : "/lastSync",
+                      "value" : object(
+                                    field("effectiveAssignments", sourceObjectEffectiveAssignments),
+                                    field("timestamp", DateUtil.getDateUtil().now()))]]
+        syncContext.disableSync()
+        JsonValue patched = openidm.patch(
+                resourcePath(mappingSource).child(sourceObject.get("_id").asString()).toString(), null, patch);
+        source.put("_rev", patched.get("_rev").asString());
     }
 } finally {
     if (syncContext != null) {
@@ -57,9 +67,9 @@ try {
  */
 private boolean cacheEffectiveAssignments(JsonValue lastSyncEffectiveAssignments,
         JsonValue sourceObjectEffectiveAssignments ) {
-    return sourceObjectEffectiveAssignments.isNotNull() && (lastSyncEffectiveAssignments.size() == 0
-        || lastSyncEffectiveAssignments.isNull()
-        || !sameAssignments(lastSyncEffectiveAssignments.copy(), sourceObjectEffectiveAssignments.copy()))
+    return sourceObjectEffectiveAssignments.isNotNull() \
+        && (lastSyncEffectiveAssignments.size() == 0 || lastSyncEffectiveAssignments.isNull()) \
+        && !sameAssignments(lastSyncEffectiveAssignments.copy(), sourceObjectEffectiveAssignments.copy())
 }
 
 
