@@ -684,7 +684,8 @@ public class UpdateManagerImpl implements UpdateManager {
     private enum UpdateAction {
         REPLACED,
         PRESERVED,
-        APPLIED
+        APPLIED,
+        REMOVED
     }
 
     private class UpdateThread extends Thread {
@@ -729,7 +730,17 @@ public class UpdateManagerImpl implements UpdateManager {
 
                 // Start by removing all files we no longer need
                 for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
-                    Files.delete(Paths.get(installDir, file));
+                    try {
+                        if (Files.deleteIfExists(Paths.get(installDir, file))) {
+                            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                                    .setFilePath(file)
+                                    .setFileState(fileStateChecker.getCurrentFileState(Paths.get(file)).name())
+                                    .setActionTaken(UpdateAction.REMOVED.toString());
+                            logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                        }
+                    } catch (IOException e) {
+                        logger.debug("Unable to remove file " + file + ", continuing update", e);
+                    }
                 }
 
                 // Iterate over the checksums.csv "manifest" in the new update archive and process each file
