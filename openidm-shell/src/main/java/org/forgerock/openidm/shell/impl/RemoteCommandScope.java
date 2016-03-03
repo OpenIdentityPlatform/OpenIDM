@@ -62,9 +62,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
     private static final String DOTTED_PLACEHOLDER = "............................................";
 
-    private static final String IDM_PORT_DEFAULT = "8080";
-    private static final String IDM_PORT_DESC =
-            "Port of OpenIDM REST service. This will override any port in --url. Default " + IDM_PORT_DEFAULT;
+    private static final String IDM_PORT_DESC = "Port of OpenIDM REST service. This will override any port in --url.";
     private static final String IDM_PORT_METAVAR = "PORT";
 
     private static final String IDM_URL_DEFAULT = "http://localhost:8080/openidm/";
@@ -156,7 +154,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = {"-P", "--port"}, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = {"-P", "--port"}, absentValue = "")
             final String idmPort,
 
             @Descriptor("Automatically accepts the product license (if present). " +
@@ -225,7 +223,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor(REPLACE_ALL_DESC)
@@ -260,7 +258,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor(REPLACE_ALL_DESC)
@@ -407,7 +405,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort) {
         configexport(session, userPass, idmUrl, idmPort, "conf");
     }
@@ -438,7 +436,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor("target directory")
@@ -514,7 +512,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor("Name of the new connector configuration.")
