@@ -55,7 +55,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
 
             this.model = configs;
             this.data = _.extend(this.data, _.pick(this.model, ["successful", "msg", "percent", "responseB64"]));
-
+            
             function finishRender() {
                 $("#menu, #footer, #settingsBody").hide();
                 this.$el.show();

@@ -977,7 +977,7 @@
                 "cli2": "here",
                 "description": "You can update OpenIDM with one of the binaries found in the openidm/bin/update/ directory.",
                 "refresh": "Refresh",
-                "error": "You can restart the update process here or via the CLI",
+                "error": "Resolve errors then restart the update process",
                 "failedClusterInfo": "Failed to retrieve cluster information.",
                 "noVersionsBG": "There are no versions available",
                 "file": "File",
@@ -986,7 +986,9 @@
                 "install": "Install",
                 "enableMaintenanceMode": "Enable Maintenance Mode",
                 "enableMaintenanceModeDesc": "When you confirm, OpenIDM allows running jobs to finish. Scheduled jobs are paused and OpenIDM goes into maintenance mode.",
-                "confirmAndInstall": "Confirm and Install"
+                "confirmAndInstall": "Confirm and Install",
+                "badBinary": "Invalid binary file",
+                "badRevision": "Cannot be applied"
             },
             "maintenanceMode": {
                 "shuttingDownScheduler": "Pausing scheduler...",
