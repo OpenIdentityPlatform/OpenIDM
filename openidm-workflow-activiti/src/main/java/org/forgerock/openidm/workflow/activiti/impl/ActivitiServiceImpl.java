@@ -127,7 +127,7 @@ public class ActivitiServiceImpl implements RequestHandler {
     @Reference(name = "processEngine", referenceInterface = ProcessEngine.class,
             bind = "bindProcessEngine", unbind = "unbindProcessEngine",
             cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.STATIC,
-            target = "(!openidm.activiti.engine=true)") //avoid registering the self made service
+            target = "(!(openidm.activiti.engine=true))") //avoid registering the self made service
     private ProcessEngine processEngine;
 
     /**
