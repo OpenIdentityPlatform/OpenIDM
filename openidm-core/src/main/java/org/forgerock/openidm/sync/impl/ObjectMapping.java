@@ -1857,6 +1857,7 @@ class ObjectMapping {
                                 }
                                 // TODO: Detect change of source id, and update link accordingly.
                                 if (action == ReconAction.CREATE || action == ReconAction.LINK) {
+                                    execScript("postMapping", postMapping);
                                     break; // do not update target
                                 }
                                 if (getSourceObject() != null && getTargetObject() != null) {
@@ -2083,6 +2084,7 @@ class ObjectMapping {
                     JsonValue source = getSourceObject();
                     scope.put("source", null != source ? source.getObject() : null);
                 }
+                scope.put("oldSource", oldValue);
                 scope.put("sourceId", sourceId);
                 
                 // Target may not have ID yet (e.g. an onCreate with the target object defined, but not stored).
@@ -2115,7 +2117,7 @@ class ObjectMapping {
             return context;
         }
 
-        public JsonValue toJsonValue() {
+        public JsonValue toJsonValue() throws SynchronizationException {
             return json(object(
                     field("reconId", reconId),
                     field("mapping", ObjectMapping.this.getName()),
@@ -2688,13 +2690,14 @@ class ObjectMapping {
             linkObject.setLinkQualifier(params.get("linkQualifier").defaultTo(Link.DEFAULT_LINK_QUALIFIER).asString());
         }
 
-        public JsonValue toJsonValue() {
+        public JsonValue toJsonValue() throws SynchronizationException {
             return json(object(
                     field("reconId", reconId),
                     field("mapping", ObjectMapping.this.getName()),
                     field("situation", situation.name()),
                     field("action", situation.getDefaultAction().name()),
                     field("target", "true"),
+                    field("oldSource", getSourceObject()),
                     field("linkQualifier", linkObject.linkQualifier),
                     (targetObjectAccessor != null && targetObjectAccessor.getLocalId() != null) 
                         ? field("targetId", targetObjectAccessor.getLocalId()) 
