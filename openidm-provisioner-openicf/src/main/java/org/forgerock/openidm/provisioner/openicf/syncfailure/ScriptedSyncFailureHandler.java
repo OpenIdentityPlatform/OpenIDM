@@ -78,8 +78,8 @@ public class ScriptedSyncFailureHandler implements SyncFailureHandler {
             throw new SyncHandlerException("No script registered");
         }
 
-        Script script = scriptEntry.getScript(new RootContext());
-        script.put("context", syncFailure);
+        Script script = scriptEntry.getScript(context);
+        script.put("context", context);
         script.put("syncFailure", syncFailure);
         script.put("failureCause", failureCause);
         script.put("failureHandlers", builtInHandlers);
