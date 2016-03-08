@@ -1,5 +1,4 @@
 {
-    "enabled" : true,
     "location" : "remote",
     "engine" : {
         "url" : "http://localhost:9090/openidm-workflow-remote-2.1.0/",
