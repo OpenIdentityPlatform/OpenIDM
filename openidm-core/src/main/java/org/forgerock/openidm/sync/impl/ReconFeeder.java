@@ -92,7 +92,8 @@ public abstract class ReconFeeder {
                     // Get any exceptions
                     Void result = future.get();
                 } catch (ExecutionException ex) {
-                    translateTaskThrowable(ex);
+                    Throwable cause = ex.getCause();
+                    translateTaskThrowable(cause);
                 }
                 submitNextIfPresent();
             }
@@ -109,15 +110,11 @@ public abstract class ReconFeeder {
     }
 
     void translateTaskThrowable(Throwable throwable) throws SynchronizationException {
-        Throwable cause = throwable.getCause();
-        
-        if (cause instanceof SynchronizationException) {
-                throw (SynchronizationException) cause;
-        } else if (cause != null) {
-            throw new SynchronizationException("Exception in executing recon task: "
-                        + cause.getMessage(), cause);
+        if (throwable instanceof SynchronizationException) {
+            throw (SynchronizationException) throwable;
         } else {
-            throw new SynchronizationException("Exception in executing recon task", throwable);
+            throw new SynchronizationException("Exception in executing recon task "
+                    + throwable.getMessage(), throwable);
         }
     }
 
