@@ -752,10 +752,11 @@ public class UpdateManagerImpl implements UpdateManager {
                 // Start by removing all files we no longer need
                 for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
                     try {
+                        FileState fileState = fileStateChecker.getCurrentFileState(Paths.get(file));
                         if (Files.deleteIfExists(Paths.get(installDir, file))) {
                             UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                                     .setFilePath(file)
-                                    .setFileState(fileStateChecker.getCurrentFileState(Paths.get(file)).name())
+                                    .setFileState(fileState.name())
                                     .setActionTaken(UpdateAction.REMOVED.toString());
                             logUpdate(updateEntry.addFile(fileEntry.toJson()));
                         }
