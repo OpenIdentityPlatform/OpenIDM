@@ -468,7 +468,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             throw exception;
         } catch (AlreadyExistsException e) {
             message = MessageFormat.format("System object {0} already exists", resourceId);
-            // TODO-crest3
             return new org.forgerock.json.resource.PreconditionFailedException(message, exception);
         } catch (ConfigurationException e) {
             message = MessageFormat.format("Operation {0} failed with ConfigurationException on system object: {1}",
@@ -1417,7 +1416,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                 // the index of the first result to be returned.
                 final int pageSize = request.getPageSize();
                 final String pagedResultsCookie = request.getPagedResultsCookie();
-                final boolean pagedResultsRequested = request.getPageSize() > 0;
                 if (pageSize > 0) {
                     operationOptionsBuilder.setPageSize(pageSize);
                 }
@@ -1465,7 +1463,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 + ", parameters: " + request.getAdditionalParameters(),
                         request.getQueryId(), null, logValue, Status.SUCCESS);
 
-                // TODO-crest3- fix contract for remainingPagedResults
+                // TODO Support count policy and totalPagedResults
                 return newResultPromise(
                         newQueryResponse(searchResult != null ? searchResult.getPagedResultsCookie() : null));
             } catch (EmptyResultSetException e) {
