@@ -1831,7 +1831,7 @@ class ObjectMapping {
 
                                 // get a copy of the target before the onLink trigger,
                                 // the onUpdate trigger or the mappings are applied
-                                JsonValue oldTarget = getTargetObject() == null ? json(null) : getTargetObject().copy();
+                                JsonValue oldTarget = getTargetObject().copy();
 
                                 if (isLinkingEnabled() && linkObject._id == null) {
                                     try {
