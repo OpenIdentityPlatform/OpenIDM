@@ -16,22 +16,20 @@
 package org.forgerock.openidm.bin.defaults.script;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.*;
 
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.script.source.DirectoryContainer;
 import org.forgerock.script.registry.ScriptRegistryImpl;
-import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import java.net.URL;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Collections;
 
@@ -60,11 +58,6 @@ public class PolicyFilterTest  {
         return RhinoScriptEngineFactory.LANGUAGE_NAME;
     }
 
-    protected ScriptRegistryImpl getScriptRegistry(Map<String, Object> configuration) {
-        return new ScriptRegistryImpl(configuration,
-                Collections.<ScriptEngineFactory>singleton(new RhinoScriptEngineFactory()), null, null);
-    }
-
     protected URL getScriptContainer(String name) {
         return PolicyFilterTest.class.getResource(name);
     }
@@ -74,16 +67,13 @@ public class PolicyFilterTest  {
         Map<String, Object> configuration = new HashMap<>(1);
         configuration.put(getLanguageName(), getConfiguration());
 
-        scriptRegistry = getScriptRegistry(configuration);
+        scriptRegistry = new ScriptRegistryImpl(configuration,
+                Collections.<ScriptEngineFactory>singleton(new RhinoScriptEngineFactory()), null, null);
 
         URL container = getScriptContainer("/bin/defaults/script/");
-        Assert.assertNotNull(container);
+        assertThat(container).isNotNull();
 
         scriptRegistry.addSourceUnit(new DirectoryContainer("bin/defaults/script", container));
-    }
-
-    public ScriptRegistry getScriptRegistry() {
-        return scriptRegistry;
     }
 
     @DataProvider
@@ -110,15 +100,18 @@ public class PolicyFilterTest  {
     @Test(dataProvider = "resourcePaths")
     public void testGetFullResourcePath(String method, String resourcePath, String resourceId, String expectedFullResourcePath)
             throws ScriptException {
-        JsonValue scriptName = new JsonValue(new LinkedHashMap<String, Object>());
-        scriptName.put("type", "text/javascript");
-        scriptName.put("source", "require('policyFilter').getFullResourcePath('"
-                + method + "', '" + resourcePath + "', " + (resourceId == null ? null : "'" + resourceId + "'") + ")");
-        ScriptEntry scriptEntry = getScriptRegistry().takeScript(scriptName);
-        Assert.assertNotNull(scriptEntry);
+        JsonValue scriptName = json(object(
+                field("type", "text/javascript"),
+                field("source", "require('policyFilter').getFullResourcePath(method, resourcePath, resourceId);")
+        ));
+        ScriptEntry scriptEntry = scriptRegistry.takeScript(scriptName);
+        assertThat(scriptEntry).isNotNull();
 
         Script script = scriptEntry.getScript(new RootContext());
+        script.put("method", method);
+        script.put("resourcePath", resourcePath);
+        script.put("resourceId", resourceId);
         String fullResourcePath = (String) script.eval();
-        Assert.assertEquals(expectedFullResourcePath, fullResourcePath);
+        assertThat(fullResourcePath).isEqualTo(expectedFullResourcePath);
     }
 }
