@@ -17,7 +17,7 @@
 /*global define */
 
 define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
-    "underscore",
+    "lodash",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -62,6 +62,7 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
 
         if (baseEntity === "selfservice/registration") {
             promise = obj.serviceCall({
+                suppressSpinner: true,
                 url: "/managed/user/-?_action=validateObject",
                 data: JSON.stringify(args.fullObject.user),
                 type: "POST"
@@ -76,6 +77,7 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
             });
         } else {
             promise = obj.serviceCall({
+                suppressSpinner: true,
                 url: "/" + baseEntity + "?_action=validateObject",
                 data: JSON.stringify(args.fullObject),
                 type: "POST"
@@ -83,32 +85,28 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
         }
 
         return promise.then(function (data) {
-            var haveWeFailed = false;
-            if (data.failedPolicyRequirements) {
-                _.each(data.failedPolicyRequirements, function (failedReq) {
-                    if (failedReq.property === args.property) {
-                        haveWeFailed = true;
+            var properyFailures = _(data.failedPolicyRequirements)
+                    .filter(function (failedReq) {
+                        return failedReq.property === args.property;
+                    })
+                    .map(function (failedReq) {
+                        return failedReq.policyRequirements;
+                    })
+                    .flatten()
+                    .value();
 
-                        if (callback) {
-                            callback({
-                                "result": false,
-                               "failedPolicyRequirements": [failedReq]
-                            });
-                        }
-
-                        return {
-                           "result": false,
-                           "failedPolicyRequirements": [failedReq]
-                        };
-                    }
-                });
-            }
-
-            if (!haveWeFailed) {
-                if (callback) {
-                    callback({"result": true });
-                }
+            if (!properyFailures.length) {
                 return {"result": true };
+            } else {
+                return {
+                    "result": false,
+                    "failedPolicyRequirements": properyFailures
+               };
+            }
+        })
+        .done(function (result) {
+            if (callback) {
+                callback(result);
             }
         });
 

@@ -207,7 +207,6 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
                 configuration: {
-                    policyDelegate: "org/forgerock/openidm/ui/common/delegates/PolicyDelegate",
                     validators: { },
                     loader: [
                         {"validators":"config/validators/CommonValidators"},

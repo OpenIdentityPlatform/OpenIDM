@@ -17,6 +17,7 @@
 /*global define*/
 
 define("org/forgerock/openidm/ui/common/main", [
+    "./util/PolicyValidatorsManager",
     "./delegates/SiteConfigurationDelegate",
     "./components/Footer",
     "./login/InternalLoginHelper",

@@ -231,9 +231,44 @@ module.exports = function(grunt) {
                 ]
             }
         },
-        qunit: {
-            admin: 'openidm-ui-admin/target/test/qunit.html',
-            enduser: 'openidm-ui-enduser/target/test/qunit.html'
+        nightwatch: {
+            admin: {
+                config_path: 'openidm-ui-admin/src/test/nightwatchjs/config.json'
+            },
+            enduser: {
+                config_path: 'openidm-ui-enduser/src/test/nightwatchjs/config.json'
+            },
+            options: {
+              "selenium" : {
+                "start_process" : true,
+                "server_path" : "selenium/selenium-server-standalone.jar",
+                "log_path" : "reports",
+                "host" : "127.0.0.1",
+                "port" : 4445,
+                "cli_args" : {
+                  "webdriver.chrome.driver" : "/usr/local/bin/chromedriver",
+                  "webdriver.ie.driver" : ""
+                }
+              },
+
+              "test_settings" : {
+                "default" : {
+                  "launch_url" : "http://localhost",
+                  "selenium_port"  : 4445,
+                  "selenium_host"  : "localhost",
+                  "silent": true,
+                  "screenshots" : {
+                    "enabled" : false,
+                    "path" : ""
+                  },
+                  "desiredCapabilities": {
+                    "browserName": "firefox",
+                    "javascriptEnabled": true,
+                    "acceptSslCerts": true
+                  }
+                }
+              }
+            }
         },
         notify_hooks: {
             options: {
@@ -243,7 +278,7 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks('grunt-contrib-qunit');
+    grunt.loadNpmTasks('grunt-nightwatch');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks('grunt-sync');
@@ -251,5 +286,6 @@ module.exports = function(grunt) {
 
     grunt.task.run('notify_hooks');
     grunt.registerTask('default', ['sync:target', 'less', 'sync:zip', 'watch']);
+    grunt.registerTask('test', ['nightwatch:admin','nightwatch:enduser']);
 
 };
