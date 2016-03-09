@@ -108,12 +108,12 @@ define("config/validators/AdminValidators", [
                     callback([$.t("common.form.validation.spaceNotAllowed")]);
                     return;
                 }
-                
+
                 callback();
             }
         },
-        "unique": {
-            "name": "Unique value",
+        "uniqueShortList": {
+            "name": "Unique value amongst a short list of values loaded in the client",
             "dependencies": [
             ],
             "validator": function(el, input, callback) {

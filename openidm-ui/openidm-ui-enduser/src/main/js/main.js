@@ -40,7 +40,6 @@ require.config({
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
         jquery: "libs/jquery-2.1.1-min",
-        jqueryui: "libs/jquery-ui-1.11.1-min",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
         handlebars: "libs/handlebars-3.0.3-min",
@@ -106,9 +105,6 @@ require.config({
         d3: {
             exports: "d3"
         },
-        jqueryui: {
-            deps: ["jquery"]
-        },
         selectize: {
             deps: ["jquery"]
         },
@@ -139,7 +135,7 @@ require([
     "org/forgerock/commons/ui/common/main/EventManager",
 
     "org/forgerock/commons/ui/common/main",
-    "org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegate",
+    "org/forgerock/openidm/ui/common/main",
     "config/main",
 
     "jquery",
