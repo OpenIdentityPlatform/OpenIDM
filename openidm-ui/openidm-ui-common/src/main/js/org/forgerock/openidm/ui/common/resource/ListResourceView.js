@@ -124,7 +124,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                                         "cell": "string",
                                                         "sortable": true,
                                                         "editable": false,
-                                                        "sortType": "toggle"
+                                                        "sortType": "toggle",
+                                                        "minimumSearchChars": 2
                                                     }
                                                 );
                                             } else {
@@ -139,7 +140,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                                         "cell": BackgridUtils.escapedStringCell(colName),
                                                         "sortable": true,
                                                         "editable": false,
-                                                        "sortType": "toggle"
+                                                        "sortType": "toggle",
+                                                        "minimumSearchChars": 2
                                                     }
                                                 );
                                             }
@@ -183,7 +185,8 @@ define("org/forgerock/openidm/ui/common/resource/ListResourceView", [
                                                     "cell": "string",
                                                     "sortable": true,
                                                     "editable": false,
-                                                    "sortType": "toggle"
+                                                    "sortType": "toggle",
+                                                    "minimumSearchChars": 2
                                                 }
                                             );
                                         }
