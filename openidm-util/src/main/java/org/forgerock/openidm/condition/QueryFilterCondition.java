@@ -44,10 +44,10 @@ class QueryFilterCondition implements Condition {
     }
 
     @Override
-    public boolean evaluate(JsonValue params, Context context) throws JsonValueException {
+    public boolean evaluate(Object content, Context context) throws JsonValueException {
         return queryFilter == null
                 ? false
-                : queryFilter.accept(JSONVALUE_FILTER_VISITOR, params);
+                : queryFilter.accept(JSONVALUE_FILTER_VISITOR, new JsonValue(content));
     }
 
     /**
