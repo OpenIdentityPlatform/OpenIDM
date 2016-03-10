@@ -76,6 +76,15 @@ public class RemoteCommandScope extends CustomCommandScope {
     private static final String REPLACE_ALL_DESC =
             "Replace the entire config set by deleting the additional configuration";
 
+    private static final String RETRIES_DESC =
+            "Number of retries between attempts to update configuration if OpenIDM is not ready";
+    private static final String RETRIES_METAVAR = "RETRIES";
+
+    private static final String RETRY_DELAY_DESC =
+            "Delay in milliseconds between config update retries if OpenIDM is not ready";
+    private static final String RETRY_DELAY_METAVAR = "DELAY";
+
+
     private final HttpRemoteJsonResource resource = new HttpRemoteJsonResource();
 
     private final ObjectMapper mapper = new ObjectMapper();
@@ -228,8 +237,16 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(REPLACE_ALL_DESC)
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false")
-            final boolean replaceall) {
-        configimport(session, userPass, idmUrl, idmPort, replaceall, "conf");
+            final boolean replaceall,
+
+            @Descriptor(RETRIES_DESC)
+            @Parameter(names = { "--retries" }, absentValue = "10")
+            final int retries,
+
+            @Descriptor(RETRY_DELAY_DESC)
+            @Parameter(names = { "--retryDelay" }, absentValue = "500")
+            final int retryDelay) {
+        configimport(session, userPass, idmUrl, idmPort, replaceall, retries, retryDelay, "conf");
     }
 
     /**
@@ -265,9 +282,21 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true",  absentValue = "false")
             final boolean replaceall,
 
+            @Descriptor(RETRIES_DESC)
+            @MetaVar(RETRIES_METAVAR)
+            @Parameter(names = { "--retries" }, absentValue = "10")
+            final int retries,
+
+            @Descriptor(RETRY_DELAY_DESC)
+            @MetaVar(RETRY_DELAY_METAVAR)
+            @Parameter(names = { "--retryDelay" }, absentValue = "500")
+            final int retryDelay,
+
             @Descriptor("source directory")
             final String source) {
         processOptions(userPass, idmUrl, idmPort);
+        resource.setRetries(retries);
+        resource.setRetryDelay(retryDelay);
 
         PrintStream console = session.getConsole();
         File file = IdentityServer.getFileForPath(source);
