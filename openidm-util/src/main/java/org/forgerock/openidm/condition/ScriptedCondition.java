@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * A Condition implemented as a script.
  */
 class ScriptedCondition implements Condition {
+    
     /** Logger */
     private final static Logger logger = LoggerFactory.getLogger(Conditions.class);
 
@@ -49,11 +50,12 @@ class ScriptedCondition implements Condition {
     }
 
     @Override
-    public boolean evaluate(JsonValue params, Context context) throws JsonValueException {
+    public boolean evaluate(Object content, Context context) throws JsonValueException {
         Map<String, Object> scope = new HashMap<>();
+        JsonValue contentValue = new JsonValue(content);
         try {
-            if (params.isMap()) {
-                scope.putAll(params.asMap());
+            if (contentValue.isMap()) {
+                scope.putAll(contentValue.asMap());
             }
             Object o = script.exec(scope, context);
             if (o == null || !(o instanceof Boolean) || Boolean.FALSE.equals(o)) {
@@ -62,7 +64,7 @@ class ScriptedCondition implements Condition {
             return true;
         } catch (ScriptException se) {
             logger.warn("Script encountered exception while evaluating condition", se);
-            throw new JsonValueException(params, se);
+            throw new JsonValueException(contentValue, se);
         }
     }
 }

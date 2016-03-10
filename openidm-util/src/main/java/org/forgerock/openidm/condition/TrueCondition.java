@@ -15,7 +15,6 @@
  */
 package org.forgerock.openidm.condition;
 
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.services.context.Context;
 
@@ -23,8 +22,9 @@ import org.forgerock.services.context.Context;
  * A Condition that always evaluates as true.
  */
 class TrueCondition implements Condition {
+    
     @Override
-    public boolean evaluate(JsonValue params, Context context) throws JsonValueException {
+    public boolean evaluate(Object content, Context context) throws JsonValueException {
         return true;
     }
 }

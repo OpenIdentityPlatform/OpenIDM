@@ -15,8 +15,6 @@
  */
 package org.forgerock.openidm.condition;
 
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
 import org.forgerock.services.context.Context;
 
 /**
@@ -27,10 +25,9 @@ public interface Condition {
     /**
      * Evaluates the condition.  Returns true if the condition is met, false otherwise.
      * 
-     * @param params parameters to use during evaluation.
+     * @param content the content to use during evaluation.
      * @param context the {@link Context} associated with this evaluation.
      * @return true if the condition is met, false otherwise.
-     * @throws JsonValueException if errors are encountered.
      */
-    boolean evaluate(JsonValue params, Context context) throws JsonValueException;
+    boolean evaluate(Object content, Context context);
 }
