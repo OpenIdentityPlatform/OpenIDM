@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
 import org.forgerock.json.resource.ActionRequest;

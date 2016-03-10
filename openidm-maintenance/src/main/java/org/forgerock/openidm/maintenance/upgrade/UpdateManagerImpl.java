@@ -416,9 +416,9 @@ public class UpdateManagerImpl implements UpdateManager {
      */
     private void validateCorrectVersion(JsonValue updateConfig, File updateFile) throws InvalidArchiveUpdateException {
         if (!updateConfig.get(ORIGIN_VERSION).asList().contains(ServerConstants.getVersion())) {
-            throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName() +
-                    " can be used only to update version '" + updateConfig.get(ORIGIN_VERSION).asList() +
-                    "' and you are running version " + ServerConstants.getVersion());
+            throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName()
+                    + " can be used only to update version '" + updateConfig.get(ORIGIN_VERSION).asList()
+                    + "' and you are running version " + ServerConstants.getVersion());
         }
     }
 
@@ -431,9 +431,9 @@ public class UpdateManagerImpl implements UpdateManager {
      */
     private void validateCorrectProduct(JsonValue updateConfig, File updateFile) throws InvalidArchiveUpdateException {
         if (!PRODUCT_NAME.equals(updateConfig.get(ORIGIN_PRODUCT).asString())) {
-            throw new InvalidArchiveUpdateException(updateFile.getName(),
-                    "The archive " + updateFile.getName() + " can be used only to update '" +
-                            updateConfig.get(ORIGIN_PRODUCT).asString() + "' and you are running " + PRODUCT_NAME);
+            throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName()
+                    + " can be used only to update '" + updateConfig.get(ORIGIN_PRODUCT).asString()
+                    + "' and you are running " + PRODUCT_NAME);
         }
     }
 
@@ -445,24 +445,23 @@ public class UpdateManagerImpl implements UpdateManager {
      */
     private void validateFileName(File archiveFile) throws InvalidArchiveUpdateException {
         if (!archiveFile.getName().endsWith(".zip")) {
-            throw new InvalidArchiveUpdateException(archiveFile.getName(),
-                    archiveFile.getName() + " does not have '.zip' extension.");
+            throw new InvalidArchiveUpdateException(archiveFile.getName(), "The archive " + archiveFile.getName()
+                    + " does not have a '.zip' extension.");
         }
     }
 
     /**
      * Check if the checksums file in the zip file is present and can be resolved.
      *
-     * @param updateFile the update archive file.
+     * @param archiveFile the update archive file.
      * @throws InvalidArchiveUpdateException
      */
-    private void validateHasChecksumFile(File updateFile) throws InvalidArchiveUpdateException {
+    private void validateHasChecksumFile(File archiveFile) throws InvalidArchiveUpdateException {
         try {
-            resolveChecksumFile(
-                    extractFileToDirectory(updateFile, CHECKSUMS_FILE_IN_OPENIDM));
+            resolveChecksumFile(extractFileToDirectory(archiveFile, CHECKSUMS_FILE_IN_OPENIDM));
         } catch (Exception e) {
-            throw new InvalidArchiveUpdateException(updateFile.getName(),
-                    "Archive doesn't appear to contain checksums file.", e);
+            throw new InvalidArchiveUpdateException(archiveFile.getName(), "The archive " + archiveFile.getName()
+                    + " does not appear to contain a checksums file.", e);
         }
     }
 

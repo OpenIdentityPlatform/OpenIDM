@@ -1,9 +1,23 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2015-2016 ForgeRock AS.
+ */
 package org.forgerock.openidm.maintenance.upgrade;
 
 import org.forgerock.commons.launcher.OSGiFrameworkService;
 import org.forgerock.openidm.util.FileUtil;
 import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
 import org.osgi.framework.wiring.FrameworkWiring;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.BeforeClass;
@@ -22,9 +36,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
-import static org.testng.Assert.assertNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 public class BundleHandlerTest {
@@ -83,7 +95,7 @@ public class BundleHandlerTest {
         service.setNewThread(true);
         service.start();
         System.out.println("Framework Started - OK");
-        assertNotNull(service.getSystemBundle());
+        assertThat(service.getSystemBundle()).isNotNull();
         setInstalledBundles();
         bundleHandler = new BundleHandler(service.getSystemBundle().getBundleContext(), ARCHIVE_EXTENSION,
                 new LogHandler() {
@@ -132,13 +144,13 @@ public class BundleHandlerTest {
         startBundle(bundle);
 
         // Assert that the bundle is installed and running
-        assertEquals(bundle.getState(), Bundle.ACTIVE);
+        assertThat(bundle.getState()).isEqualTo(Bundle.ACTIVE);
 
         // stop the bundle
         stopBundle(bundle);
 
         // assert that bundle is in stopped state
-        assertEquals(bundle.getState(), Bundle.RESOLVED);
+        assertThat(bundle.getState()).isEqualTo(Bundle.RESOLVED);
     }
 
     @Test
@@ -150,7 +162,7 @@ public class BundleHandlerTest {
         startBundle(bundle);
 
         // assert that the bundle is installed in the framework
-        assertNotNull(bundle);
+        assertThat(bundle).isNotNull();
 
         // stop bundle
         stopBundle(bundle);
@@ -168,7 +180,7 @@ public class BundleHandlerTest {
 
         // assert that the bundle is in uninstalled state
         bundle = installedBundles.get(bundlePath.toUri().toString());
-        assertEquals(bundle.getState(), Bundle.UNINSTALLED);
+        assertThat(bundle.getState()).isEqualTo(Bundle.UNINSTALLED);
 
         // at the "system" level remove the bundle from the bundles/directory now
     }
@@ -179,14 +191,14 @@ public class BundleHandlerTest {
         Bundle bundle = installedBundles.get(bundlePath);
 
         // check that the bundle does not exist already in the framework
-        assertNull(bundle);
+        assertThat(bundle).isNull();
 
         // install the bundle
         bundle = installBundle(bundlePath);
 
         // validate that the bundle has actually been installed
-        assertNotNull(bundle);
-        assertEquals(bundle.getState(), Bundle.INSTALLED);
+        assertThat(bundle).isNotNull();
+        assertThat(bundle.getState()).isEqualTo(Bundle.INSTALLED);
 
     }
 
@@ -199,7 +211,7 @@ public class BundleHandlerTest {
         startBundle(bundle);
 
         // assert that the bundle is now started in the Active state
-        assertEquals(bundle.getState(), Bundle.ACTIVE);
+        assertThat(bundle.getState()).isEqualTo(Bundle.ACTIVE);
 
     }
 
@@ -223,10 +235,10 @@ public class BundleHandlerTest {
             startBundle(bundle);
 
             // assert that the bundle is now started in the Active state
-            assertEquals(bundle.getState(), Bundle.ACTIVE);
+            assertThat(bundle.getState()).isEqualTo(Bundle.ACTIVE);
 
             String bundle1Version = FileUtil.readManifest(bundlePathV1.toFile()).getValue("Bundle-Version");
-            assertEquals(bundle1Version, bundle.getVersion().toString());
+            assertThat(bundle1Version).isEqualTo(bundle.getVersion().toString());
 
             Path bundlePathV2  =
                     Paths.get(service.getProjectURI().resolve("bundle/updated/HelloImplementation-1.0-SNAPSHOT.jar"));
@@ -235,7 +247,7 @@ public class BundleHandlerTest {
 
             // assert that the old file has been backed up with archive extension
             backupFile = Paths.get(new URI(bundlePathV1.toUri().toString().concat(ARCHIVE_EXTENSION)));
-            assertNotNull(backupFile);
+            assertThat(backupFile).isNotNull();
 
             // update bundle
             bundleHandler.updateBundle(bundle);

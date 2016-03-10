@@ -24,8 +24,6 @@ import org.forgerock.util.Function;
 
 /**
  * Abstraction of an upgrade archive
- *
- * TODO Maybe this can be coalesced with the {@link org.forgerock.openidm.patch.Archive}
  */
 public interface Archive {
     /**

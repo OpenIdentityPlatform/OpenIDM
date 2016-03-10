@@ -16,9 +16,9 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -62,10 +62,10 @@ public class UpdateManagerImplTest {
         // Test when properties file isn't found in the archive.
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
-        assertFalse(responseJson.get("rejects").asList().isEmpty(),
-                "Rejects should be populated as can't read properties of the mocked archiveFile.");
-        assertTrue(responseJson.get("rejects").get(0).get("reason").asString().endsWith("'.zip' extension."),
-                "Reject reason message is expected to be regarding properties testing.");
+        // Rejects should be populated as can't read properties of the mocked archiveFile.
+        assertThat(responseJson).hasArray("rejects").hasSize(1);
+        // Reject reason message is expected to be regarding properties testing.
+        assertThat(responseJson.get("rejects").get(0)).stringAt("reason").endsWith("'.zip' extension.");
     }
 
     @Test
@@ -76,10 +76,10 @@ public class UpdateManagerImplTest {
         // Test when properties file isn't found in the archive.
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
-        assertFalse(responseJson.get("rejects").asList().isEmpty(),
-                "Rejects should be populated as can't read properties of the mocked archiveFile.");
-        assertTrue(responseJson.get("rejects").get(0).get("reason").asString().equals("bad properties"),
-                "Reject reason message is expected to be regarding properties testing.");
+        // Rejects should be populated as can't read properties of the mocked archiveFile.
+        assertThat(responseJson).hasArray("rejects").hasSize(1);
+        // Reject reason message is expected to be regarding properties testing.
+        assertThat(responseJson.get("rejects").get(0)).stringAt("reason").isEqualTo("bad properties");
     }
 
     @Test
@@ -91,10 +91,10 @@ public class UpdateManagerImplTest {
 
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
-        assertFalse(responseJson.get("rejects").asList().isEmpty(),
-                "Rejects should be populated as the update is for a different product.");
-        assertTrue(responseJson.get("rejects").get(0).get("reason").asString().endsWith(UpdateManagerImpl.PRODUCT_NAME),
-                "Reject reason message is expected to be the product mismatch error.");
+        // Rejects should be populated as the update is for a different product.
+        assertThat(responseJson).hasArray("rejects").hasSize(1);
+        // Reject reason message is expected to be the product mismatch error.
+        assertThat(responseJson.get("rejects").get(0)).stringAt("reason").endsWith(UpdateManagerImpl.PRODUCT_NAME);
     }
 
     @Test
@@ -107,10 +107,10 @@ public class UpdateManagerImplTest {
 
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
-        assertFalse(responseJson.get("rejects").asList().isEmpty(),
-                "Rejects should be populated as the update is for a different product version.");
-        assertTrue(responseJson.get("rejects").get(0).get("reason").asString().endsWith(ServerConstants.getVersion()),
-                "Reject reason message is expected to be the version mismatch error.");
+        // Rejects should be populated as the update is for a different product version.
+        assertThat(responseJson).hasArray("rejects").hasSize(1);
+        // Reject reason message is expected to be the version mismatch error.
+        assertThat(responseJson.get("rejects").get(0)).stringAt("reason").endsWith(ServerConstants.getVersion());
     }
 
     @Test
@@ -132,9 +132,11 @@ public class UpdateManagerImplTest {
         when(updateManager.extractFileToDirectory(any(File.class), any(Path.class))).thenReturn(mock(Path.class));
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
-        assertTrue(responseJson.get("rejects").asList().isEmpty(), "Archive should not be rejected.");
-        assertTrue(responseJson.get("updates").get(0).get("archive").asString().equals("test.zip"),
-                "The archive should match our test filename.");
+        // Archive should not be rejected.
+        assertThat(responseJson).hasArray("rejects").isEmpty();
+        // The archive should match our test filename.
+        assertThat(responseJson).hasArray("updates").hasSize(1);
+        assertThat(responseJson.get("updates").get(0)).stringAt("archive").isEqualTo("test.zip");
     }
 
     @Test
@@ -147,11 +149,11 @@ public class UpdateManagerImplTest {
                 new UpdateException("missing checksum file"));
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
-        assertFalse(responseJson.get("rejects").asList().isEmpty(),
-                "Rejects should be populated as checksum file is missing.");
-        assertTrue(responseJson.get("rejects").get(0).get("archive").asString().equals("test.zip"),
-                "The archive should match our test filename.");
-        assertTrue(responseJson.get("rejects").get(0).get("reason").asString().equals("Archive doesn't appear to contain checksums file."));
-        assertTrue(responseJson.get("rejects").get(0).get("errorMessage").asString().equals("missing checksum file"));
+        // Rejects should be populated as checksum file is missing.
+        assertThat(responseJson).hasArray("rejects").hasSize(1);
+        // The archive should match our test filename.
+        assertThat(responseJson.get("rejects").get(0)).stringAt("archive").isEqualTo("test.zip");
+        assertThat(responseJson.get("rejects").get(0)).stringAt("reason").isEqualTo("The archive test.zip does not appear to contain a checksums file.");
+        assertThat(responseJson.get("rejects").get(0)).stringAt("errorMessage").isEqualTo("missing checksum file");
     }
 }
