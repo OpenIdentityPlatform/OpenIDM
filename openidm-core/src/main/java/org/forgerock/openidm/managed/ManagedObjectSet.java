@@ -509,7 +509,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
                 decryptedOld, responseContent);
 
-        return connectionFactory.getConnection().read(context, Requests.newReadRequest(repoId(resourceId)));
+        ResourceResponse readResponse =
+                connectionFactory.getConnection().read(context, Requests.newReadRequest(repoId(resourceId)));
+        readResponse.getContent().asMap().putAll(strippedRelationshipFields.asMap());
+
+        return readResponse;
     }
 
     /**
