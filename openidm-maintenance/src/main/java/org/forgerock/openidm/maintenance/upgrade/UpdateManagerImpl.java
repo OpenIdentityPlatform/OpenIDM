@@ -72,8 +72,10 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SortKey;
+import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.maintenance.impl.UpdateContext;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
@@ -822,12 +824,17 @@ public class UpdateManagerImpl implements UpdateManager {
                     } else if (path.startsWith(CONF_PATH) &&
                             path.getFileName().toString().endsWith(PATCH_EXT)) {
                         // a patch file for a config in the repo
-                        patchConfig(ContextUtil.createInternalContext(),
-                                "repo/config", json(FileUtil.readFile(path.toFile())));
+                        File patchFile = new File(new File(tempDirectory.toString(), "openidm").toString(),
+                                path.toString());
+                        Path configFile = Paths.get(path.toString()
+                                .substring(0, path.toString().length() - PATCH_EXT.length()));
                         UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                                 .setFilePath(path.toString())
-                                .setFileState(fileStateChecker.getCurrentFileState(path).name())
-                                .setActionTaken(UpdateAction.APPLIED.toString());
+                                .setFileState(fileStateChecker.getCurrentFileState(configFile).name());
+                        String pid = parsePid(configFile.getFileName().toString());
+                        patchConfig(ContextUtil.createInternalContext(),
+                                "config/" + pid, JsonUtil.parseStringified(FileUtil.readFile(patchFile)));
+                        fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
                         logUpdate(updateEntry.addFile(fileEntry.toJson()));
                     } else {
                         // normal static file; update it
@@ -865,7 +872,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 try {
                     logUpdate(updateEntry.setEndDate(getDateString())
                             .setStatus(UpdateStatus.FAILED)
-                            .setStatusMessage("Update failed."));
+                            .setStatusMessage(e.getMessage()));
                 } catch (UpdateException ue) {}
                 logger.debug("Failed to install update!", e);
                 return;
@@ -890,6 +897,20 @@ public class UpdateManagerImpl implements UpdateManager {
                     logger.debug("Failed to restart!", e);
                 }
             }
+        }
+
+        /*
+            Based on JSONConfigInstaller#parsePid()
+         */
+        String parsePid(String path) {
+            String pid = path.substring(0, path.lastIndexOf('.'));
+            int n = pid.indexOf('-');
+            if (n > 0) {
+                String factoryPid = pid.substring(n + 1);
+                pid = pid.substring(0, n);
+            }
+            pid = ConfigBootstrapHelper.qualifyPid(pid);
+            return pid;
         }
 
         protected void restart() throws BundleException {
@@ -919,7 +940,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 for (PatchOperation op : PatchOperation.valueOfList(patch)) {
                     request.addPatchOperation(op);
                 }
-                UpdateManagerImpl.this.connectionFactory.getConnection().patch(context, request);
+                UpdateManagerImpl.this.connectionFactory.getConnection().patch(new UpdateContext(context), request);
             } catch (ResourceException e) {
                 throw new UpdateException("Patch request failed", e);
             }
