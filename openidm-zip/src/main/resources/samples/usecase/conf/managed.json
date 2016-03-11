@@ -612,6 +612,23 @@
                         "viewable" : false,
                         "searchable" : false,
                         "type" : "string"
+                    },
+                    "temporalConstraints" : {
+                        "description" : "An array of temporal constraints for a role",
+                        "title" : "Temporal Constraints",
+                        "viewable" : true,
+                        "returnByDefault" : true,
+                        "items" : {
+                            "type" : "object",
+                            "properties" : {
+                                "duration" : {
+                                    "type" : "string"
+                                }
+                            },
+                            "required" : [
+                                "duration"
+                            ]
+                        }
                     }
                 },
                 "required" : [
