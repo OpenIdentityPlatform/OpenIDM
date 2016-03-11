@@ -119,6 +119,10 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                     this.data.mapProps = mapProps;
                     this.gridFromMapProps(mapProps);
 
+                    autocompleteProps = _.filter(autocompleteProps, function(prop) {
+                        return !_.isUndefined(prop);
+                    });
+
                     mappingUtils.setupSampleSearch($("#findSampleSource",this.$el), this.mapping, autocompleteProps, _.bind(function(item) {
                         item.IDMSampleMappingName = this.mapping.name;
                         conf.globalData.sampleSource = item;
