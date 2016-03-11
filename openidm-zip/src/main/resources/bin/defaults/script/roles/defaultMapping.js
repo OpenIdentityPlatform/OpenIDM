@@ -123,8 +123,8 @@ function findAssignment(assignment, listOfAssignments) {
     return null;
 }
 
-function oldValueProvided() { 
-    return (typeof oldSource !== 'undefined' && oldSource !== null) 
+function oldValueProvided() {
+    return (typeof oldSource !== 'undefined' && oldSource !== null)
 }
 
 function lastSyncProvided(managedObject) {
