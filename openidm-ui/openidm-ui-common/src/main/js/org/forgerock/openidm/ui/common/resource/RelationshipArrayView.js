@@ -19,6 +19,7 @@
 define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
     "jquery",
     "underscore",
+    "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/util/Constants",
     "backgrid",
@@ -35,6 +36,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
 ], function(
         $,
         _,
+        Handlebars,
         AbstractView,
         constants,
         Backgrid,
@@ -144,8 +146,12 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                     render: function () {
                         var propertyValuePath = resourceCollectionUtils.getPropertyValuePath(this.model.attributes),
                             resourceCollectionIndex = resourceCollectionUtils.getResourceCollectionIndex(_this.schema, propertyValuePath, _this.data.prop.propName),
-                            txt = resourceCollectionUtils.getDisplayText(_this.data.prop, this.model.attributes, resourceCollectionIndex),
+                            txt = Handlebars.Utils.escapeExpression(resourceCollectionUtils.getDisplayText(_this.data.prop, this.model.attributes, resourceCollectionIndex)),
                             link = '<a class="resourceEditLink" href="#resource/' + propertyValuePath + '/edit/' + this.model.attributes._id + '">' + txt + '</a>';
+
+                        if (propertyValuePath.indexOf("repo") >= 0) {
+                            link = "<span class='unEditable'>" + txt + "</span>";
+                        }
 
                         this.$el.html(link);
 
@@ -267,7 +273,7 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                             e.preventDefault();
                         }
 
-                        if ($target.is("input") || $target.is(".select-row-cell") || $target.hasClass("resourceEditLink")) {
+                        if ($target.is("input") || $target.is(".select-row-cell") || $target.hasClass("resourceEditLink") || $target.is(".unEditable")) {
                             return;
                         }
 
