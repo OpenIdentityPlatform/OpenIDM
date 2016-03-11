@@ -44,7 +44,7 @@ module.exports = {
                 }, ["test"], function() {}
             );
 
-            client.config.read("sync", function(){});
+            client.config.read("sync");
         },
         after: function(client) {
             client.config.resetAll();
@@ -98,6 +98,20 @@ module.exports = {
                 .click('@syncStatus')
                 .waitForElementPresent('@syncDetails', 2000)
                 .expect.element('@syncSuccess').text.to.equal("24");
+        },
+        'Sample Source Not Fail' : function(client) {
+            var mapping = client.page.mappings(),
+                message = mapping.section.message,
+                attributesGridPanel = mapping.section.attributesGridPanel;
+
+            attributesGridPanel
+                .click('@sampleUserSearch');
+
+            client
+                .keys('use');
+
+            message
+                .assert.elementNotPresent('@displayMessage', 3000);
         },
         'Mapping Save' : function(client) {
             var mapping = client.page.mappings(),

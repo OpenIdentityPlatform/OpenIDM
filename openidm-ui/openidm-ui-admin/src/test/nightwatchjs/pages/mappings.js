@@ -121,6 +121,9 @@ module.exports = {
                 },
                 dragHandle: {
                     selector: '.dragToSort'
+                },
+                sampleUserSearch: {
+                    selector: 'input[placeholder="Search to see preview"]'
                 }
             }
         },

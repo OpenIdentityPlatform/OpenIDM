@@ -44,7 +44,8 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
     var MappingAddView = AdminAbstractView.extend({
         template: "templates/admin/mapping/AddMappingTemplate.html",
         events: {
-            "click .card" : "addResourceMapping"
+            "click #resourceConnectorContainer .card" : "addResourceMapping",
+            "click #resourceManagedContainer .card" : "addResourceMapping"
         },
         addMappingView: false,
         render: function(args, callback) {
