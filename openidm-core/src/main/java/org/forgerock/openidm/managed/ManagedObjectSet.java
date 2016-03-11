@@ -35,6 +35,8 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicReference;
 
+
+import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -859,10 +861,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             performSyncAction(managedContext, request, resourceId, SynchronizationService.SyncServiceAction.notifyDelete,
                     resource.getContent(), new JsonValue(null));
 
-            ResourceResponse readResponse =
-                    connectionFactory.getConnection().read(managedContext, Requests.newReadRequest(repoId(resourceId)));
-
-            return prepareResponse(managedContext, readResponse, request.getFields()).asPromise();
+            return prepareResponse(managedContext, resource, request.getFields()).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (Exception e) {
@@ -1441,8 +1440,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             
             try {
             	// Execute the sync script
-                ResourceResponse readResponse =
-                        connectionFactory.getConnection().read(context, Requests.newReadRequest(repoId(resourceId)));
+                ResourceResponse readResponse = newValue.isNotNull()
+                        ? connectionFactory.getConnection().read(context, Requests.newReadRequest(repoId(resourceId)))
+                        : newResourceResponse(null, null, json(null));
                 JsonValue scriptBindings = prepareScriptBindings(context, request, resourceId, oldValue,
                         readResponse.getContent());
                 Map<String,Object> syncResults = new HashMap<>();
