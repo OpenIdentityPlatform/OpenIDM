@@ -74,6 +74,7 @@
                     "**/openidm-jaas-loginmodule-repo*.jar",
                     "**/openidm-jetty-fragment*.jar",
                     "**/openidm-quartz-fragment*.jar",
+                    "**/openidm-cluster*.jar",
                     "**/openidm-config*.jar",
                     "**/openidm-crypto*.jar",
                     "**/openidm-repo-jdbc*.jar",
