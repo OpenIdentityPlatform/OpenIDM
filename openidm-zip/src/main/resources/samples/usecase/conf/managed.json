@@ -437,34 +437,43 @@
                     },
                     "manager" : {
                         "type" : "relationship",
+                        "validate" : true,
+                        "reverseRelationship" : true,
+                        "reversePropertyName" : "reports",
                         "description" : "",
                         "title" : "Manager",
                         "viewable" : true,
                         "searchable" : false,
                         "properties" : {
-                        	"_ref" : { "type" : "string" },
-                            "_refProperties": {
-                                "type": "object",
-                                "properties": {
-                                    "_id": { "type": "string" }
+                            "_ref" : {
+                                "type" : "string"
+                            },
+                            "_refProperties" : {
+                                "type" : "object",
+                                "properties" : {
+                                    "_id" : {
+                                        "type" : "string"
+                                    }
                                 }
                             }
                         },
-                        "resourceCollection" : {
-                            "path" : "managed/user",
-                            "label" : "Reports",
-                            "query" : {
-                                "queryFilter" : "true",
-                                "fields" : [
-                                    "userName",
-                                    "givenName",
-                                    "sn"
-                                ],
-                                "sortKeys" : [
-                                    "userName"
-                                ]
+                        "resourceCollection" : [
+                            {
+                                "path" : "managed/user",
+                                "label" : "User",
+                                "query" : {
+                                    "queryFilter" : "true",
+                                    "fields" : [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ],
+                                    "sortKeys" : [
+                                        "userName"
+                                    ]
+                                }
                             }
-                        },
+                        ],
                         "userEditable" : false
                     },
                     "lastSync" : {
