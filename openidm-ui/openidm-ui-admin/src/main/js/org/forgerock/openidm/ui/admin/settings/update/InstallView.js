@@ -55,14 +55,16 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
 
             this.model = configs;
             this.data = _.extend(this.data, _.pick(this.model, ["successful", "msg", "percent", "responseB64"]));
-            
+
             function finishRender() {
                 $("#menu, #footer, #settingsBody").hide();
                 this.$el.show();
 
                 this.parentRender(_.bind(function() {
-                    if (this.data.successful) {
+                    if (this.data.successful && this.model.archiveModel.get("restartRequired")) {
                         this.restarting();
+                    } else if (this.data.successful && !this.model.archiveModel.get("restartRequired")) {
+                        this.installationReport();
                     } else if (this.model.runningID) {
                         this.pollInstall(this.model.runningID);
                     }
@@ -124,17 +126,8 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
 
             if (!this.model.restarted) {
                 this.$el.find(".restart").text($.t("templates.update.install.restarting"));
-
-                MaintenanceDelegate.restartIDM();
-
-                this.waitForLastUpdateID(_.bind(function() {
-                    this.showUI();
-                    this.model.success({
-                        "response": this.model.response,
-                        "runningID": this.model.runningID,
-                        "version": this.model.version
-                    });
-                }, this));
+                
+                this.waitForLastUpdateID(_.bind(this.installationReport, this));
             }
         },
 
@@ -156,14 +149,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                     if (!this.model.restarted) {
                         this.$el.find(".restart").text($.t("templates.update.install.restarting"));
 
-                        this.waitForLastUpdateID(_.bind(function() {
-                            this.showUI();
-                            this.model.success({
-                                "runningID": this.model.runningID,
-                                "version": this.model.version,
-                                "response": this.model.response
-                            });
-                        }, this));
+                        this.waitForLastUpdateID(_.bind(this.installationReport, this));
                     }
                 }
             };
@@ -171,6 +157,14 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
             _.bind(countDown, this)(30);
         },
 
+        installationReport: function() {
+            this.showUI();
+            this.model.success({
+                "runningID": this.model.runningID,
+                "version": this.model.version,
+                "response": this.model.response
+            });
+        },
         /**
          * If the UI has not tracked a restart before then we assume this is the first time we have begun waiting on a last update ID.
          *
