@@ -18,8 +18,16 @@ package org.forgerock.openidm.maintenance.impl;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
+import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -36,6 +44,7 @@ import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.maintenance.upgrade.UpdateException;
 import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.util.NaturalOrderComparator;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -112,6 +121,8 @@ public class UpdateService extends AbstractRequestHandler {
 
     private enum Action {
         available,
+        previewMigrations,
+        getMigration,
         preview,
         update,
         getLicense,
@@ -128,11 +139,15 @@ public class UpdateService extends AbstractRequestHandler {
         switch (request.getActionAsEnum(Action.class)) {
             case available:
                 return handleListAvailable();
+            case previewMigrations:
+                return handlePreviewMigrations(request.getAdditionalParameters());
             case preview:
                 return handlePreviewUpdate(request.getAdditionalParameters());
             case update:
                 return handleInstallUpdate(request.getAdditionalParameters(),
                         context.asContext(SecurityContext.class).getAuthenticationId());
+            case getMigration:
+                return handleMigration(request.getAdditionalParameters());
             case getLicense:
                 return handleLicense(request.getAdditionalParameters());
             case restart:
@@ -146,6 +161,34 @@ public class UpdateService extends AbstractRequestHandler {
             default:
                 return new NotSupportedException(request.getAction() + " is not supported").asPromise();
         }
+    }
+
+    private Promise<ActionResponse, ResourceException> handleMigration(Map<String, String> additionalParameters) {
+        if (!additionalParameters.containsKey(ARCHIVE_NAME)) {
+            return new BadRequestException("Archive name not specified.").asPromise();
+        }
+
+        return new NotSupportedException("Not yet implemented").asPromise();
+    }
+
+    private Promise<ActionResponse, ResourceException> handlePreviewMigrations(
+            Map<String, String> additionalParameters) {
+        if (!additionalParameters.containsKey(ARCHIVE_NAME)) {
+            return new BadRequestException("Archive name not specified.").asPromise();
+        }
+
+        try {
+            return newActionResponse(updateManager.previewMigrations(
+                    archivePath(additionalParameters.get(ARCHIVE_NAME))
+            )).asPromise();
+        } catch (UpdateException e) {
+            return new InternalServerErrorException(e).asPromise();
+        }
+
+    }
+
+    private Path archivePath(String archiveName) {
+        return Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY + archiveName);
     }
 
     private Promise<ActionResponse, ResourceException> handleListAvailable() {
@@ -162,9 +205,9 @@ public class UpdateService extends AbstractRequestHandler {
                 return new BadRequestException("Archive name not specified.").asPromise();
             }
             return newActionResponse(updateManager.report(
-                    Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
-                            parameters.get(ARCHIVE_NAME)),
-                    IdentityServer.getInstance().getInstallLocation().toPath())).asPromise();
+                    archivePath(parameters.get(ARCHIVE_NAME)),
+                    IdentityServer.getInstance().getInstallLocation().toPath()
+            )).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
@@ -188,9 +231,9 @@ public class UpdateService extends AbstractRequestHandler {
             }
 
             return newActionResponse(updateManager.upgrade(
-                    Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
-                            parameters.get(ARCHIVE_NAME)),
-                    IdentityServer.getInstance().getInstallLocation().toPath(), userName)).asPromise();
+                    archivePath(parameters.get(ARCHIVE_NAME)),
+                    IdentityServer.getInstance().getInstallLocation().toPath(), userName
+            )).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
@@ -199,8 +242,8 @@ public class UpdateService extends AbstractRequestHandler {
     private Promise<ActionResponse, ResourceException> handleLicense(Map<String, String> parameters) {
         try {
             return newActionResponse(updateManager.getLicense(
-                    Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY +
-                            parameters.get(ARCHIVE_NAME)))).asPromise();
+                    archivePath(parameters.get(ARCHIVE_NAME))
+            )).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }

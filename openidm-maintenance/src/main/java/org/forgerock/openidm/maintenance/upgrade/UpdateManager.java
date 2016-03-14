@@ -65,6 +65,14 @@ public interface UpdateManager {
     JsonValue listAvailableUpdates() throws UpdateException;
 
     /**
+     * List repo migrations for a given archive.
+     *
+     * @return A json list of objects describing each migration found in the archive
+     * @throws UpdateException on failure to read archive
+     */
+    JsonValue previewMigrations(final Path archiveFile) throws UpdateException;
+
+    /**
      * Return the license for a given update archive.  Defaults to the license found in the current OpenIDM
      * deployment if the archive does not contain a license file.
      *
