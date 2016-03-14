@@ -176,9 +176,6 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     this.renderExpressionTree(callback);
                 } else {
                     this.$el.find(".filter").text(this.getFilterString());
-                    if (callback) {
-                        callback();
-                    }
                 }
             },
 

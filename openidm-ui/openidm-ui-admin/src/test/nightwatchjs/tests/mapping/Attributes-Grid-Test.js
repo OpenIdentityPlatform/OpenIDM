@@ -70,6 +70,29 @@ module.exports = {
             .assert.elementPresent('@firstRowIconBadge');
     },
 
+    'Condition Filter shows correct values after property is selected (OPENIDM-5404)': function(client) {
+        var mappingPage = client.page.mapping();
+
+        client
+            .pause(1000);
+        mappingPage
+            .waitForElementPresent('@attributesGridFirstRow', 1000)
+            .click('@attributesGridFirstRow')
+            .waitForElementVisible('@scriptDialogUpdate', 1000)
+            .click('@conditionScriptTab')
+            .waitForElementVisible('@conditionFilter', 1000)
+            .click('@conditionFilter')
+            .waitForElementVisible('@conditionFilterSelect', 1000)
+            .click('@conditionFilterSelect')
+            .waitForElementVisible('@conditionFilterSelectOption', 1000)
+            .click('@conditionFilterSelectOption')
+            .waitForElementVisible('@conditionFilterValueForProperty', 1000)
+            .click('@conditionFilterValueForProperty')
+            .waitForElementVisible('@conditionFilterValueForPropertyOption', 1000)
+            .click('@conditionFilterValueForPropertyOption')
+            .waitForElementNotPresent('@conditionFilterValueForPropertyErroneous', 1000, "There are no erroneously created select elements");
+    },
+
     "Grid should render sample data into row": function(client) {
         var mappingPage = client.page.mapping(),
             previewPopUpValue = mappingPage.elements.previewPopUpValue.selector;
