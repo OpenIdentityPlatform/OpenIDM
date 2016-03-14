@@ -1580,7 +1580,7 @@
             "confirmDeleteMapping": "Are you sure you want to delete the &quot;__mappingName__&quot; mapping?<br/><br/>**Caution: this action cannot be reversed.",
             "noMappingsDefined": "No mappings defined.",
             "addProperty": "Add property",
-            "sampleSource": "Sample source.",
+            "sampleSource": "Sample source",
             "confirmRemoveProperty": "Are you sure you want to remove the &quot;__property__&quot; property mapping?",
             "transformRequiredForMulti": "A transformation script is required when mapping from a multiple-value source to a single-value target.",
             "validPropertyRequired": "You must select a valid property name.",
