@@ -32,12 +32,16 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
+import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,6 +49,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Attributes;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import difflib.DiffUtils;
@@ -61,6 +66,8 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.commons.launcher.OSGiFrameworkService;
+import org.forgerock.guava.common.base.Predicate;
+import org.forgerock.guava.common.collect.Collections2;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -73,6 +80,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.maintenance.impl.UpdateContext;
@@ -80,6 +88,7 @@ import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
 import org.forgerock.openidm.util.JsonUtil;
+import org.forgerock.openidm.util.NaturalOrderComparator;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.forgerock.util.query.QueryFilter;
@@ -167,6 +176,12 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC)
     protected IDMConnectionFactory connectionFactory;
+
+    /**
+     * Enhanced configuration service.
+     */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile EnhancedConfig enhancedConfig;
 
     /**
      * Execute a {@link Function} on an input stream for the given {@link Path}.
@@ -335,6 +350,79 @@ public class UpdateManagerImpl implements UpdateManager {
                         }
                     }
                 });
+    }
+
+    @Override
+    public JsonValue previewMigrations(final Path archiveFile) throws UpdateException {
+        // FIXME - get from osgi properties
+        final String dbDir = "postgresql";
+
+        final Pattern migrationPattern = Pattern.compile("db/"+dbDir+"/scripts/migrations/v(\\d+)_(\\w+).(pg)?sql");
+
+        return withTempDirectory("openidm-upgrade-",
+                new Function<Path, JsonValue, UpdateException>() {
+                    @Override
+                    public JsonValue apply(Path tempDir) throws UpdateException {
+                        final ZipArchive archive =  new ZipArchive(archiveFile, tempDir);
+
+                        final List<Path> migrations = new ArrayList<>(Collections2.filter(archive.getFiles(), new Predicate<Path>() {
+                            @Override
+                            public boolean apply(Path path) {
+                                final Matcher m = migrationPattern.matcher(path.toString());
+
+                                if (m.matches()) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            }
+                        }));
+
+                        migrations.sort(new NaturalOrderComparator());
+
+                        final JsonValue response = json(array());
+
+                        for (Path p : migrations) {
+//                            String migration = FileUtil.readFile(p.toFile());
+
+                            response.add(p.getFileName().toString());
+                        }
+
+                        return response;
+                    }
+                });
+
+
+//        final Path migrationsPath = IdentityServer.getInstance().getInstallLocation().toPath()
+//                .resolve("db/" + dbDir + "/scripts/migrations");
+//
+//        final List<Path> pendingMigrations = new ArrayList<>();
+
+//        final int currentVersion = config.get("schemaVersion").expect(Integer.class).defaultTo(0).asInteger();
+
+//        try (DirectoryStream<Path> ds = Files.newDirectoryStream(migrationsPath)) {
+//            for (Path migration : ds) {
+//                final Matcher m = migrationPattern.matcher(migration.getFileName().toString());
+//                if (m.matches() && Integer.parseInt(m.group(1)) > currentVersion) {
+//                    pendingMigrations.add(migration);
+//                }
+//            }
+//
+//            // Sort migrations so versions are in proper order
+//            pendingMigrations.sort(new NaturalOrderComparator());
+//            final JsonValue response = json(array());
+//
+//            for (Path p : pendingMigrations) {
+////                String migration = FileUtil.readFile(p.toFile());
+//
+//                response.add(p.getFileName().toString());
+//            }
+//
+//            return response;
+//        } catch (IOException e) {
+////            e.printStackTrace();
+//            throw new UpdateException(e);
+//        }
     }
 
     /**
@@ -864,6 +952,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
                             .setStatusMessage("Processed " + path.getFileName().toString()));
                 }
+
                 logUpdate(updateEntry.setEndDate(getDateString())
                         .setStatus(UpdateStatus.COMPLETE)
                         .setStatusMessage("Update complete."));
