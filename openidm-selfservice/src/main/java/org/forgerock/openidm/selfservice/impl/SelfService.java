@@ -271,16 +271,13 @@ public class SelfService {
             if (handler == null) {
                 try {
                     // pull the shared key in from the keystore
-                    JsonValue sharedKey = connectionFactory.getConnection()
+                    String sharedKey = connectionFactory.getConnection()
                             .read(createInternalContext(), newReadRequest(SHARED_KEY_ROUTER_PATH))
                             .getContent()
-                            .get(ENCODED_SECRET_PTR);
-                    if (sharedKey == null) {
-                        throw new RuntimeException("Selfservice shared key does not exist");
-                    }
-                    SigningManager signingManager = new SigningManager();
-                    SigningHandler signingHandler = signingManager.newHmacSigningHandler(
-                            sharedKey.asString().getBytes());
+                            .get(ENCODED_SECRET_PTR)
+                            .required()
+                            .asString();
+                    SigningHandler signingHandler = new SigningManager().newHmacSigningHandler(sharedKey.getBytes());
 
                     KeyPairGenerator keyPairGen = KeyPairGenerator.getInstance(config.getKeyPairAlgorithm());
                     keyPairGen.initialize(config.getKeyPairSize());
