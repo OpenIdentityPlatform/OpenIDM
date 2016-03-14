@@ -23,6 +23,7 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
@@ -46,7 +47,7 @@ import static org.fest.assertions.api.Assertions.entry;
 public class DocumentUtilTest {
 
     String dbURL = "plocal:./target/docutiltestdb";
-    ODatabaseDocumentTx db = null; 
+    ODatabaseDocumentTx db = null;
     String orientDocClass = "Sample";
     OServer server;
 
@@ -66,7 +67,12 @@ public class DocumentUtilTest {
             db.close();
         }
     }
-    
+
+    public ODatabaseDocumentTx getDatabase() {
+        ODatabaseRecordThreadLocal.INSTANCE.set(db);
+        return db;
+    }
+
     @Test
     public void docToMapNullTest() {
         assertNull(DocumentUtil.toMap(null));
@@ -288,7 +294,7 @@ public class DocumentUtilTest {
     
     @Test
     public void mapToDocNullTest() throws ConflictException {
-        assertNull(DocumentUtil.toDocument(null, null, db, orientDocClass, false, true));
+        assertNull(DocumentUtil.toDocument(null, null, getDatabase(), orientDocClass, false, true));
     }
     
     @Test
@@ -306,7 +312,7 @@ public class DocumentUtilTest {
         map.put("present", Boolean.FALSE);
         map.put("somedate", new Date());
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "Sam", "unexpected firstname");
@@ -337,7 +343,7 @@ public class DocumentUtilTest {
         map.put("somedate", new Date());
         
         // An existing document to get updated from the map
-        ODocument existingDoc = db.newInstance(orientDocClass);
+        ODocument existingDoc = getDatabase().newInstance(orientDocClass);
         existingDoc.field(DocumentUtil.ORIENTDB_PRIMARY_KEY, "client-assigned-id");
         // firstname and lastname deliberately not in the existing doc
         existingDoc.field("fieldtoberemoved", "ABC");
@@ -349,7 +355,7 @@ public class DocumentUtilTest {
         existingDoc.field("somedate", new Date());
         existingDoc.field("AnotherFieldToBeRemoved", new Date());
         
-        ODocument result = DocumentUtil.toDocument(map, existingDoc, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, existingDoc, getDatabase(), orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "Sam", "unexpected firstname");
@@ -374,7 +380,7 @@ public class DocumentUtilTest {
         map.put(DocumentUtil.TAG_ID, "client-assigned-id");
         map.put(DocumentUtil.TAG_REV, "100");
         map.put("firstname", "John");
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "John", "unexpected firstname");
@@ -399,7 +405,7 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "John", "unexpected firstname");
@@ -434,7 +440,7 @@ public class DocumentUtilTest {
         existingDoc.field("city", new ODocument().field("name","Paris").field("country", "France"));
         existingDoc.field("phonenumbers", new ODocument().field("home","555-666-7777").field("mobile", "555-111-2222"), OType.EMBEDDED);
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertFalse(result.containsField("firstname"), "Firstname should have been removed but is present");
@@ -470,7 +476,7 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
         
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
         assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
         assertEquals(result.field("firstname"), "John", "unexpected firstname");
@@ -496,7 +502,7 @@ public class DocumentUtilTest {
         map.put(DocumentUtil.TAG_ID, "client-assigned-id");
         map.put(DocumentUtil.TAG_REV, "invalid-version"); // OrientDB revisions are ints
         map.put("firstname", "John");
-        ODocument result = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         assertTrue(false, "Invalid Revision must trigger failure");
     }
     
@@ -518,7 +524,7 @@ public class DocumentUtilTest {
         phone.put("mobile", "555-111-2222");
         map.put("phonenumbers", phone);
         
-        ODocument intermediateResult = DocumentUtil.toDocument(map, null, db, orientDocClass);
+        ODocument intermediateResult = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
         Map result = DocumentUtil.toMap(intermediateResult);
         
