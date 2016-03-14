@@ -54,6 +54,15 @@ module.exports = {
         conditionFilterSelectOption: {
             selector: "#conditionFilterHolder option[value='and']"
         },
+        conditionFilterValueForProperty: {
+            selector: "#conditionFilterHolder .expressionTree .row:first-of-type .selectize-input"
+        },
+        conditionFilterValueForPropertyErroneous: {
+            selector: "#conditionFilterHolder .expressionTree .row:first-of-type select:nth-of-type(2)"
+        },
+        conditionFilterValueForPropertyOption: {
+            selector: "#conditionFilterHolder .expressionTree .row:first-of-type div[data-value='/linkQualifier']"
+        },
         gridPreviewInput: {
             selector: 'input[placeholder="Search to see preview"]'
         },

@@ -28,7 +28,7 @@ module.exports = {
             selector: '.expressionTree'
         },
         conditionStatus: {
-            selector: '#tabHeader_condition span i.fa-check'
+            selector: '#tabHeader_condition span i.fa-toggle-on'
         },
         conditionOpSelect: {
             selector: '.expressionTree select:first-of-type'
