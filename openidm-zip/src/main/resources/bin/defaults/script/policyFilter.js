@@ -30,12 +30,12 @@
      * policy checked for it.
      * @param {string} method Either create or update
      * @param {string} basePath Path to resource (e.g. managed/user or managed/user/1)
-     * @param {string} id The identifier for the new resource, for creates
+     * @param {string} unencodedId The identifier for the new resource, for creates
      * @returns {string} The full path to use for policy evaluation
      */
-    exports.getFullResourcePath = function (method, basePath, uncodedId) {
+    exports.getFullResourcePath = function (method, basePath, unencodedId) {
         var fullResourcePath;
-        var id = org.forgerock.http.util.Uris.urlEncodePathElement(uncodedId);
+        var id = org.forgerock.http.util.Uris.urlEncodePathElement(unencodedId);
 
         if (method === "create") {
             if (basePath === "") {
