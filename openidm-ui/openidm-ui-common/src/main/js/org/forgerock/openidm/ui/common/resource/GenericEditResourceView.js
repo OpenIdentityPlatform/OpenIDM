@@ -389,6 +389,10 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 e.preventDefault();
             }
 
+            if ($(e.currentTarget).attr("disabled") === "disabled" ) {
+                return false;
+            }
+
             this.render(this.data.args);
         },
         deleteObject: function(e, callback){

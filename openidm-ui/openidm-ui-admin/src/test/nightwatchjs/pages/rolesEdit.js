@@ -1,5 +1,8 @@
 module.exports = {
     elements: {
+        spinner: {
+          selector: ".spinner"
+        },
         nameInput: {
             selector: 'input[name="root[name]"]'
         },
@@ -8,6 +11,9 @@ module.exports = {
         },
         saveButton: {
             selector: '#saveBtn'
+        },
+        resetButton: {
+            selector: "#resetBtn"
         },
         deleteButton: {
             selector: '#deleteBtn'
