@@ -17,7 +17,7 @@ module.exports = {
                 .navigate()
                 .waitForElementPresent('@newRoleButton', 2000)
                 .click('@newRoleButton');
-           
+
             rolesEdit
                 .waitForElementPresent('@nameInput', 2000)
                 .setValue('@nameInput', "Role1")
@@ -26,6 +26,14 @@ module.exports = {
                 .waitForElementPresent('@alertMessage', 2000)
                 .waitForElementVisible('@alertMessage', 2000)
                 .expect.element('@alertMessage').text.to.equal("Successfully added Role");
+        },
+        "OPENIDM-4857 Click a disabled reset button doesn't reload the page": function(client) {
+            var rolesEdit = client.page.rolesEdit();
+
+            rolesEdit
+                .waitForElementPresent('@resetButton', 2000)
+                .click("@resetButton")
+                .expect.element("@spinner").to.not.be.present;
         },
         'Condition tab status Displayed': function (client) {
             var rolesEdit = client.page.rolesEdit();
