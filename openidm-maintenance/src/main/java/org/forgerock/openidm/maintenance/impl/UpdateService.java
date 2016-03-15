@@ -37,7 +37,6 @@ import org.forgerock.openidm.maintenance.upgrade.UpdateException;
 import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -179,7 +178,7 @@ public class UpdateService implements RequestHandler {
             }
 
             try {
-                ActionResponse response = connectionFactory.getConnection().action(new RootContext(),
+                ActionResponse response = connectionFactory.getConnection().action(new UpdateContext(),
                         Requests.newActionRequest("/maintenance", "status"));
                 if (!response.getJsonContent().get("maintenanceEnabled").asBoolean().equals(Boolean.TRUE)) {
                     throw new UpdateException("Must be in maintenance mode prior to installing an update.");
@@ -214,7 +213,7 @@ public class UpdateService implements RequestHandler {
 
             final JsonValue results = json(array());
             connectionFactory.getConnection().query(
-                    context, query, new QueryResourceHandler() {
+                    new UpdateContext(context), query, new QueryResourceHandler() {
                         @Override
                         public boolean handleResource(ResourceResponse resource) {
                             results.add(object(
@@ -246,7 +245,7 @@ public class UpdateService implements RequestHandler {
     }
 
     /**
-     * Service does not support deleting entries..
+     * Service does not support deleting entries.
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
