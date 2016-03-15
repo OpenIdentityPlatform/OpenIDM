@@ -20,7 +20,7 @@ exports.command = function (callback) {
             data: prov
         });
         done(true);
-    }, [provisioner]);
+    }, [provisioner], callback);
 };
 
 provisioner = JSON.stringify({

@@ -286,7 +286,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
 
             if(this.targetDetails.resourceType === "connector") {
                 tempObjectType = this.$el.find("#mappingTarget .resource-object-type-select").val().charAt(0).toUpperCase() + this.$el.find("#mappingTarget .resource-object-type-select").val().substring(1);
-                targetName = "source" + tempName +tempObjectType;
+                targetName = "system" + tempName +tempObjectType;
                 this.targetDetails.saveName = "system/" + this.targetDetails.name +"/" +this.$el.find("#mappingTarget .resource-object-type-select").val();
             } else{
                 targetName = "managed" + tempName;
@@ -297,7 +297,7 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
 
             if(this.sourceDetails.resourceType === "connector") {
                 tempObjectType = this.$el.find("#mappingSource .resource-object-type-select").val().charAt(0).toUpperCase() + this.$el.find("#mappingSource .resource-object-type-select").val().substring(1);
-                sourceName = "source" +tempName +tempObjectType;
+                sourceName = "system" +tempName +tempObjectType;
                 this.sourceDetails.saveName = "system/" + this.sourceDetails.name +"/" +this.$el.find("#mappingSource .resource-object-type-select").val();
             } else{
                 sourceName = "managed" + tempName;
