@@ -353,7 +353,7 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     @Override
-    public JsonValue previewMigrations(final Path archiveFile) throws UpdateException {
+    public JsonValue listMigrations(final Path archiveFile) throws UpdateException {
         // FIXME - get from osgi properties
         final String dbDir = "postgresql";
 
