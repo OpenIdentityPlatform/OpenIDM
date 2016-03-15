@@ -214,7 +214,6 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
         deleteConnections: function(event) {
             var selectedItem = $(event.currentTarget).parents(".card-spacer"),
                 alternateItem,
-                url,
                 tempConnector = _.clone(this.data.currentConnectors);
 
             if(selectedItem.length > 0) {
@@ -234,15 +233,17 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
             }
 
             UIUtils.confirmDialog($.t("templates.connector.connectorDelete"), "danger", _.bind(function(){
+                var url;
+
                 _.each(tempConnector, function(connectorObject, index){
                     if(connectorObject.cleanUrlName === selectedItem.attr("data-connector-title")) {
+                        url = this.data.currentConnectors[index].config.split("/");
+
                         this.data.currentConnectors.splice(index, 1);
                     }
                 }, this);
 
-                url = selectedItem.attr("data-connector-title").split("_");
-
-                ConfigDelegate.deleteEntity(url[0] +"/" +url[1]).then(function(){
+                ConfigDelegate.deleteEntity(url[1] +"/" +url[2]).then(function(){
                         ConnectorDelegate.deleteCurrentConnectorsCache();
                         selectedItem.remove();
                         alternateItem.remove();
