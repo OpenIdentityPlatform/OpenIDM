@@ -18,16 +18,9 @@ package org.forgerock.openidm.maintenance.impl;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
-import java.io.IOException;
-import java.nio.file.DirectoryStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -44,7 +37,6 @@ import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.maintenance.upgrade.UpdateException;
 import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
 import org.forgerock.openidm.router.IDMConnectionFactory;
-import org.forgerock.openidm.util.NaturalOrderComparator;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
@@ -121,8 +113,7 @@ public class UpdateService extends AbstractRequestHandler {
 
     private enum Action {
         available,
-        previewMigrations,
-        getMigration,
+        listMigrations,
         preview,
         update,
         getLicense,
@@ -139,15 +130,13 @@ public class UpdateService extends AbstractRequestHandler {
         switch (request.getActionAsEnum(Action.class)) {
             case available:
                 return handleListAvailable();
-            case previewMigrations:
+            case listMigrations:
                 return handlePreviewMigrations(request.getAdditionalParameters());
             case preview:
                 return handlePreviewUpdate(request.getAdditionalParameters());
             case update:
                 return handleInstallUpdate(request.getAdditionalParameters(),
                         context.asContext(SecurityContext.class).getAuthenticationId());
-            case getMigration:
-                return handleMigration(request.getAdditionalParameters());
             case getLicense:
                 return handleLicense(request.getAdditionalParameters());
             case restart:
@@ -163,14 +152,6 @@ public class UpdateService extends AbstractRequestHandler {
         }
     }
 
-    private Promise<ActionResponse, ResourceException> handleMigration(Map<String, String> additionalParameters) {
-        if (!additionalParameters.containsKey(ARCHIVE_NAME)) {
-            return new BadRequestException("Archive name not specified.").asPromise();
-        }
-
-        return new NotSupportedException("Not yet implemented").asPromise();
-    }
-
     private Promise<ActionResponse, ResourceException> handlePreviewMigrations(
             Map<String, String> additionalParameters) {
         if (!additionalParameters.containsKey(ARCHIVE_NAME)) {
@@ -178,7 +159,7 @@ public class UpdateService extends AbstractRequestHandler {
         }
 
         try {
-            return newActionResponse(updateManager.previewMigrations(
+            return newActionResponse(updateManager.listMigrations(
                     archivePath(additionalParameters.get(ARCHIVE_NAME))
             )).asPromise();
         } catch (UpdateException e) {
