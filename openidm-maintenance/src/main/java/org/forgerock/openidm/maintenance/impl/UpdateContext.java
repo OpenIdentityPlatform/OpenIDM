@@ -19,12 +19,17 @@ package org.forgerock.openidm.maintenance.impl;
 import org.forgerock.json.JsonValue;
 import org.forgerock.services.context.AbstractContext;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 
 /**
  * Context used exclusively by {@code UpdateManagerImpl} to tell the {@code MaintenanceFilter}
  * to allow requests through.
  */
 public class UpdateContext extends AbstractContext {
+    UpdateContext() {
+        super(new RootContext(), "update");
+    }
+
     public UpdateContext(Context parent) {
         super(parent, "update");
     }

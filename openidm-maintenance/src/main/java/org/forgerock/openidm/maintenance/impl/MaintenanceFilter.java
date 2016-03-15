@@ -63,7 +63,8 @@ public class MaintenanceFilter extends MutableFilterDecorator {
             new FilterCondition() {
                 @Override
                 public boolean matches(Context context, Request request) {
-                    return !context.containsContext(UpdateContext.class);
+                    return !context.containsContext(UpdateContext.class)
+                            && !request.getResourcePath().startsWith("maintenance");
                 }
             },
             new Filter() {
