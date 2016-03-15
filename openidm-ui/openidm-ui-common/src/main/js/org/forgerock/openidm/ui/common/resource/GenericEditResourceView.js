@@ -279,25 +279,31 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
          * </div>
          *
          */
-        addTooltips: function(){
+        addTooltips: function() {
             var propertyDescriptionSpan = this.$el.find("p.help-block"),
                 objectHeader = this.$el.find("#resource").find("h3:eq(0)"),
-                objectDescriptionSpan = objectHeader.next();
+                objectDescriptionSpan = objectHeader.next(),
+                // this text escaped since it's being inserted into an attribute
+                tipDescription = handlebars.Utils.escapeExpression(objectDescriptionSpan.text()),
+                iconElement = $('<i class="fa fa-info-circle info" />');
 
-            $.each(propertyDescriptionSpan, function(){
-                $(this).parent().find("label").after(' <i class="fa fa-info-circle info" title="' + $(this).text() + '"/>');
+            $.each(propertyDescriptionSpan, function() {
+                // this text escaped since it's being inserted into an attribute
+                var tipDescription = handlebars.Utils.escapeExpression($(this).text());
+                iconElement.attr('title', tipDescription);
+                $(this).parent().find("label").after(iconElement);
                 $(this).empty();
             });
 
-            if(objectDescriptionSpan.text().length > 0){
-                objectHeader.append('<i class="fa fa-info-circle info" title="' + objectDescriptionSpan.text() + '"/>');
+            if (objectDescriptionSpan.text().length > 0) {
+                iconElement.attr('title', tipDescription);
+                objectHeader.append(iconElement);
                 objectDescriptionSpan.empty();
             }
 
             this.$el.find(".info").popover({
                 content: function () { return $(this).attr("data-original-title");},
-                trigger:'hover',
-                placement:'top',
+                placement: 'top',
                 container: 'body',
                 html: 'true',
                 template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
