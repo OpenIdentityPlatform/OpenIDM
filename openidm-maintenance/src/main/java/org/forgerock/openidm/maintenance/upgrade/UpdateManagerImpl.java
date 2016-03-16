@@ -32,21 +32,20 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.jar.Attributes;
 import java.util.regex.Matcher;
@@ -60,6 +59,7 @@ import org.apache.commons.io.FileUtils;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
@@ -146,11 +146,17 @@ public class UpdateManagerImpl implements UpdateManager {
     public enum UpdateStatus {
         IN_PROGRESS,
         COMPLETE,
+        PENDING_MIGRATIONS,
         FAILED
     }
 
     /** The OSGiFramework Service **/
     protected OSGiFrameworkService osgiFrameworkService;
+
+    @Deactivate
+    void deactivate(ComponentContext compContext) throws Exception {
+        archiveCache.clear();
+    }
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -269,6 +275,11 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         @Override
+        public Path extractedPath(Path file) {
+            return upgradeRoot.resolve(file);
+        }
+
+        @Override
         public <R, E extends Exception> R withInputStreamForPath(Path path, Function<InputStream, R, E> function)
                 throws E, IOException {
             return UpdateManagerImpl.withInputStreamForPath(upgradeRoot.resolve(path), function);
@@ -315,6 +326,21 @@ public class UpdateManagerImpl implements UpdateManager {
         R invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException;
     }
 
+    final Map<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
+
+    private ZipArchive getArchive(final Path archiveFile) throws IOException, ArchiveException {
+        final ZipArchive cached = archiveCache.get(archiveFile);
+
+        if (cached != null) {
+            return cached;
+        } else {
+            final Path tempDir = Files.createTempDirectory("openidm-update-");
+            final ZipArchive archive = new ZipArchive(archiveFile, tempDir);
+            archiveCache.put(archiveFile, archive);
+            return archive;
+        }
+    }
+
     /**
      * Invoke an {@link UpgradeAction} using an archive at a given URL.  Use {@code installDir} as the location
      * of the currently-installed OpenIDM.
@@ -335,21 +361,15 @@ public class UpdateManagerImpl implements UpdateManager {
         validateCorrectVersion(updateConfig, archiveFile.toFile());
         validateHasChecksumFile(archiveFile.toFile());
 
-        return withTempDirectory("openidm-upgrade-",
-                new Function<Path, R, UpdateException>() {
-                    @Override
-                    public R apply(Path tempUnzipDir) throws UpdateException {
-                        try {
-                            final ZipArchive archive = new ZipArchive(archiveFile, tempUnzipDir);
-                            final ChecksumFile checksumFile = resolveChecksumFile(installDir);
-                            final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
+        try {
+            final ZipArchive archive = getArchive(archiveFile);
+            final ChecksumFile checksumFile = resolveChecksumFile(installDir);
+            final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
 
-                            return upgradeAction.invoke(archive, fileStateChecker);
-                        } catch (Exception e) {
-                            throw new UpdateException(e.getMessage(), e);
-                        }
-                    }
-                });
+            return upgradeAction.invoke(archive, fileStateChecker);
+        } catch (Exception e) {
+            throw new UpdateException(e.getMessage(), e);
+        }
     }
 
     @Override
@@ -359,22 +379,16 @@ public class UpdateManagerImpl implements UpdateManager {
 
         final Pattern migrationPattern = Pattern.compile("db/"+dbDir+"/scripts/migrations/v(\\d+)_(\\w+).(pg)?sql");
 
-        return withTempDirectory("openidm-upgrade-",
-                new Function<Path, JsonValue, UpdateException>() {
+        return usingArchive(archiveFile, IdentityServer.getInstance().getInstallLocation().toPath(),
+                new UpgradeAction<JsonValue>() {
                     @Override
-                    public JsonValue apply(Path tempDir) throws UpdateException {
-                        final ZipArchive archive =  new ZipArchive(archiveFile, tempDir);
+                    public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException {
+//                        final ZipArchive archive =  new ZipArchive(archiveFile, tempDir);
 
                         final List<Path> migrations = new ArrayList<>(Collections2.filter(archive.getFiles(), new Predicate<Path>() {
                             @Override
                             public boolean apply(Path path) {
-                                final Matcher m = migrationPattern.matcher(path.toString());
-
-                                if (m.matches()) {
-                                    return true;
-                                } else {
-                                    return false;
-                                }
+                                return migrationPattern.matcher(path.toString()).matches();
                             }
                         }));
 
@@ -387,15 +401,13 @@ public class UpdateManagerImpl implements UpdateManager {
 
                             response.add(object(
                                     field("file", p.getFileName().toString()),
-                                    // FIXME - must hardcode openidm here due to ZipArchive stripping
-                                    field("absolutePath", tempDir.toAbsolutePath().resolve("openidm").resolve(p).toString())
+                                    field("extractedPath", archive.extractedPath(p).toString())
                             ));
                         }
 
                         return response;
                     }
                 });
-
 
 //        final Path migrationsPath = IdentityServer.getInstance().getInstallLocation().toPath()
 //                .resolve("db/" + dbDir + "/scripts/migrations");
@@ -971,6 +983,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 return;
             } finally {
                 try {
+                    // TODO - don't delete if not complete (pending migrations)
                     if (tempDirectory != null) {
                         FileUtils.deleteDirectory(tempDirectory.toFile());
                     }
