@@ -626,6 +626,7 @@
                         "title" : "Temporal Constraints",
                         "viewable" : true,
                         "returnByDefault" : true,
+                        "type" : "array",
                         "items" : {
                             "type" : "object",
                             "properties" : {
