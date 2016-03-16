@@ -385,7 +385,11 @@ public class UpdateManagerImpl implements UpdateManager {
                         for (Path p : migrations) {
 //                            String migration = FileUtil.readFile(p.toFile());
 
-                            response.add(p.getFileName().toString());
+                            response.add(object(
+                                    field("file", p.getFileName().toString()),
+                                    // FIXME - must hardcode openidm here due to ZipArchive stripping
+                                    field("absolutePath", tempDir.toAbsolutePath().resolve("openidm").resolve(p).toString())
+                            ));
                         }
 
                         return response;
