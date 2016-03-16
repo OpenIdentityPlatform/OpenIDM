@@ -17,7 +17,7 @@ package org.forgerock.openidm.bin.defaults.script;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import org.codehaus.jackson.map.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
 import org.testng.annotations.Test;
 

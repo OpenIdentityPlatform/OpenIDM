@@ -148,25 +148,6 @@
             <artifactId>h2</artifactId>
         </dependency>
 
-        <!-- REST Dependencies-->
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.httpclient</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient-osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore-osgi</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.jackson</artifactId>
-            <optional>true</optional>
-        </dependency>
-
         <!-- Provided OSGi Dependencies -->
         <dependency>
             <groupId>org.osgi</groupId>
@@ -247,17 +228,6 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <dependencies>
-                <dependency>
-                    <groupId>org.restlet.osgi</groupId>
-                    <artifactId>org.restlet.ext.servlet</artifactId>
-                    <version>2.1.2</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.restlet.osgi</groupId>
-                    <artifactId>org.restlet.ext.httpclient</artifactId>
-                </dependency>
-            </dependencies>
             <build>
                 <plugins>
                     <plugin>

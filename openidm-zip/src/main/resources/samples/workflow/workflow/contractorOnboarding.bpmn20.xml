@@ -102,7 +102,7 @@
                     "url": "https://localhost:"+identityServer.getProperty('openidm.port.https')+"/openidm/selfservice/reset?_action=submitRequirements",
                     "method": "POST",
                     "headers": [
-                        "Content-type": "application/json",
+                        "Content-Type": "application/json",
                         "X-OpenIDM-Username": "anonymous",
                         "X-OpenIDM-Password": "anonymous",
                         "Accept-Language": "en-US,en"
