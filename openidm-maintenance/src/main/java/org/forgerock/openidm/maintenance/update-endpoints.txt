@@ -81,6 +81,25 @@ UI Endpoints for Update Process
 		}
 	]
 
+2a. Get list of repo migrations (for the current db type) for a given update archive
+    ACTION openidm/maintenance/update?_action=listMigrations&archive=OpenIDM-4.5.0.zip
+
+    returns:
+    [
+        {
+            "file": "v1_shorten_link_columns.sql",
+            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v1_shorten_link_columns.sql"
+        },
+        {
+            "file": "v2_some_change.sql",
+            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v2_some_change.sql"
+        },
+        {
+            "file": "v3_more_changes.sql",
+            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v3_more_changes.sql"
+        }
+    ]
+
 2b. Get applicable license for an update archive:
 
 	ACTION openidm/maintenance/update?_action=getLicense&archive=OpenIDM-4.5.0.zip
@@ -105,6 +124,21 @@ UI Endpoints for Update Process
 		"user" : "openidm-admin"
 	}
 
+3a. Mark migrations as complete for a PENDING_MIGRATIONS update
+
+    ACTION openidm/maintenance/update?_action=markComplete&id=someIDstring
+
+	returns:
+	{
+		"_id" : "someIDstring",
+		"status" : "COMPLETE",
+		"statusMessage" : "All done!",
+		"completedTasks" : 350,
+		"totalTasks" : 350,
+		"startDate" : "2016-04-01 12:00:00",
+		"user" : "openidm-admin"
+	}
+
 4. Get status of running update
 
 	QUERY openidm/maintenance/update/log?_queryFilter=_id+eq+%22someIDstring%22
@@ -119,6 +153,27 @@ UI Endpoints for Update Process
 		"startDate" : "2016-04-01 12:00:00",
 		"user" : "openidm-admin"
 	}
+
+	(while main update complete but database migrations must be run):
+    {
+        "_id" : "someIDstring",
+        "status" : "PENDING_MIGRATIONS",
+        "statusMessage" : "Database migrations required",
+        "completedTasks" : 350,
+        "totalTasks" : 350,
+        "startDate" : "2016-04-01 12:00:00",
+        "endDate" : "2016-04-01 13:00:00",
+        "user" : "openidm-admin",
+        "nodeId" : "node3",
+        "files" : [
+            {
+                "filePath" : "bin/defaults/script/access.js",
+                "fileState" : "REPLACED" (see Post-Update File States below),
+                "backup" : "bin/defaults/script/access.js.<update id>"
+            },
+            ...
+        ]
+    }
 
 	(while in terminal state):
 	{
@@ -221,12 +276,13 @@ FileState States:
     /** The file is unchanged from the original distribution. */
     UNCHANGED
 
-Update Stati:
+Update Statuses:
 
-    IN_PROGRESS     Update has started but not yet completed
-    COMPLETE        Update has completed
-    FAILED          Update failed but has not yet reverted
-    REVERTED        Update failed and was reverted
+    IN_PROGRESS         Update has started, not yet completed
+    PENDING_MIGRATIONS  Update is completed, repo migrations pending
+    COMPLETE            Update is complete
+    FAILED              Update failed, not yet reverted
+    REVERTED            Update failed, changes have been reverted
 
     Note that it is possible an update could remain in IN_PROGRESS or FAILED state forever if the thread/process
     died before the update could reach COMPLETE or REVERTED, the two "terminal states".  Updates are not reentrant
