@@ -39,6 +39,7 @@ import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -477,6 +478,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         execScript(context, ScriptHook.onUpdate, decryptedNew,
                 prepareScriptBindings(context, request, resourceId, decryptedOld, decryptedNew));
 
+        // determine if any onUpdate script manipulated a relationship field, and update the relationshipFields Set accordingly
+        updateRelationshipFields(relationshipFields, decryptedOld, decryptedNew);
+
         // Validate relationships before persisting
         validateRelationshipFields(context, decryptedOld, decryptedNew);
 
@@ -514,6 +518,31 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         readResponse.getContent().asMap().putAll(strippedRelationshipFields.asMap());
 
         return readResponse;
+    }
+
+    /**
+     * It is possible that a script updates a relationship field in one of the updated objects. If this is the case,
+     * the relationshipFields set must be updated with this field name, so that the corresponding relationships can
+     * be persisted. So if the relationshipFields does not contain a relationship field, and a difference between the
+     * oldObject and newObject includes this field, then this field must be added to the relationshipFields collection.
+     * @param relationshipFields the set of relationship fields that should be updated
+     * @param oldObject the managed object prior to the script onUpdate invocation
+     * @param newObject the managed object following script onUpdate invocation
+     */
+    private void updateRelationshipFields(Set<JsonPointer> relationshipFields, JsonValue oldObject, JsonValue newObject) {
+        final Set<JsonPointer> systemRelationships = relationshipProviders.keySet();
+        if (!relationshipFields.containsAll(systemRelationships)) {
+            final JsonValue diff = JsonPatch.diff(oldObject, newObject);
+            for (Map<String, Object> diffOp : diff.asList(Map.class)) {
+                //not descriminating on type of diff - replace/add/remove
+                JsonPointer pathPointer = new JsonPointer((String) diffOp.get(JsonPatch.PATH_PTR.leaf()));
+                if (systemRelationships.contains(pathPointer) && !relationshipFields.contains(pathPointer)) {
+                    relationshipFields.add(pathPointer);
+                    logger.info("In updateRelationshipFields, adding onUpdate-script-modified relationship to " +
+                            "processed relationship set: {}", pathPointer);
+                }
+            }
+        }
     }
 
     /**
