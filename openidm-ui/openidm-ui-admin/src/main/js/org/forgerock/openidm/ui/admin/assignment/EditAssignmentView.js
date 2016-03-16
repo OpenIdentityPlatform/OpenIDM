@@ -160,7 +160,7 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 _.each(this.data.resource.attributes, _.bind(function(attribute) {
                     this.addAttribute(attribute);
                 }, this));
-                
+
                 this.showRolesTab();
 
                 if(callback) {
@@ -306,6 +306,7 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 attributeDetails = this.model.assignmentAttributes[index];
 
             $(button).popover({
+                trigger: 'click',
                 placement:'bottom',
                 html: true,
                 content:  $(handlebars.compile("{{> assignment/_OperationsPopover}}")(attributeDetails))
@@ -419,23 +420,23 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 });
             }, this));
         },
-        
+
         showRolesTab: function () {
             var tabView = new RelationshipArrayView();
-            
+
             resourceDelegate.getSchema(this.model.args).then(_.bind(function (schema) {
-                var opts = { 
-                        element: ".assignmentRoles", 
-                        prop: schema.properties.roles, 
+                var opts = {
+                        element: ".assignmentRoles",
+                        prop: schema.properties.roles,
                         schema: schema
                     };
-                
+
                 opts.prop.propName = "roles";
                 opts.prop.selector = "\\.roles";
                 opts.prop.relationshipUrl = "managed/assignment/" + this.data.resource._id + "/roles";
-                
+
                 tabView.render(opts);
-                
+
             }, this));
         }
     });
