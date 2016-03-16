@@ -74,7 +74,6 @@ public class JsonValuePatch {
         if (!operation.isReplace()) {
             throw new BadRequestException("Operation is an " + operation.getOperation() + ", not a replace!");
         }
-        subject.remove(operation.getField());
         if (!operation.getValue().isNull()) {
             subject.putPermissive(operation.getField(), operation.getValue().getObject());
         }
