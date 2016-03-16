@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.util;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -65,9 +65,9 @@ public class ScriptsTest {
     @Test
     public void testScriptUtil() throws JsonValueException, ScriptException {
         // Test a valid script configuration
-        assertThat(Scripts.newScript(testScriptConfig).exec(null, context)).isEqualTo(true);     
+        assertThat(Scripts.newScript(testScriptConfig).exec(null, context)).isEqualTo(true);
         // Test invalid script configurations
-        assertThat(Scripts.newScript(json(null))).isEqualTo(null);
-        assertThat(Scripts.newScript(null)).isEqualTo(null);
+        assertThat(Scripts.newScript(json(null))).isNull();
+        assertThat(Scripts.newScript(null)).isNull();
     }
 }
