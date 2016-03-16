@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -44,7 +44,6 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
@@ -865,7 +864,8 @@ public abstract class RelationshipProvider {
      */
     protected ResourceResponse getManagedObject(Context context) throws ResourceException {
         String managedObjectPath = resourceContainer.child(getManagedObjectId(context)).toString();
-        return getConnection().read(context, Requests.newReadRequest(managedObjectPath));
+        return getConnection().read(context, Requests.newReadRequest(managedObjectPath)
+                .addField(new JsonPointer("*")).addField(propertyPtr));
     }
     
     /**
