@@ -43,7 +43,7 @@ module.exports = {
             selector: '.expressionTree select:first-of-type option[value=expr]'
         },
         conditionOpNameInput: {
-            selector: '.expressionTree input.name'
+            selector: '.expressionTree .name-body:first-of-type .selectize-input'
         },
         conditionOpValueInput: {
             selector: '.expressionTree input.value'
@@ -53,6 +53,9 @@ module.exports = {
         },
         changesPending: {
             selector: '#resourceChangesPending #changedFields'
+        },
+        conditionOpNameInputSelectOption: {
+            selector: '.selectize-dropdown-content div[data-value="/mail"].option'
         }
     }
 };
