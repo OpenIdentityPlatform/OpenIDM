@@ -16,11 +16,12 @@
 
 package org.forgerock.openidm.patch;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.array;
-import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
 
@@ -40,6 +41,77 @@ import org.testng.annotations.Test;
  */
 public class JsonValuePatchTest {
     private JsonValue subject = json(object(field("key", "value")));
+
+    @Test
+    public void testMapAdd() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", "add"),
+                                field("field", "/key"),
+                                field("value", "pineapple")
+                        )
+                )));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+        assertThat(result).isTrue();
+        assertThat(object).stringAt("key").isEqualTo("pineapple");
+    }
+
+    // OPENIDM-1822 - validate that add @ ptr is a permissive-patch, aka "replace" on multivalued attributes
+    @Test
+    public void testArrayAddAtIndex() throws ResourceException {
+        JsonValue object = json(object(field("fruits", array("apple", "kiwi", "pear", "strawberry"))));
+        final List<PatchOperation> operations = PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", "add"),
+                                field("field", "/fruits/1"),
+                                field("value", "pineapple")
+                        )
+                )));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("fruits").containsSequence("apple", "pineapple", "pear", "strawberry");
+    }
+
+    @Test
+    public void testMapReplace() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", "replace"),
+                                field("field", "/key"),
+                                field("value", "pineapple")
+                        )
+                )));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+        assertThat(result).isTrue();
+        assertThat(object).stringAt("key").isEqualTo("pineapple");
+    }
+
+    // OPENIDM-3097
+    @Test
+    public void testArrayReplaceAtIndex() throws ResourceException {
+        JsonValue object = json(object(field("fruits", array("apple", "kiwi", "pear", "strawberry"))));
+        final List<PatchOperation> operations = PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", "replace"),
+                                field("field", "/fruits/1"),
+                                field("value", "pineapple")
+                        )
+                )));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("fruits").containsSequence("apple", "pineapple", "pear", "strawberry");
+    }
+
     private ScriptedPatchValueTransformer transformer = new ScriptedPatchValueTransformer() {
         public JsonValue evalScript(JsonValue content, JsonValue script) throws BadRequestException {
             if (!script.isString()) {
