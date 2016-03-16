@@ -600,6 +600,8 @@ class Mapping {
 
     final static Logger logger = LoggerFactory.getLogger(Mapping.class);
 
+    final static JsonPointer pathToTotal = new JsonPointer("/total");
+
     String tableName;
     Accessor<CryptoService> cryptoServiceAccessor;
     List<ColumnMapping> columnMappings = new ArrayList<ColumnMapping>();
@@ -644,6 +646,9 @@ class Mapping {
                 }
                 mappedResult.putPermissive(entry.objectColPointer, value);
             }
+        }
+        if (columnNames.contains("total") && !columnMappings.contains("total")) {
+            mappedResult.putPermissive(pathToTotal, rs.getInt("total"));
         }
         logger.debug("Mapped rs {} to {}", rs, mappedResult);
         return mappedResult;
