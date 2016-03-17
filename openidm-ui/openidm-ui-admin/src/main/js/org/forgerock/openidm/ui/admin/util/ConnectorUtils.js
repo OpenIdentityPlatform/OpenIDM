@@ -76,6 +76,9 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
         ]
     };
 
+    obj.configPromise = null;
+    obj.iconPromise = null;
+
     obj.cleanConnectorName = function(name) {
         var clearName = name.split(".");
         clearName = clearName[clearName.length - 2] + "_" +clearName[clearName.length - 1];
@@ -124,18 +127,23 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
     };
 
     obj.getIconList = function() {
-        var deferred = $.Deferred();
+        if(_.isNull(obj.configPromise)) {
+            obj.iconPromise = $.Deferred();
+            obj.configPromise = ConfigDelegate.readEntity("ui/iconlist");
 
-        ConfigDelegate.readEntity("ui/iconlist").then(function(result){
-                deferred.resolve(result.icons);
-            },
-            _.bind(function(){
-                deferred.resolve(this.iconListDefaults.icons);
+            obj.configPromise.then(function (result) {
+                    obj.configPromise = null;
+                    obj.iconPromise.resolve(result.icons);
+                },
+                _.bind(function () {
+                    obj.configPromise = null;
+                    obj.iconPromise.resolve(this.iconListDefaults.icons);
 
-                ConfigDelegate.createEntity("ui/iconlist", obj.iconListDefaults);
-            },this));
+                    ConfigDelegate.createEntity("ui/iconlist", obj.iconListDefaults);
+                }, this));
+        }
 
-        return deferred;
+        return obj.iconPromise;
     };
 
     obj.getIcon = function (iconType, iconList) {
