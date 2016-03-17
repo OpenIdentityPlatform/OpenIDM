@@ -441,9 +441,6 @@ public class UpdateManagerImpl implements UpdateManager {
 //        }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JsonValue listAvailableUpdates() throws UpdateException {
         final JsonValue rejects = json(array());
@@ -598,9 +595,6 @@ public class UpdateManagerImpl implements UpdateManager {
         return ARCHIVE_PATH.toFile().listFiles();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JsonValue report(final Path archiveFile, final Path installDir)
             throws UpdateException {
@@ -628,9 +622,6 @@ public class UpdateManagerImpl implements UpdateManager {
                 });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JsonValue diff(final Path archiveFile, final Path installDir, final String filename)
             throws UpdateException {
@@ -677,9 +668,6 @@ public class UpdateManagerImpl implements UpdateManager {
                 });
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName)
             throws UpdateException {
@@ -726,9 +714,6 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public JsonValue getLicense(Path archiveFile) throws UpdateException {
         validateFileName(archiveFile.toFile());
@@ -757,9 +742,6 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public void restartNow() {
         restartImmediately.set(true);
@@ -772,9 +754,6 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public String getLastUpdateId() {
         if (lastUpdateId == null) {
