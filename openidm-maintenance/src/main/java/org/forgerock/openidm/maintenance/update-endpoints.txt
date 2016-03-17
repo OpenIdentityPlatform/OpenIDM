@@ -178,7 +178,7 @@ UI Endpoints for Update Process
 	(while in terminal state):
 	{
 		"_id" : "someIDstring",
-		"status" : "COMPLETE" | "REVERTED",
+		"status" : "COMPLETE",
 		"statusMessage" : "Something went horribly wrong",
 		"completedTasks" : 15,
 		"totalTasks" : 350,
@@ -195,9 +195,6 @@ UI Endpoints for Update Process
 			...
 		]
 	}
-
-	Note that if the final status was unsuccessful and the update was reverted the "backup" attribute will not be
-	present (backups have been removed as part of the revert).
 
 5. Get list of updates
 
@@ -282,11 +279,9 @@ Update Statuses:
     PENDING_MIGRATIONS  Update is completed, repo migrations pending
     COMPLETE            Update is complete
     FAILED              Update failed, not yet reverted
-    REVERTED            Update failed, changes have been reverted
 
     Note that it is possible an update could remain in IN_PROGRESS or FAILED state forever if the thread/process
-    died before the update could reach COMPLETE or REVERTED, the two "terminal states".  Updates are not reentrant
-    at this time.
+    died before the update could reach COMPLETE, the "terminal state".  Updates are not reentrant at this time.
 
 Post-Update File States:
 
