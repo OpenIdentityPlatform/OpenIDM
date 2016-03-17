@@ -865,7 +865,7 @@ public abstract class RelationshipProvider {
     protected ResourceResponse getManagedObject(Context context) throws ResourceException {
         String managedObjectPath = resourceContainer.child(getManagedObjectId(context)).toString();
         return getConnection().read(context, Requests.newReadRequest(managedObjectPath)
-                .addField(new JsonPointer("*")).addField(propertyPtr));
+                .addField(SchemaField.FIELD_ALL).addField(propertyPtr));
     }
     
     /**
@@ -911,8 +911,8 @@ public abstract class RelationshipProvider {
                 response.addField(field);
             }
             for (JsonPointer field : refFields) {
-                if (field.equals(new JsonPointer("*"))) {
-                    response.addField(new JsonPointer(""));
+                if (field.equals(SchemaField.FIELD_ALL)) {
+                    response.addField(SchemaField.FIELD_EMPTY);
                 } else {
                     response.addField(field);
                 }
