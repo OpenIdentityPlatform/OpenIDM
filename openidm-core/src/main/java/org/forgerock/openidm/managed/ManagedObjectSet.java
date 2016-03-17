@@ -817,7 +817,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     }
 
     @Override
-    public Promise<ResourceResponse, ResourceException>  updateInstance(final Context context, final String resourceId, 
+    public Promise<ResourceResponse, ResourceException>  updateInstance(final Context context, final String resourceId,
     		final UpdateRequest request) {
         logger.debug("update {} ", "name=" + name + " id=" + resourceId + " rev=" + request.getRevision());
         Context managedContext = new ManagedObjectContext(context);
@@ -825,7 +825,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         try {
             ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
             for (JsonPointer pointer : request.getFields()) {
-                if (pointer.equals(new JsonPointer("*"))) {
+                if (pointer.equals(SchemaField.FIELD_ALL)) {
                     readRequest.addField("");
                 } else if (!pointer.equals(SchemaField.FIELD_ALL_RELATIONSHIPS)) {
                     readRequest.addField(pointer);
@@ -1262,7 +1262,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         fields.add(key);
                     }
                     fields.remove(field);
-                } else if (!field.equals(new JsonPointer("*")) && !field.equals(new JsonPointer(""))){
+                } else if (!field.equals(SchemaField.FIELD_ALL) && !field.equals(SchemaField.FIELD_EMPTY)){
                     if (schema.hasField(field)) {
                         // Allow the field by removing it from the fieldsToRemove list.
                         logger.debug("Allowing field {} to be returned", field);
@@ -1292,9 +1292,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         }
                     }
 
-                } else if (field.equals(new JsonPointer("*"))) {
+                } else if (field.equals(SchemaField.FIELD_ALL)) {
                 	fields.remove(field);
-                	fields.add(new JsonPointer(""));
+                	fields.add(SchemaField.FIELD_EMPTY);
                 }
             }
         }

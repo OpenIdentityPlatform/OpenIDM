@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -123,16 +115,16 @@ public class ManagedObjectSchemaTest {
         assertNull(schema.getResourceExpansionField(new JsonPointer("field1/*")));
         assertNull(schema.getResourceExpansionField(new JsonPointer("field1/*/*")));
         assertNull(schema.getResourceExpansionField(new JsonPointer("field1/*/field2")));
-        assertNull(schema.getResourceExpansionField(new JsonPointer("*")));
+        assertNull(schema.getResourceExpansionField(SchemaField.FIELD_ALL));
         assertNull(schema.getResourceExpansionField(new JsonPointer("field5/field1")));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*")).getFirst(), new JsonPointer("field5"));
-        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*")).getSecond(), new JsonPointer("*"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*")).getSecond(), SchemaField.FIELD_ALL);
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2")).getFirst(), new JsonPointer("field5"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2")).getSecond(), new JsonPointer("field2"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2/field3")).getFirst(), new JsonPointer("field5"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field5/*/field2/field3")).getSecond(), new JsonPointer("field2/field3"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/*")).getFirst(), new JsonPointer("field6"));
-        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/*")).getSecond(), new JsonPointer("*"));
+        assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/*")).getSecond(), SchemaField.FIELD_ALL);
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2")).getFirst(), new JsonPointer("field6"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2")).getSecond(), new JsonPointer("field2"));
         assertEquals(schema.getResourceExpansionField(new JsonPointer("field6/field2/field3")).getFirst(), new JsonPointer("field6"));
