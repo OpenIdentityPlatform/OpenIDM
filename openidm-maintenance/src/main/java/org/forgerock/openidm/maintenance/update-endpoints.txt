@@ -124,7 +124,26 @@ UI Endpoints for Update Process
 		"user" : "openidm-admin"
 	}
 
-3a. Mark migrations as complete for a PENDING_MIGRATIONS update
+3a. List pending migrations for the currently running update (identical to 2a sans archive)
+    ACTION openidm/maintenance/update?_action=listMigrations
+
+    returns:
+    [
+        {
+            "file": "v1_shorten_link_columns.sql",
+            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v1_shorten_link_columns.sql"
+        },
+        {
+            "file": "v2_some_change.sql",
+            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v2_some_change.sql"
+        },
+        {
+            "file": "v3_more_changes.sql",
+            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v3_more_changes.sql"
+        }
+    ]
+
+3b. Mark migrations as complete for a PENDING_MIGRATIONS update
 
     ACTION openidm/maintenance/update?_action=markComplete&id=someIDstring
 

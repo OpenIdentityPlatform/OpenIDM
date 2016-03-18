@@ -74,10 +74,11 @@ public interface UpdateManager {
     JsonValue listAvailableUpdates() throws UpdateException;
 
     /**
-     * List migrations present in a given archive
+     * List migrations present in a given archive or the currently pending update
      *
-     * @return A json list of objects describing each migration found in the archive
-     * @throws UpdateException on failure to read archive
+     * @param archiveFile The archive file to list migrations for or null to use the the currently pending update
+     * @return A json list of objects representing each migration
+     * @throws UpdateException on failure to generate migration list
      */
     JsonValue listMigrations(final Path archiveFile) throws UpdateException;
 

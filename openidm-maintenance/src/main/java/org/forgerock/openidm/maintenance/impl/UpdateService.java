@@ -173,14 +173,16 @@ public class UpdateService extends AbstractRequestHandler {
 
     private Promise<ActionResponse, ResourceException> handlePreviewMigrations(
             Map<String, String> additionalParameters) {
+        final Path archive;
+
         if (!additionalParameters.containsKey(ARCHIVE_NAME)) {
-            return new BadRequestException("Archive name not specified.").asPromise();
+            archive = null;
+        } else {
+            archive = archivePath(additionalParameters.get(ARCHIVE_NAME));
         }
 
         try {
-            return newActionResponse(updateManager.listMigrations(
-                    archivePath(additionalParameters.get(ARCHIVE_NAME))
-            )).asPromise();
+            return newActionResponse(updateManager.listMigrations(archive)).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e).asPromise();
         }
