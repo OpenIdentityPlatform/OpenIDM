@@ -11,16 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2016 ForgeRock AS. All rights reserved.
  */
 package org.forgerock.openidm.util;
 
 import java.util.Date;
 
+import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
+import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
@@ -91,8 +93,7 @@ public final class DateUtil {
     }
 
     /**
-     * Creates a DateUtil using a specified timezone and generates ISO8601
-     * timestamps.
+     * Creates a DateUtil using a specified timezone and generates ISO8601 timestamps.
      *
      * @param zone
      *            timezone object
@@ -176,6 +177,36 @@ public final class DateUtil {
         }
         return d;
     }
+    
+    /**
+     * Returns true if the current (now) timestamp is within the specified time interval.  The supplied interval string 
+     * should contain an ISO 8601 formatted interval string and may be of the formats 'datetime/datetime', 
+     * 'datetime/period' or 'period/datetime'
+     * 
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @return true if the instant is within the interval, false otherwise.
+     * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
+     */
+    public boolean isNowWithinInterval(String intervalString) throws IllegalArgumentException {
+        Interval interval = Interval.parse(intervalString);
+        return interval.contains(DateTime.now()); 
+    }
+    
+    /**
+     * Returns true if the supplied timestamp is within the specified time interval.  The supplied interval string 
+     * should contain an ISO 8601 formatted interval string and may be of the formats 'datetime/datetime', 
+     * 'datetime/period' or 'period/datetime'
+     * 
+     * @param timestamp a {@link DateTime} object representing a date time instant.
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @return true if the instant is within the interval, false otherwise.
+     * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
+     */
+    public boolean isTimestampWithinInterval(DateTime timestamp, String intervalString) 
+            throws IllegalArgumentException {
+        Interval interval = Interval.parse(intervalString);
+        return interval.contains(timestamp); 
+    }
 
     /**
      * return the number of days between the two dates.
@@ -203,5 +234,6 @@ public final class DateUtil {
 
     public static void main(String[] args) {
         System.out.println(new DateUtil(ServerConstants.TIME_ZONE_UTC).now());
+        System.out.println(new DateUtil().isNowWithinInterval(""));
     }
 }

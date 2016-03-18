@@ -48,7 +48,8 @@ public class ScriptRunnerTest  {
      */
     private static final String[] moduleContainers = new String[] {
         "/",
-        "/bin/defaults/script/"
+        "/bin/defaults/script/",
+        "/scriptLibs/"
     };
 
     /**

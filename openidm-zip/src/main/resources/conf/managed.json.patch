@@ -1,0 +1,17 @@
+[
+    {
+        "operation" : "remove",
+        "field" : "objects/0/schema/properties/effectiveRoles/file",
+        "value" : ""
+    },
+    {
+        "operation" : "remove",
+        "field" : "objects/0/schema/properties/effectiveRoles/rolesPropName",
+        "value" : ""
+    },
+    {
+        "operation" : "add",
+        "field" : "objects/0/schema/properties/effectiveRoles/source",
+        "value" : "require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');"
+    }
+]

@@ -337,8 +337,7 @@
                         "isVirtual" : true,
                         "onRetrieve" : {
                             "type" : "text/javascript",
-                            "file" : "roles/effectiveRoles.js",
-                            "rolesPropName" : "roles"
+                             "source" : "require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');"
                         },
                         "items" : {
                             "type" : "object"
