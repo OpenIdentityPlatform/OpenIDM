@@ -20,7 +20,7 @@
   !
   ! CCPL HEADER END
   !
-  !      Copyright 2011-2015 ForgeRock AS.
+  !      Copyright 2011-2016 ForgeRock AS.
   !    
 -->
 <document
@@ -67,6 +67,12 @@
     <dd>
      <a href="./doc/bootstrap/integrators-guide/index.html">HTML</a>,
      <a href="./doc/OpenIDM-${project.version}-Integrators-Guide.pdf">PDF</a>
+    </dd>
+
+    <dt>Connectors Guide</dt>
+    <dd>
+     <a href="./doc/bootstrap/connectors-guide/index.html">HTML</a>,
+     <a href="./doc/OpenIDM-${project.version}-Connectors-Guide.pdf">PDF</a>
     </dd>
 
 <!--
