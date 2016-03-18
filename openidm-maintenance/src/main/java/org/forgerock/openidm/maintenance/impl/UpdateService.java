@@ -117,6 +117,7 @@ public class UpdateService extends AbstractRequestHandler {
         preview,
         update,
         getLicense,
+        markComplete,
         restart,
         lastUpdateId,
         installed
@@ -139,6 +140,8 @@ public class UpdateService extends AbstractRequestHandler {
                         context.asContext(SecurityContext.class).getAuthenticationId());
             case getLicense:
                 return handleLicense(request.getAdditionalParameters());
+            case markComplete:
+                return handleMarkComplete(request.getAdditionalParameters());
             case restart:
                 updateManager.restartNow();
                 return newActionResponse(json(object())).asPromise();
@@ -149,6 +152,22 @@ public class UpdateService extends AbstractRequestHandler {
                 return handleGetInstalledUpdates(context);
             default:
                 return new NotSupportedException(request.getAction() + " is not supported").asPromise();
+        }
+    }
+
+    private Promise<ActionResponse, ResourceException> handleMarkComplete(Map<String, String> additionalParameters) {
+        // FIXME - not sure about using 'id' here. Also make constant.
+        if (!additionalParameters.containsKey("id")) {
+            return new BadRequestException("id not specified").asPromise();
+        }
+
+        try {
+            final int logId = Integer.parseInt(additionalParameters.get("id"));
+            return newActionResponse(updateManager.completeMigrations(logId)).asPromise();
+        } catch (NumberFormatException e) {
+            return new BadRequestException("id must be an integer").asPromise();
+        } catch (UpdateException e) {
+            return new InternalServerErrorException(e).asPromise();
         }
     }
 

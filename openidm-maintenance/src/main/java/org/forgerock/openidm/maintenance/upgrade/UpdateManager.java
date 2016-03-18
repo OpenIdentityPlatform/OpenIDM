@@ -57,6 +57,15 @@ public interface UpdateManager {
     JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName) throws UpdateException;
 
     /**
+     * Mark migrations for a given update as having been performed.
+     *
+     * @param logId The id of the update log entry to complete
+     * @return a json response containing the updated log entry
+     * @throws UpdateException
+     */
+    JsonValue completeMigrations(int logId) throws UpdateException;
+
+    /**
      * List the applicable update archives found in the update directory.
      *
      * @return a json list of objects describing each applicable update archive.
