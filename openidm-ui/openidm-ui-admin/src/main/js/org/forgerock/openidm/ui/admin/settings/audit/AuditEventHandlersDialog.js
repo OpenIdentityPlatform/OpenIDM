@@ -72,6 +72,9 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                 if (_.has(this.data.eventHandler.config, "enabled")) {
                     this.data.enabled = this.data.eventHandler.config.enabled;
                     delete this.data.eventHandler.config.enabled;
+                // When the property enabled is not present but a handler is, treat it as enabled.
+                } else {
+                    this.data.enabled = true;
                 }
             }
 
