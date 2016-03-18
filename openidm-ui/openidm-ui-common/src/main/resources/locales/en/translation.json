@@ -568,7 +568,7 @@
                 "captchaTitle" : "reCAPTCHA for Registration"
             },
             "username" : {
-                "captchaTitle" : "reCAPTCHA for Forgotten Username",
+                "captchaTitle" : "reCAPTCHA for Username Retrieval",
                 "userQueryTitle" : "Configure User Lookup Form",
                 "emailUsernameTitle" : "Configure Email Username",
                 "retrieveUsernameTitle" : "Display Username"
@@ -598,7 +598,7 @@
             },
             "userQuery" : {
                 "name" : "User Query Form",
-                "description": "Configure form used to find users during password reset",
+                "description": "Configure form to find usernames",
                 "validQueryFields" : "Valid Query Fields",
                 "queryFieldsHelp" : "",
                 "identityIdField" : "Identity Id Field",
