@@ -68,7 +68,6 @@ try {
 private boolean cacheEffectiveAssignments(JsonValue lastSyncEffectiveAssignments,
         JsonValue sourceObjectEffectiveAssignments ) {
     return sourceObjectEffectiveAssignments.isNotNull() \
-        && (lastSyncEffectiveAssignments.size() == 0 || lastSyncEffectiveAssignments.isNull()) \
         && !sameAssignments(lastSyncEffectiveAssignments.copy(), sourceObjectEffectiveAssignments.copy())
 }
 
