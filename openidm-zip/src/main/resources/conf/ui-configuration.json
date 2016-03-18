@@ -92,7 +92,7 @@
                                 "href" : "#resource/managed/user/list/"
                             },
                             {
-                                "name" : "Set up System",
+                                "name" : "Configure OpenIDM",
                                 "icon" : "fa-user",
                                 "href" : "#settings/"
                             }
