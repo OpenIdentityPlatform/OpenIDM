@@ -122,6 +122,8 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     Map<String, TableHandler> tableHandlers;
     TableHandler defaultTableHandler;
 
+    private DatabaseType databaseType;
+
     private JsonValue config;
     private int maxTxRetry = 5;
 
@@ -737,6 +739,24 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         }
     }
 
+    @Override
+    public String getDbDirname() {
+        switch (databaseType) {
+            case SQLSERVER:
+                return "mssql";
+            case MYSQL:
+            case POSTGRESQL:
+            case ORACLE:
+            case DB2:
+            case H2:
+                return databaseType.toString().toLowerCase();
+            case ANSI_SQL99:
+            case ODBC:
+            default:
+                return null;
+        }
+    }
+
     /**
      * Performs the repo command defined by the {@code request).
      *
@@ -876,7 +896,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
             tableHandlers = new HashMap<>();
 
-            DatabaseType databaseType = config.get(CONFIG_DB_TYPE)
+            databaseType = config.get(CONFIG_DB_TYPE)
                     .defaultTo(DatabaseType.ANSI_SQL99.name())
                     .asEnum(DatabaseType.class);
             maxTxRetry = config.get(CONFIG_MAX_TX_RETRY).defaultTo(5).asInteger();

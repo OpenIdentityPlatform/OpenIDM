@@ -503,5 +503,10 @@ public class EntryResourceProviderTest {
                 throw new InternalServerErrorException("Unable to query objects in repo", e);
             }
         }
+
+        @Override
+        public String getDbDirname() {
+            return null;
+        }
     }
 }

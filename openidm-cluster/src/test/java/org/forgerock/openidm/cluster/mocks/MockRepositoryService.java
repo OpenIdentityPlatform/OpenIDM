@@ -127,7 +127,12 @@ public class MockRepositoryService implements RepositoryService, RequestHandler 
 		}
 		return null;
 	}
-	
+
+	@Override
+	public String getDbDirname() {
+		return null;
+	}
+
 	// RequestHandler methods
 
 	@Override
