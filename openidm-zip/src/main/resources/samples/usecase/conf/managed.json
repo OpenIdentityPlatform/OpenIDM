@@ -247,6 +247,10 @@
                                     "properties" : {
                                         "_id" : {
                                             "type" : "string"
+                                        },
+                                        "_grantType" : {
+                                            "type" : "string",
+                                            "label" : "Grant Type"
                                         }
                                     }
                                 }
@@ -570,7 +574,13 @@
                                 "_refProperties": {
                                     "type": "object",
                                     "properties": {
-                                        "_id": { "type": "string" }
+                                        "_id": {
+                                            "type": "string"
+                                        },
+                                        "_grantType" : {
+                                            "type" : "string",
+                                            "label" : "Grant Type"
+                                        }
                                     }
                                 }
                             },
@@ -628,7 +638,7 @@
                     "temporalConstraints" : {
                         "description" : "An array of temporal constraints for a role",
                         "title" : "Temporal Constraints",
-                        "viewable" : true,
+                        "viewable" : false,
                         "returnByDefault" : true,
                         "type" : "array",
                         "items" : {
