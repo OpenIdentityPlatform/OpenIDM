@@ -39,6 +39,7 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
@@ -421,7 +422,7 @@ public class UpdateManagerImpl implements UpdateManager {
             }
         }));
 
-        migrations.sort(new NaturalOrderComparator());
+        Collections.sort(migrations, new NaturalOrderComparator());
 
         return migrations;
     }
