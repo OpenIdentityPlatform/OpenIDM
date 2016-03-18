@@ -28,35 +28,79 @@
 
 /*global object */
 
-var directRoles = null,
-    objectId = object._id,
-    response;
+/**
+ * Module which calculates the effective roles
+ */
+(function () {
+    var _ = require('lib/lodash');
+    var relationshipHelper = require('roles/relationshipHelper');
 
-logger.debug("Invoked effectiveRoles script on property {}", propertyName);
+    /**
+     * This function calculates the effectiveRoles of a given user object.
+     * 
+     * @param object and object representing a user.
+     */
+    exports.calculateEffectiveRoles = function(object, rolesPropName) {
+        var directRoles = null,
+            objectId = object._id,
+            response,
+            effectiveRoles;
+        
+        logger.debug("Invoked effectiveRoles script on property {}", propertyName);
 
-// Allow for configuration in virtual attribute config, but default
-if (rolesPropName === undefined) {
-    var rolesPropName = "roles";
-}
+        logger.trace("Configured rolesPropName: {}", rolesPropName);
+        
+        if (object[rolesPropName] === undefined && objectId !== undefined && objectId !== null) {
+            // User's roles are not present, so query for them
+            //logger.trace("User's " + rolesPropName + " is not present so querying the roles", rolesPropName);
+            //var path = org.forgerock.json.resource.ResourcePath.valueOf("managed/user").child(objectId).child(rolesPropName);
+            //response = openidm.query(path.toString(), {"_queryId": "find-relationships-for-resource"});
+            directRoles = relationshipHelper.getGrants(object, "roles", "user");
+        } else {
+            directRoles = object[rolesPropName];
+        }
 
-logger.trace("Configured rolesPropName: {}", rolesPropName);
-if (object[rolesPropName] === undefined && objectId !== undefined && objectId !== null) {
-    logger.trace("User's " + rolesPropName + " is not present so querying the roles", rolesPropName);
-    var path = org.forgerock.json.resource.ResourcePath.valueOf("managed/user").child(objectId).child(rolesPropName);
-    response = openidm.query(path.toString(), {"_queryId": "find-relationships-for-resource"});
-    directRoles = response.result;
-} else {
-    directRoles = object[rolesPropName];
-}
+        effectiveRoles = directRoles == null 
+             ? [] 
+             : directRoles.map(function(role) { return { "_ref" : role._ref }; });
 
-var effectiveRoles = directRoles == null 
-        ? [] 
-        : directRoles.map(function(role) { 
-                return { "_ref" : role._ref };
-            });
+        // This is the location to expand to dynamic roles, 
+        // project role script return values can then be added via
+        // effectiveRoles = effectiveRoles.concat(dynamicRolesArray);
 
-// This is the location to expand to dynamic roles, 
-// project role script return values can then be added via
-// effectiveRoles = effectiveRoles.concat(dynamicRolesArray);
-
-effectiveRoles;
+        // Filter roles by temporal constraints
+        effectiveRoles = effectiveRoles.filter(function(roleRelationship) {
+            var role = openidm.read(roleRelationship._ref);
+            return processConstraintsForRole(role);
+         });
+        
+        return effectiveRoles;
+    };
+    
+    exports.processTemporalConstraintsForRole = processConstraintsForRole;
+    
+    /**
+     * Processes the temporal constraints of a given role. If any temporal constraints are defined, this function will
+     * return true if the current time instant (now) is contained within any of the temporal constraints, false
+     * otherwise.  If no constraints are defined the function will return true.
+     * 
+     * @param role the role to process.
+     * @returns false if temporal constraints are defined and don't include the current time instant, true otherwise.
+     */
+    function processConstraintsForRole(role) {
+        if (role.temporalConstraints !== undefined) {
+            // Loops through constraints
+            for (index in role.temporalConstraints) {
+                var constraint = role.temporalConstraints[index];
+                // If at least one constraint passes, the role is in effect
+                if (org.forgerock.openidm.util.DateUtil.getDateUtil().isNowWithinInterval(constraint.duration)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        // No temporal constraints
+        return true;
+    };
+    
+}());

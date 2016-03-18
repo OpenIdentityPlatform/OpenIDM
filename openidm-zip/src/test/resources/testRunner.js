@@ -18,7 +18,8 @@
  * Backend script module test runner.  For each module to be tested, create a suitable *Test module that
  * exports a "test" method, and add it to the array of test modules below.
  */
-[ "policyFilterTest" ]
+[ "policyFilterTest", 
+  "effectiveRolesTest" ]
     .forEach(function (module) {
         require (module).test();
     });
