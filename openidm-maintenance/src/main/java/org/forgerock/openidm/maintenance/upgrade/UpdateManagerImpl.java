@@ -47,6 +47,9 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -70,6 +73,7 @@ import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.Collections2;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
@@ -84,6 +88,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.maintenance.impl.UpdateContext;
+import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
@@ -140,7 +145,10 @@ public class UpdateManagerImpl implements UpdateManager {
     static final JsonPointer REMOVEFILE = new JsonPointer("/removeFile");
 
     protected final AtomicBoolean restartImmediately = new AtomicBoolean(false);
+
+    /** The currently-running update thread */
     private UpdateThread updateThread = null;
+
     private String lastUpdateId = null;
 
     public enum UpdateStatus {
@@ -715,6 +723,17 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     @Override
+    public JsonValue completeMigrations(int logId) throws UpdateException {
+        if (updateThread == null || !updateThread.isAlive()) {
+            throw new UpdateException("Update is not currently running");
+        } else {
+            updateThread.complete();
+
+            return json("FIXME - this is supposed to be the update log entry");
+        }
+    }
+
+    @Override
     public JsonValue getLicense(Path archiveFile) throws UpdateException {
         validateFileName(archiveFile.toFile());
         final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
@@ -802,6 +821,10 @@ public class UpdateManagerImpl implements UpdateManager {
         private final Path tempDirectory;
         private final long timestamp = new Date().getTime();
 
+        private final Lock lock = new ReentrantLock();
+        final Condition complete = lock.newCondition();
+
+        // FIXME - Does this even work? Can we make it private?
         public UpdateThread() {
             this.updateEntry = null;
             this.archive = null;
@@ -830,15 +853,15 @@ public class UpdateManagerImpl implements UpdateManager {
             }
 
             try {
-                String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
+                final String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 final String installDir = IdentityServer.getInstance().getInstallLocation().toString();
 
                 // Start by removing all files we no longer need
                 for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
                     try {
-                        FileState fileState = fileStateChecker.getCurrentFileState(Paths.get(file));
+                        final FileState fileState = fileStateChecker.getCurrentFileState(Paths.get(file));
                         if (Files.deleteIfExists(Paths.get(installDir, file))) {
-                            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                            final UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                                     .setFilePath(file)
                                     .setFileState(fileState.name())
                                     .setActionTaken(UpdateAction.REMOVED.toString());
@@ -948,9 +971,22 @@ public class UpdateManagerImpl implements UpdateManager {
                             .setStatusMessage("Processed " + path.getFileName().toString()));
                 }
 
+                // TODO - do we want to set end date here or upon marking complete?
                 logUpdate(updateEntry.setEndDate(getDateString())
-                        .setStatus(UpdateStatus.COMPLETE)
-                        .setStatusMessage("Update complete."));
+                        .setStatus(UpdateStatus.PENDING_MIGRATIONS)
+                        .setStatusMessage("Update complete. Repo migrations pending."));
+
+                // TODO - only wait if migrations are present in archive
+                lock.lock();
+                try {
+                    // Wait until migrations have been marked complete
+                    complete.await();
+
+                    logUpdate(updateEntry.setStatus(UpdateStatus.COMPLETE)
+                            .setStatusMessage("Update complete."));
+                } finally {
+                    lock.unlock();
+                }
 
             } catch (Exception e) {
                 try {
@@ -962,7 +998,6 @@ public class UpdateManagerImpl implements UpdateManager {
                 return;
             } finally {
                 try {
-                    // TODO - don't delete if not complete (pending migrations)
                     if (tempDirectory != null) {
                         FileUtils.deleteDirectory(tempDirectory.toFile());
                     }
@@ -981,6 +1016,16 @@ public class UpdateManagerImpl implements UpdateManager {
                 } catch (BundleException e) {
                     logger.debug("Failed to restart!", e);
                 }
+            }
+        }
+
+        void complete() {
+            lock.lock();
+
+            try {
+                complete.signalAll();
+            } finally {
+                lock.unlock();
             }
         }
 
