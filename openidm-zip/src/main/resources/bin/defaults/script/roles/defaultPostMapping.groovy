@@ -31,6 +31,8 @@ def mappingSource = mappingConfig.source.getObject() as String
 def sourceObject = source as JsonValue
 def oldSource = oldSource as JsonValue
 
+mappingName =  mappingConfig.name.getObject() as String
+
 try {
     if (!mappingSource.equals("managed/user") && syncContext == null) {
         return;
@@ -43,10 +45,11 @@ try {
 
     if (cacheEffectiveAssignments(lastSyncEffectiveAssignments, sourceObjectEffectiveAssignments)) {
         def patch = [["operation" : "replace",
-                      "field" : "/lastSync",
+                      "field" : "/lastSync/"+ mappingName,
                       "value" : object(
                                     field("effectiveAssignments", sourceObjectEffectiveAssignments),
-                                    field("timestamp", DateUtil.getDateUtil().now()))]]
+                                    field("timestamp", DateUtil.getDateUtil().now()))]];
+
         syncContext.disableSync()
         JsonValue patched = openidm.patch(
                 resourcePath(mappingSource).child(sourceObject.get("_id").asString()).toString(), null, patch);
