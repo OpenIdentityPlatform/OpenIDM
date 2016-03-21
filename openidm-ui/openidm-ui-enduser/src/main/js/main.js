@@ -42,7 +42,7 @@ require.config({
         jquery: "libs/jquery-2.1.1-min",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-3.0.3-min",
+        handlebars: "libs/handlebars-4.0.5",
         bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
@@ -146,5 +146,5 @@ require([
     "spin",
     "placeholder"
 ], function (Constants, EventManager) {
-    EventManager.sendEvent(Constants.EVENT_DEPENDECIES_LOADED);
+    EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);
 });

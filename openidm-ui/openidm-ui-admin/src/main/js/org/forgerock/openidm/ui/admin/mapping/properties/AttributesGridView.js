@@ -384,7 +384,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                         name: "",
                         cell: BackgridUtils.ButtonCell([
                             {
-                                className: "fa fa-times grid-icon",
+                                className: "fa fa-times grid-icon removeProperty",
                                 callback: function(event){
                                     event.preventDefault();
 

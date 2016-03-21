@@ -47,7 +47,7 @@ require.config({
         cron: "libs/jquery-cron-r2427",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-3.0.3-min",
+        handlebars: "libs/handlebars-4.0.5",
         "bootstrap-tabdrop": "libs/bootstrap-tabdrop-1.0",
         bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
@@ -186,7 +186,7 @@ require([
     EventManager,
     JSONEditor) {
 
-    EventManager.sendEvent(Constants.EVENT_DEPENDECIES_LOADED);
+    EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);
 
     JSONEditor.defaults.options.theme = 'bootstrap3';
     JSONEditor.defaults.options.iconlib = "fontawesome4";
