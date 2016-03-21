@@ -1010,7 +1010,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         // Getting the first token as we currently only support top-level relationship fields
                         // This allows us to ignore trailing array index's or '-' characters.
                         String field = operation.getField().get(0);
-                        propertiesToValidate.put(field, newValue.get(field));
+                        if (newValue.keys().contains(field)) {
+                            propertiesToValidate.put(field, newValue.get(field));
+                        }
                     }
                     // The action request to validate the policy of all the patched properties
                     ActionRequest policyAction = Requests.newActionRequest(
