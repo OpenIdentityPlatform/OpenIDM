@@ -96,7 +96,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/LinkQualifiersView", [
                         "scriptData": scriptData,
                         "disablePassedVariable": false,
                         "disableValidation" : false,
-                        "placeHolder" : "['test', 'default']"
+                        "placeHolder" : "if(returnAll){ ['test', 'admin'] } else { /* script */ }"
                     },
                     _.bind(function(){
                         if(callback) {
