@@ -21,7 +21,7 @@ module.exports = {
     },
     sections: {
         connectorList: {
-            selector: '#connectorCardContainer',
+            selector: '#content',
             elements: {
                 addCard: {
                     selector: '.add-card'
@@ -29,14 +29,38 @@ module.exports = {
                 connectorCard: {
                     selector: '.card-container'
                 },
-                connectorToggle: {
-                    selector: '.dropdown-toggle'
+                cards: {
+                    selector: '.card-body'
+                },
+                connectorListToggle: {
+                    selector: '#connectorCardContainer .dropdown-toggle'
+                },
+                connectorGridToggle: {
+                    selector: '#connectorGridContainer .dropdown-toggle'
                 },
                 connectorDelete: {
                     selector: '.connector-delete'
                 },
                 connectorDropdown: {
                     selector: '.dropdown-menu'
+                },
+                toggleCardViewButton : {
+                    selector: 'a[href="#connectorCardContainer"]'
+                },
+                toggleGridViewButton : {
+                    selector: 'a[href="#connectorGridContainer"]'
+                },
+                gridView: {
+                    selector: '#connectorGrid'
+                },
+                connectorListFilter: {
+                    selector: '.filter-input'
+                },
+                backToConnector: {
+                    selector: 'a[href="#connectors/"]'
+                },
+                addToMapping: {
+                    selector: 'a[href="#mapping/add/connector/testtest"]'
                 }
             }
         },
