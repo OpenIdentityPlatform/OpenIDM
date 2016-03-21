@@ -72,7 +72,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.cluster.ClusterUtils;
+import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -143,7 +143,7 @@ public class SecurityResourceProvider {
         this.cryptoAlias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
         this.cryptoCipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
         this.instanceType = IdentityServer.getInstance().getProperty(
-                "openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+                "openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
     }
     /**
      * Returns a PEM String representation of a object.
@@ -576,7 +576,7 @@ public class SecurityResourceProvider {
      * @throws ResourceException
      */
     protected void saveStore() throws ResourceException {
-        if (!instanceType.equals(ClusterUtils.TYPE_STANDALONE)) {
+        if (!instanceType.equals(ClusterUtil.TYPE_STANDALONE)) {
             saveStoreToRepo();
         }
     }

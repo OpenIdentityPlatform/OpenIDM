@@ -64,7 +64,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.cluster.ClusterUtils;
+import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
@@ -177,13 +177,13 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         router.addRoute(uriTemplate("/truststore/cert"), truststoreCertProvider);
         
         String instanceType =
-                IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+                IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
         
         String propValue = Param.getProperty("openidm.https.keystore.cert.alias");
         String privateKeyAlias = (propValue == null) ? "openidm-localhost" : propValue;
 
         try {
-            if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_ADDITIONAL)) {
+            if (instanceType.equals(ClusterUtil.TYPE_CLUSTERED_ADDITIONAL)) {
                 // Load keystore and truststore from the repository
                 keystoreProvider.loadStoreFromRepo();
                 truststoreProvider.loadStoreFromRepo();
@@ -227,7 +227,7 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
                 }
 
                 // If this is the first/primary node in a cluster, then save the keystore and truststore to the repository
-                if (instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
+                if (instanceType.equals(ClusterUtil.TYPE_CLUSTERED_FIRST)) {
                     keystoreProvider.saveStoreToRepo();
                     truststoreProvider.saveStoreToRepo();
                 }
