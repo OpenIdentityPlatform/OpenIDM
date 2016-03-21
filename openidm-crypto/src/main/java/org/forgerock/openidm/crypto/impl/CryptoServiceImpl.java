@@ -56,7 +56,7 @@ import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
-import org.forgerock.openidm.cluster.ClusterUtils;
+import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -125,7 +125,7 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
             int keyCount = 0;
             String password = IdentityServer.getInstance().getProperty("openidm.keystore.password");
             if (password != null) { // optional
-                String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+                String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
                 String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
                 String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
                 String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
@@ -145,8 +145,8 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
                     if (null != in) {
                         char[] clearPassword = Main.unfold(password);
                         ks.load(in, password == null ? null : clearPassword);
-                        if (instanceType.equals(ClusterUtils.TYPE_STANDALONE)
-                                || instanceType.equals(ClusterUtils.TYPE_CLUSTERED_FIRST)) {
+                        if (instanceType.equals(ClusterUtil.TYPE_STANDALONE)
+                                || instanceType.equals(ClusterUtil.TYPE_CLUSTERED_FIRST)) {
                             for (String alias : configAliases) {
                                 Key key = ks.getKey(alias, clearPassword);
                                 if (key == null) {
