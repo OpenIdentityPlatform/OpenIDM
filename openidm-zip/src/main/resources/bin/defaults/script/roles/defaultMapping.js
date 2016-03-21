@@ -123,6 +123,12 @@ function findAssignment(assignment, listOfAssignments) {
     return null;
 }
 
+function oldAssignments(source) {
+    return (typeof source.lastSync[mappingName] != 'undefined')
+        ? source.lastSync[mappingName].effectiveAssignments
+        : null;
+}
+
 function oldValueProvided() {
     return (typeof oldSource !== 'undefined' && oldSource !== null)
 }
@@ -135,8 +141,8 @@ function lastSyncProvided(managedObject) {
 if (lastSyncProvided(source) || oldValueProvided() && lastSyncProvided(oldSource)) {
     // Assignments from the last syncd snapshot
     var oldAssignments = oldValueProvided() && lastSyncProvided(oldSource)
-        ? oldSource.lastSync.effectiveAssignments
-        : source.lastSync.effectiveAssignments;
+        ? oldAssignments(oldSource)
+        : oldAssignments(source);
     var currentAssignments = source.effectiveAssignments; // Assignments from the current source value
     var unassigned = [];
     // Loop through old assignments
