@@ -33,7 +33,6 @@ import java.net.URLClassLoader;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
-import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
@@ -41,18 +40,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.jar.Attributes;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import difflib.DiffUtils;
@@ -75,7 +73,6 @@ import org.forgerock.guava.common.base.Strings;
 import org.forgerock.guava.common.collect.Collections2;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
@@ -340,16 +337,33 @@ public class UpdateManagerImpl implements UpdateManager {
         R invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException;
     }
 
-    final Map<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
+    /**
+     * Cache of exploded archives. Should not be used outside of synchronized {@link #getArchive(Path)}
+     */
+    final Map<Path, ZipArchive> archiveCache = new HashMap<>();
 
-    private ZipArchive getArchive(final Path archiveFile) throws IOException, ArchiveException {
-        final ZipArchive cached = archiveCache.get(archiveFile);
+    /**
+     * Get an archive from the given path and cache its exploded location. This method caches the exploded
+     * archive allowing for consistent exploded location between requests.
+     *
+     * @param archiveFile Path to archive file to be extracted
+     * @return The cached ZipArchive
+     * @throws IOException If a temporary directory cannot be created
+     * @throws ArchiveException On failure to extract the archive
+     */
+    private synchronized ZipArchive getArchive(final Path archiveFile) throws IOException, ArchiveException {
+        /*
+         * Synchronize method because ZipArchive is very expensive and prevents race condition
+         * allowing multiple archives to be extracted prior to being placed in the cache.
+         */
+        ZipArchive cached = archiveCache.get(archiveFile);
 
         if (cached != null) {
             return cached;
         } else {
             final Path tempDir = Files.createTempDirectory("openidm-update-");
             final ZipArchive archive = new ZipArchive(archiveFile, tempDir);
+
             archiveCache.put(archiveFile, archive);
             return archive;
         }
