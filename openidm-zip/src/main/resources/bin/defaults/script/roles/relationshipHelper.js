@@ -77,7 +77,7 @@
      * @returns {boolean|*|Object|n} the list of existing conditional roles
      */
     exports.getConditionalRoles = function() {
-        return openidm.query('managed/role', {_queryFilter: '/condition pr and ! (/condition eq "false")'}).result;
+        return openidm.query('managed/role', {_queryFilter: '/condition pr'}).result;
     }
 
     /**
@@ -96,6 +96,6 @@
      * @returns {boolean} returns true if the role is conditional - false otherwise.
      */
     exports.isRoleConditional = function(role) {
-        return role.condition !== undefined && role.condition !== 'false';
+        return role.condition !== undefined;
     }
 }());
