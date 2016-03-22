@@ -83,7 +83,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
-import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.maintenance.impl.UpdateContext;
@@ -193,12 +192,6 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The repository service */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     protected volatile RepositoryService repositoryService;
-
-    /**
-     * Enhanced configuration service.
-     */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile EnhancedConfig enhancedConfig;
 
     /**
      * Execute a {@link Function} on an input stream for the given {@link Path}.
