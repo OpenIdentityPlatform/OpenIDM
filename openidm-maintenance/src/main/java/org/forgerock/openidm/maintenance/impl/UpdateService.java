@@ -83,6 +83,7 @@ public class UpdateService extends AbstractRequestHandler {
     public static final String PID = "org.forgerock.openidm.maintenance.update";
 
     private static final String ARCHIVE_NAME = "archive";
+    private static final String UPDATE_ID = "updateId";
     private static final String ARCHIVE_DIRECTORY = "/bin/update/";
 
     @Reference(policy=ReferencePolicy.STATIC)
@@ -156,16 +157,12 @@ public class UpdateService extends AbstractRequestHandler {
     }
 
     private Promise<ActionResponse, ResourceException> handleMarkComplete(Map<String, String> additionalParameters) {
-        // FIXME - not sure about using 'id' here. Also make constant.
-        if (!additionalParameters.containsKey("id")) {
-            return new BadRequestException("id not specified").asPromise();
+        if (!additionalParameters.containsKey(UPDATE_ID)) {
+            return new BadRequestException(UPDATE_ID + " not specified").asPromise();
         }
 
         try {
-            final int logId = Integer.parseInt(additionalParameters.get("id"));
-            return newActionResponse(updateManager.completeMigrations(logId)).asPromise();
-        } catch (NumberFormatException e) {
-            return new BadRequestException("id must be an integer").asPromise();
+            return newActionResponse(updateManager.completeMigrations(additionalParameters.get(UPDATE_ID))).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e).asPromise();
         }

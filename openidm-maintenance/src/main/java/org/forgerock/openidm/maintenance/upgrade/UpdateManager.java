@@ -59,11 +59,11 @@ public interface UpdateManager {
     /**
      * Mark migrations for a given update as having been performed.
      *
-     * @param logId The id of the update log entry to complete
+     * @param updateId The id of the update log entry to complete
      * @return a json response containing the updated log entry
      * @throws UpdateException
      */
-    JsonValue completeMigrations(int logId) throws UpdateException;
+    JsonValue completeMigrations(String updateId) throws UpdateException;
 
     /**
      * List the applicable update archives found in the update directory.
