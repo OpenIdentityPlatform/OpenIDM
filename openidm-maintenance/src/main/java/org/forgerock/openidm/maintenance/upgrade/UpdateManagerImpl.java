@@ -782,8 +782,10 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     @Override
-    public JsonValue completeMigrations(int logId) throws UpdateException {
-        if (updateThread == null || !updateThread.isAlive()) {
+    public JsonValue completeMigrations(final String updateId) throws UpdateException {
+        if (updateThread == null
+                || !updateThread.isAlive()
+                || !updateThread.getUpdateEntry().getId().equals(updateId)) {
             throw new UpdateException("Update is not currently running");
         } else {
             return updateThread.complete();
@@ -1093,6 +1095,8 @@ public class UpdateManagerImpl implements UpdateManager {
             lock.lock();
 
             try {
+                // FIXME - needs a lock on waitingForComplete to stop running before ready
+                // FIXME - should only be callable once.
                 logUpdate(updateEntry.setStatus(UpdateStatus.COMPLETE)
                         .setStatusMessage("Update complete."));
 
@@ -1150,6 +1154,11 @@ public class UpdateManagerImpl implements UpdateManager {
                 throw new UpdateException("Patch request failed", e);
             }
         }
+
+        UpdateLogEntry getUpdateEntry() {
+            return updateEntry;
+        }
+
     }
 
     private boolean isReadOnly(Path path) {
