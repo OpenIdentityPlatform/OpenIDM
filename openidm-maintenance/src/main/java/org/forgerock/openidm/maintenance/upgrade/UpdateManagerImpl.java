@@ -441,6 +441,19 @@ public class UpdateManagerImpl implements UpdateManager {
         return migrations;
     }
 
+    private JsonValue formatMigrationsList(final List<Path> migrations, final Archive archive) {
+        final JsonValue response = json(array());
+
+        for (Path p : migrations) {
+            response.add(object(
+                    field("file", p.getFileName().toString()),
+                    field("extractedPath", archive.extractedPath(p).toString())
+            ));
+        }
+
+        return response;
+    }
+
     @Override
     public JsonValue listMigrations(final Path archiveFile) throws UpdateException {
         final String dbDir = repositoryService.getDbDirname();
@@ -449,76 +462,26 @@ public class UpdateManagerImpl implements UpdateManager {
             return json(array());
         }
 
+        // If no archive is specified output migrations from the currently running thread
         if (archiveFile == null) {
-            // FIXME - dirty for PR ... shouldn't duplicate below
             if (updateThread != null && updateThread.isAlive()) {
-                final JsonValue response = json(array());
-
-                for (Path p : updateThread.archiveMigrations) {
-                    response.add(object(
-                            field("file", p.getFileName().toString()),
-                            field("extractedPath", updateThread.archive.extractedPath(p).toString())
-                    ));
-                }
-
-                return response;
+                return formatMigrationsList(updateThread.archiveMigrations, updateThread.archive);
             } else {
                 throw new UpdateException("No archive specified and no running update");
             }
-        }
-
-        return usingArchive(archiveFile, IdentityServer.getInstance().getInstallLocation().toPath(),
-                new UpgradeAction<JsonValue>() {
-                    @Override
-                    public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException {
-                        try {
-                            final List<Path> migrations = listMigrations(archive, fileStateChecker);
-                            final JsonValue response = json(array());
-
-                            for (Path p : migrations) {
-                                response.add(object(
-                                        field("file", p.getFileName().toString()),
-                                        field("extractedPath", archive.extractedPath(p).toString())
-                                ));
+        } else {
+            return usingArchive(archiveFile, IdentityServer.getInstance().getInstallLocation().toPath(),
+                    new UpgradeAction<JsonValue>() {
+                        @Override
+                        public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException {
+                            try {
+                                return formatMigrationsList(listMigrations(archive, fileStateChecker), archive);
+                            } catch (IOException e) {
+                                throw new UpdateException(e);
                             }
-
-                            return response;
-                        } catch (IOException e) {
-                            throw new UpdateException(e);
                         }
-                    }
-                });
-
-//        final Path migrationsPath = IdentityServer.getInstance().getInstallLocation().toPath()
-//                .resolve("db/" + dbDir + "/scripts/migrations");
-//
-//        final List<Path> pendingMigrations = new ArrayList<>();
-
-//        final int currentVersion = config.get("schemaVersion").expect(Integer.class).defaultTo(0).asInteger();
-
-//        try (DirectoryStream<Path> ds = Files.newDirectoryStream(migrationsPath)) {
-//            for (Path migration : ds) {
-//                final Matcher m = migrationPattern.matcher(migration.getFileName().toString());
-//                if (m.matches() && Integer.parseInt(m.group(1)) > currentVersion) {
-//                    pendingMigrations.add(migration);
-//                }
-//            }
-//
-//            // Sort migrations so versions are in proper order
-//            pendingMigrations.sort(new NaturalOrderComparator());
-//            final JsonValue response = json(array());
-//
-//            for (Path p : pendingMigrations) {
-////                String migration = FileUtil.readFile(p.toFile());
-//
-//                response.add(p.getFileName().toString());
-//            }
-//
-//            return response;
-//        } catch (IOException e) {
-////            e.printStackTrace();
-//            throw new UpdateException(e);
-//        }
+                    });
+        }
     }
 
     @Override
