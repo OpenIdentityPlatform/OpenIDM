@@ -161,7 +161,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                 _.extend({}, conf.globalData, data),
                 _.bind(function(data) {
                     var schema = {};
-                    
+
                     if (_.has(this.data.handler, "config")) {
                         schema = this.data.handler.config;
 
@@ -181,7 +181,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                             };
                         }
                     }
-                    
+
                     validatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
                     validatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
 
@@ -200,8 +200,11 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                         // default value for signatureInterval
                         if (_.has(schema, "properties.security.properties.signatureInterval") &&
                                 (
-                                    !_.has(this.data.eventHandler.config, "security.signatureInterval") ||
-                                    !this.data.eventHandler.config.security.signatureInterval
+                                    _.has(this.data.eventHandler, "config") &&
+                                    (
+                                        !_.has(this.data.eventHandler.config, "security.signatureInterval") ||
+                                        !this.data.eventHandler.config.security.signatureInterval
+                                     )
                                 )
                         ) {
                             this.data.eventHandler.config.security = this.data.eventHandler.config.security || {};
