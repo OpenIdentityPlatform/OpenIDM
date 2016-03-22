@@ -46,6 +46,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -330,10 +331,8 @@ public class UpdateManagerImpl implements UpdateManager {
         R invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException;
     }
 
-    /**
-     * Cache of exploded archives. Should not be used outside of synchronized {@link #getArchive(Path)}
-     */
-    final Map<Path, ZipArchive> archiveCache = new HashMap<>();
+    /** Cache of exploded archives. */
+    private final Map<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
 
     /**
      * Get an archive from the given path and cache its exploded location. This method caches the exploded
@@ -344,11 +343,7 @@ public class UpdateManagerImpl implements UpdateManager {
      * @throws IOException If a temporary directory cannot be created
      * @throws ArchiveException On failure to extract the archive
      */
-    private synchronized ZipArchive getArchive(final Path archiveFile) throws IOException, ArchiveException {
-        /*
-         * Synchronize method because ZipArchive is very expensive and prevents race condition
-         * allowing multiple archives to be extracted prior to being placed in the cache.
-         */
+    private ZipArchive getArchive(final Path archiveFile) throws IOException, ArchiveException {
         ZipArchive cached = archiveCache.get(archiveFile);
 
         if (cached != null) {
@@ -357,8 +352,16 @@ public class UpdateManagerImpl implements UpdateManager {
             final Path tempDir = Files.createTempDirectory("openidm-update-");
             final ZipArchive archive = new ZipArchive(archiveFile, tempDir);
 
-            archiveCache.put(archiveFile, archive);
-            return archive;
+            cached = archiveCache.putIfAbsent(archiveFile, archive);
+
+            if (cached == null) {
+                cached = archive;
+            } else {
+                // already had archive in cache, clean up unused
+                FileUtils.deleteDirectory(tempDir.toFile());
+            }
+
+            return cached;
         }
     }
 
