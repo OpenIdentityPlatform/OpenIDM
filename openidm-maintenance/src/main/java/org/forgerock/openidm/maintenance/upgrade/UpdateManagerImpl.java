@@ -40,7 +40,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -215,10 +214,17 @@ public class UpdateManagerImpl implements UpdateManager {
     private class ZipArchive implements Archive {
         private final Path upgradeRoot;
         private final Set<Path> filePaths;
+        private final Path destination;
         private ProductVersion version = null;
 
+        /** Get the destination of the exploded archive */
+        Path getDestination() {
+            return destination;
+        }
+
         ZipArchive(Path zipFilePath, Path destination) throws ArchiveException {
-            upgradeRoot = destination.resolve("openidm");
+            this.destination = destination;
+            this.upgradeRoot = destination.resolve("openidm");
 
             // unzip the upgrade dist
             try {
@@ -717,40 +723,33 @@ public class UpdateManagerImpl implements UpdateManager {
         validateCorrectVersion(updateConfig, archiveFile.toFile());
         validateHasChecksumFile(archiveFile.toFile());
 
-        Path tempUnzipDir = null;
         try {
-            tempUnzipDir = Files.createTempDirectory("openidm-upgrade-");
+            final ZipArchive archive = getArchive(archiveFile);
+            final ChecksumFile checksumFile = resolveChecksumFile(installDir);
+            final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
+
+            // perform upgrade
+            UpdateLogEntry updateEntry = new UpdateLogEntry();
+            updateEntry.setStatus(UpdateStatus.IN_PROGRESS)
+                    .setArchive(archiveFile.getFileName().toString())
+                    .setStatusMessage("Initializing update")
+                    .setTotalTasks(archive.getFiles().size())
+                    .setStartDate(getDateString())
+                    .setNodeId(IdentityServer.getInstance().getNodeName())
+                    .setUserName(userName);
             try {
-                // FIXME - should be using getArchive() need to fix UpdateThread requiring temp dir
-                final ZipArchive archive = new ZipArchive(archiveFile, tempUnzipDir);
-                final ChecksumFile checksumFile = resolveChecksumFile(installDir);
-                final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
-
-                // perform upgrade
-                UpdateLogEntry updateEntry = new UpdateLogEntry();
-                updateEntry.setStatus(UpdateStatus.IN_PROGRESS)
-                        .setArchive(archiveFile.getFileName().toString())
-                        .setStatusMessage("Initializing update")
-                        .setTotalTasks(archive.getFiles().size())
-                        .setStartDate(getDateString())
-                        .setNodeId(IdentityServer.getInstance().getNodeName())
-                        .setUserName(userName);
-                try {
-                    updateLogService.logUpdate(updateEntry);
-                } catch (ResourceException e) {
-                    throw new UpdateException("Unable to log update.", e);
-                }
-
-                updateThread = new UpdateThread(updateEntry, archive, fileStateChecker, installDir, updateConfig,
-                        tempUnzipDir);
-                updateThread.start();
-
-                return updateEntry.toJson();
-            } catch (Exception e) {
-                throw new UpdateException(e.getMessage(), e);
+                updateLogService.logUpdate(updateEntry);
+            } catch (ResourceException e) {
+                throw new UpdateException("Unable to log update.", e);
             }
-        } catch (IOException e) {
-            throw new UpdateException("Cannot create temporary directory to unzip archive");
+
+            updateThread = new UpdateThread(updateEntry, archive, fileStateChecker, installDir, updateConfig,
+                    archive.getDestination());
+            updateThread.start();
+
+            return updateEntry.toJson();
+        } catch (Exception e) {
+            throw new UpdateException(e.getMessage(), e);
         }
     }
 
@@ -1016,7 +1015,6 @@ public class UpdateManagerImpl implements UpdateManager {
 
                 // If this update contained migrations wait until they are done
                 if (!archiveMigrations.isEmpty()) {
-                    // TODO - do we want to set end date here or upon marking complete?
                     logUpdate(updateEntry
                             .setStatus(UpdateStatus.PENDING_MIGRATIONS)
                             .setStatusMessage("Update complete. Repo migrations pending."));
