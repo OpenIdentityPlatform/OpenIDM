@@ -15,7 +15,16 @@ module.exports = {
             selector: "#AuditEventHandlersBody",
             elements: {
                 csvEditButton: {
-                    selector: "#AuditEventHandlersBody tbody tr:first-child .editEventHandler"
+                    selector: ".editEventHandler[data-name=csv]"
+                },
+                eventHandlerSelect: {
+                    selector: "#addAuditModuleSelect"
+                },
+                eventHandlerCSVOption: {
+                    selector: "#addAuditModuleSelect option[value='org.forgerock.audit.handlers.csv.CsvAuditEventHandler']"
+                },
+                addEventHandlerButton: {
+                    selector: ".addEventHandler"
                 }
             }
         },
@@ -29,7 +38,13 @@ module.exports = {
                     selector: "#enabled"
                 },
                 closeButton: {
-                    selector: ".btn-default"
+                    selector: ".close"
+                },
+                signatureIntervalInput:{
+                    selector: "[data-schemapath='root.security.signatureInterval'] input"
+                },
+                propertiesContainerFirstChild: {
+                    selector: "#auditEventHandlerConfig div:first-child"
                 }
             }
         }
