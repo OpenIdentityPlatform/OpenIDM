@@ -14,21 +14,23 @@
   Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
 -->
 <style>
-#taskDetails fieldset {
+#contractorOnBoardForm fieldset {
        margin-top: 0;
 }
-#taskDetails .field label {
+#contractorOnBoardForm .field label {
        text-align: left;
 }
-#taskDetails .field input,#taskDetails .field select {
+#contractorOnBoardForm .field input,#taskDetails .field select {
        clear: both;
 }
-#taskDetails .field .validation-message {
+#contractorOnBoardForm .field .validation-message {
        clear: none !important;
        margin-left: 20px !important;
        float: left !important;
 }
 </style>
+
+<div class="workflowFormContainer" data-validationBaseEntity="managed/user/*" id="contractorOnBoardForm">
 
     <h3 class="text-center">Contractor Details</h3>
 
@@ -130,15 +132,10 @@
         </div>
         {{/if}}
     <div style="clear:both;"></div>
+</div>
 
 <script>
 {{#if variables.provisionToXML}}
 $('#taskDetails form select[name=provisionToXML]').val("{{variables.provisionToXML}}");
 {{/if}}
-(function () {
-  var v = require("org/forgerock/commons/ui/common/main/ValidatorsManager" );
-  v.bindValidators($('#taskDetails form' ), "managed/user/*", function () {
-      v.validateAllFields($('#taskDetails form'));
-  });
-}());
 </script>

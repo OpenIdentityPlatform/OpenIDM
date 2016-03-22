@@ -33,8 +33,10 @@ define("org/forgerock/openidm/ui/common/workflow/processes/AbstractProcessForm",
             "onValidate": "onValidate"
         },
 
-        postRender: function() {
-
+        postRender: function(callback) {
+            if (callback) {
+                callback();
+            }
         },
 
         prepareData: function(callback) {
