@@ -101,15 +101,13 @@
     exports.roleUpdate = function(oldRole, newRole) {
         /*
          Only iterate through all of the users if we are dealing with a conditional role, and if the
-         role condition has changed. Also need to handle the case where the role goes from unconditional to conditional,
-         and visa-versa. The change from unconditional to conditional should be handled by the logic below.
-         A conditional->unconditional role change will be interpreted as a no-op, as the assumption
-         is that those who currently are granted the role will continue to enjoy it. TODO: policy decision which should
-         be documented (or the alternative chosen: that the newly-minted unconditional role should be un-granted). But
-         for now, the transition from conditional->unconditional will be a no-op.
+         role condition has changed. And if the role's condition has been removed, the new role grantees will be only
+         those members who previously enjoyed a direct grant.
          */
         if (relationshipHelper.isRoleConditional(newRole) && hasRoleConditionChanged(oldRole, newRole)) {
             newRole.members = processUpdatedConditionalRole(oldRole, newRole);
+        } else if (relationshipHelper.isRoleConditional(oldRole) && !relationshipHelper.isRoleConditional(newRole)) {
+            newRole.members = processRoleConditionRemoval(oldRole);
         }
     }
 
@@ -122,6 +120,14 @@
         if (relationshipHelper.isRoleConditional(newRole)) {
             newRole.members = processCreatedConditionalRole(newRole);
         }
+    }
+
+    /**
+     * This function will be called when a role's condition is removed. It will return only those
+     * @param newRole
+     */
+    function processRoleConditionRemoval(oldRole) {
+        return relationshipHelper.getConditionalAndDirectGrants(oldRole, 'members', 'role').directGrants;
     }
 
     /**
