@@ -145,7 +145,7 @@ UI Endpoints for Update Process
 
 3b. Mark migrations as complete for a PENDING_MIGRATIONS update
 
-    ACTION openidm/maintenance/update?_action=markComplete&id=someIDstring
+    ACTION openidm/maintenance/update?_action=markComplete&updateId=someIDstring
 
 	returns:
 	{
