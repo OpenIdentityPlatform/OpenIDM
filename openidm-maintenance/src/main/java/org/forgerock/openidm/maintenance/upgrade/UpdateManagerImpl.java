@@ -857,6 +857,7 @@ public class UpdateManagerImpl implements UpdateManager {
         private final JsonValue updateConfig;
         private final Path tempDirectory;
         private final long timestamp = new Date().getTime();
+        private boolean completeable = false;
 
         private final Lock lock = new ReentrantLock();
         private final Condition complete = lock.newCondition();
@@ -1014,10 +1015,13 @@ public class UpdateManagerImpl implements UpdateManager {
                             .setStatusMessage("Processed " + path.getFileName().toString()));
                 }
 
+                // un-block complete()
+                completeable = true;
+
                 // If this update contained migrations wait until they are done
                 if (!archiveMigrations.isEmpty()) {
                     // TODO - do we want to set end date here or upon marking complete?
-                    logUpdate(updateEntry.setEndDate(getDateString())
+                    logUpdate(updateEntry
                             .setStatus(UpdateStatus.PENDING_MIGRATIONS)
                             .setStatusMessage("Update complete. Repo migrations pending."));
 
@@ -1066,20 +1070,23 @@ public class UpdateManagerImpl implements UpdateManager {
          * Mark the update for this thread as complete.
          *
          * @return The log entry for the current update as json
-         * @throws UpdateException
+         * @throws UpdateException if the thread is not ready to be completed or cannot update the log
          */
         JsonValue complete() throws UpdateException {
             lock.lock();
-
             try {
-                // FIXME - needs a lock on waitingForComplete to stop running before ready
-                // FIXME - should only be callable once.
-                logUpdate(updateEntry.setStatus(UpdateStatus.COMPLETE)
-                        .setStatusMessage("Update complete."));
+                if (!completeable) {
+                    throw new UpdateException("Update cannot be completed or has already been marked complete");
+                } else {
+                    logUpdate(updateEntry.setEndDate(getDateString())
+                            .setStatus(UpdateStatus.COMPLETE)
+                            .setStatusMessage("Update complete."));
+                    completeable = false;
 
-                complete.signalAll();
+                    complete.signalAll();
 
-                return updateEntry.toJson();
+                    return updateEntry.toJson();
+                }
             } finally {
                 lock.unlock();
             }
