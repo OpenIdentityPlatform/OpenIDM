@@ -147,6 +147,9 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The currently-running update thread */
     private UpdateThread updateThread = null;
 
+    /** Cache of exploded archives. */
+    private final Map<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
+
     private String lastUpdateId = null;
 
     public enum UpdateStatus {
@@ -336,9 +339,6 @@ public class UpdateManagerImpl implements UpdateManager {
     private interface UpgradeAction<R> {
         R invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException;
     }
-
-    /** Cache of exploded archives. */
-    private final Map<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
 
     /**
      * Get an archive from the given path and cache its exploded location. This method caches the exploded
