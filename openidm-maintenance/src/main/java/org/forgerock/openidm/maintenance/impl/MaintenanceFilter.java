@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.maintenance.impl;
 
+import java.util.regex.Pattern;
+
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
@@ -61,39 +63,58 @@ public class MaintenanceFilter extends MutableFilterDecorator {
     /** maintenance filter that prevents modification via CREST endpoints during maintenance mode */
     private static Filter MAINTENANCE_FILTER = Filters.conditionalFilter(
             new FilterCondition() {
+                // pass requests on audit or maintenance endpoints
+                private final Pattern allowedEndpoints = Pattern.compile("^(audit|maintenance)(/?.*|$)");
                 @Override
                 public boolean matches(Context context, Request request) {
-                    return !context.containsContext(UpdateContext.class)
-                            && !request.getResourcePath().startsWith("maintenance");
+                    /* The semantic of "matches" is "if this condition is true, then the filter will be entered".
+                     *
+                     * We want to enter the filter (and disallow writes) if all of the following are TRUE
+                     *  a) the request does not matches the allowedEndpoints regex
+                     *  b) the request does not have an UpdateContext
+                     *
+                     * That is, while in maintenance mode,
+                     *  - requests on audit,
+                     *  - requests on maintenance
+                     *  - requests with an UpdateContext
+                     * are "passed through" by *avoiding* this filter, which would deny them.  All other requests
+                     * enter this filter and are denied.
+                     */
+                    return !allowedEndpoints.matcher(request.getResourcePath()).matches()
+                            && !context.containsContext(UpdateContext.class);
                 }
             },
             new Filter() {
                 @Override
-                public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
-                        RequestHandler requestHandler) {
-                    return new ServiceUnavailableException("Unable to perform action on " + actionRequest.getResourcePath() +
-                            " in maintenance mode.").asPromise();
+                public Promise<ActionResponse, ResourceException> filterAction(
+                        Context context, ActionRequest actionRequest, RequestHandler requestHandler) {
+                    return new ServiceUnavailableException(
+                            "Unable to perform action on " + actionRequest.getResourcePath() + " in maintenance mode.")
+                            .asPromise();
                 }
 
                 @Override
-                public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest createRequest,
-                        RequestHandler requestHandler) {
-                    return new ServiceUnavailableException("Unable to create on " + createRequest.getResourcePath() +
-                            " in maintenance mode.").asPromise();
+                public Promise<ResourceResponse, ResourceException> filterCreate(
+                        Context context, CreateRequest createRequest, RequestHandler requestHandler) {
+                    return new ServiceUnavailableException(
+                            "Unable to create on " + createRequest.getResourcePath() + " in maintenance mode.")
+                            .asPromise();
                 }
 
                 @Override
-                public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest deleteRequest,
-                        RequestHandler requestHandler) {
-                    return new ServiceUnavailableException("Unable to delete on " + deleteRequest.getResourcePath() +
-                            " in maintenance mode.").asPromise();
+                public Promise<ResourceResponse, ResourceException> filterDelete(
+                        Context context, DeleteRequest deleteRequest, RequestHandler requestHandler) {
+                    return new ServiceUnavailableException(
+                            "Unable to delete on " + deleteRequest.getResourcePath() + " in maintenance mode.")
+                            .asPromise();
                 }
 
                 @Override
-                public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest patchRequest,
-                        RequestHandler requestHandler) {
-                    return new ServiceUnavailableException("Unable to patch on " + patchRequest.getResourcePath() +
-                            " in maintenance mode.").asPromise();
+                public Promise<ResourceResponse, ResourceException> filterPatch(
+                        Context context, PatchRequest patchRequest, RequestHandler requestHandler) {
+                    return new ServiceUnavailableException(
+                            "Unable to patch on " + patchRequest.getResourcePath() + " in maintenance mode.")
+                            .asPromise();
                 }
 
                 @Override
@@ -109,10 +130,11 @@ public class MaintenanceFilter extends MutableFilterDecorator {
                 }
 
                 @Override
-                public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest updateRequest,
-                        RequestHandler requestHandler) {
-                    return new ServiceUnavailableException("Unable to update on " + updateRequest.getResourcePath() +
-                            " in maintenance mode.").asPromise();
+                public Promise<ResourceResponse, ResourceException> filterUpdate(
+                        Context context, UpdateRequest updateRequest, RequestHandler requestHandler) {
+                    return new ServiceUnavailableException(
+                            "Unable to update on " + updateRequest.getResourcePath() + " in maintenance mode.")
+                            .asPromise();
                 }
             });
 

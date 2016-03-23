@@ -11,9 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.impl;
+
+import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
+import static org.forgerock.json.resource.Requests.copyOfReadRequest;
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.json.resource.ResourcePath.resourcePath;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -24,21 +29,15 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.maintenance.upgrade.UpdateLogEntry;
 import org.forgerock.openidm.maintenance.upgrade.UpdateLogService;
@@ -62,11 +61,14 @@ import org.slf4j.LoggerFactory;
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Log Service"),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/maintenance/update/log/*")
 })
-public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
+public class UpdateLogServiceImpl extends AbstractRequestHandler implements UpdateLogService {
 
     private final static Logger logger = LoggerFactory.getLogger(UpdateService.class);
 
     public static final String PID = "org.forgerock.openidm.maintenance.update.log";
+
+    /** ResourcePath to store the updates. */
+    private static final ResourcePath updateStore = resourcePath("repo/updates");
 
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC)
@@ -85,53 +87,16 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
     }
 
     /**
-     * Service does not allow actions.
-     */
-    @Override
-    public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
-        return new NotSupportedException("Not allowed on update log service").asPromise();
-    }
-
-    /**
-     * Service does not allow creating entries.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        return new NotSupportedException("Not allowed on update log service").asPromise();
-    }
-
-    /**
-     * Service does not support deleting entries..
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return new NotSupportedException("Not allowed on update log service").asPromise();
-    }
-
-    /**
-     * Service does not support changing entries.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return new NotSupportedException("Not allowed on update log service").asPromise();
-    }
-
-    /**
      * Query update history objects (wrapper to conceal repo endpoint)
      */
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
             final QueryResourceHandler handler) {
-        QueryRequest newRequest = Requests.copyOfQueryRequest(request).setResourcePath("repo/updates");
         try {
-            QueryResponse result = connectionFactory.getConnection().query(
-                    context, newRequest, new QueryResourceHandler() {
-                        @Override
-                        public boolean handleResource(ResourceResponse resourceResponse) {
-                            return handler.handleResource(resourceResponse);
-                        }
-                    });
-            return result.asPromise();
+            return connectionFactory.getConnection().queryAsync(
+                    new UpdateContext(context),
+                    copyOfQueryRequest(request).setResourcePath(updateStore),
+                    handler);
         } catch (ResourceException e) {
             return e.asPromise();
         }
@@ -142,30 +107,25 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
      */
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
-        ReadRequest newRequest = Requests.copyOfReadRequest(request)
-                .setResourcePath("repo/updates/" + request.getResourcePath());
         try {
-            return connectionFactory.getConnection().read(context, newRequest).asPromise();
+            return connectionFactory.getConnection().readAsync(
+                    new UpdateContext(context),
+                    copyOfReadRequest(request).setResourcePath(updateStore.concat(request.getResourcePathObject())));
         } catch (ResourceException e) {
             return e.asPromise();
         }
     }
 
-    /**
-     * Service does not support changing entries.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return new NotSupportedException("Not allowed on update history service").asPromise();
-    }
+    // UpdateLogService implementation
 
     /**
      * {@inheritDoc}
      */
     @Override
     public void logUpdate(UpdateLogEntry entry) throws ResourceException {
-        ResourceResponse response = connectionFactory.getConnection().create(ContextUtil.createInternalContext(),
-                Requests.newCreateRequest("repo/updates", entry.toJson()));
+        ResourceResponse response = connectionFactory.getConnection().create(
+                new UpdateContext(ContextUtil.createInternalContext()),
+                newCreateRequest(updateStore, entry.toJson()));
         entry.setId(response.getContent().get("_id").asString());
     }
 
@@ -174,7 +134,8 @@ public class UpdateLogServiceImpl implements RequestHandler, UpdateLogService {
      */
     @Override
     public void updateUpdate(UpdateLogEntry entry) throws ResourceException {
-        connectionFactory.getConnection().update(ContextUtil.createInternalContext(),
-                Requests.newUpdateRequest("repo/updates", entry.getId(), entry.toJson()));
+        connectionFactory.getConnection().update(
+                new UpdateContext(ContextUtil.createInternalContext()),
+                Requests.newUpdateRequest(updateStore, entry.getId(), entry.toJson()));
     }
 }
