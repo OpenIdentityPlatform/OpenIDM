@@ -367,7 +367,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
         // # filters = config filters + maintenance + logging + audit
         final List<Filter> filters = new ArrayList<>(filterConfig.size() + 3);
 
-        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("((?!(audit|updates)).)*"), maintenanceFilter));
+        filters.add(maintenanceFilter);
         filters.add(newLoggingFilter());
         filters.add(Filters.conditionalFilter(Filters.matchResourcePath("^(?!.*(^audit/)).*$"), auditFilter));
 

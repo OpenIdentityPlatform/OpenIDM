@@ -255,7 +255,7 @@ public class UpdateLogEntry {
         JsonValue ret = json(object(
                 field("_id", getId()),
                 field("archive", getArchive()),
-                field("status", getStatus().toString()),
+                field("status", getStatus() != null ? getStatus().toString() : null),
                 field("completedTasks", getCompletedTasks()),
                 field("totalTasks", getTotalTasks()),
                 field("startDate", getStartDate()),

@@ -14,7 +14,7 @@
  * Copyright 2014-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.audit.mocks;
+package org.forgerock.openidm.mocks;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;

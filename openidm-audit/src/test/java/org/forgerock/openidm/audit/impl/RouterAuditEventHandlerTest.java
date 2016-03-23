@@ -43,7 +43,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.Router;
-import org.forgerock.openidm.audit.mocks.MockRequestHandler;
+import org.forgerock.openidm.mocks.MockRequestHandler;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
