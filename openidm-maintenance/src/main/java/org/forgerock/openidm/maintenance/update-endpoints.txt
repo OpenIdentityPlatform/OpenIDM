@@ -81,26 +81,7 @@ UI Endpoints for Update Process
 		}
 	]
 
-2a. Get list of repo migrations (for the current db type) for a given update archive
-    ACTION openidm/maintenance/update?_action=listMigrations&archive=OpenIDM-4.5.0.zip
-
-    returns:
-    [
-        {
-            "file": "v1_shorten_link_columns.sql",
-            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v1_shorten_link_columns.sql"
-        },
-        {
-            "file": "v2_some_change.sql",
-            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v2_some_change.sql"
-        },
-        {
-            "file": "v3_more_changes.sql",
-            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v3_more_changes.sql"
-        }
-    ]
-
-2b. Get applicable license for an update archive:
+2a. Get applicable license for an update archive:
 
 	ACTION openidm/maintenance/update?_action=getLicense&archive=OpenIDM-4.5.0.zip
 
@@ -108,6 +89,37 @@ UI Endpoints for Update Process
     {
         "license" : "<WALL O' TEXT>"
     }
+
+2b. Get list of repo updates (for the current db type) for a given update archive
+    ACTION openidm/maintenance/update?_action=listRepoUpdates&archive=OpenIDM-4.5.0.zip
+
+    returns:
+    [
+        {
+            "file": "v1_shorten_link_columns.sql",
+            "path": "db/postgresql/scripts/updates/v1_shorten_link_columns.sql"
+        },
+        {
+            "file": "v2_some_change.sql",
+            "path": "db/postgresql/scripts/updates/v2_some_change.sql"
+        },
+        {
+            "file": "v3_more_changes.sql",
+            "path": "db/postgresql/scripts/updates/v3_more_changes.sql"
+        }
+    ]
+
+2c. Get repo update file(s) from archive
+    GET openidm/maintenance/update/archives/{archive}/{path...}
+    GET openidm/maintenance/update/archives/OpenIDM-4.5.0.zip/db/postgresql/scripts/updates/v1_shorten_link_columns.sql?_field=/contents&_mimeType=text/plain
+
+    returns:
+
+        -- Column lengths are stored as N+4 for legacy reasons
+        -- Much faster way of updating column length in postgres
+        -- Instant change vs full-rewrite with ALTER
+        UPDATE pg_attribute SET atttypmod = 54 WHERE attrelid = 'links'::regclass AND attname = 'linktype';
+        UPDATE pg_attribute SET atttypmod = 54 WHERE attrelid = 'links'::regclass AND attname = 'linkqualifier';
 
 3. Perform update using a given update archive
 
@@ -124,26 +136,28 @@ UI Endpoints for Update Process
 		"user" : "openidm-admin"
 	}
 
-3a. List pending migrations for the currently running update (identical to 2a sans archive)
-    ACTION openidm/maintenance/update?_action=listMigrations
+3a. List pending repo updates for the currently running update (identical to 2a sans archive)
+    ACTION openidm/maintenance/update?_action=listRepoUpdates
 
     returns:
     [
         {
             "file": "v1_shorten_link_columns.sql",
-            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v1_shorten_link_columns.sql"
+            "path": "db/postgresql/scripts/updates/v1_shorten_link_columns.sql"
         },
         {
             "file": "v2_some_change.sql",
-            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v2_some_change.sql"
+            "path": "db/postgresql/scripts/updates/v2_some_change.sql"
         },
         {
             "file": "v3_more_changes.sql",
-            "extractedPath": "/var/folders/88/04pmly_d2z71bddrtklwpm040000gn/T/openidm-update-9031739103398354281/openidm/db/postgresql/scripts/migrations/v3_more_changes.sql"
+            "path": "db/postgresql/scripts/updates/v3_more_changes.sql"
         }
     ]
 
-3b. Mark migrations as complete for a PENDING_MIGRATIONS update
+3b. Get the repo update script (see 2c)
+
+3c. Mark repo updates as complete for a PENDING_REPO_UPDATES update
 
     ACTION openidm/maintenance/update?_action=markComplete&updateId=someIDstring
 
@@ -173,11 +187,11 @@ UI Endpoints for Update Process
 		"user" : "openidm-admin"
 	}
 
-	(while main update complete but database migrations must be run):
+	(while main update complete but repo updates must be run):
     {
         "_id" : "someIDstring",
-        "status" : "PENDING_MIGRATIONS",
-        "statusMessage" : "Database migrations required",
+        "status" : "PENDING_REPO_UPDATES",
+        "statusMessage" : "Repo updates required",
         "completedTasks" : 350,
         "totalTasks" : 350,
         "startDate" : "2016-04-01 12:00:00",
@@ -294,10 +308,10 @@ FileState States:
 
 Update Statuses:
 
-    IN_PROGRESS         Update has started, not yet completed
-    PENDING_MIGRATIONS  Update is completed, repo migrations pending
-    COMPLETE            Update is complete
-    FAILED              Update failed, not yet reverted
+    IN_PROGRESS             Update has started, not yet completed
+    PENDING_REPO_UPDATES    Update is completed, repo updates pending
+    COMPLETE                Update is complete
+    FAILED                  Update failed, not yet reverted
 
     Note that it is possible an update could remain in IN_PROGRESS or FAILED state forever if the thread/process
     died before the update could reach COMPLETE, the "terminal state".  Updates are not reentrant at this time.
