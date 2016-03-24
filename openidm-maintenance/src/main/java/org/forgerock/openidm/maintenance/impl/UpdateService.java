@@ -114,7 +114,7 @@ public class UpdateService extends AbstractRequestHandler {
 
     private enum Action {
         available,
-        listMigrations,
+        listRepoUpdates,
         preview,
         update,
         getLicense,
@@ -132,8 +132,8 @@ public class UpdateService extends AbstractRequestHandler {
         switch (request.getActionAsEnum(Action.class)) {
             case available:
                 return handleListAvailable();
-            case listMigrations:
-                return handlePreviewMigrations(request.getAdditionalParameters());
+            case listRepoUpdates:
+                return handleListRepoUpdates(request.getAdditionalParameters());
             case preview:
                 return handlePreviewUpdate(request.getAdditionalParameters());
             case update:
@@ -162,13 +162,13 @@ public class UpdateService extends AbstractRequestHandler {
         }
 
         try {
-            return newActionResponse(updateManager.completeMigrations(additionalParameters.get(UPDATE_ID))).asPromise();
+            return newActionResponse(updateManager.completeRepoUpdates(additionalParameters.get(UPDATE_ID))).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e).asPromise();
         }
     }
 
-    private Promise<ActionResponse, ResourceException> handlePreviewMigrations(
+    private Promise<ActionResponse, ResourceException> handleListRepoUpdates(
             Map<String, String> additionalParameters) {
         final Path archive;
 
@@ -179,14 +179,15 @@ public class UpdateService extends AbstractRequestHandler {
         }
 
         try {
-            return newActionResponse(updateManager.listMigrations(archive)).asPromise();
+            return newActionResponse(updateManager.listRepoUpdates(archive)).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e).asPromise();
         }
 
     }
 
-    private Path archivePath(String archiveName) {
+    // FIXME - Seems like this should be in UpdateManager
+    public Path archivePath(String archiveName) {
         return Paths.get(IdentityServer.getInstance().getInstallLocation() + ARCHIVE_DIRECTORY + archiveName);
     }
 

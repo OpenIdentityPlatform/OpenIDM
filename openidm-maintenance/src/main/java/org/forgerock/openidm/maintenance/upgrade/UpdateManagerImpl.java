@@ -46,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -148,14 +149,14 @@ public class UpdateManagerImpl implements UpdateManager {
     private UpdateThread updateThread = null;
 
     /** Cache of exploded archives. */
-    private final Map<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
+    private final ConcurrentMap<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
 
     private String lastUpdateId = null;
 
     public enum UpdateStatus {
         IN_PROGRESS,
         COMPLETE,
-        PENDING_MIGRATIONS,
+        PENDING_REPO_UPDATES,
         FAILED
     }
 
@@ -164,6 +165,13 @@ public class UpdateManagerImpl implements UpdateManager {
 
     @Deactivate
     void deactivate(ComponentContext compContext) throws Exception {
+        // Clean up exploded archives
+        for (Map.Entry<Path, ZipArchive> entry : archiveCache.entrySet()) {
+            final Path tempDir = entry.getValue().getDestination();
+            if (Files.exists(tempDir)) {
+                FileUtils.deleteDirectory(tempDir.toFile());
+            }
+        }
         archiveCache.clear();
     }
 
@@ -296,6 +304,8 @@ public class UpdateManagerImpl implements UpdateManager {
         @Override
         public <R, E extends Exception> R withInputStreamForPath(Path path, Function<InputStream, R, E> function)
                 throws E, IOException {
+            // Not sure how I feel about this going off upgradeRoot
+            // Are we NEVER going to have root folders other than "openidm" in the zip?
             return UpdateManagerImpl.withInputStreamForPath(upgradeRoot.resolve(path), function);
         }
     }
@@ -317,6 +327,8 @@ public class UpdateManagerImpl implements UpdateManager {
         Path tempUnzipDir = null;
         try {
             tempUnzipDir = Files.createTempDirectory(tempDirectoryPrefix);
+            // JVM will attempt to delete on normal termination
+            tempUnzipDir.toFile().deleteOnExit();
             return func.apply(tempUnzipDir);
         } catch (IOException e) {
             throw new UpdateException("Cannot create temporary directory to unzip archive");
@@ -352,13 +364,19 @@ public class UpdateManagerImpl implements UpdateManager {
     private ZipArchive getArchive(final Path archiveFile) throws IOException, ArchiveException {
         ZipArchive cached = archiveCache.get(archiveFile);
 
-        if (cached != null) {
+        if (cached != null && Files.exists(cached.getDestination())) {
             return cached;
         } else {
             final Path tempDir = Files.createTempDirectory("openidm-update-");
             final ZipArchive archive = new ZipArchive(archiveFile, tempDir);
 
-            cached = archiveCache.putIfAbsent(archiveFile, archive);
+            if (!Files.exists(cached.getDestination())) {
+                // Destination was already deleted
+                archiveCache.put(archiveFile, archive);
+                cached = archive;
+            } else {
+                cached = archiveCache.putIfAbsent(archiveFile, archive);
+            }
 
             if (cached == null) {
                 cached = archive;
@@ -391,65 +409,70 @@ public class UpdateManagerImpl implements UpdateManager {
         validateCorrectVersion(updateConfig, archiveFile.toFile());
         validateHasChecksumFile(archiveFile.toFile());
 
-        try {
-            final ZipArchive archive = getArchive(archiveFile);
-            final ChecksumFile checksumFile = resolveChecksumFile(installDir);
-            final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
+        return withTempDirectory("openidm-update-", new Function<Path, R, UpdateException>() {
+            @Override
+            public R apply(Path tempDir) throws UpdateException {
+                try {
+                    final ZipArchive archive = new ZipArchive(archiveFile, tempDir);
+                    final ChecksumFile checksumFile = resolveChecksumFile(installDir);
+                    final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
 
-            return upgradeAction.invoke(archive, fileStateChecker);
-        } catch (Exception e) {
-            throw new UpdateException(e.getMessage(), e);
-        }
+                    return upgradeAction.invoke(archive, fileStateChecker);
+                } catch (Exception e) {
+                    throw new UpdateException(e.getMessage(), e);
+                }
+            }
+        });
     }
 
     /**
-     * Return a list of migrations in the archive that are not present in the checker
+     * Return a list of repo updates in the archive that are not present in the checker
      *
      * @param archive
      * @param checker
      * @return
      */
-    private List<Path> listMigrations(final Archive archive, final FileStateChecker checker) throws IOException {
-        final List<Path> newMigrations = new ArrayList<>();
+    private List<Path> listRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException {
+        final List<Path> newUpdates = new ArrayList<>();
 
-        for (Path migrationFile : listMigrations(archive)) {
+        for (Path updateFile : listRepoUpdates(archive)) {
             // TODO - What about unexpected?
-            if (checker.getCurrentFileState(migrationFile) == FileState.NONEXISTENT) {
-                newMigrations.add(migrationFile);
+            if (checker.getCurrentFileState(updateFile) == FileState.NONEXISTENT) {
+                newUpdates.add(updateFile);
             }
         }
 
-        return newMigrations;
+        return newUpdates;
     }
 
-    private List<Path> listMigrations(final Archive archive) {
+    private List<Path> listRepoUpdates(final Archive archive) {
         final String dbDir = repositoryService.getDbDirname();
 
         if (Strings.isNullOrEmpty(dbDir)) {
             return new ArrayList<>();
         }
 
-        final Pattern migrationPattern = Pattern.compile("db/"+dbDir+"/scripts/migrations/v(\\d+)_(\\w+).(pg)?sql");
+        final Pattern updatePattern = Pattern.compile("db/"+dbDir+"/scripts/updates/v(\\d+)_(\\w+).(pg)?sql");
 
-        final List<Path> migrations = new ArrayList<>(Collections2.filter(archive.getFiles(), new Predicate<Path>() {
+        final List<Path> updates = new ArrayList<>(Collections2.filter(archive.getFiles(), new Predicate<Path>() {
             @Override
             public boolean apply(Path path) {
-                return migrationPattern.matcher(path.toString()).matches();
+                return updatePattern.matcher(path.toString()).matches();
             }
         }));
 
-        Collections.sort(migrations, new NaturalOrderComparator());
+        Collections.sort(updates, new NaturalOrderComparator());
 
-        return migrations;
+        return updates;
     }
 
-    private JsonValue formatMigrationsList(final List<Path> migrations, final Archive archive) {
+    private JsonValue formatRepoUpdateList(final List<Path> updates) {
         final JsonValue response = json(array());
 
-        for (Path p : migrations) {
+        for (Path p : updates) {
             response.add(object(
                     field("file", p.getFileName().toString()),
-                    field("extractedPath", archive.extractedPath(p).toString())
+                    field("path", p.toString())
             ));
         }
 
@@ -457,17 +480,17 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     @Override
-    public JsonValue listMigrations(final Path archiveFile) throws UpdateException {
+    public JsonValue listRepoUpdates(final Path archiveFile) throws UpdateException {
         final String dbDir = repositoryService.getDbDirname();
 
         if (Strings.isNullOrEmpty(dbDir)) {
             return json(array());
         }
 
-        // If no archive is specified output migrations from the currently running thread
+        // If no archive is specified output updates from the currently running thread
         if (archiveFile == null) {
             if (updateThread != null && updateThread.isAlive()) {
-                return formatMigrationsList(updateThread.archiveMigrations, updateThread.archive);
+                return formatRepoUpdateList(updateThread.archiveRepoUpdates);
             } else {
                 throw new UpdateException("No archive specified and no running update");
             }
@@ -477,7 +500,7 @@ public class UpdateManagerImpl implements UpdateManager {
                         @Override
                         public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException {
                             try {
-                                return formatMigrationsList(listMigrations(archive, fileStateChecker), archive);
+                                return formatRepoUpdateList(listRepoUpdates(archive, fileStateChecker));
                             } catch (IOException e) {
                                 throw new UpdateException(e);
                             }
@@ -717,6 +740,10 @@ public class UpdateManagerImpl implements UpdateManager {
     public JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName)
             throws UpdateException {
 
+        if (updateThread != null && updateThread.isAlive()) {
+            throw new UpdateException("Only one update may be run at a time");
+        }
+
         validateFileName(archiveFile.toFile());
         final JsonValue updateConfig = readUpdateConfig(archiveFile.toFile());
         validateCorrectProduct(updateConfig, archiveFile.toFile());
@@ -754,7 +781,7 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     @Override
-    public JsonValue completeMigrations(final String updateId) throws UpdateException {
+    public JsonValue completeRepoUpdates(final String updateId) throws UpdateException {
         if (updateThread == null
                 || !updateThread.isAlive()
                 || !updateThread.getUpdateEntry().getId().equals(updateId)) {
@@ -790,6 +817,29 @@ public class UpdateManagerImpl implements UpdateManager {
         } catch (IOException | ZipException e) {
             return json(object());
         }
+    }
+
+    @Override
+    public JsonValue getArchiveFile(final Path archiveFile, final Path file) throws UpdateException {
+        return usingArchive(archiveFile, IdentityServer.getInstance().getInstallLocation().toPath(),
+                new UpgradeAction<JsonValue>() {
+                    @Override
+                    public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException {
+                        try {
+                            return archive.withInputStreamForPath(file, new Function<InputStream, JsonValue, UpdateException>() {
+                                @Override
+                                public JsonValue apply(InputStream is) throws UpdateException {
+                                    // \0 delimiter to scan to end-of-file and get single token
+                                    java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\Z");
+                                    String contents = s.hasNext() ? s.next() : "";
+                                    return json(object(field("contents", contents)));
+                                }
+                            });
+                        } catch (IOException e) {
+                            throw new UpdateException(e);
+                        }
+                    }
+                });
     }
 
     @Override
@@ -857,8 +907,8 @@ public class UpdateManagerImpl implements UpdateManager {
         private final Lock lock = new ReentrantLock();
         private final Condition complete = lock.newCondition();
 
-        /** List of new migrations found in archive */
-        private final List<Path> archiveMigrations;
+        /** List of new repo updates found in archive */
+        private final List<Path> archiveRepoUpdates;
 
         // FIXME - Does this even work? Can we just make this private?
         public UpdateThread() {
@@ -868,7 +918,7 @@ public class UpdateManagerImpl implements UpdateManager {
             this.staticFileUpdate = null;
             this.updateConfig = null;
             this.tempDirectory = null;
-            this.archiveMigrations = new ArrayList<>();
+            this.archiveRepoUpdates = new ArrayList<>();
         }
 
         public UpdateThread(UpdateLogEntry updateEntry, Archive archive, FileStateChecker fileStateChecker,
@@ -882,7 +932,7 @@ public class UpdateManagerImpl implements UpdateManager {
             this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
                     archive, new ProductVersion(ServerConstants.getVersion(),
                     ServerConstants.getRevision()), timestamp);
-            this.archiveMigrations = listMigrations(archive, fileStateChecker);
+            this.archiveRepoUpdates = listRepoUpdates(archive, fileStateChecker);
         }
 
         public void run() {
@@ -1013,11 +1063,11 @@ public class UpdateManagerImpl implements UpdateManager {
                 // un-block complete()
                 completeable = true;
 
-                // If this update contained migrations wait until they are done
-                if (!archiveMigrations.isEmpty()) {
+                // If this update contained repo updates wait until they are done
+                if (!archiveRepoUpdates.isEmpty()) {
                     logUpdate(updateEntry
-                            .setStatus(UpdateStatus.PENDING_MIGRATIONS)
-                            .setStatusMessage("Update complete. Repo migrations pending."));
+                            .setStatus(UpdateStatus.PENDING_REPO_UPDATES)
+                            .setStatusMessage("Update complete. Repo updates pending."));
 
                     lock.lock();
                     try {
