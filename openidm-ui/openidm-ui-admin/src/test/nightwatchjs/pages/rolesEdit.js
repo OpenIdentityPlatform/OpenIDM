@@ -39,11 +39,17 @@ module.exports = {
         conditionOpSelect: {
             selector: '.expressionTree select:first-of-type'
         },
-        conditionOpValueForOption: {
+        conditionOpValueForExpr: {
             selector: '.expressionTree select:first-of-type option[value=expr]'
         },
-        conditionOpNameInput: {
+        conditionOpValueForAnd: {
+            selector: '.expressionTree select:first-of-type option[value=and]'
+        },
+        conditionOpNameInputFirst: {
             selector: '.expressionTree .name-body:first-of-type .selectize-input'
+        },
+        conditionOpNameInputSecond: {
+            selector: '.expressionTree ul.subgroup li:nth-of-type(2) .selectize-input'
         },
         conditionOpValueInput: {
             selector: '.expressionTree input.value'
