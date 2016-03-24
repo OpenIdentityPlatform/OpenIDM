@@ -51,19 +51,23 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
                 }
             },
             serialize: function (node) {
-                switch (node.op) {
-                    case "expr":
-                        if (node.tag === "pr") {
-                            return node.name + ' pr';
-                        } else {
-                            return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
-                        }
-                    case "not":
-                        return "!(" + this.serialize(node.children[0]) + ")";
-                    case "none":
-                        return "";
-                    default:
-                        return "(" + _.map(node.children, this.serialize, this).join(" " + node.op + " ") + ")";
+                if (node) {
+                    switch (node.op) {
+                        case "expr":
+                            if (node.tag === "pr") {
+                                return node.name + ' pr';
+                            } else {
+                                return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
+                            }
+                        case "not":
+                            return "!(" + this.serialize(node.children[0]) + ")";
+                        case "none":
+                            return "";
+                        default:
+                            return "(" + _.map(node.children, this.serialize, this).join(" " + node.op + " ") + ")";
+                    }
+                } else {
+                    return "";
                 }
             },
             getFilterString: function () {
@@ -107,7 +111,7 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
                     this.delegateEvents(this.events);
                     this.renderExpressionTree();
                 }
-                
+
                 if (callback) {
                     callback();
                 }

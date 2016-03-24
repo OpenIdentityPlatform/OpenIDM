@@ -25,7 +25,12 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/admin/role/util/UserQueryFilterEditor"
 ],
-function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsManager, UserQueryFilterEditor) {
+function ($, _, Handlebars,
+    AbstractView,
+    GenericEditResourceView,
+    ValidatorsManager,
+    UserQueryFilterEditor
+  ) {
     var EditRoleView = function () {
         return AbstractView.apply(this, arguments);
     };
@@ -112,12 +117,14 @@ function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsMan
     };
 
     EditRoleView.prototype.getFormValue = function () {
-        var checked = this.$el.find("#enableDynamicRoleGrantCheckbox").attr("checked"),
-            condition = "false",
+        var conditionChecked = this.$el.find("#enableDynamicRoleGrantCheckbox").attr("checked"),
+            condition = "",
             returnVal;
 
-        if (checked && this.queryEditor) {
+        if (conditionChecked && this.queryEditor) {
             condition = this.queryEditor.getFilterString();
+        } else {
+            condition = undefined;
         }
 
         if (this.queryEditor) {

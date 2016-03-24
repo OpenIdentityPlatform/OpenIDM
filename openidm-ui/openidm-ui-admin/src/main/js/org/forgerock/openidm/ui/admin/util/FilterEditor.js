@@ -92,7 +92,8 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                 var context = this.getExpressionContext(e),
                     node = context.current,
                     field = $(e.target),
-                    redrawContainer = false;
+                    redrawContainer = false,
+                    emptyChild = {name: "", value: "", tag: "equalityMatch", children: [], op: "expr"};
 
                 if (field.hasClass("op")) {
                     redrawContainer = true;
@@ -105,7 +106,11 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     } else if (node.op === "none") {
                         node.children = [];
                     } else if (!node.children || !node.children.length) {
-                        node.children = [{name: "", value: "", tag: "equalityMatch", children: [], op: "expr"}];
+                        node.children = [emptyChild];
+                        //if op is "and" or "or" add two children by default to let the user know that multiple comparisons are needed
+                        if (node.children.length === 1 && (node.op === "and" || node.op === "or")) {
+                            node.children.push(emptyChild);
+                        }
                     }
                 } else if (field.hasClass("name")) {
 
@@ -116,7 +121,9 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                         node.extensible.matchType = field.val();
                         node.name = field.val() + ":1.2.840.113556.1.4.804";
                     } else {
-                        node.name = field.val();
+                        if (node) {
+                            node.name = field.val();
+                        }
                     }
 
                 } else if (field.hasClass("tag")) {
@@ -166,7 +173,7 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     node.value = field.val();
                 }
 
-                if (node.op !== "none") {
+                if (node && node.op !== "none") {
                     this.data.filterString = this.getFilterString();
                 } else {
                     this.data.filterString = "";
