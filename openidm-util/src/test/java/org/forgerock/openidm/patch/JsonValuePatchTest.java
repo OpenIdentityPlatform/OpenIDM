@@ -36,46 +36,10 @@ import org.testng.annotations.Test;
 /**
  * Test JsonValuePatch methods.
  *
- * The test file was created primarily in order to keep the implementation of DEFAULT_TRANSFORMER.
  * TODO Write tests for rest of JsonValuePatch class.
  */
 public class JsonValuePatchTest {
     private JsonValue subject = json(object(field("key", "value")));
-
-    @Test
-    public void testMapAdd() throws ResourceException {
-        JsonValue object = json(object(field("key", "value")));
-        final List<PatchOperation> operations = PatchOperation.valueOfList(
-                json(array(
-                        object(
-                                field("operation", "add"),
-                                field("field", "/key"),
-                                field("value", "pineapple")
-                        )
-                )));
-
-        final boolean result = JsonValuePatch.apply(object, operations);
-        assertThat(result).isTrue();
-        assertThat(object).stringAt("key").isEqualTo("pineapple");
-    }
-
-    // OPENIDM-1822 - validate that add @ ptr is a permissive-patch, aka "replace" on multivalued attributes
-    @Test
-    public void testArrayAddAtIndex() throws ResourceException {
-        JsonValue object = json(object(field("fruits", array("apple", "kiwi", "pear", "strawberry"))));
-        final List<PatchOperation> operations = PatchOperation.valueOfList(
-                json(array(
-                        object(
-                                field("operation", "add"),
-                                field("field", "/fruits/1"),
-                                field("value", "pineapple")
-                        )
-                )));
-
-        final boolean result = JsonValuePatch.apply(object, operations);
-        assertThat(result).isTrue();
-        assertThat(object).hasArray("fruits").containsSequence("apple", "pineapple", "pear", "strawberry");
-    }
 
     @Test
     public void testMapReplace() throws ResourceException {
@@ -158,7 +122,7 @@ public class JsonValuePatchTest {
                 ))));
 
         List<PatchOperation> operations = PatchOperation.valueOfList(diff);
-        boolean modified = JsonValuePatch.apply(subject, operations, transformer);
+        JsonValuePatch.apply(subject, operations, transformer);
     }
 
     @Test(expectedExceptions = BadRequestException.class)
@@ -172,7 +136,6 @@ public class JsonValuePatchTest {
                 ))));
 
         List<PatchOperation> operations = PatchOperation.valueOfList(diff);
-        boolean modified = JsonValuePatch.apply(subject, operations, transformer);
-
+        JsonValuePatch.apply(subject, operations, transformer);
     }
 }
