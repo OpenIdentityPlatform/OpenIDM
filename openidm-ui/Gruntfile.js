@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 module.exports = function(grunt) {
@@ -53,7 +53,7 @@ module.exports = function(grunt) {
                     'openidm-ui-enduser/src/main/resources/**',
                     'openidm-ui-enduser/src/test/qunit/**',
                 ],
-                tasks: [ 'sync:target', 'less', 'sync:zip' ]
+                tasks: [ 'sync:target', 'less', 'sync:zip', 'qunit' ]
             }
         },
         less: {
@@ -107,18 +107,6 @@ module.exports = function(grunt) {
                         dest    : 'openidm-ui-enduser/target/www'
                     },
 
-                    // common test libs
-                    {
-                        cwd     : 'openidm-ui-common/target/test/libs',
-                        src     : ['**'],
-                        dest    : 'openidm-ui-admin/target/test/libs'
-                    },
-                    {
-                        cwd     : 'openidm-ui-common/target/test/libs',
-                        src     : ['**'],
-                        dest    : 'openidm-ui-enduser/target/test/libs'
-                    },
-
                     // openidm-ui-common main
                     {
                         cwd     : 'openidm-ui-common/src/main/resources',
@@ -165,51 +153,26 @@ module.exports = function(grunt) {
                         dest    : 'openidm-ui-enduser/target/www'
                     },
 
-                    // openidm-ui-common test
-                    {
-                        cwd     : 'openidm-ui-common/src/test/resources',
-                        src     : ['css/**', 'qunit.html'],
-                        dest    : 'openidm-ui-admin/target/test'
-                    },
+                    // QUnit tests
                     {
                         cwd     : 'openidm-ui-common/src/test/qunit',
                         src     : ['**'],
-                        dest    : 'openidm-ui-admin/target/test/tests'
+                        dest    : 'openidm-ui-admin/target/qunit'
                     },
-                    {
-                        cwd     : 'openidm-ui-common/src/test/js',
-                        src     : ['**'],
-                        dest    : 'openidm-ui-admin/target/test'
-                    },
-                    {
-                        cwd     : 'openidm-ui-common/src/test/resources',
-                        src     : ['css/**', 'qunit.html'],
-                        dest    : 'openidm-ui-enduser/target/test'
-                    },
-                    {
-                        cwd     : 'openidm-ui-common/src/test/qunit',
-                        src     : ['**'],
-                        dest    : 'openidm-ui-enduser/target/test/tests'
-                    },
-                    {
-                        cwd     : 'openidm-ui-common/src/test/js',
-                        src     : ['**'],
-                        dest    : 'openidm-ui-enduser/target/test'
-                    },
-
-
-                    // openidm-ui-admin test
                     {
                         cwd     : 'openidm-ui-admin/src/test/qunit',
                         src     : ['**'],
-                        dest    : 'openidm-ui-admin/target/test/tests'
+                        dest    : 'openidm-ui-admin/target/qunit/tests'
                     },
-
-                    // openidm-ui-enduser test
+                    {
+                        cwd     : 'openidm-ui-common/src/test/qunit',
+                        src     : ['**'],
+                        dest    : 'openidm-ui-enduser/target/qunit'
+                    },
                     {
                         cwd     : 'openidm-ui-enduser/src/test/qunit',
                         src     : ['**'],
-                        dest    : 'openidm-ui-enduser/target/test/tests'
+                        dest    : 'openidm-ui-enduser/target/qunit/tests'
                     }
 
 
@@ -270,6 +233,10 @@ module.exports = function(grunt) {
               }
             }
         },
+        qunit: {
+            admin: 'openidm-ui-admin/target/qunit/index.html',
+            enduser: 'openidm-ui-enduser/target/qunit/index.html'
+        },
         notify_hooks: {
             options: {
                 enabled: true,
@@ -278,6 +245,7 @@ module.exports = function(grunt) {
         }
     });
 
+    grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks('grunt-nightwatch');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-notify');
@@ -285,7 +253,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-less');
 
     grunt.task.run('notify_hooks');
-    grunt.registerTask('default', ['sync:target', 'less', 'sync:zip', 'watch']);
-    grunt.registerTask('test', ['nightwatch:admin','nightwatch:enduser']);
+    grunt.registerTask('default', ['sync:target', 'less', 'sync:zip', 'qunit', 'watch']);
+    grunt.registerTask('test', ['qunit', 'nightwatch:admin','nightwatch:enduser']);
 
 };
