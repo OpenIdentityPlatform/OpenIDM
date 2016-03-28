@@ -20,6 +20,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_REVISION;
 import static org.forgerock.json.resource.Responses.newActionResponse;
@@ -171,7 +172,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             JsonValue repoConfig) {
         JDBCRepoService bootRepo = new JDBCRepoService();
         bootRepo.dataSourceService = dataSourceService;
-        bootRepo.init(repoConfig, context);
+        bootRepo.init(repoConfig);
         return bootRepo;
     }
 
@@ -192,7 +193,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                     + ex.getMessage(), ex);
             throw ex;
         }
-        init(config, compContext.getBundleContext());
+        init(config);
         logger.info("Repository started.");
     }
 
@@ -255,18 +256,16 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         final String localId = request.getResourcePathObject().leaf();
 
         Connection connection = null;
-        ResourceResponse result = null;
         try {
             connection = getConnection();
             connection.setAutoCommit(true); // Ensure this does not get
                                             // transaction isolation handling
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                throw newResourceException(ResourceException.INTERNAL_ERROR,
                         "No handler configured for resource type " + type);
             }
-            result = handler.read(request.getResourcePath(), type, localId, connection);
-            return result;
+            return handler.read(request.getResourcePath(), type, localId, connection);
         } catch (SQLException ex) {
             if (logger.isDebugEnabled()) {
                 logger.debug("SQL Exception in read of {} with error code {}, sql state {}",
@@ -299,7 +298,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     public ResourceResponse create(CreateRequest request) throws ResourceException {
         if (request.getResourcePathObject().isEmpty()) {
             throw new BadRequestException(
-                    "The respository requires clients to supply a type for the object to create.");
+                    "The repository requires clients to supply a type for the object to create.");
         }
         // Parse the remaining resourceName
         final String type = request.getResourcePath();
@@ -311,12 +310,12 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         final JsonValue obj = request.getContent();
 
         Connection connection = null;
-        boolean retry = false;
+        boolean retry;
         int tryCount = 0;
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                throw newResourceException(ResourceException.INTERNAL_ERROR,
                         "No handler configured for resource type " + type);
             }
             retry = false;
@@ -328,7 +327,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 handler.create(fullId, type, localId, obj.asMap(), connection);
 
                 connection.commit();
-                logger.debug("Commited created object for id: {}", fullId);
+                logger.debug("Committed created object for id: {}", fullId);
 
             } catch (SQLException ex) {
                 if (logger.isDebugEnabled()) {
@@ -404,19 +403,19 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
         Connection connection = null;
         Integer previousIsolationLevel = null;
-        boolean retry = false;
+        boolean retry;
         int tryCount = 0;
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                throw newResourceException(ResourceException.INTERNAL_ERROR,
                         "No handler configured for resource type " + type);
             }
             retry = false;
             ++tryCount;
             try {
                 connection = getConnection();
-                previousIsolationLevel = new Integer(connection.getTransactionIsolation());
+                previousIsolationLevel = connection.getTransactionIsolation();
                 connection.setTransactionIsolation(Connection.TRANSACTION_READ_COMMITTED);
                 connection.setAutoCommit(false);
 
@@ -457,7 +456,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 if (connection != null) {
                     try {
                         if (previousIsolationLevel != null) {
-                            connection.setTransactionIsolation(previousIsolationLevel.intValue());
+                            connection.setTransactionIsolation(previousIsolationLevel);
                         }
                     } catch (SQLException ex) {
                         logger.warn("Failure in resetting connection isolation level ", ex);
@@ -499,12 +498,12 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
         ResourceResponse result = null;
         Connection connection = null;
-        boolean retry = false;
+        boolean retry;
         int tryCount = 0;
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                throw newResourceException(ResourceException.INTERNAL_ERROR,
                         "No handler configured for resource type " + type);
             }
 
@@ -679,7 +678,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         String fullId = request.getResourcePath();
         String type = trimStartingSlash(fullId);
         logger.trace("Full id: {} Extracted type: {}", fullId, type);
-        Map<String, Object> params = new HashMap<String, Object>();
+        Map<String, Object> params = new HashMap<>();
         params.putAll(request.getAdditionalParameters());
         params.put(QUERY_ID, request.getQueryId());
         params.put(QUERY_EXPRESSION, request.getQueryExpression());
@@ -692,7 +691,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         try {
             TableHandler tableHandler = getTableHandler(type);
             if (tableHandler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                throw newResourceException(ResourceException.INTERNAL_ERROR,
                         "No handler configured for resource type " + type);
             }
             connection = getConnection();
@@ -700,7 +699,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                                             // start transaction isolation
 
             List<Map<String, Object>> docs = tableHandler.query(type, params, connection);
-            List<ResourceResponse> results = new ArrayList<ResourceResponse>();
+            List<ResourceResponse> results = new ArrayList<>();
             for (Map<String, Object> resultMap : docs) {
                 String id = (String) resultMap.get("_id");
                 String rev = (String) resultMap.get("_rev");
@@ -755,7 +754,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         do {
             TableHandler handler = getTableHandler(type);
             if (handler == null) {
-                throw ResourceException.getException(ResourceException.INTERNAL_ERROR,
+                throw newResourceException(ResourceException.INTERNAL_ERROR,
                         "No handler configured for resource type " + type);
             }
 
@@ -861,11 +860,9 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
      *
      * @param config
      *            the configuration object
-     * @param bundleContext
-     *            the bundle context
      * @throws InvalidException
      */
-    void init(JsonValue config, BundleContext bundleContext) throws InvalidException {
+    void init(JsonValue config) throws InvalidException {
         try {
             String enabled = config.get("enabled").asString();
             if ("false".equals(enabled)) {
@@ -877,7 +874,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             JsonValue genericQueries = config.get("queries").get("genericTables");
             JsonValue genericCommands = config.get("commands").get("genericTables");
 
-            tableHandlers = new HashMap<String, TableHandler>();
+            tableHandlers = new HashMap<>();
 
             DatabaseType databaseType = config.get(CONFIG_DB_TYPE)
                     .defaultTo(DatabaseType.ANSI_SQL99.name())
