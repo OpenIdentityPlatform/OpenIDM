@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
@@ -109,7 +101,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
 
     final static Logger logger = LoggerFactory.getLogger(OrientDBRepoService.class);
     public static final String PID = "org.forgerock.openidm.repo.orientdb";
-    
+
     // Keys in the JSON configuration
     public static final String CONFIG_QUERIES = "queries";
     public static final String CONFIG_COMMANDS = "commands";
@@ -149,7 +141,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     private String password;
     private int poolMinSize;
     private int poolMaxSize;
-    
+
     // Used to synchronize operations on the DB that require user/password credentials
     private static Object dbLock = new Object();
 
@@ -164,7 +156,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     Commands commands = new Commands();
 
     EmbeddedOServerService embeddedServer;
-    
+
     @Override
     public Promise<ResourceResponse, ResourceException> handleRead(final Context context, final ReadRequest request) {
         try {
@@ -276,16 +268,16 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
 
         String orientClassName = typeToOrientClassName(type);
         JsonValue obj = request.getContent();
- 
+
         obj.put(DocumentUtil.TAG_ID, localId);
-        
+
         ODatabaseDocumentTx db = getConnection();
         try{
             // Rather than using MVCC for insert, rely on primary key uniqueness constraints to detect duplicate create
             ODocument newDoc = DocumentUtil.toDocument(obj, null, db, orientClassName);
             logger.trace("Created doc for id: {} to save {}", fullId, newDoc);
             newDoc.save();
-            
+
             obj.put(DocumentUtil.TAG_REV, Integer.toString(newDoc.getVersion()));
             logger.debug("Completed create for id: {} revision: {}", fullId, newDoc.getVersion());
             logger.trace("Create payload for id: {} doc: {}", fullId, newDoc);
@@ -297,10 +289,10 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             // Because the OpenIDM ID is defined as unique, duplicate inserts must fail
             throw new PreconditionFailedException("Create rejected as Object with same ID already exists. " + ex.getMessage(), ex);
         } catch (ODatabaseException ex) {
-            // Because the OpenIDM ID is defined as unique, duplicate inserts must fail. 
+            // Because the OpenIDM ID is defined as unique, duplicate inserts must fail.
             // OrientDB may wrap the IndexException root cause.
             if (isCauseIndexException(ex, 10) || isCauseRecordDuplicatedException(ex, 10)) {
-                throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. " 
+                throw new PreconditionFailedException("Create rejected as Object with same ID already exists and was detected. "
                         + ex.getMessage(), ex);
             } else {
                 throw ex;
@@ -354,7 +346,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             }
             ODocument updatedDoc = DocumentUtil.toDocument(obj, existingDoc, db, orientClassName);
             logger.trace("Updated doc for id {} to save {}", request.getResourcePath(), updatedDoc);
-            
+
             updatedDoc.save();
 
             obj.put(DocumentUtil.TAG_REV, Integer.toString(updatedDoc.getVersion()));
@@ -368,7 +360,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             // Without transaction the concurrent modification exception gets nested instead
             if (isCauseConcurrentModificationException(ex, 10)) {
                 throw new PreconditionFailedException(
-                        "Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: " 
+                        "Update rejected as current Object revision is different than expected by caller, the object has changed since retrieval: "
                         + ex.getMessage(), ex);
             } else {
                 throw ex;
@@ -380,7 +372,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         } finally {
             if (db != null) {
                 db.close();
-            } 
+            }
         }
     }
 
@@ -412,15 +404,15 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         final String localId = request.getResourcePathObject().leaf();
 
         int ver = DocumentUtil.parseVersion(request.getRevision()); // This throws ConflictException if parse fails
-        
+
         ODatabaseDocumentTx db = getConnection();
         try {
             ODocument existingDoc = predefinedQueries.getByID(localId, type, db);
             if (existingDoc == null) {
                 throw new NotFoundException("Object does not exist for delete on: " + request.getResourcePath());
             }
-            
-            db.delete(existingDoc.getIdentity(), new OSimpleVersion(ver)); 
+
+            db.delete(existingDoc.getIdentity(), new OSimpleVersion(ver));
             logger.debug("delete for id succeeded: {} revision: {}", localId, request.getRevision());
             return DocumentUtil.toResource(existingDoc);
         } catch (ODatabaseException ex) {
@@ -433,7 +425,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 throw ex;
             }
 
-        } catch (OConcurrentModificationException ex) {  
+        } catch (OConcurrentModificationException ex) {
             throw new PreconditionFailedException(
                     "Delete rejected as current Object revision is different than expected by caller, the object has changed since retrieval."
                     + ex.getMessage(), ex);
@@ -445,13 +437,13 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             }
         }
     }
-    
+
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
         // TODO: impl
         return adapt(new NotSupportedException("Patch not supported yet")).asPromise();
     }
-    
+
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         try {
@@ -507,9 +499,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
      * Performs the query on the specified object and returns the associated results.
      * <p>
      * Queries are parametric; a set of named parameters is provided as the query criteria.
-     * The query result is a JSON object structure composed of basic Java types. 
-     * 
-     * The returned map is structured as follow: 
+     * The query result is a JSON object structure composed of basic Java types.
+     *
+     * The returned map is structured as follow:
      * - The top level map contains meta-data about the query, plus an entry with the actual result records.
      * - The <code>QueryConstants</code> defines the map keys, including the result records (QUERY_RESULT)
      *
@@ -665,10 +657,10 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                 result.put(QueryConstants.STATISTICS_CONVERSION_TIME, Long.valueOf(convEnd-convStart));
             }
             result.put(QueryConstants.STATISTICS_QUERY_TIME, Long.valueOf(end-start));
-            
+
             if (logger.isDebugEnabled()) {
                 logger.debug("Query result contains {} records, took {} ms and took {} ms to convert result.",
-                        new Object[] {results.size(), 
+                        new Object[] {results.size(),
                         result.get(QueryConstants.STATISTICS_QUERY_TIME),
                         result.get(QueryConstants.STATISTICS_CONVERSION_TIME)});
             }
@@ -679,7 +671,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             }
         }
     }
-    
+
     /**
      * @return A connection from the pool. Call close on the connection when done to return to the pool.
      * @throws InternalServerErrorException
@@ -688,7 +680,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         ODatabaseDocumentTx db = null;
         int maxRetry = 100; // give it up to approx 10 seconds to recover
         int retryCount = 0;
-        
+
         synchronized (dbLock) {
             while (db == null && retryCount < maxRetry) {
                 retryCount++;
@@ -703,7 +695,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
                     if (retryCount == maxRetry) {
                         logger.warn("Failure reported acquiring connection from pool, retried {} times before giving up.", retryCount, ex);
                         throw new InternalServerErrorException(
-                                "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: " 
+                                "Failure reported acquiring connection from pool, retried " + retryCount + " times before giving up: "
                                         + ex.getMessage(), ex);
                     } else {
                         logger.info("Pool acquire reported failure, retrying - attempt {}", retryCount);
@@ -723,7 +715,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     public static String typeToOrientClassName(String type) {
         return type.replace("/", "_");
     }
-    
+
     //public static String idToOrientClassName(String id) {
     //    String type = getObjectType(id);
     //    return typeToOrientClassName(type);
@@ -741,7 +733,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     private boolean isCauseRecordDuplicatedException(Throwable ex, int maxLevels) {
         return isCauseException (ex, ORecordDuplicatedException.class, maxLevels);
     }
-    
+
     /**
      * Detect if the root cause of the exception is an index constraint violation
      * This is necessary as the database may wrap this root cause in further exceptions,
@@ -754,7 +746,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     private boolean isCauseIndexException(Throwable ex, int maxLevels) {
         return isCauseException (ex, OIndexException.class, maxLevels);
     }
-    
+
     /**
      * Detect if the root cause of the exception is an index constraint violation
      * This is necessary as the database may wrap this root cause in further exceptions,
@@ -767,7 +759,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     private boolean isCauseConcurrentModificationException(Throwable ex, int maxLevels) {
         return isCauseException (ex, OConcurrentModificationException.class, maxLevels);
     }
-    
+
     /**
      * Detect if the root cause of the exception is a specific OrientDB exception
      * This is necessary as the database may wrap this root cause in further exceptions,
@@ -784,7 +776,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             if (cause != null) {
                 return clazz.isInstance(cause) || isCauseException(cause, clazz, maxLevels - 1);
             }
-        }    
+        }
         return false;
     }
 
@@ -802,32 +794,32 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         bootRepo.init(cfg);
         return bootRepo;
     }
-    
+
     @Activate
-    void activate(ComponentContext compContext) throws Exception { 
+    void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Service with configuration {}", compContext.getProperties());
-        
+
         try {
             existingConfig = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository: " 
+            logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository: "
                     + ex.getMessage(), ex);
             throw ex;
         }
         embeddedServer = new EmbeddedOServerService();
         embeddedServer.activate(existingConfig);
-        
+
         init(existingConfig);
-        
+
         logger.info("Repository started.");
     }
-    
+
     /**
      * Initialize the instance with the given configuration.
-     * 
+     *
      * This can configure managed (DS/SCR) instances, as well as explicitly instantiated
      * (bootstrap) instances.
-     * 
+     *
      * @param config the configuration
      */
     void init (JsonValue config) {
@@ -863,30 +855,30 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         }
         }
     }
-    
+
     private String getDBUrl(JsonValue config) {
         File dbFolder = IdentityServer.getFileForWorkingPath("db/openidm");
         String orientDbFolder = dbFolder.getAbsolutePath();
         orientDbFolder = orientDbFolder.replace('\\', '/'); // OrientDB does not handle backslashes well
         return config.get(OrientDBRepoService.CONFIG_DB_URL).defaultTo("local:" + orientDbFolder).asString();
     }
-    
+
     private String getUser(JsonValue config) {
         return config.get(CONFIG_USER).defaultTo("admin").asString();
     }
-    
+
     private String getPassword(JsonValue config) {
         return config.get(CONFIG_PASSWORD).defaultTo("admin").asString();
     }
-    
+
     private int getPoolMinSize(JsonValue config) {
         return config.get(CONFIG_POOL_MIN_SIZE).defaultTo(DEFAULT_POOL_MIN_SIZE).asInteger();
     }
-    
+
     private int getPoolMaxSize(JsonValue config) {
         return config.get(CONFIG_POOL_MAX_SIZE).defaultTo(DEFAULT_POOL_MAX_SIZE).asInteger();
     }
-    
+
     /**
      * Adapts a {@code Throwable} to a {@code ResourceException}. If the
      * {@code Throwable} is an JSON {@code JsonValueException} then an
@@ -914,9 +906,9 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
 
     /**
-     * Handle an existing activated service getting changed; 
+     * Handle an existing activated service getting changed;
      * e.g. configuration changes or dependency changes
-     * 
+     *
      * @param compContext THe OSGI component context
      * @throws Exception if handling the modified event failed
      */
@@ -927,7 +919,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         try {
             newConfig = enhancedConfig.getConfigurationAsJson(compContext);
         } catch (RuntimeException ex) {
-            logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository", ex); 
+            logger.warn("Configuration invalid and could not be parsed, can not start OrientDB repository", ex);
             throw ex;
         }
         if (existingConfig != null
@@ -935,7 +927,7 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             // The embedded server configuration has changed so re-initialize it.
             embeddedServer.modified(newConfig);
         }
-        if (existingConfig != null 
+        if (existingConfig != null
                 && user.equals(getUser(newConfig))
                 && password.equals(getPassword(newConfig))
                 && dbURL.equals(getDBUrl(newConfig))
@@ -949,17 +941,17 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
             DBHelper.closePool(dbURL, pool);
         }
         init(newConfig);
-        
+
         if (bootRepo != null) {
             bootRepo.init(newConfig);
         }
-        
+
         existingConfig = newConfig;
         logger.debug("Repository service modified");
     }
-    
+
     @Deactivate
-    void deactivate(ComponentContext compContext) { 
+    void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
         cleanup();
         if (embeddedServer != null) {
