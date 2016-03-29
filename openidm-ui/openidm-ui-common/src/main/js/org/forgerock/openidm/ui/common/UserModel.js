@@ -128,6 +128,7 @@ define("org/forgerock/openidm/ui/common/UserModel", [
                     }
                 }
             }).then(_.bind(function (sessionDetails) {
+                delete this.policy;
                 this.id = sessionDetails.authorization.id;
                 this.url = "/" + Constants.context + "/" + sessionDetails.authorization.component;
                 this.component = sessionDetails.authorization.component;
