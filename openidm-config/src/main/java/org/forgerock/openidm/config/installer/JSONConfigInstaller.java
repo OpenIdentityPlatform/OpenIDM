@@ -215,6 +215,8 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                             }
                         }
                     }
+                    // Add to pidToFile map.
+                    pidToFile.put(pid, fileName);
                 }
             } catch (Exception e) {
                 logger.info("Unable to save configuration", e);
