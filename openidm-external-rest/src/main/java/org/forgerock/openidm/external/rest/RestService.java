@@ -289,11 +289,8 @@ public class RestService implements SingletonResourceProvider {
                                 (Series<Header>) cr.getResponseAttributes().get(
                                         HeaderConstants.ATTRIBUTE_HEADERS);
                         if (respHeaders != null) {
-                            for (Header param : respHeaders) {
-                                String name = param.getName();
-                                String value = param.getValue();
-                                resultHeaders.put(name, value);
-                                logger.debug("Adding Response Attribute: {} : {}", name, value);
+                            for (String key : respHeaders.getNames()) {
+                                resultHeaders.put(key, respHeaders.getValuesArray(key));
                             }
                         }
                         JsonValue result = new JsonValue(new HashMap<String, Object>());
