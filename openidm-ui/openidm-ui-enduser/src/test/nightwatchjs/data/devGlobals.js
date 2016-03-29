@@ -1,8 +1,8 @@
 module.exports = {
         baseUrl: "http://localhost:8080/",
         adminUser: {
-            username: "openidm-admin",
-            password: "openidm-admin",
+            userName: "openidm-admin",
+            password: "openidm-admin"
         },
         nonAdminUser: {
             userName: "bjensen",
@@ -29,7 +29,7 @@ module.exports = {
                         $.ajax({
                             "type": "PUT",
                             "headers" : {
-                                "X-OpenIDM-Username": args.admin.username,
+                                "X-OpenIDM-Username": args.admin.userName,
                                 "X-OpenIDM-Password": args.admin.password,
                                 "X-OpenIDM-NoSession": "true",
                                 "Content-type": "application/json"
@@ -63,7 +63,7 @@ module.exports = {
                         $.ajax({
                             "type": "DELETE",
                             "headers" : {
-                                "X-OpenIDM-Username": args.admin.username,
+                                "X-OpenIDM-Username": args.admin.userName,
                                 "X-OpenIDM-Password": args.admin.password,
                                 "X-OpenIDM-NoSession": "true",
                                 "Content-type": "application/json",

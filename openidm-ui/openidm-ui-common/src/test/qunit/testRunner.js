@@ -27,7 +27,10 @@
     };
 
     stashedRequire.original.config({
-        baseUrl: '../www'
+        baseUrl: '../www',
+        paths: {
+            sinon: "libs/sinon-1.15.4"
+        }
     });
 
     stashedRequire.original(["main"], function () {
