@@ -46,6 +46,7 @@ import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -75,6 +76,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
 
     private final ScriptCustomizer customizer;
 
+    private final boolean includeJavascriptDebugState;
+
     public ScriptedRequestHandler(final ScriptEntry scriptEntry, final ScriptCustomizer customizer) {
         if (null == scriptEntry) {
             throw new NullPointerException();
@@ -84,6 +87,8 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
         this.scriptEntry = new AtomicReference<ScriptEntry>(scriptEntry);
         this.customizer = customizer;
+        includeJavascriptDebugState =
+                Boolean.parseBoolean(IdentityServer.getInstance().getProperty("javascript.exception.debug.info", "false"));
     }
 
     private ScriptEntry getScriptEntry() {
@@ -425,13 +430,15 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         if (convertedError.getDetail().isNull()) {
             convertedError.setDetail(new JsonValue(new HashMap<String, Object>()));
         }
-        final JsonValue detail = convertedError.getDetail();
-        if (detail.get("fileName").isNull()
-                && detail.get("lineNumber").isNull()
-                && detail.get("columnNumber").isNull()) {
-            detail.put("fileName", scriptException.getFileName());
-            detail.put("lineNumber", scriptException.getLineNumber());
-            detail.put("columnNumber", scriptException.getColumnNumber());
+        if (includeJavascriptDebugState) {
+            final JsonValue detail = convertedError.getDetail();
+            if (detail.get("fileName").isNull()
+                    && detail.get("lineNumber").isNull()
+                    && detail.get("columnNumber").isNull()) {
+                detail.put("fileName", scriptException.getFileName());
+                detail.put("lineNumber", scriptException.getLineNumber());
+                detail.put("columnNumber", scriptException.getColumnNumber());
+            }
         }
 
         return convertedError;
