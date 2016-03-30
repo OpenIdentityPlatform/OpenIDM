@@ -20,129 +20,109 @@
             display: inline;
         }
     }
-
 }
 
-.selfservice-holder {
-  position:relative;
+.gu-mirror.self-service-card .panel-footer {
+  background-color: #eee;
+}
 
-  ul {
-    list-style: none;
-    padding-left: 0px;
+.selfservice-holder .wide-card,
+.gu-mirror.self-service-card, {
+  height:125px;
 
-    li.placeholder {
-      height:75px;
-      width:100%;
+  &.disabled{
+    button {
+      display:none;
     }
   }
 
-  .dragged button {
-    display:none;
+  .panel-heading {
+    padding: 5px 15px 0 0;
   }
 
-  .wide-card {
-    height:125px;
+  .panel-body {
+    padding-left:90px;
+    padding-top:5px;
+  }
 
-    &.disabled{
-      button {
-        display:none;
+  .panel-footer {
+    position: absolute;
+    right: 10px;
+    top: 1px;
+    border:0;
+    padding:0;
+
+    .btn-drag {
+      display: none;
+
+      .fa-arrows {
+        margin-right: 0px;
       }
     }
 
-    .panel-heading {
-      padding: 5px 15px 0 0;
+    .btn-link:hover {
+      background-color:inherit;
+    }
+  }
+
+  &.disabled {
+    cursor:default;
+
+    &:hover {
+      border-color:#ddd;
     }
 
-    .panel-body {
-      padding-left:90px;
-      padding-top:5px;
-    }
-
-    .panel-footer {
-      position: absolute;
-      right: 10px;
-      top: 1px;
-      border:0;
-      padding:0;
-
-      .btn-drag {
-        display: none;
-
-        .fa-arrows {
-          margin-right: 0px;
-        }
-      }
-
-      .btn-link:hover {
-        background-color:inherit;
-      }
-    }
-
-    &.disabled {
-      cursor:default;
-
-      &:hover {
-        border-color:#ddd;
-      }
-
-      h3 {
-        color:#777;
-      }
-
-      .btn-link {
-        cursor:default;
-
-        &:hover {
-          color:#777;
-        }
-      }
-
-      label {
-        span {
-          cursor: default;
-        }
-      }
-    }
-
-    .switch-holder {
-      position:absolute;
-
-      .checkbox-slider {
-        position: relative;
-        top: 5px;
-        left: 15px;
-      }
-    }
-
-    .details {
-      h3 {
-        font-size: 18px;
-        text-align: left;
-        margin-bottom: 5px;
-      }
+    h3 {
+      color:#777;
     }
 
     .btn-link {
-      padding: 0px;
-      margin-top: 10px;
+      cursor:default;
+
+      &:hover {
+        color:#777;
+      }
     }
 
-    .fa {
-      text-align: right;
-      margin-right: 10px;
+    label {
+      span {
+        cursor: default;
+      }
     }
   }
 
-  .shim {
-    height:100%;
-    width:100%;
+  .switch-holder {
     position:absolute;
-    opacity:.4;
-    background-color: #fff;
-    z-index:10;
-    top:0;
-    bottom:0;
+
+    .checkbox-slider {
+      position: relative;
+      top: 5px;
+      left: 15px;
+    }
   }
+
+  .details {
+    h3 {
+      font-size: 18px;
+      text-align: left;
+      margin-bottom: 5px;
+    }
+  }
+
+  .btn-link {
+    padding: 0px;
+    margin-top: 10px;
+  }
+
+  .fa {
+    text-align: right;
+    margin-right: 10px;
+  }
+}
+
+
+.selfservice-holder {
+  position:relative;
 
   .details h3 {
       text-transform: none;
@@ -165,26 +145,25 @@
 }
 
 @media (min-width: 768px) {
-  .selfservice-holder {
-    .wide-card {
-      height: 75px;
+  .gu-mirror.self-service-card,
+  .selfservice-holder .wide-card {
+    height: 75px;
 
-      .panel-footer {
-        .btn-drag {
-          display:inline;
-        }
+    .panel-footer {
+      .btn-drag {
+        display:inline;
       }
+    }
 
-      &.disabled {
-        .btn-drag {
-          display: none;
-        }
+    &.disabled {
+      .btn-drag {
+        display: none;
       }
+    }
 
-      &.dragged {
-        .btn-drag {
-          display:none;
-        }
+    &.dragged {
+      .btn-drag {
+        display:none;
       }
     }
   }

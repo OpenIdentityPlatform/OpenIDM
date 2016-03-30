@@ -31,7 +31,9 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/AutoScroll",
     "dragula"
+
 ], function($, _,
             BootstrapDialog,
             Handlebars,
@@ -45,6 +47,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             ValidatorsManager,
             SiteConfigurationDelegate,
             UIUtils,
+            AutoScroll,
             dragula) {
 
     var DashboardView = AdminAbstractView.extend({
@@ -143,18 +146,20 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             var start,
                 dragDropInstance = dragula([this.$el.find("#dashboardWidgets")[0]], {
                     moves: function (el, container, handle) {
-
                         return handle.className.indexOf("fa-arrows") > -1 || handle.className.indexOf("btn-move") > -1;
                     }
                 });
 
             dragDropInstance.on("drag", _.bind(function(el, container) {
                 start = _.indexOf($(container).find(".widget-holder"), el);
+                AutoScroll.startDrag();
             }, this));
 
-            dragDropInstance.on("drop", _.bind(function(el, container) {
+            dragDropInstance.on("dragend", _.bind(function(el, container) {
                 var widgetCopy = this.data.dashboard.widgets[start],
                     stop = _.indexOf($(container).find(".widget-holder"), el);
+
+                AutoScroll.endDrag();
 
                 this.data.dashboard.widgets.splice(start, 1);
                 this.data.dashboard.widgets.splice(stop, 0, widgetCopy);

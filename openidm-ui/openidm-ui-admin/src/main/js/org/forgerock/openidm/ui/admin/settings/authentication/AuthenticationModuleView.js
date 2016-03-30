@@ -26,8 +26,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
     "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationAbstractView",
     "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationModuleDialogView",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
-    "org/forgerock/commons/ui/common/components/ChangesPending",
-    "jquerySortable"
+    "org/forgerock/commons/ui/common/components/ChangesPending"
 
 ], function($, _,
             Backbone,
@@ -207,7 +206,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
 
         makeSortable: function() {
             BackgridUtils.sortable({
-                "grid": this.$el.find("#authModuleGrid table"),
+                "containers": [this.$el.find("#authModuleGrid tbody")[0]],
                 "rows": _.clone(this.model.changes, true)
             }, _.bind(function(newOrder) {
                 this.model.changes = newOrder;

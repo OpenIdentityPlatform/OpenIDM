@@ -284,35 +284,36 @@ h3.block-header {
 }
 
 /*
-  jQuery Sortable
+  Dragula
 */
-.smallScreenCell .dragToSort {
+.smallScreenCell .fa-arrows {
   display: none;
 }
-.dragToSort {
-  margin: 2px 10px 0 0;
-  color: #999;
-  cursor: move;
 
+.gu-mirror {
+  position: fixed !important;
+  margin: 0 !important;
+  z-index: 9999 !important;
+}
+.gu-hide {
+  display: none !important;
 }
 
-body.dragging, body.dragging * {
-  cursor: move !important;
+.gu-transit {
+  opacity: 0.2;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+  filter: alpha(opacity=20);
 }
-
-.dragged {
-  position: absolute;
-  background-color: #f3f3f3 !important;
-  z-index: 2000;
-}
-
-table.placeholder {
-  position: relative;
-
-  &:before {
-    position: absolute;
+.gu-mirror {
+  .smallScreenCell {
+    display: none;
   }
+  opacity: 0.6;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+  filter: alpha(opacity=60);
+  background-color: #eee;
 }
+
 
 /*
   Toolbar

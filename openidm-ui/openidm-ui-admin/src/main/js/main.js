@@ -42,7 +42,6 @@ require.config({
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
         jquery: "libs/jquery-2.1.1-min",
-        jquerySortable: "libs/jquery-nestingSortable-0.9.12",
         gentleSelect: "libs/jquery-gentleSelect-0.1.3.1-min",
         cron: "libs/jquery-cron-r2427",
         xdate: "libs/xdate-0.8-min",
@@ -108,9 +107,6 @@ require.config({
             deps: ["jquery"]
         },
         gentleSelect: {
-            deps: ["jquery"]
-        },
-        jquerySortable: {
             deps: ["jquery"]
         },
         xdate: {
