@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 /*global define, $, _, Handlebars, form2js, window */
@@ -25,7 +25,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils",
@@ -45,7 +44,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             eventManager,
             conf,
             constants,
-            searchDelegate,
             connectorDelegate,
             configDelegate,
             mappingUtils,
