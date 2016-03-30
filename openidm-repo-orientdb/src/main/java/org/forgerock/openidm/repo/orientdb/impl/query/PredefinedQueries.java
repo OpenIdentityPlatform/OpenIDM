@@ -71,11 +71,11 @@ public class PredefinedQueries {
                 first = result.get(0); // ID is of type unique index, there must only be one at most
             }
         } catch (OQueryParsingException | OCommandExecutionException e) {
-            logger.warn("The passed id or type is invalid: " + e.getMessage(), e);
-            throw new BadRequestException("Illegal query request", e);
+            logger.debug("The passed id: {} or type: {} is invalid.", id, type, e);
+            throw new BadRequestException("Illegal query request.", e);
         } catch (Exception e) {
-            logger.warn(e.getMessage(), e);
-            throw new InternalServerErrorException("An error occurred processing the query request", e);
+            logger.debug("Could not complete query for id: {} and type: {}.", id, type, e);
+            throw new InternalServerErrorException("An error occurred processing the query request.", e);
         }
         return first;
     }
