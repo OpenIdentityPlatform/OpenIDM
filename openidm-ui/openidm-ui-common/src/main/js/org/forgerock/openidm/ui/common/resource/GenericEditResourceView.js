@@ -254,6 +254,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                         this.$el.find("#resourceChangesPending").show();
                     } else {
                         this.$el.find("#resourceChangesPending").hide();
+                        this.$el.find("#saveBtn").attr("disabled", true);
+                        this.$el.find("#resetBtn").attr("disabled", true);
                     }
                 } else {
                     this.$el.find("#saveBtn").removeAttr("disabled");
@@ -321,8 +323,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 This loop filters out previously null values that have not been changed.
                 */
                 _.each(_.keys(formVal), function(key){
-                    if(!_.has(this.oldObject, key) && (!formVal[key] || !formVal[key].length)){
-                        delete formVal[key];
+                    if ((this.oldObject[key] === null || this.oldObject[key] === undefined) && (!formVal[key] || !formVal[key].length)){
+                        formVal[key] = this.oldObject[key];
                     }
                 }, this);
             } else {
@@ -356,6 +358,10 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 e.preventDefault();
             }
 
+            if ($(e.currentTarget).attr("disabled") === "disabled" ) {
+                return false;
+            }
+
             if(this.data.newObject){
                 formVal = _.omit(formVal,function (val) { return val === "" || val === null; });
                 resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
@@ -366,10 +372,12 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                         if (val.length) {
                             val = JSON.parse($(element).val());
+                        } else {
+                            val = null;
                         }
                         formVal[$(element).attr("propname")] = val;
                     });
-                    resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
+                    resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, _.extend({}, this.oldObject, formVal), successCallback);
                 } else {
                     resourceDelegate.updateResource(this.data.serviceUrl, this.oldObject._id, formVal, successCallback);
                 }

@@ -23,30 +23,41 @@ define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/resource/GenericEditResourceView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/openidm/ui/admin/role/util/UserQueryFilterEditor"
+    "org/forgerock/openidm/ui/admin/role/util/UserQueryFilterEditor",
+    "bootstrap-datetimepicker",
+    "org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils"
 ],
 function ($, _, Handlebars,
     AbstractView,
     GenericEditResourceView,
     ValidatorsManager,
-    UserQueryFilterEditor
+    UserQueryFilterEditor,
+    Datetimepicker,
+    TemporalConstraintsUtils
   ) {
     var EditRoleView = function () {
-        return AbstractView.apply(this, arguments);
-    };
+            return AbstractView.apply(this, arguments);
+        };
 
     EditRoleView.prototype = Object.create(GenericEditResourceView);
     EditRoleView.prototype.events = _.extend({
         "change .expressionTree :input": "showPendingChanges",
-        "change #enableDynamicRoleGrantCheckbox": "toggleQueryView"
+        "blur :input.datetimepicker": "showPendingChanges",
+        "change #enableDynamicRoleGrantCheckbox": "toggleQueryView",
+        "change #enableTemporalConstraintsCheckbox": "toggleTemporalConstraintsView"
     }, GenericEditResourceView.events);
 
-    EditRoleView.prototype.partials = GenericEditResourceView.partials.concat(["partials/role/_conditionForm.html"]);
+    EditRoleView.prototype.partials = GenericEditResourceView.partials.concat(["partials/role/_conditionForm.html", "partials/role/_temporalConstraintsForm.html"]);
 
     EditRoleView.prototype.render = function (args, callback) {
         GenericEditResourceView.render.call(this, args, _.bind(function () {
+        if (_.has(this.data.schema.properties, "temporalConstraints")) {
+            if (!this.data.newObject && !this.$el.find('#temporalConstraintsForm').length) {
+                    this.addTemporalConstraintsForm();
+                }
+            }
             if (_.has(this.data.schema.properties, "condition") && !this.$el.find("#condition").length ) {
-                if (!this.data.newObject && !$('#conditionFilterForm').length) {
+                if (!this.data.newObject && !this.$el.find('#conditionFilterForm').length) {
                     this.addConditionForm();
                 }
             }
@@ -56,11 +67,47 @@ function ($, _, Handlebars,
         }, this));
     };
 
+    EditRoleView.prototype.addTemporalConstraintsForm = function () {
+        var resourceDetailsForm = this.$el.find("#resource-details form"),
+            temporalConstraints = [],
+            temporalConstraintsContent;
+
+        if (this.oldObject.temporalConstraints) {
+            temporalConstraints = _.map(this.oldObject.temporalConstraints, function (constraint) {
+                return TemporalConstraintsUtils.convertFromIntervalString(constraint.duration);
+            });
+        }
+
+        temporalConstraintsContent = Handlebars.compile("{{> role/_temporalConstraintsForm}}")({ temporalConstraints : temporalConstraints });
+
+        resourceDetailsForm.append(temporalConstraintsContent);
+
+        this.$el.find('.datetimepicker').datetimepicker({
+            sideBySide: true,
+            useCurrent: false,
+            icons: {
+                time: 'fa fa-clock-o',
+                date: 'fa fa-calendar',
+                up: 'fa fa-chevron-up',
+                down: 'fa fa-chevron-down',
+                previous: 'fa fa-chevron-left',
+                next: 'fa fa-chevron-right',
+                today: 'fa fa-crosshairs',
+                clear: 'fa fa-trash',
+                close: 'fa fa-remove'
+            }
+        });
+
+        if (this.oldObject.temporalConstraints && this.oldObject.temporalConstraints.length) {
+            this.toggleTemporalConstraintsView();
+        }
+    };
+
     EditRoleView.prototype.addConditionForm = function () {
         var resourceDetailsForm = this.$el.find("#resource-details form"),
             conditionContent = Handlebars.compile("{{> role/_conditionForm}}");
 
-        resourceDetailsForm.after(conditionContent);
+        resourceDetailsForm.append(conditionContent);
 
         if (this.oldObject.condition && this.oldObject.condition !== "false") {
             this.toggleQueryView();
@@ -116,9 +163,27 @@ function ($, _, Handlebars,
         }
     };
 
+    EditRoleView.prototype.toggleTemporalConstraintsView = function (e) {
+        if (e) {
+            e.preventDefault();
+        }
+
+        if (!this.$el.find("#enableTemporalConstraintsCheckbox").attr("checked")) {
+            this.$el.find("#enableTemporalConstraintsCheckbox").attr("checked", true);
+            this.$el.find("#temporalConstraintsFields").show();
+        } else {
+            this.$el.find("#enableTemporalConstraintsCheckbox").removeAttr("checked");
+            this.$el.find("#temporalConstraintsFields").find(".datetimepicker").val("");
+            this.$el.find("#temporalConstraintsFields").hide();
+        }
+        this.showPendingChanges();
+    };
+
     EditRoleView.prototype.getFormValue = function () {
         var conditionChecked = this.$el.find("#enableDynamicRoleGrantCheckbox").attr("checked"),
+            temporalConstraintsChecked = this.$el.find("#enableTemporalConstraintsCheckbox").attr("checked"),
             condition = "",
+            temporalConstraints = [],
             returnVal;
 
         if (conditionChecked && this.queryEditor) {
@@ -127,17 +192,19 @@ function ($, _, Handlebars,
             condition = undefined;
         }
 
-        if (this.queryEditor) {
+        if (temporalConstraintsChecked) {
+            temporalConstraints = TemporalConstraintsUtils.getTemporalConstraintsValue(this.$el.find('#temporalConstraintsForm'));
+        } else {
+            temporalConstraints = undefined;
+        }
+
             returnVal = _.extend(
                 {
-                    "condition": condition
+                    "condition": condition,
+                    "temporalConstraints": temporalConstraints
                 },
                 GenericEditResourceView.getFormValue.call(this)
             );
-        }
-        else {
-            returnVal = GenericEditResourceView.getFormValue.call(this);
-        }
 
         return returnVal;
     };

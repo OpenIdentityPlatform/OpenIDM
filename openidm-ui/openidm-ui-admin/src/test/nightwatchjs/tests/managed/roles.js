@@ -126,6 +126,43 @@ module.exports = {
 
             checkCondition(false, "Role does not have the condition property after disabling...successfully removed condition from role!");
         },
+        'Temporal Constraint is set and changes pending shows Temporal Constraint as pending': function (client) {
+            var rolesEdit = client.page.rolesEdit();
+
+            rolesEdit
+                .waitForElementPresent('@enableTemporalConstraintSlider', 2000)
+                .click('@enableTemporalConstraintSlider')
+                .setValue('@temporalConstraintStartDate', "04/25/2016 12:00 AM")
+                .setValue('@temporalConstraintEndDate', "04/30/2016 3:00 PM");
+
+            rolesEdit
+                .waitForElementVisible('@changesPending', 2000)
+                .expect.element('@changesPending').text.to.equal('- Temporal Constraints');
+        },
+        'Temporal Constraint is properly saved': function (client) {
+            var rolesList = client.page.rolesList(),
+                rolesEdit = client.page.rolesEdit();
+
+            rolesEdit
+                .waitForElementNotPresent('@alertMessage', 2000)
+                .click('@saveButton')
+                .waitForElementPresent('@alertMessage', 2000)
+                .waitForElementVisible('@alertMessage', 2000)
+                .expect.element('@alertMessage').text.to.equal("Successfully updated Role");
+
+            rolesList
+                .navigate()
+                .waitForElementPresent('@grid', 2000)
+                .expect.element('@firstGridRowNameCell').text.to.equal("Role1");
+
+            rolesList
+                .click('@firstGridRowNameCell');
+
+            rolesEdit
+                .waitForElementVisible('@temporalConstraintStartDate', 2000)
+                .assert.value('@temporalConstraintStartDate','04/25/2016 12:00 AM', 'After saving Role1 going to the grid and coming back the temporal constraints start date is the correct value')
+                .assert.value('@temporalConstraintEndDate','04/30/2016 3:00 PM', 'temporal constraints end date is the correct value');
+        },
         'Remove Role1': function (client) {
             var rolesList = client.page.rolesList(),
                 rolesEdit = client.page.rolesEdit();

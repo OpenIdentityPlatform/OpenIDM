@@ -50,6 +50,7 @@ require.config({
         "bootstrap-tabdrop": "libs/bootstrap-tabdrop-1.0",
         bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
+        "bootstrap-datetimepicker": "libs/bootstrap-datetimepicker-4.14.30-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
         selectize : "libs/selectize-0.12.1-min",
         d3 : "libs/d3-3.5.5-min",

@@ -66,9 +66,11 @@ function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsMan
     };
 
     EditUserView.prototype.getFormValue = function () {
-        if (ValidatorsManager.formValidated(this.$el.find("#password"))) {
+        var passwordText = this.$el.find("#input-password").val();
+
+        if (ValidatorsManager.formValidated(this.$el.find("#password")) && passwordText && passwordText.length) {
             return _.extend({
-                    "password": this.$el.find("#input-password").val()
+                    "password": passwordText
                 },
                 GenericEditResourceView.getFormValue.call(this)
             );

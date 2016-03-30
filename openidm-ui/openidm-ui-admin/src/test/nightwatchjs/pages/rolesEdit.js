@@ -62,6 +62,15 @@ module.exports = {
         },
         conditionOpNameInputSelectOption: {
             selector: '.selectize-dropdown-content div[data-value="/mail"].option'
+        },
+        enableTemporalConstraintSlider: {
+            selector: '#enableTemporalConstraintsCheckbox'
+        },
+        temporalConstraintStartDate: {
+            selector: '.temporalConstraintStartDate'
+        },
+        temporalConstraintEndDate: {
+            selector: '.temporalConstraintEndDate'
         }
     }
 };
