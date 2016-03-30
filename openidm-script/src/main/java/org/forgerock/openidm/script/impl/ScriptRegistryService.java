@@ -197,7 +197,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     @Activate
     protected void activate(ComponentContext context) throws Exception {
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
-
+        JsonValue jsConfig = configuration.get("ECMAScript").required();
+        jsConfig.put("javascript.exception.debug.info",
+                Boolean.parseBoolean(IdentityServer.getInstance().getProperty("javascript.exception.debug.info", "false")));
         setConfiguration(configuration.required().asMap());
 
         HashMap<String, Object> identityServer = new HashMap<String, Object>();
