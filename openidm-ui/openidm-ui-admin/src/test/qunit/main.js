@@ -16,5 +16,5 @@
 
 // add new test modules here:
 define([
-    "./test1"
+    "./searchTest"
 ]);
