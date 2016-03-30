@@ -95,7 +95,7 @@ define("org/forgerock/openidm/ui/admin/role/util/UserQueryFilterEditor", [
             }, this));
         },
         addFilterNode : function(event) {
-            this.addNode(event, _.bind(function() {
+            this.addNodeAndReRender(event, _.bind(function() {
                 this.changeToDropdown();
             }, this));
         },

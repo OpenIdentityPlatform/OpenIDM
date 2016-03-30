@@ -168,6 +168,20 @@
             <classifier>min</classifier>
             <type>css</type>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap-datetimepicker</artifactId>
+            <version>4.14.30</version>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap-datetimepicker</artifactId>
+            <version>4.14.30</version>
+            <classifier>min</classifier>
+            <type>css</type>
+        </dependency>
 
         <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>

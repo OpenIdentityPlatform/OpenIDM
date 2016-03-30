@@ -81,6 +81,9 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
             createNode: function (e) {
                 var context = this.getExpressionContext(e),
                     node = context.current;
+                if (!node.children) {
+                    node.children = [];
+                }
                 node.children.push({name: "", value: "", tag: "equalityMatch", children: [], op: "expr"});
                 this.data.filterString = this.getFilterString();
             },
@@ -109,7 +112,8 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     } else if (!node.children || !node.children.length) {
                         // create 2 nodes for 'and'/'or' comparisons
                         if (node.op === "and" || node.op === "or") {
-                            _.times(2, this.createNode(e));
+                            this.createNode(e);
+                            this.createNode(e);
                         // create 1 node for other types of comparisons
                         } else {
                             this.createNode(e);
