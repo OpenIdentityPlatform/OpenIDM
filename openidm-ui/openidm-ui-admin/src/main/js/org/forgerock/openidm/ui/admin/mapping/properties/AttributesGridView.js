@@ -37,8 +37,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/admin/util/AdminUtils",
-    "jquerySortable"
+    "org/forgerock/openidm/ui/admin/util/AdminUtils"
 ], function($, _, Handlebars, Backbone,
             MappingAdminAbstractView,
             eventManager,
@@ -141,7 +140,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
 
         initSort: function() {
             BackgridUtils.sortable({
-                "grid": this.$el.find("#attributesGridHolder table"),
+                "containers": [this.$el.find("#attributesGridHolder tbody")[0]],
                 "rows": _.clone(this.model.mappingProperties, true)
             }, _.bind(this.setMappingProperties, this));
         },

@@ -30,7 +30,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "bootstrap-dialog",
     "selectize",
-    "jquerySortable"
+    "org/forgerock/commons/ui/common/util/AutoScroll",
+    "dragula"
 ], function($, _,
             bootstrap,
             handlebars,
@@ -43,7 +44,9 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             Constants,
             BootstrapDialog,
             selectize,
-            jquerySortable) {
+            AutoScroll,
+            dragula) {
+
     var AbstractSelfServiceView = AdminAbstractView.extend({
         events: {
             "change .all-check" : "controlAllSwitch",
@@ -208,7 +211,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 card.toggleClass("disabled", false);
                 card.toggleClass("active", true);
 
-                orderPosition = this.$el.find(".selfservice-holder ul li:not(.disabled)").index(card);
+                orderPosition = this.$el.find(".selfservice-holder .wide-card:not(.disabled)").index(card);
 
                 if(_.findWhere(this.model.saveConfig.stageConfigs, {"name" : type}) === undefined) {
                     this.model.saveConfig.stageConfigs.splice(orderPosition, 0, _.clone(this.model.configDefault.stageConfigs[configPosition]));
@@ -350,8 +353,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                         this.setSortable();
 
                         _.each(result.stageConfigs, function(stage){
-                            this.$el.find("li[data-type='" +stage.name +"']").toggleClass("disabled", false);
-                            this.$el.find("li[data-type='" +stage.name +"'] .section-check").prop("checked", true).trigger("change");
+                            this.$el.find(".wide-card[data-type='" +stage.name +"']").toggleClass("disabled", false);
+                            this.$el.find(".wide-card[data-type='" +stage.name +"'] .section-check").prop("checked", true).trigger("change");
                         }, this);
 
                         this.model.surpressSave = false;
@@ -378,31 +381,24 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
         },
 
         setSortable: function() {
-            var startIndex,
-                _this = this;
+            var start,
+                dragDropInstance = dragula([$(".selfservice-holder")[0]]);
 
-            this.$el.find(".selfservice-holder ul").nestingSortable({
-                handle: "div",
-                items: "li",
-                toleranceElement: "ul",
-                placeholder: "<li class='placeholder well'></li>",
-                onMousedown: function ($item, _super, event) {
-                    startIndex = _this.$el.find(".selfservice-holder ul li:not(.disabled)").index($item);
+            dragDropInstance.on("drag", _.bind(function(el, container) {
+                start = this.$el.find(".selfservice-holder .card").not(".disabled").index($(el));
 
-                    if (!event.target.nodeName.match(/^(input|select)$/i)) {
-                        event.preventDefault();
-                        return true;
-                    }
-                },
-                onDrop: function ($item, container, _super, event) {
-                    var endIndex = _this.$el.find(".selfservice-holder ul li:not(.disabled)").index($item);
+                AutoScroll.startDrag();
+            }, this));
 
-                    _super($item, container, _super, event);
+            dragDropInstance.on("dragend", _.bind(function(el) {
+                var stop = this.$el.find(".selfservice-holder .card").not(".disabled").index($(el));
 
-                    _this.setOrder(startIndex, endIndex);
-                }
-            });
+                AutoScroll.endDrag();
+
+                this.setOrder(start, stop);
+            }, this));
         },
+
         setOrder: function(start, end) {
             var movedElement = this.model.saveConfig.stageConfigs[start];
 
@@ -421,7 +417,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
             $.extend(true, tempConfig, this.model.saveConfig);
 
-            _.each(this.$el.find(".selfservice-holder ul li"), function(config) {
+            _.each(this.$el.find(".selfservice-holder .wide-card"), function(config) {
                 _.each(tempConfig.stageConfigs, function(stage){
                     if(stage.name === $(config).attr("data-type")) {
                         stageOrder.push(_.clone(stage));

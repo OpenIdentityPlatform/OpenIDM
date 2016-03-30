@@ -32,7 +32,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
-    "jquerySortable"
+    "org/forgerock/commons/ui/common/util/AutoScroll",
+    "dragula"
 ], function($, _, handlebars,
             Backbone,
             AdminAbstractView,
@@ -45,7 +46,9 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             connectorUtils,
             UIUtils,
             Backgrid,
-            BackgridUtils) {
+            BackgridUtils,
+            AutoScroll,
+            dragula) {
 
     var MappingListView = AdminAbstractView.extend({
         template: "templates/admin/mapping/MappingListTemplate.html",
@@ -161,38 +164,30 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                     });
 
                     this.parentRender(_.bind(function () {
-                        var startIndex = null;
+                        var start,
+                            dragDropInstance = dragula([$("#mappingConfigHolder")[0]]);
 
-                        this.$el.find("#mappingConfigHolder ul").nestingSortable({
-                            handle: "div",
-                            items: "li",
-                            toleranceElement: "ul",
-                            disabledClass: "disabled",
-                            placeholder: "<li class='placeholder well'></li>",
-                            onMousedown: _.bind(function ($item, _super, event) {
-                                startIndex = this.$el.find("#mappingConfigHolder ul li:not(.disabled)").index($item);
-                                if (!event.target.nodeName.match(/^(input|select)$/i)) {
-                                    event.preventDefault();
-                                    return true;
-                                }
-                            }, this),
-                            onDrop: _.bind(function ($item, container, _super, event) {
-                                var endIndex = this.$el.find("#mappingConfigHolder ul li:not(.disabled)").index($item),
-                                    tempRemoved;
+                        dragDropInstance.on("drag", _.bind(function(el) {
+                            start = _.indexOf($("#mappingConfigHolder .card"), el);
+                            AutoScroll.startDrag();
+                        }, this));
 
-                                _super($item, container, _super, event);
+                        dragDropInstance.on("dragend", _.bind(function(el) {
+                            var tempRemoved,
+                                stop = _.indexOf($("#mappingConfigHolder .card"), el);
 
-                                if (startIndex !== endIndex) {
-                                    tempRemoved = this.cleanConfig.splice(startIndex, 1);
-                                    this.cleanConfig.splice(endIndex, 0, tempRemoved[0]);
+                            AutoScroll.endDrag();
 
-                                    configDelegate.updateEntity("sync", {"mappings": this.cleanConfig}).then(_.bind(function () {
-                                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                                    }, this));
-                                }
+                            if (start !== stop) {
+                                tempRemoved = this.cleanConfig.splice(start, 1);
+                                this.cleanConfig.splice(stop, 0, tempRemoved[0]);
 
-                            }, this)
-                        });
+                                configDelegate.updateEntity("sync", {"mappings": this.cleanConfig}).then(_.bind(function () {
+                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                                }, this));
+                            }
+
+                        }, this));
                         
                         mappingGrid = new Backgrid.Grid({
                             className: "table backgrid",

@@ -1417,9 +1417,6 @@ Version: jquery.json-2.2.min.js
 Copyright: Copyright 2009-2011 Brantley Harris
            Copyright 2010–2014 Timo Tijhof
 
-Version: jquery-sortable.js v0.9.12 (jquery-nestingSortable-0.9.12.js)
-Copyright: Copyright (c) 2012 Jonas von Andrian
-
 Version: jquery.tools.min.js
 Copyright: Copyright (c) 2008, Three Dub Media (http://threedubmedia.com)
 
