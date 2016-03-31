@@ -77,9 +77,9 @@ class StaticFileUpdate {
      */
     Path replace(final Path path) throws IOException {
         Path destination = null;
-        Set<PosixFilePermission> permissions = null;
+        final Set<PosixFilePermission> perms = getPosixPermissions(path);
+
         try {
-            permissions = Files.getPosixFilePermissions(path);
             if (CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path))) {
                 destination = root.resolve(path.toString() + OLD_SUFFIX + timestamp);
                 Files.move(root.resolve(path),
@@ -89,8 +89,6 @@ class StaticFileUpdate {
         } catch (NoSuchFileException e) {
             // this is ok, just install the new file
         }
-
-        final Set<PosixFilePermission> perms = permissions;
         archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
             @Override
             public Void apply(InputStream inputStream) throws IOException {
@@ -116,6 +114,8 @@ class StaticFileUpdate {
      */
     Path keep(final Path path) throws IOException {
         boolean changed = CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path));
+        final Set<PosixFilePermission> permissions = getPosixPermissions(path);
+
         final Path destination = root.resolve(changed
                 ? path.toString() + NEW_SUFFIX + timestamp
                 : path.toString());
@@ -126,6 +126,11 @@ class StaticFileUpdate {
                 Files.copy(inputStream,
                         destination,
                         StandardCopyOption.REPLACE_EXISTING);
+
+                if (permissions != null) {
+                    Files.setPosixFilePermissions(destination, permissions);
+                }
+
                 return null;
             }
         });
@@ -133,5 +138,22 @@ class StaticFileUpdate {
         fileStateChecker.updateState(path);
 
         return changed ? destination : null;
+    }
+
+    /**
+     * Get permissions for the file at the given path
+     *
+     * @param path Path of file to get permissions of
+     * @return The permission set or null if the file does not exist or doesn't support POSIX
+     */
+    private Set<PosixFilePermission> getPosixPermissions(final Path path) throws IOException {
+        Set<PosixFilePermission> permissions = null;
+        if (Files.exists(path)) {
+            try {
+                permissions = Files.getPosixFilePermissions(path);
+            } catch (UnsupportedOperationException e) {} // thrown if filesystem doesn't support POSIX
+        }
+
+        return permissions;
     }
 }
