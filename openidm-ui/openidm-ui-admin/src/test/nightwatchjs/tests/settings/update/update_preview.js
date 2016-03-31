@@ -61,7 +61,7 @@ response = JSON.stringify({
 		"toProduct": "OpenIDM",
 		"toVersion": "4.2.0",
 		"description": "Full product installation",
-		"resource": "http://openidm.forgerock.org/doc/bootstrap/release-notes/",
+		"resource": "https://forgerock.org/openidm/doc/bootstrap/release-notes/",
 		"restartRequired": true
 	}],
 	"rejects": [{

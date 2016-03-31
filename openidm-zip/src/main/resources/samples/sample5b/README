@@ -55,7 +55,7 @@ Sample 5b includes a script that demonstrates compensating for a synchronization
 failure.
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample-5b
+https://forgerock.org/openidm/doc/bootstrap/samples-guide/#more-sample-5b
 
 To try the sample, follow these steps.
 
@@ -67,7 +67,7 @@ To try the sample, follow these steps.
     $ cp samples/misc/external.email.json samples/sample5b/conf
 
     Edit this file to have your email server SMTP details.
-    See http://openidm.forgerock.org/doc/integrators-guide/index.html#chap-mail
+    See https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#chap-mail
     for more information.
 
     2. Edit samples/sample5b/script/reconStats.js and change these values to your

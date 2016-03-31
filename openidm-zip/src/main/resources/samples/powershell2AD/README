@@ -32,11 +32,11 @@ These are the steps to follow to use the samples:
 
 1- Install the OpenICF .Net connector server on a machine running an Active Directory Domain Controller
 or a Workstation where the MS Active Directory PowerShell module is installed. See:
-http://openidm.forgerock.org/doc/integrators-guide/index.html#install-.net-connector
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#install-.net-connector
 The user used by the script is the same as the user running the .Net Connector server
 
 2- Install the PowerShell connector. See:
-http://openidm.forgerock.org/doc/integrators-guide/index.html#powershell-connector
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#powershell-connector
 
 3- Copy all the .ps1 files to the machine where you installed the .Net connector server and the PowerShell connector.
 In the sample provisioner, files are copied to the folder C:/openidm/samples/powershell2AD/tools/

@@ -32,7 +32,7 @@ to each other. It also demonstrates the use of a reconciliation report delivered
 via email.
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample-5
+https://forgerock.org/openidm/doc/bootstrap/samples-guide/index.html#more-sample-5
 
 To try the sample, follow these steps.
 
@@ -42,7 +42,7 @@ To try the sample, follow these steps.
     $ cd /path/to/openidm
     $ cp samples/misc/external.email.json samples/sample5/conf
 
-    Edit this file to have your email server SMTP details. See http://openidm.forgerock.org/doc/integrators-guide/index.html#chap-mail for more information.
+    Edit this file to have your email server SMTP details. See https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#chap-mail for more information.
 
     2. Edit samples/sample5/script/reconStats.js and change these values to your own email addresses:
 
