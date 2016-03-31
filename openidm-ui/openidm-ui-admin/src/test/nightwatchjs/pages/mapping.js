@@ -68,6 +68,45 @@ module.exports = {
         },
         previewPopUpValue: {
             selector: 'div[data-value="bjensen@example.com"]'
+        },
+        policyDialogSubmit: "#submitPolicyDialog",
+        confirmPolicyPatternButton: ".bootstrap-dialog-footer-buttons > .btn-primary",
+        modal: ".modal-body"
+
+    },
+    sections: {
+        modalBody: {
+            selector: ".modal-body",
+            elements: {
+                restrictToTab: "#restrictToTab",
+                actionTab: "#actionTab",
+                actionCompleteTab: "#actionCompleteTab",
+                defaultActionPane: "#defaultActionPane",
+                defaultActionPaneSelect: "#defaultActionPane select",
+                actionCompletePre: "#actionComplete pre",
+                conditionFilterPaneSelect: '#conditionFilterPane select'
+            }
+        },
+        behaviorsTab: {
+            selector: '#policyPatternBody',
+            elements: {
+                tabLink: {
+                    selector: 'a[href="#mappingContent"]'
+                },
+                policiesTable: "#situationalPolicies table",
+                policiesTableRows: '#situationalPolicies table > tbody > tr',
+                policiesTableFirstRow: "#situationalPolicies table tbody > tr:first-child",
+                policiesTableFirstRowActionColumn: "#situationalPolicies table tbody > tr:first-child > td:nth-child(4)",
+                policiesTableFirstRowOnCompleteColumn: "#situationalPolicies table tbody > tr:first-child > td:nth-child(5)",
+                policiesTableFirstRowConditionColumn: "#situationalPolicies table tbody > tr:first-child > td:nth-child(3)",
+                addPolicyButton: "button.add-policy",
+                deletePolicyButton: "#situationalPolicies table tbody > tr:first-child button.delete-policy",
+                policyPatterns: "#policyPatterns",
+                readOnlyPolicyPattern: 'option[value="Read-only"]',
+                editPolicyButton: "#situationalPolicies table tbody > tr:first-child button.edit-policy",
+                reset: "input.reset",
+                save: "input.savePolicy"
+            }
         }
     }
 };
