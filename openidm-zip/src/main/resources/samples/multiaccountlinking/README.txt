@@ -54,7 +54,7 @@ External LDAP Configuration
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Configure the LDAP server as for sample 2,
-http://openidm.forgerock.org/doc/bootstrap/install-guide/index.html#external-ldap-config-2[External LDAP Configuration^]
+https://forgerock.org/openidm/doc/bootstrap/samples-guide/index.html#external-ldap-config-2[External LDAP Configuration^]
 
 The LDAP user must have write access to create users from OpenIDM on the LDAP server. When you configure the LDAP 
 server, import the appropriate LDIF file, in this case, _openidm/samples/multiaccountlinking/data/Example.ldif_.
@@ -64,7 +64,7 @@ Install the Sample
 ------------------
 
 Prepare OpenIDM as described in
-http://openidm.forgerock.org/doc/bootstrap/install-guide/index.html#preparing-openidm[Preparing OpenIDM^],
+https://forgerock.org/openidm/doc/bootstrap/samples-guide/index.html#preparing-openidm[Preparing OpenIDM^],
 then start OpenIDM with the following configuration for the Multi-Account Linking sample.
 
 ++++
@@ -278,9 +278,9 @@ one-to-many relationships in mappings and policies.
 
 For more information on resource mappings and link qualifiers, see the following sections of the Integrator's Guide:
 
-http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#synchronization-mappings-file[Configuring the Synchronization Mapping]
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#synchronization-mappings-file[Configuring the Synchronization Mapping]
 
-http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#mapping-link-qualifiers[Adding Link Qualifiers to a Mapping]
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#mapping-link-qualifiers[Adding Link Qualifiers to a Mapping]
 
 In this sample, we use two link qualifiers:
 

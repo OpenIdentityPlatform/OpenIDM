@@ -92,7 +92,7 @@ Usecase 2 - New User Onboarding
 
     To use email notification as part of the process make the following changes:
     1. Enable external email. This process is described in the Integrator's Guide at
-       http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#chap-mail.
+       https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#chap-mail.
     2. Change the notification email properties in the workflow definition file.
        To do so:
        - Copy the workflow bar file (samples/usecase/usecase2/workflow/newUserCreate.bar)

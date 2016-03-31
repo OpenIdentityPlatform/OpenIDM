@@ -110,7 +110,7 @@ the system-generated identifier, but it is rather unsightly:
 
 An easier way to retrieve a role with a server side (or system) generated identifier is to use the query filter facility 
 (see the section "Common Filter Expressions" in the Integrator's guide: 
-http://openidm.forgerock.org/doc/bootstrap/integrators-guide/index.html#query-filters).
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#query-filters).
 
 The following query uses a filter expression to retrieve a role with a name equal to "Contractor", and displays the 
 result in a clear format:

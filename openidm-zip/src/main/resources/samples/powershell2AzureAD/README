@@ -77,10 +77,10 @@ newly created directory.
     d.	If no error occurs, you are connected.
 
 5.  Install the OpenICF .NET connector server on the Windows box.
-    See: http://openidm.forgerock.org/doc/integrators-guide/index.html#install-.net-connector
+    See: https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#install-.net-connector
 
 6.  Install the PowerShell connector on the Windows box. See:
-    http://openidm.forgerock.org/doc/integrators-guide/index.html#powershell-connector
+    https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#powershell-connector
 
 7.  Copy all the tools/*.ps1 scripts to the Windows box where you installed the .NET connector server and the
     PowerShell connector.  In the sample provisioner configuration file

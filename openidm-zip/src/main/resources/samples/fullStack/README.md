@@ -72,7 +72,7 @@ Be sure to include "/openam" in the deployment url (or whatever servlet context 
 
 Note the list under groupRoleMapping->"openidm-admin". You can optionally add group values to this list, and any user which is a member of one of those groups will be granted the associated role (in this case, "openidm-admin").
 
-If you are using SSL (as in the above HTTPS example) then you will need to make sure that the SSL certificate is trusted by OpenIDM. If your LDAP server's SSL certificate has not been provided by a well-known certificate authority, you may need to import this ssl certificate into OpenIDM's truststore. See the "[Accessing the Security Management Service](http://openidm.forgerock.org/doc/integrators-guide/index.html#security-management-service)" section of the Integrator's guide for more details.
+If you are using SSL (as in the above HTTPS example) then you will need to make sure that the SSL certificate is trusted by OpenIDM. If your LDAP server's SSL certificate has not been provided by a well-known certificate authority, you may need to import this ssl certificate into OpenIDM's truststore. See the "[Accessing the Security Management Service](https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#security-management-service)" section of the Integrator's guide for more details.
 
 You must verify that the domain you will be using to access the OpenIDM UI is listed under "Configuration"->"System"->"Platform"->"Cookie Domains". For example, if you plan on accessing the UI like so:
 

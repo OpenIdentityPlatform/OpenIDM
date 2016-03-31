@@ -132,4 +132,4 @@ Inspect audit sync logs.
  
  
 For a more complete list of commands that can be run on the audit logs please see the
-[OpenIDM Integrators Guide](http://openidm.forgerock.org/doc/integrators-guide/index.html#accessing-log-REST)
+[OpenIDM Integrators Guide](https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#accessing-log-REST)

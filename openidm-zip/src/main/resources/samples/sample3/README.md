@@ -36,7 +36,7 @@ This example requires a fresh installation of OpenIDM. It also requires that you
 have Maven installed. 
 
 For documentation pertaining to this example see:
-http://openidm.forgerock.org/doc/bootstrap/samples-guide/#more-sample3
+https://forgerock.org/openidm/doc/bootstrap/samples-guide/index.html#more-sample3
 
 This sample also demonstrates the use of complex data types. Complex types can
 be stored, retrieved and synced like any other property of an object. These
@@ -52,7 +52,7 @@ user is created or updated in the external repo. In both cases the script is
 explicitly included in the sync.json file but could just as easily have referenced
 an external file for the script source instead. For more information see:
 
-http://openidm.forgerock.org/doc/bootstrap/integrators-guide/appendix-scripting.html
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#appendix-scripting
 
 The scripted connector supports any number of custom scripted endpoints. These are
 configured via the provisioner script and currently support only Groovy. See

@@ -783,7 +783,7 @@
             "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
             "linkQualifierInfo": "Link one record in the source system to multiple records in the target system.",
             "linkQualifierStaticInfo" : "Static lists will apply each qualifier to every source record.",
-            "linkQualifierScriptInfo" : "Dynamic scripts may return different link qualifiers for each source record; they must return all valid link qualifiers when the returnAll global variable is true. For more information, see the <a href='http://openidm.forgerock.org/doc/bootstrap/integrators-guide/#link-qualifier-object'>Integrators Guide</a>.",
+            "linkQualifierScriptInfo" : "Dynamic scripts may return different link qualifiers for each source record; they must return all valid link qualifiers when the returnAll global variable is true. For more information, see the <a href='https://forgerock.org/openidm/doc/bootstrap/integrators-guide/#link-qualifier-object'>Integrators Guide</a>.",
             "noCondition": "No Condition",
             "undo": "Undo",
             "query": {

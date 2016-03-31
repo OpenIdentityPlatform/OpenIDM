@@ -26,7 +26,7 @@ define("org/forgerock/openidm/ui/common/util/Constants", [
     commonConstants.HEADER_PARAM_NO_SESSION = "X-OpenIDM-NoSession";
     commonConstants.HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
 
-    commonConstants.DOC_URL = "http://openidm.forgerock.org/doc/";
+    commonConstants.DOC_URL = "https://forgerock.org/openidm/doc/bootstrap/";
 
     commonConstants.EVENT_POLICY_FAILURE = "EVENT_POLICY_FAILURE";
 
