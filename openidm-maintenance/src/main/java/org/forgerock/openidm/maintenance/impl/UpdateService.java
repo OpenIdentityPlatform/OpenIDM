@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.impl;
 
@@ -37,6 +37,7 @@ import org.forgerock.openidm.maintenance.upgrade.UpdateException;
 import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
+import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -49,7 +50,6 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -75,7 +75,7 @@ import org.slf4j.LoggerFactory;
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Management Service"),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/maintenance/update/*")
 })
-public class UpdateService implements RequestHandler {
+public class UpdateService extends AbstractRequestHandler {
 
     private final static Logger logger = LoggerFactory.getLogger(UpdateService.class);
 
@@ -234,55 +234,5 @@ public class UpdateService implements RequestHandler {
         } catch (ResourceException e) {
             return e.asPromise();
         }
-    }
-
-    /**
-     * Service does not allow creating entries.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-        return new NotSupportedException("Not allowed on update service").asPromise();
-    }
-
-    /**
-     * Service does not support deleting entries.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-        return new NotSupportedException("Not allowed on update service").asPromise();
-    }
-
-    /**
-     * Service does not support changing entries.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-        return new NotSupportedException("Not allowed on update service").asPromise();
-    }
-
-    /**
-     * Service does not support querying entries yet.
-     */
-    @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
-            QueryResourceHandler handler) {
-        return new NotSupportedException("Not allowed on update service").asPromise();
-    }
-
-    /**
-     * Service does not support reading entries yet.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
-        return new NotSupportedException("Not allowed on update service").asPromise();
-    }
-
-
-    /**
-     * Service does not support changing entries.
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-        return new NotSupportedException("Not allowed on update service").asPromise();
     }
 }
