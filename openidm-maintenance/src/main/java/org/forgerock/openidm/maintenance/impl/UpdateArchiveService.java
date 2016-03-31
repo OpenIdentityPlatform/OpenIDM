@@ -59,26 +59,6 @@ public class UpdateArchiveService extends AbstractRequestHandler {
     private UpdateManager updateManager;
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
-            QueryResourceHandler handler) {
-        final String archiveName = request.getResourcePathObject().get(0);
-        final Path archivePath = IdentityServer.getInstance().getInstallLocation().toPath().resolve("bin/update").resolve(archiveName);
-        Path requestedFile = Paths.get("");
-        Iterator<String> it = request.getResourcePathObject().tail(1).iterator();
-        while (it.hasNext()) {
-            requestedFile = requestedFile.resolve(it.next());
-        }
-
-        try {
-            final JsonValue fileContents = updateManager.getArchiveFile(archivePath, requestedFile);
-            handler.handleResource(Responses.newResourceResponse(null, null, fileContents));
-            return Responses.newQueryResponse().asPromise();
-        } catch (UpdateException e) {
-            return new InternalServerErrorException(e).asPromise();
-        }
-    }
-
-    @Override
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         final String archiveName = request.getResourcePathObject().get(0);
         final Path archivePath = IdentityServer.getInstance().getInstallLocation().toPath().resolve("bin/update").resolve(archiveName);
