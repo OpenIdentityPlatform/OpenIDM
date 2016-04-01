@@ -64,7 +64,7 @@ public class MaintenanceFilter extends MutableFilterDecorator {
     private static Filter MAINTENANCE_FILTER = Filters.conditionalFilter(
             new FilterCondition() {
                 // pass requests on audit or maintenance endpoints
-                private final Pattern allowedEndpoints = Pattern.compile("^(audit|maintenance)(/?.*|$)");
+                private final Pattern allowedEndpoints = Pattern.compile("^((repo\\/)?audit|maintenance)(/?.*|$)");
                 @Override
                 public boolean matches(Context context, Request request) {
                     /* The semantic of "matches" is "if this condition is true, then the filter will be entered".
