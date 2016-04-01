@@ -426,13 +426,13 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     /**
-     * Return a list of repo updates in the archive that are not present in the checker
+     * Return a list of required repo updates. Update is deemed required if it is not currently present in the install.
      *
      * @param archive
      * @param checker
      * @return
      */
-    private List<Path> listRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException {
+    private List<Path> listRequiredRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException {
         final List<Path> newUpdates = new ArrayList<>();
         final String dbDir = repositoryService.getDbDirname();
 
@@ -468,27 +468,29 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     @Override
-    public JsonValue listRepoUpdates(final Path archiveFile) throws UpdateException {
+    public JsonValue listRepoUpdates(final Path archivePath) throws UpdateException {
         final String dbDir = repositoryService.getDbDirname();
 
         if (Strings.isNullOrEmpty(dbDir)) {
             return json(array());
         }
 
-        // If no archive is specified output updates from the currently running thread
-        if (archiveFile == null) {
+        // If no archive is specified output updates from the currently running thread.
+        // If archive is requested and it's the running thread we must use the cached thread updates
+        // since they have already been replaced on disk
+        if (archivePath == null || (updateThread != null && archivePath.equals(updateThread.archivePath))) {
             if (updateThread != null && updateThread.isAlive()) {
-                return formatRepoUpdateList(updateThread.archiveRepoUpdates);
+                return formatRepoUpdateList(updateThread.repoUpdates);
             } else {
                 throw new UpdateException("No archive specified and no running update");
             }
         } else {
-            return usingArchive(archiveFile, IdentityServer.getInstance().getInstallLocation().toPath(),
+            return usingArchive(archivePath, IdentityServer.getInstance().getInstallLocation().toPath(),
                     new UpgradeAction<JsonValue>() {
                         @Override
                         public JsonValue invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException {
                             try {
-                                return formatRepoUpdateList(listRepoUpdates(archive, fileStateChecker));
+                                return formatRepoUpdateList(listRequiredRepoUpdates(archive, fileStateChecker));
                             } catch (IOException e) {
                                 throw new UpdateException(e);
                             }
@@ -758,7 +760,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 throw new UpdateException("Unable to log update.", e);
             }
 
-            updateThread = new UpdateThread(updateEntry, archive, fileStateChecker, installDir, updateConfig,
+            updateThread = new UpdateThread(updateEntry, archiveFile, archive, fileStateChecker, installDir, updateConfig,
                     archive.getDestination());
             updateThread.start();
 
@@ -890,29 +892,32 @@ public class UpdateManagerImpl implements UpdateManager {
         private final JsonValue updateConfig;
         private final Path tempDirectory;
         private final long timestamp = new Date().getTime();
+        private final Path archivePath;
         private boolean completeable = false;
 
         private final Lock lock = new ReentrantLock();
         private final Condition complete = lock.newCondition();
 
         /** List of new repo updates found in archive */
-        private final List<Path> archiveRepoUpdates;
+        private final List<Path> repoUpdates;
 
         // FIXME - Does this even work? Can we just make this private?
         public UpdateThread() {
             this.updateEntry = null;
             this.archive = null;
+            this.archivePath = null;
             this.fileStateChecker = null;
             this.staticFileUpdate = null;
             this.updateConfig = null;
             this.tempDirectory = null;
-            this.archiveRepoUpdates = new ArrayList<>();
+            this.repoUpdates = new ArrayList<>();
         }
 
-        public UpdateThread(UpdateLogEntry updateEntry, Archive archive, FileStateChecker fileStateChecker,
+        public UpdateThread(UpdateLogEntry updateEntry, Path archivePath, Archive archive, FileStateChecker fileStateChecker,
                 Path installDir, JsonValue updateConfig, Path tempDirectory) throws IOException {
             this.updateEntry = updateEntry;
             this.archive = archive;
+            this.archivePath = archivePath;
             this.fileStateChecker = fileStateChecker;
             this.updateConfig = updateConfig;
             this.tempDirectory = tempDirectory;
@@ -920,7 +925,7 @@ public class UpdateManagerImpl implements UpdateManager {
             this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
                     archive, new ProductVersion(ServerConstants.getVersion(),
                     ServerConstants.getRevision()), timestamp);
-            this.archiveRepoUpdates = listRepoUpdates(archive, fileStateChecker);
+            this.repoUpdates = listRequiredRepoUpdates(archive, fileStateChecker);
         }
 
         public void run() {
@@ -1052,7 +1057,7 @@ public class UpdateManagerImpl implements UpdateManager {
                 completeable = true;
 
                 // If this update contained repo updates wait until they are done
-                if (!archiveRepoUpdates.isEmpty()) {
+                if (!repoUpdates.isEmpty()) {
                     logUpdate(updateEntry
                             .setStatus(UpdateStatus.PENDING_REPO_UPDATES)
                             .setStatusMessage("Update complete. Repo updates pending."));
