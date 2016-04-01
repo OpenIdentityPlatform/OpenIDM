@@ -148,9 +148,6 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The currently-running update thread */
     private UpdateThread updateThread = null;
 
-    /** Cache of exploded archives. */
-    private final ConcurrentMap<Path, ZipArchive> archiveCache = new ConcurrentHashMap<>();
-
     private String lastUpdateId = null;
 
     public enum UpdateStatus {
@@ -162,18 +159,6 @@ public class UpdateManagerImpl implements UpdateManager {
 
     /** The OSGiFramework Service **/
     protected OSGiFrameworkService osgiFrameworkService;
-
-    @Deactivate
-    void deactivate(ComponentContext compContext) throws Exception {
-        // Clean up exploded archives
-        for (Map.Entry<Path, ZipArchive> entry : archiveCache.entrySet()) {
-            final Path tempDir = entry.getValue().getDestination();
-            if (Files.exists(tempDir)) {
-                FileUtils.deleteDirectory(tempDir.toFile());
-            }
-        }
-        archiveCache.clear();
-    }
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
@@ -327,8 +312,6 @@ public class UpdateManagerImpl implements UpdateManager {
         Path tempUnzipDir = null;
         try {
             tempUnzipDir = Files.createTempDirectory(tempDirectoryPrefix);
-            // JVM will attempt to delete on normal termination
-            tempUnzipDir.toFile().deleteOnExit();
             return func.apply(tempUnzipDir);
         } catch (IOException e) {
             throw new UpdateException("Cannot create temporary directory to unzip archive");
@@ -350,43 +333,6 @@ public class UpdateManagerImpl implements UpdateManager {
      */
     private interface UpgradeAction<R> {
         R invoke(Archive archive, FileStateChecker fileStateChecker) throws UpdateException;
-    }
-
-    /**
-     * Get an archive from the given path and cache its exploded location. This method caches the exploded
-     * archive allowing for consistent exploded location between requests.
-     *
-     * @param archiveFile Path to archive file to be extracted
-     * @return The cached ZipArchive
-     * @throws IOException If a temporary directory cannot be created
-     * @throws ArchiveException On failure to extract the archive
-     */
-    private ZipArchive getArchive(final Path archiveFile) throws IOException, ArchiveException {
-        ZipArchive cached = archiveCache.get(archiveFile);
-
-        if (cached != null && Files.exists(cached.getDestination())) {
-            return cached;
-        } else {
-            final Path tempDir = Files.createTempDirectory("openidm-update-");
-            final ZipArchive archive = new ZipArchive(archiveFile, tempDir);
-
-            if (!Files.exists(cached.getDestination())) {
-                // Destination was already deleted
-                archiveCache.put(archiveFile, archive);
-                cached = archive;
-            } else {
-                cached = archiveCache.putIfAbsent(archiveFile, archive);
-            }
-
-            if (cached == null) {
-                cached = archive;
-            } else {
-                // already had archive in cache, clean up unused
-                FileUtils.deleteDirectory(tempDir.toFile());
-            }
-
-            return cached;
-        }
     }
 
     /**
@@ -741,7 +687,8 @@ public class UpdateManagerImpl implements UpdateManager {
         validateHasChecksumFile(archiveFile.toFile());
 
         try {
-            final ZipArchive archive = getArchive(archiveFile);
+            final Path tempDir = Files.createTempDirectory("openidm-update-");
+            final ZipArchive archive = new ZipArchive(archiveFile, tempDir);
             final ChecksumFile checksumFile = resolveChecksumFile(installDir);
             final FileStateChecker fileStateChecker = new FileStateChecker(checksumFile);
 
