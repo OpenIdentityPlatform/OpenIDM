@@ -596,7 +596,9 @@ class ObjectMapping {
         try {
             final String id = target.get("_id").required().asString();
             final String fullId = LazyObjectAccessor.qualifiedId(targetObjectSet, id);
-            if (!targetId.equals(id)) {
+            // Do simple comparison first, only if it fails handle case sensitivity
+            if (!targetId.equals(id) && 
+                    !linkType.normalizeTargetId(targetId).equals(linkType.normalizeTargetId(id))) {
                 throw new SynchronizationException("target '_id' has changed");
             }
             LOGGER.trace("Update target object {}", fullId);
