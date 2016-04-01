@@ -282,11 +282,6 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         @Override
-        public Path extractedPath(Path file) {
-            return upgradeRoot.resolve(file);
-        }
-
-        @Override
         public <R, E extends Exception> R withInputStreamForPath(Path path, Function<InputStream, R, E> function)
                 throws E, IOException {
             // Not sure how I feel about this going off upgradeRoot

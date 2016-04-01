@@ -41,14 +41,6 @@ public interface Archive {
     Set<Path> getFiles();
 
     /**
-     * Return the absolute extracted path of a file in the archive
-     *
-     * @param file
-     * @return
-     */
-    Path extractedPath(Path file);
-
-    /**
      * Get an InputStream for a path within the archive and process it according to the provided Function.
      *
      * @param path The Path for which to retrieve an InputStream
