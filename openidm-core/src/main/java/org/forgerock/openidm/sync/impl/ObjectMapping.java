@@ -2343,7 +2343,7 @@ class ObjectMapping {
                         situation = Situation.LINK_ONLY;
                     }
                 } else {
-                    if (oldValue == null) {
+                    if (oldValue == null || oldValue.isNull()) {
                         // If there is no previous value known we can not correlate
                         situation = Situation.ALL_GONE;
                     } else {
