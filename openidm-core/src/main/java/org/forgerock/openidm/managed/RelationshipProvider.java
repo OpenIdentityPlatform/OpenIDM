@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.managed;
 
+import static java.text.MessageFormat.format;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.json.resource.ResourceResponse.*;
@@ -391,10 +392,19 @@ public abstract class RelationshipProvider {
                         .performRequest(request.getContent().get(REFERENCE_ID).asString(), createRequest, context)
                         .then(formatResponse(context, request));
             }
-            
+
+            /*
+                Calls directly from ManagedObjectSet will return in the block above. If we get to this point, it is because
+                the RelationshipProvider is functioning as a CollectionResourceProvider, and servicing a create call directly
+                on a relationship endpoint. When this occurs, the MO specified in the _ref in the request needs to be
+                validated for existence, the presence of the reversePropertyName confirmed. Finally, the invocation needs
+                to be rejected if the reversePropertyName is not a collection, and presently set. The latter check will
+                have to rely on the state obtained from the MO corresponding to the _ref itself, as the SchemaField in this
+                class will specify the reversePropertyName, but not its type.
+             */
+            validateRelationshipEndpointOperand(request.getContent().get(REFERENCE_ID).asString(), context);
             // Get the before value of the managed object
             final ResourceResponse beforeValue = getManagedObject(context);
-            
             // Create the relationship
             ResourceResponse response = syncReferencedObjectCreateHandler
                     .performRequest(request.getContent().get(REFERENCE_ID).asString(), createRequest, context)
@@ -418,6 +428,33 @@ public abstract class RelationshipProvider {
             return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
+        }
+    }
+
+    /**
+     * Called to validate the operand passed as the _ref to the relationship endpoint
+     * @param managedObjectRef
+     * @throws BadRequestException
+     */
+    private void validateRelationshipEndpointOperand(String managedObjectRef, Context context) throws BadRequestException {
+        if (schemaField.isValidationRequired() && schemaField.isReverseRelationship()) {
+            ResourceResponse response;
+            try {
+                response = getConnection().read(context,
+                        Requests.newReadRequest(managedObjectRef).addField(schemaField.getReversePropertyName()));
+            } catch (ResourceException e) {
+                throw new BadRequestException(format(
+                        "In relationship endpoint ''{0}'', could not read referenced managed object ''{1}''.",
+                        resourceContainer.toString() + "/" + schemaField.getName(), managedObjectRef));
+            }
+            final JsonValue relationshipField = response.getContent().get(schemaField.getReversePropertyName());
+            if (relationshipField.isNotNull() && !relationshipField.isCollection()) {
+                throw new BadRequestException(format(
+                        "In relationship endpoint ''{0}'', field ''{1}'' of managed object ''{2}'' is neither null nor a collection, " +
+                                "and thus not available for assignment.",
+                        resourceContainer.toString() + "/" + schemaField.getName(), schemaField.getReversePropertyName(),
+                        managedObjectRef));
+            }
         }
     }
 
