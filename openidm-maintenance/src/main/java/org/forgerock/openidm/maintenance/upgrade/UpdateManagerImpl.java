@@ -434,18 +434,6 @@ public class UpdateManagerImpl implements UpdateManager {
      */
     private List<Path> listRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException {
         final List<Path> newUpdates = new ArrayList<>();
-
-        for (Path updateFile : listRepoUpdates(archive)) {
-            // TODO - What about unexpected?
-            if (checker.getCurrentFileState(updateFile) == FileState.NONEXISTENT) {
-                newUpdates.add(updateFile);
-            }
-        }
-
-        return newUpdates;
-    }
-
-    private List<Path> listRepoUpdates(final Archive archive) {
         final String dbDir = repositoryService.getDbDirname();
 
         if (Strings.isNullOrEmpty(dbDir)) {
@@ -454,16 +442,16 @@ public class UpdateManagerImpl implements UpdateManager {
 
         final Pattern updatePattern = Pattern.compile("db/"+dbDir+"/scripts/updates/v(\\d+)_(\\w+).(pg)?sql");
 
-        final List<Path> updates = new ArrayList<>(Collections2.filter(archive.getFiles(), new Predicate<Path>() {
-            @Override
-            public boolean apply(Path path) {
-                return updatePattern.matcher(path.toString()).matches();
+        for (Path updateFile : archive.getFiles()) {
+            if (updatePattern.matcher(updateFile.toString()).matches()
+                    && checker.getCurrentFileState(updateFile) == FileState.NONEXISTENT) {
+                newUpdates.add(updateFile);
             }
-        }));
+        }
 
-        Collections.sort(updates, new NaturalOrderComparator());
+        Collections.sort(newUpdates, new NaturalOrderComparator());
 
-        return updates;
+        return newUpdates;
     }
 
     private JsonValue formatRepoUpdateList(final List<Path> updates) {
