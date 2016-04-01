@@ -81,7 +81,15 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                     }
                 },
                 load: function(query, callback) {
-                    searchDelegate.searchResults(pathToResource, obj.autocompleteProps(prop, resourceCollectionIndex, true), query, null, prop.resourceCollection[resourceCollectionIndex].query.queryFilter).then(function(result) {
+                    var queryFilter;
+
+                    if(prop.items) {
+                        queryFilter = prop.items.resourceCollection[resourceCollectionIndex].query.queryFilter;
+                    } else {
+                        queryFilter = prop.resourceCollection[resourceCollectionIndex].query.queryFilter;
+                    }
+
+                    searchDelegate.searchResults(pathToResource, obj.autocompleteProps(prop, resourceCollectionIndex, true), query, null, queryFilter).then(function(result) {
                             var convertNestedProps = function(item) {
                                     _.each(obj.autocompleteProps(prop, resourceCollectionIndex), function(propName) {
                                         if(propName.indexOf(".") > -1) {
