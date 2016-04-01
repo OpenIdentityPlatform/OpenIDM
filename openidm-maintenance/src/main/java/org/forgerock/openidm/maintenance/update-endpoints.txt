@@ -311,7 +311,7 @@ Update Statuses:
     IN_PROGRESS             Update has started, not yet completed
     PENDING_REPO_UPDATES    Update is completed, repo updates pending
     COMPLETE                Update is complete
-    FAILED                  Update failed, not yet reverted
+    FAILED                  Update failed
 
     Note that it is possible an update could remain in IN_PROGRESS or FAILED state forever if the thread/process
     died before the update could reach COMPLETE, the "terminal state".  Updates are not reentrant at this time.
