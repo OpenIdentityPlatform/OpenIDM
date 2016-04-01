@@ -74,14 +74,44 @@ Usecase1 - Initial Reconciliation
     $ cd /path/to/openidm
     $ ./startup.sh -p samples/usecase/usecase1
 
-    2. Run reconciliation.
+    2. Run reconciliation for the first time.
 
     $ curl -k -u openidm-admin:openidm-admin -H "Content-Type: application/json" \
     -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
 
-    3. Query the managed users created by reconciliation
+    3) Query the managed users created by reconciliation
 
     $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+
+    On this first recon there should be only one user created, superadmin, because this user does not have a manager
+    to report to. The other 22 users will fail because their managers have not been created yet and the validation to
+    verify that their manager actually exists will error out in the console.
+
+    4) Run reconciliation a second time.
+
+    $ curl -k -u openidm-admin:openidm-admin -H "Content-Type: application/json" \
+        -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
+
+    5) Query the managed users created by the second reconciliation
+
+    $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+
+    On this second recon there will be 12 new additional users created. These users have superadmin as their manager,
+    that is why they were able to be created. There should be an additional 10 failures of the users that require the 12
+    users that were created during this second recon.
+
+    6) Run reconcilation a third time.
+
+    $ curl -k -u openidm-admin:openidm-admin -H "Content-Type: application/json" \
+            -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemHRAccounts_managedUser"
+
+    7) Query the managed users created by the third reconciliation
+
+    $ curl -k -u openidm-admin:openidm-admin "https://localhost:8443/openidm/managed/user?_queryId=query-all-ids"
+
+    On this third recon there will be 10 new additional users created, bringing the total to 23 users. These additional
+    10 users were created this time successfully because the users that were created on the second recon are their
+    managers.
     
     There should be 23 users created. The default password of the imported users is "Passw0rd".
 
