@@ -59,6 +59,9 @@ module.exports = {
                 },
                 deleteMapping: {
                     selector: '.wide-card .delete-button'
+                },
+                listTableLink : {
+                    selector: '.table-clink'
                 }
             }
         },
