@@ -208,9 +208,9 @@
 
     <properties>
         <!-- Version management -->
-        <commons.forgerock-bom.version>4.1.1</commons.forgerock-bom.version>
+        <commons.forgerock-bom.version>7.0</commons.forgerock-bom.version>
 
-        <forgerock-audit.version>4.2.0</forgerock-audit.version>
+        <forgerock-audit.version>5.1.0</forgerock-audit.version>
 
         <!-- Commons versions -->
         <commons.forgerock-script.version>3.1.0</commons.forgerock-script.version>
@@ -412,6 +412,11 @@
             <dependency>
                 <groupId>org.forgerock.commons</groupId>
                 <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
+                <version>${forgerock-audit.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.forgerock.commons</groupId>
+                <artifactId>forgerock-audit-handler-jms</artifactId>
                 <version>${forgerock-audit.version}</version>
             </dependency>
             <dependency>

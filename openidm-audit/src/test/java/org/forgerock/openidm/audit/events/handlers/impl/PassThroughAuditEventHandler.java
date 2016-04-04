@@ -80,4 +80,9 @@ public class PassThroughAuditEventHandler extends AuditEventHandlerBase {
         return new NotSupportedException().asPromise();
     }
 
+    @Override
+    public boolean canBeUsedForQueries() {
+        return false;
+    }
+
 }
