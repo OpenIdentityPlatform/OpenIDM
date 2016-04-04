@@ -60,11 +60,11 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
                                 return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
                             }
                         case "not":
-                            return "!(" + this.serialize(node.children[0]) + ")";
+                            return "!(" + this.serialize(node.children[0]) + " )";
                         case "none":
                             return "";
                         default:
-                            return "(" + _.map(node.children, this.serialize, this).join(" " + node.op + " ") + ")";
+                            return "(" + _.map(node.children, this.serialize, this).join(" " + node.op + " ") + " )";
                     }
                 } else {
                     return "";
