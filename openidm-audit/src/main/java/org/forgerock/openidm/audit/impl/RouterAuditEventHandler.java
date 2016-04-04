@@ -127,4 +127,9 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase {
         }
     }
 
+    @Override
+    public boolean canBeUsedForQueries() {
+        return true;
+    }
+
 }

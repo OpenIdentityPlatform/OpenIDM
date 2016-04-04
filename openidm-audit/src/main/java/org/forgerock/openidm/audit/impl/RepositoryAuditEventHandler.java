@@ -86,4 +86,9 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase {
             final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
         return routerAuditEventHandler.queryEvents(context, auditEventTopic, queryRequest, queryResourceHandler);
     }
+
+    @Override
+    public boolean canBeUsedForQueries() {
+        return true;
+    }
 }
