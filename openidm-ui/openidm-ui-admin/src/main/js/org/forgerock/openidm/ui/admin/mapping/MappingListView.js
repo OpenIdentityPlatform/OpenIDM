@@ -64,7 +64,8 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
         partials: [
             "partials/mapping/list/_sourceTargetGridCellDisplay.html",
             "partials/mapping/list/_syncStatusCellDisplay.html",
-            "partials/mapping/list/_actionCellDisplay.html"
+            "partials/mapping/list/_actionCellDisplay.html",
+            "partials/mapping/list/_linkName.html"
         ],
         mappingDetail: function(e){
             if(!$(e.target).closest("button").hasClass("delete-button")){
@@ -196,9 +197,19 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                                 {
                                     name: "name",
                                     label: "name",
-                                    cell: "string",
                                     sortable: false,
-                                    editable: false
+                                    editable: false,
+                                    cell: Backgrid.Cell.extend({
+                                        render: function () {
+                                            var display = handlebars.compile("{{> mapping/list/_linkName}}")({
+                                                name: this.model.attributes.name
+                                            });
+
+                                            this.$el.html(display);
+
+                                            return this;
+                                        }
+                                    })
                                 },
                                 {
                                     name: "source",

@@ -159,6 +159,12 @@ module.exports = {
                 .click("@mappingConfigHolder")
                 .waitForElementVisible('@mappingListItem', 2000);
         },
+        'Verify grid mapping name' : function(client) {
+            var mapping = client.page.mappings(),
+                mappingList = mapping.section.mappingList;
+
+            mappingList.assert.attributeContains('@listTableLink', 'href', '#properties/managedAssignment_managedRole/');
+        },
         'Delete Mapping': function (client) {
             var mapping = client.page.mappings(),
                 message = mapping.section.message,
