@@ -140,10 +140,15 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     });
 
 
-                    if (this.data.scriptData && this.data.scriptData.file === "workflow/triggerWorkflowGeneric.js") {
-                        workflowName = this.data.scriptData.globals.workflowName;
-                        workflowParams = this.data.scriptData.globals.params;
+                    if (this.data.scriptData) {
+                        if(this.data.scriptData.file === "workflow/triggerWorkflowGeneric.js") {
+                            workflowName = this.data.scriptData.globals.workflowName;
+                            workflowParams = this.data.scriptData.globals.params;
+                        }
+
+                        this.$el.find(".event-select").val(this.data.scriptData.type);
                     }
+
                     if (this.model.hasWorkflow) {
                         this.workflow = WorkflowWidget.generateWorkflowWidget({
                             "element": this.$el.find(".workflow-body"),
