@@ -24,5 +24,6 @@
         "description": "audit.handlers.all.name.help"
       }
     }
-  }
+  },
+  "isUsableForQueries" : false
 }

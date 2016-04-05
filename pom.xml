@@ -210,7 +210,7 @@
         <!-- Version management -->
         <commons.forgerock-bom.version>7.0</commons.forgerock-bom.version>
 
-        <forgerock-audit.version>5.1.0</forgerock-audit.version>
+        <forgerock-audit.version>6.1.0</forgerock-audit.version>
 
         <!-- Commons versions -->
         <commons.forgerock-script.version>3.1.0</commons.forgerock-script.version>

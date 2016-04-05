@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,8 +23,9 @@
  */
 package org.forgerock.openidm.audit.impl;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A configuration for router audit event handler.
@@ -59,4 +60,8 @@ public class RouterAuditEventHandlerConfiguration extends EventHandlerConfigurat
         this.resourcePath = resourcePath;
     }
 
+    @Override
+    public boolean isUsableForQueries() {
+        return true;
+    }
 }

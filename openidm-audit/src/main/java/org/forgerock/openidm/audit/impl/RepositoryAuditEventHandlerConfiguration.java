@@ -11,17 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
 
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 /**
  * Configuration class for RepositoryAuditEventHandler.
  * @see RepositoryAuditEventHandler
  */
+@JsonIgnoreProperties(ignoreUnknown=true)
 public class RepositoryAuditEventHandlerConfiguration extends EventHandlerConfiguration {
     private static final String REPO_AUDIT_PATH = "repo/audit";
 
@@ -33,4 +36,8 @@ public class RepositoryAuditEventHandlerConfiguration extends EventHandlerConfig
         return REPO_AUDIT_PATH;
     }
 
+    @Override
+    public boolean isUsableForQueries() {
+        return true;
+    }
 }

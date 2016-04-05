@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
@@ -85,10 +85,5 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase {
     public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String auditEventTopic,
             final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
         return routerAuditEventHandler.queryEvents(context, auditEventTopic, queryRequest, queryResourceHandler);
-    }
-
-    @Override
-    public boolean canBeUsedForQueries() {
-        return true;
     }
 }
