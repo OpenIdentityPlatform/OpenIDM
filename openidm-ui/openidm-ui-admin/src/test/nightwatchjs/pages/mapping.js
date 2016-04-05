@@ -71,8 +71,8 @@ module.exports = {
         },
         policyDialogSubmit: "#submitPolicyDialog",
         confirmPolicyPatternButton: ".bootstrap-dialog-footer-buttons > .btn-primary",
-        modal: ".modal-body"
-
+        modal: ".modal-body",
+        reconQueryFilterPanelToggle: 'a[href="#reconQueriesBase"]'
     },
     sections: {
         modalBody: {
@@ -106,6 +106,17 @@ module.exports = {
                 editPolicyButton: "#situationalPolicies table tbody > tr:first-child button.edit-policy",
                 reset: "input.reset",
                 save: "input.savePolicy"
+            }
+        },
+        targetQuery: {
+            selector: "#targetQuery",
+            elements: {
+                select: "select",
+                firstInputName: 'li[index="0"] input.name',
+                firstInputValue: 'li[index="0"] input.value',
+                secondInputName: 'li[index="1"] input.name',
+                secondInputValue: 'li[index="1"] input.value',
+                filter: '.filter'
             }
         }
     }

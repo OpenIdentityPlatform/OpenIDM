@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
             },
             events: {
                 "change .expressionTree :input": "updateNodeValue",
-                "click .expressionTree .add-btn": "addNode",
+                "click .expressionTree .add-btn": "addNodeAndReRender",
                 "click .expressionTree .remove-btn": "removeNode"
             },
             getExpressionContext: function (e) {
@@ -78,22 +78,23 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
 
                 this.renderExpressionTree(callback);
             },
-            addNode: function (e, callback) {
+            createNode: function (e) {
                 var context = this.getExpressionContext(e),
                     node = context.current;
-
                 node.children.push({name: "", value: "", tag: "equalityMatch", children: [], op: "expr"});
-
                 this.data.filterString = this.getFilterString();
+            },
 
+            addNodeAndReRender: function(e, callback) {
+                this.createNode(e);
                 this.renderExpressionTree(callback);
             },
+
             updateNodeValue: function (e, callback) {
                 var context = this.getExpressionContext(e),
                     node = context.current,
                     field = $(e.target),
-                    redrawContainer = false,
-                    emptyChild = {name: "", value: "", tag: "equalityMatch", children: [], op: "expr"};
+                    redrawContainer = false;
 
                 if (field.hasClass("op")) {
                     redrawContainer = true;
@@ -106,10 +107,12 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                     } else if (node.op === "none") {
                         node.children = [];
                     } else if (!node.children || !node.children.length) {
-                        node.children = [emptyChild];
-                        //if op is "and" or "or" add two children by default to let the user know that multiple comparisons are needed
-                        if (node.children.length === 1 && (node.op === "and" || node.op === "or")) {
-                            node.children.push(emptyChild);
+                        // create 2 nodes for 'and'/'or' comparisons
+                        if (node.op === "and" || node.op === "or") {
+                            _.times(2, this.createNode(e));
+                        // create 1 node for other types of comparisons
+                        } else {
+                            this.createNode(e);
                         }
                     }
                 } else if (field.hasClass("name")) {
