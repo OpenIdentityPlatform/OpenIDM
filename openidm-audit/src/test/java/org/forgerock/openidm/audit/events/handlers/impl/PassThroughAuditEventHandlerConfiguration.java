@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.audit.events.handlers.impl;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * A configuration for pass-through audit event handler.
@@ -42,5 +43,10 @@ public class PassThroughAuditEventHandlerConfiguration extends EventHandlerConfi
      */
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    @Override
+    public boolean isUsableForQueries() {
+        return false;
     }
 }

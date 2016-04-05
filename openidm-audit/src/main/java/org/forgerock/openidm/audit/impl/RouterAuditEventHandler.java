@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -126,10 +126,4 @@ public class RouterAuditEventHandler extends AuditEventHandlerBase {
             return e.asPromise();
         }
     }
-
-    @Override
-    public boolean canBeUsedForQueries() {
-        return true;
-    }
-
 }
