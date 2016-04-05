@@ -111,7 +111,7 @@ UI Endpoints for Update Process
 
 2c. Get repo update file(s) from archive
     GET openidm/maintenance/update/archives/{archive}/{path...}
-    GET openidm/maintenance/update/archives/OpenIDM-4.5.0.zip/db/postgresql/scripts/updates/v1_shorten_link_columns.sql?_field=/contents&_mimeType=text/plain
+    GET openidm/maintenance/update/archives/OpenIDM-4.5.0.zip/db/postgresql/scripts/updates/v1_shorten_link_columns.sql?_fields=/contents&_mimeType=text/plain
 
     returns:
 
