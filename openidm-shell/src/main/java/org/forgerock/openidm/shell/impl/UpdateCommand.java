@@ -21,19 +21,22 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.BufferedWriter;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import static java.util.Arrays.asList;
 
 import org.apache.felix.service.command.CommandSession;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.*;
 import org.forgerock.services.context.Context;
 
 /**
@@ -52,12 +55,19 @@ public class UpdateCommand {
     static final String UPDATE_LOG_ROUTE = UPDATE_ROUTE + "/log";
     static final String UPDATE_ACTION_AVAIL = "available";
     static final String UPDATE_ACTION_GET_LICENSE = "getLicense";
+    static final String UPDATE_ACTION_LIST_REPO_UPDATES = "listRepoUpdates";
+    static final String UPDATE_ACTION_MARK_COMPLETE = "markComplete";
     static final String UPDATE_PARAM_ARCHIVE = "archive";
+    static final String UPDATE_PARAM_ARCHIVES = "archives";
+    static final String UPDATE_PARAM_UPDATE_ID = "updateId";
     static final String UPDATE_ACTION_UPDATE = "update";
     static final String UPDATE_ACTION_RESTART = "restart";
     static final String UPDATE_STATUS_FAILED = "FAILED";
     static final String UPDATE_STATUS_COMPLETE = "COMPLETE";
+    static final String UPDATE_STATUS_PENDING_REPO_UPDATES = "PENDING_REPO_UPDATES";
     static final String UPDATE_STATUS_IN_PROGRESS = "IN_PROGRESS";
+    static final List<String> TERMINAL_STATE = asList(UPDATE_STATUS_COMPLETE, UPDATE_STATUS_FAILED,
+            UPDATE_STATUS_PENDING_REPO_UPDATES);
 
     private final CommandSession session;
     private final HttpRemoteJsonResource resource;
@@ -73,14 +83,25 @@ public class UpdateCommand {
     enum UpdateStep {
         PREVIEW_ARCHIVE,
         ACCEPT_LICENSE,
+        LIST_REPO_UPDATES,
         PAUSING_SCHEDULER,
         WAIT_FOR_JOBS_TO_COMPLETE,
         ENTER_MAINTENANCE_MODE,
         INSTALL_ARCHIVE,
         WAIT_FOR_INSTALL_DONE,
+        MARK_REPO_UPDATES_COMPLETE,
         EXIT_MAINTENANCE_MODE,
         ENABLE_SCHEDULER,
         FORCE_RESTART
+    }
+
+    /**
+     * Status execute() will return.
+     */
+    enum ExecutorStatus {
+        SUCCESS,
+        FAIL,
+        ABORT
     }
 
     /**
@@ -123,20 +144,31 @@ public class UpdateCommand {
         // Register the update steps.
         registerStepExecutor(new GetArchiveDataStepExecutor());
         registerStepExecutor(new AcceptLicenseStepExecutor());
+        registerStepExecutor(new ListRepoUpdatesStepExecutor());
         registerStepExecutor(new PauseSchedulerStepExecutor());
         registerStepExecutor(new WaitForJobsStepExecutor());
         registerStepExecutor(new EnterMaintenanceModeStepExecutor());
         registerStepExecutor(new InstallArchiveStepExecutor());
         registerStepExecutor(new WaitForInstallDoneStepExecutor());
+        registerStepExecutor(new MarkRepoUpdatesCompleteExecutor());
         registerStepExecutor(new ExitMaintenanceModeStepExecutor());
         registerStepExecutor(new EnableSchedulerStepExecutor());
         registerStepExecutor(new ForceRestartStepExecutor());
 
         // Set the sequence of execution for the steps.
-        setExecuteSequence(PREVIEW_ARCHIVE, ACCEPT_LICENSE, PAUSING_SCHEDULER, WAIT_FOR_JOBS_TO_COMPLETE,
-                ENTER_MAINTENANCE_MODE, INSTALL_ARCHIVE, WAIT_FOR_INSTALL_DONE);
+        setExecuteSequence(PREVIEW_ARCHIVE,
+                           ACCEPT_LICENSE,
+                           LIST_REPO_UPDATES,
+                           PAUSING_SCHEDULER,
+                           WAIT_FOR_JOBS_TO_COMPLETE,
+                           ENTER_MAINTENANCE_MODE,
+                           INSTALL_ARCHIVE,
+                           WAIT_FOR_INSTALL_DONE,
+                           MARK_REPO_UPDATES_COMPLETE);
         // Set the sequence of execution of the recovery steps.
-        setRecoverySequence(EXIT_MAINTENANCE_MODE, ENABLE_SCHEDULER, FORCE_RESTART);
+        setRecoverySequence(EXIT_MAINTENANCE_MODE,
+                            ENABLE_SCHEDULER,
+                            FORCE_RESTART);
     }
 
     /**
@@ -168,8 +200,8 @@ public class UpdateCommand {
 
     /**
      * For each step in the executeSequence, this executes each registered executor as long as the condition of
-     * the executor is ok to run.  When all are complete, or one fails, this will then similarly loop through each
-     * step in the recoverySequence and execute its registered executor.
+     * the executor is ok to run.  When all are complete, or one fails, or one aborts, this will then similarly
+     * loop through each step in the recoverySequence and execute its registered executor.
      *
      * @param context The context to pass to the REST calls.
      * @return the value bean holding the results of the execution run.
@@ -183,7 +215,10 @@ public class UpdateCommand {
                 StepExecutor executor = executorRegistry.get(nextStep);
                 if (null != executor && executor.onCondition(executionResults)) {
                     executionResults.setLastAttemptedStep(nextStep);
-                    if (!executor.execute(context, executionResults)) {
+                    ExecutorStatus status = executor.execute(context, executionResults);
+                    if (status.equals(ExecutorStatus.ABORT)) {
+                        return executionResults;
+                    } else if (status.equals(ExecutorStatus.FAIL)) {
                         log("ERROR: Error during execution. The state of OpenIDM is now unknown. " +
                                 "Last Attempted step was " + executionResults.getLastAttemptedStep() +
                                 ". Now attempting recovery steps.");
@@ -200,7 +235,10 @@ public class UpdateCommand {
                     StepExecutor executor = executorRegistry.get(nextStep);
                     if (null != executor && executor.onCondition(executionResults)) {
                         executionResults.setLastRecoveryStep(nextStep);
-                        if (!executor.execute(context, executionResults)) {
+                        ExecutorStatus status = executor.execute(context, executionResults);
+                        if (status.equals(ExecutorStatus.ABORT)) {
+                            return executionResults;
+                        } else if (status.equals(ExecutorStatus.FAIL)) {
                             log("WARN: Failed a recovery step " + nextStep + ", continuing on with recovery.");
                         }
                     }
@@ -276,9 +314,9 @@ public class UpdateCommand {
          *
          * @param context context to be utilized for REST calls.
          * @param state the current state of the command execution.
-         * @return true if the execution ran to a successful outcome.
+         * @return ExecutorStatus.SUCCESS if the execution ran to a successful outcome.
          */
-        boolean execute(Context context, UpdateExecutionState state);
+        ExecutorStatus execute(Context context, UpdateExecutionState state);
 
         /**
          * Implementors should return true if the conditions are appropriate for the executor to execute.
@@ -305,7 +343,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 ActionResponse response = resource.action(context,
                         Requests.newActionRequest(UPDATE_ROUTE, UPDATE_ACTION_AVAIL));
@@ -314,7 +352,7 @@ public class UpdateCommand {
                 for (JsonValue archiveData : responseData.get("updates")) {
                     if (updateArchive.equals(archiveData.get("archive").asString())) {
                         state.setArchiveData(archiveData);
-                        return true;
+                        return ExecutorStatus.SUCCESS;
                     }
                 }
                 log("A valid archive was not found in the bin/update directory. Requested filename was = " +
@@ -329,10 +367,10 @@ public class UpdateCommand {
                                         " error=" + reject.get("error").asString()));
                     }
                 }
-                return false;
+                return ExecutorStatus.FAIL;
             } catch (ResourceException e) {
                 log("The attempt to lookup the archive meta-data failed.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -364,7 +402,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 // Request the license content
                 ActionResponse response = resource.action(context,
@@ -374,7 +412,7 @@ public class UpdateCommand {
                 String license = response.getJsonContent().get("license").asString();
                 if (null == license) {
                     log("No license found to accept in this update archive.");
-                    return true;
+                    return ExecutorStatus.SUCCESS;
                 }
                 log("-------------BEGIN LICENSE----------------------------------------------------");
                 log(license);
@@ -384,16 +422,16 @@ public class UpdateCommand {
                 while (input.hasNext()) {
                     String next = input.next();
                     if ("y".equals(next)) {
-                        return true;
+                        return ExecutorStatus.SUCCESS;
                     } else if ("n".equals(next)) {
                         break;
                     }
                 }
                 log("License was NOT accepted.");
-                return false;
+                return ExecutorStatus.FAIL;
             } catch (ResourceException e) {
                 log("There was trouble retrieving the license agreement.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -426,7 +464,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 log("Pausing the Scheduler");
                 ActionResponse response = resource.action(context,
@@ -434,14 +472,14 @@ public class UpdateCommand {
                 // Test if the pause request was successful.
                 if (response.getJsonContent().get("success").defaultTo(false).asBoolean()) {
                     log("Scheduler has been paused.");
-                    return true;
+                    return ExecutorStatus.SUCCESS;
                 } else {
                     log("Scheduler could not be paused. Exiting update process.");
-                    return false;
+                    return ExecutorStatus.FAIL;
                 }
             } catch (ResourceException e) {
                 log("Error encountered while pausing the job scheduler.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -473,7 +511,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             long start = System.currentTimeMillis();
             long maxWaitTime = config.getMaxJobsFinishWaitTimeMs();
 
@@ -486,29 +524,29 @@ public class UpdateCommand {
                     if (jobRunning) {
                         if (maxWaitTime < 0) {
                             log("Jobs are still running, exiting update process.");
-                            return false;
+                            return ExecutorStatus.FAIL;
                         }
                         try {
                             log("Waiting for jobs to finish...");
                             Thread.sleep(config.getCheckJobsRunningFrequency());
                         } catch (InterruptedException e) {
                             log("WARNING: Got interrupted while waiting for jobs to finish, exiting update process.");
-                            return false;
+                            return ExecutorStatus.FAIL;
                         }
                         timeout = (System.currentTimeMillis() - start > maxWaitTime);
                     }
                 } catch (ResourceException e) {
                     log("Error encountered while waiting for jobs to finish", e);
-                    return false;
+                    return ExecutorStatus.FAIL;
                 }
             } while (jobRunning && !timeout);
 
             if (jobRunning) {
                 log("Running jobs did not finish within the allotted wait time of " + maxWaitTime + "ms.");
-                return false;
+                return ExecutorStatus.FAIL;
             } else {
                 log("All running jobs have finished.");
-                return true;
+                return ExecutorStatus.SUCCESS;
             }
         }
 
@@ -551,7 +589,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 log("Entering into maintenance mode...");
                 // Make the call to enter maintenance mode.
@@ -560,14 +598,14 @@ public class UpdateCommand {
                 // Test that we are now in maintenance mode.
                 if (response.getJsonContent().get("maintenanceEnabled").defaultTo(false).asBoolean()) {
                     log("Now in maintenance mode.");
-                    return true;
+                    return ExecutorStatus.SUCCESS;
                 } else {
                     log("Failed to enter maintenance mode. Exiting update process.");
-                    return false;
+                    return ExecutorStatus.FAIL;
                 }
             } catch (ResourceException e) {
                 log("Error occurred while attempting to enter maintenance mode.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -599,7 +637,7 @@ public class UpdateCommand {
          * @param state The current state of the execution sequence.
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 log("Installing the update archive " + config.getUpdateArchive());
                 // Invoke the installation process.
@@ -609,14 +647,14 @@ public class UpdateCommand {
                 // Read response from install call.
                 JsonValue installResponse = response.getJsonContent();
                 if (installResponse.get("status").isNull()) {
-                    return false;
+                    return ExecutorStatus.FAIL;
                 }
                 state.setInstallResponse(installResponse);
                 state.setStartInstallTime(System.currentTimeMillis());
-                return true;
+                return ExecutorStatus.SUCCESS;
             } catch (ResourceException e) {
                 log("Error encountered while installing the update archive.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -631,7 +669,7 @@ public class UpdateCommand {
     }
 
     /**
-     * This will repeatably check the update installation status until it times out or returns COMPLETE or FAILED.
+     * This will repeatably check the update installation status until it times out or returns a TERMINAL_STATE.
      *
      * @see UpdateCommandConfig#getMaxUpdateWaitTimeMs()
      * @see UpdateCommandConfig#getCheckCompleteFrequency()
@@ -649,7 +687,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             JsonValue installResponse = state.getInstallResponse();
             long startTime = state.getStartInstallTime();
             if (null == installResponse || startTime <= 0 || installResponse.get("status").isNull()) {
@@ -660,8 +698,7 @@ public class UpdateCommand {
             String status = installResponse.get("status").defaultTo(UPDATE_STATUS_IN_PROGRESS).asString().toUpperCase();
             String updateId = installResponse.get(ResourceResponse.FIELD_CONTENT_ID).asString();
             try {
-                boolean timeout = false;
-                while (!timeout && !UPDATE_STATUS_COMPLETE.equals(status) && !UPDATE_STATUS_FAILED.equals(status)) {
+                while (!TERMINAL_STATE.contains(status)) {
                     log("Update procedure is still processing...");
                     // Wait for the installation process to make some progress.
                     try {
@@ -672,22 +709,21 @@ public class UpdateCommand {
                     // Query the status of the installation process.
                     ResourceResponse response = resource.read(context,
                             Requests.newReadRequest(UPDATE_LOG_ROUTE, updateId));
-                    timeout = (System.currentTimeMillis() - startTime > config.getMaxUpdateWaitTimeMs());
                     status = response.getContent().get("status").defaultTo(UPDATE_STATUS_IN_PROGRESS)
                             .asString().toUpperCase();
                 }
-                if (UPDATE_STATUS_COMPLETE.equals(status) || UPDATE_STATUS_FAILED.equals(status)) {
+                if (TERMINAL_STATE.contains(status)) {
                     state.setCompletedInstallStatus(status);
                     log("The update process is complete with a status of " + status);
-                    return true;
+                    return ExecutorStatus.SUCCESS;
                 } else {
                     log("The update process failed to complete within the allotted time.  " +
                             "Please verify the state of OpenIDM.");
-                    return false;
+                    return ExecutorStatus.FAIL;
                 }
             } catch (ResourceException e) {
                 log("Error encountered while checking status of install.  The update might still be in process", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -701,7 +737,70 @@ public class UpdateCommand {
     }
 
     /**
-     * Only if the archive didn't need a restart, then this executor will request OpenIDM to exit maintenance mode.
+     * If status is PENDING, then the user will be prompted to execute the repo updates on the DB.
+     */
+    private class MarkRepoUpdatesCompleteExecutor implements StepExecutor {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public UpdateStep getStep() {
+            return MARK_REPO_UPDATES_COMPLETE;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
+            try {
+                // Skip if status is not PENDING.
+                if (!state.getCompletedInstallStatus().equals(UPDATE_STATUS_PENDING_REPO_UPDATES)) {
+                    return ExecutorStatus.SUCCESS;
+                }
+
+                // Ask user to perform repo updates.
+                log("Run repository update scripts now, and then enter 'yes' to complete the OpenIDM update process.");
+                // Forcing user to hit "yes".
+                Scanner input = new Scanner(session.getKeyboard());
+                while (input.hasNext()) {
+                    String next = input.next();
+                    if (next.equalsIgnoreCase("yes")) {
+                        // Mark repo updates as complete for a PENDING_REPO_UPDATES update.
+                        ActionResponse response = resource.action(context,
+                                Requests.newActionRequest(UPDATE_ROUTE, UPDATE_ACTION_MARK_COMPLETE)
+                                .setAdditionalParameter(UPDATE_PARAM_UPDATE_ID,
+                                        state.getInstallResponse().get(ResourceResponse.FIELD_CONTENT_ID).asString()));
+                        String status = response.getJsonContent().get("status").asString().toUpperCase();
+                        if (status.equals(UPDATE_STATUS_COMPLETE)) {
+                            log("Repo Updates status: " + UPDATE_STATUS_COMPLETE);
+                            return ExecutorStatus.SUCCESS;
+                        } else {
+                            log("Unable to mark repository updates as complete. Status: " + status);
+                            return ExecutorStatus.FAIL;
+                        }
+                    } else {
+                        log("Run repository update scripts now, and then enter 'yes' to complete the OpenIDM update process.");
+                    }
+                }
+                return ExecutorStatus.FAIL;
+            } catch (ResourceException e) {
+                log("Unable to mark repository updates as complete.", e);
+                return ExecutorStatus.FAIL;
+            }
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean onCondition(UpdateExecutionState state) {
+            return true;
+        }
+    }
+
+    /**
+     * If no restart required, the StepExecutor will attempt to exit maintenance mode.
      */
     private class ExitMaintenanceModeStepExecutor implements StepExecutor {
         /**
@@ -716,7 +815,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 log("Exiting maintenance mode...");
                 // Make the call to exit maintenance mode.
@@ -725,14 +824,14 @@ public class UpdateCommand {
                 // Test that we are no longer in maintenance mode.
                 if (response.getJsonContent().get("maintenanceEnabled").defaultTo(false).asBoolean()) {
                     log("Failed to exit maintenance mode. Exiting update process.");
-                    return false;
+                    return ExecutorStatus.FAIL;
                 } else {
                     log("No longer in maintenance mode.");
-                    return true;
+                    return ExecutorStatus.SUCCESS;
                 }
             } catch (ResourceException e) {
                 log("Error encountered while exiting maintenance mode.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -763,7 +862,7 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 log("Resuming the job scheduler.");
                 ActionResponse response = resource.action(context,
@@ -771,15 +870,15 @@ public class UpdateCommand {
                 // Pull the success value from the response.
                 if (response.getJsonContent().get("success").defaultTo(false).asBoolean()) {
                     log("Scheduler has been resumed.");
-                    return true;
+                    return ExecutorStatus.SUCCESS;
                 } else {
                     log("WARN: A successful request was made to resume the scheduler, " +
                             "but it appears to not have restarted.");
-                    return false;
+                    return ExecutorStatus.FAIL;
                 }
             } catch (ResourceException e) {
                 log("Trouble attempting to resume scheduled jobs.  Please check that the scheduler is resumed.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -811,16 +910,16 @@ public class UpdateCommand {
          * {@inheritDoc}
          */
         @Override
-        public boolean execute(Context context, UpdateExecutionState state) {
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
             try {
                 log("Restarting OpenIDM.");
                 // Invoke the restart.
                 resource.action(context, Requests.newActionRequest(UPDATE_ROUTE, UPDATE_ACTION_RESTART));
                 log("Restart request completed.");
-                return true; //
+                return ExecutorStatus.SUCCESS; //
             } catch (ResourceException e) {
                 log("Error encountered while requesting the restart of OpenIDM.", e);
-                return false;
+                return ExecutorStatus.FAIL;
             }
         }
 
@@ -834,5 +933,148 @@ public class UpdateCommand {
         public boolean onCondition(UpdateExecutionState state) {
             return isRestartRequired(state);
         }
+    }
+
+    /**
+     * If the database repo update files are found, then the user will be prompted to specify a path to save
+     * repo update files.
+     * If the path does not exist, create one. Then save the repo update files in the path specified.
+     *
+     * @see UpdateCommandConfig#isSkipRepoUpdatePreview()
+     */
+    private class ListRepoUpdatesStepExecutor implements StepExecutor {
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public UpdateStep getStep() {
+            return LIST_REPO_UPDATES;
+        }
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public ExecutorStatus execute(Context context, UpdateExecutionState state) {
+            try {
+                // List repo update files present in archive.
+                JsonValue responseData = fetchRepoUpdates(context);
+                if (!responseData.asList().isEmpty()) {
+                    log("Database repo update files present in archive were found:");
+                    for (JsonValue repoUpdate: responseData) {
+                        log(repoUpdate.get("file").asString());
+                    }
+
+                    // Prompt for path to save repo updates files.
+                    // Check if that directory specified exists, if not create it.
+                    log("Please enter the directory to save repository update files: ");
+                    boolean isDirCreated = false;
+                    Scanner input = new Scanner(session.getKeyboard());
+                    String targetPath;
+                    do {
+                        targetPath = input.next();
+                        File dir = new File(targetPath);
+                        if (!dir.isDirectory()) {
+                            if (dir.mkdirs()) {
+                                isDirCreated = true;
+                            }
+                            else { // failed to create dir
+                                log("Invalid directory. Please enter a valid directory: ");
+                            }
+                        } else { // dir already exists
+                            isDirCreated = true;
+                        }
+                    } while (!isDirCreated);
+
+                    // Fetch each repo update file and place it as a file in that dir.
+                    for (JsonValue repoUpdate : responseData) {
+                        // get file name and path
+                        String file = repoUpdate.get("file").asString();
+                        String path = repoUpdate.get("path").asString();
+                        // get file content
+                        ResourceResponse responseValue = resource.read(context,
+                                Requests.newReadRequest(UPDATE_ROUTE + "/" + UPDATE_PARAM_ARCHIVES
+                                        + "/" +  config.getUpdateArchive() + "/" +  path));
+                        JsonValue fileContent = responseValue.getContent().get("contents");
+                        // create a file in dir and write content in it
+                        if (Files.exists(Paths.get(targetPath + "/" + file))) {
+                            // ask if they want to overwrite it
+                            log(targetPath + "/" + file + " already exists. Do you want to overwrite it? (y|n) ");
+                            boolean isYOrN = false;
+                            do {
+                                String nextInput = input.next();
+                                if ("y".equals(nextInput)) {
+                                    try {
+                                        writeToFile(Paths.get(targetPath + "/" + file), fileContent.asString());
+                                    } catch (IOException ex) {
+                                        log("There was trouble storing repo update file " + file +
+                                                " to the path " + targetPath + ".", ex);
+                                        return ExecutorStatus.FAIL;
+                                    }
+                                    log(file + " was overwritten.");
+                                    isYOrN = true;
+                                } else if ("n".equals(nextInput)) {
+                                    log("Skipped overwriting " + file + ".");
+                                    isYOrN = true;
+                                } else {
+                                    log("Invalid entry. Please reenter (y|n): ");
+                                }
+                            } while (!isYOrN);
+                        } else {
+                            try {
+                                writeToFile(Paths.get(targetPath + "/" + file), fileContent.asString());
+                            } catch (IOException e) {
+                                log("There was trouble storing repo update file " + file +
+                                        " to the path " + targetPath + ".", e);
+                                return ExecutorStatus.FAIL;
+                            }
+                        }
+                    }
+                    log("Repository scripts are in the following directory: " + targetPath + ".\n" +
+                            "Please come back and run the update again with --skipRepoUpdatePreview " +
+                            "after updates have been reviewed.");
+                    return ExecutorStatus.ABORT;
+                }
+                return ExecutorStatus.SUCCESS;
+            } catch (ResourceException e) {
+                log("Unable to retrieve repository scripts.", e);
+                return ExecutorStatus.FAIL;
+            }
+        }
+
+
+        /**
+         * {@inheritDoc}
+         */
+        @Override
+        public boolean onCondition(UpdateExecutionState state) {
+            if (config.isSkipRepoUpdatePreview()) {
+                log("Repository update preview was skipped.");
+                return false;
+            }
+            return true;
+        }
+    }
+
+    /**
+     * Write content to file with the default charset of this Java virtual machine for encoding.
+     * Overwrite content if the file already exists.
+     *
+     * @param path the path where the file is located
+     * @param content the content to be written into the file
+     * @throws IOException
+     */
+    private void writeToFile(Path path, String content) throws IOException {
+        try (final BufferedWriter writer = Files.newBufferedWriter(path, Charset.defaultCharset())) {
+            writer.write(content);
+        }
+    }
+
+    protected JsonValue fetchRepoUpdates(Context context) throws ResourceException {
+        // List repo update files present in archive.
+        ActionResponse response = resource.action(context,
+                Requests.newActionRequest(UPDATE_ROUTE, UPDATE_ACTION_LIST_REPO_UPDATES)
+                        .setAdditionalParameter(UPDATE_PARAM_ARCHIVE, config.getUpdateArchive()));
+        return response.getJsonContent();
     }
 }
