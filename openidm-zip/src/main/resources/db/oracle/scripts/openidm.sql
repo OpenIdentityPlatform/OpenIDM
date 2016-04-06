@@ -178,7 +178,7 @@ CREATE TABLE auditconfig (
   operation VARCHAR2(255 CHAR) NULL ,
   beforeObject CLOB,
   afterObject CLOB,
-  changedfields VARCHAR2(255 CHAR),
+  changedfields CLOB,
   rev VARCHAR2(255 CHAR)
 );
 
@@ -221,7 +221,7 @@ CREATE TABLE auditactivity (
   operation VARCHAR2(255 CHAR) NULL ,
   subjectbefore CLOB,
   subjectafter CLOB,
-  changedfields VARCHAR2(255 CHAR),
+  changedfields CLOB,
   subjectrev VARCHAR2(255 CHAR),
   passwordchanged VARCHAR2(5 CHAR),
   message CLOB,

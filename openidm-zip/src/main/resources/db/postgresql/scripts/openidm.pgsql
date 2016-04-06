@@ -264,7 +264,7 @@ CREATE TABLE openidm.auditconfig (
   operation VARCHAR(255) NULL ,
   beforeObject TEXT,
   afterObject TEXT,
-  changedfields VARCHAR(255) DEFAULT NULL,
+  changedfields TEXT DEFAULT NULL,
   rev VARCHAR(255) DEFAULT NULL,
   PRIMARY KEY (objectid)
 );
@@ -287,7 +287,7 @@ CREATE TABLE openidm.auditactivity (
   operation VARCHAR(255) NULL ,
   subjectbefore TEXT,
   subjectafter TEXT,
-  changedfields VARCHAR(255) DEFAULT NULL,
+  changedfields TEXT DEFAULT NULL,
   subjectrev VARCHAR(255) DEFAULT NULL,
   passwordchanged VARCHAR(5) DEFAULT NULL,
   message TEXT,
