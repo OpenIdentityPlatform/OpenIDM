@@ -503,7 +503,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         responseContent.asMap().putAll(strippedRelationshipFields.asMap());
 
         // Persists all relationship fields that are present in the new value and updates their values.
-        responseContent.asMap().putAll(persistRelationships(false, context, resourceId, responseContent, relationshipFields)
+        responseContent.asMap().putAll(persistRelationships(false, context, resourceId, oldValue, responseContent, relationshipFields)
                 .asMap());
 
         // Execute the postUpdate script if configured
@@ -552,12 +552,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param clearExisting If existing (those not present in the object) should be cleared
      * @param context The current context
      * @param resourceId The id of the resource these relationships are associated with
+     * @param oldValue A JsonValue map of the old value
      * @param json A JsonValue map that contains relationship fields and value(s) to be persisted
      * @param relationshipFields a set of relationship fields to persist
      * @return A {@link JsonValue} map containing each relationship field and its persisted value(s)
      */
-    private JsonValue persistRelationships(final boolean clearExisting, Context context, String resourceId, final JsonValue json,
-            Set<JsonPointer> relationshipFields) throws ResourceException {
+    private JsonValue persistRelationships(final boolean clearExisting, Context context, String resourceId,
+            final JsonValue oldValue, final JsonValue json, Set<JsonPointer> relationshipFields) throws ResourceException {
         EventEntry measurement = Publisher.start(Name.get("openidm/internal/managedobjectset/persistRelationships"), json, context);
 
         try {
@@ -565,8 +566,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
             for (final JsonPointer relationshipField : relationshipFields) {
                 // value of the relationship in the managed object
-                final JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
-
+                JsonValue relationshipValue = json.expect(Map.class).get(relationshipField);
+                if (relationshipValue == null) {
+                    // If the relationship existed in the old value it means that it has been removed
+                    // in the new object so we will remove the relationships
+                    relationshipValue =
+                            (oldValue.isNotNull() && oldValue.expect(Map.class).get(relationshipField) != null)
+                                ? json(null)
+                                : null;
+                }
                 // Relationships not present in the request will be null
                 // Relationships present in the request but set to null will be JsonValue(null)
                 if (relationshipValue != null) {
@@ -692,7 +700,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             content.asMap().putAll(strippedRelationshipFields.asMap());
 
             // Persists all relationship fields and place their persisted values in content
-            content.asMap().putAll(persistRelationships(true, managedContext, resourceId, content,
+            content.asMap().putAll(persistRelationships(true, managedContext, resourceId, json(null), content,
                     relationshipProviders.keySet()).asMap());
 
             // Execute the postCreate script if configured
