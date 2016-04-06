@@ -245,7 +245,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditconfig` (
   `operation` VARCHAR(255) NULL ,
   `beforeObject` MEDIUMTEXT NULL ,
   `afterObject` MEDIUMTEXT NULL ,
-  `changedfields` VARCHAR(255) NULL ,
+  `changedfields` MEDIUMTEXT NULL ,
   `rev` VARCHAR(255) NULL ,
   PRIMARY KEY (`objectid`));
 
@@ -264,7 +264,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `operation` VARCHAR(255) NULL ,
   `subjectbefore` MEDIUMTEXT NULL ,
   `subjectafter` MEDIUMTEXT NULL ,
-  `changedfields` VARCHAR(255) NULL ,
+  `changedfields` MEDIUMTEXT NULL ,
   `subjectrev` VARCHAR(255) NULL ,
   `passwordchanged` VARCHAR(5) NULL ,
   `message` TEXT NULL,

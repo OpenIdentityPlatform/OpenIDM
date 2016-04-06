@@ -368,7 +368,7 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditconfig' and xtype='U
       operation NVARCHAR(255) NULL ,
       beforeObject NTEXT,
       afterObject NTEXT,
-      changedfields NVARCHAR(255) NULL,
+      changedfields NTEXT NULL,
       rev NVARCHAR(255) NULL,
       PRIMARY KEY CLUSTERED (objectid),
     );
@@ -395,7 +395,7 @@ CREATE  TABLE [openidm].[auditactivity]
   operation NVARCHAR(255) NULL ,
   subjectbefore NTEXT,
   subjectafter NTEXT,
-  changedfields NVARCHAR(255) NULL,
+  changedfields NTEXT NULL,
   subjectrev NVARCHAR(255) NULL,
   passwordchanged NVARCHAR(5) NULL,
   message NTEXT,
