@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.shell.impl;
 
@@ -23,6 +23,7 @@ public class UpdateCommandConfig {
     private long maxJobsFinishWaitTimeMs;
     private long maxUpdateWaitTimeMs;
     private boolean acceptedLicense;
+    private boolean skipRepoUpdatePreview;
     private String logFilePath;
     private boolean quietMode;
     private long checkCompleteFrequency = 5000L;
@@ -108,6 +109,29 @@ public class UpdateCommandConfig {
      */
     public UpdateCommandConfig setAcceptedLicense(boolean acceptedLicense) {
         this.acceptedLicense = acceptedLicense;
+        return this;
+    }
+
+    /**
+     * Returns true if a preview of repository updates was bypassed via the input parameters of the command line.
+     *
+     * @return true if a preview of repository updates was bypassed via the input parameters of the command line.
+     */
+    public boolean isSkipRepoUpdatePreview() {
+        return skipRepoUpdatePreview;
+    }
+
+    /**
+     * Sets if a preview of repository updates was bypassed via the input parameters of the command line.
+     * Suitable if user has already downloaded and approved changes to his/her repository.
+     * If true the process will skip a preview and storing of repository updates.
+     *
+     * @param skipRepoUpdatePreview true if a preview of repository updates was bypassed via the input parameters
+     *                              of the command line.
+     * @return this config instance
+     */
+    public UpdateCommandConfig setSkipRepoUpdatePreview(boolean skipRepoUpdatePreview) {
+        this.skipRepoUpdatePreview = skipRepoUpdatePreview;
         return this;
     }
 
