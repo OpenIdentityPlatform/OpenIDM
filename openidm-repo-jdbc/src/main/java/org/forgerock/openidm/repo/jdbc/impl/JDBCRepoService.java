@@ -739,8 +739,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         }
     }
 
-    @Override
-    public String getDbDirname() {
+    String getDbDirname() {
         switch (databaseType) {
             case SQLSERVER:
                 return "mssql";

@@ -80,6 +80,7 @@ public class Activator implements BundleActivator {
          prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.jdbc");
          prop.put("openidm.router.prefix", "bootrepo");
          prop.put("db.type", "JDBC");
+         prop.put("db.dirname", ((JDBCRepoService)bootSvc).getDbDirname());
          context.registerService(RepoBootService.class.getName(), bootSvc, prop);
          logger.info("Registered bootstrap repository service");
          logger.debug("JDBC bundle started", context);

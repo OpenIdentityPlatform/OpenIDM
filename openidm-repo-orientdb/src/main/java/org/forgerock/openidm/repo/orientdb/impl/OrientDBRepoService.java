@@ -672,11 +672,6 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
         }
     }
 
-    @Override
-    public String getDbDirname() {
-        return null;
-    }
-
     /**
      * @return A connection from the pool. Call close on the connection when done to return to the pool.
      * @throws InternalServerErrorException
