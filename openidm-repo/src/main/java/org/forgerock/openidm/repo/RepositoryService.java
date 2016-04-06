@@ -106,11 +106,4 @@ public interface RepositoryService {
      *             if an error was encountered during query
      */
     public List<ResourceResponse> query(QueryRequest request) throws ResourceException;
-
-    /**
-     * Return the name of the directory in db/ for this repository
-     *
-     * @return The name of the directory or null if not applicable
-     */
-    String getDbDirname();
 }

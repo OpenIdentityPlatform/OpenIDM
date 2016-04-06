@@ -87,6 +87,7 @@ import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.maintenance.impl.UpdateContext;
+import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.ContextUtil;
@@ -100,8 +101,11 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
+import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
+import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -150,6 +154,9 @@ public class UpdateManagerImpl implements UpdateManager {
 
     private String lastUpdateId = null;
 
+    /** The context of this service */
+    private ComponentContext context;
+
     public enum UpdateStatus {
         IN_PROGRESS,
         COMPLETE,
@@ -169,12 +176,59 @@ public class UpdateManagerImpl implements UpdateManager {
         ServiceTracker serviceTracker = new ServiceTracker(bundleContext, filter, null);
         serviceTracker.open(true);
         this.osgiFrameworkService = (OSGiFrameworkService) serviceTracker.getService();
+        this.context = compContext;
+
 
         if (osgiFrameworkService != null) {
             logger.debug("Obtained OSGiFrameworkService", compContext.getProperties());
         } else {
             throw new InternalServerErrorException("Cannot instantiate service without OSGiFrameworkService");
         }
+    }
+
+    /**
+     * Return the name of the db directory in db/ representing the current repo.
+     *
+     * This is retrieved from the OSGi context stored as the db.dirname property on the RepositoryService
+     *
+     * @return The name of the directory in db/ for the current repo or null if none exists
+     * @throws UpdateException If the repo bundle cannot be found
+     */
+    private String getDbDir() throws UpdateException {
+        try {
+            final Filter repoFilter = this.context.getBundleContext()
+                    .createFilter(String.format("(%s=%s)", Constants.OBJECTCLASS, RepoBootService.class.getName()));
+            ServiceTracker repoTracker = new ServiceTracker(this.context.getBundleContext(), repoFilter, null);
+
+            try {
+                repoTracker.open(true);
+
+                ServiceReference ref = repoTracker.getServiceReference();
+
+                if (ref == null) {
+                    throw new UpdateException("Repo bundle could not be found");
+                } else {
+                    final String dbDir = (String) ref.getProperty("db.dirname");
+
+                    if (dbDir == null) {
+                        logger.warn("No directory found in db/ for the current database.");
+                    }
+
+                    return dbDir;
+                }
+            } finally {
+                if (repoTracker != null) {
+                    repoTracker.close();
+                }
+            }
+        } catch (InvalidSyntaxException e) {
+            throw new UpdateException(e);
+        }
+    }
+
+    @Deactivate
+    void deactivate(ComponentContext compContext) {
+        this.context = null;
     }
 
     /** The update logging service */
@@ -184,10 +238,6 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The connection factory */
     @Reference(policy = ReferencePolicy.STATIC)
     protected IDMConnectionFactory connectionFactory;
-
-    /** The repository service */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected volatile RepositoryService repositoryService;
 
     /**
      * Execute a {@link Function} on an input stream for the given {@link Path}.
@@ -373,9 +423,9 @@ public class UpdateManagerImpl implements UpdateManager {
      * @param checker
      * @return
      */
-    private List<Path> listRequiredRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException {
+    private List<Path> listRequiredRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException, UpdateException {
         final List<Path> newUpdates = new ArrayList<>();
-        final String dbDir = repositoryService.getDbDirname();
+        final String dbDir = getDbDir();
 
         if (Strings.isNullOrEmpty(dbDir)) {
             return new ArrayList<>();
@@ -410,9 +460,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
     @Override
     public JsonValue listRepoUpdates(final Path archivePath) throws UpdateException {
-        final String dbDir = repositoryService.getDbDirname();
-
-        if (Strings.isNullOrEmpty(dbDir)) {
+        if (Strings.isNullOrEmpty(getDbDir())) {
             return json(array());
         }
 
@@ -853,7 +901,7 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         public UpdateThread(UpdateLogEntry updateEntry, Path archivePath, Archive archive, FileStateChecker fileStateChecker,
-                Path installDir, JsonValue updateConfig, Path tempDirectory) throws IOException {
+                Path installDir, JsonValue updateConfig, Path tempDirectory) throws IOException, UpdateException {
             this.updateEntry = updateEntry;
             this.archive = archive;
             this.archivePath = archivePath;
@@ -876,6 +924,7 @@ public class UpdateManagerImpl implements UpdateManager {
             try {
                 final String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 final String installDir = IdentityServer.getInstance().getInstallLocation().toString();
+                final Path repoConfPath = Paths.get("db", getDbDir(), "conf");
 
                 // Start by removing all files we no longer need
                 for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
