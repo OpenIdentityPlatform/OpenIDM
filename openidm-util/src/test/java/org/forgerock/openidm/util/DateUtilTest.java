@@ -21,6 +21,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 import org.joda.time.DateTime;
+import org.joda.time.DateTimeZone;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -34,7 +35,7 @@ public class DateUtilTest {
     
     @BeforeClass
     public void beforeClass() throws Exception {
-        dateUtil = DateUtil.getDateUtil();
+        dateUtil = DateUtil.getDateUtil("UTC");
     }
     
     @DataProvider
@@ -62,6 +63,27 @@ public class DateUtilTest {
         };
     }
     
+    @DataProvider
+    public Object[][] schedulerData() {
+        return new Object[][] {
+            { "2016-01-01T09:01:00.000Z", "0 1 9 1 1 ? 2016"},
+            { "2016-03-01T09:01:00.000+00", "0 1 9 1 3 ? 2016"},
+            { "2016-06-20T09:01:55.000+01:00", "55 1 9 20 6 ? 2016"},
+            { "2016-07-30T09:01:55.444+02:34", "55 1 9 30 7 ? 2016"}
+        };
+    }
+    
+    @DataProvider
+    public Object[][] intervalData() {
+        return new Object[][] {
+            { "2016-01-01T09:01:00.000Z/P1M", "2016-01-01T09:01:00.000Z", "2016-02-01T09:01:00.000Z"},
+            { "P1M1DT01H01M/2016-02-01T09:01:00.000Z", "2015-12-31T08:00:00.000Z", 
+                "2016-02-01T09:01:00.000Z"},
+            { "2016-01-01T09:01:00.000Z/2016-03-01T09:01:00.000Z", "2016-01-01T09:01:00.000Z", 
+                "2016-03-01T09:01:00.000Z"},
+        };
+    }
+    
     @Test(dataProvider = "timestampIntervalData")
     public void testIsTimestampWithinInterval(String timestamp, String interval, boolean result) {
         DateTime instant = dateUtil.parseIfDate(timestamp);
@@ -76,12 +98,12 @@ public class DateUtilTest {
     
     @Test
     public void testIsNowWithinInterval() {
-        String passInterval = dateUtil.formatDateTime(DateTime.now().minusDays(1)) 
+        String passInterval = dateUtil.formatDateTime(DateTime.now(DateTimeZone.UTC).minusDays(1)) 
                 + "/" 
-                + dateUtil.formatDateTime(DateTime.now().plusDays(1));
-        String failInterval = dateUtil.formatDateTime(DateTime.now().plusDays(1)) 
+                + dateUtil.formatDateTime(DateTime.now(DateTimeZone.UTC).plusDays(1));
+        String failInterval = dateUtil.formatDateTime(DateTime.now(DateTimeZone.UTC).plusDays(1)) 
                 + "/" 
-                + dateUtil.formatDateTime(DateTime.now().plusDays(2));
+                + dateUtil.formatDateTime(DateTime.now(DateTimeZone.UTC).plusDays(2));
 
         assertThat(dateUtil.isNowWithinInterval(passInterval)).isEqualTo(true);
         assertThat(dateUtil.isNowWithinInterval(failInterval)).isEqualTo(false);
@@ -91,7 +113,18 @@ public class DateUtilTest {
     public void testGetDateDifferenceInDays(String format, String start, String end, Boolean includeDay, int diff) 
             throws ParseException {
         SimpleDateFormat sdf = new SimpleDateFormat(format);
-        assertThat(DateUtil.getDateDifferenceInDays(sdf.parse(start), sdf.parse(end), includeDay))
+        assertThat(dateUtil.getDateDifferenceInDays(sdf.parse(start), sdf.parse(end), includeDay))
                 .isEqualTo(includeDay ? diff + 1 : diff);
+    }
+    
+    @Test(dataProvider = "schedulerData")
+    public void testGetSchedulerExpression(String date, String cronExpression) {
+        assertThat(dateUtil.getSchedulerExpression(dateUtil.parseIfDate(date))).isEqualTo(cronExpression);
+    }
+    
+    @Test(dataProvider = "intervalData")
+    public void testGetStartAndEndOfInterval(String interval, String start, String end) {
+        assertThat(dateUtil.getStartOfInterval(interval).withZone(DateTimeZone.UTC).toString()).isEqualTo(start);
+        assertThat(dateUtil.getEndOfInterval(interval).withZone(DateTimeZone.UTC).toString()).isEqualTo(end);
     }
 }
