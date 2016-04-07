@@ -193,6 +193,54 @@ public final class DateUtil {
     }
     
     /**
+     * Returns a {@link DateTime} object representing the start date of the supplied interval.
+     * 
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @return a {@link DateTime} object representing the start date of the supplied interval.
+     * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
+     */
+    public DateTime getStartOfInterval(String intervalString) throws IllegalArgumentException {
+        Interval interval = Interval.parse(intervalString);
+        DateTime result = interval.getStart();
+        return result;
+    }
+    
+    /**
+     * Returns a {@link DateTime} object representing the end date of the supplied interval.
+     * 
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @return a {@link DateTime} object representing the end date of the supplied interval.
+     * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
+     */
+    public DateTime getEndOfInterval(String intervalString) throws IllegalArgumentException {
+        Interval interval = Interval.parse(intervalString);
+        DateTime result = interval.getEnd();
+        return result;
+    }
+    
+    /**
+     * Returns a {@link String} representing a scheduler expression of the supplied date. The scheduler expression is of
+     * the form: "{second} {minute} {hour} {day} {month} ? {year}".  
+     *
+     * For example, a scheduler expression for January 3, 2016 at 04:56 AM would be: "0 56 4 3 1 ? 2016". 
+     * 
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @return a {@link String} representing a scheduler expression of the supplied date.
+     * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
+     */
+    public String getSchedulerExpression(DateTime date) throws IllegalArgumentException {
+        StringBuilder sb = new StringBuilder()
+                .append(date.getSecondOfMinute()).append(" ")
+                .append(date.getMinuteOfHour()).append(" ")
+                .append(date.getHourOfDay()).append(" ")
+                .append(date.getDayOfMonth()).append(" ")
+                .append(date.getMonthOfYear()).append(" ")
+                .append("? ")
+                .append(date.getYear());
+        return sb.toString();
+    }
+    
+    /**
      * Returns true if the supplied timestamp is within the specified time interval.  The supplied interval string 
      * should contain an ISO 8601 formatted interval string and may be of the formats 'datetime/datetime', 
      * 'datetime/period' or 'period/datetime'
@@ -219,7 +267,7 @@ public final class DateUtil {
      *            include both Days (increase the result with one)
      * @return number of days
      */
-    public static int getDateDifferenceInDays(Date start, Date end, Boolean includeDay) {
+    public int getDateDifferenceInDays(Date start, Date end, Boolean includeDay) {
         Integer result = null;
         if (start != null && end != null) {
             Long l = 86400000L;
