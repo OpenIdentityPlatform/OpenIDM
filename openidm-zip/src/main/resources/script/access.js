@@ -78,6 +78,12 @@ var httpAccessConfig =
            "actions"    : "*",
            "customAuthz": "checkIfUIIsEnabled('selfRegistration') || checkIfUIIsEnabled('passwordReset')"
         },
+        {
+            "pattern"    : "config/ui/dashboard",
+            "roles"      : "openidm-authorized",
+            "methods"    : "read",
+            "actions"    : "*"
+        },
 
         // externally-visisble Self-Service endpoints
         {
