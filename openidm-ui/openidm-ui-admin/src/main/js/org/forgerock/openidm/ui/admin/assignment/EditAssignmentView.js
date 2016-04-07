@@ -276,12 +276,24 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 },
                 editor;
 
+            if (schema.type === "relationship") {
+                schema.type = "object";
+
+                if (!_.isObject(schema.properties)) {
+                    schema.properties = {};
+                }
+
+                schema.properties._ref = {
+                    "type": "string"
+                };
+            }
+
             container.find(".attribute-value").empty();
 
             editor = new JSONEditor(container.find(".attribute-value")[0], {
                 disable_array_reorder: true,
                 disable_collapse: true,
-                disable_edit_json: false,
+                disable_edit_json: true,
                 disable_properties: false,
                 iconlib: "fontawesome4",
                 no_additional_properties: false,
@@ -293,7 +305,7 @@ define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
                 this.$el.find(".compactJSON div.form-control>:input").addClass("form-control");
             }, this));
 
-            if(jsonEditorValue) {
+            if (jsonEditorValue) {
                 editor.setValue(jsonEditorValue);
             }
 

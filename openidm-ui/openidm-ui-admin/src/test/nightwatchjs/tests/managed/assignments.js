@@ -28,6 +28,7 @@ module.exports = {
                 .waitForElementVisible('@alertMessage', 2000)
                 .expect.element('@alertMessage').text.to.equal("Assignment successfully saved.");
         },
+
         'OPENIDM-5444 onAssignment popover stays visible and selection can be made': function (client) {
             var assignmentsEdit = client.page.assignmentsEdit();
 
@@ -44,6 +45,19 @@ module.exports = {
                 .click('@onAssignmentSelectOption')
                 .click('@assignmentOperationPopover');
         },
+
+        "OPENIDM-4859 manager on assignment attribute tab should load an object json editor": function(client) {
+            var assignmentsEdit = client.page.assignmentsEdit();
+
+            assignmentsEdit
+                .waitForElementVisible('@attributeSelect', 2000)
+                .click('@attributeSelect')
+                .waitForElementVisible('@attributeSelectManagerOption', 2000)
+                .click('@attributeSelectManagerOption')
+                .click('@attributeSelect')
+                .assert.attributeEquals("@attributeJSONEditorRoot", "data-schematype", "object");
+        },
+
         'Remove Assignment1': function (client) {
             var assignmentsList = client.page.assignmentsList(),
                 assignmentsEdit = client.page.assignmentsEdit();

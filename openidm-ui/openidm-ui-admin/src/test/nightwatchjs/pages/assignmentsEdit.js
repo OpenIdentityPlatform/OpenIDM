@@ -35,6 +35,15 @@ module.exports = {
         },
         onAssignmentSelectOption: {
             selector: '.onAssignment-select option[value="noOp"]'
+        },
+        attributeSelect: {
+            selector: ".select-attribute"
+        },
+        attributeSelectManagerOption: {
+            selector: '.select-attribute option[value="manager"]'
+        },
+        attributeJSONEditorRoot: {
+            selector: ".attribute-value > div"
         }
     }
 };
