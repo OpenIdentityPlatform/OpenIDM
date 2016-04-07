@@ -35,7 +35,6 @@
 .operations-popover {
   width:200px;
 
-
   .save-operations {
     margin-bottom:5px;
   }
@@ -45,8 +44,27 @@
   .control-label {
     display:none;
   }
+  .well .control-label {
+    display: inline-block;
+  }
 
-  div[data-schemaid="root"] > h3 {
-    display:none;
+  button {
+    border-radius: 4px !important;
+  }
+
+  div[data-schemapath="root"] > h3 {
+    display: none;
+  }
+
+  div[data-schematype="object"] > h3 {
+    display: inline-block !important;
+    margin-top: 0;
+    .btn-group {
+      margin: 0 !important;
+    }
+
+    span {
+      display: none;
+    }
   }
 }
