@@ -16,5 +16,6 @@
 
 // add new test modules here:
 define([
-    "./UserModel"
+    "./UserModel",
+    "./WorkflowForms"
 ]);
