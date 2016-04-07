@@ -156,7 +156,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public ResourceResponse create(Context context, CreateRequest request) throws ResourceException {
-        JsonValue response = handle(request, request.getResourcePathObject().child(request.getNewResourceId()).toString(), null);
+        JsonValue response = handle(request, request.getResourcePathObject().toString(), null);
         return newResourceResponse(response.get("_id").asString(), response.get("_rev").asString(), response);
     }
 
