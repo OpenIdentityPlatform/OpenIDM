@@ -55,7 +55,8 @@ require.config({
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
         d3 : "libs/d3-3.5.5-min",
         dimple : "libs/dimple-2.1.2-min",
-        jsonEditor: "libs/jsoneditor-0.7.9-min"
+        jsonEditor: "libs/jsoneditor-0.7.9-min",
+        dragula : "libs/dragula-3.6.7-min"
     },
 
     shim: {
