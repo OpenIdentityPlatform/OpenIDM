@@ -27,35 +27,36 @@ define("config/process/AdminIDMConfig", [
             description: "",
             override: true,
             dependencies: [
-                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
                 "config/routes/AdminRoutesConfig"
             ],
-            processDescription: function(event, Configuration, AdminRoutesConfig) {
+            processDescription: function(event, ConfigDelegate, AdminRoutesConfig) {
                 var landingPage,
                     dashboardIndex;
 
-                // If a default dashboard is configured set that to the landing page
-                if (_.has(Configuration.globalData, "adminDashboards") && Configuration.globalData.adminDashboards.length > 0) {
+                ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig) {
+                    // If a default dashboard is configured set that to the landing page
+                    if (_.has(dashboardConfig, "adminDashboards") && dashboardConfig.adminDashboards.length > 0) {
 
-                    dashboardIndex = _.findIndex(Configuration.globalData.adminDashboards, {"isDefault": true});
+                        dashboardIndex = _.findIndex(dashboardConfig.adminDashboards, {"isDefault": true});
 
-                    if (dashboardIndex === -1) {
-                        dashboardIndex = 0;
+                        if (dashboardIndex === -1) {
+                            dashboardIndex = 0;
+                        }
+
+                        landingPage = {
+                            view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
+                            role: "ui-admin",
+                            url: "dashboard/" + dashboardIndex
+                        };
+
+                        // If there are no dashboards set the landing page to the new dashboard view
+                    } else {
+                        landingPage = AdminRoutesConfig.newDashboardView;
                     }
 
-                    landingPage = {
-                        view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
-                        role: "ui-admin",
-                        url: "dashboard/" + dashboardIndex
-                    };
-
-                    // If there are no dashboards set the landing page to the new dashboard view
-                } else {
-                    landingPage = AdminRoutesConfig.newDashboardView;
-                }
-
-                EventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: landingPage});
-
+                    EventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: landingPage});
+                }));
             }
         },
         {
@@ -144,8 +145,9 @@ define("config/process/AdminIDMConfig", [
 
                 $.when(
                     ConfigDelegate.readEntity("managed"),
-                    ConfigDelegate.readEntity("ui/configuration")
-                ).then(function(managedConfig, uiConfig) {
+                    ConfigDelegate.readEntity("ui/configuration"),
+                    ConfigDelegate.readEntity("ui/dashboard")
+                ).then(function(managedConfig, uiConfig, dashboardConfig) {
                     // used to reflect the state of self-service features in the navigation
                     var selfServiceOptions = [
                         {
@@ -187,10 +189,10 @@ define("config/process/AdminIDMConfig", [
                     // Updates the Dashboards dropdown values
                     Navigation.configuration.links.admin.urls.dashboard.urls = [];
 
-                    _.each(Configuration.globalData.adminDashboards, function(dashboard, index) {
+                    _.each(dashboardConfig.adminDashboards, function(dashboard, index) {
                         name = dashboard.name;
 
-                        if (index === _.findIndex(Configuration.globalData.adminDashboards, {"isDefault": true})) {
+                        if (index === _.findIndex(dashboardConfig.adminDashboards, {"isDefault": true})) {
                             name = name + " (" + $.t("dashboard.new.default")+")";
                         }
 

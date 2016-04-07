@@ -51,20 +51,22 @@ define("org/forgerock/openidm/ui/admin/dashboard/NewDashboard", [
         render: function(args, callback) {
             var adminDashboards = [];
 
-            this.model.uiConf = Configuration.globalData;
+            ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig) {
+                this.model.uiConf = dashboardConfig;
 
-            if (_.has(this.model.uiConf, "adminDashboards")) {
-                this.model.adminDashboards = this.model.uiConf.adminDashboards;
-            }
-
-            this.data.existingDashboards = _.pluck(this.model.adminDashboards, "name");
-
-            this.parentRender(_.bind(function () {
-                ValidatorsManager.bindValidators(this.$el.find("#NewDashboardForm"));
-                ValidatorsManager.validateAllFields(this.$el.find("#NewDashboardForm"));
-                if (callback) {
-                    callback();
+                if (_.has(this.model.uiConf, "adminDashboards")) {
+                    this.model.adminDashboards = this.model.uiConf.adminDashboards;
                 }
+
+                this.data.existingDashboards = _.pluck(this.model.adminDashboards, "name");
+
+                this.parentRender(_.bind(function () {
+                    ValidatorsManager.bindValidators(this.$el.find("#NewDashboardForm"));
+                    ValidatorsManager.validateAllFields(this.$el.find("#NewDashboardForm"));
+                    if (callback) {
+                        callback();
+                    }
+                }, this));
             }, this));
         },
 
@@ -84,7 +86,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/NewDashboard", [
                 "widgets": []
             });
 
-            ConfigDelegate.updateEntity("ui/configuration", {"configuration": this.model.uiConf}).then(_.bind(function() {
+            ConfigDelegate.updateEntity("ui/dashboard", this.model.uiConf).then(_.bind(function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "newDashboardCreated");
                 EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
                 EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: {
@@ -92,9 +94,6 @@ define("org/forgerock/openidm/ui/admin/dashboard/NewDashboard", [
                     role: "ui-admin",
                     url: "dashboard/" + (this.model.adminDashboards.length - 1)
                 }});
-
-                SiteConfigurationDelegate.updateConfiguration();
-
             }, this));
         }
     });

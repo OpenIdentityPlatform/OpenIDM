@@ -17,9 +17,7 @@ module.exports = {
     },
 
     after: function(client) {
-        client.config.resetAll(function(data) {
-            client.end();
-        });
+        client.end();
     },
 
     "Add a dashboard": function(client) {
@@ -34,10 +32,17 @@ module.exports = {
         // Add a new dashboard named "Test Dashboard 1"
         navigation.click("@newDashboardLink");
 
-        newDashboard.waitForElementPresent("@form", 2000)
+        newDashboard
+            .waitForElementPresent("@form", 2000)
             .setValue("@nameInput", "Test Dashboard 1");
 
-        client.pause(1000);
+        client
+            .pause(1000)
+            .execute(function () {
+                $("#DashboardName").trigger("blur");
+            })
+            .pause(1000);
+
         newDashboard.click("@createDashboardButton");
 
         dashboardBody.waitForElementPresent("@widgetContainer", 2000);
@@ -58,6 +63,8 @@ module.exports = {
             .waitForElementPresent("@firstWidgetTitle", 2000)
             .assert.containsText("@firstWidgetTitle", "CPU USAGE");
 
+        client.pause(2000);
+
         addWidgetsWindow
             .assert.elementPresent("@dialogBody")
             .waitForElementPresent("@closeButton", 2000)
@@ -65,15 +72,26 @@ module.exports = {
             .waitForElementNotPresent("@dialogBody", 3000);
     },
 
+
     "Attempt to add a dashboard with a used name": function(client) {
         // Attempt to add a dashboard with the same name as a previously added dashboard
         navigation
             .click("@dashboardDropdown")
             .click("@newDashboardLink");
 
+
         newDashboard
             .waitForElementPresent("@form", 2000)
-            .setValue("@nameInput", "Test Dashboard 1")
+            .setValue("@nameInput", "Test Dashboard 1");
+
+        client
+            .pause(1000)
+            .execute(function () {
+                $("#DashboardName").trigger("blur");
+            })
+            .pause(1000);
+
+        newDashboard
             .assert.attributeEquals("@createDashboardButton", "disabled", "true");
     },
 
@@ -82,6 +100,15 @@ module.exports = {
         newDashboard
             .clearValue("@nameInput")
             .setValue("@nameInput", "Test Dashboard 2")
+
+        client
+            .pause(1000)
+            .execute(function () {
+                $("#DashboardName").trigger("blur");
+            })
+            .pause(1000);
+
+        newDashboard
             .click("@setAsDefaultToggle")
             .click("@createDashboardButton");
 
@@ -103,6 +130,8 @@ module.exports = {
             .assert.elementPresent("@dialogBody")
             .click("@lifeCycleMemoryHeapAddButton");
 
+        client.pause(2000);
+
         dashboardBody
             .waitForElementPresent("@firstWidgetTitle", 2000)
             .assert.containsText("@firstWidgetTitle", "MEMORY USAGE (JVM HEAP)");
@@ -112,6 +141,8 @@ module.exports = {
             .assert.elementPresent("@dialogBody")
             .waitForElementPresent("@systemHealthFullAddButton", 2000)
             .click("@systemHealthFullAddButton");
+
+        client.pause(2000);
 
         dashboardBody.waitForElementPresent("@secondWidgetTitle", 3000);
 
@@ -146,7 +177,9 @@ module.exports = {
             .waitForElementPresent("@logoLink", 2000)
             .click("@logoLink");
 
-        dashboardHeader.assert.containsText("@title", "Test Dashboard 2 (Default)");
+        dashboardHeader
+            .waitForElementPresent("@title", 2000)
+            .assert.containsText("@title", "Test Dashboard 2 (Default)");
     },
 
     "Deleting a dashboard takes you to the first dash": function(client) {
@@ -194,13 +227,30 @@ module.exports = {
 
         renameDashboardWindow
             .waitForElementPresent("@body", 2000)
-            .setValue("@name", "Reconciliation Dashboard")
-            .assert.attributeEquals("@submit", "disabled", "true");
+            .setValue("@name", "Reconciliation Dashboard");
+
+        client
+            .pause(1000)
+            .execute(function () {
+                $("#DashboardName").trigger("keyup");
+            })
+            .pause(1000);
+
+        renameDashboardWindow.assert.attributeEquals("@submit", "disabled", "true");
 
         // Rename dashboard to "Renamed Test Dashboard 1", assert the view now has this as a title
         renameDashboardWindow
             .clearValue("@name")
-            .setValue("@name", "Renamed Test Dashboard 1")
+            .setValue("@name", "Renamed Test Dashboard 1");
+
+        client
+            .pause(1000)
+            .execute(function () {
+                $("#DashboardName").trigger("keyup");
+            })
+            .pause(1000);
+
+        renameDashboardWindow
             .click("@submit");
 
         client.pause(1000);
@@ -221,15 +271,32 @@ module.exports = {
             .assert.value("@name", "Duplicate of Renamed Test Dashboard 1");
 
         // assert you can't name it "Renamed Test Dashboard 1"
-        duplicateDashboardWindow
+       duplicateDashboardWindow
             .clearValue("@name")
-            .setValue("@name", "Renamed Test Dashboard 1")
-            .assert.attributeEquals("@submit", "disabled", "true");
+            .setValue("@name", "Renamed Test Dashboard 1");
+
+        client
+            .pause(1000)
+            .execute(function () {
+                $("#DashboardName").trigger("keyup");
+            })
+            .pause(1000);
+
+        duplicateDashboardWindow.assert.attributeEquals("@submit", "disabled", "true");
 
         // rename it "Duplicated Test Dashboard",
         duplicateDashboardWindow
             .clearValue("@name")
-            .setValue("@name", "Duplicated Test Dashboard")
+            .setValue("@name", "Duplicated Test Dashboard");
+
+        client
+            .pause(1000)
+            .execute(function () {
+                $("#DashboardName").trigger("keyup");
+            })
+            .pause(1000);
+
+        duplicateDashboardWindow
             .click("@submit");
 
         client.pause(1000);
@@ -254,15 +321,7 @@ module.exports = {
             .click("@optionsToggle")
             .click("@deleteButton");
         client.pause(1000);
+
         dashboardHeader.assert.containsText("@title", "Reconciliation Dashboard");
-
-        //Delete "Reconciliation Dashboard"
-        dashboardHeader
-            .click("@optionsToggle")
-            .click("@deleteButton");
-        client.pause(1000);
-
-        // With no dashboards you should be redirected to the create a dashboard view
-        newDashboard.assert.containsText("@title", "Create New Dashboard");
     }
 };

@@ -1,0 +1,92 @@
+{
+    "dashboard" : {
+        "widgets" : [
+            {
+                "type" : "workflow"
+            },
+            {
+                "type" : "quickStart",
+                "size" : "large",
+                "cards" : [
+                    {
+                        "name" : "dashboard.quickStart.viewProfile",
+                        "icon" : "fa-user",
+                        "href" : "#profile/details"
+                    },
+                    {
+                        "name" : "dashboard.quickStart.changePassword",
+                        "icon" : "fa-lock",
+                        "href" : "#profile/password"
+                    }
+                ]
+            }
+        ]
+    },
+    "adminDashboards" : [
+        {
+            "name" : "Reconciliation Dashboard",
+            "isDefault" : true,
+            "widgets" : [
+                {
+                    "type" : "quickStart",
+                    "size" : "large",
+                    "cards" : [
+                        {
+                            "name" : "Add New Connector",
+                            "icon" : "fa-database",
+                            "href" : "#connectors/add/"
+                        },
+                        {
+                            "name" : "Add New Mapping",
+                            "icon" : "fa-map-marker",
+                            "href" : "#mapping/add/"
+                        },
+                        {
+                            "name" : "Managed Role",
+                            "icon" : "fa-check-square-o",
+                            "href" : "#resource/managed/role/list/"
+                        },
+                        {
+                            "name" : "Add New Device",
+                            "icon" : "fa-tablet",
+                            "href" : "#managed/add/"
+                        },
+                        {
+                            "name" : "Set up Registration",
+                            "icon" : "fa-gear",
+                            "href" : "#selfservice/userregistration/"
+                        },
+                        {
+                            "name" : "Set up Password Reset",
+                            "icon" : "fa-gear",
+                            "href" : "#selfservice/passwordreset/"
+                        },
+                        {
+                            "name" : "Manage User",
+                            "icon" : "fa-user",
+                            "href" : "#resource/managed/user/list/"
+                        },
+                        {
+                            "name" : "Configure OpenIDM",
+                            "icon" : "fa-user",
+                            "href" : "#settings/"
+                        }
+                    ]
+                },
+                {
+                    "type" : "lastRecon",
+                    "size" : "large",
+                    "barchart" : false
+                },
+                {
+                    "type" : "systemHealthFull",
+                    "size" : "large"
+                },
+                {
+                    "type" : "resourceList",
+                    "size" : "large"
+                }
+            ]
+        }
+    ]
+}

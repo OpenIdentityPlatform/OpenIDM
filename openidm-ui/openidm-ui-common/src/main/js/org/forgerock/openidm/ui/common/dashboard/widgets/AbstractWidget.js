@@ -55,6 +55,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget", [
             this.data.widgetTitle = args.title;
             this.data.widgetType = args.widget.type;
             this.data.showConfigButton = args.showConfigButton;
+            this.data.dashboardConfig = args.dashboardConfig;
 
             this.widgetRender(args, callback);
         },
@@ -63,7 +64,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget", [
             event.preventDefault();
 
             //We have to go outside the view scope to actually find the widgets proper location
-            var currentConf = Configuration.globalData,
+            var currentConf = this.data.dashboardConfig,
                 currentWidget = $(event.target).parents(".widget-holder"),
                 widgetLocation = $(".widget-holder").index(currentWidget),
                 self = this,
@@ -117,7 +118,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget", [
         saveWidgetConfiguration: function(currentConfig) {
             var currentDashboard = URIUtils.getCurrentFragment().split("/")[1];
 
-            ConfigDelegate.updateEntity("ui/configuration", {"configuration": currentConfig}).then(_.bind(function() {
+            ConfigDelegate.updateEntity("ui/dashboard", currentConfig).then(_.bind(function() {
                 this.updateConfiguration(function() {
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "dashboardWidgetConfigurationSaved");
 

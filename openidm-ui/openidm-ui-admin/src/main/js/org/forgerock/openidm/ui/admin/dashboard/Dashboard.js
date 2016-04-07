@@ -74,69 +74,73 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
         render: function(args, callback) {
             var holderList = null;
 
-            this.data.dashboard = Configuration.globalData.adminDashboard;
-            this.model.uiConf = Configuration.globalData;
+            ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig){
+                this.data.dashboard = dashboardConfig.adminDashboard;
+                this.model.uiConf = dashboardConfig;
+                this.model.dashboardRef = this;
 
-            if (_.has(this.model.uiConf, "adminDashboards")) {
-                this.model.allDashboards = this.model.uiConf.adminDashboards;
-            }
-
-            this.model.dashboardIndex = parseInt(Router.getCurrentHash().split("/")[1], 10) || 0;
-
-            this.model.loadedWidgets = [];
-            this.data.dashboard = this.model.allDashboards[this.model.dashboardIndex];
-
-            if (!this.data.dashboard) {
-                EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.newDashboardView});
-                return;
-            }
-
-            this.data.isDefault = this.data.dashboard.isDefault;
-
-            this.parentRender(_.bind(function() {
-                $(window).unbind("resize.dashboardResize");
-                var renderedWidgetCount = 0;
-
-                if (!_.isUndefined(this.data.dashboard.widgets) && this.data.dashboard.widgets.length > 0) {
-                    holderList = this.$el.find(".widget-holder");
-
-                    _.each(this.data.dashboard.widgets, function (widget, index) {
-                        this.model.loadedWidgets.push(DashboardWidgetLoader.generateWidget(
-                            {
-                                "element" : holderList[index],
-                                "widget" : widget
-                            },
-                            // This callback is used to make sure every widget has been rendered before initiating the
-                            // drag and drop utility.
-                            _.bind(function() {
-                                renderedWidgetCount ++;
-                                if (renderedWidgetCount === this.data.dashboard.widgets.length) {
-                                    this.initDragDrop();
-                                }
-                            }, this))
-                        );
-
-                    }, this);
+                if (_.has(this.model.uiConf, "adminDashboards")) {
+                    this.model.allDashboards = this.model.uiConf.adminDashboards;
                 }
 
-                //Calls widget specific resize function if needed
-                $(window).bind("resize.dashboardResize", _.bind(function () {
-                    if (!$.contains(document, this.$el.find("#dashboardWidgets")[0])) {
-                        $(window).unbind("resize");
-                    } else {
-                        _.each(this.model.loadedWidgets, function(dashboardHolder){
-                            if(dashboardHolder.model.widget.resize){
-                                dashboardHolder.model.widget.resize();
-                            }
+                this.model.dashboardIndex = parseInt(Router.getCurrentHash().split("/")[1], 10) || 0;
+
+                this.model.loadedWidgets = [];
+                this.data.dashboard = this.model.allDashboards[this.model.dashboardIndex];
+
+                if (!this.data.dashboard) {
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.newDashboardView});
+                    return;
+                }
+
+                this.data.isDefault = this.data.dashboard.isDefault;
+
+                this.parentRender(_.bind(function() {
+                    $(window).unbind("resize.dashboardResize");
+                    var renderedWidgetCount = 0;
+
+                    if (!_.isUndefined(this.data.dashboard.widgets) && this.data.dashboard.widgets.length > 0) {
+                        holderList = this.$el.find(".widget-holder");
+
+                        _.each(this.data.dashboard.widgets, function (widget, index) {
+                            this.model.loadedWidgets.push(DashboardWidgetLoader.generateWidget(
+                                    {
+                                        "element" : holderList[index],
+                                        "widget" : widget,
+                                        "dashboardConfig" : dashboardConfig
+                                    },
+                                    // This callback is used to make sure every widget has been rendered before initiating the
+                                    // drag and drop utility.
+                                    _.bind(function() {
+                                        renderedWidgetCount ++;
+                                        if (renderedWidgetCount === this.data.dashboard.widgets.length) {
+                                            this.initDragDrop();
+                                        }
+                                    }, this))
+                            );
+
                         }, this);
                     }
-                    this.initDragDrop();
 
+                    //Calls widget specific resize function if needed
+                    $(window).bind("resize.dashboardResize", _.bind(function () {
+                        if (!$.contains(document, this.$el.find("#dashboardWidgets")[0])) {
+                            $(window).unbind("resize");
+                        } else {
+                            _.each(this.model.loadedWidgets, function(dashboardHolder){
+                                if(dashboardHolder.model.widget.resize){
+                                    dashboardHolder.model.widget.resize();
+                                }
+                            }, this);
+                        }
+                        this.initDragDrop();
+
+                    }, this));
+
+                    if (callback) {
+                        callback();
+                    }
                 }, this));
-
-                if (callback) {
-                    callback();
-                }
             }, this));
         },
 
@@ -155,7 +159,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
 
             dragDropInstance.on("dragend", _.bind(function(el, container) {
                 var widgetCopy = this.data.dashboard.widgets[start],
-                    stop = _.indexOf($(container).find(".widget-holder"), el);
+                    stop = _.indexOf(this.$el.find("#dashboardWidgets .widget-holder"), el);
 
                 AutoScroll.endDrag();
 
@@ -250,16 +254,19 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             });
         },
 
+        /**
+         Override validation to allow dialog to enable/disable Save correctly
+         */
         validationSuccessful: function (event) {
             AdminAbstractView.prototype.validationSuccessful(event);
 
-            this.$el.closest(".modal-content").find("#SaveNewName").prop('disabled', false);
+            this.model.dashboardRef.$el.closest(".modal-content").find("#SaveNewName").prop('disabled', false);
         },
 
         validationFailed: function (event, details) {
             AdminAbstractView.prototype.validationFailed(event, details);
 
-            this.$el.closest(".modal-content").find("#SaveNewName").prop('disabled', true);
+            this.model.dashboardRef.$el.closest(".modal-content").find("#SaveNewName").prop('disabled', true);
         },
 
         duplicateDashboard: function(e) {
@@ -336,48 +343,43 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
         saveChanges: function(message, landingIndex, callback) {
             this.model.uiConf.adminDashboards = this.model.allDashboards;
 
-            ConfigDelegate.updateEntity("ui/configuration", {"configuration": this.model.uiConf}).then(_.bind(function() {
+            ConfigDelegate.updateEntity("ui/dashboard", this.model.uiConf).then(_.bind(function() {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, message);
                 EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
 
-                SiteConfigurationDelegate.updateConfiguration(_.bind(function() {
-                    if (this.model.dashboardIndex === landingIndex) {
-                        this.render();
+                if (this.model.dashboardIndex === landingIndex) {
+                    this.render();
 
-                    } else if (_.isNumber(landingIndex) && landingIndex > -1) {
-                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
-                            route: {
-                                view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
-                                role: "ui-admin",
-                                url: "dashboard/" + landingIndex
-                            }
-                        });
-                    } else if (_.isNumber(landingIndex)) {
-                        EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.newDashboardView});
-                    }
+                } else if (_.isNumber(landingIndex) && landingIndex > -1) {
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        route: {
+                            view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
+                            role: "ui-admin",
+                            url: "dashboard/" + landingIndex
+                        }
+                    });
+                } else if (_.isNumber(landingIndex)) {
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.newDashboardView});
+                }
 
-                    if (callback) {
-                        callback();
-                    }
-                }, this));
+                if (callback) {
+                    callback();
+                }
             }, this));
         },
 
         deleteWidget: function(event) {
             event.preventDefault();
 
-            var currentConf = Configuration.globalData,
+            var currentConf = this.model.uiConf,
                 currentWidget = $(event.target).parents(".widget-holder"),
                 widgetLocation = this.$el.find(".widget-holder").index(currentWidget);
 
             currentConf.adminDashboards[this.model.dashboardIndex].widgets.splice(widgetLocation, 1);
 
             UIUtils.confirmDialog($.t("dashboard.widgetDelete"), "danger", _.bind(function(){
-                 ConfigDelegate.updateEntity("ui/configuration", {"configuration": currentConf}).then(_.bind(function() {
-                     SiteConfigurationDelegate.updateConfiguration(_.bind(function() {
-                             this.render();
-                         }, this)
-                     );
+                 ConfigDelegate.updateEntity("ui/dashboard", currentConf).then(_.bind(function() {
+                     this.render();
                  }, this));
             }, this));
         }

@@ -24,8 +24,16 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/workflow/tasks/TasksDashboard",
-    "org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader"
-], function($, _, AbstractView, eventManager, constants, conf, tasksDashboard, DashboardWidgetLoader) {
+    "org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate"
+], function($, _,
+            AbstractView,
+            eventManager,
+            constants,
+            conf,
+            tasksDashboard,
+            DashboardWidgetLoader,
+            ConfigDelegate) {
     var Dashboard = AbstractView.extend({
         template: "templates/dashboard/DashboardTemplate.html",
         model: {
@@ -44,39 +52,41 @@ define("org/forgerock/openidm/ui/dashboard/Dashboard", [
             if (conf.loggedUser) {
                 var roles = conf.loggedUser.uiroles;
 
-                this.model.dashboard = conf.globalData.dashboard;
+                ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig) {
+                    this.model.dashboard = dashboardConfig.dashboard;
 
-                this.parentRender(_.bind(function(){
-                    var templElement;
+                    this.parentRender(_.bind(function () {
+                        var templElement;
 
-                    if (!_.isUndefined(this.model.dashboard.widgets) && this.model.dashboard.widgets.length > 0) {
-                        _.each(this.model.dashboard.widgets, _.bind(function (widget) {
+                        if (!_.isUndefined(this.model.dashboard.widgets) && this.model.dashboard.widgets.length > 0) {
+                            _.each(this.model.dashboard.widgets, _.bind(function (widget) {
 
-                            if (widget.type === "workflow") {
-                                this.loadWorkflow(roles, callback);
-                            } else {
-                                if(widget.size === "x-small") {
-                                    templElement = $('<div class="col-sm-4"></div>');
-                                } else if (widget.size === "small"){
-                                    templElement = $('<div class="col-sm-6"></div>');
-                                } else if (widget.size === "medium") {
-                                    templElement = $('<div class="col-sm-8"></div>');
+                                if (widget.type === "workflow") {
+                                    this.loadWorkflow(roles, callback);
                                 } else {
-                                    templElement = $('<div class="col-sm-12"></div>');
+                                    if (widget.size === "x-small") {
+                                        templElement = $('<div class="col-sm-4"></div>');
+                                    } else if (widget.size === "small") {
+                                        templElement = $('<div class="col-sm-6"></div>');
+                                    } else if (widget.size === "medium") {
+                                        templElement = $('<div class="col-sm-8"></div>');
+                                    } else {
+                                        templElement = $('<div class="col-sm-12"></div>');
+                                    }
+
+                                    this.$el.find("#dashboardWidgets").append(templElement);
+
+                                    this.model.loadedWidgets = [DashboardWidgetLoader.generateWidget({
+                                        "element": templElement,
+                                        "widget": widget
+                                    })];
                                 }
 
-                                this.$el.find("#dashboardWidgets").append(templElement);
-
-                                this.model.loadedWidgets = [DashboardWidgetLoader.generateWidget({
-                                    "element" : templElement,
-                                    "widget" : widget
-                                })];
-                            }
-
-                        }, this));
-                    } else {
-                        this.loadWorkflow(roles, callback);
-                    }
+                            }, this));
+                        } else {
+                            this.loadWorkflow(roles, callback);
+                        }
+                    }, this));
                 }, this));
             }
         },
