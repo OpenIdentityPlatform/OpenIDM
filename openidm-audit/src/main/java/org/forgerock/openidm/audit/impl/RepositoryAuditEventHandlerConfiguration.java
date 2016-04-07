@@ -16,9 +16,9 @@
 
 package org.forgerock.openidm.audit.impl;
 
-import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import org.forgerock.audit.events.handlers.EventHandlerConfiguration;
 
 /**
  * Configuration class for RepositoryAuditEventHandler.
@@ -32,6 +32,7 @@ public class RepositoryAuditEventHandlerConfiguration extends EventHandlerConfig
      * Returns the fixed path to repository audits.
      * @return #REPO_AUDIT_PATH
      */
+    @JsonIgnore
     public String getResourcePath() {
         return REPO_AUDIT_PATH;
     }
