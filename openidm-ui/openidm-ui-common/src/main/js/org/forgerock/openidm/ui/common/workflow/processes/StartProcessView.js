@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
         formSubmit: function(event) {
             event.preventDefault();
 
-            if(validatorsManager.formNotInvalid(this.$el)) {
+            if(validatorsManager.formValidated(this.$el)) {
                 var params = form2js(this.$el.attr("id"), '.', false), param, typeName, paramValue, date, dateFormat;
                 delete params.startProcessButton;
                 for (param in params) {
