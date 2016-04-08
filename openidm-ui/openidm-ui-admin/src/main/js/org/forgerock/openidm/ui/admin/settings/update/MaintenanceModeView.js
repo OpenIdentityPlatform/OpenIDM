@@ -47,6 +47,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/MaintenanceModeView", [
          * @param [callback]
          */
         render: function(configs, callback) {
+
             this.data.enterMaintenanceMode = configs.enterMaintenanceMode;
             this.model.success = configs.success;
             this.model.error = configs.error;

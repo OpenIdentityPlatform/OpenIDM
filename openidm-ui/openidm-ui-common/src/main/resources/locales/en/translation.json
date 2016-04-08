@@ -969,6 +969,22 @@
         },
         "update": {
             "title": "Update",
+            "repoUpdates" : {
+                "header": "Repository Update Script Preview",
+                "headerText": "Review repository updates to be performed manually below.",
+                "description": "OpenIDM will stay in maintenance mode until repository updates are complete.",
+                "tableHeader": "DATABASE FILE",
+                "continue": "Continue",
+                "cancel": "Cancel",
+                "link": "LINK",
+                "complete": "Mark Complete",
+                "paused": "Update paused.",
+                "processManual": "Process all repository updates manually before resuming.",
+                "headerFinal": "Repository Updates",
+                "details": "OpenIDM will restart when repository updates are marked complete",
+                "preview": "Repository update preview.",
+                "download": "Download"
+            },
             "versions": {
                 "header": "Available Updates",
                 "noVersions": "To update OpenIDM, download the desired binary (in zip format), and copy it to the openidm/bin/update directory.",

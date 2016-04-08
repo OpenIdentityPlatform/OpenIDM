@@ -1,8 +1,24 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015-2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="container col-md-6 col-md-offset-3" id="updateInstallerContainer">
 
-    {{#unless successful}}
+<div class="container col-md-6 col-md-offset-3" id="updateInstallerContainer">
+    {{#if successful}}
+    <div class="text-center">
+        <img src="images/login-logo.png"/>
+
+        <div class="page-header text-primary"><h1>{{t "templates.update.install.successfulUpdate"}}</h1></div>
+
+        <p class="restart">{{t "templates.update.install.restartIn"}} <span>30</span> {{t "templates.update.install.seconds"}} <a href="#" class="restartNow text-primary">{{t "templates.update.install.restartNow"}}</a></p>
+
+        <a class="downloadBtn" href="data:application/octet-stream;charset=utf-16le;base64,{{responseB64}}">
+            <button type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase">
+                <i class="fa fa-download"></i> {{t "templates.update.install.download"}}
+            </button>
+        </a>
+
+        <p class="text-muted">{{t "templates.update.install.details"}}</p>
+    </div>
+    {{else}}
         <div class="text-center">
             <img src="images/login-logo.png"/>
 
@@ -13,23 +29,5 @@
             </div>
         </div>
         <strong>{{msg}}</strong>
-
-    {{else}}
-        <div class="text-center">
-            <img src="images/login-logo.png"/>
-
-            <div class="page-header text-primary"><h1>{{t "templates.update.install.successfulUpdate"}}</h1></div>
-
-            <p class="restart">{{t "templates.update.install.restartIn"}} <span>30</span> {{t "templates.update.install.seconds"}} <a href="#" class="restartNow text-primary">{{t "templates.update.install.restartNow"}}</a></p>
-
-            <a class="downloadBtn" href="data:application/octet-stream;charset=utf-16le;base64,{{responseB64}}">
-                <button type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase">
-                    <i class="fa fa-download"></i> {{t "templates.update.install.download"}}
-                </button>
-            </a>
-
-            <p class="text-muted">{{t "templates.update.install.details"}}</p>
-        </div>
-    {{/unless}}
-
+    {{/if}}
 </div>

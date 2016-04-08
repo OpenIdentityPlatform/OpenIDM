@@ -62,6 +62,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", 
          * @param [callback]
          */
         render: function(configs, callback) {
+
             // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
             SpinnerManager.showSpinner();
 

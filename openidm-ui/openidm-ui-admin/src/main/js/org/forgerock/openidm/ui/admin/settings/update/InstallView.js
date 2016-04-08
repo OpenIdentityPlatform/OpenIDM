@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define, window*/
@@ -22,13 +22,11 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate"
-
 ], function($, _,
-            AdminAbstractView,
-            Constants,
-            MaintenanceDelegate) {
-
-    var VersionsView = AdminAbstractView.extend({
+        AdminAbstractView,
+        Constants,
+        MaintenanceDelegate) {
+    var InstallView = AdminAbstractView.extend({
         template: "templates/admin/settings/update/InstallTemplate.html",
         element: "#install",
         noBaseTemplate: true,
@@ -51,9 +49,10 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
          * @param configs.error {function}
          * @param [callback]
          */
-        render: function(configs, callback) {
 
+        render: function(configs, callback) {
             this.model = configs;
+
             this.data = _.extend(this.data, _.pick(this.model, ["successful", "msg", "percent", "responseB64"]));
 
             function finishRender() {
@@ -65,6 +64,8 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                         this.restarting();
                     } else if (this.data.successful && !this.model.archiveModel.get("restartRequired")) {
                         this.installationReport();
+                    } else if (this.data.repoUpdates) {
+                        this.showRepoUpdates(this.data.lastID);
                     } else if (this.model.runningID) {
                         this.pollInstall(this.model.runningID);
                     }
@@ -98,16 +99,18 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                     _.bind(finishRender, this)();
                 }
             }
+            _.bind(preRender, this)();
 
-            if (!_.has(this.model, "lastUpdateId")) {
-                MaintenanceDelegate.getLastUpdateId().then(_.bind(function(response) {
-                    this.model.lastUpdateId = response.lastUpdateId;
-                    _.bind(preRender, this)();
-                }, this));
+        },
 
-            } else {
-                _.bind(preRender, this)();
-            }
+        showRepoUpdates: function() {
+            this.data.final = true;
+            this.model.repoUpdates({
+                "archiveModel": this.model.archiveModel,
+                "data": this.data,
+                "model": this.model
+            });
+            this.showUI();
         },
 
         showUI: function() {
@@ -116,7 +119,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
         },
 
         /**
-         * Restarts IDM if it wasn't triggered naturally thought the countdown. Then waits for the last update id.
+         * Restarts IDM if it wasn't triggered naturally through the countdown. Then waits for the last update id.
          * @param e
          */
         restartNow: function(e) {
@@ -126,8 +129,11 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
 
             if (!this.model.restarted) {
                 this.$el.find(".restart").text($.t("templates.update.install.restarting"));
-                
-                this.waitForLastUpdateID(_.bind(this.installationReport, this));
+
+                MaintenanceDelegate.restartIDM().then(_.bind(function() {
+                    this.waitForLastUpdateID(_.bind(this.installationReport, this));
+                }, this));
+
             }
         },
 
@@ -142,14 +148,18 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
 
                 if (seconds > 0 && !this.model.restarted) {
                     _.delay(_.bind(function () {
-                        _.bind(countDown, this)(seconds-1);
+                        _.bind(countDown, this)(seconds - 1);
                     }, this), 1000);
 
                 } else {
                     if (!this.model.restarted) {
                         this.$el.find(".restart").text($.t("templates.update.install.restarting"));
 
-                        this.waitForLastUpdateID(_.bind(this.installationReport, this));
+                        MaintenanceDelegate.restartIDM().then(_.bind(function() {
+                            this.waitForLastUpdateID(_.bind(this.installationReport, this));
+                        }, this));
+
+
                     }
                 }
             };
@@ -161,7 +171,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
             this.showUI();
             this.model.success({
                 "runningID": this.model.runningID,
-                "version": this.model.version,
+                "version": this.model.archiveModel.get("toVersion"),
                 "response": this.model.response
             });
         },
@@ -172,7 +182,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
          * We can assume an error if this timeout is allowed to complete.
          *
          * If the restart hasn't timed out we poll the lastupdate id and compare it with a previous copy.
-         * These values should differ when the restart is complete.
+         * These values should be the same after the restart is complete.
          *
          * @param callback
          */
@@ -187,9 +197,11 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
 
             if (!this.model.timeout) {
                 MaintenanceDelegate.getLastUpdateId().then(_.bind(function (response) {
-                    if (this.model.lastUpdateId === response.lastUpdateId) {
+
+                    if (this.model.lastUpdateId !== response.lastUpdateId) {
                         // Wait a short period so we don't bog down the ui with AJAX calls.
                         _.delay(_.bind(function () {
+                            this.model.lastUpdateId = response.lastUpdateId;
                             this.waitForLastUpdateID(callback);
                         }, this), 500);
                     } else {
@@ -211,13 +223,12 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
         pollInstall: function(id) {
 
             MaintenanceDelegate.getLogDetails(id).then(_.bind(function(response) {
-
                 if (response && response.status === "IN_PROGRESS") {
                     // This delay is to given a moment to take in the status
                     _.delay(_.bind(function() {
                         this.render(_.extend(this.model, {
                             "runningID": this.model.runningID,
-                            "percent": Math.floor((response.completedTasks / response.totalTasks ) * 10),
+                            "percent": Math.floor((response.completedTasks / response.totalTasks ) * 100),
                             "msg": response.statusMessage,
                             "version": this.model.version
                         }));
@@ -236,7 +247,12 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                             "version": this.model.version
                         }));
                     }, this), 1000);
-
+                } else if (response && response.status === "PENDING_REPO_UPDATES") {
+                    this.data.repoUpdates = true;
+                    this.data.repoUpdatesList = this.model.repoUpdatesList;
+                    this.model.runningID = response._id;
+                    this.model.response = response;
+                    this.showRepoUpdates();
                 } else if (response && response.status === "REVERTED") {
                     this.showUI();
                     this.model.error($.t("templates.update.install.reverted"));
@@ -253,5 +269,5 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
         }
     });
 
-    return new VersionsView();
+    return new InstallView();
 });

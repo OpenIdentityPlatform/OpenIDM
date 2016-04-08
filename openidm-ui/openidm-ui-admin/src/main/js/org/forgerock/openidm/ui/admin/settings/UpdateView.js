@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define*/
@@ -29,6 +29,7 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
     "org/forgerock/openidm/ui/admin/settings/update/MaintenanceModeView",
     "org/forgerock/openidm/ui/admin/settings/update/InstallView",
     "org/forgerock/openidm/ui/admin/settings/update/InstallationReportView",
+    "org/forgerock/openidm/ui/admin/settings/update/RepoUpdateView",
     "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate"
 
 ], function($, _, Backgrid,
@@ -41,6 +42,7 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
             MaintenanceModeView,
             InstallView,
             InstallationReportView,
+            RepoUpdateView,
             MaintenanceDelegate) {
 
     var UpdateView = AdminAbstractView.extend({
@@ -50,6 +52,7 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
         events: {},
 
         render: function(args, callback) {
+
             this.data.docHelpUrl = Constants.DOC_URL;
 
             this.parentRender(_.bind(function() {
@@ -110,16 +113,19 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
                         break;
 
                     /*
-                     *  Preview Installation takes the files and achieve model, and generates a preview for the installation.  If the user cancels,
+                     *  Preview Installation takes the files and archive model, and generates a preview for the installation.  If the user cancels,
                      *  we exit maintenance mode and start up the scheduler, if they wish to proceed with the install and agree to the license (if any),
                      *  then we to pass the archive model and last update id to the installer page.
                      */
                     case "previewInstallation":
-                       InstallationPreviewView.render({
+                        InstallationPreviewView.render({
                             "files": args.files,
                             "archiveModel": args.archiveModel,
-                            "install": _.bind(function (archiveModel) {
-                                this.render({"step": "install", "archiveModel": archiveModel});
+                            "install": _.bind(function (archiveModel, repoUpdates) {
+                                this.render({"step": "install", "archiveModel": archiveModel, "repoUpdates": repoUpdates});
+                            }, this),
+                            "repoUpdates": _.bind(function (args) {
+                                this.render({"step": "repoUpdates", "archiveModel": args.archiveModel, "data": args.data, "files": args.files});
                             }, this),
                             "cancel": _.bind(function () {
                                 this.render({"step": "exitMaintenanceMode"});
@@ -131,35 +137,49 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
                         break;
 
                     /*
-                     *  Given the archive data model or a running id and the last update id OpenIDM will update and show the status.
+                     *  Displays repo updates that must be manually completed before update can complete
                      */
-                    case "install":
-                        InstallView.render({
+                    case "repoUpdates":
+                        RepoUpdateView.render({
+                            "archiveModel": args.archiveModel,
+                            "data": args.data,
                             "runningID": args.runningID || null,
-                            "archiveModel": args.archiveModel || null,
-                            "success": _.bind(function(data) {
-                                this.render({"step": "exitMaintenanceMode", data: {"response": data.response, "runningID": data.runningID, "version": data.version}});
+                            "files": args.files || null,
+                            "response": args.response || null,
+                            "install": _.bind(function (archiveModel, repoUpdatesList) {
+                                this.render({"step": "install", "archiveModel": archiveModel, "repoUpdatesList": repoUpdatesList});
+                            }, this),
+                            "completeInstall": _.bind(function(args) {
+                                this.render({"step": "install", "archiveModel": args.archiveModel, "runningID": args.runningID, "data": args.data, "response": args.response});
+                            }, this),
+                            "cancel": _.bind(function () {
+                                this.render({"step": "exitMaintenanceMode"});
                             }, this),
                             "error": _.bind(function(error) {
                                 this.render({"step": "version", "errorMessage": error});
                             }, this)
                         }, _.noop);
-
                         break;
 
                     /*
-                     *  Given the running ID and the updated file list this view will display the install results.
+                     *  Given the archive data model or a running id and the last update id OpenIDM will update and show the status.
                      */
-                    case "installationReport":
-                        InstallationReportView.render({
-                            "runningID": args.runningID,
-                            "response": args.response,
-                            "version": args.version,
-                            "error": _.bind(function(msg) {
-                                this.render({"step": "version", "errorMessage": msg});
+                    case "install":
+                        InstallView.render({
+                            "archiveModel": args.archiveModel || null,
+                            "repoUpdatesList": args.repoUpdatesList || null,
+                            "runningID": args.runningID || null,
+                            "lastUpdateId": args.lastUpdateId || null,
+                            "data": args.data || null,
+                            "response": args.response || null,
+                            "success": _.bind(function(data) {
+                                this.render({"step": "exitMaintenanceMode", data: {"response": data.response, "runningID": data.runningID, "version": data.version}});
                             }, this),
-                            "back": _.bind(function(kik) {
-                                this.render({"step": "version"});
+                            "repoUpdates": _.bind(function (args) {
+                                this.render({"step": "repoUpdates", "archiveModel": args.archiveModel, "data": args.data, "runningID": args.model.runningID, "response": args.model.response});
+                            }, this),
+                            "error": _.bind(function(error) {
+                                this.render({"step": "version", "errorMessage": error});
                             }, this)
                         }, _.noop);
 
@@ -186,6 +206,26 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
 
                         }, _.noop);
                         break;
+
+                    /*
+                     *  Given the running ID and the updated file list this view will display the install results.
+                     */
+                    case "installationReport":
+                        InstallationReportView.render({
+                            "runningID": args.runningID,
+                            "response": args.response,
+                            "version": args.version,
+                            "error": _.bind(function(msg) {
+                                this.render({"step": "version", "errorMessage": msg});
+                            }, this),
+                            "back": _.bind(function(kik) {
+                                this.render({"step": "version"});
+                            }, this)
+                        }, _.noop);
+
+                        break;
+
+
 
                     default:
                         this.render({"step": "version", "errorMessage": "Update state unfound."});
