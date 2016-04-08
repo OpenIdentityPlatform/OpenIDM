@@ -13,5 +13,30 @@
         "operation" : "add",
         "field" : "objects/0/schema/properties/effectiveRoles/source",
         "value" : "require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');"
+    },
+    {
+        "operation" : "remove",
+        "field" : "objects/0/onCreate/file",
+        "value" : ""
+    },
+    {
+        "operation" : "add",
+        "field" : "objects/0/onCreate/source",
+        "value" : "require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').createConditionalGrantsForUser(object, 'roles');"
+    },
+    {
+        "operation" : "add",
+        "field" : "objects/0/onUpdate",
+        "value" : {"type" : "text/javascript", "source" : "require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"}
+    },
+    {
+        "operation" : "add",
+        "field" : "objects/1/onCreate",
+        "value" : {"type" : "text/javascript","source" : "require('roles/conditionalRoles').roleCreate(object);"}
+    },
+    {
+        "operation" : "add",
+        "field" : "objects/1/onUpdate",
+        "value" : {"type" : "text/javascript","source" : "require('roles/conditionalRoles').roleUpdate(oldObject, object);"}
     }
 ]
