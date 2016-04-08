@@ -25,9 +25,28 @@
     var relationshipHelper = require('roles/relationshipHelper');
 
     /**
-     * This function will be called for the onCreate and onUpdate triggers for managed users. It must determine which
+     * This function will be called for the onCreate trigger for managed users. It must determine which
+     * conditional role grants will be applied-to the given user.
+     * @param user the newly-created user
+     * @param rolesPropName the name of the array in the user referencing the user's roles
+     */
+    exports.createConditionalGrantsForUser = function(user, rolesPropName) {
+        var userRoleGrants,
+            existingConditionalRoles;
+
+        //no existing role grants for newly-created user
+        userRoleGrants = {
+            'conditionalGrants' : [],
+            'directGrants' : []
+        }
+        existingConditionalRoles = relationshipHelper.getConditionalRoles();
+        this.evaluateConditionalRoles(user, rolesPropName, existingConditionalRoles, userRoleGrants);
+    };
+
+    /**
+     * This function will be called for the onUpdate trigger for managed users. It must determine which
      * conditional role grants will be preserved/applied-to/removed-from the given user.
-     * @param user the newly-created, or updated, user
+     * @param user the updated user
      * @param rolesPropName the name of the array in the user referencing the user's roles
      */
     exports.updateConditionalGrantsForUser = function(user, rolesPropName) {
