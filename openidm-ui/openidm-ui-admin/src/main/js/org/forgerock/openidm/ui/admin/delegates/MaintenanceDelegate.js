@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -62,6 +62,27 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
     obj.getLicense = function (archive) {
         return obj.serviceCall({
             url: "/update?_action=getLicense&archive=" + archive,
+            type: "POST"
+        });
+    };
+
+    obj.getRepoUpdates = function (archive) {
+        return obj.serviceCall({
+            url: "/update?_action=listRepoUpdates&archive=" + archive,
+            type: "POST"
+        });
+    };
+
+    obj.getUpdateFile = function(archive, path) {
+        return obj.serviceCall({
+            url: "/update/archives/" + archive + "/" + path + "?_fields=/contents",
+            type: "GET"
+        });
+    };
+
+    obj.markComplete = function (updateId) {
+        return obj.serviceCall({
+            url: "/update?_action=markComplete&updateId=" + updateId,
             type: "POST"
         });
     };
