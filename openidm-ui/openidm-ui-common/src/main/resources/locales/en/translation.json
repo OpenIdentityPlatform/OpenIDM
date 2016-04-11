@@ -1021,8 +1021,10 @@
             },
             "preview": {
                 "ready": "Ready to update",
+                "helpHead": "See",
+                "helpTail": ", for a list of changes.",
                 "versionIsReady": "You're ready to update to",
-                "releaseNotes": "More details",
+                "releaseNotes": "the following",
                 "header": "Installation Preview",
                 "description": "Review files to be replaced below. OpenIDM will save customized files for future access.",
                 "installUpdateBtn": "Install Update",
