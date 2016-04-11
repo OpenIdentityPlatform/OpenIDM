@@ -36,10 +36,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditFilterPoliciesDialog"
     var AuditFilterPoliciesDialog = AuditAdminAbstractView.extend({
         template: "templates/admin/settings/audit/AuditFilterPoliciesDialogTemplate.html",
         el: "#dialogs",
-        events: {
-            "onValidate": "onValidate",
-            "customValidate": "customValidate"
-        },
+        events: {},
 
         /**
          * Opens the dialog
@@ -85,10 +82,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditFilterPoliciesDialog"
                         // Will be supported next release
                         //this.$el.find(".include-exclude-select")[0].selectize.setValue(this.data.filter.includeExcludeLiteral);
                     }
-
-                    ValidatorsManager.bindValidators(this.$el.find(".audit-filter-form"));
-                    ValidatorsManager.validateAllFields(this.$el.find(".audit-filter-form"));
-
                 }, this),
                 "replace"
             );
@@ -98,11 +91,14 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditFilterPoliciesDialog"
                 size: BootstrapDialog.SIZE_WIDE,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.model.currentDialog,
-                onshown: function() {
+                onshown: _.bind(function() {
+                    ValidatorsManager.bindValidators(this.$el.find(".audit-filter-form"));
+                    ValidatorsManager.validateAllFields(this.$el.find(".audit-filter-form"));
+
                     if (callback) {
                         callback();
                     }
-                },
+                }, this),
                 buttons: [
                     {
                         label: $.t("common.form.cancel"),
@@ -130,9 +126,18 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditFilterPoliciesDialog"
             });
         },
 
-        customValidate: function() {
-            this.validationResult = ValidatorsManager.formValidated(this.$el.find(".audit-filter-form"));
-            this.$el.closest(".modal-content").find("#submitAuditFilters").prop('disabled', !this.validationResult);
+        validationSuccessful: function (event) {
+            AuditAdminAbstractView.prototype.validationSuccessful(event);
+
+            if(ValidatorsManager.formValidated(this.$el.find("#submitAuditFilters"))) {
+                this.$el.parentsUntil(".model-content").find("#submitAuditFilters").prop('disabled', false);
+            }
+        },
+
+        validationFailed: function (event, details) {
+            AuditAdminAbstractView.prototype.validationFailed(event, details);
+
+            this.$el.parentsUntil(".model-content").find("#submitAuditFilters").prop('disabled', true);
         }
     });
 

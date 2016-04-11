@@ -38,8 +38,6 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
         element: "#emailContainer",
         noBaseTemplate: true,
         events: {
-            "onValidate": "onValidate",
-            "customValidate": "customValidate",
             "click #emailAuth": "toggleUserPass",
             "change #emailToggle": "toggleEmail",
             "change #emailAuthPassword": "updatePassword",
@@ -91,9 +89,6 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
 
         setup: function(callback) {
             this.parentRender(_.bind(function() {
-                validatorsManager.bindValidators(this.$el.find("#emailConfigForm"));
-                validatorsManager.validateAllFields(this.$el.find("#emailConfigForm"));
-
                 if (_.isEmpty(this.data.config) || !this.data.config.host) {
                     this.$el.find("#emailToggle").prop("checked", false);
                     this.$el.find("#emailSettingsForm").hide();
@@ -120,9 +115,16 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
                 this.$el.find("fieldset").find("input:checkbox").prop("checked", false);
                 this.$el.find("fieldset").prop("disabled", true);
                 this.$el.find("#emailSettingsForm").hide();
+
+                validatorsManager.clearValidators(this.$el.find("#emailConfigForm"));
+                this.$el.find("#saveEmailConfig").prop('disabled', false);
+
             } else {
                 this.$el.find("fieldset").prop("disabled", false);
                 this.$el.find("#emailSettingsForm").show();
+
+                validatorsManager.bindValidators(this.$el.find("#emailConfigForm"));
+                validatorsManager.validateAllFields(this.$el.find("#emailConfigForm"));
             }
         },
 
@@ -169,11 +171,6 @@ define("org/forgerock/openidm/ui/admin/settings/EmailConfigView", [
                 }, this));
 
             }
-        },
-
-        customValidate: function() {
-            this.validationResult = validatorsManager.formValidated(this.$el.find("#emailConfigForm"));
-            this.$el.find("#saveEmailConfig").prop('disabled', !this.validationResult);
         }
     });
 

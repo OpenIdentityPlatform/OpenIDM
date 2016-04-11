@@ -47,9 +47,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 "click .add-passed-variables" : "addEmptyPassedVariable",
                 "click .passed-variables-holder .btn-delete-attribute" : "deletePassedVariable",
                 "blur .passed-variables-holder input" : "passedVariableBlur",
-                "onValidate": "onValidate",
-                "click .script-tabs button" : "changeScriptTab",
-                "customValidate": "customValidate"
+                "click .script-tabs button" : "changeScriptTab"
             },
             model : {
                 autoFocus: true,
@@ -411,6 +409,18 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 if (this.model.onBlurPassedVariable) {
                     this.model.onBlurPassedVariable(event);
                 }
+            },
+
+            validationSuccessful: function (event) {
+                AbstractView.prototype.validationSuccessful(event);
+
+                this.customValidate();
+            },
+
+            validationFailed: function (event, details) {
+                AbstractView.prototype.validationFailed(event, details);
+
+                this.customValidate();
             },
 
             customValidate: function() {
