@@ -1,0 +1,119 @@
+{
+    "auditServiceConfig" : {
+        "handlerForQueries" : "repo",
+        "availableAuditEventHandlers" : [
+            "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+            "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+            "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+            "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+            "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+        ],
+        "filterPolicies" : {
+            "value" : {
+                "excludeIf" : [
+                    "/access/http/request/headers/Authorization",
+                    "/access/http/request/headers/X-OpenIDM-Password",
+                    "/access/http/request/cookies/session-jwt",
+                    "/access/http/response/headers/Authorization",
+                    "/access/http/response/headers/X-OpenIDM-Password"
+                ],
+                "includeIf" : [ ]
+            }
+        }
+    },
+    "eventHandlers" : [
+        {
+            "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+            "config" : {
+                "name" : "csv",
+                "logDirectory" : "&{launcher.working.location}/audit",
+                "topics" : [
+                    "access",
+                    "activity",
+                    "recon",
+                    "sync",
+                    "authentication",
+                    "config"
+                ]
+            }
+        },
+        {
+            "class" : "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
+            "config" : {
+                "name" : "repo",
+                "topics" : [
+                    "access",
+                    "activity",
+                    "recon",
+                    "sync",
+                    "authentication",
+                    "config"
+                ]
+            }
+        },
+        {
+            "class" : "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+            "config" : {
+                "name": "jms",
+                "enabled" : true,
+                "topics": [
+                    "access",
+                    "activity",
+                    "config",
+                    "authentication",
+                    "sync",
+                    "recon"
+                ],
+                "deliveryMode": "NON_PERSISTENT",
+                "sessionMode": "AUTO",
+                "batch": {
+                    "batchEnabled": true,
+                    "capacity": 1000,
+                    "threadCount": 3,
+                    "maxBatchedEvents": 100
+                },
+                "jndi": {
+                    "contextProperties": {
+                        "java.naming.factory.initial" : "org.apache.activemq.jndi.ActiveMQInitialContextFactory",
+                        "java.naming.provider.url" : "tcp://127.0.0.1:61616?daemon=true",
+                        "topic.audit" : "audit"
+                    },
+                    "topicName": "audit",
+                    "connectionFactoryName": "ConnectionFactory"
+                }
+            }
+        }
+    ],
+    "eventTopics" : {
+        "config" : {
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
+            }
+        },
+        "activity" : {
+            "filter" : {
+                "actions" : [
+                    "create",
+                    "update",
+                    "delete",
+                    "patch",
+                    "action"
+                ]
+            },
+            "watchedFields" : [ ],
+            "passwordFields" : [
+                "password"
+            ]
+        }
+    },
+    "exceptionFormatter" : {
+        "type" : "text/javascript",
+        "file" : "bin/defaults/script/audit/stacktraceFormatter.js"
+    }
+}
