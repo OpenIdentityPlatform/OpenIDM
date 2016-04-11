@@ -1,13 +1,28 @@
 <!-- Copyright 2015 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div class="panel-body">
-    <div class="alert alert-success">
-        <i class="fa fa-check"></i> <strong>{{t "templates.update.review.successHeader"}}</strong> {{t "templates.update.review.successMsg"}} {{version}}.
-    </div>
+
+    {{#unless isHistoricalInstall}}
+        <div class="alert alert-success">
+            <i class="fa fa-check"></i> <strong>{{t "templates.update.review.successHeader"}}</strong> {{t "templates.update.review.successMsg"}} {{version}}.
+        </div>
 
     <hr/>
+    {{/unless}}
 
     <h3>{{t "templates.update.review.header"}}</h3>
+
+    {{#if isHistoricalInstall}}
+        <p class="panel-description">
+            <small class='text-muted'>
+                {{t "templates.update.history.updatedBy"}}: {{this.user}}
+            </small>
+            <br />
+            <small class='text-muted'>
+                {{t "templates.update.versions.date"}}: {{this.date}}
+            </small>
+        </p>
+    {{/if}}
 
     <p class="panel-description">
         {{t "templates.update.review.desc"}}

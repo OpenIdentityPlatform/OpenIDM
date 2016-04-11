@@ -18,9 +18,10 @@
 
 define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
     "jquery",
+    "lodash",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function($, constants, AbstractDelegate) {
+], function($, _, constants, AbstractDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/maintenance");
 
@@ -42,13 +43,6 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
         return obj.serviceCall({
             url: "?_action=enable",
             type: "POST"
-        });
-    };
-
-    obj.getUpdateLogs = function () {
-        return obj.serviceCall({
-            url: "/update/log/?_queryFilter=true",
-            type: "GET"
         });
     };
 
@@ -101,6 +95,13 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
         });
     };
 
+    obj.restartIDM = function () {
+        return obj.serviceCall({
+            url: "/update?_action=restart",
+            type: "POST"
+        });
+    };
+
     obj.getLastUpdateId = function () {
         return obj.serviceCall({
             url: "/update?_action=lastUpdateId",
@@ -122,11 +123,40 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
         });
     };
 
-    obj.restartIDM = function () {
+    obj.getUpdateLogs = function (options) {
+        var queryString = this.parseQueryOptions(this.getUpdateLogFields(), options, true);
         return obj.serviceCall({
-            url: "/update?_action=restart",
-            type: "POST"
+            url: "/update/log/?_queryFilter=true" + queryString,
+            type: "GET"
         });
+    };
+
+    obj.getUpdateLogFields = function() {
+        return [
+            'archive',
+            'completedTasks',
+            'endDate',
+            'files',
+            'nodeId',
+            'startDate',
+            'status',
+            'statusMessage',
+            'totalTasks',
+            'userName'
+        ];
+    };
+
+    obj.parseQueryOptions = function(fields, options) {
+        if (options) {
+            if (options.fields) {
+                return '&_fields=' + options.fields.join(',');
+            } else if (options.excludeFields) {
+                return '&_fields=' + fields.filter(function(field) {
+                    return options.excludeFields.indexOf(field) === -1;
+                }).join(',');
+            }
+        }
+        return '';
     };
 
     return obj;

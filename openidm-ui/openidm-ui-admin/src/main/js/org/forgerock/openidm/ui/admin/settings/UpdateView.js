@@ -25,6 +25,7 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
     "org/forgerock/commons/ui/common/main/AbstractCollection",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/settings/update/VersionsView",
+    "org/forgerock/openidm/ui/admin/settings/update/HistoryView",
     "org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
     "org/forgerock/openidm/ui/admin/settings/update/MaintenanceModeView",
     "org/forgerock/openidm/ui/admin/settings/update/InstallView",
@@ -38,6 +39,7 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
             AbstractCollection,
             Constants,
             VersionsView,
+            HistoryView,
             InstallationPreviewView,
             MaintenanceModeView,
             InstallView,
@@ -66,10 +68,11 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
                      *  If you do have a running ID this step will render the install step.
                      */
                     case "version":
-                        MaintenanceDelegate.getStatus().then(_.bind(function(maintenanceData) {
+                        MaintenanceDelegate.getStatus()
 
-                            MaintenanceDelegate.getUpdateLogs().then(_.bind(function(updateLogData) {
-
+                        .then(_.bind(function(maintenanceData) {
+                            MaintenanceDelegate.getUpdateLogs({excludeFields: ['files']})
+                            .then(_.bind(function(updateLogData) {
                                 var runningUpdate = _.findWhere(updateLogData.result, {"status": "IN_PROGRESS"});
 
                                 // There isn't a running install and OpenIDM is in maintenance mode
@@ -82,12 +85,29 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
 
                                 // The user wishes to begin a new update, show them which version they have
                                 } else {
-                                   VersionsView.render({
+                                    VersionsView.render({
                                         "errorMsg": args.errorMessage,
                                         "archiveSelected": _.bind(function (model) {
                                             this.render({"step": "enterMaintenanceMode", "model": model});
                                         }, this)
-                                    }, _.noop);
+                                    }, function() {
+                                        this.$el.find('#versionHistoryGroup').toggleClass('hidden');
+                                    }.bind(this));
+                                    if (updateLogData.resultCount > 0 ) {
+                                        HistoryView.render({
+                                             "errorMsg": args.errorMessage,
+                                             "previousUpdates": updateLogData.result,
+                                             "viewDetails": _.bind(function (runningID, response, version, isHistoricalInstall) {
+                                                 this.render({
+                                                     "step": "installationReport",
+                                                     "runningID": runningID,
+                                                     "response": response,
+                                                     "version": version,
+                                                     "isHistoricalInstall": true
+                                                 });
+                                             }, this)
+                                         }, _.noop);
+                                    }
                                 }
                             }, this));
                         }, this));
@@ -215,6 +235,7 @@ define("org/forgerock/openidm/ui/admin/settings/UpdateView", [
                             "runningID": args.runningID,
                             "response": args.response,
                             "version": args.version,
+                            "isHistoricalInstall": args.isHistoricalInstall,
                             "error": _.bind(function(msg) {
                                 this.render({"step": "version", "errorMessage": msg});
                             }, this),

@@ -91,7 +91,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/VersionsView", [
                         }, this);
                     }, this);
 
-                    this.data.noVersions = data.length === 0;
+                    this.data.noVersions = data.updates.length === 0;
 
                     ClusterDelegate.getClusters().then(_.bind(function(data) {
 

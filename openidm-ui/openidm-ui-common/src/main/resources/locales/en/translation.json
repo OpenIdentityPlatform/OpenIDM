@@ -1004,7 +1004,14 @@
                 "enableMaintenanceModeDesc": "When you confirm, OpenIDM allows running jobs to finish. Scheduled jobs are paused and OpenIDM goes into maintenance mode.",
                 "confirmAndInstall": "Confirm and Install",
                 "badBinary": "Invalid binary file",
-                "badRevision": "Cannot be applied"
+                "badRevision": "Cannot be applied",
+                "checkForUpdates": "Check for updates"
+            },
+            "history": {
+                "header": "Update History",
+                "description": "Previous updates",
+                "updatedBy": "Updated by",
+                "viewDetails": "View details"
             },
             "maintenanceMode": {
                 "shuttingDownScheduler": "Pausing scheduler...",
