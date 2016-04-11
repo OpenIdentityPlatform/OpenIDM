@@ -59,8 +59,6 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             "click #DeleteDashboard": "deleteDashboard",
             "click .add-widget": "addWidget",
             "click .open-add-widget-dialog": "openAddWidgetDialog",
-            "onValidate": "onValidate",
-            "customValidate": "customValidate",
             "click .widget-delete" : "deleteWidget" //This event relies on child views creating the correct HTML menu item
         },
         partials : [
@@ -252,10 +250,16 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
             });
         },
 
-        customValidate: function() {
-            this.validationResult = ValidatorsManager.formValidated(this.$el.find("form"));
+        validationSuccessful: function (event) {
+            AdminAbstractView.prototype.validationSuccessful(event);
 
-            this.$el.closest(".modal-content").find("#SaveNewName").prop('disabled', !this.validationResult);
+            this.$el.closest(".modal-content").find("#SaveNewName").prop('disabled', false);
+        },
+
+        validationFailed: function (event, details) {
+            AdminAbstractView.prototype.validationFailed(event, details);
+
+            this.$el.closest(".modal-content").find("#SaveNewName").prop('disabled', true);
         },
 
         duplicateDashboard: function(e) {

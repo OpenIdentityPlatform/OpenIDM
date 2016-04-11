@@ -39,17 +39,14 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
             conf,
             InlineScriptEditor,
             constants,
-            validatorsManager,
+            ValidatorsManager,
             BootstrapDialog,
             JSONEditor) {
 
     var AuditEventHandlersDialog = AuditAdminAbstractView.extend({
         template: "templates/admin/settings/audit/AuditEventHandlersDialogTemplate.html",
         el: "#dialogs",
-        events: {
-            "onValidate": "onValidate",
-            "customValidate": "customValidate"
-        },
+        events: {},
         model: {},
 
         render: function(args, callback) {
@@ -98,7 +95,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                     size: BootstrapDialog.SIZE_WIDE,
                     type: BootstrapDialog.TYPE_DEFAULT,
                     message: this.model.currentDialog,
-                    onshown: _this.renderTemplate(_this.data),
+                    onshown: function(){_this.renderTemplate(_this.data);},
                     buttons: [
                         {
                             label: $.t("common.form.cancel"),
@@ -182,9 +179,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                         }
                     }
 
-                    validatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
-                    validatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
-
                     if (!_.isEmpty(schema)) {
 
                         if (_.has(schema.properties, "name")) {
@@ -237,14 +231,26 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                         items: this.data.selectedTopics
                     });
 
+                    ValidatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
+                    ValidatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
+
                 }, this),
                 "replace"
             );
         },
 
-        customValidate: function() {
-            this.validationResult = validatorsManager.formValidated(this.$el.find("#auditEventHandlersForm"));
-            this.$el.parentsUntil(".model-content").find("#submitAuditEventHandlers").prop('disabled', !this.validationResult);
+        validationSuccessful: function (event) {
+            AuditAdminAbstractView.prototype.validationSuccessful(event);
+
+            if(ValidatorsManager.formValidated(this.$el.find("#auditEventHandlersForm"))) {
+                this.$el.parentsUntil(".model-content").find("#submitAuditEventHandlers").prop('disabled', false);
+            }
+        },
+
+        validationFailed: function (event, details) {
+            AuditAdminAbstractView.prototype.validationFailed(event, details);
+
+            this.$el.parentsUntil(".model-content").find("#submitAuditEventHandlers").prop('disabled', true);
         }
     });
 

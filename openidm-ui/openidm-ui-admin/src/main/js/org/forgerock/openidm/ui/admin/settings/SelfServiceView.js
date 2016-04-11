@@ -35,9 +35,7 @@ define("org/forgerock/openidm/ui/admin/settings/SelfServiceView", [
         element: "#selfServiceContainer",
         noBaseTemplate: true,
         events: {
-            "click #saveSelfServiceURL": "saveSelfServiceURL",
-            "onValidate": "onValidate",
-            "customValidate": "customValidate"
+            "click #saveSelfServiceURL": "saveSelfServiceURL"
         },
         model: {
             uiContextObject: {}
@@ -54,8 +52,8 @@ define("org/forgerock/openidm/ui/admin/settings/SelfServiceView", [
                 this.data.selfServiceURL = data.urlContextRoot;
 
                 this.parentRender(_.bind(function() {
-                    validatorsManager.bindValidators(this.$el.find("#urlConfigBody"));
-                    validatorsManager.validateAllFields(this.$el.find("#urlConfigBody"));
+                    validatorsManager.bindValidators(this.$el.find("#systemConfigForm"));
+                    validatorsManager.validateAllFields(this.$el.find("#systemConfigForm"));
                 }, this));
             }, this));
         },
@@ -67,12 +65,6 @@ define("org/forgerock/openidm/ui/admin/settings/SelfServiceView", [
             ConfigDelegate.updateEntity("ui.context/selfservice", this.model.uiContextObject).then(_.bind(function () {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "selfServiceSaveSuccess");
             }, this));
-        },
-
-        customValidate: function() {
-            this.validationResult = validatorsManager.formValidated(this.$el.find("#urlConfigBody"));
-
-            this.$el.find("#saveSelfServiceURL").prop('disabled', !this.validationResult);
         }
     });
 
