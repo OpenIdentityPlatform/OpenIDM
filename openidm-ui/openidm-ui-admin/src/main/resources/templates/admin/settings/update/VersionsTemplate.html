@@ -1,45 +1,57 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="panel-body">
-    {{#if errorMessage}}
-        <div role="alert" id="updateInstallError" class="alert alert-danger" style="">
-            <i class="fa fa-times pull-right closeErrorMsg"></i>
-            <i class="fa fa-exclamation-circle"></i><strong>{{t "common.form.error"}}</strong>
-            {{errorMessage}}
-            <br/>
-            {{t "templates.update.versions.error"}}
-        </div>
-    {{/if}}
+<div class="panel-heading" role="tab" id="AvailableUpdatesHeader">
 
-    <div class="alert alert-info">
-        <p><strong>{{t "templates.update.versions.currentVersion"}}</strong> {{version}} ({{revision}})</p>
-    </div>
+    <h4 class="panel-title">
+        <a data-toggle="collapse" href="#AvailableUpdatesBody" aria-expanded="true" aria-controls="AvailableUpdatesHeader" role="button">
+            {{t "templates.update.versions.header"}}
+        </a>
+    </h4>
+</div>
 
-    <hr/>
-
-    <h3>{{t "templates.update.versions.header"}}</h3>
-
-    {{#if noVersions}}
-        <div class="well text-center">
-            <div class="message-icon text-primary "><i class="fa fa-refresh checkUpdatesAvailable"></i></div>
-
-            <p>
-                {{t "templates.update.versions.noVersions"}}
-            </p>
-        </div>
-    {{else}}
-        {{#if updateCLI}}
-            <p class="panel-description">
-                {{t "templates.update.versions.cli1"}} <a href="{{docHelpUrl}}install-guide#migrate-idm-cli" target="_blank">{{t "templates.update.versions.cli2"}}</a>.
-            </p>
-
-        {{else}}
-            <p class="panel-description">
-                {{t "templates.update.versions.description"}}
-                <a href="#" class="checkUpdatesAvailable">{{t "templates.update.versions.refresh"}}</a>
-            </p>
-
-            <div id="versionGrid"></div>
+<div id="AvailableUpdatesBody" class="collapse in" role="tabpanel" aria-labelledby="AvailableUpdatesHeader" aria-expanded="true">
+    <div class="panel-body">
+        {{#if errorMessage}}
+            <div role="alert" id="updateInstallError" class="alert alert-danger" style="">
+                <i class="fa fa-times pull-right closeErrorMsg"></i>
+                <i class="fa fa-exclamation-circle"></i><strong>{{t "common.form.error"}}</strong>
+                {{errorMessage}}
+                <br/>
+                {{t "templates.update.versions.error"}}
+            </div>
         {{/if}}
-    {{/if}}
+
+        <div class="alert alert-info">
+            <p><strong>{{t "templates.update.versions.currentVersion"}}</strong> {{version}} ({{revision}})</p>
+        </div>
+
+        <hr/>
+
+        {{#if noVersions}}
+            <div class="well text-center">
+                <p>
+                    {{t "templates.update.versions.noVersions"}}
+                </p>
+
+                <button type="button" class="btn btn-primary checkUpdatesAvailable">
+                    <i class="fa fa-refresh"></i>
+                    {{t "templates.update.versions.checkForUpdates"}}
+                </button>
+            </div>
+        {{else}}
+            {{#if updateCLI}}
+                <p class="panel-description">
+                    {{t "templates.update.versions.cli1"}} <a href="{{docHelpUrl}}install-guide#migrate-idm-cli" target="_blank">{{t "templates.update.versions.cli2"}}</a>.
+                </p>
+
+            {{else}}
+                <p class="panel-description">
+                    {{t "templates.update.versions.description"}}
+                    <a href="#" class="checkUpdatesAvailable">{{t "templates.update.versions.refresh"}}</a>
+                </p>
+
+                <div id="versionGrid"></div>
+            {{/if}}
+        {{/if}}
+    </div>
 </div>
