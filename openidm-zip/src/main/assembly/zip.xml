@@ -514,6 +514,43 @@
             </includes>
             <outputDirectory>/openidm/samples/audit-sample</outputDirectory>
         </fileSet>
+        <!-- setup jms audit sample -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/Example.ldif</exclude>
+                <exclude>conf/authentication.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/sample1/conf</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>conf/sync.json</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/audit-jms-sample/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-xml.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/audit-jms-sample/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
+        </fileSet>
         <!-- Setup fullStack  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
