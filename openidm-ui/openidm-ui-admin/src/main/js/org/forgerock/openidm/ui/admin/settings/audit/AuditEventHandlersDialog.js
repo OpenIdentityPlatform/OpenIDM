@@ -120,7 +120,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                                 data.eventHandler.config.name = this.$el.find("#eventHandlerName").val();
                                 data.eventHandler.config.topics = this.$el.find(".topics").val();
                                 data.eventHandler.config.enabled = this.$el.find("#enabled").is(":checked");
-                                data.useForQueries = this.$el.find(".useForQueries").is(":checked");
 
                                 if (callback) {
                                     callback(data);
@@ -211,13 +210,13 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                             "disable_edit_json": true,
                             "disable_array_reorder": false,
                             "disable_collapse": true,
-                            "disable_properties": true,
+                            "disable_properties": false,
                             "show_errors": "never",
                             "template": "handlebars",
                             "iconlib": "fontawesome4",
                             "theme": "bootstrap3",
-                            "no_additional_properties": true,
-                            "additionalItems": false,
+                            "no_additional_properties": false,
+                            "additionalItems": true,
                             "required_by_default": true
                         });
 
