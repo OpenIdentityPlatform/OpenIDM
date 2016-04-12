@@ -23,8 +23,20 @@ module.exports = {
                 eventHandlerCSVOption: {
                     selector: "#addAuditModuleSelect option[value='org.forgerock.audit.handlers.csv.CsvAuditEventHandler']"
                 },
+                eventHandlerJMSOption: {
+                    selector: "#addAuditModuleSelect option[value='org.forgerock.audit.handlers.jms.JmsAuditEventHandler']"
+                },
                 addEventHandlerButton: {
                     selector: ".addEventHandler"
+                },
+                csvUseForQueries: {
+                    selector: "#AuditEventHandlersView tbody tr:nth-child(1) td:nth-child(4) input"
+                },
+                repoUseForQueries: {
+                    selector: "#AuditEventHandlersView tbody tr:nth-child(2) td:nth-child(4) input"
+                },
+                jmsUseForQueries: {
+                    selector: "#AuditEventHandlersView tbody tr:nth-child(3) td:nth-child(4) input"
                 }
             }
         },
@@ -34,11 +46,17 @@ module.exports = {
                 title: {
                     selector: ".bootstrap-dialog-title"
                 },
+                name: {
+                    selector: "#eventHandlerName"
+                },
                 enabledCheck: {
                     selector: "#enabled"
                 },
                 closeButton: {
                     selector: ".close"
+                },
+                submitAuditEventHandlers: {
+                    selector: "#submitAuditEventHandlers"
                 },
                 signatureIntervalInput:{
                     selector: "[data-schemapath='root.security.signatureInterval'] input"

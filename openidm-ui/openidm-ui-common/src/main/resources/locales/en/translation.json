@@ -2241,6 +2241,54 @@
                     }
 
                 }
+            },
+            "jms": {
+                "deliveryMode": {
+                    "help": "JMS mode to deliver the messages in, either PERSISTENT or NON_PERSISTENT"
+                },
+                "sessionMode": {
+                    "help": "JMS session acknowledgement mode: AUTO, CLIENT, or DUPS_OK"
+                },
+                "batch": {
+                    "help": "Batch configuration settings to be utilized if batch is enabled"
+                },
+                "publisher": {
+                    "batch": {
+                        "batchEnabled": {
+                            "help": "Boolean for batch delivery of audit events"
+                        },
+                        "capacity": {
+                            "help": "Maximum event count in the batch queue; additional events are dropped"
+                        },
+                        "threadCount": {
+                            "help": "Number of concurrent threads that pull events from the batch queue"
+                        },
+                        "maxBatchedEvents": {
+                            "help": "Maximum number of events per batch"
+                        },
+                        "insertTimeoutSec": {
+                            "help": "Waiting period (seconds) for available capacity, when a new event enters the queue"
+                        },
+                        "pollTimeoutSec": {
+                            "help": "Worker thread waiting period (seconds) for the next event, before going idle"
+                        },
+                        "shutdownTimeoutSec": {
+                            "help": "Application waiting period (seconds) for worker thread termination"
+                        }
+                    }
+                },
+                "jndi": {
+                    "help": "JNDI initial context settings"
+                },
+                "contextProperties": {
+                    "help": "Settings to populate the JNDI initial context with"
+                },
+                "topicName": {
+                    "help": "JNDI lookup name for the JMS topic"
+                },
+                "connectionFactoryName": {
+                    "help": "JNDI lookup name for the JMS connection factory"
+                }
             }
         },
         "service": {
