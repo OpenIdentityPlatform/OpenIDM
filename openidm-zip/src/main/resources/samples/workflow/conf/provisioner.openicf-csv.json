@@ -2,7 +2,7 @@
     "name" : "rolesFile",
     "connectorRef" : {
         "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
-        "bundleVersion" : "1.5.0.0",
+        "bundleVersion" : "1.5.1.0",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     "poolConfigOption" : {
@@ -28,8 +28,7 @@
     },
     "configurationProperties" : {
         "csvFile" : "&{launcher.project.location}/data/roles.csv",
-        "headerUid": "id",
-        "headerName": "name"
+        "headerUid": "id"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,

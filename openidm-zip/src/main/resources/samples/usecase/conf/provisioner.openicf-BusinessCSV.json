@@ -2,7 +2,7 @@
     "name" : "business",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.csvfile-connector",
-        "bundleVersion" : "1.5.0.0",
+        "bundleVersion" : "1.5.1.0",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     "poolConfigOption" : {
@@ -27,9 +27,7 @@
         "SEARCH" : -1
     },
     "configurationProperties" : {
-        "csvFile" : "&{launcher.project.location}/data/business.csv",
-        "headerName" : "username",
-        "headerUid" : "uid"
+        "csvFile" : "&{launcher.project.location}/data/business.csv"
     },
     "syncFailureHandler" : {
         "maxRetries" : 5,
