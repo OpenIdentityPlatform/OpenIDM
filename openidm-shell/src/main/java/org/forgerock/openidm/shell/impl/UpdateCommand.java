@@ -99,8 +99,17 @@ public class UpdateCommand {
      * Status execute() will return.
      */
     enum ExecutorStatus {
+        /**
+         * Completion
+         */
         SUCCESS,
+        /**
+         * An error in the executor
+         */
         FAIL,
+        /**
+         * A non-error state that is an early abortion of the normal update process
+         */
         ABORT
     }
 
