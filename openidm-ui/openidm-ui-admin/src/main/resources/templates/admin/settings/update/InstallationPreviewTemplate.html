@@ -5,7 +5,7 @@
     <div class="panel-body">
         <div class="alert alert-success">
             <i class="fa fa-check"></i>
-            <strong>{{t "templates.update.preview.ready"}}</strong> {{t "templates.update.preview.versionIsReady"}} {{version}}. {{#if link}}<a href="{{link}}" class="alert-link"> {{t "templates.update.preview.releaseNotes"}}</a>{{/if}}
+            <strong>{{t "templates.update.preview.ready"}}</strong> {{t "templates.update.preview.versionIsReady"}} {{version}}. {{#if link}}{{t "templates.update.preview.helpHead"}}<a href="{{link}}" class="alert-link"> {{t "templates.update.preview.releaseNotes"}}</a>{{t "templates.update.preview.helpTail"}}{{/if}}
         </div>
 
         <hr/>
