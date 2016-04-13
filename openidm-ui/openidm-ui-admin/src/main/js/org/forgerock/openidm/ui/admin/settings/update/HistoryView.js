@@ -55,8 +55,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/HistoryView", [
         },
         model: {},
         partials: [
-            "partials/settings/_updateHistoryGridMain.html",
-            "partials/settings/_updateHistoryGridTasks.html"
+            "partials/settings/_updateHistoryGridMain.html"
         ],
 
         /**
