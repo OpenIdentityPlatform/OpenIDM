@@ -22,7 +22,7 @@
     {
         "operation" : "add",
         "field" : "objects/0/onCreate/source",
-        "value" : "require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').createConditionalGrantsForUser(object, 'roles');"
+        "value" : "require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
     },
     {
         "operation" : "add",
