@@ -196,21 +196,20 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
             }
 
             if (!this.model.timeout) {
-                MaintenanceDelegate.getLastUpdateId().then(_.bind(function (response) {
+                // Poll endpoint once a second so don't bog down the ui with AJAX calls.
+                _.delay(_.bind(function() {
+                    MaintenanceDelegate.getLastUpdateId().then(_.bind(function (response) {
 
-                    if (this.model.lastUpdateId !== response.lastUpdateId) {
-                        // Wait a short period so we don't bog down the ui with AJAX calls.
-                        _.delay(_.bind(function () {
+                        if (this.model.lastUpdateId !== response.lastUpdateId) {
                             this.model.lastUpdateId = response.lastUpdateId;
                             this.waitForLastUpdateID(callback);
-                        }, this), 500);
-                    } else {
-                        callback();
-                    }
-                }, this), _.bind(function () {
-                    this.waitForLastUpdateID(callback);
-                }, this));
-
+                        } else {
+                            callback();
+                        }
+                    }, this), _.bind(function () {
+                        this.waitForLastUpdateID(callback);
+                    }, this));
+                }, this), 1000);
             } else {
                 this.model.error("Restart timed out.");
             }
