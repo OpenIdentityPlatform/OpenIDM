@@ -213,7 +213,7 @@
         <forgerock-audit.version>6.1.0</forgerock-audit.version>
 
         <!-- Commons versions -->
-        <commons.forgerock-script.version>3.1.0</commons.forgerock-script.version>
+        <commons.forgerock-script.version>3.2.0</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
         <commons.forgerock-launcher.version>1.2.2</commons.forgerock-launcher.version>
 
