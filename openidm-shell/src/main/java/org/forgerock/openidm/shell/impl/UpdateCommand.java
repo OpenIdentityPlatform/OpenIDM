@@ -256,12 +256,12 @@ public class UpdateCommand {
                 }
             }
         }
+
+        closeLogger();
+
         return executionResults;
     }
 
-    /**
-     * Opens the logger for appending, if the file has been defined in the config.
-     */
     private void openLogger() {
         String logFilePath = config.getLogFilePath();
         if (null != logFilePath) {
@@ -275,12 +275,19 @@ public class UpdateCommand {
         }
     }
 
+    private void closeLogger() {
+        if (null != logger) {
+            logger.close();
+        }
+    }
+
     private void log(String message) {
         if (!config.isQuietMode()) {
             session.getConsole().println(message);
         }
         if (null != logger) {
             logger.println(SimpleDateFormat.getDateTimeInstance().format(new Date()) + ": " + message);
+            logger.flush();
         }
     }
 
@@ -291,6 +298,7 @@ public class UpdateCommand {
         }
         if (null != logger) {
             throwable.printStackTrace(logger);
+            logger.flush();
         }
     }
 

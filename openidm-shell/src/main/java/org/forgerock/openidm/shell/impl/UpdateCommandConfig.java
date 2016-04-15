@@ -20,12 +20,12 @@ package org.forgerock.openidm.shell.impl;
  */
 public class UpdateCommandConfig {
     private String updateArchive;
-    private long maxJobsFinishWaitTimeMs;
-    private long maxUpdateWaitTimeMs;
-    private boolean acceptedLicense;
-    private boolean skipRepoUpdatePreview;
-    private String logFilePath;
-    private boolean quietMode;
+    private long maxJobsFinishWaitTimeMs = -1;
+    private long maxUpdateWaitTimeMs = 30000;
+    private boolean acceptedLicense = false;
+    private boolean skipRepoUpdatePreview = false;
+    private String logFilePath = "logs/update.log";
+    private boolean quietMode = false;
     private long checkCompleteFrequency = 5000L;
     private long checkJobsRunningFrequency = 1000L;
 
