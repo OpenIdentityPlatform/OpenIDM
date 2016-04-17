@@ -64,7 +64,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/RepoUpdateView", [
             this.data = configs.data;
             this.model = configs;
 
-            var repoUpdatesGrid = this.makeGrid(this.getRepoUpdate());
+            var repoUpdatesGrid = this.makeGrid(this.getRepoUpdate(this.repoUpdatesList));
 
             _.delay(_.bind(function() {
                 this.parentRender(_.bind(function () {
@@ -75,22 +75,24 @@ define("org/forgerock/openidm/ui/admin/settings/update/RepoUpdateView", [
             if (callback) {
                 callback();
             }
+            return this;
         },
 
-        getRepoUpdate: function() {
+        getRepoUpdate: function(repoUpdatesList) {
+
             var repoUpdates = new Backbone.Collection();
 
-            _.each(this.repoUpdatesList, _.bind(function (repoUpdate) {
-
+            _.each(repoUpdatesList, _.bind(function (repoUpdate) {
                 MaintenanceDelegate.getUpdateFile(this.archiveName, repoUpdate.path).then(
 
-                    _.bind(function(data) {
-                        repoUpdate.url = encodeURIComponent(data.contents);
+                    _.bind(function(response) {
+                        repoUpdate.contents = encodeURIComponent(response.contents);
                         repoUpdates.add(repoUpdate);
                     }, this)
 
                 );
             },  this));
+
             return repoUpdates;
         },
 
