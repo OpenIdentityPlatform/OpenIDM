@@ -64,7 +64,7 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
                         case "none":
                             return "";
                         default:
-                            return "(" + _.map(node.children, this.serialize, this).join(" " + node.op + " ") + " )";
+                            return "(" + _.map(node.children, this.serialize, this).join(" " + node.op) + " )";
                     }
                 } else {
                     return "";
