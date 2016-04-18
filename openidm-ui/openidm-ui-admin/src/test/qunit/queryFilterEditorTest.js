@@ -37,7 +37,7 @@ define([
                 noneVal = _.assign(_.clone(node), {op: 'none'}),
                 notVal = _.assign(_.clone(node), {op: 'not'});
 
-            assert.equal(queryFilterEditor.serialize(defaultVal), '( eq "" or  eq "" )', '"default" ok');
+            assert.equal(queryFilterEditor.serialize(defaultVal), '( eq "" or eq "" )', '"default" ok');
 
             assert.equal(queryFilterEditor.serialize(expr), 'testName testTag "testValue"', '"expr" ok');
 
