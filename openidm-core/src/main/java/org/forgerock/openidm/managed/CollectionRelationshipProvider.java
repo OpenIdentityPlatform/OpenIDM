@@ -92,7 +92,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
             final SchemaField schemaField, final ActivityLogger activityLogger,
-            final ManagedObjectSyncService managedObjectSyncService) {
+            final ManagedObjectSetService managedObjectSyncService) {
         super(connectionFactory, resourcePath, schemaField, activityLogger,
                 managedObjectSyncService);
 

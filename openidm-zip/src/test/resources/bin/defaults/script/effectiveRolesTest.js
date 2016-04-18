@@ -94,7 +94,7 @@ exports.test = function() {
             function (testcase) {
                 (function (role, expectedResult) {
                     // apply the temporal constraint
-                    var result = effectiveRoles.processTemporalConstraintsForRole(role);
+                    var result = effectiveRoles.processTemporalConstraints(role);
                     if (result !== expectedResult) {
                         throw {
                             "message": "Applying constraint failed for role " + role._id +", got <" 

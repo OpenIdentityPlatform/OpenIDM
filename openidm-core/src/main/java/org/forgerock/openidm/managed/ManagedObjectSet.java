@@ -101,7 +101,7 @@ import org.slf4j.LoggerFactory;
  * Provides access to a set of managed objects of a given type: managed/[type]/{id}.
  *
  */
-class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, ManagedObjectSyncService {
+class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, ManagedObjectSetService {
 
     /** Actions supported by this resource provider */
     enum Action {
@@ -299,6 +299,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             measure.end();
         }
     }
+    
+    public void executePostUpdate(Context context, Request request, String resourceId, JsonValue oldValue, 
+            JsonValue newValue) throws ResourceException {
+        // Execute the postUpdate script if configured
+        execScript(context, ScriptHook.postUpdate, newValue,
+                prepareScriptBindings(context, request, resourceId, oldValue, newValue));
+    };
 
     /**
      * Prepares a map of additional bindings for the script hook invocation.
@@ -507,8 +514,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 .asMap());
 
         // Execute the postUpdate script if configured
-        execScript(context, ScriptHook.postUpdate, responseContent,
-                prepareScriptBindings(context, request, resourceId, decryptedOld, responseContent));
+        executePostUpdate(context, request, resourceId, decryptedOld, responseContent);
 
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
                 decryptedOld, responseContent);
