@@ -50,14 +50,14 @@ public class RelationshipValidatorTest {
             json(object(field("reversePropertyName", "im_populated")));
     public static final JsonValue TEST_RELATIONSHIP =
             json(object(field(RelationshipUtil.REFERENCE_ID, "managed/widgetPart/part1")));
-    private ManagedObjectSyncService managedObjectSyncService;
+    private ManagedObjectSetService managedObjectSyncService;
     private ConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
 
     @BeforeTest
     public void setup() throws Exception {
         activityLogger = mock(ActivityLogger.class);
-        managedObjectSyncService = mock(ManagedObjectSyncService.class);
+        managedObjectSyncService = mock(ManagedObjectSetService.class);
         connectionFactory = mock(ConnectionFactory.class);
     }
 

@@ -17,6 +17,7 @@ package org.forgerock.openidm.managed;
 
 import static java.text.MessageFormat.format;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -80,7 +81,7 @@ public abstract class RelationshipProvider {
     /**
      * A service for sending sync events on managed objects
      */
-    protected final ManagedObjectSyncService managedObjectSyncService;
+    protected final ManagedObjectSetService managedObjectSetService;
     
     /** Used for accessing the repo */
     protected final ConnectionFactory connectionFactory;
@@ -282,13 +283,13 @@ public abstract class RelationshipProvider {
      */
     public static RelationshipProvider newProvider(final ConnectionFactory connectionFactory,
             final ResourcePath resourcePath, final SchemaField relationshipField, final ActivityLogger activityLogger,
-            final ManagedObjectSyncService managedObjectSyncService) {
+            final ManagedObjectSetService managedObjectSetService) {
         if (relationshipField.isArray()) {
             return new CollectionRelationshipProvider(connectionFactory, resourcePath, relationshipField,
-                    activityLogger, managedObjectSyncService);
+                    activityLogger, managedObjectSetService);
         } else {
             return new SingletonRelationshipProvider(connectionFactory, resourcePath, relationshipField,
-                    activityLogger, managedObjectSyncService);
+                    activityLogger, managedObjectSetService);
         }
     }
 
@@ -299,17 +300,17 @@ public abstract class RelationshipProvider {
      * @param resourcePath Name of the resource we are handling relationships for eg. managed/user
      * @param schemaField The field used to represent this relationship in the parent object
      * @param activityLogger The audit activity logger to use
-     * @param managedObjectSyncService Service to send sync events to
+     * @param managedObjectSetService Service to send sync events to
      */
     protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
             final SchemaField schemaField, final ActivityLogger activityLogger,
-            final ManagedObjectSyncService managedObjectSyncService) {
+            final ManagedObjectSetService managedObjectSetService) {
         this.connectionFactory = connectionFactory;
         this.resourceContainer = resourcePath;
         this.schemaField = schemaField;
         this.propertyPtr = new JsonPointer(schemaField.getName());
         this.activityLogger = activityLogger;
-        this.managedObjectSyncService = managedObjectSyncService;
+        this.managedObjectSetService = managedObjectSetService;
         this.relationshipValidator = (schemaField.isReverseRelationship())
                 ? new ReverseRelationshipValidator(this)
                 : new ForwardRelationshipValidator(this);
@@ -404,7 +405,8 @@ public abstract class RelationshipProvider {
              */
             validateRelationshipEndpointOperand(request.getContent().get(REFERENCE_ID).asString(), context);
             // Get the before value of the managed object
-            final ResourceResponse beforeValue = getManagedObject(context);
+            final JsonValue beforeValue = getManagedObject(context).getContent();
+
             // Create the relationship
             ResourceResponse response = syncReferencedObjectCreateHandler
                     .performRequest(request.getContent().get(REFERENCE_ID).asString(), createRequest, context)
@@ -412,16 +414,10 @@ public abstract class RelationshipProvider {
                     .getOrThrow();
 
             // Get the before value of the managed object
-            final ResourceResponse afterValue = getManagedObject(context);
-            
-            // Do activity logging. 
-            // Log an "update" for the managed object, even though this is a "create" request on relationship field.
-            activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue.getContent(), 
-                    afterValue.getContent(), Status.SUCCESS);
+            final JsonValue afterValue = getManagedObject(context).getContent();
 
-            // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
-                    notifyUpdate, beforeValue.getContent(), afterValue.getContent());
+            // Perform update operations on the managed object
+            performUpdateOperations(context, request, afterValue, beforeValue);
             
             return expandFields(context, request, response);
         } catch (ResourceException e) {
@@ -529,7 +525,7 @@ public abstract class RelationshipProvider {
             ResourceResponse result;
             
             // Get the before value of the managed object
-            final ResourceResponse beforeValue = getManagedObject(context);
+            final JsonValue beforeValue = getManagedObject(context).getContent();
 
             // Read the relationship
             final ResourceResponse oldResource = getConnection().readAsync(context, readRequest).getOrThrow();
@@ -538,15 +534,10 @@ public abstract class RelationshipProvider {
             result = updateIfChanged(context, request, relationshipId, rev, oldResource, newValue).getOrThrow();
             
             // Get the after value of the managed object
-            final ResourceResponse afterValue = getManagedObject(context);
-            
-            // Do activity logging.
-            activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue.getContent(), 
-                    afterValue.getContent(), Status.SUCCESS);
+            final JsonValue afterValue = getManagedObject(context).getContent();
 
-            // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
-                    notifyUpdate, beforeValue.getContent(), afterValue.getContent());
+            // Perform update operations on the managed object
+            performUpdateOperations(context, request, afterValue, beforeValue);
 
             return expandFields(context, request, result);
         } catch (ResourceException e) {
@@ -580,21 +571,16 @@ public abstract class RelationshipProvider {
             ResourceResponse result;
             
             // Get the before value of the managed object
-            final ResourceResponse beforeValue = getManagedObject(context);
+            final JsonValue beforeValue = getManagedObject(context).getContent();
             
             // Perform the delete and wait for result
             result = deleteAsync(context, path, deleteRequest).getOrThrow();
             
             // Get the after value of the managed object
-            final ResourceResponse afterValue = getManagedObject(context);
-            
-            // Do activity logging.
-            activityLogger.log(context, request, "delete", getManagedObjectPath(context), beforeValue.getContent(), 
-                    null, Status.SUCCESS);
+            final JsonValue afterValue = getManagedObject(context).getContent();
 
-            // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-            managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
-                    notifyUpdate, beforeValue.getContent(), afterValue.getContent());
+            // Perform update operations on the managed object
+            performUpdateOperations(context, request, afterValue, beforeValue);
             
             return expandFields(context, request, result);
         } catch (ResourceException e) {
@@ -701,13 +687,11 @@ public abstract class RelationshipProvider {
                 if (revision == null) {
                     revision = oldResource.getRevision();
                 }
-                
-                ResourceResponse managedObjectBefore = null;
-                
-                if (!fromManagedObjectSet) {
-                    // Get the before value of the managed object
-                    managedObjectBefore = getManagedObject(context);
-                }
+
+                // Get the before value of the managed object
+                final JsonValue beforeValue = !fromManagedObjectSet 
+                        ? getManagedObject(context).getContent()
+                        : null;
                 
                 JsonValue newValue = oldResource.getContent().copy();
                 boolean modified = JsonValuePatch.apply(newValue, request.getPatchOperations());
@@ -728,17 +712,10 @@ public abstract class RelationshipProvider {
                 }
                 
                 // Get the before value of the managed object
-                final ResourceResponse managedObjectAfter = getManagedObject(context);
+                final JsonValue afterValue = getManagedObject(context).getContent();
 
-                // Do activity logging.
-                activityLogger.log(context, request, "update", getManagedObjectPath(context), 
-                        managedObjectBefore.getContent(), managedObjectAfter.getContent(), Status.SUCCESS);
-
-                // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-                managedObjectSyncService.performSyncAction(context, request, getManagedObjectId(context),
-                        notifyUpdate, managedObjectBefore.getContent(),
-                        managedObjectAfter.getContent());
-
+                // Perform update operations on the managed object
+                performUpdateOperations(context, request, afterValue, beforeValue);
 
                 retry = false;
                 logger.debug("Patch retationship successful!");
@@ -758,6 +735,34 @@ public abstract class RelationshipProvider {
         
         // Return the result
         return promise;
+    }
+    
+    /**
+     * Performs operations associated with the updated managed object.  The operations include: activity logging,
+     * executing the postUpdate script of the managed object, and performing a notifyUpdate sync action on the managed
+     * object. 
+     * 
+     * @param context the current context
+     * @param request the current request
+     * @param afterValue the value of the managed object after the update
+     * @param beforeValue the value of the managed object before the update
+     * @throws ResourceException
+     */
+    private void performUpdateOperations(Context context, Request request, JsonValue afterValue, JsonValue beforeValue) 
+            throws ResourceException {
+        final String managedId = getManagedObjectId(context);
+        
+        // Do activity logging.
+        activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue, null, 
+                Status.SUCCESS);
+
+        // Execute the postUpdate script of the managed object
+        managedObjectSetService.executePostUpdate(context, newUpdateRequest(managedId, afterValue), managedId, 
+                beforeValue, afterValue);
+        
+        // Changes to the relationship will trigger sync on the managed object that this field belongs to.
+        managedObjectSetService.performSyncAction(context, request, managedId, notifyUpdate, 
+                beforeValue, afterValue);
     }
 
     /**

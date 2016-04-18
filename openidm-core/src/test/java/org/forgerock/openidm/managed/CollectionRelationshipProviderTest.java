@@ -35,7 +35,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class CollectionRelationshipProviderTest {
-    private ManagedObjectSyncService managedObjectSyncService;
+    private ManagedObjectSetService managedObjectSyncService;
     private ConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
     private final JsonValue userWithManager =
@@ -88,7 +88,7 @@ public class CollectionRelationshipProviderTest {
     @BeforeTest
     public void setup() throws Exception {
         activityLogger = mock(ActivityLogger.class);
-        managedObjectSyncService = mock(ManagedObjectSyncService.class);
+        managedObjectSyncService = mock(ManagedObjectSetService.class);
         connectionFactory = mock(ConnectionFactory.class);
     }
 
