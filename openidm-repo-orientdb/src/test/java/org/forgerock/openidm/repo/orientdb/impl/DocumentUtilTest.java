@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright © 2011-2013 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -23,12 +23,14 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.metadata.schema.OType;
 import com.orientechnologies.orient.core.record.impl.ODocument;
 import com.orientechnologies.orient.server.OServer;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -37,9 +39,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConflictException;
 
 import org.testng.annotations.*;
+
 import static org.testng.Assert.*;
 import static org.fest.assertions.api.Assertions.assertThat;
 import static org.fest.assertions.api.Assertions.entry;
@@ -559,5 +563,14 @@ public class DocumentUtilTest {
     public void parseInvalidRevision() throws ConflictException {
         int ver = DocumentUtil.parseVersion("some-text-98765");
         assertTrue(false, "Parsing of invalid revision must fail, but did not.");
+    }
+
+    @Test
+    public void testNestedObjectMarshaling() throws IOException {
+        final JsonValue scriptJson =
+                new JsonValue(new ObjectMapper().readValue(getClass().getResourceAsStream("/script.json"), Map.class));
+        final ODocument scriptODoc = DocumentUtil.toDocument(scriptJson, null, getDatabase(), orientDocClass);
+        final Map<String, Object> roundTripMap = DocumentUtil.toMap(scriptODoc);
+        assertThat(roundTripMap).isEqualTo(scriptJson.asMap());
     }
 }

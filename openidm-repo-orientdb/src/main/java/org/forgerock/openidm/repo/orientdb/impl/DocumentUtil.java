@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -269,6 +269,7 @@ public class DocumentUtil  {
         if (objModel != null) {
             if (docToPopulate == null) {
                 result = db.newInstance(orientDocClass);
+                result.setAllowChainedAccess(false);
             } else {
                 result = docToPopulate;
                 if (!patch) {
@@ -334,7 +335,10 @@ public class DocumentUtil  {
                     // unless it is a new instance
                     //if (existingDoc == null) {
                     logger.trace("Instantiate new ODocument to represent embedded map for {}.", key);
-                    existingDoc = new ODocument(); 
+                    existingDoc = new ODocument();
+                    //necessary for fields which contain '.'. See javadocs for ODocument.field for details
+                    existingDoc.setAllowChainedAccess(false);
+
                     //} 
                     ODocument converted = toDocument(json(value).asMap(), existingDoc, db, null, patch, false);
                     result.field(entry.getKey(), converted, OType.EMBEDDED);
