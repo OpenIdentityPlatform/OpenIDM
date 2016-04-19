@@ -19,9 +19,11 @@ JMS Audit Sample - Show Audit Events Published on a JMS Topic.
 
 This sample is copied from samples/sample1 and adds the usage of the JMS Audit Event Handler.
 
-In production, you will need to setup communications between OpenIDM and an external JMS Message Broker.  
-This sample will provide instructions to utilize [Apache ActiveMQ](http://activemq.apache.org/) as the JMS provider and 
-broker installed on the same machine as OpenIDM.
+This sample will provide instructions to utilize an instance of [Apache ActiveMQ](http://activemq.apache.org/). 
+Follow the instructions [here](http://activemq.apache.org/getting-started.html#GettingStarted-StartingActiveMQStartingActiveMQ) 
+to start ActiveMQ. 
+
+In production, you will need to setup communications between OpenIDM and an external JMS Message Broker.
 
 ### Add ActiveMQ client jar, and dependencies, to the IDM bundle directory.
 1. Download the ActiveMQ client jar [(activemq-client-5.13.2.jar)](https://repository.apache.org/content/repositories/releases/org/apache/activemq/activemq-client/5.13.2/).
@@ -55,8 +57,8 @@ listening on port 61616.
 1. Run this command from your OpenIDM installation directory `./startup.sh -p samples/audit-jms-sample`
 
 ### Configure the JNDI settings to match your ActiveMQ broker installation, and enable the JMS Audit Handler.
-1. Modify `samples/audit-jms-sample/audit.json`, setting the JNDI settings to match your broker connection configuration 
-and to enable the JmsAuditEventHandler. 
+1. Modify `samples/audit-jms-sample/conf/audit.json`, setting the JNDI settings to match your broker connection 
+configuration and to enable the JmsAuditEventHandler. 
     For example:
 
         ...
