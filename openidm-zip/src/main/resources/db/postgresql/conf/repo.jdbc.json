@@ -82,7 +82,7 @@
             "updates" : {
                 "mainTable" : "updateobjects",
                 "propertiesTable" : "updateobjectproperties",
-                "searchableDefault" : true
+                "searchableDefault" : false
             }
         },
         "explicitMapping" : {
