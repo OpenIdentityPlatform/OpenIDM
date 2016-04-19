@@ -67,7 +67,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 "openamUseExclusively"
             ],
             amTruststoreType : "&{openidm.truststore.type}",
-            amTruststoreFile : "&{openidm.truststore.location}",
+            amTruststorePath : "&{openidm.truststore.location}",
             amTruststorePassword : "&{openidm.truststore.password}"
         },
 
@@ -296,7 +296,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
 
             //before saving these properties need to be changed back to the untranslated versions
             this.model.changes[amAuthIndex].properties.truststoreType = this.data.amTruststoreType;
-            this.model.changes[amAuthIndex].properties.truststoreFile = this.data.amTruststoreFile;
+            this.model.changes[amAuthIndex].properties.truststorePath = this.data.amTruststorePath;
             this.model.changes[amAuthIndex].properties.truststorePassword = this.data.amTruststorePassword;
         },
 

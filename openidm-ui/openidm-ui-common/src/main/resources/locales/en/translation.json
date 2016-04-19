@@ -1218,7 +1218,7 @@
             "groupComparisonMethod": "Group Comparison Method",
             "groupComparisonMethodMessage" : "Data store for group roles",
             "truststorePassword": "Truststore Password",
-            "truststoreFile": "Truststore File",
+            "truststorePath": "Truststore Path",
             "truststoreType": "Truststore Type",
             "openamUserAttribute": "OpenAM User Attribute",
             "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
