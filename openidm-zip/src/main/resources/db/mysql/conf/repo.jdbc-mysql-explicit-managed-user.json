@@ -73,7 +73,12 @@
             "updates" : {
                 "mainTable" : "updateobjects",
                 "propertiesTable" : "updateobjectproperties",
-                "searchableDefault" : true
+                "searchableDefault" : false,
+                "properties" : {
+                    "/startDate" : {
+                        "searchable" : true
+                    }
+                }
             }
         },
         "explicitMapping" : {
