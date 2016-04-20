@@ -36,12 +36,12 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
          *     schema = the schema for the current resource
          *     onChange = a function that gets called after the save button is pressed
          */
-        render: function(opts, callback) {
+        render: function(opts, onLoadCallback) {
             var _this = this,
                 title = $.t("templates.admin.ResourceEdit.addResource",{ resource: opts.property.title }),
                 saveButtonText = $.t("common.form.add");
 
-            this.callback = callback;
+            this.onLoadCallback = onLoadCallback;
 
             this.currentDialog = $('<div id="resourceCollectionSearchDialog"></div>');
             this.schema = opts.schema;
@@ -198,6 +198,10 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
                 this.currentDialog.find("#formGroupType").hide();
                 this.setupResourceField(0);
             }
+
+            if (this.onLoadCallback) {
+                this.onLoadCallback();
+            }
         },
         setupResourceField: function(resourceCollectionIndex) {
             var autocompleteField = $("#select_" + this.data.property.propName),
@@ -242,5 +246,5 @@ define("org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog"
         }
     });
 
-    return new ResourceCollectionSearchDialog();
+    return ResourceCollectionSearchDialog;
 });

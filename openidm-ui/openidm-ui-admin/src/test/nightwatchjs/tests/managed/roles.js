@@ -1,12 +1,18 @@
 module.exports = {
         before : function (client, done) {
             client.globals.login.helpers.setSession(client, function () {
-                done();
+                //add a dummy user for use in a test where a user is needed in a dropdown
+                client.globals.user.createDummyUser(client, function () {
+                    done();
+                });
             });
         },
         after : function (client) {
             client.config.resetAll(function(data) {
-                client.end();
+                //remove the dummy user
+                client.globals.user.removeDummyUser(client, function () {
+                    client.end();
+                });
             });
         },
         'Add Role1': function (client) {
@@ -130,10 +136,10 @@ module.exports = {
             var rolesEdit = client.page.rolesEdit();
 
             rolesEdit
-                .waitForElementPresent('@enableTemporalConstraintSlider', 2000)
-                .click('@enableTemporalConstraintSlider')
-                .setValue('@temporalConstraintStartDate', "04/25/2016 12:00 AM")
-                .setValue('@temporalConstraintEndDate', "04/30/2016 3:00 PM");
+                .waitForElementPresent('@enableRoleTemporalConstraintSlider', 2000)
+                .click('@enableRoleTemporalConstraintSlider')
+                .setValue('@roleTemporalConstraintStartDate', "04/25/2016 12:00 AM")
+                .setValue('@roleTemporalConstraintEndDate', "04/30/2016 3:00 PM");
 
             rolesEdit
                 .waitForElementVisible('@changesPending', 2000)
@@ -159,13 +165,80 @@ module.exports = {
                 .click('@firstGridRowNameCell');
 
             rolesEdit
-                .waitForElementVisible('@temporalConstraintStartDate', 2000)
-                .assert.value('@temporalConstraintStartDate','04/25/2016 12:00 AM', 'After saving Role1 going to the grid and coming back the temporal constraints start date is the correct value')
-                .assert.value('@temporalConstraintEndDate','04/30/2016 3:00 PM', 'temporal constraints end date is the correct value');
+                .waitForElementVisible('@roleTemporalConstraintStartDate', 2000)
+                .assert.value('@roleTemporalConstraintStartDate','04/25/2016 12:00 AM', 'After saving Role1 going to the grid and coming back the temporal constraints start date is the correct value')
+                .assert.value('@roleTemporalConstraintEndDate','04/30/2016 3:00 PM', 'temporal constraints end date is the correct value');
+        },
+        'Add role add role member with temporal constraint' : function (client) {
+            var rolesEdit = client.page.rolesEdit();
+
+            rolesEdit
+                .click('@roleMembersHeader')
+                .waitForElementPresent('@addRoleMembersButton', 2000)
+                .click('@addRoleMembersButton');
+
+            client.pause(1000);
+
+            rolesEdit
+                .waitForElementPresent('@resourceCollectionSearchDialog', 2000)
+                .waitForElementPresent('@resourceCollectionSearchDialogDropdown', 2000)
+                .waitForElementVisible('@resourceCollectionSearchDialogDropdown', 3000)
+                /*the 'du' below is the first two letters of 'dummyUser'
+                * typing this into the search field makes the dummyUser value visible
+                * to selenium hence it can be selected
+                */
+                .setValue('@resourceCollectionSearchDialogDropdown','du')
+                .waitForElementVisible('@roleMemberSelection', 2000)
+                .click('@roleMemberSelection')
+                .waitForElementPresent('@enableGrantTemporalConstraintSlider', 2000)
+                .click('@enableGrantTemporalConstraintSlider')
+                .setValue('@roleMembersTemporalConstraintStartDate', "04/25/2016 12:00 AM")
+                .setValue('@roleMembersTemporalConstraintEndDate', "04/30/2016 3:00 PM")
+                .click('@resourceCollectionSearchDialogSaveBtn');
+        },
+        'Role member is added and saved properly' : function (client) {
+                var rolesEdit = client.page.rolesEdit();
+
+                rolesEdit
+                    .waitForElementPresent('@firstMembersGridRowNameCell', 2000)
+                    .click('@firstMembersGridRowNameCell')
+                    .waitForElementPresent('@resourceCollectionSearchDialog', 2000)
+                    .waitForElementVisible('@roleMembersTemporalConstraintStartDate', 2000)
+                    .assert.value('@roleMembersTemporalConstraintStartDate','04/25/2016 12:00 AM', 'grant temporal constraints start date is the correct value')
+                    .assert.value('@roleMembersTemporalConstraintEndDate','04/30/2016 3:00 PM', 'grant temporal constraints end date is the correct value')
+                    .click('@resourceCollectionSearchDialogCloseBtn');
+
+        },
+        'Remove role member' : function (client) {
+            var rolesEdit = client.page.rolesEdit();
+
+            rolesEdit
+                .waitForElementPresent('@membersListSelectAll', 2000);
+                //.click('@membersListSelectAll') does not fire the change event on the checkbox
+            client
+                .execute(function(data) {
+                    var selectAll = $('#relationshipArray-members th input[type=checkbox]'),
+                        removeButton = $('#relationshipArray-members .remove-relationships-btn');
+
+                    selectAll.click();
+                    removeButton.click();
+                    return true;
+                }, [{}]);
+
+            rolesEdit
+                //.click('@removeRoleMembersButton') does not work moved to above .execute func
+                .waitForElementPresent('@confirmationOkButton', 2000)
+                .waitForElementVisible('@confirmationOkButton', 2000)
+                .click('@confirmationOkButton')
+                .waitForElementNotPresent('@firstMembersGridRowNameCell', 2000);
+
         },
         'Remove Role1': function (client) {
             var rolesList = client.page.rolesList(),
                 rolesEdit = client.page.rolesEdit();
+
+            //without this pause the deleteButton cannot be clicked
+            client.pause(500);
 
             rolesEdit
                 .waitForElementPresent('@deleteButton', 2000)

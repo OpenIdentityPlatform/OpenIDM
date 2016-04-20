@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2014 ForgeRock AS. All rights reserved.
@@ -22,9 +22,9 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-/** 
+/**
  * Calculates the effective roles
- */  
+ */
 
 /*global object */
 
@@ -37,7 +37,7 @@
 
     /**
      * This function calculates the effectiveRoles of a given user object.
-     * 
+     *
      * @param object and object representing a user.
      */
     exports.calculateEffectiveRoles = function(object, rolesPropName) {
@@ -46,11 +46,11 @@
             objectId = object._id,
             response,
             effectiveRoles;
-        
+
         logger.debug("Invoked effectiveRoles script on property {}", propertyName);
 
         logger.trace("Configured rolesPropName: {}", rolesPropName);
-        
+
         if (object[rolesPropName] === undefined && objectId !== undefined && objectId !== null) {
             // User's roles are not present, so query for them
             //logger.trace("User's " + rolesPropName + " is not present so querying the roles", rolesPropName);
@@ -60,17 +60,17 @@
         } else {
             directRoleGrants = object[rolesPropName];
         }
-        
+
         // Filter roles by temporal constraints defined on the grant
         directRoleGrants = directRoleGrants.filter(function(grant) {
             var properties = grant._refProperties;
-            return properties !== undefined 
-                    ? processConstraints(grant._refProperties) 
+            return properties !== undefined
+                    ? processConstraints(grant._refProperties)
                     : true;
         });
 
-        effectiveRoles = directRoleGrants == null 
-             ? [] 
+        effectiveRoles = directRoleGrants == null
+             ? []
              : directRoleGrants.map(function(role) { return { "_ref" : role._ref }; });
 
         // Filter roles by temporal constraints defined on the role
@@ -79,25 +79,25 @@
             return processConstraints(role);
          });
 
-        // This is the location to expand to dynamic roles, 
+        // This is the location to expand to dynamic roles,
         // project role script return values can then be added via
         // effectiveRoles = effectiveRoles.concat(dynamicRolesArray);
-        
+
         return effectiveRoles;
     };
-    
+
     exports.processTemporalConstraints = processConstraints;
-    
+
     /**
      * Processes the temporal constraints of a given object. If any temporal constraints are defined, this function will
      * return true if the current time instant (now) is contained within any of the temporal constraints, false
      * otherwise.  If no constraints are defined the function will return true.
-     * 
+     *
      * @param role the role to process.
      * @returns false if temporal constraints are defined and don't include the current time instant, true otherwise.
      */
     function processConstraints(object) {
-        if (object.temporalConstraints !== undefined) {
+        if (object.temporalConstraints !== undefined && object.temporalConstraints.length) {
             // Loops through constraints
             for (index in object.temporalConstraints) {
                 var constraint = object.temporalConstraints[index];
@@ -111,5 +111,5 @@
         // No temporal constraints
         return true;
     };
-    
+
 }());
