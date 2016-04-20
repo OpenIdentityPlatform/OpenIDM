@@ -191,7 +191,33 @@ public final class DateUtil {
         Interval interval = Interval.parse(intervalString);
         return interval.contains(DateTime.now()); 
     }
-    
+
+    /**
+     * Returns true if the specified time interval has past.  The supplied interval string
+     * should contain an ISO 8601 formatted interval string and may be of the formats 'datetime/datetime',
+     * 'datetime/period' or 'period/datetime'
+     *
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @return true if the specified interval has passed
+     * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
+     */
+    public boolean isIntervalInPast(String intervalString) throws IllegalArgumentException {
+        return Interval.parse(intervalString).getEnd().isBeforeNow();
+    }
+
+    /**
+     * Returns true if the specified time interval is in the future.  The supplied interval string
+     * should contain an ISO 8601 formatted interval string and may be of the formats 'datetime/datetime',
+     * 'datetime/period' or 'period/datetime'
+     *
+     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @return true if the specified interval is in the future
+     * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
+     */
+    public boolean isIntervalInFuture(String intervalString) throws IllegalArgumentException {
+        return Interval.parse(intervalString).getStart().isAfterNow();
+    }
+
     /**
      * Returns a {@link DateTime} object representing the start date of the supplied interval.
      * 
