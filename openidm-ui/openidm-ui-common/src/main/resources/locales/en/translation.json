@@ -443,7 +443,9 @@
                 "temporalConstraints" : "Temporal Constraint",
                 "temporalConstraintsDescription" : "Enable role only during a selected temporal constraint.",
                 "startDate" : "Start Date",
-                "endDate" : "End Date"
+                "endDate" : "End Date",
+                "grantType" : "Grant Type",
+                "conditional" : "Conditional"
             },
             "ResourceList":
             {

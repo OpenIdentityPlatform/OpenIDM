@@ -1,0 +1,30 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<form class="form-horizontal">
+   <div class="form-group has-feedback" id="formGroupType">
+      <label for="selectRelationshipResourceType" class="control-label col-sm-3">{{property.title}} {{t "templates.admin.ResourceEdit.type"}}</label>
+      <div class="col-sm-7">
+         <div class="control-group">
+            <select class="form-control selectize" id="select_{{property.propName}}_Type"></select>
+         </div>
+      </div>
+   </div>
+   <div id="relationshipForm" style="display:none;">
+      <div class="form-group has-feedback">
+         <label for="selectManager" class="control-label col-sm-3">{{property.title}}</label>
+         <div class="col-sm-7">
+	         <div class="control-group">
+	            <select class="form-control selectize" id="select_{{property.propName}}"></select>
+	            <a href="#" id="addResourceLink"><i class="fa fa-plus"></i> <span></span></a>
+	         </div>
+         </div>
+      </div>
+      <div class="form-group has-feedback" {{#equals _refProperties.grantType.value "conditional"}}{{else}}style="display:none;"{{/equals}}>
+         <label class="control-label col-sm-3">{{t "templates.admin.RoleEdit.grantType"}}</label>
+         <div class="col-sm-7">
+            <span>{{t "templates.admin.RoleEdit.conditional"}}</span>
+         </div>
+      </div>
+      <div id="_refProperty-temporalConstraints"></div>
+   </div>
+</form>

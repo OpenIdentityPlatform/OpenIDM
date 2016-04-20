@@ -20,14 +20,16 @@ define("org/forgerock/openidm/ui/admin/user/EditUserView", [
     "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/resource/GenericEditResourceView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/openidm/ui/admin/role/MembersView"
 ],
-function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsManager) {
+function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsManager, MembersView) {
     var EditUserView = function () {
         return AbstractView.apply(this, arguments);
     };
 
     EditUserView.prototype = Object.create(GenericEditResourceView);
+    EditUserView.prototype.tabViewOverrides.roles = MembersView;
     EditUserView.prototype.events = _.extend({
         "change #password :input": "showPendingChanges",
         "keyup #password :input": "showPendingChanges"

@@ -52,7 +52,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
     ) {
     var EditResourceView = AbstractView.extend({
         template: "templates/admin/resource/EditResourceViewTemplate.html",
-
+        tabViewOverrides : {},
         events: {
             "click #saveBtn": "save",
             "click #backBtn": "backToList",
@@ -537,7 +537,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                     if ($(e.target).attr("id") === buttonId || $(e.target).closest(".updateRelationshipButton").attr("id") === buttonId) {
                         e.preventDefault();
-                        ResourceCollectionSearchDialog.render(opts);
+                        new ResourceCollectionSearchDialog().render(opts);
                     }
                 });
 
@@ -550,22 +550,31 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             };
 
             convertArrayField = function(prop) {
-                _this.editor.getEditor('root' + prop.selector.replace("\\","")).destroy();
+                var doConversion = function (tabView) {
+                    _this.editor.getEditor('root' + prop.selector.replace("\\","")).destroy();
 
-                //in case this relationship array field is returned by default
-                //remove it from the original version of the resource
-                if (_this.oldObject[prop.propName]) {
-                    delete _this.oldObject[prop.propName];
+                    //in case this relationship array field is returned by default
+                    //remove it from the original version of the resource
+                    if (_this.oldObject[prop.propName]) {
+                        delete _this.oldObject[prop.propName];
+                    }
+
+                    return addTab(prop, {
+                        templateId : "tabContentTemplate",
+                        tabView: tabView,
+                        viewId: "relationshipArray-" + prop.propName,
+                        contentId: "resource-" + prop.propName,
+                        contentClass: "resourceCollectionArray",
+                        headerText: prop.title
+                    });
+                };
+
+                //check for tabViewOverride
+                if (_this.tabViewOverrides[prop.propName]) {
+                    doConversion(_this.tabViewOverrides[prop.propName]);
+                } else {
+                    doConversion(new RelationshipArrayView());
                 }
-
-                return addTab(prop, {
-                    templateId : "tabContentTemplate",
-                    tabView: new RelationshipArrayView(),
-                    viewId: "relationshipArray-" + prop.propName,
-                    contentId: "resource-" + prop.propName,
-                    contentClass: "resourceCollectionArray",
-                    headerText: prop.title
-                });
             };
 
             showRelationships = function(prop) {
