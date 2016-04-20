@@ -19,7 +19,8 @@
  * exports a "test" method, and add it to the array of test modules below.
  */
 [ "policyFilterTest", 
-  "effectiveRolesTest" ]
+  "effectiveRolesTest",
+  "temporalConstraintsTest"]
     .forEach(function (module) {
         require (module).test();
     });
