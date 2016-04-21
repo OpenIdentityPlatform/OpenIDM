@@ -12,7 +12,7 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>4.0.0</version>
+        <version>4.5.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-salesforce</artifactId>
     <version>${provisioner.salesforcemodule.version}</version>
@@ -24,7 +24,7 @@
         <jetty-version>9.2.9.v20150224</jetty-version>
         <salesforce.api.version>29</salesforce.api.version>
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.2</provisioner.salesforcemodule.version>
-        <restlet.version>2.1.2</restlet.version>
+        <restlet.version>2.3.5</restlet.version>
     </properties>
 
     <repositories>
