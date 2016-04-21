@@ -220,7 +220,7 @@
         <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
-        <restlet.version>2.3.5</restlet.version>
+        <restlet.version>2.3.1</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.1</joda-time.version>
         <h2.version>1.4.191</h2.version>
@@ -252,7 +252,7 @@
         <openicf.googleconnector.version>1.4.1.0</openicf.googleconnector.version>
         <openicf.groovyconnector.version>1.4.2.0</openicf.groovyconnector.version>
         <salesforce.api.version>29</salesforce.api.version>
-        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.2-SNAPSHOT</provisioner.salesforcemodule.version>
+        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.3-SNAPSHOT</provisioner.salesforcemodule.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
