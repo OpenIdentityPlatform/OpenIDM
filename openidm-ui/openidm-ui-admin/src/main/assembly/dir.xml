@@ -33,14 +33,6 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/classes</directory>
-            <outputDirectory>/</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency</directory>
-            <outputDirectory>/</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${project.build.directory}/codemirror-4.10</directory>
             <outputDirectory>/libs/codemirror</outputDirectory>
             <includes>

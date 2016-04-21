@@ -31,16 +31,6 @@
     <formats>
         <format>dir</format>
     </formats>
-    <fileSets>
-        <fileSet>
-            <directory>${project.build.directory}/classes</directory>
-            <outputDirectory>/</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${project.build.directory}/dependency</directory>
-            <outputDirectory>/</outputDirectory>
-        </fileSet>
-    </fileSets>
     <dependencySets>
         <dependencySet>
             <includes>
