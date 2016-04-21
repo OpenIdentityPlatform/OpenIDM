@@ -1,0 +1,17 @@
+{
+    "root": true,
+    "extends": "forgerock",
+    "env": {
+        "browser": true
+    },
+    "rules": {
+        /**
+         * Allow the use of eval!
+         */
+        "no-eval": 1,
+        /**
+         * Allow case statement fallthrough.
+         */
+        "no-fallthrough": 0
+    }
+}

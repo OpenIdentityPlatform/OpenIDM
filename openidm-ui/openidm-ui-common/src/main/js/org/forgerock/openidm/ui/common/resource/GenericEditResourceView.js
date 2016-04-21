@@ -331,7 +331,9 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 _.each(this.$el.find(".resourceCollectionValue"), function(element) {
                     try {
                         formVal[$(element).attr("propname")] = JSON.parse($(element).val());
-                    } catch (e) {}
+                    } catch (e) {
+                        // Ignored
+                    }
                 });
             }
 

@@ -11,19 +11,28 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
-({
-    baseUrl         : "../../../target/www",
-    mainConfigFile  : '../js/main.js',
-    out             : "../../../target/www/main.js",
-    include: ["main"],
-    preserveLicenseComments: false,
-    generateSourceMaps: true,
-    optimize: "uglify2",
-    excludeShallow: [
-        // This file is excluded from optimization so that the UI can be customized without having to repackage it.
-        "config/AppConfiguration"
-    ]
-})
+module.exports = function(grunt) {
+    grunt.initConfig({
+        eslint: {
+            /**
+             * Check the JavaScript source code for common mistakes and style issues.
+             */
+            lint: {
+                src: [
+                    "src/main/js/**/*.js"
+                ],
+                options: {
+                    format: require.resolve("eslint-formatter-warning-summary")
+                }
+            }
+        }
+    });
+
+    grunt.loadNpmTasks("grunt-eslint");
+
+    grunt.registerTask('build', ['eslint']);
+    grunt.registerTask("default", "build");
+};

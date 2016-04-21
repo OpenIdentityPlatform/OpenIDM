@@ -22,7 +22,8 @@ define("org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils", [
     "handlebars",
     "moment"
 ], function ($, _, Handlebars, moment) {
-    var obj = {};
+    var obj = {},
+        format = 'MM/DD/YYYY h:mm:ss A';
 
     /*
     * This function takes in an interval string (ex. "2016-04-25T07:00:00.000Z/2016-04-30T07:00:00.000Z"),
@@ -34,11 +35,15 @@ define("org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils", [
     * @param {string} intervalString - a string containing two interval parts separated by "/"
     * @returns {object} - and object formatted like that in the example
     */
-    obj.convertFromIntervalString = function (intervalString) {
+    obj.convertFromIntervalString = function (intervalString, timezoneOffset) {
           var intervalStart = "",
               intervalEnd = "",
               start = "",
               end = "";
+
+          if (timezoneOffset == null) {
+              timezoneOffset = new Date().getTimezoneOffset();
+          }
 
           if (intervalString.split("/").length === 2) {
               intervalStart = intervalString.split("/")[0];
@@ -46,16 +51,16 @@ define("org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils", [
           }
 
           if (intervalStart.length) {
-              start = moment(intervalStart);
+              start = moment(intervalStart).zone(timezoneOffset);
           }
 
           if (intervalEnd.length) {
-              end = moment(intervalEnd);
+              end = moment(intervalEnd).zone(timezoneOffset);
           }
 
           return {
-              start: start.format('MM/DD/YYYY h:mm:ss A'),
-              end: end.format('MM/DD/YYYY h:mm:ss A')
+              start: start.format(format),
+              end: end.format(format)
           };
     };
 
@@ -71,17 +76,21 @@ define("org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils", [
     * @param {string} intervalEnd - human readable endDate
     * @returns {string} - a string formatted like that in the example
     */
-    obj.convertToIntervalString = function (intervalStart, intervalEnd) {
+    obj.convertToIntervalString = function (intervalStart, intervalEnd, timezoneOffset) {
          var start = new Date(),
             end = new Date(),
             intervalString = "";
 
+         if (timezoneOffset == null) {
+            timezoneOffset = new Date().getTimezoneOffset();
+         }
+
          if (intervalStart.length) {
-            start = new Date(intervalStart);
+            start = moment.utc(intervalStart, format).add(timezoneOffset, 'minutes');
          }
 
          if (intervalEnd.length) {
-            end = new Date(intervalEnd);
+            end = moment.utc(intervalEnd, format).add(timezoneOffset, 'minutes');
          }
 
          intervalString = start.toISOString() + "/" + end.toISOString();

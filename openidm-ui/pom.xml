@@ -32,6 +32,8 @@
 
     <properties>
         <forgerock-ui.version>12.0.3</forgerock-ui.version>
+        <node.install.directory>${project.parent.basedir}</node.install.directory>
+        <grunt.task>build:dev</grunt.task>
     </properties>
 
     <artifactId>openidm-ui</artifactId>
@@ -42,4 +44,63 @@
         <module>openidm-ui-admin</module>
         <module>openidm-ui-enduser</module>
     </modules>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>com.github.eirslett</groupId>
+                    <artifactId>frontend-maven-plugin</artifactId>
+                    <version>0.0.28</version>
+                    <configuration>
+                        <installDirectory>${node.install.directory}</installDirectory>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>install-node-and-npm</id>
+                            <goals>
+                                <goal>install-node-and-npm</goal>
+                            </goals>
+                            <phase>initialize</phase>
+                            <configuration>
+                                <nodeVersion>v4.4.2</nodeVersion>
+                                <npmVersion>3.8.5</npmVersion>
+                                <downloadRoot>http://maven.forgerock.org/repo/forgerock-third-party-virtual/</downloadRoot>
+                                <npmDownloadRoot>http://maven.forgerock.org/repo/api/npm/npm-virtual/npm/-/</npmDownloadRoot>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>npm-install</id>
+                            <goals>
+                                <goal>npm</goal>
+                            </goals>
+                            <phase>initialize</phase>
+                            <configuration>
+                                <arguments>install</arguments>
+                            </configuration>
+                        </execution>
+                        <execution>
+                            <id>grunt</id>
+                            <goals>
+                                <goal>grunt</goal>
+                            </goals>
+                            <phase>compile</phase>
+                            <configuration>
+                                <arguments>${grunt.task}</arguments>
+                            </configuration>
+                        </execution>
+                    </executions>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+    </build>
+
+    <profiles>
+        <profile>
+            <id>commercial-build</id>
+            <properties>
+                <grunt.task>build:prod</grunt.task>
+            </properties>
+        </profile>
+    </profiles>
 </project>

@@ -11,19 +11,21 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
-({
-    baseUrl         : "../../../target/www",
-    mainConfigFile  : '../js/main.js',
-    out             : "../../../target/www/main.js",
-    include: ["main"],
-    preserveLicenseComments: false,
-    generateSourceMaps: true,
-    optimize: "uglify2",
-    excludeShallow: [
-        // This file is excluded from optimization so that the UI can be customized without having to repackage it.
-        "config/AppConfiguration"
-    ]
-})
+var common = require('../Gruntfile-common');
+
+module.exports = function(grunt) {
+    var forgeRockCommonsDirectory = process.env.FORGEROCK_UI_SRC + "/forgerock-ui-commons";
+
+    common(grunt, {
+        watchCompositionDirs: [
+            forgeRockCommonsDirectory + "/src/main/js",
+            forgeRockCommonsDirectory + "/src/main/resources"
+        ],
+        deployDirectory: "admin/default",
+        eslintFormatter: require.resolve("eslint-formatter-warning-summary"),
+        lessPlugins: [new (require("less-plugin-clean-css"))({})]
+    });
+};

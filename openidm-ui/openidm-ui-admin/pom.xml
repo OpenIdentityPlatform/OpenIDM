@@ -219,26 +219,6 @@
 
         <plugins>
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>jslint-maven-plugin</artifactId>
-                <configuration>
-                    <disallowInsecureCharsInRegExp>false</disallowInsecureCharsInRegExp>
-                    <excludes>
-                        <exclude>**/libs/*.js</exclude>
-                        <exclude>**/libs/i18n/*.js</exclude>
-                    </excludes>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>jslint</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <artifactId>maven-resources-plugin</artifactId>
                 <executions>
                     <execution>
@@ -251,40 +231,44 @@
             </plugin>
 
             <plugin>
+                <groupId>com.github.eirslett</groupId>
+                <artifactId>frontend-maven-plugin</artifactId>
+            </plugin>
+
+            <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-dependency-plugin</artifactId>
                 <executions>
                     <execution>
-                    <id>unpack</id>
-                    <phase>prepare-package</phase>
-                    <goals>
-                        <goal>unpack</goal>
-                    </goals>
-                    <configuration>
-                        <artifactItems>
-                            <artifactItem>
-                            <groupId>org.forgerock.commons.ui</groupId>
-                            <artifactId>forgerock-ui-commons</artifactId>
-                            <version>${forgerock-ui.version}</version>
-                            <type>zip</type>
-                            <classifier>www</classifier>
-                        </artifactItem>
+                        <id>unpack</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>unpack</goal>
+                        </goals>
+                        <configuration>
+                            <artifactItems>
+                                <artifactItem>
+                                    <groupId>org.forgerock.commons.ui</groupId>
+                                    <artifactId>forgerock-ui-commons</artifactId>
+                                    <version>${forgerock-ui.version}</version>
+                                    <type>zip</type>
+                                    <classifier>www</classifier>
+                                </artifactItem>
 
-                        <artifactItem>
-                            <groupId>org.forgerock.openidm</groupId>
-                            <artifactId>openidm-ui-common</artifactId>
-                            <version>${project.version}</version>
-                            <type>zip</type>
-                            <classifier>www</classifier>
-                        </artifactItem>
-
-                        </artifactItems>
-                    </configuration>
+                                <artifactItem>
+                                    <groupId>org.forgerock.openidm</groupId>
+                                    <artifactId>openidm-ui-common</artifactId>
+                                    <version>${project.version}</version>
+                                    <type>zip</type>
+                                    <classifier>www</classifier>
+                                </artifactItem>
+                            </artifactItems>
+                        </configuration>
                     </execution>
 
                     <execution>
                         <id>unpack-codemirror</id>
-                        <phase>prepare-package</phase>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>unpack</goal>
                         </goals>
@@ -300,103 +284,25 @@
                         </configuration>
                     </execution>
 
-                    <execution>
-                        <id>copy-dependencies-less</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>less</includeArtifactIds>
-                            <includeTypes>js</includeTypes>
-                            <outputDirectory>${project.build.directory}/less</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-
-                    <execution>
-                        <id>copy-dependencies-r</id>
-                        <phase>prepare-package</phase>
-                        <goals>
-                            <goal>copy-dependencies</goal>
-                        </goals>
-                        <configuration>
-                            <includeArtifactIds>r</includeArtifactIds>
-                            <includeTypes>js</includeTypes>
-                            <outputDirectory>${project.build.directory}/optimization</outputDirectory>
-                            <overWriteReleases>false</overWriteReleases>
-                            <overWriteSnapshots>false</overWriteSnapshots>
-                            <overWriteIfNewer>true</overWriteIfNewer>
-                        </configuration>
-                    </execution>
-
                 </executions>
             </plugin>
 
             <plugin>
                 <artifactId>maven-assembly-plugin</artifactId>
-                <configuration>
-                    <descriptors>
-                        <descriptor>src/main/assembly/zip.xml</descriptor>
-                    </descriptors>
-                    <finalName>www</finalName>
-                    <appendAssemblyId>false</appendAssemblyId>
-                </configuration>
                 <executions>
                     <execution>
-                        <phase>prepare-package</phase>
+                        <id>prepare-working-dir</id>
+                        <phase>process-resources</phase>
                         <goals>
                             <goal>single</goal>
                         </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-antrun-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>compile-structure-less-to-css</id>
-                        <phase>prepare-package</phase>
-
                         <configuration>
-                            <target name="compileLess">
-
-                                <java classname="org.mozilla.javascript.tools.shell.Main" fork="true">
-                                    <classpath refid="maven.compile.classpath" />
-                                    <arg value="${project.build.directory}/less/less-1.5.1-rhino.js" />
-                                    <arg value="${project.build.directory}/www/css/structure.less" />
-                                    <arg value="${project.build.directory}/www/css/structure.css" />
-                                </java>
-
-                            </target>
+                            <finalName>dependencies</finalName>
+                            <appendAssemblyId>false</appendAssemblyId>
+                            <descriptors>
+                                <descriptor>src/main/assembly/dir.xml</descriptor>
+                            </descriptors>
                         </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
-                    </execution>
-                    <execution>
-                        <id>compile-theme-less-to-css</id>
-                        <phase>prepare-package</phase>
-
-                        <configuration>
-                            <target name="compileLess">
-
-                                <java classname="org.mozilla.javascript.tools.shell.Main" fork="true">
-                                    <classpath refid="maven.compile.classpath" />
-                                    <arg value="${project.build.directory}/less/less-1.5.1-rhino.js" />
-                                    <arg value="${project.build.directory}/www/css/theme.less" />
-                                    <arg value="${project.build.directory}/www/css/theme.css" />
-                                </java>
-
-                            </target>
-                        </configuration>
-                        <goals>
-                            <goal>run</goal>
-                        </goals>
                     </execution>
                 </executions>
             </plugin>
@@ -427,64 +333,4 @@
         </plugins>
     </build>
 
-    <profiles>
-        <profile>
-            <id>commercial-build</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-antrun-plugin</artifactId>
-                        <executions>
-                            <execution>
-                                <id>js/css optimization</id>
-                                <phase>prepare-package</phase>
-
-                                <configuration>
-                                    <target name="optimizeJS">
-
-                                        <property name="requirejs.dir" value="${project.build.directory}/optimization" />
-
-                                        <java classname="org.mozilla.javascript.tools.shell.Main">
-                                            <classpath refid="maven.compile.classpath" />
-                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
-                                            <arg value="-o" />
-                                            <arg value="${basedir}/src/main/optimization/app.build.js" />
-                                        </java>
-
-                                        <java classname="org.mozilla.javascript.tools.shell.Main">
-                                            <classpath refid="maven.compile.classpath" />
-                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
-                                            <arg value="-o" />
-                                            <arg value="cssIn=${project.build.directory}/www/css/structure.css" />
-                                            <arg value="out=${project.build.directory}/www/css/structure_min.css" />
-                                            <arg value="optimizeCss=standard" />
-                                        </java>
-
-                                        <move file="${project.build.directory}/www/css/structure_min.css" tofile="${project.build.directory}/www/css/structure.css" />
-
-                                        <java classname="org.mozilla.javascript.tools.shell.Main">
-                                            <classpath refid="maven.compile.classpath" />
-                                            <arg value="${requirejs.dir}/r-2.1.10.js" />
-                                            <arg value="-o" />
-                                            <arg value="cssIn=${project.build.directory}/www/css/theme.css" />
-                                            <arg value="out=${project.build.directory}/www/css/theme_min.css" />
-                                            <arg value="optimizeCss=standard" />
-                                        </java>
-
-                                        <move file="${project.build.directory}/www/css/theme_min.css" tofile="${project.build.directory}/www/css/theme.css" />
-
-                                    </target>
-                                </configuration>
-                                <goals>
-                                    <goal>run</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-
-    </profiles>
 </project>
