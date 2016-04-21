@@ -32,8 +32,8 @@ import org.restlet.data.Preference;
 import org.restlet.data.Protocol;
 import org.restlet.data.Reference;
 import org.restlet.data.Status;
+import org.restlet.data.Header;
 import org.restlet.engine.header.ChallengeWriter;
-import org.restlet.engine.header.Header;
 import org.restlet.engine.header.HeaderConstants;
 import org.restlet.ext.jackson.JacksonRepresentation;
 import org.restlet.representation.EmptyRepresentation;
@@ -178,17 +178,15 @@ public class SalesforceConnection extends ClientResource {
         getContext().getParameters().add("tcpNoDelay",
                 Boolean.toString(configuration.getTcpNoDelay()));
 
-        Client client = new Client(Protocol.HTTPS);
-        client.setContext(getContext());
-
         /*
          * The connection timeout in milliseconds. The default value is 0,
          * meaning an infinite timeout
          */
-        client.setConnectTimeout(configuration.getConnectTimeout());
+        getContext().getParameters().add("socketConnectTimeoutMs",
+                Integer.toString(configuration.getConnectTimeout()));
 
-        // getContext().getParameters().add("socketConnectTimeoutMs",
-        // Integer.toString(configuration.getConnectTimeout()));
+        Client client = new Client(Protocol.HTTPS);
+        client.setContext(getContext());
 
         setNext(client);
 
