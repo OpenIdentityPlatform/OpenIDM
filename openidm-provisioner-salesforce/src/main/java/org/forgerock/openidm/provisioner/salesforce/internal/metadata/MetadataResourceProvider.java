@@ -1,11 +1,23 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2013-2015 ForgeRock AS.
  */
-
 package org.forgerock.openidm.provisioner.salesforce.internal.metadata;
 
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.provisioner.salesforce.internal.SalesforceConnectorUtil.adapt;
 import static org.forgerock.openidm.util.ResourceUtil.getUriTemplateVariables;
 
 import java.io.ByteArrayInputStream;
@@ -16,8 +28,9 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.CreateRequest;
@@ -28,13 +41,11 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
-import org.forgerock.json.resource.QueryResultHandler;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Resource;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResultHandler;
-import org.forgerock.json.resource.ServerContext;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
@@ -42,6 +53,8 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.provisioner.salesforce.internal.SalesforceConnection;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -160,8 +173,7 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
     }
 
     @Override
-    public void createInstance(final ServerContext context, final CreateRequest request,
-            final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> createInstance(final Context context, final CreateRequest request) {
         try {
             if (StringUtils.isBlank(request.getNewResourceId())) {
                 Class<? extends Metadata> metaClass = getMetadataClass(context);
@@ -171,24 +183,23 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
                 AsyncResult[] results = getConnection().create(new Metadata[] { metadata });
                 getAsyncResult(results[0]);
 
-                Resource metadataResource = getMetadataResource(metadata.getFullName(), metaClass);
+                ResourceResponse metadataResource = getMetadataResource(metadata.getFullName(), metaClass);
                 if (null != metadataResource) {
-                    handler.handleResult(metadataResource);
+                    return metadataResource.asPromise();
                 } else {
-                    handler.handleResult(new Resource(metadata.getFullName(), null, null));
+                    return newResourceResponse(metadata.getFullName(), null, null).asPromise();
                 }
             } else {
-                handler.handleError(new NotSupportedException(
-                        "Create metadata with client provided ID is not supported"));
+                return new NotSupportedException("Create metadata with client provided ID is not supported").asPromise();
             }
         } catch (final Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+            return adapt(t).asPromise();
         }
     }
 
     @Override
-    public void updateInstance(final ServerContext context, final String resourceId,
-            final UpdateRequest request, final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String resourceId,
+            final UpdateRequest request) {
         try {
             Class<? extends Metadata> metaClass = getMetadataClass(context);
             Metadata metadata =
@@ -201,37 +212,37 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
             AsyncResult[] results = getConnection().update(new UpdateMetadata[] { updateMetadata });
             getAsyncResult(results[0]);
 
-            Resource metadataResource = getMetadataResource(metadata.getFullName(), metaClass);
+            ResourceResponse metadataResource = getMetadataResource(metadata.getFullName(), metaClass);
             if (null != metadataResource) {
-                handler.handleResult(metadataResource);
+                return metadataResource.asPromise();
             } else {
-                handler.handleResult(new Resource(metadata.getFullName(), null, null));
+                return newResourceResponse(metadata.getFullName(), null, null).asPromise();
             }
         } catch (final Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+            return adapt(t).asPromise();
         }
     }
 
     @Override
-    public void readInstance(final ServerContext context, final String resourceId,
-            final ReadRequest request, ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final String resourceId,
+            final ReadRequest request) {
         try {
             Class<? extends Metadata> metaClass = getMetadataClass(context);
 
-            Resource metadataResource = getMetadataResource(resourceId, metaClass);
+            ResourceResponse metadataResource = getMetadataResource(resourceId, metaClass);
             if (null != metadataResource) {
-                handler.handleResult(metadataResource);
+                return metadataResource.asPromise();
             } else {
-                handler.handleError(new NotFoundException());
+                return new NotFoundException().asPromise();
             }
         } catch (Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+            return adapt(t).asPromise();
         }
     }
 
     @Override
-    public void queryCollection(final ServerContext context, final QueryRequest request,
-            final QueryResultHandler handler) {
+    public Promise<QueryResponse, ResourceException> queryCollection(final Context context, final QueryRequest request,
+            final QueryResourceHandler handler) {
         try {
             if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
                 Class<? extends Metadata> metaClass = getMetadataClass(context);
@@ -244,21 +255,21 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
                                 sfconnection.getAPIVersion());
 
                 for (FileProperties file : results) {
-                    handler.handleResource(new Resource(file.getFullName(), "", new JsonValue(
-                            OBJECT_MAPPER.convertValue(file, Map.class))));
+                    handler.handleResource(newResourceResponse(
+                            file.getFullName(), "", new JsonValue(OBJECT_MAPPER.convertValue(file, Map.class))));
                 }
-                handler.handleResult(new QueryResult());
+                return newQueryResponse().asPromise();
             } else {
-                handler.handleError(new BadRequestException("Not supported queryId"));
+                return new BadRequestException("Not supported queryId").asPromise();
             }
         } catch (final Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+            return adapt(t).asPromise();
         }
     }
 
     @Override
-    public void deleteInstance(final ServerContext context, final String resourceId,
-            final DeleteRequest request, final ResultHandler<Resource> handler) {
+    public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId,
+            final DeleteRequest request) {
         try {
             Class<? extends Metadata> metaClass = getMetadataClass(context);
             Metadata metadata = metaClass.newInstance();
@@ -267,31 +278,30 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
             AsyncResult[] results = getConnection().delete(new Metadata[] { metadata });
             getAsyncResult(results[0]);
 
-            handler.handleResult(new Resource(metadata.getFullName(), null, null));
+            return newResourceResponse(metadata.getFullName(), null, null).asPromise();
         } catch (final Throwable t) {
-            handler.handleError(ResourceUtil.adapt(t));
+            return adapt(t).asPromise();
         }
     }
 
     @Override
-    public void actionInstance(final ServerContext context, final String resourceId,
-            final ActionRequest request, final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ActionResponse, ResourceException> actionInstance(final Context context, final String resourceId,
+            final ActionRequest request) {
+        return ResourceUtil.notSupportedOnInstance(request).asPromise();
     }
 
     @Override
-    public void actionCollection(final ServerContext context, final ActionRequest request,
-            final ResultHandler<JsonValue> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnCollection(request));
+    public Promise<ActionResponse, ResourceException> actionCollection(final Context context, final ActionRequest request) {
+        return ResourceUtil.notSupportedOnCollection(request).asPromise();
     }
 
     @Override
-    public void patchInstance(final ServerContext context, final String resourceId,
-            final PatchRequest request, final ResultHandler<Resource> handler) {
-        handler.handleError(ResourceUtil.notSupportedOnInstance(request));
+    public Promise<ResourceResponse, ResourceException> patchInstance(final Context context, final String resourceId,
+            final PatchRequest request) {
+        return ResourceUtil.notSupportedOnInstance(request).asPromise();
     }
 
-    protected String getPartition(ServerContext context) throws ResourceException {
+    protected String getPartition(Context context) throws ResourceException {
         Map<String, String> variables = getUriTemplateVariables(context);
         if (null != variables && variables.containsKey("metadataType")) {
             return variables.get("metadataType");
@@ -299,7 +309,7 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
         throw new ForbiddenException("Direct access without Router to this service is forbidden.");
     }
 
-    private Class<? extends Metadata> getMetadataClass(final ServerContext context)
+    private Class<? extends Metadata> getMetadataClass(final Context context)
             throws ResourceException {
         Class<? extends Metadata> metaClass;
         if ("samlssoconfig".equalsIgnoreCase(getPartition(context))) {
@@ -346,7 +356,7 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
         return asyncResult;
     }
 
-    private Resource getMetadataResource(String resourceId, Class<? extends Metadata> metaClass)
+    private ResourceResponse getMetadataResource(String resourceId, Class<? extends Metadata> metaClass)
             throws ConnectionException, ResourceException, InterruptedException, IOException {
         PackageTypeMembers packageTypeMembers = new PackageTypeMembers();
         packageTypeMembers.setName(metaClass.getSimpleName());
@@ -366,7 +376,7 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
         return getMetadataResource(result.getZipFile(), metaClass.getSimpleName(), resourceId);
     }
 
-    public static Resource getMetadataResource(byte[] zipFile, String type, String id)
+    public static ResourceResponse getMetadataResource(byte[] zipFile, String type, String id)
             throws ResourceException, IOException {
         String entryName = null;
         Metadata metadata = null;
@@ -389,9 +399,10 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
                     try {
                         xin.setInput(stream, "utf-8");
                         metadata.load(xin, TYPE_MAPPER);
-                        return new Resource(null != metadata.getFullName() ? metadata.getFullName()
-                                : id, null, new JsonValue(OBJECT_MAPPER.convertValue(metadata,
-                                Map.class)));
+                        return newResourceResponse(
+                                null != metadata.getFullName() ? metadata.getFullName() : id,
+                                null,
+                                new JsonValue(OBJECT_MAPPER.convertValue(metadata, Map.class)));
                     } catch (PullParserException e) {
                         /* ignore */
                     } catch (ConnectionException e) {
