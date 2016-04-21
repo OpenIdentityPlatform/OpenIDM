@@ -12,16 +12,17 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResult;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.Resource;
-import org.forgerock.json.resource.RootContext;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.provisioner.salesforce.internal.TestUtil;
 import org.forgerock.openidm.router.RouterRegistry;
 import org.forgerock.openidm.provisioner.salesforce.internal.GuiceSalesforceModule;
+import org.forgerock.services.context.RootContext;
 import org.testng.Assert;
 import org.testng.SkipException;
 import org.testng.annotations.BeforeClass;
@@ -41,7 +42,7 @@ public class SalesforceProvisionerServiceTest {
 
     @Inject
     @Nullable
-    RouterRegistry routerRegistry = null;
+    TestUtil.TestRouterRegistry routerRegistry = null;
 
     @BeforeClass
     public void beforeClass() throws Exception {
@@ -60,7 +61,7 @@ public class SalesforceProvisionerServiceTest {
         ReadRequest readRequest = Requests.newReadRequest("/system/test/sobjects/User/describe");
         int i = 0;
         do {
-            Resource r = routerRegistry.getConnection("test").read(new RootContext(), readRequest);
+            ResourceResponse r = routerRegistry.getConnection().read(new RootContext(), readRequest);
             Assert.assertNotNull(r.getContent().getObject());
             Thread.sleep(16 * 60 * 1000);
             Toolkit.getDefaultToolkit().beep();
@@ -71,18 +72,18 @@ public class SalesforceProvisionerServiceTest {
     public void testQueryCollection() throws Exception {
         QueryRequest queryRequest = Requests.newQueryRequest("/system/test/sobjects/User");
         queryRequest.setQueryId("active-only");
-        Set<Resource> resourcesFirst = new HashSet<Resource>();
-        QueryResult resultFirst =
-                routerRegistry.getConnection("test").query(new RootContext(), queryRequest,
+        Set<ResourceResponse> resourcesFirst = new HashSet<ResourceResponse>();
+        QueryResponse resultFirst =
+                routerRegistry.getConnection().query(new RootContext(), queryRequest,
                         resourcesFirst);
         Assert.assertFalse(resourcesFirst.isEmpty());
 
         queryRequest = Requests.newQueryRequest("/system/test/query");
         queryRequest
                 .setQueryExpression("select Id from User where IsActive = true AND Alias != 'Chatter'");
-        Set<Resource> resourceSecond = new HashSet<Resource>();
-        QueryResult resultSecond =
-                routerRegistry.getConnection("test").query(new RootContext(), queryRequest,
+        Set<ResourceResponse> resourceSecond = new HashSet<ResourceResponse>();
+        QueryResponse resultSecond =
+                routerRegistry.getConnection().query(new RootContext(), queryRequest,
                         resourceSecond);
         Assert.assertFalse(resourceSecond.isEmpty());
 
@@ -91,11 +92,11 @@ public class SalesforceProvisionerServiceTest {
         Assert.assertEquals(resultFirst.getPagedResultsCookie(), resultSecond
                 .getPagedResultsCookie());
 
-        Resource resourceFirst = resourcesFirst.iterator().next();
+        ResourceResponse resourceFirst = resourcesFirst.iterator().next();
         ReadRequest readRequest =
                 Requests.newReadRequest("/system/test/sobjects/User", resourceFirst.getId());
-        Resource resourceRead =
-                routerRegistry.getConnection("test").read(new RootContext(), readRequest);
+        ResourceResponse resourceRead =
+                routerRegistry.getConnection().read(new RootContext(), readRequest);
         Assert.assertEquals(resourceFirst.getId(), resourceRead.getId());
 
     }
@@ -105,9 +106,9 @@ public class SalesforceProvisionerServiceTest {
         QueryRequest queryRequest = Requests.newQueryRequest("/system/test/query");
         queryRequest
                 .setQueryExpression("select Id from User where IsActive = true AND Alias != 'Chatter'");
-        Set<Resource> resource = new HashSet<Resource>();
-        QueryResult result =
-                routerRegistry.getConnection("test").query(new RootContext(), queryRequest,
+        Set<ResourceResponse> resource = new HashSet<ResourceResponse>();
+        QueryResponse result =
+                routerRegistry.getConnection().query(new RootContext(), queryRequest,
                         resource);
         Assert.assertFalse(resource.isEmpty());
     }
@@ -126,7 +127,7 @@ public class SalesforceProvisionerServiceTest {
     public void testActionCollection() throws Exception {
         ActionRequest actionRequest = Requests.newActionRequest("/system/test", "test");
         JsonValue result =
-                routerRegistry.getConnection("test").action(new RootContext(), actionRequest);
+                routerRegistry.getConnection().action(new RootContext(), actionRequest).getJsonContent();
         Assert.assertTrue(result.get("ok").asBoolean(), "System is not available");
     }
 

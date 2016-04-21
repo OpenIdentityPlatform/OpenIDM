@@ -6,12 +6,14 @@
 
 package org.forgerock.openidm.provisioner.salesforce.internal;
 
+import static org.testng.Assert.assertNotNull;
+
 import java.net.URL;
 import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.forgerock.json.resource.NotFoundException;
-import org.forgerock.json.resource.Resource;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.provisioner.salesforce.internal.data.SObjectDescribe;
 import org.forgerock.openidm.provisioner.salesforce.internal.metadata.MetadataResourceProvider;
 import org.forgerock.openidm.provisioner.salesforce.internal.metadata.MetadataResourceProviderTest;
@@ -29,7 +31,7 @@ public class SalesforceConnectionTest {
     @Test(enabled = false)
     public void testIsCreateable() throws Exception {
         URL configURL = SalesforceConnectionTest.class.getResource("/User.json");
-        Assert.assertNotNull(configURL);
+        assertNotNull(configURL);
 
         SObjectDescribe describe =
                 SalesforceConnection.mapper
@@ -41,7 +43,7 @@ public class SalesforceConnectionTest {
     @Test
     public void testTest() throws Exception {
         URL configURL = SalesforceConnectionTest.class.getResource("/salesforce.json");
-        Assert.assertNotNull(configURL);
+        assertNotNull(configURL);
 
         Map<String, Object> config =
                 SalesforceConnection.mapper.readValue(configURL.openStream(), Map.class);
@@ -64,9 +66,9 @@ public class SalesforceConnectionTest {
                         .getResourceAsStream("/metadata/metadata.zip"));
         String type = "samlssoconfig";
         String id = "Migrated_SAML_Config";
-        Resource metaResource = MetadataResourceProvider.getMetadataResource(zipFile, type, id);
+        ResourceResponse metaResource = MetadataResourceProvider.getMetadataResource(zipFile, type, id);
 
-        Assert.assertNotNull(metaResource);
+        assertNotNull(metaResource);
 
         Assert.assertNull(MetadataResourceProvider.getMetadataResource(zipFile, type, "Not_EXITS"));
 

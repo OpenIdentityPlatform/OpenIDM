@@ -27,16 +27,12 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.Context;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.RootContext;
-import org.forgerock.json.resource.Route;
 import org.forgerock.json.resource.Router;
-import org.forgerock.json.resource.ServerContext;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
@@ -45,6 +41,7 @@ import org.forgerock.openidm.crypto.impl.UpdatableKeyStoreSelector;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistry;
+import org.forgerock.services.routing.RouteMatcher;
 import org.osgi.service.component.ComponentContext;
 
 /**
@@ -67,6 +64,10 @@ public final class TestUtil {
 
         private final Connection connection = Resources.newInternalConnection(router);
 
+        public Connection getConnection() {
+            return connection;
+        }
+
         @Override
         public RouteEntry addRoute(RouteBuilder routeBuilder) {
             if (null != routeBuilder) {
@@ -75,26 +76,9 @@ public final class TestUtil {
             return null;
         }
 
-        @Override
-        public Connection getConnection(String s) throws ResourceException {
-            if ("test".equals(s)) {
-                return connection;
-            } else {
-                throw new InternalServerErrorException("Connection is not found for id: " + s);
-            }
-        }
-
-        @Override
-        public String getConnectionId(Connection connection) throws ResourceException {
-            if (this.connection == connection) {
-                return "test";
-            }
-            throw new InternalServerErrorException("Unknown Connection");
-        }
-
         private class RouteEntryImpl implements RouteEntry {
 
-            protected Route[] registeredRoutes;
+            protected RouteMatcher[] registeredRoutes;
 
             RouteEntryImpl(final RouteBuilder builder) {
                 registeredRoutes = builder.register(router);
@@ -108,16 +92,6 @@ public final class TestUtil {
                     isModified = r.removeRoute(registeredRoutes);
                 }
                 return isModified;
-            }
-
-            @Override
-            public ServerContext createServerContext() throws ResourceException {
-                return new ServerContext(new RootContext());
-            }
-
-            @Override
-            public ServerContext createServerContext(Context context) throws ResourceException {
-                return new ServerContext(context);
             }
         }
     }

@@ -5,20 +5,22 @@
  */
 package org.forgerock.openidm.provisioner.salesforce.internal;
 
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCrypto;
-import org.forgerock.json.fluent.JsonPointer;
-import org.forgerock.json.fluent.JsonValue;
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.osgi.framework.Bundle;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static org.forgerock.json.fluent.JsonValue.json;
-import static org.forgerock.json.fluent.JsonValue.field;
-import static org.forgerock.json.fluent.JsonValue.object;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONFIGURATION_PROPERTIES;
 
 /**
@@ -58,6 +60,27 @@ public class SalesforceConnectorUtil {
         }
 
         return decrypted;
+    }
+
+    /**
+     * Adapts an {@code Exception} to a {@code ResourceException}.
+     *
+     * @param t
+     *            The exception which caused the request to fail.
+     * @return The equivalent resource exception.
+     */
+    public static ResourceException adapt(final Throwable t) {
+        int resourceResultCode;
+        try {
+            throw t;
+        } catch (final ResourceException e) {
+            return e;
+        } catch (final JsonValueException e) {
+            resourceResultCode = ResourceException.BAD_REQUEST;
+        } catch (final Throwable e) {
+            resourceResultCode = ResourceException.INTERNAL_ERROR;
+        }
+        return newResourceException(resourceResultCode, t.getMessage(), t);
     }
 
 }
