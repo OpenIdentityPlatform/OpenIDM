@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.repo.jdbc.impl.query;
@@ -334,10 +326,10 @@ public class TableQueries {
             } else {
                 queryDescription = queries.getQueryInfo(queryId).getQueryString();
             }
-            throw new InternalServerErrorException("DB reported failure preparing query: "
-                    + queryDescription
-                    + " with params: " + params + " error code: " + ex.getErrorCode()
-                    + " sqlstate: " + ex.getSQLState() + " message: " + ex.getMessage(), ex);
+            logger.debug("DB reported failure preparing query: {} "
+                    + " with params: {} error code: {} sqlstate: {} message: {} ",
+                    queryDescription, params, ex.getErrorCode(), ex.getSQLState(), ex.getMessage(), ex);
+            throw new InternalServerErrorException("DB reported failure preparing query.");
         }
 
         Name eventName = getEventName(queryId);
@@ -348,10 +340,10 @@ public class TableQueries {
             result = resultMapper.mapQueryToObject(rs, queryId, type, params, this);
             measure.setResult(result);
         } catch (SQLException ex) {
-            throw new InternalServerErrorException("DB reported failure executing query "
-                    + foundQuery.toString() + " with params: " + params + " error code: "
-                    + ex.getErrorCode() + " sqlstate: " + ex.getSQLState() + " message: "
-                    + ex.getMessage(), ex);
+            logger.debug("DB reported failure executing query " +
+                            "{} with params: {} error code: {} sqlstate: {} message: {}",
+                    foundQuery.toString(), params, ex.getErrorCode(), ex.getSQLState(), ex.getMessage(), ex);
+            throw new InternalServerErrorException("DB reported failure executing query.");
         } catch (IOException ex) {
             throw new InternalServerErrorException("Failed to convert result objects for query "
                     + foundQuery.toString() + " with params: " + params + " message: "
@@ -387,10 +379,12 @@ public class TableQueries {
                         + " does not match any configured commands on the JDBC repository service.");
             }
         } catch (SQLException ex) {
-            throw new InternalServerErrorException("DB reported failure preparing command: "
-                    + (queryExpression != null ? queryExpression : commands.getQueryInfo(queryId).getQueryString())
-                    + " with params: " + params + " error code: " + ex.getErrorCode()
-                    + " sqlstate: " + ex.getSQLState() + " message: " + ex.getMessage(), ex);
+            if (queryExpression == null) {
+                queryExpression = commands.getQueryInfo(queryId).getQueryString();
+            }
+            logger.debug("DB reported failure preparing command: {} with params: {} error code: {} sqlstate: {} " +
+                    "message: {}", queryExpression, params, ex.getErrorCode(), ex.getSQLState(), ex.getMessage(), ex);
+            throw new InternalServerErrorException("DB reported failure preparing command.");
         }
 
         Name eventName = getEventName(queryId);
@@ -400,10 +394,10 @@ public class TableQueries {
             result = foundQuery.executeUpdate();
             measure.setResult(result);
         } catch (SQLException ex) {
-            throw new InternalServerErrorException("DB reported failure executing query "
-                    + foundQuery.toString() + " with params: " + params + " error code: "
-                    + ex.getErrorCode() + " sqlstate: " + ex.getSQLState() + " message: "
-                    + ex.getMessage(), ex);
+            logger.debug("DB reported failure executing query {} " +
+                    "with params: {} error code: {} sqlstate: {} message: {} ",
+                    foundQuery.toString(), params, ex.getErrorCode(), ex.getSQLState(), ex.getMessage(), ex);
+            throw new InternalServerErrorException("DB reported failure executing query.");
         } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(foundQuery);
