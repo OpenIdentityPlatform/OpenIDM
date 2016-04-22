@@ -1,31 +1,25 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2014-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.orientechnologies.common.exception.OException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.openidm.repo.QueryConstants;
@@ -111,7 +105,7 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
         boolean tryPrepared = false;
 
         try {
-            if (tryPrepared /* queryInfo.isUsePrepared() */ ) {
+            if (tryPrepared /* queryInfo.isUsePrepared() */) {
                 result = doPreparedQuery(queryInfo, params, database);
             } else {
                 result = doTokenSubsitutionQuery(queryInfo, params, database);
@@ -119,7 +113,7 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
             measure.setResult(result);
             return result;
         } catch (OQueryParsingException firstTryEx) {
-            if (tryPrepared /* queryInfo.isUsePrepared() */ ) {
+            if (tryPrepared /* queryInfo.isUsePrepared() */) {
                 // Prepared query is invalid, fall back onto add-hoc resolved query
                 try {
                     logger.debug("Prepared version not valid, trying manual substitution");
@@ -130,8 +124,9 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
                     queryInfo.setUsePrepared(false);
                 } catch (OQueryParsingException secondTryEx) {
                     // TODO: consider differentiating between bad configuration and bad request
-                    throw new BadRequestException("Failed to resolve and parse the command "
-                            + queryInfo.getQueryString() + " with params: " + params, secondTryEx);
+                    logger.debug("Failed to resolve and parse the command {} with params: {}",
+                            queryInfo.getQueryString(), params, secondTryEx);
+                    throw new BadRequestException("Failed to resolve and parse the command.");
                 }
             } else {
                 // TODO: consider differentiating between bad configuration and bad request
@@ -140,8 +135,11 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
             }
         } catch (IllegalArgumentException ex) {
             // TODO: consider differentiating between bad configuration and bad request
-            throw new BadRequestException("Command is invalid: "
-                    + queryInfo.getQueryString() + " " + ex.getMessage(), ex);
+            logger.debug("Command is invalid: {} {}", queryInfo.getQueryString(), ex.getMessage(), ex);
+            throw new BadRequestException("Command is invalid.");
+        } catch (OException ex) {
+            logger.debug("Error executing DB command {} {}", queryInfo.getQueryString(), ex.getMessage(), ex);
+            throw new BadRequestException("Error executing DB command.");
         } catch (RuntimeException ex) {
             logger.warn("Unexpected failure during DB command: {}", ex.getMessage());
             throw ex;
