@@ -24,7 +24,6 @@ define("org/forgerock/openidm/ui/admin/connector/AbstractConnectorView", [
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/admin/connector/ConnectorTypeView",
     "org/forgerock/openidm/ui/admin/connector/ConnectorRegistry",
-    "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
     "org/forgerock/commons/ui/common/main/Router"
 
 ], function($, _,
@@ -35,7 +34,6 @@ define("org/forgerock/openidm/ui/admin/connector/AbstractConnectorView", [
             ConnectorDelegate,
             ConnectorType,
             ConnectorRegistry,
-            connectorUtils,
             router) {
 
     var AddEditConnectorView = AdminAbstractView.extend({

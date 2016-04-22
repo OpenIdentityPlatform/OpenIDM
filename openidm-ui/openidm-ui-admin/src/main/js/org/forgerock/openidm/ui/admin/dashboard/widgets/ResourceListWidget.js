@@ -38,11 +38,10 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget", [
 
                 $.when(SyncDelegate.mappingDetails(),
                     ConnectorDelegate.currentConnectors(),
-                    ConfigDelegate.readEntity("managed"),
-                    ConnectorUtils.getIconList()).then(
-                    _.bind(function (sync, connectors, managedObjects, iconList) {
+                    ConfigDelegate.readEntity("managed")).then(
+                    _.bind(function (sync, connectors, managedObjects) {
                         _.each(connectors, _.bind(function(connector){
-                            tempIconClass = ConnectorUtils.getIcon(connector.connectorRef.connectorName, iconList);
+                            tempIconClass = ConnectorUtils.getIcon(connector.connectorRef.connectorName);
                             connector.iconClass = tempIconClass.iconClass;
                             connector.iconSrc = tempIconClass.src;
                         }, this));

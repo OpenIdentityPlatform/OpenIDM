@@ -1,6 +1,6 @@
 module.exports = {
     url: function() {
-        return this.api.globals.baseUrl + "#dashboard/";
+        return this.api.globals.baseUrl + "#mapping/";
     },
     sections: {
         navigation: {
@@ -33,6 +33,9 @@ module.exports = {
         mappingList: {
             selector: '#content',
             elements: {
+                nosuch: {
+                    selector: '#nosuch'
+                },
                 addNewMapping: {
                     selector: '#addMapping'
                 },

@@ -130,7 +130,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             this.userDefinedObjectTypes = null;
 
             //Get available list of connectors
-            $.when(ConnectorDelegate.availableConnectors(), connectorUtils.getIconList()).then(_.bind(function(connectors, iconList){
+            $.when(ConnectorDelegate.availableConnectors()).then(_.bind(function(connectors){
                 connectors = connectors[0];
                 this.data.connectors = connectors.connectorRef;
 
@@ -165,7 +165,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                 ConfigDelegate.readEntity(this.data.systemType +"/" + this.data.connectorId).then(_.bind(function(data){
                     var tempVersion;
 
-                    this.data.connectorIcon = connectorUtils.getIcon(data.connectorRef.connectorName, iconList);
+                    this.data.connectorIcon = connectorUtils.getIcon(data.connectorRef.connectorName);
                     this.currentObjectTypeLoaded = "savedConfig";
                     this.data.objectTypeDefaultConfigs = this.objectTypeConfigs[data.connectorRef.bundleName];
 

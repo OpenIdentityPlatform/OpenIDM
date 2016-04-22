@@ -1,0 +1,8 @@
+{
+    "_id": "sync",
+    "mappings": [{
+        "name": "HumanResources_Engineering",
+        "source": "system/csv/account",
+        "target": "system/xmlfile/account"
+    }]
+}
