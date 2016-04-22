@@ -46,14 +46,24 @@
                                 <div class="connector source">
                                     <div class="panel-body">
                                         <div class="media">
-                                            <a class="media-left" href="#">
+                                            <div class="media-left">
+                                                {{#if sourceConnector.isMissing}}
+                                                <div class="image circle missing">
+                                                    <i class="fa fa-question"></i>
+                                                </div>
+                                                {{else}}
                                                 <div class="image circle">
                                                     <i class="mapping-icon left-icon {{sourceIcon}}"></i>
                                                 </div>
-                                            </a>
+                                                {{/if}}
+                                            </div>
                                             <div class="media-body">
                                                 <h4 class="connector-role">{{t "templates.mapping.source"}}</h4>
+                                                {{#if sourceConnector.isMissing}}
+                                                <h3 class="text-muted">{{source}}</h3>
+                                                {{else}}
                                                 <h3>{{source}}</h3>
+                                                {{/if}}
                                                 <p class="">{{sourceType}}</p>
                                             </div>
                                         </div>
@@ -69,13 +79,23 @@
                                     <div class="panel-body">
                                         <div class="media">
                                             <a class="media-left" href="#">
+                                                {{#if targetConnector.isMissing}}
+                                                <div class="image circle missing">
+                                                    <i class="fa fa-question"></i>
+                                                </div>
+                                                {{else}}
                                                 <div class="image circle">
                                                     <i class="mapping-icon left-icon {{targetIcon}}"></i>
                                                 </div>
+                                                {{/if}}
                                             </a>
                                             <div class="media-body">
                                                 <h4 class="connector-role">{{t "templates.mapping.target"}}</h4>
+                                                {{#if targetConnector.isMissing}}
+                                                <h3 class="text-muted">{{target}}</h3>
+                                                {{else}}
                                                 <h3>{{target}}</h3>
+                                                {{/if}}
                                                 <p>{{targetType}}</p>
                                             </div>
                                         </div>
@@ -91,7 +111,7 @@
                                         <h2 class="connector-name mapping-config-header sync-label">
                                             {{name}}
                                         </h2>
-                                        <div class="connector-status text-danger">
+                                        <div class="connector-status">
                                             <i class="{{name}}_syncStatus_icon fa"></i>
                                             <span class="{{name}}_syncStatus"></span>
                                         </div>

@@ -53,20 +53,18 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
         render: function(args, callback) {
             var managedPromise,
                 repoCheckPromise,
-                iconPromise,
                 tempIconClass;
 
             this.data.docHelpUrl = constants.DOC_URL;
 
             managedPromise = ConfigDelegate.readEntity("managed");
             repoCheckPromise = ConfigDelegate.getConfigList();
-            iconPromise = connectorUtils.getIconList();
 
-            $.when(managedPromise, repoCheckPromise, iconPromise).then(_.bind(function(managedObjects, configFiles, iconList){
+            $.when(managedPromise, repoCheckPromise).then(_.bind(function(managedObjects, configFiles){
                 this.data.currentManagedObjects = _.sortBy(managedObjects.objects, 'name');
 
                 _.each(this.data.currentManagedObjects, _.bind(function(managedObject){
-                    tempIconClass = connectorUtils.getIcon("managedobject", iconList);
+                    tempIconClass = connectorUtils.getIcon("managedobject");
 
                     managedObject.iconClass = tempIconClass.iconClass;
                     managedObject.iconSrc = tempIconClass.src;

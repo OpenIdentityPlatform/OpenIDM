@@ -49,7 +49,6 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
         render: function(args, callback) {
             var connectorPromise,
                 managedPromise,
-                iconPromise,
                 splitConfig,
                 tempIconClass;
 
@@ -57,14 +56,13 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
 
             connectorPromise = ConnectorDelegate.currentConnectors();
             managedPromise = ConfigDelegate.readEntity("managed");
-            iconPromise = connectorUtils.getIconList();
 
-            $.when(connectorPromise, managedPromise, iconPromise).then(_.bind(function(connectors, managedObjects, iconList){
+            $.when(connectorPromise, managedPromise).then(_.bind(function(connectors, managedObjects){
 
                 _.each(connectors, _.bind(function(connector){
                     connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
 
-                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName, iconList);
+                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName);
                     connector.iconClass = tempIconClass.iconClass;
                     connector.iconSrc = tempIconClass.src;
 
@@ -98,7 +96,7 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                 this.data.currentManagedObjects = _.sortBy(managedObjects.objects, 'name');
 
                 _.each(this.data.currentManagedObjects, _.bind(function(managedObject){
-                    tempIconClass = connectorUtils.getIcon("managedobject", iconList);
+                    tempIconClass = connectorUtils.getIcon("managedobject");
 
                     managedObject.iconClass = tempIconClass.iconClass;
                     managedObject.iconSrc = tempIconClass.src;

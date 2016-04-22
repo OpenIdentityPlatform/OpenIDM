@@ -53,7 +53,6 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
         },
         render: function(args, callback) {
             var connectorPromise,
-                iconPromise,
                 splitConfig,
                 tempIconClass,
                 ConnectorModel = Backbone.Model.extend({}),
@@ -78,11 +77,10 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
             this.model.connectorCollection = new Connectors();
 
             connectorPromise = ConnectorDelegate.currentConnectors();
-            iconPromise = connectorUtils.getIconList();
 
-            $.when(connectorPromise, iconPromise).then(_.bind(function(connectors, iconList){
+            $.when(connectorPromise).then(_.bind(function(connectors){
                 _.each(connectors, _.bind(function(connector){
-                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName, iconList);
+                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName);
                     connector.iconClass = tempIconClass.iconClass;
                     connector.iconSrc = tempIconClass.src;
 

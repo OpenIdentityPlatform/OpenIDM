@@ -61,6 +61,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
         model: {},
         partials: [
             "partials/mapping/list/_sourceTargetGridCellDisplay.html",
+            "partials/mapping/list/_emptyConnectorGridCell.html",
             "partials/mapping/list/_syncStatusCellDisplay.html",
             "partials/mapping/list/_actionCellDisplay.html",
             "partials/mapping/list/_linkName.html"
@@ -111,7 +112,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                         mappingGrid,
                         RenderRow,
                         _this = this;
-    
+
                     this.model.mappingCollection = new Mappings();
 
                     _.each(results, function (mappingInfo, index) {
@@ -129,10 +130,17 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
 
                             this.data.mappingConfig[index].sourceConnector.url = "#connectors/edit/" + cleanName +"/";
                         } else {
-                            this.data.mappingConfig[index].sourceConnector = {
-                                "displayName" : $.t("templates.connector.managedObjectType"),
-                                "url" : "#managed/edit/" +this.data.mappingConfig[index].source.split("/")[1] +"/"
-                            };
+                            if (this.data.mappingConfig[index].sourceType === "managed") {
+                                this.data.mappingConfig[index].sourceConnector = {
+                                    "displayName" : $.t("templates.connector.managedObjectType"),
+                                    "url" : "#managed/edit/" +this.data.mappingConfig[index].source.split("/")[1] +"/"
+                                };
+                            } else {
+                                this.data.mappingConfig[index].sourceConnector = {
+                                    "displayName" : this.data.mappingConfig[index].sourceType,
+                                    "isMissing" : true
+                                };
+                            }
                         }
 
                         if (this.data.mappingConfig[index].targetConnector){
@@ -143,21 +151,29 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
 
                             this.data.mappingConfig[index].targetConnector.url = "#connectors/edit/" + cleanName +"/";
                         } else {
-                            this.data.mappingConfig[index].targetConnector = {
-                                "displayName" : $.t("templates.connector.managedObjectType"),
-                                "url" : "#managed/edit/" +this.data.mappingConfig[index].target.split("/")[1] +"/"
-                            };
+                            if (this.data.mappingConfig[index].sourceType === "managed") {
+                                this.data.mappingConfig[index].targetConnector = {
+                                    "displayName" : $.t("templates.connector.managedObjectType"),
+                                    "url" : "#managed/edit/" +this.data.mappingConfig[index].target.split("/")[1] +"/"
+                                };
+                            } else {
+                                this.data.mappingConfig[index].targetConnector = {
+                                    "displayName" : this.data.mappingConfig[index].targetType,
+                                    "isMissing" : true
+                                };
+                            }
+
                         }
-                        
+
                         this.model.mappingCollection.add(this.data.mappingConfig[index]);
                     }, this);
-    
+
                     RenderRow = Backgrid.Row.extend({
                         render: function () {
                             RenderRow.__super__.render.apply(this, arguments);
-    
+
                             this.$el.attr('data-mapping-title', this.model.attributes.name);
-    
+
                             return this;
                         }
                     });
@@ -187,7 +203,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                             }
 
                         }, this));
-                        
+
                         mappingGrid = new Backgrid.Grid({
                             className: "table backgrid",
                             row: RenderRow,
@@ -215,12 +231,18 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                                     editable: false,
                                     cell: Backgrid.Cell.extend({
                                         render: function () {
-                                            var display = handlebars.compile("{{> mapping/list/_sourceTargetGridCellDisplay}}")({
-                                                linkUrl: this.model.attributes.sourceConnector.url,
-                                                icon: this.model.attributes.sourceIcon,
-                                                displayName: this.model.attributes.sourceConnector.displayName
-                                            });
-
+                                            var display;
+                                            if (this.model.attributes.sourceType === "managed" || this.model.attributes.sourceConnector.connectorRef) {
+                                                display = handlebars.compile("{{> mapping/list/_sourceTargetGridCellDisplay}}")({
+                                                    linkUrl: this.model.attributes.sourceConnector.url,
+                                                    icon: this.model.attributes.sourceIcon,
+                                                    displayName: this.model.attributes.sourceConnector.displayName
+                                                });
+                                            } else {
+                                                display = handlebars.compile("{{> mapping/list/_emptyConnectorGridCell}}")({
+                                                    displayName: this.model.attributes.sourceConnector.displayName
+                                                });
+                                            }
                                             this.$el.html(display);
 
                                             return this;
@@ -233,11 +255,18 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                                     editable: false,
                                     cell: Backgrid.Cell.extend({
                                         render: function () {
-                                            var display = handlebars.compile("{{> mapping/list/_sourceTargetGridCellDisplay}}")({
-                                                linkUrl: this.model.attributes.targetConnector.url,
-                                                icon: this.model.attributes.targetIcon,
-                                                displayName: this.model.attributes.targetConnector.displayName
-                                            });
+                                            var display;
+                                            if (this.model.attributes.sourceType === "managed" || this.model.attributes.targetConnector.connectorRef) {
+                                                display = handlebars.compile("{{> mapping/list/_sourceTargetGridCellDisplay}}")({
+                                                    linkUrl: this.model.attributes.targetConnector.url,
+                                                    icon: this.model.attributes.targetIcon,
+                                                    displayName: this.model.attributes.targetConnector.displayName
+                                                });
+                                            } else {
+                                                display = handlebars.compile("{{> mapping/list/_emptyConnectorGridCell}}")({
+                                                    displayName: this.model.attributes.targetConnector.displayName
+                                                });
+                                            }
                                             this.$el.html(display);
 
                                             return this;
@@ -267,7 +296,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                                         render: function () {
                                             var display = handlebars.compile("{{> mapping/list/_actionCellDisplay}}")({ name: this.model.attributes.name }),
                                                 actions = _this.$el.find("[mapping='" + this.model.attributes.name + "'] .dropdown-menu").clone();
-                                            
+
                                             display = $(display).append(actions);
 
                                             this.$el.html(display);
@@ -305,10 +334,10 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
         deleteMapping: function(event) {
             var selectedEl = $(event.target).parents(".mapping-config-body"),
                 index = this.$el.find("#mappingConfigHolder .mapping-config-body").index(selectedEl);
-    
+
             if(!selectedEl.length) {
                 selectedEl = $(event.currentTarget).parents("tr");
-                
+
                 _.each(this.$el.find(".backgrid tbody tr"), function(row,idx) {
                     if($(row).attr("data-mapping-title") === selectedEl.attr("data-mapping-title")) {
                         index = idx;
@@ -327,38 +356,49 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
             }, this));
         },
         showSyncStatus: function(){
-            _.each(this.data.mappingConfig, function (sync){
-                var el = this.$el.find("." + sync.name + "_syncStatus"),
-                    icon = this.$el.find("." + sync.name + "_syncStatus_icon"),
-                    txt = $.t("templates.mapping.notYetSynced");
-                
-                icon.removeClass("fa-check-circle");
-                el.toggleClass("text-danger", true);
-                icon.addClass("fa-exclamation-circle");
-                
-                if(sync.recon){
-                    if(sync.recon.state === "CANCELED") {
-                        txt = $.t("templates.mapping.lastSyncCanceled");
-                        el.toggleClass("text-success", false);
-                        el.toggleClass("text-danger", true);
-                        icon.removeClass("fa-check-circle text-success");
-                        icon.addClass("fa-exclamation-circle");
-                    } else if(sync.recon.state === "ACTIVE") {
-                        txt = $.t("templates.mapping.inProgress");
-                        el.toggleClass("text-success", false);
-                        el.toggleClass("text-danger", true);
-                        icon.removeClass("fa-check-circle text-success");
-                        icon.addClass("fa-exclamation-circle");
+            _.each(this.data.mappingConfig, function (mapping){
+                var el = this.$el.find("." + mapping.name + "_syncStatus"),
+                    icon = this.$el.find("." + mapping.name + "_syncStatus_icon"),
+                    text, type, parent = el.parent();
+
+                if(mapping.recon){
+                    if(mapping.recon.state === "CANCELED") {
+                        text = $.t("templates.mapping.lastSyncCanceled");
+                        type = "DANGER";
+                    } else if(mapping.recon.state === "ACTIVE") {
+                        text = $.t("templates.mapping.inProgress");
+                        type = "SUCCESS";
                     } else {
-                        txt = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(sync.recon.ended,"MMMM dd, yyyy HH:mm");
-                        el.toggleClass("text-success", true);
-                        el.toggleClass("text-danger", false);
-                        icon.addClass("fa-check-circle text-success");
-                        icon.removeClass("fa-exclamation-circle");
+                        text = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(mapping.recon.ended,"MMMM dd, yyyy HH:mm");
+                        type = "SUCCESS";
+                    }
+                } else {
+                    text = $.t("templates.mapping.notYetSynced");
+                    type = "DANGER";
+                }
+                if (mapping.sourceType !== "managed") {
+                    if (!mapping.sourceConnector.connectorRef) {
+                        text = $.t("templates.mapping.missingSourceConnector");
+                        type = "DANGER";
+                    }
+                    if (!mapping.targetConnector.connectorRef) {
+                        text = $.t("templates.mapping.missingTargetConnector");
+                        type = "DANGER";
                     }
                 }
 
-                el.text(txt);
+                parent.removeClass("text-success text-danger text-muted");
+                icon.removeClass("fa-exclamation-circle fa-check-circle fa-question-circle");
+
+                if (type === "DANGER") {
+                    parent.addClass("text-danger");
+                    icon.addClass("fa-exclamation-circle");
+                } else if (type === "SUCCESS") {
+                    parent.addClass("text-success");
+                    icon.addClass("fa-check-circle");
+                }
+
+                el.text(text);
             }, this);
         },
 

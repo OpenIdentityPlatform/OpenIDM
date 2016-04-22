@@ -5,8 +5,7 @@ module.exports = {
             client.execute(function(data) {
                     require(["sinon",
                             "org/forgerock/openidm/ui/admin/mapping/MappingBaseView"],
-                        function (sinon,
-                                  MappingBaseView) {
+                        function (sinon, MappingBaseView) {
 
                             var mappingSync = sinon.stub(MappingBaseView, "syncNow", function(){
                                 mappingSync.restore();
@@ -164,6 +163,31 @@ module.exports = {
                 mappingList = mapping.section.mappingList;
 
             mappingList.assert.attributeContains('@listTableLink', 'href', '#properties/managedAssignment_managedRole/');
+        },
+        'Verify connector missing' : function(client) {
+            var details = require("./data/mappingDetail.json"), connectors = require("./data/xmlConnector.json"), mapping, mappingList;
+
+            client.execute(function(details, connectors){
+                require(["sinon",
+                        "jquery",
+                        "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
+                        "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"],
+                        function (sinon, $, SyncDelegate, ConnectorDelegate) {
+                            var syncStub = sinon.stub(SyncDelegate, "mappingDetails"), connectorStub;
+                            syncStub.returns($.Deferred().resolve(details));
+
+                            connectorStub = sinon.stub(ConnectorDelegate, "currentConnectors");
+                            connectorStub.returns($.Deferred().resolve(connectors));
+                        });
+                    return true;
+                }, [details, connectors]);
+
+            mapping = client.page.mappings();
+            mappingList = mapping.section.mappingList;
+
+            mapping.navigate();
+
+            mappingList.waitForElementPresent("@mappingListItem", 2000);
         },
         'Delete Mapping': function (client) {
             var mapping = client.page.mappings(),
