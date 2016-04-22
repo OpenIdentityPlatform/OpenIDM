@@ -21,21 +21,21 @@
  */
 
 /**
- * Manages schedules associated with temporalConstraints that have been created, updated, or deleted.
+ * Manages schedules associated with temporalConstraints on roles that have been created, updated, or deleted.
  */
-function  manageTemporalConstraintJobs() {
+function  manageTemporalConstraintJobsForRoles() {
     switch (request.method) {
     case "create":
         if (hasConstraints(newObject)) {
-            createJobsForConstraints(newObject.temporalConstraints);
+            createJobsForRoleConstraints(newObject.temporalConstraints);
         }
         break;
     case "patch":
     case "update":
         if (hasConstraints(newObject) && !hasConstraints(oldObject)) {
-            createJobsForConstraints(newObject.temporalConstraints);
+            createJobsForRoleConstraints(newObject.temporalConstraints);
         } else if (!hasConstraints(newObject) && hasConstraints(oldObject)) {
-            deleteJobsForConstraints(oldObject.temporalConstraints);
+            deleteJobsForRoleConstraints(oldObject.temporalConstraints);
         } else if (hasConstraints(newObject) && hasConstraints(oldObject)) {
             var index = 0,
             oldConstraints = oldObject.temporalConstraints,
@@ -49,10 +49,10 @@ function  manageTemporalConstraintJobs() {
                 : null;
                 if (JSON.stringify(oldConstraint) !== JSON.stringify(newConstraint)) {
                     if (oldConstraint !== null) {
-                        deleteJobsForConstraint(index);
+                        deleteJobsForRoleConstraint(index);
                     }
                     if (newConstraint !== null) {
-                        createJobsForConstraint(newConstraint, index);
+                        createJobForRoleConstraint(newConstraint, index);
                     }
                 }
                 index++;
@@ -61,32 +61,176 @@ function  manageTemporalConstraintJobs() {
         break;
     case "delete":
         if (hasConstraints(oldObject)) {
-            deleteJobsForConstraints(oldObject.temporalConstraints);
+            deleteJobsForRoleConstraints(oldObject.temporalConstraints);
         }
         break;
     }
 };
 
 /**
- * Creates new scheduled jobs that will fire when the time window of the temporal constraints start and end.
- * 
- * @param constraint an array of objects representing temporal constraints.
+ * Manages schedules associated with temporalConstraints on grants for users or roles that have been created, updated, 
+ * or deleted.
  */
-function createJobsForConstraints(constraints) {
-    for (index in constraints) {
-        createJobsForConstraint(constraints[index], index);
+function  manageTemporalConstraintJobsForGrants(field) {
+    switch (request.method) {
+    case "create":
+        if (isNonEmptyList(newObject[field])) {
+            newObject[field].forEach(createJobsForGrantConstraints);
+        }
+        break;
+    case "patch":
+    case "update":
+        if (isNonEmptyList(newObject[field]) && !isNonEmptyList(oldObject[field])) {
+            newObject[field].forEach(createJobsForGrantConstraints);
+        } else if (!isNonEmptyList(newObject[field]) && isNonEmptyList(oldObject[field])) {
+            oldObject[field].forEach(deleteJobsForGrantConstraints);
+        } else if (isNonEmptyList(newObject[field]) && isNonEmptyList(oldObject[field])) {
+            var newGrants = newObject[field].reduce(reduceGrants, {}),
+                oldGrants = oldObject[field].reduce(reduceGrants, {}),
+                addedGrants = [];
+                // Schedule jobs for removed and changed grants
+                for (var grantId in oldGrants) {
+                    var newGrant = newGrants[grantId],
+                        oldGrant = oldGrants[grantId];
+                    if (newGrant !== undefined) { // grant exists in newGrants map
+                        // Check if grant has changed
+                        if (JSON.stringify(oldGrant) !== JSON.stringify(newGrant)) {
+                            // Delete old jobs and create new ones
+                            deleteJobsForGrantConstraints(oldGrant);
+                            createJobsForGrantConstraints(newGrant);
+                        }
+                        // Remove the grant from the newGrants map so that we are left with only new grants
+                        delete newGrants[grantId];
+                    } else {  // The grant does not exist in newGrants map, meaning it was removed
+                        // Delete old jobs
+                        deleteJobsForGrantConstraints(oldGrant);
+                    }
+                }
+                // Schedule jobs for newly added grants
+                for (var grantId in newGrants) {
+                    // Create new jobs
+                    createJobsForGrantConstraints(newGrants[grantId]);
+                }
+        }
+        break;
+    case "delete":
+        if (isNonEmptyList(oldObject[field])) {
+            oldObject[field].forEach(deleteJobsForGrantConstraints);
+        }
+        break;
     }
 };
 
 /**
- * Deletes all scheduled jobs for these temporal constraints.
+ * A reduce function which adds a grant to a map using the relationship _id as the key.
+ *
+ * @param map the map to add the grant to.
+ * @param grant the grant to add to the map
+ */
+function reduceGrants(map, grant) {
+    var refProperties = grant._refProperties;
+    if (refProperties !== undefined && refProperties !== null) {
+        map[refProperties._id] = grant;
+    }
+    return map;
+}
+
+/**
+ * Creates new scheduled jobs that will fire when the time window of temporal constraints on a grant start and end.
+ * 
+ * @param grant a grant object.
+ */
+function createJobsForGrantConstraints(grant) {
+    if (hasConstraints(grant._refProperties)) {
+        var userId = resourceName.startsWith('managed/user/') 
+                ? resourceName.toString() 
+                : grant._ref,
+            scriptConfig = { 
+                "type" : "text/javascript", 
+                "source" : "openidm.action(userId, 'triggerSyncCheck', {}, {}, ['*', 'roles']);",
+                "globals" : { 
+                    "userId" : userId
+                }
+            };
+                
+        for (index in grant._refProperties.temporalConstraints) {
+            createJobsForConstraint(
+                    grant._refProperties.temporalConstraints[index], 
+                    grant._refProperties._id + "-temporalConstraint-" + index + "-start",
+                    grant._refProperties._id + "-temporalConstraint-" + index + "-end",
+                    scriptConfig);
+        }
+    }
+}
+
+/**
+ * Deletes all scheduled jobs for temporal constraints on a grant.
+ * 
+ * @param grant a grant object.
+ */
+function deleteJobsForGrantConstraints(grant) {
+    if (hasConstraints(grant._refProperties)) {
+        for (index in grant.temporalConstraints) {
+            deleteJobsForConstraint(
+                    grant._refProperties._id + "-temporalConstraint-" + index + "-start",
+                    grant._refProperties._id + "-temporalConstraint-" + index + "-end",
+                    index);
+        }
+    }
+}
+
+/**
+ * Creates new scheduled jobs that will fire when the time window of temporal constraints on a role start and end.
  * 
  * @param constraint an array of objects representing temporal constraints.
  */
-function deleteJobsForConstraints(constraints) {
+function createJobsForRoleConstraints(constraints) {
     for (index in constraints) {
-        deleteJobsForConstraint(index);
+        createJobForRoleConstraint(constraints[index], index);
     }
+};
+
+/**
+ * Creates new scheduled jobs that will fire when the time window of the temporal constraint on a role starts and ends.
+ * 
+ * @param constraint an array of objects representing temporal constraints.
+ */
+function createJobForRoleConstraint(constraint, index) {
+    createJobsForConstraint(
+            constraint, 
+            resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-start",
+            resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-end",
+            { 
+                "type" : "text/javascript", 
+                "source" : "require('roles/onSync-roles').syncUsersOfRoles(resourceName, object, object, null);",
+                "globals" : { 
+                    "object" : newObject,
+                    "resourceName" : resourceName.toString()
+                }
+            });
+} 
+
+/**
+ * Deletes all scheduled jobs for all temporal constraints on a role.
+ * 
+ * @param constraint an array of objects representing temporal constraints.
+ */
+function deleteJobsForRoleConstraints(constraints) {
+    for (index in constraints) {
+        deleteJobsForRoleConstraint(index);
+    }
+};
+
+/**
+ * Deletes all scheduled jobs for a temporal constraints on a role.
+ * 
+ * @param constraint an array of objects representing temporal constraints.
+ */
+function deleteJobsForRoleConstraint(index) {
+    deleteJobsForConstraint(
+            resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-start",
+            resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-end",
+            index);
 };
 
 /**
@@ -95,31 +239,23 @@ function deleteJobsForConstraints(constraints) {
  * @param constraint an object representing a temporal constraint.
  * @param index the index of the constraint in the array of constraints defined in the role.
  */
-function createJobsForConstraint(constraint, index) {
-    logger.debug("creating new jobs for: " + constraint + ", index: " + index);
+function createJobsForConstraint(constraint, startJobId, endJobId, script) {
+    logger.debug("creating new jobs for: " + constraint);
     var dateUtil = org.forgerock.openidm.util.DateUtil.getDateUtil(),
         startDate = dateUtil.getStartOfInterval(constraint.duration),
         endDate = dateUtil.getEndOfInterval(constraint.duration),
         startExpression = dateUtil.getSchedulerExpression(startDate.plusSeconds(1)),
         endExpression = dateUtil.getSchedulerExpression(endDate.plusSeconds(1));
     
-    var invokeScript = { 
-            "script" : { 
-                "type" : "text/javascript", 
-                "source" : "require('roles/onSync-roles').syncUsersOfRoles(resourceName, object, object, null);",
-                "globals" : { 
-                    "object" : newObject,
-                    "resourceName" : resourceName.toString()
-                } 
-            } 
-        },
-        startJob = {
+    var startJob = {
             "type" : "cron",
             "schedule" : startExpression, 
             "misfirePolicy" : "doNothing",
             "persisted" : true,
             "invokeService" : "script", 
-            "invokeContext" : invokeScript
+            "invokeContext" : {
+                "script" : script
+            }
         },
         endJob = {
             "type" : "cron",
@@ -127,20 +263,36 @@ function createJobsForConstraint(constraint, index) {
             "misfirePolicy" : "doNothing",
             "persisted" : true,
             "invokeService" : "script", 
-            "invokeContext" : invokeScript
-        },
-        startJobId = resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-start",
-        endJobId = resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-end";
+            "invokeContext" : {
+                "script" : script
+            }
+        };
 
     if (startDate.isAfterNow()) {
         logger.debug("create startJob: " + startJobId);
-        openidm.create("scheduler", startJobId, startJob);
+        try {
+            openidm.create("scheduler", startJobId, startJob);
+        } catch (e) {
+            // If 412 (precondition failed) code is encountered, ignore, otherwise log error
+            if (e.javaException.getCode() !== 412) {
+                logger.error("Error while attempting to create start schedule for temporal constraint on grant of: " 
+                        + resourceName);
+            }
+        }
     } else {
         logger.debug("Not creating start job, is in the past");
     }
     if (endDate.isAfterNow()) {
         logger.debug("create endJob: " + endJobId);
-        openidm.create("scheduler", endJobId, endJob);
+        try {
+            openidm.create("scheduler", endJobId, endJob);
+        } catch (e) {
+            // If 412 (precondition failed) code is encountered, ignore, otherwise log error
+            if (e.javaException.getCode() !== 412) {
+                logger.error("Error while attempting to create end schedule for temporal constraint on grant of: " 
+                        + resourceName);
+            }
+        }
     } else {
         logger.debug("Not creating end job, is in the past");
     }
@@ -152,7 +304,7 @@ function createJobsForConstraint(constraint, index) {
  * 
  * @param constraint an object representing a temporal constraint
  */
-function deleteJobsForConstraint(index) {
+function deleteJobsForConstraint(startJobId, endJobId, index) {
     var startJobId = resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-start",
         endJobId = resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-end";
     try {
@@ -176,13 +328,35 @@ function deleteJobsForConstraint(index) {
 };
 
 /**
- * Returns true if the role's temporalConstraints is defined and not null, false otherwise.
+ * Returns true if the object's temporalConstraints is defined and not null, false otherwise.
  * 
- * @param role a role object.
- * @returns true if the role's temporalConstraints is defined and not null, false otherwise.
+ * @param object a object.
+ * @returns true if the object's temporalConstraints is defined and not null, false otherwise.
  */
-function hasConstraints(role) {
-    return (role.temporalConstraints !== undefined && role.temporalConstraints !== null);
+function hasConstraints(object) {
+    return (object.temporalConstraints !== undefined && object.temporalConstraints !== null);
 };
 
-manageTemporalConstraintJobs();
+/**
+ * Returns true if the supplied list is defined, not null, and not empty.
+ * 
+ * @param list a list.
+ * @returns true if the supplied list is defined, not null, and not empty.
+ */
+function isNonEmptyList(list) {
+    if (list !== undefined && list !== null && list.length > 0) {
+        return true;
+    }
+    return false;
+}
+
+// Check if the object is a managed role or managed user
+if (resourceName.startsWith('managed/role/')) {
+    // manage the temporal constraints defined on the role
+    manageTemporalConstraintJobsForRoles();
+    // manage the temporal constraints defined in the grants
+    manageTemporalConstraintJobsForGrants("members");
+} else if (resourceName.startsWith('managed/user/')) {
+    // manage the temporal constraints defined in the grants
+    manageTemporalConstraintJobsForGrants("roles");
+}

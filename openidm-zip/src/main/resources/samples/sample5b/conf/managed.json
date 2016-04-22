@@ -14,6 +14,18 @@
                 "type" : "text/javascript",
                 "file" : "ui/onDelete-user-cleanup.js"
             },
+            "postCreate" : {
+                "type" : "text/javascript",
+                "file" : "roles/postOperation-roles.js"
+            },
+            "postUpdate" : {
+                "type" : "text/javascript",
+                "file" : "roles/postOperation-roles.js"
+            },
+            "postDelete" : {
+                "type" : "text/javascript",
+                "file" : "roles/postOperation-roles.js"
+            },
             "onSync" : {
                 "type" : "text/javascript",
                 "file" : "compensate.js"
