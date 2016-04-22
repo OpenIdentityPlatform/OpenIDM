@@ -2511,6 +2511,13 @@ class ObjectMapping {
             }
             return false;
         }
+
+        @Override
+        public JsonValue toJsonValue() throws SynchronizationException {
+            JsonValue jsonValue = super.toJsonValue();
+            jsonValue.put("ambiguousTargetIds", getAmbiguousTargetIds());
+            return jsonValue;
+        }
     }
     
     enum CorrelationType {
