@@ -170,16 +170,14 @@ public class UpdateService extends AbstractRequestHandler {
 
     private Promise<ActionResponse, ResourceException> handleListRepoUpdates(
             Map<String, String> additionalParameters) {
-        final Path archive;
-
         if (!additionalParameters.containsKey(ARCHIVE_NAME)) {
-            archive = null;
-        } else {
-            archive = archivePath(additionalParameters.get(ARCHIVE_NAME));
+            return new BadRequestException("Archive name not specified.").asPromise();
         }
 
         try {
-            return newActionResponse(updateManager.listRepoUpdates(archive)).asPromise();
+            return newActionResponse(updateManager.listRepoUpdates(
+                    archivePath(additionalParameters.get(ARCHIVE_NAME))
+            )).asPromise();
         } catch (UpdateException e) {
             return new InternalServerErrorException(e).asPromise();
         }
