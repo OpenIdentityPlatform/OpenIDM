@@ -416,15 +416,12 @@ public class UpdateManagerImpl implements UpdateManager {
             return json(array());
         }
 
-        // If no archive is specified output updates from the currently running thread.
         // If archive is requested and it's the running thread we must use the cached thread updates
         // since they have already been replaced on disk
-        if (archivePath == null || (updateThread != null && archivePath.equals(updateThread.archivePath))) {
-            if (updateThread != null && updateThread.isAlive()) {
-                return formatRepoUpdateList(updateThread.repoUpdates);
-            } else {
-                throw new UpdateException("No archive specified and no running update");
-            }
+        if (updateThread != null
+                && updateThread.isAlive()
+                && archivePath.equals(updateThread.archivePath)) {
+            return formatRepoUpdateList(updateThread.repoUpdates);
         } else {
             return usingArchive(archivePath, IdentityServer.getInstance().getInstallLocation().toPath(),
                     new UpgradeAction<JsonValue>() {
