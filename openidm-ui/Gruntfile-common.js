@@ -33,6 +33,7 @@ module.exports = function(grunt, options) {
         mavenSrcPath = "src/main/js",
         compositionDirectory = "target/compose",
         compiledDirectory = "target/www",
+        transpiledDirectory = "target/transpiled",
         testDirectory = "target/qunit",
         deployDirectory = "../../openidm-zip/target/openidm/ui/" + options.deployDirectory,
         lessFiles = [{
@@ -44,6 +45,35 @@ module.exports = function(grunt, options) {
         }];
 
     grunt.initConfig({
+        babel: {
+            /**
+             * Transpile the ES6 sources to ES5.
+             */
+            source: {
+                files: [{
+                    expand: true,
+                    cwd: compositionDirectory,
+                    src: [
+                        "org/**/*.js",
+                        "config/**/*.js"
+                    ],
+                    dest: transpiledDirectory
+                }]
+            },
+            test: {
+                files: Object.keys(testCompositionDirs).map(function (dir) {
+                    return {
+                        expand: true,
+                        cwd: dir,
+                        src: ["**/*.js"],
+                        dest: testDirectory + testCompositionDirs[dir]
+                    }
+                }),
+                options: {
+                    sourceMaps: true
+                }
+            }
+        },
         copy: {
             /**
              * Copy all the sources and resources from this project and all dependencies into the composition directory.
@@ -70,7 +100,8 @@ module.exports = function(grunt, options) {
                     cwd: compositionDirectory,
                     src: [
                         "**",
-                        "!main.js", // Output by r.js
+                        "!org/**/*.js", // Transpiled
+                        "!config/**/*.js", // Transpiled
                         "!**/*.less" // Compiled to CSS files
                     ],
                     dest: compiledDirectory
@@ -87,14 +118,28 @@ module.exports = function(grunt, options) {
                 compareUsing: "md5"
             },
             /**
-             * Copy the test source files into the test target directory.
+             * Copy files that have been transpiled into the compiled directory.
+             */
+            transpiled: {
+                files: [{
+                    expand: true,
+                    cwd: transpiledDirectory,
+                    src: ["**/*.js"],
+                    dest: compiledDirectory
+                }]
+            },
+            /**
+             * Copy files that do not need to be compiled into the test directory.
              */
             test: {
                 files: Object.keys(testCompositionDirs).map(function (dir) {
                     return {
                         expand: true,
                         cwd: dir,
-                        src: ["**"],
+                        src: [
+                            "**/*",
+                            "!**/*.js" // Transpiled
+                        ],
                         dest: testDirectory + testCompositionDirs[dir]
                     }
                 })
@@ -149,8 +194,8 @@ module.exports = function(grunt, options) {
              */
             compile: {
                 options: {
-                    baseUrl: compositionDirectory,
-                    mainConfigFile: compositionDirectory + "/main.js",
+                    baseUrl: transpiledDirectory,
+                    mainConfigFile: transpiledDirectory + "/main.js",
                     out: compiledDirectory + "/main.js",
                     include: ["main"],
                     preserveLicenseComments: false,
@@ -196,6 +241,20 @@ module.exports = function(grunt, options) {
                 compareUsing: "md5"
             },
             /**
+             * Copy files that have been transpiled (with their source maps) into the compiled directory.
+             */
+            transpiled: {
+                files: [{
+                    cwd: transpiledDirectory,
+                    src: [
+                        "**/*.js",
+                        "**/*.js.map"
+                    ],
+                    dest: compiledDirectory
+                }],
+                compareUsing: "md5"
+            },
+            /**
              * Copy the test source files into the test target directory.
              */
             test: {
@@ -214,8 +273,15 @@ module.exports = function(grunt, options) {
              */
             deploy: {
                 files: [{
+                    cwd: compositionDirectory,
+                    src: [
+                        "**",
+                        "!**/*.less"
+                    ],
+                    dest: deployDirectory
+                }, {
                     cwd: compiledDirectory,
-                    src: ["**"],
+                    src: ["**/*.css"],
                     dest: deployDirectory
                 }],
                 verbose: true,
@@ -235,21 +301,26 @@ module.exports = function(grunt, options) {
         }
     });
 
+    grunt.loadNpmTasks("grunt-babel");
     grunt.loadNpmTasks("grunt-contrib-copy");
     grunt.loadNpmTasks("grunt-contrib-less");
     grunt.loadNpmTasks('grunt-contrib-qunit');
     grunt.loadNpmTasks("grunt-contrib-requirejs");
     grunt.loadNpmTasks("grunt-contrib-watch");
     grunt.loadNpmTasks("grunt-eslint");
+    grunt.loadNpmTasks("grunt-newer");
     grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks("grunt-sync");
 
     grunt.registerTask('build:dev', [
         'copy:compose',
         'eslint',
+        'babel:source',
         'less:dev',
         'copy:compiled',
         'copy:compiledMain',
+        'copy:transpiled',
+        'babel:test',
         'copy:test',
         'qunit'
     ]);
@@ -257,18 +328,24 @@ module.exports = function(grunt, options) {
     grunt.registerTask('build:prod', [
         'copy:compose',
         'eslint',
+        'babel:source',
         'requirejs',
         'less:prod',
         'copy:compiled',
+        'copy:transpiled',
+        'babel:test',
         'copy:test',
         'qunit'
     ]);
 
     grunt.registerTask("deploy", [
         "sync:compose",
+        "newer:babel",
         "less:dev",
         "sync:compiled",
-        "sync:test",
+        "sync:transpiled",
+        "newer:babel:test",
+        'copy:test',
         "sync:deploy",
         'qunit'
     ]);

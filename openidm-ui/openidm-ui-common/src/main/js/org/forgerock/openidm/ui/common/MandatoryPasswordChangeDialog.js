@@ -38,7 +38,7 @@ define([
         },
 
         render: function(args, callback) {
-            ModuleLoader.load(router.configuration.routes.landingPage.view).then(_.bind(function (landingView) {
+            ModuleLoader.load(router.configuration.routes.landingPage.view).then((landingView) => {
                 var _this = this,
                     currentDialog = $('<div id="mandatoryPasswordChangeDialog"></div>');
 
@@ -91,7 +91,7 @@ define([
                     }, _this),
                     "append");
 
-            }, this));
+            });
 
         },
 

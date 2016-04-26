@@ -4,6 +4,8 @@
   "version": "0.0.1",
   "private": true,
   "devDependencies": {
+    "babel-eslint": "6.0.3",
+    "babel-plugin-transform-es2015-arrow-functions": "6.5.2",
     "eslint": "1.10.3",
     "eslint-config-forgerock": "1.1.1",
     "eslint-formatter-warning-summary": "1.0.1",
