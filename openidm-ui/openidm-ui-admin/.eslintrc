@@ -1,9 +1,13 @@
 {
     "root": true,
     "extends": "forgerock",
+    "parser": "babel-eslint",
     "env": {
         "amd": true,
         "browser": true
+    },
+    "ecmaFeatures": {
+        "arrowFunctions": true
     },
     "rules": {
         "indent": [2, 4, {
@@ -26,6 +30,12 @@
         /**
          * Allow case statement fallthrough.
          */
-        "no-fallthrough": 0
+        "no-fallthrough": 0,
+
+        /**
+         * ES6 rules
+         */
+        "arrow-parens": [2, "always"],
+        "arrow-spacing": 2
     }
 }

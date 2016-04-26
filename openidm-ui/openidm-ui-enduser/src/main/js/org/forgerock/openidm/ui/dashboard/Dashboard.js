@@ -50,10 +50,10 @@ define([
             if (conf.loggedUser) {
                 var roles = conf.loggedUser.uiroles;
 
-                ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig) {
+                ConfigDelegate.readEntity("ui/dashboard").then((dashboardConfig) => {
                     this.model.dashboard = dashboardConfig.dashboard;
 
-                    this.parentRender(_.bind(function () {
+                    this.parentRender(() => {
                         var templElement;
 
                         if (!_.isUndefined(this.model.dashboard.widgets) && this.model.dashboard.widgets.length > 0) {
@@ -84,8 +84,8 @@ define([
                         } else {
                             this.loadWorkflow(roles, callback);
                         }
-                    }, this));
-                }, this));
+                    });
+                });
             }
         },
 

@@ -119,7 +119,7 @@ define([
     obj.getTemporalConstraintsValue = function (el, usePreviousTimezone) {
         var constraints = el.find(".temporalConstraint");
 
-        return _.map(constraints, _.bind(function (constraint) {
+        return _.map(constraints, (constraint) => {
             var startDate = $(constraint).find(".temporalConstraintStartDate").val(),
                 endDate = $(constraint).find(".temporalConstraintEndDate").val(),
                 timezone = $(constraint).find(".temporalConstraintTimezone").val(),
@@ -136,7 +136,7 @@ define([
             intervalString = this.convertToIntervalString(startDate, endDate, timezoneOffset);
 
             return { duration: intervalString };
-        }, this));
+        });
     };
 
     /*

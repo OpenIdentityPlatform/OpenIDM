@@ -19,7 +19,7 @@ define([
 ], function (TemporalConstraintsUtils) {
     QUnit.module('TemporalConstraintsUtils Tests');
 
-    QUnit.test("convertFromIntervalString", function () {
+    QUnit.test("convertFromIntervalString", () => {
         var intervalString = "2016-04-25T07:00:00.000Z/2016-04-30T07:00:00.000Z",
             convertedValue = TemporalConstraintsUtils.convertFromIntervalString(intervalString, 0);
 
@@ -27,7 +27,7 @@ define([
         QUnit.equal(convertedValue.end, '04/30/2016 7:00 AM', "endDate is correct");
     });
 
-    QUnit.test("convertFromIntervalString with timezone offset", function () {
+    QUnit.test("convertFromIntervalString with timezone offset", () => {
         var intervalString = "2016-04-25T07:00:00.000Z/2016-04-30T07:00:00.000Z",
             convertedValue = TemporalConstraintsUtils.convertFromIntervalString(intervalString, 420);
 
@@ -35,7 +35,7 @@ define([
         QUnit.equal(convertedValue.end, '04/30/2016 12:00 AM', "endDate is correct");
     });
 
-    QUnit.test("convertToIntervalString", function () {
+    QUnit.test("convertToIntervalString", () => {
         var startDate = "04/25/2016 7:00 AM",
             endDate = "04/30/2016 7:00 AM",
             intervalString = TemporalConstraintsUtils.convertToIntervalString(startDate, endDate, 0);
@@ -43,7 +43,7 @@ define([
         QUnit.equal(intervalString, '2016-04-25T07:00:00.000Z/2016-04-30T07:00:00.000Z', "start and end dates are correctly converted to an invervalString");
     });
 
-    QUnit.test("convertToIntervalString with timezone offset", function () {
+    QUnit.test("convertToIntervalString with timezone offset", () => {
         var startDate = "04/25/2016 12:00 AM",
             endDate = "04/30/2016 12:00 AM",
             intervalString = TemporalConstraintsUtils.convertToIntervalString(startDate, endDate, 420);
