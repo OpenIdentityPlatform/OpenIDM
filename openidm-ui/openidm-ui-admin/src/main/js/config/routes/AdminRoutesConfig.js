@@ -14,7 +14,6 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-/*global define */
 define("config/routes/AdminRoutesConfig", [
     "config/routes/CommonRoutesConfig"
 ], function(commonRoutes) {

@@ -14,8 +14,6 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-/*global define */
-
 define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
     "jquery",
     "underscore",

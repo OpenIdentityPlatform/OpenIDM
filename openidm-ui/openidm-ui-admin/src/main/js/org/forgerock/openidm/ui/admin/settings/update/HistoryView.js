@@ -14,8 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define*/
-
 define("org/forgerock/openidm/ui/admin/settings/update/HistoryView", [
     "jquery",
     "underscore",
@@ -30,7 +28,6 @@ define("org/forgerock/openidm/ui/admin/settings/update/HistoryView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ClusterDelegate"
-
 ], function($, _, Handlebars, Backgrid, BootstrapDialog, Backbone,
             AdminAbstractView,
             InfoDelegate,

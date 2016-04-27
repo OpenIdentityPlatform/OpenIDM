@@ -14,8 +14,6 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-/*global define, require */
-
 define("org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate", [
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",

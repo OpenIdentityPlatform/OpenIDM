@@ -14,8 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define, $, _, Handlebars, form2js, window */
-
 define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
     "jquery",
     "underscore",

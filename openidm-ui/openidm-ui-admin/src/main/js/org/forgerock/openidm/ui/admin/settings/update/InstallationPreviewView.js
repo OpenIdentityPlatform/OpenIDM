@@ -14,8 +14,6 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-/*global define, window*/
-
 define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView", [
     "jquery",
     "underscore",
@@ -29,7 +27,6 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
     "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate"
-
 ], function($, _, Handlebars,
             Backbone,
             Bootstrap,

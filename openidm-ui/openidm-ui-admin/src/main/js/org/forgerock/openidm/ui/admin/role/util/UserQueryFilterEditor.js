@@ -14,8 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define */
-
 define("org/forgerock/openidm/ui/admin/role/util/UserQueryFilterEditor", [
     "jquery",
     "underscore",

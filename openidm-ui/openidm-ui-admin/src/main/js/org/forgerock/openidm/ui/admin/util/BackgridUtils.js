@@ -11,17 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
-
-/*global define */
 
 define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
     "underscore",
     "backbone",
     "org/forgerock/commons/ui/common/backgrid/Backgrid",
     "org/forgerock/commons/ui/common/util/BackgridUtils"
-
 ], function (_, Backbone, Backgrid, commonBackgridUtils) {
     var obj = _.extend({}, commonBackgridUtils);
 

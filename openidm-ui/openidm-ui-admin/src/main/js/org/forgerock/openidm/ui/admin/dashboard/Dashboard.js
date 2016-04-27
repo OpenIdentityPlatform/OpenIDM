@@ -14,8 +14,6 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-/*global define window*/
-
 define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
     "jquery",
     "underscore",
@@ -33,7 +31,6 @@ define("org/forgerock/openidm/ui/admin/dashboard/Dashboard", [
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/util/AutoScroll",
     "dragula"
-
 ], function($, _,
             BootstrapDialog,
             Handlebars,

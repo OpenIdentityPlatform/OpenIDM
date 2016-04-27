@@ -14,10 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*jslint regexp:false, evil:true */
-
-/*global require, define */
-
 define("org/forgerock/openidm/ui/common/util/PolicyValidatorsManager", [
     "jquery",
     "underscore",
@@ -147,9 +143,9 @@ define("org/forgerock/openidm/ui/common/util/PolicyValidatorsManager", [
                             failures,
                             nodeMap = obj.nodeCallbackHandler(container.hasClass("jsonEditor"), element[0]);
 
-                        // the source of the jslint "evil" - this function is returned from the backend
-                        // (as part of an administrative specification) so it should be safe to evaluate.
-                        policyFunction = eval("(" + policyFunctionObject.policyFunction + ")");
+                        // this function is returned from the backend (as part of an administrative specification) so
+                        // it should be safe to evaluate.
+                        policyFunction = eval("(" + policyFunctionObject.policyFunction + ")"); // eslint-disable-line no-eval
                         failures = policyFunction.call({
                                 failedPolicyRequirements: []
                             },
