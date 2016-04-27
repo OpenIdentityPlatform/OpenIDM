@@ -19,5 +19,6 @@ define([
     "./connectorTest",
     "./searchTest",
     "./queryFilterEditorTest",
-    "./TemporalConstraintsUtilsTest"
+    "./TemporalConstraintsUtilsTest",
+    "./ConnectorListViewTest"
 ]);
