@@ -56,6 +56,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             "change #connectorType" : "loadConnectorTemplate",
             "click #updateObjectTypes" : "objectTypeFormSubmit",
             "click #updateSync" : "syncFormSubmit",
+            "click #updateAdvanced" : "advancedFormSubmit",
             "click .addLiveSync" : "addLiveSync",
             "click .edit-objectType" : "editObjectType",
             "click .delete-objectType" : "deleteObjectType",
@@ -68,6 +69,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             "change #connectorForm :input" : "connectorChangesCheck",
             "keypress #connectorForm :input" : "connectorFlowCheck",
             "paste #connectorForm :input" : "connectorFlowCheck",
+            "change #advancedForm :input" : "advancedChangesCheck",
             "change .toggleBoolean" : connectorUtils.toggleValue
         },
         data: {
@@ -169,7 +171,22 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
 
                     this.data.connectorName = data.name;
                     this.data.connectorTypeName = data.connectorRef.connectorName;
+
                     this.data.enabled = data.enabled;
+
+                    //Need a check here in the instances where connectors do not have enable
+                    if(_.isUndefined(this.data.enabled)) {
+                        this.data.enabled = true;
+                    }
+
+                    this.data.poolConfigOption = data.poolConfigOption;
+                    this.data.resultsHandlerConfig = data.resultsHandlerConfig;
+                    this.data.operationTimeout = data.operationTimeout;
+
+                    this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler = (this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler === "true" || this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler === true);
+                    this.data.resultsHandlerConfig.enableCaseInsensitiveFilter = (this.data.resultsHandlerConfig.enableCaseInsensitiveFilter === "true" || this.data.resultsHandlerConfig.enableCaseInsensitiveFilter === true);
+                    this.data.resultsHandlerConfig.enableFilteredResultsHandler = (this.data.resultsHandlerConfig.enableFilteredResultsHandler === "true" || this.data.resultsHandlerConfig.enableFilteredResultsHandler === true);
+                    this.data.resultsHandlerConfig.enableNormalizingResultsHandler = (this.data.resultsHandlerConfig.enableNormalizingResultsHandler === "true" || this.data.resultsHandlerConfig.enableNormalizingResultsHandler === true);
 
                     //Store in memory version of connector details. This is to ensure we can move around tabs and keep the correct data state.
                     this.connectorDetails = data;
@@ -300,7 +317,6 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
 
                                         //Set the current newest version incase there is a range
                                         this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
-
                                         this.setSubmitFlow();
 
                                         if (callback) {
@@ -338,6 +354,67 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
                     });
             } , this));
+        },
+
+        advancedFormSubmit: function(event) {
+            event.preventDefault();
+
+            var advancedData = form2js('advancedForm', '.', true),
+                mergedResults = this.advancedDetailsGenerate(this.connectorDetails, advancedData);
+
+            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId,  mergedResults).then(_.bind(function () {
+                this.connectorDetails = mergedResults;
+
+                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "advancedSaved");
+
+                this.$el.find("#connectorWarningMessage .message .advanced-pending").remove();
+
+                this.warningMessageCheck();
+            }, this));
+        },
+
+        advancedDetailsGenerate: function(oldAdvanced, newAdvanced) {
+            var mergedResults = {},
+                tempNumber,
+                defaultOperationTimeout = -1,
+                defaultPoolConfigOption = 10;
+
+            $.extend(true, mergedResults, oldAdvanced, newAdvanced);
+
+            /*
+             Because form2js doesn't handle the titatoggle well we need to manually get the values
+
+             Need to check this later when form2js updates
+             */
+            if(this.$el.find("#advancedForm")) {
+                mergedResults.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler = (this.$el.find("#advancedForm #advancedEnableNormalizingResultsHandler").val() === "true");
+                mergedResults.resultsHandlerConfig.enableCaseInsensitiveFilter = (this.$el.find("#advancedForm #advancedEnableFilteredResultsHandler").val() === "true");
+                mergedResults.resultsHandlerConfig.enableFilteredResultsHandler = (this.$el.find("#advancedForm #advancedEnableCaseInsensitiveFilter").val() === "true");
+                mergedResults.resultsHandlerConfig.enableNormalizingResultsHandler = (this.$el.find("#advancedForm #advancedEnableAttributesToGetSearchResultsHandler").val() === "true");
+            }
+
+            //Need to convert all strings to numbers also some safety check to prevent bad values
+            _.each(mergedResults.operationTimeout, function(value, key) {
+                tempNumber = parseInt(value, 10);
+
+                if(!_.isNaN(tempNumber)) {
+                    mergedResults.operationTimeout[key] = parseInt(value, 10);
+                } else {
+                    mergedResults.operationTimeout[key] = defaultOperationTimeout;
+                }
+            });
+
+            _.each(mergedResults.poolConfigOption, function(value, key) {
+                tempNumber = parseInt(value, 10);
+
+                if(!_.isNaN(tempNumber)) {
+                    mergedResults.poolConfigOption[key] = parseInt(value, 10);
+                } else {
+                    mergedResults.poolConfigOption[key] = defaultPoolConfigOption;
+                }
+            });
+
+            return mergedResults;
         },
 
         //Saves the connector tab
@@ -626,6 +703,13 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             }
         },
 
+        advancedChangesCheck: function() {
+            if(this.$el.find("#connectorWarningMessage .message .advanced-pending").length === 0) {
+                this.$el.find("#connectorWarningMessage .message").append('<div class="pending-changes advanced-pending">' +$.t("templates.connector.advanced.pendingAdvancedChanges") +'</div>');
+                this.$el.find("#connectorWarningMessage").show();
+            }
+        },
+
         //This function is to find the newest version of a connector and select it if a user provides a range
         versionRangeCheck: function(version) {
             var cleanVersion = null,
@@ -674,10 +758,9 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
         //Returns the current provisioner based on a merged copy of the connector defaults and what was set in the template by the user
         getProvisioner: function() {
             var connectorData = {},
-                connDetails = this.connectorTypeRef.data.connectorDefaults,
+                connDetails = this.connectorDetails,
                 mergedResult = {},
                 tempArrayObject,
-                tempKeys,
                 arrayComponents = $(".connector-array-component");
 
             if(this.connectorTypeRef.getGenericState()) {
