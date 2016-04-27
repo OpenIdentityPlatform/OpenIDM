@@ -29,7 +29,8 @@
 /*global object */
 
 // Query members of a role
-var users = openidm.query("managed/role/" + object._id + "/members", {"_queryFilter": "true"}, ["*"]).result;
+var resourcePath = "managed/role/" +  org.forgerock.http.util.Uris.urlEncodePathElement(object._id) + "/members";
+var users = openidm.query(resourcePath, {"_queryFilter": "true"}, ["*"]).result;
 
 if (users.length > 0) {
     throw {
