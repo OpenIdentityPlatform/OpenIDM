@@ -11,10 +11,8 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
-
-/*global define*/
 
 define("org/forgerock/openidm/ui/admin/settings/update/MaintenanceModeView", [
     "jquery",
@@ -23,7 +21,6 @@ define("org/forgerock/openidm/ui/admin/settings/update/MaintenanceModeView", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate"
-
 ], function($, _,
             AdminAbstractView,
             Constants,

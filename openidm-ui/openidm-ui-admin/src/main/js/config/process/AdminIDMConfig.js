@@ -14,8 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define */
-
 define("config/process/AdminIDMConfig", [
     "underscore",
     "org/forgerock/openidm/ui/common/util/Constants",

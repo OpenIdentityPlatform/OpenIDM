@@ -14,8 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define */
-
 define("org/forgerock/openidm/ui/common/resource/ResourceCollection", [
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",

@@ -11,12 +11,8 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
-
-/*global define*/
-/*jslint es5: true */
-
 
 define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog", [
     "jquery",
@@ -32,7 +28,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
     "jsonEditor",
     "bootstrap-tabdrop",
     "selectize"
-
 ], function($, _, AuditAdminAbstractView,
             AuditDelegate,
             uiUtils,

@@ -14,8 +14,6 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-/*global define */
-
 define("config/process/IDMConfig", [
     "underscore",
     "org/forgerock/openidm/ui/common/util/Constants",

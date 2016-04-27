@@ -2,12 +2,10 @@
     "root": true,
     "extends": "forgerock",
     "env": {
+        "amd": true,
         "browser": true
     },
     "rules": {
-        /**
-         * Allow the use of eval!
-         */
-        "no-eval": 1
+        "no-invalid-regexp": 2
     }
 }

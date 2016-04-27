@@ -14,8 +14,6 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define, window */
-
 define("org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget", [
     "jquery",
     "underscore",

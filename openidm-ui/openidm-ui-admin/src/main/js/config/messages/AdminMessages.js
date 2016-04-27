@@ -14,8 +14,6 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-/*global define*/
-
 define("config/messages/AdminMessages", [
 ], function() {
 

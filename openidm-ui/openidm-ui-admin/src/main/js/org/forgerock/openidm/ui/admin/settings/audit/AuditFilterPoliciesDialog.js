@@ -11,10 +11,8 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
-
-/*global define*/
 
 define("org/forgerock/openidm/ui/admin/settings/audit/AuditFilterPoliciesDialog", [
     "jquery",
@@ -25,7 +23,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditFilterPoliciesDialog"
     "bootstrap-dialog",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "selectize"
-
 ], function($, _,
             AuditAdminAbstractView,
             UIUtils,

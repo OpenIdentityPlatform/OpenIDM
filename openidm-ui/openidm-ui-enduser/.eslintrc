@@ -2,6 +2,10 @@
     "root": true,
     "extends": "forgerock",
     "env": {
+        "amd": true,
         "browser": true
+    },
+    "rules": {
+        "no-invalid-regexp": 2
     }
 }
