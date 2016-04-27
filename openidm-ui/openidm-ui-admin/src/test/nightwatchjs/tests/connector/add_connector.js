@@ -13,7 +13,7 @@ module.exports = {
             .click('@addConnector')
             .waitForElementNotPresent('@addConnector', 2000);
     },
-    'Load CSV Form': function (client) {
+    'Load Add Connector Form': function (client) {
         var addConnector = client.page.connectorsAdd();
 
         addConnector
@@ -36,6 +36,10 @@ module.exports = {
             .clearValue('@uid')
             .assert.attributeEquals('@uid', 'data-validation-status', 'error')
             .setValue('@uid','test_uid')
+            .click('@uid').api.pause(500);
+        client
+            .keys(['\uE004']).pause(500); //press TAB to change focus
+        csvDetails
             .assert.attributeEquals('@uid', 'data-validation-status', 'ok')
             .assert.attributeEquals('@username', 'data-validation-status', 'error')
             .setValue('@username','test_user')
@@ -79,10 +83,18 @@ module.exports = {
             .clearValue('@jdbcDriver')
             .assert.attributeEquals('@jdbcDriver', 'data-validation-status', 'error')
             .setValue('@jdbcDriver','test.driver')
+            .click('@jdbcDriver').api.pause(500);
+        client
+            .keys(['\uE004']).pause(500); //press TAB to change focus
+        dbTableDetails
             .assert.attributeEquals('@jdbcDriver', 'data-validation-status', 'ok')
             .clearValue('@jdbcUrl')
             .assert.attributeEquals('@jdbcUrl', 'data-validation-status', 'error')
             .setValue('@jdbcUrl','test.url')
+            .click('@jdbcUrl').api.pause(500);
+        client
+            .keys(['\uE004']).pause(500);
+        dbTableDetails
             .assert.attributeEquals('@jdbcUrl', 'data-validation-status', 'ok');
         addConnector
             .click('@addConnectorButton')
@@ -108,10 +120,18 @@ module.exports = {
             .clearValue('@port')
             .assert.attributeEquals('@port', 'data-validation-status', 'error')
             .setValue('@port','1389')
+            .click('@port').api.pause(500);
+        client
+            .keys(['\uE004']).pause(500); //press TAB to change focus
+        ldapDetails
             .assert.attributeEquals('@port', 'data-validation-status', 'ok')
             .clearValue('@accountDN')
             .assert.attributeEquals('@accountDN', 'data-validation-status', 'error')
             .setValue('@accountDN','cn=Administrator')
+            .click('@accountDN').api.pause(500);
+        client
+            .keys(['\uE004']).pause(500); //press TAB to change focus
+        ldapDetails
             .assert.attributeEquals('@accountDN', 'data-validation-status', 'ok')
             .assert.attributeEquals('@password', 'data-validation-status', 'error')
             .setValue('@password','password')
@@ -119,6 +139,10 @@ module.exports = {
             .clearValue('@baseDN')
             .assert.attributeEquals('@baseDN', 'data-validation-status', 'error')
             .setValue('@baseDN','cn=Users')
+            .click('@baseDN').api.pause(500);
+        client
+            .keys(['\uE004']).pause(500); //press TAB to change focus
+        ldapDetails
             .assert.attributeEquals('@baseDN', 'data-validation-status', 'ok');
         addConnector
             .click('@addConnectorButton')
@@ -135,6 +159,7 @@ module.exports = {
         xmlDetails
             .waitForElementVisible(xmlDetails.selector, 2000)
             .assert.attributeEquals('@xsdPath', 'data-validation-status', 'error')
+            .click('@xsdPath')
             .setValue('@xsdPath','testXSD')
             .assert.attributeEquals('@xsdPath', 'data-validation-status', 'ok')
             .assert.attributeEquals('@xmlPath', 'data-validation-status', 'error')
