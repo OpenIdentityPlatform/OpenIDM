@@ -1,0 +1,16 @@
+[
+    {
+        "operation" : "replace",
+        "field" : "/resourceMapping/genericMapping/updates/searchableDefault",
+        "value" : false
+    },
+    {
+        "operation" : "add",
+        "field" : "/resourceMapping/genericMapping/updates/properties",
+        "value" : {
+            "/startDate" : {
+                "searchable" : true
+            }
+        }
+    }
+]

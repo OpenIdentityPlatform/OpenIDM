@@ -1,7 +1,0 @@
-[
-    {
-        "op" : "replace",
-        "path" : "/resourceMapping/genericMapping/updates/searchableDefault",
-        "value" : false
-    }
-]

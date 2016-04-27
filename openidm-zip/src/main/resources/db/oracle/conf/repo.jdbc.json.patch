@@ -1,17 +1,17 @@
 [
     {
-        "op" : "replace",
-        "path" : "/queries/genericTables/scan-tasks",
+        "operation" : "replace",
+        "field" : "/queries/genericTables/scan-tasks",
         "value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.${_propTable} prop ON obj.id = prop.${_mainTable}_id LEFT OUTER JOIN ${_dbSchema}.${_propTable} complete ON obj.id = complete.${_mainTable}_id AND complete.propkey=${taskState.completed} INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE ( prop.propkey=${property} AND prop.propvalue < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( complete.propvalue is NULL )"
     },
     {
-        "op" : "replace",
-        "path" : "/resourceMapping/genericMapping/updates/searchableDefault",
+        "operation" : "replace",
+        "field" : "/resourceMapping/genericMapping/updates/searchableDefault",
         "value" : false
     },
     {
-        "op" : "add",
-        "path" : "/resourceMapping/genericMapping/updates/properties",
+        "operation" : "add",
+        "field" : "/resourceMapping/genericMapping/updates/properties",
         "value" : {
             "/startDate" : {
                 "searchable" : true

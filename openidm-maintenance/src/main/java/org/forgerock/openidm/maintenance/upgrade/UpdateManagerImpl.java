@@ -189,7 +189,7 @@ public class UpdateManagerImpl implements UpdateManager {
     /**
      * Return the name of the db directory in db/ representing the current repo.
      *
-     * This is retrieved from the OSGi context stored as the db.dirname property on the RepositoryService
+     * This is retrieved from the OSGi context via the db.dirname property on the RepoBootService
      *
      * @return The name of the directory in db/ for the current repo or null if none exists
      * @throws UpdateException If the repo bundle cannot be found
@@ -997,7 +997,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     } else if (path.startsWith(CONF_PATH) &&
                             path.getFileName().toString().endsWith(JSON_EXT)) {
                         // a json config in the default project - ignore it
-                    } else if (path.startsWith(CONF_PATH) &&
+                    } else if ((path.startsWith(CONF_PATH) || path.startsWith(repoConfPath)) &&
                             path.getFileName().toString().endsWith(PATCH_EXT)) {
                         // a patch file for a config in the repo
                         File patchFile = new File(new File(tempDirectory.toString(), "openidm").toString(),
