@@ -40,17 +40,22 @@
         <ul class="nav nav-tabs" role="tablist"><li class="dropdown pull-right tabdrop hide"><a class="dropdown-toggle" data-toggle="dropdown" href="#"><i class="icon-align-justify"></i> <i class="fa fa-ellipsis-v"></i></a><ul class="dropdown-menu"></ul></li>
             <li role="presentation" class="active">
                 <a href="#connectorDetailsTab" aria-controls="attributes" role="tab" data-toggle="tab">
-                    <span class="glyph-title hidden-xs">Details</span>
+                    <span class="glyph-title hidden-xs">{{t "templates.connector.detailsTab"}}</span>
                 </a>
             </li>
             <li role="presentation">
                 <a href="#objectTypesTab" aria-controls="object types" role="tab" data-toggle="tab">
-                    <span class="glyph-title hidden-xs">Object Types</span>
+                    <span>{{t "templates.connector.objectTypeTab"}}</span>
                 </a>
             </li>
             <li role="presentation">
                 <a href="#syncTab" aria-controls="sync" role="tab" data-toggle="tab">
-                    <span class="glyph-title hidden-xs">Sync</span>
+                    <span>{{t "templates.connector.syncTab"}}</span>
+                </a>
+            </li>
+            <li role="presentation">
+                <a href="#connectorAdvancedTab" aria-controls="sync" role="tab" data-toggle="tab">
+                    <span>{{t "templates.connector.advancedTab"}}</span>
                 </a>
             </li>
         </ul>
@@ -73,11 +78,11 @@
                         <div id="connectorGeneralDetails" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorGeneralDetails" aria-expanded="true">
                             <div class="panel-body">
                                 <div class="form-group">
-                                    <label for="connectorType" class="col-sm-3 control-label">{{t "templates.connector.connectorEnabled"}}</label>
+                                    <label for="connectorEnabled" class="col-sm-3 control-label">{{t "templates.connector.connectorEnabled"}}</label>
                                     <div class="col-sm-8">
                                         <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                                             <label>
-                                                <input class="toggleBoolean" id="connectorEnabled" type="checkbox" name="enabled" value="true" checked>
+                                                <input class="toggleBoolean" id="connectorEnabled" type="checkbox" name="enabled" value="{{enabled}}" {{#if enabled}} checked {{/if}}>
                                                 <span></span>
                                             </label>
                                         </div>
@@ -238,6 +243,204 @@
                 <div class="pull-right">
                     <a href="#connectors/"><button class="btn btn-default" type="button">{{t 'common.form.cancel'}}</button></a>
                     <button id="updateObjectTypes" name="updateObjectTypes" class="btn btn-primary" type="button">{{t "templates.connector.saveObjectType"}}</button>
+                    <div style="clear:both;"></div>
+                </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="tab-pane" id="connectorAdvancedTab">
+            <div class="panel no-margin-bottom panel-connector panel-default panel-content panel-collapse-group">
+                <form class="form-horizontal" role="form" id="advancedForm">
+                    <div class="panel panel-default panel-collapse">
+                        <div class="panel-heading" role="tab" id="poolConfigOptionsHeading">
+                            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/#pool-configuration-option" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" href="#poolConfigOptions" aria-expanded="true" aria-controls="poolConfigOptions" class="">{{t "templates.connector.advanced.poolConfig"}}</a>
+                            </h4>
+                        </div>
+                        <div id="poolConfigOptions" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="poolConfigOptions" aria-expanded="true">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="advancedMaxObjects" class="col-sm-3 control-label">{{t "templates.connector.advanced.maxObjects"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedMaxObjects" class="form-control" type="text" name="poolConfigOption.maxObjects" value="{{poolConfigOption.maxObjects}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedMaxIdle" class="col-sm-3 control-label">{{t "templates.connector.advanced.maxIdle"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedMaxIdle" class="form-control" type="text" name="poolConfigOption.maxIdle" value="{{poolConfigOption.maxIdle}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedMaxWait" class="col-sm-3 control-label">{{t "templates.connector.advanced.maxWait"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedMaxWait" class="form-control" type="text" name="poolConfigOption.maxWait" value="{{poolConfigOption.maxWait}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedMinEvictableIdleTimeMillis" class="col-sm-3 control-label">{{t "templates.connector.advanced.minEvictable"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedMinEvictableIdleTimeMillis" class="form-control" type="text" name="poolConfigOption.minEvictableIdleTimeMillis" value="{{poolConfigOption.minEvictableIdleTimeMillis}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedMinIdle" class="col-sm-3 control-label">{{t "templates.connector.advanced.minIdle"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedMinIdle" class="form-control" type="text" name="poolConfigOption.minIdle" value="{{poolConfigOption.minIdle}}" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default panel-collapse">
+                        <div class="panel-heading" role="tab" id="resultHandlerConfigHeading">
+                            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/#results-handler-config" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" href="#resultHandlerConfig" aria-expanded="true" aria-controls="resultHandlerConfig" class="">{{t "templates.connector.advanced.resultHandler"}}</a>
+                            </h4>
+                        </div>
+                        <div id="resultHandlerConfig" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="resultHandlerConfig" aria-expanded="true">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="advancedEnableNormalizingResultsHandler" class="col-sm-3 control-label">{{t "templates.connector.advanced.enableNormailizingResults"}}</label>
+                                    <div class="col-sm-8">
+                                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                            <label>
+                                                <input id="advancedEnableNormalizingResultsHandler" class="toggleBoolean" name="resultsHandlerConfig.enableNormalizingResultsHandler" type="checkbox" value="{{resultsHandlerConfig.enableNormalizingResultsHandler}}" {{#if resultsHandlerConfig.enableNormalizingResultsHandler}} checked {{/if}}>
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedEnableFilteredResultsHandler" class="col-sm-3 control-label">{{t "templates.connector.advanced.enableFilteredResults"}}</label>
+                                    <div class="col-sm-8">
+                                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                            <label>
+                                                <input id="advancedEnableFilteredResultsHandler" class="toggleBoolean" name="resultsHandlerConfig.enableFilteredResultsHandler" type="checkbox" value="{{resultsHandlerConfig.enableFilteredResultsHandler}}" {{#if resultsHandlerConfig.enableFilteredResultsHandler}} checked {{/if}}>
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedEnableCaseInsensitiveFilter" class="col-sm-3 control-label">{{t "templates.connector.advanced.enableCaseInsensitiveFilter"}}</label>
+                                    <div class="col-sm-8">
+                                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                            <label>
+                                                <input id="advancedEnableCaseInsensitiveFilter" class="toggleBoolean" name="resultsHandlerConfig.enableCaseInsensitiveFilter" type="checkbox" value="{{resultsHandlerConfig.enableCaseInsensitiveFilter}}" {{#if resultsHandlerConfig.enableCaseInsensitiveFilter}} checked {{/if}}>
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedEnableAttributesToGetSearchResultsHandler" class="col-sm-3 control-label">{{t "templates.connector.advanced.enableAttributesToGetSearch"}}</label>
+                                    <div class="col-sm-8">
+                                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                            <label>
+                                                <input id="advancedEnableAttributesToGetSearchResultsHandler" class="toggleBoolean" name="resultsHandlerConfig.enableAttributesToGetSearchResultsHandler" type="checkbox" value="{{resultsHandlerConfig.enableAttributesToGetSearchResultsHandler}}" {{#if resultsHandlerConfig.enableAttributesToGetSearchResultsHandler}} checked {{/if}}>
+                                                <span></span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel panel-default panel-collapse">
+                        <div class="panel-heading" role="tab" id="operationTimeoutHeading">
+                            <a class="pull-right" href="{{docHelpUrl}}integrators-guide/#operation-timeout" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+
+                            <h4 class="panel-title">
+                                <a data-toggle="collapse" href="#operationTimeoutConfig" aria-expanded="true" aria-controls="operationTimeoutConfig" class="">{{t "templates.connector.advanced.operationTimeout"}}</a>
+                            </h4>
+                        </div>
+                        <div id="operationTimeoutConfig" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="operationTimeoutConfig" aria-expanded="true">
+                            <div class="panel-body">
+                                <div class="form-group">
+                                    <label for="advancedOperationCreate" class="col-sm-3 control-label">{{t "templates.connector.advanced.create"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationCreate" class="form-control" type="text" name="operationTimeout.CREATE" value="{{operationTimeout.CREATE}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationValidate" class="col-sm-3 control-label">{{t "templates.connector.advanced.validate"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationValidate" class="form-control" type="text" name="operationTimeout.VALIDATE" value="{{operationTimeout.VALIDATE}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationTest" class="col-sm-3 control-label">{{t "templates.connector.advanced.test"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationTest" class="form-control" type="text" name="operationTimeout.TEST" value="{{operationTimeout.TEST}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationScritOnConnector" class="col-sm-3 control-label">{{t "templates.connector.advanced.scriptOnConnect"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationScritOnConnector" class="form-control" type="text" name="operationTimeout.SCRIPT_ON_CONNECTOR" value="{{operationTimeout.SCRIPT_ON_CONNECTOR}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationSchema" class="col-sm-3 control-label">{{t "templates.connector.advanced.schema"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationSchema" class="form-control" type="text" name="operationTimeout.SCHEMA" value="{{operationTimeout.SCHEMA}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationDelete" class="col-sm-3 control-label">{{t "templates.connector.advanced.delete"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationDelete" class="form-control" type="text" name="operationTimeout.DELETE" value="{{operationTimeout.DELETE}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationUpdate" class="col-sm-3 control-label">{{t "templates.connector.advanced.update"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationUpdate" class="form-control" type="text" name="operationTimeout.UPDATE" value="{{operationTimeout.UPDATE}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationSync" class="col-sm-3 control-label">{{t "templates.connector.advanced.sync"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationSync" class="form-control" type="text" name="operationTimeout.SYNC" value="{{operationTimeout.SYNC}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationAuthenticate" class="col-sm-3 control-label">{{t "templates.connector.advanced.authenticate"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationAuthenticate" class="form-control" type="text" name="operationTimeout.AUTHENTICATE" value="{{operationTimeout.AUTHENTICATE}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationGet" class="col-sm-3 control-label">{{t "templates.connector.advanced.get"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationGet" class="form-control" type="text" name="operationTimeout.GET" value="{{operationTimeout.GET}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationScriptOnResource" class="col-sm-3 control-label">{{t "templates.connector.advanced.scriptOnResource"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationScriptOnResource" class="form-control" type="text" name="operationTimeout.SCRIPT_ON_RESOURCE" value="{{operationTimeout.SCRIPT_ON_RESOURCE}}" />
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <label for="advancedOperationSearch" class="col-sm-3 control-label">{{t "templates.connector.advanced.search"}}</label>
+                                    <div class="col-sm-8">
+                                        <input id="advancedOperationSearch" class="form-control" type="text" name="operationTimeout.SEARCH" value="{{operationTimeout.SEARCH}}" />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="panel-footer clearfix">
+                <div class="pull-right">
+                    <a href="#connectors/"><button class="btn btn-default" type="button">{{t 'common.form.cancel'}}</button></a>
+                    <button id="updateAdvanced" name="updateAdvanced" class="btn btn-primary" type="button">{{t "templates.connector.advanced.updateAdvanced"}}</button>
                     <div style="clear:both;"></div>
                 </div>
             </div>

@@ -1,7 +1,7 @@
-<!-- Copyright 2015 ForgeRock AS.
-	License terms: https://forgerock.org/cddlv1-0/ -->
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
 {{#unless editState}}
-<div class="panel panel-default panel-collapse">
+<div class="panel panel-default panel-collapse" id="forLdapConnector">
     <div class="panel-heading" role="tab" id="ldapSelectionHeading">
         <h4 class="panel-title">
             <a data-toggle="collapse" href="#ldapSelection" aria-expanded="true" aria-controls="ldapSelectionHeading" class="">{{t "templates.connector.ldapConnector.ldapType"}}</a>
@@ -49,7 +49,7 @@
             <div class="form-group has-feedback">
                 <label for="port" class="control-label col-sm-3">{{t "templates.connector.ldapConnector.port"}}</label>
                 <div class="input-group col-sm-7 ldap-port-group">
-                    <input id="port" aria-describedby="ssl-addon" data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
+                    <input id="port" aria-describedby="ssl-addon" data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="configurationProperties.port" value={{t "templates.connector.ldapConnector.defaultPort"}} />
                     <div class="input-group-addon" id="ssl-addon">
                         <input id="ssl" autocomplete="off" type="checkbox" name="configurationProperties.ssl" {{#if connectorDefaults.configurationProperties.ssl}} checked{{/if}} value="true">
                         <label for="ssl">{{t "templates.connector.ldapConnector.ssl"}}</label>
@@ -65,6 +65,7 @@
                     <input class="form-control" type="text" id="ldapPrincipal" name="configurationProperties.principal" placeholder="{{t "templates.connector.ldapConnector.usernamePlaceholder"}}" value="{{connectorDefaults.configurationProperties.principal}}" data-validator-event="keyup blur" data-validator="required" />
                     <div class="validation-message"></div>
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <span class="help-block">{{t "templates.connector.ldapConnector.loginAccountDN"}}</span>
                 </div>
             </div>
 
@@ -96,7 +97,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                    <input class="form-control"  data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]"  placeholder={{t "templates.connector.ldapConnector.baseDN"}} value={{value}} />
                     <div class="input-group-addon">
                         <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -108,7 +109,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                    <input class="form-control" id="baseDN" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" placeholder={{t "templates.connector.ldapConnector.baseDN"}} />
                     <div class="input-group-addon">
                         <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -141,7 +142,7 @@
         <div class="form-group has-feedback field">
             <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
             <div class="input-group col-sm-8">
-                <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}"  />
+                <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder={{t "templates.connector.ldapConnector.baseDN"}} value="{{value}}"  />
                 <div class="input-group-addon">
                     <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                 </div>
@@ -153,7 +154,7 @@
         <div class="form-group has-feedback field">
             <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
             <div class="input-group col-sm-8">
-                <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="cn=Users,dc=company,dc=com" value=""  />
+                <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder={{t "templates.connector.ldapConnector.baseDN"}} value=""  />
                 <div class="input-group-addon">
                     <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                 </div>
@@ -192,6 +193,10 @@
                         </button>
                     </div>
 
+
+                </div>
+                <div class="col-sm-offset-3">
+                    <span class="help-block">{{t "templates.connector.ldapConnector.filterLdapAttr"}}</span>
                 </div>
             </div>
 
@@ -206,7 +211,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="Account" value="{{value}}"  />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder={{t "templates.connector.ldapConnector.account"}} value="{{value}}"  />
                     <div class="input-group-addon">
                         <button field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -218,7 +223,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="Account" value=""  />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder={{t "templates.connector.ldapConnector.account"}} value=""  />
                     <div class="input-group-addon">
                         <button field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -240,7 +245,7 @@
     <div id="groupObject" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="groupObjectClassesWrapper" aria-expanded="true">
         <div class="panel-body connector-array-component" id="groupObjectClassesWrapper">
             <div class="form-group">
-                <label class="control-label col-sm-3">Group Filter</label>
+                <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.groupFilter"}}</label>
 
                 <div class="input-group col-sm-8 filter-holder">
                     <input class="form-control"
@@ -272,7 +277,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="Group" value="{{value}}"  />
+                    <input class="form-control" data-validator-event="keyup blur" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="{{t "templates.connector.ldapConnector.group"}} value="{{value}}"  />
                     <div class="input-group-addon">
                         <button field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -284,7 +289,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="Group" value=""  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder={{t "templates.connector.ldapConnector.group"}} value=""  />
                     <div class="input-group-addon">
                         <button field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>

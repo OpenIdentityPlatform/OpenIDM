@@ -16,6 +16,7 @@
 
 // add new test modules here:
 define([
+    "./connectorTest",
     "./searchTest",
     "./queryFilterEditorTest",
     "./TemporalConstraintsUtilsTest"

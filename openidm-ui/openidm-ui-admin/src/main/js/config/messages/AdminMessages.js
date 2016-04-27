@@ -62,6 +62,10 @@ define("config/messages/AdminMessages", [
             msg: "config.messages.ConnectorMessages.objectTypeSaved",
             type: "info"
         },
+        "advancedSaved": {
+            msg: "config.messages.ConnectorMessages.advancedSaved",
+            type: "info"
+        },
         "liveSyncSaved": {
             msg: "config.messages.ConnectorMessages.liveSyncSaved",
             type: "info"

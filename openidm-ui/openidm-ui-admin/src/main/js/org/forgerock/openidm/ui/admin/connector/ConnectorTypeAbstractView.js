@@ -174,7 +174,8 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
             $('#' + field_type + 'Wrapper').find('.input-group-addon').show();
 
             validatorsManager.bindValidators(this.$el.find('#' + field_type + 'Wrapper'));
-            validatorsManager.validateAllFields(this.$el.find('#' + field_type + 'Wrapper'));
+
+            $(field).find("input").trigger("validate");
         },
 
         removeField: function (event){
