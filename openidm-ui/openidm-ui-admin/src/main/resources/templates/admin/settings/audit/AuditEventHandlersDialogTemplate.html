@@ -33,13 +33,19 @@
     <div class="form-group">
         <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.enabled"}}</label>
         <div class="col-sm-6">
+
             <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+            {{#if canDisable}}
                 <label>
                     <input id="enabled" class="changes-watched section-check" name="enabled" type="checkbox" {{#if enabled}}checked{{/if}}><span></span>
                 </label>
+            {{else }}
+                <p class="text-muted">{{t "templates.audit.eventHandlers.cannotDisableMsg"}}</p>
+            {{/if}}
             </div>
         </div>
     </div>
+
 
     <div id="auditEventHandlerConfig" class="jsonEditorContainer panel-body"></div>
 </form>

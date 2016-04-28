@@ -903,6 +903,7 @@
                 "addOption": "Add an event handler...",
                 "addButton": "Add Event Handler",
                 "enabled": "Enabled",
+                "cannotDisableMsg": "Hander required for queries",
                 "dialog": {
                     "add": "Add Audit Event Handler",
                     "edit": "Edit Audit Event Handler"

@@ -14,6 +14,12 @@ module.exports = {
         eventHandlers: {
             selector: "#AuditEventHandlersBody",
             elements: {
+                editHandlerButton: {
+                    selector: ".editEventHandler"
+                },
+                useForQueriesRadio: {
+                    selector: 'input[name="useForQueries"]'
+                },
                 csvEditButton: {
                     selector: ".editEventHandler[data-name=csv]"
                 },
@@ -45,6 +51,9 @@ module.exports = {
             elements: {
                 title: {
                     selector: ".bootstrap-dialog-title"
+                },
+                form: {
+                    selector: '#auditEventHandlersForm'
                 },
                 name: {
                     selector: "#eventHandlerName"
