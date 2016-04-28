@@ -229,11 +229,13 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
 
         editEventHandler: function (e) {
             e.preventDefault();
-            var eventHandlerName = $(e.currentTarget).attr("data-name"),
-                event = _.findWhere(this.model.auditData.eventHandlers, {"config": {"name": eventHandlerName}});
+            var eventHandlerName = {"config": {"name": $(e.currentTarget).attr("data-name")}},
+                event = _.findWhere(this.model.auditData.eventHandlers, eventHandlerName),
+                canDisable = !_.findWhere(this.data.definedEventHandlers, eventHandlerName).useForQueries;
 
             AuditEventHandlersDialog.render(
                 {
+                    "canDisable": canDisable,
                     "eventHandlerType": event.class,
                     "eventHandler": _.clone(event, true),
                     "newEventHandler": false,
