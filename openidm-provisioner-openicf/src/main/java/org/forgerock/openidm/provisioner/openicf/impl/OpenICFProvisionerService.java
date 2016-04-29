@@ -387,7 +387,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 logger.info("OpenICF Provisioner Service component {} is activated.",
                                         systemIdentifier.getName());
                             } catch (Throwable t) {
-                                logger.warn(t.getMessage());
+                                logger.warn("Failure to activate connector.", t);
                             }
                         }
                     });

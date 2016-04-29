@@ -1030,6 +1030,22 @@
 		</includes>
 		<outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
 	</fileSet>
+    <!-- Setup kerberos sample -->
+    <fileSet>
+        <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+        <includes>
+            <include>provisioner.openicf-kerberos.json</include>
+        </includes>
+        <outputDirectory>/openidm/samples/kerberos/conf</outputDirectory>
+    </fileSet>
+    <fileSet>
+        <directory>${basedir}/src/main/resources</directory>
+        <includes>
+            <include>conf/**</include>
+            <include>script/**</include>
+        </includes>
+        <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
+    </fileSet>
   </fileSets>
     <!-- sample6 -->
     <files>

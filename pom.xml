@@ -251,6 +251,8 @@
         <openicf.ldapconnector.version>1.4.1.0</openicf.ldapconnector.version>
         <openicf.googleconnector.version>1.4.1.0</openicf.googleconnector.version>
         <openicf.groovyconnector.version>1.4.2.0</openicf.groovyconnector.version>
+        <openicf.sshconnector.version>1.4.0.0</openicf.sshconnector.version>
+        <openicf.kerberosconnector.version>1.4.0.0</openicf.kerberosconnector.version>
         <salesforce.api.version>29</salesforce.api.version>
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.3-SNAPSHOT</provisioner.salesforcemodule.version>
 

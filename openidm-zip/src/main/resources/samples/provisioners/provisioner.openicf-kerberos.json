@@ -1,0 +1,270 @@
+{
+  "name" : "kerberos",
+  "displayName" : "KerberosConnector",
+  "description" : "Kerberos connector used to connect to kerberos systems via ssh",
+  "version" : "1.4.0.0",
+  "author" : "ForgeRock",
+  "connectorRef" : {
+    "bundleName" : "org.forgerock.openicf.connectors.kerberos-connector",
+    "bundleVersion" : "1.4.0.0",
+    "connectorName" : "org.forgerock.openicf.connectors.kerberos.KerberosConnector"
+  },
+  "poolConfigOption" : {
+    "maxObjects" : 1,
+    "maxIdle" : 1,
+    "maxWait" : 150000,
+    "minEvictableIdleTimeMillis" : 120000,
+    "minIdle" : 1
+  },
+  "operationTimeout" : {
+    "CREATE" : -1,
+    "TEST" : -1,
+    "AUTHENTICATE" : -1,
+    "SEARCH" : -1,
+    "UPDATE" : -1,
+    "DELETE" : -1,
+    "SYNC" : -1,
+    "SCHEMA" : -1,
+    "GET" : -1,
+    "VALIDATE" : -1,
+    "SCRIPT_ON_CONNECTOR" : -1,
+    "SCRIPT_ON_RESOURCE" : -1
+  },
+  "configurationProperties" : {
+    "host" : "<HOSTNAME OR IP>",
+    "port" : 22,
+    "user" : "<USERNAME>",
+    "password" : "<PASSWORD>",
+    "prompt" : "<Example: myusername@target:>",
+    "sudoCommand" : "/usr/bin/sudo",
+    "echoOff" : true,
+    "terminalType" : "vt102",
+    "setLocale" : false,
+    "locale" : "en_US.utf8",
+    "connectionTimeout" : 5000,
+    "expectTimeout" : 5000,
+    "authenticationType" : "PASSWORD",
+    "throwOperationTimeoutException" : true,
+    "customConfiguration" : "kadmin { cmd = '/usr/sbin/kadmin.local'; user='<KADMIN USERNAME>'; default_realm='<REALM, e.g. EXAMPLE.COM>' }",
+    "customSensitiveConfiguration" : "kadmin { password = '<KADMIN PASSWORD>'}",
+    "scriptRoots" : [
+      "jar:file:connectors/kerberos-connector-1.4.0.0.jar!/script/kerberos/"
+    ],
+    "classpath" : [ ],
+    "reloadScriptOnExecution" : false,
+    "createScriptFileName" : "CreateKerberos.groovy",
+    "deleteScriptFileName" : "DeleteKerberos.groovy",
+    "schemaScriptFileName" : "SchemaKerberos.groovy",
+    "scriptOnResourceScriptFileName" : "ScriptOnResourceKerberos.groovy",
+    "searchScriptFileName" : "SearchKerberos.groovy",
+    "testScriptFileName" : "TestKerberos.groovy",
+    "updateScriptFileName" : "UpdateKerberos.groovy"
+  },
+  "systemActions" : [ ],
+  "syncFailureHandler" : {
+    "maxRetries" : 5,
+    "postRetryAction" : "logged-ignore"
+  },
+  "objectTypes" : {
+    "account" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "__ACCOUNT__",
+      "type" : "object",
+      "nativeType" : "__ACCOUNT__",
+      "properties" : {
+        "principal" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "__NAME__",
+          "required" : true
+        },
+        "password" : {
+          "type" : "string",
+          "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+          "nativeName" : "__PASSWORD__",
+          "required" : true,
+          "flags" : [
+            "NOT_READABLE",
+            "NOT_RETURNED_BY_DEFAULT"
+          ]
+        },
+        "lockout" : {
+          "type" : "string",
+          "nativeType" : "boolean",
+          "nativeName" : "__LOCK_OUT__",
+          "required" : false,
+          "flags" : [
+            "NOT_READABLE",
+            "NOT_RETURNED_BY_DEFAULT"
+          ]
+        },
+        "policy" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "policy",
+          "required" : false
+        },
+        "expirationDate" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "expirationDate",
+          "required" : false
+        },
+        "passwordExpiration" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "passwordExpiration",
+          "required" : false
+        },
+        "maximumTicketLife" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "maximumTicketLife",
+          "required" : false
+        },
+        "maximumRenewableLife" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "maximumRenewableLife",
+          "required" : false
+        },
+        "lastPasswordChange" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "lastPasswordChange",
+          "required" : false,
+          "flags" : [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ]
+        },
+        "lastModified" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "lastModified",
+          "required" : false,
+          "flags" : [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ]
+        },
+        "lastSuccessfulAuthentication" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "lastSuccessfulAuthentication",
+          "required" : false,
+          "flags" : [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ]
+        },
+        "lastFailedAuthentication" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "lastFailedAuthentication",
+          "required" : false,
+          "flags" : [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ]
+        },
+        "failedPasswordAttempts" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "failedPasswordAttempts",
+          "required" : false,
+          "flags" : [
+            "NOT_CREATABLE",
+            "NOT_UPDATEABLE"
+          ]
+        }
+      }
+    }
+  },
+  "operationOptions" : {
+    "CREATE" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "UPDATE" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "DELETE" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "TEST" : {
+      "objectFeatures" : { }
+    },
+    "SCRIPT_ON_CONNECTOR" : {
+      "objectFeatures" : { }
+    },
+    "SCRIPT_ON_RESOURCE" : {
+      "objectFeatures" : { }
+    },
+    "GET" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "RESOLVEUSERNAME" : {
+      "objectFeatures" : { }
+    },
+    "AUTHENTICATE" : {
+      "objectFeatures" : { }
+    },
+    "SEARCH" : {
+      "objectFeatures" : {
+        "__ACCOUNT__" : {
+          "operationOptionInfo" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "FIX_ME",
+            "type" : "object",
+            "properties" : { }
+          }
+        }
+      }
+    },
+    "VALIDATE" : {
+      "objectFeatures" : { }
+    },
+    "SYNC" : {
+      "objectFeatures" : { }
+    },
+    "SCHEMA" : {
+      "objectFeatures" : { }
+    }
+  }
+}
