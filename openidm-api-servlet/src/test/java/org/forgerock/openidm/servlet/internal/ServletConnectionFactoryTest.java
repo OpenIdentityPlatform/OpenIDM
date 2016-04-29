@@ -92,6 +92,7 @@ public class ServletConnectionFactoryTest {
         filterService.bindRequestHandler(requestHandler);
         filterService.bindEnhancedConfig(enhancedConfig);
         filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
 
         final ResourceResponse response = sendRequest(filterService);
 
@@ -107,6 +108,7 @@ public class ServletConnectionFactoryTest {
         filterService.bindEnhancedConfig(enhancedConfig);
         filterService.bindMaintenanceFilter(createMockFilter("maintenance"));
         filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
 
         final ResourceResponse response = sendRequest(filterService);
 
@@ -122,6 +124,7 @@ public class ServletConnectionFactoryTest {
         filterService.bindEnhancedConfig(enhancedConfig);
         filterService.bindAuditFilter(createMockFilter("audit"));
         filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
 
         final ResourceResponse response = sendRequest(filterService);
 
@@ -138,6 +141,7 @@ public class ServletConnectionFactoryTest {
         filterService.bindMaintenanceFilter(createMockFilter("maintenance"));
         filterService.bindAuditFilter(createMockFilter("audit"));
         filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
 
         final ResourceResponse response = sendRequest(filterService);
 
@@ -153,6 +157,7 @@ public class ServletConnectionFactoryTest {
         filterService.bindEnhancedConfig(enhancedConfig);
         filterService.bindMaintenanceFilter(createMockFilter("maintenance"));
         filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
 
         ResourceResponse response = sendRequest(filterService);
 
@@ -175,6 +180,7 @@ public class ServletConnectionFactoryTest {
         filterService.bindEnhancedConfig(enhancedConfig);
         filterService.bindAuditFilter(createMockFilter("audit"));
         filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
 
         ResourceResponse response = sendRequest(filterService);
 
@@ -190,6 +196,16 @@ public class ServletConnectionFactoryTest {
         assertThat(response.getContent()).doesNotContain("filterMarker");
     }
 
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testRouterFiltersNotReady() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.activate(mock(ComponentContext.class));
+
+        sendRequest(filterService);
+    }
+
     @Test
     public void testAddRemoveRouterFilter() throws Exception {
         ServletConnectionFactory filterService = new ServletConnectionFactory();
@@ -198,6 +214,7 @@ public class ServletConnectionFactoryTest {
         filterService.activate(mock(ComponentContext.class));
         Filter filter = createMockFilter("crestFilter");
         filterService.addFilter(filter);
+        filterService.setRouterFilterReady();
 
         ResourceResponse response = sendRequest(filterService);
 
