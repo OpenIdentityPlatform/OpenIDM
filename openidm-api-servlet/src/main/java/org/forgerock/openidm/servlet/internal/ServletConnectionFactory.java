@@ -60,6 +60,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.filter.PassthroughFilter;
 import org.forgerock.openidm.filter.MutableFilterDecorator;
+import org.forgerock.openidm.filter.ServiceUnavailableFilter;
 import org.forgerock.openidm.router.RouterFilterRegistration;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
@@ -88,10 +89,11 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
     /** Event name prefix for monitoring the router */
     private static final String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
 
-    /**
-     * Setup logging for the {@link org.forgerock.openidm.servlet.internal.ServletConnectionFactory}.
-     */
-    private final static Logger logger = LoggerFactory.getLogger(ServletConnectionFactory.class);
+    /** Setup logging for the {@link org.forgerock.openidm.servlet.internal.ServletConnectionFactory}. */
+    private static final Logger logger = LoggerFactory.getLogger(ServletConnectionFactory.class);
+
+    /** Router Filter at head of chain while services are still being initialized. */
+    private static final Filter SERVICE_UNAVAILABLE_FILTER = new ServiceUnavailableFilter("Service is starting");
 
     /** the Request Handler (Router) */
     @Reference(target = "(org.forgerock.openidm.router=*)")
@@ -102,15 +104,19 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
     private EnhancedConfig enhancedConfig = null;
 
     /**
-     * We define 3 filters that are "statically" defined:
+     * We define 4 filters that are "statically" defined:
      * <ul>
-     *     <li>maintenance filter</li>
-     *     <li>logging filter</li>
-     *     <li>audit filter</li>
+     *     <li>startup filter - throws ServiceUnavailableException until configured router filters are loaded</li>
+     *     <li>maintenance filter - toggled based on maintenance mode</li>
+     *     <li>logging filter - always enabled, logs trace-level messages</li>
+     *     <li>audit filter - enabled once AuditFilter is bound</li>
      * </ul></ol>
      * These are via Java implementation and not sourced from router.json {@see RouterFilterChain}.
      */
-    private static final int NUMBER_OF_STATIC_FILTERS = 3;
+    private static final int NUMBER_OF_STATIC_FILTERS = 4;
+
+    /** A wrapper for the startup filter - begin with a service-unavailable filter */
+    private final MutableFilterDecorator startupFilter = new MutableFilterDecorator(SERVICE_UNAVAILABLE_FILTER);
 
     /** A wrapper for the maintenance filter - populated when the MaintenanceFilter is bound */
     @Reference(name = "MaintenanceFilter", referenceInterface = Filter.class,
@@ -183,6 +189,7 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
         List<Filter> filters = new ArrayList<>(NUMBER_OF_STATIC_FILTERS);
 
         // static filters - order is important here
+        filters.add(startupFilter);
         filters.add(maintenanceFilter);
         filters.add(loggingFilter);
         filters.add(Filters.conditionalFilter(Filters.matchResourcePath("^(?!.*(^audit/)).*$"), auditFilter));
@@ -508,5 +515,15 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
     public void removeFilter(Filter filter) {
         // remove the filter directly from the filter chain
         filterChain.getFilters().remove(filter);
+    }
+
+    @Override
+    public void setRouterFilterReady() {
+        startupFilter.setDelegate(PassthroughFilter.PASSTHROUGH_FILTER);
+    }
+
+    @Override
+    public void setRouterFilterNotReady() {
+        startupFilter.setDelegate(SERVICE_UNAVAILABLE_FILTER);
     }
 }

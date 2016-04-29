@@ -63,7 +63,7 @@ import org.slf4j.LoggerFactory;
  * A config object holder to manage the router configuration, including the list of CREST router {@link Filter}s
  * to be added to the {@link FilterChain} managed by the {@link RouterFilterRegistration} service.
  */
-@Component(name = RouterConfig.PID, policy = ConfigurationPolicy.OPTIONAL,
+@Component(name = RouterConfig.PID, policy = ConfigurationPolicy.REQUIRE,
         configurationFactory = false, immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
@@ -104,11 +104,9 @@ public class RouterConfig {
         }
         try {
             config = enhancedConfig.getConfigurationAsJson(context);
-            addFilters(createFilterList(config));
-
-            logger.info("Router filter config created.");
+            createFiltersFromConfig(config);
         } catch (Exception e) {
-            logger.error("Failed to configure the RouterConfig service", e);
+            logger.error("Failed to configure router filters", e);
         }
     }
 
@@ -117,23 +115,35 @@ public class RouterConfig {
         logger.debug("Updating router config");
         try {
             JsonValue modifiedConfig = enhancedConfig.getConfigurationAsJson(context);
-            if (JsonPatch.diff(config, modifiedConfig).size() == 0) {
+            if (config != null
+                    && modifiedConfig != null
+                    && JsonPatch.diff(config, modifiedConfig).size() == 0) {
                 return;
             }
-            removeFilters();
-            addFilters(createFilterList(modifiedConfig));
+            deactivate(context);
+            createFiltersFromConfig(modifiedConfig);
             config = modifiedConfig;
-
-            logger.info("Router filter chain updated.");
         } catch (Exception e) {
-            logger.error("Failed to reconfigure the RouterConfig service", e);
+            logger.error("Failed to reconfigure router filters", e);
         }
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        logger.debug("Deactivating router config");
+        filterRegistration.setRouterFilterNotReady();
         removeFilters();
-        logger.debug("Router filter chain deactivated.");
+        logger.info("Router filters removed.");
+    }
+
+    private void createFiltersFromConfig(JsonValue config) throws ScriptException {
+        addFilters(createFilterList(config));
+        filterRegistration.setRouterFilterReady();
+        if (filters.isEmpty()) {
+            logger.warn("Configuring router without filters.");
+        } else {
+            logger.info("Router filters added.");
+        }
     }
 
     private void addFilters(List<Filter> newFilters) throws ScriptException {
@@ -153,13 +163,13 @@ public class RouterConfig {
     }
 
     /**
-     * Initialize the router filter list with configuration. Supports modifying router configuration.
+     * Initialize the router filter list from configuration.
      *
      * @param configuration the router configuration listing filters that are installed
      * @return the list of Filters
      * @throws ScriptException on failure to create filter from config
      */
-    List<Filter> createFilterList(JsonValue configuration) throws ScriptException {
+    private List<Filter> createFilterList(JsonValue configuration) throws ScriptException {
         final JsonValue filterConfig = configuration.get("filters").expect(List.class);
         final List<Filter> filters = new ArrayList<>(filterConfig.size());
 
@@ -179,10 +189,10 @@ public class RouterConfig {
      * @param config
      *            the configuration describing a single filter.
      * @return a Filter
-     * @throws JsonValueException
-     *             TODO.
+     * @throws ScriptException on failure to create filter from config
+     * @throws JsonValueException if filter configuration is incorrect
      */
-    private Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
+    Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
         FilterCondition filterCondition = null;
 
         final Pair<JsonPointer, ScriptEntry> condition = getScript(config.get("condition"));

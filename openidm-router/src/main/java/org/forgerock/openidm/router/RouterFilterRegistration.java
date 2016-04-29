@@ -35,4 +35,15 @@ public interface RouterFilterRegistration {
      * @param filter the registered Filter
      */
     void removeFilter(Filter filter);
+
+    /**
+     * Instructs the filter registration service that all router filters have been added and the service is "ready".
+     */
+    void setRouterFilterReady();
+
+    /**
+     * Instructs the filter registration service that router filters are not ready and the service should prevent
+     * inbound requests.
+     */
+    void setRouterFilterNotReady();
 }

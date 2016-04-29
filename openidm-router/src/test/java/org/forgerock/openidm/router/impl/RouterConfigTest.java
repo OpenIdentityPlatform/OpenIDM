@@ -52,12 +52,12 @@ public class RouterConfigTest {
 
     private Router requestHandler;
     private RouterConfig routerConfig;
-    private List<Filter> filters;
+    private Filter filter;
 
     @BeforeClass
     public void BeforeClass() throws Exception {
 
-        URL config = RouterConfigTest.class.getResource("/conf/router.json");
+        URL config = RouterConfigTest.class.getResource("/conf/filter.json");
         assertThat(config).isNotNull().overridingErrorMessage("router configuration is not found");
         JsonValue configuration = new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
 
@@ -71,14 +71,12 @@ public class RouterConfigTest {
         routerConfig = new RouterConfig();
         routerConfig.bindScriptRegistry(sr);
 
-        filters = routerConfig.createFilterList(configuration);
-        // there should be 1 filter
-        assertThat(filters.size()).isEqualTo(1);
+        filter = routerConfig.newFilter(configuration);
+        assertThat(filter).isNotNull();
     }
 
     @Test
     public void testFilterCreate() throws Exception {
-        Filter filter = filters.get(0);
         JsonValue content = json(object(field("username", "bob"), field("password", "secret")));
         final JsonValue response = filter
                 .filterCreate(createContext("admin"),
@@ -92,8 +90,6 @@ public class RouterConfigTest {
 
     @Test
     public void testFilterUpdate() throws Exception {
-
-        Filter filter = filters.get(0);
         JsonValue content = json(object(field("username", "bob"), field("password", "secret")));
         final JsonValue response = filter
                 .filterUpdate(createContext("admin"),

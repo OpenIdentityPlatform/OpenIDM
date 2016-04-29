@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.filter;
 
+import static org.forgerock.util.Reject.checkNotNull;
+
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
@@ -39,17 +41,31 @@ import org.forgerock.util.promise.Promise;
 public class MutableFilterDecorator implements Filter {
 
     /** the delegate filter */
-    private volatile Filter delegate = PassthroughFilter.PASSTHROUGH_FILTER;
+    private volatile Filter delegate;
+
+    /**
+     * Construct a mutable filter decorator which delegates to passthrough behavior, i.e., no filtering.
+     */
+    public MutableFilterDecorator() {
+        this(PassthroughFilter.PASSTHROUGH_FILTER);
+    }
+
+    /**
+     * Construct a mutable filter decorator which delegates to the given delegate.
+     *
+     * @param delegate the Filter to which to delegate requests
+     */
+    public MutableFilterDecorator(Filter delegate) {
+        setDelegate(delegate);
+    }
 
     /**
      * Set the delegate delegate to the given {@link Filter}.
      *
      * @param delegate the delegate @{link Filter} to wrap
      */
-    public synchronized void setDelegate(Filter delegate) {
-        if (delegate != null) {
-            this.delegate = delegate;
-        }
+    public void setDelegate(Filter delegate) {
+        this.delegate = checkNotNull(delegate);
     }
 
     @Override
