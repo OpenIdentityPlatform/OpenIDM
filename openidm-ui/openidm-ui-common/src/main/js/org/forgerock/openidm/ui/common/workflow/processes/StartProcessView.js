@@ -96,28 +96,28 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
 
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
-                    workflowManager.getProcessDefinition(id, _.bind(function(definition) {
-                        var template = this.getGenerationTemplate(definition), view, passJSLint;
-                        this.processDefinition = definition;
-                        delete this.definitionFormPropertyMap;
+                workflowManager.getProcessDefinition(id, _.bind(function(definition) {
+                    var template = this.getGenerationTemplate(definition), view, passJSLint;
+                    this.processDefinition = definition;
+                    delete this.definitionFormPropertyMap;
 
-                        if (template === false && definition.formResourceKey) {
-                            ModuleLoader.load(formManager.getViewForForm(definition.formResourceKey)).then(function (view) {
-                                view.render(definition, {}, {}, callback);
-                            });
-                        } else if (template !== false) {
-                            templateStartProcessForm.render(definition, {}, template,
-                                _.bind(formGenerationUtils.validateForm, this, formValidateOptions, validatorsManager, callback)
-                            );
-                            return;
-                        } else {
-                            this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
-                            templateStartProcessForm.render({"formProperties": definition.formProperties.formPropertyHandlers}, {}, formGenerationUtils.generateTemplateFromFormProperties(definition),
-                                _.bind(formGenerationUtils.validateForm, this, formValidateOptions, validatorsManager, callback)
-                            );
-                            return;
-                        }
-                    }, this));
+                    if (template === false && definition.formResourceKey) {
+                        ModuleLoader.load(formManager.getViewForForm(definition.formResourceKey)).then(function (view) {
+                            view.render(definition, {}, {}, callback);
+                        });
+                    } else if (template !== false) {
+                        templateStartProcessForm.render(definition, {}, template,
+                            _.bind(formGenerationUtils.validateForm, this, formValidateOptions, validatorsManager, callback)
+                        );
+                        return;
+                    } else {
+                        this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
+                        templateStartProcessForm.render({"formProperties": definition.formProperties.formPropertyHandlers}, {}, formGenerationUtils.generateTemplateFromFormProperties(definition),
+                            _.bind(formGenerationUtils.validateForm, this, formValidateOptions, validatorsManager, callback)
+                        );
+                        return;
+                    }
+                }, this));
             });
         },
 

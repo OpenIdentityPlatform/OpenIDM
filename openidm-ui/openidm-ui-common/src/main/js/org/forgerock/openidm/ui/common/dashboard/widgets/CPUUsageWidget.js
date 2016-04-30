@@ -157,8 +157,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
                     this.model.cpuChart.data = [{
                         "memory" : widgetData.availableProcessors - widgetData.systemLoadAverage,
                         "type" : "Free"
-                    },
-                    {
+                    }, {
                         "memory" : widgetData.systemLoadAverage,
                         "type" : "Used"
                     }];

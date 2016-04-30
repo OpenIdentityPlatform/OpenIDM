@@ -18,14 +18,14 @@ define("config/messages/CommonIDMMessages", [
 ], function() {
 
     var obj = {
-            "userValidationError" : {
-                msg: "config.messages.AdminMessages.userValidationError",
-                type: "error"
-            },
-            "resourceValidationError" : {
-                msg: "config.messages.AdminMessages.resourceValidationError",
-                type: "error"
-            }
+        "userValidationError" : {
+            msg: "config.messages.AdminMessages.userValidationError",
+            type: "error"
+        },
+        "resourceValidationError" : {
+            msg: "config.messages.AdminMessages.resourceValidationError",
+            type: "error"
+        }
     };
 
     return obj;

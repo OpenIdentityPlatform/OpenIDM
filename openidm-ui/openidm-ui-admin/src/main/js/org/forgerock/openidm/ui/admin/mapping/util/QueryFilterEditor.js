@@ -21,11 +21,11 @@ define("org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor", [
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate"
 ], function ($, _, FilterEditor, ScriptDelegate) {
     var tagMap = {
-                    "equalityMatch" : "eq",
-                    "greaterOrEqual" : "ge",
-                    "lessOrEqual" : "le",
-                    "approxMatch" : "sw"
-                },
+            "equalityMatch" : "eq",
+            "greaterOrEqual" : "ge",
+            "lessOrEqual" : "le",
+            "approxMatch" : "sw"
+        },
         invertedTagMap = _.invert(tagMap),
         QueryFilterEditor = FilterEditor.extend({
             transform: function (queryFilterTree) {

@@ -27,81 +27,79 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
     var obj = new AbstractDelegate(constants.host + "/openidm/recon");
 
     obj.waitForAll = function (reconIds, suppressSpinner, progressCallback) {
-            var resultPromise = $.Deferred(),
-                completedRecons = [],
-                checkCompleted;
+        var resultPromise = $.Deferred(),
+            completedRecons = [],
+            checkCompleted;
 
-            checkCompleted = function () {
+        checkCompleted = function () {
 
-                obj.serviceCall({
-                    "type": "GET",
-                    "url": "/" + reconIds[completedRecons.length],
-                    "suppressSpinner": suppressSpinner,
-                    "errorsHandlers": {
-                        "Not found": {
-                            status: 404
-                        }
+            obj.serviceCall({
+                "type": "GET",
+                "url": "/" + reconIds[completedRecons.length],
+                "suppressSpinner": suppressSpinner,
+                "errorsHandlers": {
+                    "Not found": {
+                        status: 404
                     }
-                }).then(function (reconStatus) {
+                }
+            }).then(function (reconStatus) {
 
-                    if (progressCallback) {
-                        progressCallback(reconStatus);
-                    }
+                if (progressCallback) {
+                    progressCallback(reconStatus);
+                }
 
-                    if (reconStatus.ended.length !== 0) {
-                        completedRecons.push(reconStatus);
-                        if (completedRecons.length === reconIds.length) {
-                            resultPromise.resolve(completedRecons);
-                        } else {
-                            _.delay(checkCompleted, 1000);
-                        }
-                    } else {
-                        if (!suppressSpinner) {
-                            spinner.showSpinner();
-                        }
-                        _.delay(checkCompleted, 1000);
-                    }
-
-
-                }, function () {
-                    // something went wrong with the read on /recon/_id, perhaps this recon was interrupted during a restart of the server?
-
-                    completedRecons.push({
-                        "reconId": reconIds[completedRecons.length],
-                        "status": "failed"
-                    });
-
+                if (reconStatus.ended.length !== 0) {
+                    completedRecons.push(reconStatus);
                     if (completedRecons.length === reconIds.length) {
                         resultPromise.resolve(completedRecons);
                     } else {
                         _.delay(checkCompleted, 1000);
                     }
+                } else {
+                    if (!suppressSpinner) {
+                        spinner.showSpinner();
+                    }
+                    _.delay(checkCompleted, 1000);
+                }
+
+
+            }, function () {
+                // something went wrong with the read on /recon/_id, perhaps this recon was interrupted during a restart of the server?
+
+                completedRecons.push({
+                    "reconId": reconIds[completedRecons.length],
+                    "status": "failed"
                 });
 
-            };
+                if (completedRecons.length === reconIds.length) {
+                    resultPromise.resolve(completedRecons);
+                } else {
+                    _.delay(checkCompleted, 1000);
+                }
+            });
 
-            if (!suppressSpinner) {
-                spinner.showSpinner();
-            }
-            _.delay(checkCompleted, 100);
-
-            return resultPromise;
         };
 
+        if (!suppressSpinner) {
+            spinner.showSpinner();
+        }
+        _.delay(checkCompleted, 100);
 
-
+        return resultPromise;
+    };
+    
     obj.triggerRecons = function (mappings, suppressSpinner) {
         var reconIds = [],
             reconPromises = [];
 
         _.each(mappings, function (m) {
             reconPromises.push(obj.serviceCall({
-                    "suppressSpinner": suppressSpinner,
-                    "url": "?_action=recon&mapping=" + m,
-                    "type": "POST"
-                }).then(function (reconId) {
-                    reconIds.push(reconId._id);
-                }));
+                "suppressSpinner": suppressSpinner,
+                "url": "?_action=recon&mapping=" + m,
+                "type": "POST"
+            }).then(function (reconId) {
+                reconIds.push(reconId._id);
+            }));
         });
 
         return $.when.apply($, reconPromises);
@@ -118,7 +116,7 @@ define("org/forgerock/openidm/ui/admin/delegates/ReconDelegate", [
 
             return obj.waitForAll([reconId._id], suppressSpinner, progressCallback)
                       .then(function (reconArray) {
-                        return reconArray[0];
+                          return reconArray[0];
                       }) ;
         });
 

@@ -34,32 +34,32 @@ define("org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils", [
     * @returns {object} - and object formatted like that in the example
     */
     obj.convertFromIntervalString = function (intervalString, timezoneOffset) {
-          var intervalStart = "",
-              intervalEnd = "",
-              start = "",
-              end = "";
+        var intervalStart = "",
+            intervalEnd = "",
+            start = "",
+            end = "";
 
-          if (timezoneOffset == null) {
-              timezoneOffset = new Date().getTimezoneOffset();
-          }
+        if (timezoneOffset == null) {
+            timezoneOffset = new Date().getTimezoneOffset();
+        }
 
-          if (intervalString.split("/").length === 2) {
-              intervalStart = intervalString.split("/")[0];
-              intervalEnd = intervalString.split("/")[1];
-          }
+        if (intervalString.split("/").length === 2) {
+            intervalStart = intervalString.split("/")[0];
+            intervalEnd = intervalString.split("/")[1];
+        }
 
-          if (intervalStart.length) {
-              start = moment(intervalStart).zone(timezoneOffset);
-          }
+        if (intervalStart.length) {
+            start = moment(intervalStart).zone(timezoneOffset);
+        }
 
-          if (intervalEnd.length) {
-              end = moment(intervalEnd).zone(timezoneOffset);
-          }
+        if (intervalEnd.length) {
+            end = moment(intervalEnd).zone(timezoneOffset);
+        }
 
-          return {
-              start: start.format(format),
-              end: end.format(format)
-          };
+        return {
+            start: start.format(format),
+            end: end.format(format)
+        };
     };
 
     /*
@@ -75,25 +75,25 @@ define("org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils", [
     * @returns {string} - a string formatted like that in the example
     */
     obj.convertToIntervalString = function (intervalStart, intervalEnd, timezoneOffset) {
-         var start = new Date(),
+        var start = new Date(),
             end = new Date(),
             intervalString = "";
 
-         if (timezoneOffset == null) {
+        if (timezoneOffset == null) {
             timezoneOffset = new Date().getTimezoneOffset();
-         }
+        }
 
-         if (intervalStart.length) {
+        if (intervalStart.length) {
             start = moment.utc(intervalStart, format).add(timezoneOffset, 'minutes');
-         }
+        }
 
-         if (intervalEnd.length) {
+        if (intervalEnd.length) {
             end = moment.utc(intervalEnd, format).add(timezoneOffset, 'minutes');
-         }
+        }
 
-         intervalString = start.toISOString() + "/" + end.toISOString();
+        intervalString = start.toISOString() + "/" + end.toISOString();
 
-         return intervalString;
+        return intervalString;
     };
 
     /*

@@ -79,71 +79,71 @@ define("org/forgerock/openidm/ui/admin/settings/update/HistoryView", [
             var versionGrid, self = this;
 
             this.parentRender(_.bind(function () {
-                    versionGrid = new Backgrid.Grid({
-                        className: "table backgrid",
-                        emptyText: $.t("templates.update.versions.noVersionsBG"),
-                        columns: BackgridUtils.addSmallScreenCell([{
-                            label: 'update',
-                            name: "archive",
-                            cell: Backgrid.Cell.extend({
-                                className: "col-md-10",
-                                render: function () {
-                                    var date;
+                versionGrid = new Backgrid.Grid({
+                    className: "table backgrid",
+                    emptyText: $.t("templates.update.versions.noVersionsBG"),
+                    columns: BackgridUtils.addSmallScreenCell([{
+                        label: 'update',
+                        name: "archive",
+                        cell: Backgrid.Cell.extend({
+                            className: "col-md-10",
+                            render: function () {
+                                var date;
 
-                                    if (this.model.get("endDate")) {
-                                        date = DateUtil.formatDate(this.model.get("endDate"), "MMM dd, yyyy");
-                                    } else {
-                                        date = "";
-                                    }
-
-                                    this.$el.html(Handlebars.compile("{{> settings/_updateHistoryGridMain}}")({
-                                        "archive": this.model.get("archive"),
-                                        "user": this.model.get("userName"),
-                                        "date": date
-                                    }));
-
-                                    return this;
+                                if (this.model.get("endDate")) {
+                                    date = DateUtil.formatDate(this.model.get("endDate"), "MMM dd, yyyy");
+                                } else {
+                                    date = "";
                                 }
-                            }),
-                            sortable: false,
-                            editable: false
-                        }, {
-                            name: "",
-                            cell: Backgrid.Cell.extend({
-                                events: {
-                                    "click .test": "goToDetails"
-                                },
-                                className: "col-md-2",
 
-                                render: function () {
-                                    var disable,
-                                        button;
+                                this.$el.html(Handlebars.compile("{{> settings/_updateHistoryGridMain}}")({
+                                    "archive": this.model.get("archive"),
+                                    "user": this.model.get("userName"),
+                                    "date": date
+                                }));
 
-                                    button = '<button type="button" class="test pull-right btn btn-primary btn-sm">';
-                                    button += $.t("templates.update.history.viewDetails");
-                                    button += '</button>';
+                                return this;
+                            }
+                        }),
+                        sortable: false,
+                        editable: false
+                    }, {
+                        name: "",
+                        cell: Backgrid.Cell.extend({
+                            events: {
+                                "click .test": "goToDetails"
+                            },
+                            className: "col-md-2",
 
-                                    this.$el.html(button);
-                                    this.delegateEvents();
-                                    return this;
-                                },
+                            render: function () {
+                                var disable,
+                                    button;
 
-                                goToDetails: function () {
-                                    var id = this.model.get('_id'),
-                                        response = this.model.attributes,
-                                        version = this.model.get('archive'),
-                                        isHistoricalInstall = true;
+                                button = '<button type="button" class="test pull-right btn btn-primary btn-sm">';
+                                button += $.t("templates.update.history.viewDetails");
+                                button += '</button>';
 
-                                    self.model.viewDetails(id, response, version, isHistoricalInstall);
-                                }
-                            }),
-                            sortable: false,
-                            editable: false
-                        }], true),
-                        collection: Versions
-                    });
+                                this.$el.html(button);
+                                this.delegateEvents();
+                                return this;
+                            },
 
-                    this.$el.find("#historyGrid").append(versionGrid.render().el);
+                            goToDetails: function () {
+                                var id = this.model.get('_id'),
+                                    response = this.model.attributes,
+                                    version = this.model.get('archive'),
+                                    isHistoricalInstall = true;
+
+                                self.model.viewDetails(id, response, version, isHistoricalInstall);
+                            }
+                        }),
+                        sortable: false,
+                        editable: false
+                    }], true),
+                    collection: Versions
+                });
+
+                this.$el.find("#historyGrid").append(versionGrid.render().el);
 
                 if (callback) {
                     callback();

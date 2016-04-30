@@ -156,7 +156,8 @@ define("org/forgerock/openidm/ui/admin/connector/AddConnectorView", [
 
             ConnectorDelegate.deleteCurrentConnectorsCache();
 
-            ConnectorDelegate.testConnector(mergedResult).then(_.bind(function (testResult) {
+            ConnectorDelegate.testConnector(mergedResult).then(
+                _.bind(function (testResult) {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
                     if(!mergedResult.objectTypes) {

@@ -185,12 +185,10 @@ define("org/forgerock/openidm/ui/admin/workflow/ActiveProcessesView", [
                         }
 
                         ResourceDelegate.searchResource(queryFilter, "managed/user").then(function(search) {
-                                callback(search.result);
-                            },
-                            function(){
-                                callback();
-                            }
-                        );
+                            callback(search.result);
+                        }, function() {
+                            callback();
+                        });
 
                     }, this)
                 });

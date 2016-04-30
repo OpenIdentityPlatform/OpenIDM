@@ -31,7 +31,7 @@ define("org/forgerock/openidm/ui/user/anonymousProcess/SelfRegistrationView", [
         baseEntity: "selfservice/registration"
     });
 
-     SelfRegistrationView.prototype = _.extend(Object.create(CommonSelfRegistrationView), SelfRegistrationView.prototype);
+    SelfRegistrationView.prototype = _.extend(Object.create(CommonSelfRegistrationView), SelfRegistrationView.prototype);
 
     return new SelfRegistrationView();
 });

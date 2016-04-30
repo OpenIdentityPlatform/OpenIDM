@@ -71,12 +71,12 @@ define("org/forgerock/openidm/ui/common/UserModel", [
         },
         getUIRoles: function (roles) {
             var getRoleFromRef = function (role) {
-                    if (_.isObject(role) && _.has(role, "_ref")) {
-                        role = role._ref.split("/").pop();
-                    }
+                if (_.isObject(role) && _.has(role, "_ref")) {
+                    role = role._ref.split("/").pop();
+                }
 
-                    return role;
-                };
+                return role;
+            };
 
             return _.chain(roles)
                     .filter(function (r) {

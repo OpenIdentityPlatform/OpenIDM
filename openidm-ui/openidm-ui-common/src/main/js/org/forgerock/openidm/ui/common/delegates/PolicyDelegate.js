@@ -99,7 +99,7 @@ define("org/forgerock/openidm/ui/common/delegates/PolicyDelegate", [
                 return {
                     "result": false,
                     "failedPolicyRequirements": properyFailures
-               };
+                };
             }
         })
         .done(function (result) {

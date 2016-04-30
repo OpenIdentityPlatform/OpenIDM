@@ -89,29 +89,27 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                     }
 
                     searchDelegate.searchResults(pathToResource, obj.autocompleteProps(prop, resourceCollectionIndex, true), query, null, queryFilter).then(function(result) {
-                            var convertNestedProps = function(item) {
-                                    _.each(obj.autocompleteProps(prop, resourceCollectionIndex), function(propName) {
-                                        if(propName.indexOf(".") > -1) {
-                                            item[propName] = eval("item." + propName);
-                                        }
-                                    });
-                                    return item;
-                                },
-                                modifiedResult = _.map(result, function(item){
-                                    return convertNestedProps(item);
+                        var convertNestedProps = function(item) {
+                                _.each(obj.autocompleteProps(prop, resourceCollectionIndex), function(propName) {
+                                    if(propName.indexOf(".") > -1) {
+                                        item[propName] = eval("item." + propName);
+                                    }
                                 });
+                                return item;
+                            },
+                            modifiedResult = _.map(result, function(item){
+                                return convertNestedProps(item);
+                            });
 
-                            if (prop.parentObjectId) {
-                                //filter out any values that are the same as the parentObjectId
-                                modifiedResult = _.reject(modifiedResult, function (mr) { return mr._id === prop.parentObjectId; });
-                            }
-
-                            callback(modifiedResult);
-                        },
-                        function(){
-                            callback();
+                        if (prop.parentObjectId) {
+                            //filter out any values that are the same as the parentObjectId
+                            modifiedResult = _.reject(modifiedResult, function (mr) { return mr._id === prop.parentObjectId; });
                         }
-                    );
+
+                        callback(modifiedResult);
+                    }, function() {
+                        callback();
+                    });
                 },
                 onLoad: function(data) {
                     if(initialLoad && propertyValue && !_.isEmpty(propertyValue)){

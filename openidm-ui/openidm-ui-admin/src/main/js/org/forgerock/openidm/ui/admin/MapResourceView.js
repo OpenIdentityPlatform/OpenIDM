@@ -59,7 +59,8 @@ define("org/forgerock/openidm/ui/admin/MapResourceView", [
             this.removeCallback = args.removeCallback;
             this.addCallback = args.addCallback;
 
-            ConfigDelegate.readEntity("sync").then(_.bind(function(sync) {
+            ConfigDelegate.readEntity("sync").then(
+                _.bind(function(sync) {
                     this.mappingList = sync.mappings;
                     this.syncExist = true;
                     this.parentRender(_.bind(function(){

@@ -70,8 +70,8 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
                         var data = this.model.chartData[e.x];
 
                         return [
-                                "Timestamp: " +  data.timestamp,
-                                "Active Recons : " + data.activeThreads
+                            "Timestamp: " +  data.timestamp,
+                            "Active Recons : " + data.activeThreads
                         ];
 
                     }, this);

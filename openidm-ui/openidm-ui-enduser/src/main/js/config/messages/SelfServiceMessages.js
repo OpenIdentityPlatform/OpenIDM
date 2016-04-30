@@ -18,27 +18,27 @@ define("config/messages/SelfServiceMessages", [
 ], function() {
 
     var obj = {
-            //tasks
-            "completedTask": {
-                msg: "config.messages.AdminMessages.completedTask",
-                type: "info"
-            },
-            "claimedTask": {
-                msg: "config.messages.AdminMessages.claimedTask",
-                type: "info"
-            },
-            "unclaimedTask": {
-                msg: "config.messages.AdminMessages.unclaimedTask",
-                type: "info"
-            },
-            "startedProcess": {
-                msg: "config.messages.AdminMessages.startedProcess",
-                type: "info"
-            },
-            "authenticationUnavailable" : {
-                msg: "config.messages.AuthenticationMessages.authenticationUnavailable",
-                type: "error"
-            }
+        //tasks
+        "completedTask": {
+            msg: "config.messages.AdminMessages.completedTask",
+            type: "info"
+        },
+        "claimedTask": {
+            msg: "config.messages.AdminMessages.claimedTask",
+            type: "info"
+        },
+        "unclaimedTask": {
+            msg: "config.messages.AdminMessages.unclaimedTask",
+            type: "info"
+        },
+        "startedProcess": {
+            msg: "config.messages.AdminMessages.startedProcess",
+            type: "info"
+        },
+        "authenticationUnavailable" : {
+            msg: "config.messages.AuthenticationMessages.authenticationUnavailable",
+            type: "error"
+        }
     };
 
     return obj;

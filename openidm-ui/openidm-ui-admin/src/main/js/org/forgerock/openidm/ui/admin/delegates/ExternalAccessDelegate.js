@@ -24,12 +24,12 @@ define("org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate", [
     obj.getToken = function(id, authCode, redirectUri, tokenUrl, connectorLocation) {
         var googleDetails = "grant_type=authorization_code&code=" +authCode +"&client_id=" +id  +"&redirect_uri=" +redirectUri,
             restDetails = {
-            "url" : tokenUrl,
-            "method" : "POST",
-            "body" : googleDetails,
-            "contentType" : "application/x-www-form-urlencoded",
-            "connectorLocation" : connectorLocation
-        };
+                "url" : tokenUrl,
+                "method" : "POST",
+                "body" : googleDetails,
+                "contentType" : "application/x-www-form-urlencoded",
+                "connectorLocation" : connectorLocation
+            };
 
         return obj.serviceCall({
             url: "?_action=getAuthZCode",

@@ -31,7 +31,7 @@ define("org/forgerock/openidm/ui/user/anonymousProcess/PasswordResetView", [
         baseEntity: "selfservice/reset"
     });
 
-     PasswordResetView.prototype = _.extend(Object.create(CommonPasswordResetView), PasswordResetView.prototype);
+    PasswordResetView.prototype = _.extend(Object.create(CommonPasswordResetView), PasswordResetView.prototype);
 
     return new PasswordResetView();
 });

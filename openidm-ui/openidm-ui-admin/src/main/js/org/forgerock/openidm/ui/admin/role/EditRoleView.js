@@ -34,8 +34,8 @@ function ($, _, Handlebars,
     TemporalConstraintsUtils
   ) {
     var EditRoleView = function () {
-            return AbstractView.apply(this, arguments);
-        };
+        return AbstractView.apply(this, arguments);
+    };
 
     EditRoleView.prototype = Object.create(GenericEditResourceView);
     EditRoleView.prototype.events = _.extend({
@@ -49,8 +49,8 @@ function ($, _, Handlebars,
 
     EditRoleView.prototype.render = function (args, callback) {
         GenericEditResourceView.render.call(this, args, _.bind(function () {
-        if (_.has(this.data.schema.properties, "temporalConstraints")) {
-            if (!this.data.newObject && !this.$el.find('#temporalConstraintsForm').length) {
+            if (_.has(this.data.schema.properties, "temporalConstraints")) {
+                if (!this.data.newObject && !this.$el.find('#temporalConstraintsForm').length) {
                     this.addTemporalConstraintsForm();
                 }
             }
@@ -130,16 +130,16 @@ function ($, _, Handlebars,
         }
 
         editor.render(
-                {
-                    "queryFilter": filter,
-                    "element": "#conditionFilterHolder",
-                    "resource": "managed/role"
-                },
-                function () {
-                    if (filter.length || clearFilter) {
-                      _this.showPendingChanges();
-                    }
+            {
+                "queryFilter": filter,
+                "element": "#conditionFilterHolder",
+                "resource": "managed/role"
+            },
+            function () {
+                if (filter.length || clearFilter) {
+                    _this.showPendingChanges();
                 }
+            }
         );
 
         return editor;
@@ -196,13 +196,13 @@ function ($, _, Handlebars,
             temporalConstraints = undefined;
         }
 
-            returnVal = _.extend(
-                {
-                    "condition": condition,
-                    "temporalConstraints": temporalConstraints
-                },
-                GenericEditResourceView.getFormValue.call(this)
-            );
+        returnVal = _.extend(
+            {
+                "condition": condition,
+                "temporalConstraints": temporalConstraints
+            },
+            GenericEditResourceView.getFormValue.call(this)
+        );
 
         return returnVal;
     };

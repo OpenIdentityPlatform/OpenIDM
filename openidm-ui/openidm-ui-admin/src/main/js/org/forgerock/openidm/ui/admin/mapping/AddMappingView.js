@@ -112,14 +112,14 @@ define("org/forgerock/openidm/ui/admin/mapping/AddMappingView", [
                     });
 
                     MapResourceView.render({
-                            "removeCallback": _.bind(function(){
-                                this.$el.find(".add-resource-button").prop("disabled", false);
-                            }, this),
-                            "addCallback" : _.bind(function(source, target){
-                                if(source && target) {
-                                    this.$el.find(".add-resource-button").prop("disabled", true);
-                                }
-                            }, this)},
+                        "removeCallback": _.bind(function(){
+                            this.$el.find(".add-resource-button").prop("disabled", false);
+                        }, this),
+                        "addCallback" : _.bind(function(source, target){
+                            if(source && target) {
+                                this.$el.find(".add-resource-button").prop("disabled", true);
+                            }
+                        }, this)},
                         _.bind(function(){
                             if(args.length > 0) {
                                 this.preselectMappingCard(args);

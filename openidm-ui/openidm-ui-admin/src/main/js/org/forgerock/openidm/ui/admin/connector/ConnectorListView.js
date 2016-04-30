@@ -251,7 +251,8 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorListView", [
                     }
                 }, this);
 
-                ConfigDelegate.deleteEntity(url[1] +"/" +url[2]).then(function(){
+                ConfigDelegate.deleteEntity(url[1] +"/" +url[2]).then(
+                    function(){
                         ConnectorDelegate.deleteCurrentConnectorsCache();
                         selectedItem.remove();
                         alternateItem.remove();

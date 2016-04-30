@@ -103,8 +103,8 @@ define("org/forgerock/openidm/ui/admin/settings/update/VersionsView", [
                         }
 
                     }, this), _.bind(function() {
-                            this.data.errorMessage = $.t("templates.update.versions.failedClusterInfo");
-                            this.init(false, Versions, callback);
+                        this.data.errorMessage = $.t("templates.update.versions.failedClusterInfo");
+                        this.init(false, Versions, callback);
 
                     }, this));// END GET IS CLUSTERED
 
