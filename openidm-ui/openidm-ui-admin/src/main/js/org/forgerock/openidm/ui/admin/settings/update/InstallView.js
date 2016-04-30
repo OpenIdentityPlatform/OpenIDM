@@ -29,7 +29,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
         element: "#install",
         noBaseTemplate: true,
         events: {
-          "click .restartNow": "restartNow"
+            "click .restartNow": "restartNow"
         },
         data: {
             "successful": false,

@@ -66,8 +66,8 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
             "click #missingRequiredPropertiesButton": "addRequiredProperties"
         },
         partials: [
-          "partials/mapping/properties/_IconContainerPartial.html",
-          "partials/mapping/properties/_PropertyContainerPartial.html"
+            "partials/mapping/properties/_IconContainerPartial.html",
+            "partials/mapping/properties/_PropertyContainerPartial.html"
         ],
         model: {
             availableObjects: {},
@@ -512,11 +512,11 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                     .then(function (queryFilterTree) {
                         var qfe = new QueryFilterEditor();
                         return FilterEvaluator.evaluate(
-                                qfe.transform(queryFilterTree),
-                                {
-                                    "linkQualifier": globals.linkQualifier,
-                                    "object": sampleSource
-                                }
+                            qfe.transform(queryFilterTree),
+                            {
+                                "linkQualifier": globals.linkQualifier,
+                                "object": sampleSource
+                            }
                         );
                     })
                     .then(function (filterCheck) {
@@ -550,28 +550,27 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView", [
                     });
                 } else {
                     ScriptDelegate.evalScript(sampleDetails.condition, { "linkQualifier": globals.linkQualifier, "object": sampleSource}).then(function(conditionResults) {
-                            if (sampleDetails.hasTransform && conditionResults === true) {
-                                ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {
-                                    samplePromise.resolve({
-                                        conditionResults: {
-                                            result: conditionResults
-                                        },
-                                        transformResults: transformResults
-                                    });
-                                }, function(e) {
-                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
-                                });
-                            } else {
+                        if (sampleDetails.hasTransform && conditionResults === true) {
+                            ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {
                                 samplePromise.resolve({
                                     conditionResults: {
                                         result: conditionResults
-                                    }
+                                    },
+                                    transformResults: transformResults
                                 });
-                            }
-                        },
-                        function(e) {
-                            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
-                        });
+                            }, function(e) {
+                                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                            });
+                        } else {
+                            samplePromise.resolve({
+                                conditionResults: {
+                                    result: conditionResults
+                                }
+                            });
+                        }
+                    }, function(e) {
+                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+                    });
                 }
             } else if (sampleDetails.hasTransform) {
                 ScriptDelegate.evalScript(sampleDetails.transform, globals).then(function(transformResults) {

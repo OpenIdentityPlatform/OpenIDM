@@ -166,7 +166,8 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
         changeLdapType: function(event) {
             var value = $(event.target).val();
 
-            uiUtils.jqConfirm($.t("templates.connector.ldapConnector.ldapTypeChange"), _.bind(function(){
+            uiUtils.jqConfirm($.t("templates.connector.ldapConnector.ldapTypeChange"),
+                _.bind(function(){
                     if(value === "baseConfig") {
                         this.render({
                             "animate": false,
@@ -178,19 +179,17 @@ define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPTypeView", [
                         });
                     } else {
                         ConnectorDelegate.connectorDefault(value, "ldap").then(_.bind(function (result) {
-                                this.render({
-                                    "animate": false,
-                                    "connectorDefaults": result,
-                                    "editState" : this.data.editState,
-                                    "systemType" : this.model.systemType,
-                                    "connectorType" : this.model.connectorType,
-                                    "ldapType" : value
-                                });
-                            }, this)
-                        );
+                            this.render({
+                                "animate": false,
+                                "connectorDefaults": result,
+                                "editState" : this.data.editState,
+                                "systemType" : this.model.systemType,
+                                "connectorType" : this.model.connectorType,
+                                "ldapType" : value
+                            });
+                        }, this));
                     }
                 }, this),
-
                 _.bind(function() {
                     this.$el.find("#ldapTemplateType").val(this.model.ldapType);
                 }, this), "330px");

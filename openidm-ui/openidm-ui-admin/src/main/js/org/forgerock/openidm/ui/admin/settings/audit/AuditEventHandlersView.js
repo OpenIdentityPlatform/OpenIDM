@@ -77,11 +77,10 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
                                 return event.class;
                             }),
                             usableForQueriesClasses =  _.map(_.filter(this.model.availableHandlers, function(event) {
-                                    return event.isUsableForQueries;
-                                }),
-                                function(event) {
-                                    return event.class;
-                                }),
+                                return event.isUsableForQueries;
+                            }), function(event) {
+                                return event.class;
+                            }),
                             usableForQueriesCount = 0;
 
                         _.each(allUsedClasses, function(classTest){

@@ -62,22 +62,22 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                         "subject" : "Reset password email",
                         "mimeType" : "text/html",
                         "subjectTranslations": {
-                          "en": "Reset your password",
-                          "fr": "Réinitialisez votre mot de passe"
+                            "en": "Reset your password",
+                            "fr": "Réinitialisez votre mot de passe"
                         },
                         "messageTranslations": {
-                          "en": "<h3>Click to reset your password</h3><h4><a href=\"%link%\">Password reset link</a></h4>",
-                          "fr": "<h3>Cliquez pour réinitialiser votre mot de passe</h3><h4><a href=\"%link%\">Mot de passe lien de réinitialisation</a></h4>"
+                            "en": "<h3>Click to reset your password</h3><h4><a href=\"%link%\">Password reset link</a></h4>",
+                            "fr": "<h3>Cliquez pour réinitialiser votre mot de passe</h3><h4><a href=\"%link%\">Mot de passe lien de réinitialisation</a></h4>"
                         },
                         "verificationLinkToken" : "%link%",
                         "verificationLink" : "https://localhost:8443/#passwordReset/"
                     },
                     {
-                      "name" : "kbaSecurityAnswerVerificationStage",
-                      "kbaPropertyName" : "kbaInfo",
-                      "identityServiceUrl" : "managed/user",
-                      "numberOfQuestionsUserMustAnswer" : "1",
-                      "kbaConfig" : null
+                        "name" : "kbaSecurityAnswerVerificationStage",
+                        "kbaPropertyName" : "kbaInfo",
+                        "identityServiceUrl" : "managed/user",
+                        "numberOfQuestionsUserMustAnswer" : "1",
+                        "kbaConfig" : null
                     },
                     {
                         "name" : "resetStage",
@@ -105,29 +105,25 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 help: $.t("templates.selfservice.captcha.description"),
                 editable: true,
                 enabledByDefault: false
-            },
-            {
+            }, {
                 type: "userQuery",
                 title: $.t("templates.selfservice.userQuery.name"),
                 help: $.t("templates.selfservice.userQuery.description"),
                 editable: true,
                 enabledByDefault: true
-            },
-            {
+            }, {
                 type: "emailValidation",
                 title: $.t("templates.selfservice.emailValidation"),
                 help: $.t("templates.selfservice.emailValidationDescription"),
                 editable: true,
                 enabledByDefault: true
-            },
-            {
+            }, {
                 type: "kbaSecurityAnswerVerificationStage",
                 title: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageForm"),
                 help: $.t("templates.selfservice.kbaSecurityAnswerVerificationStageFormDescription"),
                 editable: false,
                 enabledByDefault: true
-            },
-            {
+            }, {
                 type: "resetStage",
                 title: $.t("templates.selfservice.passwordResetForm"),
                 help: $.t("templates.selfservice.passwordResetFormDescription"),

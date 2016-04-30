@@ -256,7 +256,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
                 files = _.clone(this.model.files, true);
 
             if (all) {
-               formattedFileList = _.map(files, function (file) {
+                formattedFileList = _.map(files, function (file) {
                     var temp = file.filePath.split("/");
                     file.fileState = Handlebars.compile("{{> settings/_updateStatePopover}}")({
                         "desc": $.t("templates.update.preview.fileStates." + file.fileState + ".desc"),

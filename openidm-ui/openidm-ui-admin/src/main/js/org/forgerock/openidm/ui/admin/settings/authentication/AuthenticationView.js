@@ -68,21 +68,21 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationVie
 
         save: function (e) {
             var doSave = _.bind(function (reload) {
-                    this.saveAuthentication().then(function() {
-                        if (!reload) {
-                            SessionModuleView.render();
-                            AuthenticationModuleView.render({
-                                "addedOpenAM": function () {
-                                    SessionModuleView.addedOpenAM();
-                                }
-                            });
-                        } else {
-                            /*when changes are made to the OPENAM_SESSION module the page needs to be reloaded so
-                              the changes to ui-configuration.json are seen immediately*/
-                            location.reload(true);
-                        }
-                    });
-                }, this);
+                this.saveAuthentication().then(function() {
+                    if (!reload) {
+                        SessionModuleView.render();
+                        AuthenticationModuleView.render({
+                            "addedOpenAM": function () {
+                                SessionModuleView.addedOpenAM();
+                            }
+                        });
+                    } else {
+                        /*when changes are made to the OPENAM_SESSION module the page needs to be reloaded so
+                          the changes to ui-configuration.json are seen immediately*/
+                        location.reload(true);
+                    }
+                });
+            }, this);
             e.preventDefault();
             
             if(AuthenticationModuleView.model.amSettings) {
@@ -108,18 +108,16 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationVie
             if (amSettings.openamAuthEnabled) {
                 // Validate openamDeploymentUrl
                 OpenAMProxyDelegate.serverinfo(amSettings.openamDeploymentUrl).then(_.bind(function(info){
-                        if (info.cookieName) {
-                            // Set openamSSOTokenCookieName for this module
-                            AuthenticationModuleView.model.changes[amAuthIndex].properties.openamSSOTokenCookieName = info.cookieName;
-                            confirmed();
-                        } else {
-                            UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
-                        }
-                    },this),
-                    _.bind(function(){
+                    if (info.cookieName) {
+                        // Set openamSSOTokenCookieName for this module
+                        AuthenticationModuleView.model.changes[amAuthIndex].properties.openamSSOTokenCookieName = info.cookieName;
+                        confirmed();
+                    } else {
                         UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
-                    },this)
-                );
+                    }
+                },this), _.bind(function(){
+                    UIUtils.jqConfirm($.t("templates.auth.openamDeploymentUrlConfirmation"), confirmed);
+                },this));
             } else {
                 confirmed();
             }

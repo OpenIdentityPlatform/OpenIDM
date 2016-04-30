@@ -130,15 +130,14 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
             obj.configPromise = ConfigDelegate.readEntity("ui/iconlist");
 
             obj.configPromise.then(function (result) {
-                    obj.configPromise = null;
-                    obj.iconPromise.resolve(result.icons);
-                },
-                _.bind(function () {
-                    obj.configPromise = null;
-                    obj.iconPromise.resolve(this.iconListDefaults.icons);
+                obj.configPromise = null;
+                obj.iconPromise.resolve(result.icons);
+            }, _.bind(function () {
+                obj.configPromise = null;
+                obj.iconPromise.resolve(this.iconListDefaults.icons);
 
-                    ConfigDelegate.createEntity("ui/iconlist", obj.iconListDefaults);
-                }, this));
+                ConfigDelegate.createEntity("ui/iconlist", obj.iconListDefaults);
+            }, this));
         }
 
         return obj.iconPromise;

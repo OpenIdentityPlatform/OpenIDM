@@ -227,7 +227,8 @@ define("org/forgerock/openidm/ui/admin/managed/ManagedListView", [
 
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.currentManagedObjects}));
 
-                $.when.apply($, promises).then(function(){
+                $.when.apply($, promises).then(
+                    function(){
                         selectedItem.remove();
                         alternateItem.remove();
 

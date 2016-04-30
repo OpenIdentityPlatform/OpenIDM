@@ -61,7 +61,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget", [
                                 callback();
                             }
                         }, this));
-                }, this));
+                    }, this));
             }
         });
 

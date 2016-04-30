@@ -88,19 +88,19 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     };
     obj.deleteResource = function (serviceUrl, id, successCallback, errorCallback) {
         var callParams = {
-                serviceUrl: serviceUrl, url: "/" + id,
-                type: "DELETE",
-                success: successCallback,
-                error: errorCallback,
-                errorsHandlers: {
-                    "Conflict": {
-                        status: 409
-                    }
-                },
-                headers: {
-                    "If-Match": "*"
+            serviceUrl: serviceUrl, url: "/" + id,
+            type: "DELETE",
+            success: successCallback,
+            error: errorCallback,
+            errorsHandlers: {
+                "Conflict": {
+                    status: 409
                 }
-            };
+            },
+            headers: {
+                "If-Match": "*"
+            }
+        };
 
         return obj.serviceCall(callParams).fail(function(err){
             var response = err.responseJSON;

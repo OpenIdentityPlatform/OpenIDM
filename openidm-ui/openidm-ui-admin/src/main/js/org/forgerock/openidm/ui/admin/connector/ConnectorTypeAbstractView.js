@@ -35,7 +35,8 @@ define("org/forgerock/openidm/ui/admin/connector/ConnectorTypeAbstractView", [
 
             this.data.connectorDefaults = args.connectorDefaults;
 
-            ConnectorDelegate.templateCheck(args.connectorType).then(_.bind(function(data){
+            ConnectorDelegate.templateCheck(args.connectorType).then(
+                _.bind(function(data){
                     this.template = base + args.connectorType +".html";
 
                     UIUtils.templates[constants.host + "templates/admin/connector/" +args.connectorType +".html"] = data;

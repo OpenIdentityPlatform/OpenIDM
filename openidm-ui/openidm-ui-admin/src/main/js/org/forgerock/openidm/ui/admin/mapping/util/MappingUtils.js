@@ -15,100 +15,99 @@
  */
 
 define("org/forgerock/openidm/ui/admin/mapping/util/MappingUtils", [
-        "jquery",
-        "underscore",
-        "handlebars",
-        "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
-        "selectize"
-    ],
-    function($, _,
+    "jquery",
+    "underscore",
+    "handlebars",
+    "org/forgerock/openidm/ui/common/delegates/SearchDelegate",
+    "selectize"
+], function($, _,
              Handlebars,
              searchDelegate,
              selectize) {
 
-        var obj = {};
+    var obj = {};
 
-        obj.buildObjectRepresentation = function(objToRep, props){
-            var propVals = [];
+    obj.buildObjectRepresentation = function(objToRep, props){
+        var propVals = [];
 
-            _.each(props, _.bind(function(prop, i){
-                var objRepEl = $("<span>"),
-                    wrapper = $("<div>");
-                if(objToRep[prop]){
-                    objRepEl.text(Handlebars.Utils.escapeExpression(objToRep[prop])).attr("title", prop);
-                }
-                if(i === 0){
-                    objRepEl.addClass("objectRepresentationHeader");
-                } else {
-                    objRepEl.addClass("objectRepresentation");
-                }
-                wrapper.append(objRepEl);
-                propVals.push(wrapper.html());
-            }, this));
+        _.each(props, _.bind(function(prop, i){
+            var objRepEl = $("<span>"),
+                wrapper = $("<div>");
+            if(objToRep[prop]){
+                objRepEl.text(Handlebars.Utils.escapeExpression(objToRep[prop])).attr("title", prop);
+            }
+            if(i === 0){
+                objRepEl.addClass("objectRepresentationHeader");
+            } else {
+                objRepEl.addClass("objectRepresentation");
+            }
+            wrapper.append(objRepEl);
+            propVals.push(wrapper.html());
+        }, this));
 
-            return propVals.join("<br/>");
-        };
+        return propVals.join("<br/>");
+    };
 
-        obj.setupSampleSearch = function(el, mapping, autocompleteProps, selectSuccessCallback){
-            var searchList,
-                selectedItem;
+    obj.setupSampleSearch = function(el, mapping, autocompleteProps, selectSuccessCallback){
+        var searchList,
+            selectedItem;
 
-            el.selectize({
-                valueField: autocompleteProps[0],
-                searchField: autocompleteProps,
-                maxOptions: 10,
-                create: false,
-                onChange: function() {
-                    selectSuccessCallback(selectedItem);
-                },
-                render: {
-                    option: function(item, selectizeEscape) {
-                        var fields = _.pick(item, autocompleteProps),
-                            element = $('<div class="fr-search-option"></div>'),
-                            counter = 0;
+        el.selectize({
+            valueField: autocompleteProps[0],
+            searchField: autocompleteProps,
+            maxOptions: 10,
+            create: false,
+            onChange: function() {
+                selectSuccessCallback(selectedItem);
+            },
+            render: {
+                option: function(item, selectizeEscape) {
+                    var fields = _.pick(item, autocompleteProps),
+                        element = $('<div class="fr-search-option"></div>'),
+                        counter = 0;
 
-                        _.forIn(fields, function(value, key) {
-                            if(counter === 0) {
-                                $(element).append('<div class="fr-search-primary">' +selectizeEscape(value) +'</div>');
-                            } else {
-                                $(element).append('<div class="fr-search-secondary text-muted">' +selectizeEscape(value) +'</div>');
-                            }
-
-                            counter++;
-                        }, this);
-
-                        return element.prop('outerHTML');
-                    },
-                    item: function(item, escape) {
-                        selectedItem = item;
-
-                        return "<div>" +escape(item[autocompleteProps[0]]) +"</div>";
-                    }
-                },
-                load: function(query, callback) {
-                    if (!query.length || query.length < 2 || !autocompleteProps.length) {
-                        return callback();
-                    }
-
-                    searchDelegate.searchResults(mapping.source, autocompleteProps, query).then(function(response) {
-                        if(response) {
-                            searchList = response;
-                            callback([response]);
+                    _.forIn(fields, function(value, key) {
+                        if(counter === 0) {
+                            $(element).append('<div class="fr-search-primary">' +selectizeEscape(value) +'</div>');
                         } else {
-                            searchList = [];
-
-                            callback();
+                            $(element).append('<div class="fr-search-secondary text-muted">' +selectizeEscape(value) +'</div>');
                         }
-                    });
+
+                        counter++;
+                    }, this);
+
+                    return element.prop('outerHTML');
+                },
+                item: function(item, escape) {
+                    selectedItem = item;
+
+                    return "<div>" +escape(item[autocompleteProps[0]]) +"</div>";
                 }
-            });
-        };
+            },
+            load: function(query, callback) {
+                if (!query.length || query.length < 2 || !autocompleteProps.length) {
+                    return callback();
+                }
 
-        obj.readOnlySituationalPolicy = function(policies){
-            return _.reduce(policies, function(memo, val){
-                return memo && val.action === "ASYNC";
-            }, true);
-        };
+                searchDelegate.searchResults(mapping.source, autocompleteProps, query).then(function(response) {
+                    if(response) {
+                        searchList = response;
+                        callback([response]);
+                    } else {
+                        searchList = [];
 
-        return obj;
-    });
+                        callback();
+                    }
+                });
+            }
+        });
+    };
+
+    obj.readOnlySituationalPolicy = function(policies){
+        return _.reduce(policies, function(memo, val){
+            return memo && val.action === "ASYNC";
+        }, true);
+    };
+
+    return obj;
+});

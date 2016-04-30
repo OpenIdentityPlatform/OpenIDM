@@ -191,17 +191,15 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
 
             _.each(relationshipProp.properties._refProperties.properties, _.bind(function(col,colName){
                 if(colName !== "_id"){
-                    cols.push(
-                            {
-                                "name": "/_refProperties/" + colName,
-                                "label": col.title || col.label || colName,
-                                "headerCell": BackgridUtils.FilterHeaderCell,
-                                "cell": "string",
-                                "sortable": true,
-                                "editable": false,
-                                "sortType": "toggle"
-                            }
-                    );
+                    cols.push({
+                        "name": "/_refProperties/" + colName,
+                        "label": col.title || col.label || colName,
+                        "headerCell": BackgridUtils.FilterHeaderCell,
+                        "cell": "string",
+                        "sortable": true,
+                        "editable": false,
+                        "sortType": "toggle"
+                    });
                 }
             }, this));
 
@@ -365,10 +363,10 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
                 type: "POST",
                 data: JSON.stringify(newVal),
                 errorsHandlers : {
-                        "error": {
-                            status: "400"
-                        }
-                    },
+                    "error": {
+                        status: "400"
+                    }
+                },
                 error: function (e) {
                     if (e.status === 400 && e.responseJSON.message.indexOf("conflict with existing") > -1) {
                         messagesManager.messages.addMessage({ "type": "error", "message": $.t("templates.admin.ResourceEdit.conflictWithExistingRelationship") });
@@ -381,10 +379,10 @@ define("org/forgerock/openidm/ui/common/resource/RelationshipArrayView", [
         openResourceCollectionDialog: function (propertyValue) {
             var _this = this,
                 opts = {
-                property: _this.data.prop,
-                propertyValue: propertyValue,
-                schema: _this.schema
-            };
+                    property: _this.data.prop,
+                    propertyValue: propertyValue,
+                    schema: _this.schema
+                };
 
             if (!propertyValue) {
                 opts.onChange = function (value, newText) {

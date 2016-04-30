@@ -22,7 +22,9 @@ define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/Corr
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor"
 ], function($, _, Handlebars, AdminAbstractView, InlineScriptEditor) {
 
-    var CorrelationQueryBuilderView = AdminAbstractView.extend({
+    var CorrelationQueryBuilderView, expressionClosure;
+    
+    CorrelationQueryBuilderView = AdminAbstractView.extend({
         template: "templates/admin/mapping/association/correlationQuery/CorrelationQueryBuilderTemplate.html",
         element: "#correlationQueryBuilderView",
         noBaseTemplate: true,
@@ -343,7 +345,7 @@ define("org/forgerock/openidm/ui/admin/mapping/association/correlationQuery/Corr
 
             this.renderExpressionTree();
         }
-    }), expressionClosure;
+    });
 
     Handlebars.registerHelper("expressionDisplay", function (rules, fieldNames, options) {
         var returnVal = '';

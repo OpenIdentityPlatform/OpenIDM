@@ -146,9 +146,8 @@ define("org/forgerock/openidm/ui/common/util/PolicyValidatorsManager", [
                         // this function is returned from the backend (as part of an administrative specification) so
                         // it should be safe to evaluate.
                         policyFunction = eval("(" + policyFunctionObject.policyFunction + ")"); // eslint-disable-line no-eval
-                        failures = policyFunction.call({
-                                failedPolicyRequirements: []
-                            },
+                        failures = policyFunction.call(
+                            { failedPolicyRequirements: [] },
                             form2js(container[0], '.', true, _.curry(obj.nodeCallbackHandler)(container.hasClass("jsonEditor"))),
                             nodeMap.value,
                             element.data("validatorParams-" + policyFunctionObject.policyId) || {},

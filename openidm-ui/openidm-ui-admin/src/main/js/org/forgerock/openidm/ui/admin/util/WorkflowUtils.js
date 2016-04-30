@@ -78,12 +78,10 @@ define("org/forgerock/openidm/ui/admin/util/WorkflowUtils", [
                             }
 
                             ResourceDelegate.searchResource(queryFilter, "managed/user").then(function (search) {
-                                    callback(search.result);
-                                },
-                                function() {
-                                    callback();
-                                }
-                            );
+                                callback(search.result);
+                            }, function() {
+                                callback();
+                            });
                         }, this)
 
                     });
@@ -127,14 +125,14 @@ define("org/forgerock/openidm/ui/admin/util/WorkflowUtils", [
          */
         obj.assignTask = function(model, id, label, successCallback) {
             var assignNow = function () {
-                    model.set("assignee",id);
+                model.set("assignee",id);
 
-                    if (id === "noUserAssigned") {
-                        model.set("assignee",null);
-                    }
+                if (id === "noUserAssigned") {
+                    model.set("assignee",null);
+                }
 
-                    model.save().then(successCallback);
-                };
+                model.save().then(successCallback);
+            };
 
             /*
              * before changing assignee alert the "assigner" that the user

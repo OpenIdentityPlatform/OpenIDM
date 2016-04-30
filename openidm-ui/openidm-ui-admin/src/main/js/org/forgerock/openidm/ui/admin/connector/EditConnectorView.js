@@ -343,7 +343,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             event.preventDefault();
 
             UIUtils.confirmDialog($.t("templates.connector.connectorDelete"), "danger", _.bind(function(){
-                ConfigDelegate.deleteEntity(this.data.systemType +"/" +this.data.connectorId).then(function(){
+                ConfigDelegate.deleteEntity(this.data.systemType +"/" +this.data.connectorId).then(
+                    function(){
                         ConnectorDelegate.deleteCurrentConnectorsCache();
 
                         eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorListView});
@@ -353,7 +354,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                     function(){
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteConnectorFail");
                     });
-            } , this));
+            }, this));
         },
 
         advancedFormSubmit: function(event) {
@@ -893,7 +894,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                 if(value === "fullConfig") {
                     this.connectorDetails.configurationProperties.readSchema = true;
 
-                    ConnectorDelegate.testConnector(this.connectorDetails).then(_.bind(function (result) {
+                    ConnectorDelegate.testConnector(this.connectorDetails).then(
+                        _.bind(function (result) {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeLoaded");
 
                             this.renderObjectTypes(result.objectTypes);
@@ -906,7 +908,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                         this.renderObjectTypes(this.previousObjectType);
                     }
                 } else {
-                    ConnectorDelegate.connectorDefault(value, type).then(_.bind(function (result) {
+                    ConnectorDelegate.connectorDefault(value, type).then(
+                        _.bind(function (result) {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeLoaded");
 
                             this.renderObjectTypes(result.objectTypes);

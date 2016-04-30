@@ -179,12 +179,10 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessHistoryView", [
                         }
 
                         ResourceDelegate.searchResource(queryFilter, "managed/user").then(function(search) {
-                                callback(search.result);
-                            },
-                            function(){
-                                callback();
-                            }
-                        );
+                            callback(search.result);
+                        }, function(){
+                            callback();
+                        });
 
                     }, this)
                 });

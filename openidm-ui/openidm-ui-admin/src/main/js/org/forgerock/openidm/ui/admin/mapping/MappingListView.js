@@ -216,11 +216,11 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingListView", [
                                     cell: Backgrid.Cell.extend({
                                         render: function () {
                                             var display = handlebars.compile("{{> mapping/list/_sourceTargetGridCellDisplay}}")({
-                                                    linkUrl: this.model.attributes.sourceConnector.url,
-                                                    icon: this.model.attributes.sourceIcon,
-                                                    displayName: this.model.attributes.sourceConnector.displayName
-                                                });
-                                                
+                                                linkUrl: this.model.attributes.sourceConnector.url,
+                                                icon: this.model.attributes.sourceIcon,
+                                                displayName: this.model.attributes.sourceConnector.displayName
+                                            });
+
                                             this.$el.html(display);
 
                                             return this;

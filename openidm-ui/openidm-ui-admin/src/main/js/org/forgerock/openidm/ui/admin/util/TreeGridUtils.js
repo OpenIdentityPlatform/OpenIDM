@@ -93,11 +93,11 @@ define("org/forgerock/openidm/ui/admin/util/TreeGridUtils", [
         _.each(data, function (obj) {
 
             if (_.startsWith(obj.filePath, "/")) {
-              obj.filePath = obj.filePath.slice(1);
+                obj.filePath = obj.filePath.slice(1);
             }
 
             if (_.endsWith(obj.filePath, "/")) {
-              obj.filePath = obj.filePath.slice(0, -1);
+                obj.filePath = obj.filePath.slice(0, -1);
             }
 
 

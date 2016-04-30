@@ -81,27 +81,27 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", 
             .then(function(logData) {
                 this.model.response.files = logData.files;
 
-                    UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(_.bind(function() {
-                        this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(), ["filePath", "actionTaken"]);
+                UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(_.bind(function() {
+                    this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(), ["filePath", "actionTaken"]);
 
-                        if (this.model.response) {
-                            this.data.responseB64 = window.btoa(JSON.stringify(this.model.response));
+                    if (this.model.response) {
+                        this.data.responseB64 = window.btoa(JSON.stringify(this.model.response));
+                    }
+
+                    this.parentRender(_.bind(function() {
+                        SpinnerManager.hideSpinner();
+
+                        this.$el.find('[data-toggle="popover"]').popover({
+                            placement: 'top',
+                            container: 'body',
+                            title: ''
+                        });
+
+                        if (callback) {
+                            callback();
                         }
-
-                        this.parentRender(_.bind(function() {
-                            SpinnerManager.hideSpinner();
-
-                            this.$el.find('[data-toggle="popover"]').popover({
-                                placement: 'top',
-                                container: 'body',
-                                title: ''
-                            });
-
-                            if (callback) {
-                                callback();
-                            }
-                        }, this));
                     }, this));
+                }, this));
 
             }.bind(this));
 
@@ -164,27 +164,27 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", 
             var formattedFileList,
                 files = _.clone(this.model.response.files, true);
 
-                formattedFileList = _.map(files, function (file) {
-                    var temp = file.filePath.split("/");
-                    file.actionTaken = Handlebars.compile("{{> settings/_updateStatePopover}}")({
-                        "desc": $.t("templates.update.review.actionTaken." + file.actionTaken + ".desc"),
-                        "name": $.t("templates.update.review.actionTaken." + file.actionTaken + ".reportName")
-                    });
-                    file.fileName = _.last(temp);
-                    file.partialFilePath = _.take(temp, temp.length - 1).join("");
-                    return file;
+            formattedFileList = _.map(files, function (file) {
+                var temp = file.filePath.split("/");
+                file.actionTaken = Handlebars.compile("{{> settings/_updateStatePopover}}")({
+                    "desc": $.t("templates.update.review.actionTaken." + file.actionTaken + ".desc"),
+                    "name": $.t("templates.update.review.actionTaken." + file.actionTaken + ".reportName")
                 });
+                file.fileName = _.last(temp);
+                file.partialFilePath = _.take(temp, temp.length - 1).join("");
+                return file;
+            });
 
-                return _.sortByAll(formattedFileList, [
-                    function(i) {
-                        if (i.partialFilePath.length > 0) {
-                            return i.partialFilePath.toLowerCase();
-                        } else {
-                            return false;
-                        }
-                    },
-                    function(i) { return i.fileName.toLowerCase();}
-                ]);
+            return _.sortByAll(formattedFileList, [
+                function(i) {
+                    if (i.partialFilePath.length > 0) {
+                        return i.partialFilePath.toLowerCase();
+                    } else {
+                        return false;
+                    }
+                },
+                function(i) { return i.fileName.toLowerCase();}
+            ]);
 
         }
     });

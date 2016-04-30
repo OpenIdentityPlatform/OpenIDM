@@ -112,34 +112,34 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
                                 }
     
                                 this.editors[selection] = new JSONEditor(
-                                        this.$el.find("#linkedViewContent")[0],
-                                        {
-                                            theme: "bootstrap3",
-                                            iconlib: "fontawesome4",
-                                            disable_edit_json: true,
-                                            disable_properties: true,
-                                            disable_array_delete: true,
-                                            disable_array_reorder: true,
-                                            disable_array_add: true,
-                                            schema: schema,
-                                            horizontalForm: true
-                                        }
-                                    );
-    
-                                    if (this.data.linkedData.linkedTo[selection].content._id) {
-                                        delete this.data.linkedData.linkedTo[selection].content._id;
+                                    this.$el.find("#linkedViewContent")[0],
+                                    {
+                                        theme: "bootstrap3",
+                                        iconlib: "fontawesome4",
+                                        disable_edit_json: true,
+                                        disable_properties: true,
+                                        disable_array_delete: true,
+                                        disable_array_reorder: true,
+                                        disable_array_add: true,
+                                        schema: schema,
+                                        horizontalForm: true
                                     }
-                                    
-                                    _.each(this.data.linkedData.linkedTo[selection].content, function(value, key) {
-                                        if(_.isArray(value) && value.length === 0) {
-                                            this.data.linkedData.linkedTo[selection].content[key] = undefined;
-                                        }
-                                    }, this);
+                                );
     
-                                    this.editors[selection].setValue(this.data.linkedData.linkedTo[selection].content);
-    
-                                    this.$el.find(".row select").hide();
-                                    this.$el.find(".row input").attr("disabled", true);
+                                if (this.data.linkedData.linkedTo[selection].content._id) {
+                                    delete this.data.linkedData.linkedTo[selection].content._id;
+                                }
+
+                                _.each(this.data.linkedData.linkedTo[selection].content, function(value, key) {
+                                    if(_.isArray(value) && value.length === 0) {
+                                        this.data.linkedData.linkedTo[selection].content[key] = undefined;
+                                    }
+                                }, this);
+
+                                this.editors[selection].setValue(this.data.linkedData.linkedTo[selection].content);
+
+                                this.$el.find(".row select").hide();
+                                this.$el.find(".row input").attr("disabled", true);
                             }, this));
                         } else {
                             this.$el.find("#linkedViewContent").text($.t("templates.admin.LinkedTemplate.recordMissing") + ': ' + this.data.linkedData.linkedTo[selection].resourceName);

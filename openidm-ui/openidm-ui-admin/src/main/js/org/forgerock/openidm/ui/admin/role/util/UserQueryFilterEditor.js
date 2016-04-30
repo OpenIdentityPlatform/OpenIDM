@@ -61,30 +61,30 @@ define("org/forgerock/openidm/ui/admin/role/util/UserQueryFilterEditor", [
             };
 
             ResourceDelegate.getSchema(["managed","user"]).then(_.bind(function(userSchema) {
-              this.model.sourceProps = _.keys(userSchema.properties);
+                this.model.sourceProps = _.keys(userSchema.properties);
 
-              this.data.filterString = args.queryFilter;
+                this.data.filterString = args.queryFilter;
 
-              if (this.data.filterString !== "") {
-                  ScriptDelegate.parseQueryFilter(this.data.filterString).then(_.bind(function (queryFilterTree) {
-                      this.data.queryFilterTree = queryFilterTree;
-                      this.data.filter = this.transform(this.data.queryFilterTree);
-                      this.delegateEvents(this.events);
-                      this.renderExpressionTree(_.bind(function() {
-                          this.changeToDropdown();
-                      }, this));
-                  }, this));
-              } else {
-                  this.data.filter = { "op": "none", "children": []};
-                  this.delegateEvents(this.events);
-                  this.renderExpressionTree(_.bind(function() {
-                      this.changeToDropdown();
-                  }, this));
-              }
+                if (this.data.filterString !== "") {
+                    ScriptDelegate.parseQueryFilter(this.data.filterString).then(_.bind(function (queryFilterTree) {
+                        this.data.queryFilterTree = queryFilterTree;
+                        this.data.filter = this.transform(this.data.queryFilterTree);
+                        this.delegateEvents(this.events);
+                        this.renderExpressionTree(_.bind(function() {
+                            this.changeToDropdown();
+                        }, this));
+                    }, this));
+                } else {
+                    this.data.filter = { "op": "none", "children": []};
+                    this.delegateEvents(this.events);
+                    this.renderExpressionTree(_.bind(function() {
+                        this.changeToDropdown();
+                    }, this));
+                }
 
-              if (callback) {
-                  callback();
-              }
+                if (callback) {
+                    callback();
+                }
             },this));
         },
         removeFilterNode: function(event) {
