@@ -14,9 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-/*global define */
-
-define("org/forgerock/openidm/ui/admin/role/MembersView", [
+define([
     "jquery",
     "lodash",
     "handlebars",

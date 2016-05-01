@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/mapping/association/ReconciliationQueryFiltersView", [
+define([
     "underscore",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",

@@ -14,7 +14,7 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-define("config/process/CommonIDMConfig", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/common/util/Constants",

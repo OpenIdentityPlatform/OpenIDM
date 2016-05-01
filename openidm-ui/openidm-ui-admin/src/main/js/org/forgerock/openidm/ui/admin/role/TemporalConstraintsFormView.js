@@ -14,9 +14,7 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/*global define */
-
-define("org/forgerock/openidm/ui/admin/role/TemporalConstraintsFormView", [
+define([
     "jquery",
     "lodash",
     "handlebars",

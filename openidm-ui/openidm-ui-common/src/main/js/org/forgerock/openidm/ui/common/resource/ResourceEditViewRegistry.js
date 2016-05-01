@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry", [
+define([
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/util/ModuleLoader"

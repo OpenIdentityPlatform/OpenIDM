@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsView", [
+define([
     "underscore",
     "form2js",
     "org/forgerock/commons/ui/common/util/ModuleLoader",

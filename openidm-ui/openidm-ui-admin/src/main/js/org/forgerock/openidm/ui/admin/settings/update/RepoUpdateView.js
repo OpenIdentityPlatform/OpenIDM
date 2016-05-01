@@ -14,7 +14,7 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/settings/update/RepoUpdateView", [
+define([
     "jquery",
     "underscore",
     "handlebars",

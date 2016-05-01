@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("config/validators/SelfServiceValidators", [
+define([
     "jquery"
 ], function($) {
     var obj = {

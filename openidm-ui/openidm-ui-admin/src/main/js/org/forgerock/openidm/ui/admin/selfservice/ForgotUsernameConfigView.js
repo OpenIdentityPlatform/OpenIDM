@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/selfservice/ForgotUsernameConfigView", [
+define([
     "jquery",
     "org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView"
 ], function($, AbstractSelfServiceView) {

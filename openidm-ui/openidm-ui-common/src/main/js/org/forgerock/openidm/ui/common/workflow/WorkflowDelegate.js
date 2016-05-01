@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/workflow/WorkflowDelegate", [
+define([
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/ServiceInvoker"

@@ -14,7 +14,7 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"

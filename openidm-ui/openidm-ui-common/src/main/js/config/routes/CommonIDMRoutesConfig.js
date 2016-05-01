@@ -14,7 +14,7 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-define("config/routes/CommonIDMRoutesConfig", [
+define([
 ], function() {
 
     var obj = {

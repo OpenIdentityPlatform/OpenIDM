@@ -14,7 +14,7 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog", [
+define([
     "jquery",
     "underscore",
     "form2js",

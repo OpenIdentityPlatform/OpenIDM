@@ -14,7 +14,7 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget", [
+define([
     "jquery",
     "underscore",
     "dimple",

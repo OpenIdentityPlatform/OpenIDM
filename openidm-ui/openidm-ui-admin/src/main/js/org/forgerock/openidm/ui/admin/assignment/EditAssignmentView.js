@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/assignment/EditAssignmentView", [
+define([
     "jquery",
     "underscore",
     "handlebars",

@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/util/WorkflowUtils", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/UIUtils",

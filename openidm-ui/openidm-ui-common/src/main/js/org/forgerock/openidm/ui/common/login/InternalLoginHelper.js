@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/login/InternalLoginHelper", [
+define([
     "underscore",
     "org/forgerock/openidm/ui/common/UserModel",
     "org/forgerock/commons/ui/common/main/EventManager",

@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
+define([
     "jquery",
     "underscore",
     "bootstrap",

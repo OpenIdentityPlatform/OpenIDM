@@ -14,7 +14,7 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/MapResourceView", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",
