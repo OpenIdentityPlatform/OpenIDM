@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/util/BackgridUtils", [
+define([
     "underscore",
     "backbone",
     "org/forgerock/commons/ui/common/backgrid/Backgrid",

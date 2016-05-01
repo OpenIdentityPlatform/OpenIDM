@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/notifications/NotificationsView", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView",

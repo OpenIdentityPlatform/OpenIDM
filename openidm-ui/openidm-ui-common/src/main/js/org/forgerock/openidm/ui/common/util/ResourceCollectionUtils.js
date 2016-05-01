@@ -16,7 +16,7 @@
 
 /* eslint no-eval: 0 */
 
-define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
+define([
     "jquery",
     "underscore",
     "handlebars",

@@ -14,7 +14,7 @@
  * Copyright 2014-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/connector/ldap/LDAPFilterDialog", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/admin/util/FilterEditor",

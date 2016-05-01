@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/components/Footer", [
+define([
     "jquery",
     "lodash",
     "org/forgerock/commons/ui/common/components/Footer",

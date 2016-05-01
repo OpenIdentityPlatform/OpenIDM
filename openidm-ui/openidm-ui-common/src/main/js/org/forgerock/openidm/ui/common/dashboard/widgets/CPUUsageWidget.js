@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
+define([
     "jquery",
     "underscore",
     "dimple",

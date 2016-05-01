@@ -14,7 +14,7 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils", [
+define([
     "jquery",
     "underscore",
     "handlebars",

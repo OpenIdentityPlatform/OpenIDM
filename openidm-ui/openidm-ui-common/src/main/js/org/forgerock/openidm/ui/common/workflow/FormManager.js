@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/workflow/FormManager", [
+define([
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware"
 ], function(AbstractConfigurationAware, eventManager) {
     var obj = new AbstractConfigurationAware();

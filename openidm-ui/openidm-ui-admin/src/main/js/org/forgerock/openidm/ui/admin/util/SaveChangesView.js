@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/util/SaveChangesView", [
+define([
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractView"
 ], function(_, AbstractView) {

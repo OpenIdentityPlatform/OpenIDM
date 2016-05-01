@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/mapping/util/MappingUtils", [
+define([
     "jquery",
     "underscore",
     "handlebars",

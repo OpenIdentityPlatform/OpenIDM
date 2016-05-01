@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/workflow/processes/customview/SendNotificationProcess", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/openidm/ui/common/workflow/processes/AbstractProcessForm",

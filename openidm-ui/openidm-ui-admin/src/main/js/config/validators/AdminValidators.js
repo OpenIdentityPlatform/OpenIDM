@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("config/validators/AdminValidators", [
+define([
     "jquery",
     "underscore"
 ], function ($, _) {

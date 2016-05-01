@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/workflow/TaskInstanceView", [
+define([
     "jquery",
     "underscore",
     "handlebars",

@@ -14,7 +14,7 @@
  * Copyright 2015-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/admin/mapping/behaviors/SituationalEventScriptsView", [
+define([
     "org/forgerock/openidm/ui/admin/mapping/util/MappingScriptsView"
 ], function(MappingScriptsView) {
     var SituationalEventScriptsView = MappingScriptsView.extend({

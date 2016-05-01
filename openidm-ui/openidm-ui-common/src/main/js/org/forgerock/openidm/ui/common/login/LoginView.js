@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/login/LoginView", [
+define([
     "underscore",
     "org/forgerock/commons/ui/common/LoginView",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"

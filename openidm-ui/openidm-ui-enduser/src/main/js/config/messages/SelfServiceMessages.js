@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("config/messages/SelfServiceMessages", [
+define([
 ], function() {
 
     var obj = {

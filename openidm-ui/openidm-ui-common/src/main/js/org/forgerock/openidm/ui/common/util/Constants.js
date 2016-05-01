@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/util/Constants", [
+define([
     "org/forgerock/commons/ui/common/util/Constants"
 ], function (commonConstants) {
     commonConstants.context = "openidm";

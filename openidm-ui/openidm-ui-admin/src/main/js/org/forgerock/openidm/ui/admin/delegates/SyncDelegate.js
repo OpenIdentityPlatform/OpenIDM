@@ -16,7 +16,7 @@
 
 /* eslint no-eval: 0 */
 
-define("org/forgerock/openidm/ui/admin/delegates/SyncDelegate", [
+define([
     "jquery",
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",

@@ -14,7 +14,7 @@
  * Copyright 2011-2016 ForgeRock AS.
  */
 
-define("org/forgerock/openidm/ui/common/util/FormGenerationUtils", [
+define([
     "jquery",
     "org/forgerock/commons/ui/common/util/DateUtil"
 ], function ($,
