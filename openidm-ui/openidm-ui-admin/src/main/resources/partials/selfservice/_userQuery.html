@@ -1,14 +1,8 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form id="configDialogForm" class="form-horizontal">
-    <div class="form-group">
-        <label class="col-sm-3 control-label">{{t "templates.selfservice.userQuery.validQueryFields"}}</label>
-        <div class="col-sm-6">
-            <input type="text" class="form-control array-selection" data-formName="validQueryFields" value="{{validQueryFields}}">
-        </div>
-    </div>
-
-    {{> form/_basicInput value=identityIdField label="templates.selfservice.userQuery.identityIdField" property="identityIdField" noValidation="true" }}
-    {{> form/_basicInput value=identityEmailField label="templates.selfservice.userQuery.identityEmailField" property="identityEmailField" noValidation="true"}}
-    {{> form/_basicInput value=identityServiceUrl label="templates.selfservice.userQuery.identityServiceUrl" property="identityServiceUrl" noValidation="true"}}
+    {{> form/_tagSelectize value=validQueryFields label="templates.selfservice.userQuery.validQueryFields" property="validQueryFields" options=identityServiceProperties}}
+    {{> form/_basicSelectize value=identityIdField label="templates.selfservice.userQuery.identityIdField" property="identityIdField" options=identityServiceProperties}}
+    {{> form/_basicSelectize value=identityEmailField label="templates.selfservice.userQuery.identityEmailField" property="identityEmailField" options=identityServiceProperties}}
+    {{> form/_basicSelectize value=identityUsernameField label="templates.selfservice.userQuery.identityUsernameField" property="identityUsernameField" options=identityServiceProperties}}
 </form>

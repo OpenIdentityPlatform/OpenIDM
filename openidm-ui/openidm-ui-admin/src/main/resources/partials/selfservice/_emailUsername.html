@@ -1,8 +1,23 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form id="configDialogForm" class="form-horizontal">
     {{> form/_basicInput value=from label="templates.selfservice.emailUsername.emailFrom" property="from" noValidation="true"}}
-    {{> form/_basicInput value=mimeType label="templates.selfservice.emailUsername.mimeType" property="mimeType" noValidation="true"}}
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="select-mimeType">{{t "templates.selfservice.emailUsername.mimeType"}}</label>
+        <div class="col-sm-6">
+
+            <select id="select-mimeType"
+                    class="form-control basic-selectize-field"
+                    name="mimeType">
+                {{#singleSelect mimeType}}
+                    <option value="text/html">text/html</option>
+                    <option value="text/plain">text/plain</option>
+                {{/singleSelect}}
+            </select>
+        </div>
+    </div>
+
     {{> form/_basicInput value=usernameToken label="templates.selfservice.emailUsername.usernameToken" property="usernameToken" noValidation="true"}}
 
 

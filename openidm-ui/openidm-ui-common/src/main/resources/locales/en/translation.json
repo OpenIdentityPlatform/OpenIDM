@@ -536,7 +536,9 @@
 
             "options" : "Options",
             "advanced" : "Advanced",
-
+            "steps": "Steps",
+            "users": "Users",
+            "idenitityService": "Identity Resource",
             "registrationSteps" : "Registration Steps",
             "passwordSteps" : "Password Reset Steps",
             "usernameSteps" : "Forgotten Username Steps",
@@ -549,8 +551,8 @@
             "userDetailsHelp" : "Configure where user detail is collected",
             "kbaSecurityAnswerVerificationStageForm": "KBA Stage",
             "kbaSecurityAnswerVerificationStageFormDescription": "Questions used during password reset",
-            "registrationForm" : "Registration Form",
-            "registrationFormDescription" : "Configure user registration form",
+            "registrationForm" : "Save Registration Form",
+            "registrationFormDescription" : "",
             "passwordResetForm" : "Password Reset Form",
             "passwordResetFormDescription" : "Configure password reset form",
             "stateless" : "Stateless",
@@ -610,7 +612,9 @@
                 "identityEmailField" : "Identity Email Field",
                 "identityEmailFieldHelp" : "",
                 "identityServiceUrl"  : "Identity Service URL",
-                "identityServiceUrlHelp" : ""
+                "identityServiceUrlHelp" : "",
+                "identityUsernameField": "Identity Username Field",
+                "identityUsernameFieldHelp": ""
             },
             "selfRegistration" : {
                 "identityServiceUrl"  : "Identity Service URL",
@@ -620,7 +624,7 @@
                 "emailServiceUrl" : "Email Service URL",
                 "emailServiceUrlHelp" : "",
                 "emailFrom" : "Email From",
-                "mimeType" : "Mime Type (text/html or text/plain)",
+                "mimeType" : "Mime Type",
                 "emailSubject" : "Email Subject",
                 "emailMessage" : "Email Message",
                 "emailMessageHelp" : "",
@@ -642,7 +646,7 @@
                 "name" : "Email Username",
                 "description" : "Send the user an email containing their username",
                 "emailFrom" : "Email From",
-                "mimeType" : "Mime Type (text/html or text/plain)",
+                "mimeType" : "Mime Type",
                 "subjectTranslations" : "Email Subject",
                 "messageTranslations" : "Email Message",
                 "emailMessageHelp" : "",

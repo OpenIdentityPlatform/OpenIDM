@@ -80,7 +80,13 @@ define("org/forgerock/openidm/ui/admin/selfservice/ForgotUsernameConfigView", [
                 },
                 "storage": "stateless"
             },
-            "saveConfig": {}
+            "saveConfig": {},
+            identityServiceURLSaveLocations: [
+                {
+                    "stepName": "userQuery",
+                    "stepProperty": "identityServiceUrl"
+                }
+            ]
         },
         render: function(args, callback) {
             this.data.configList = [{
@@ -94,7 +100,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/ForgotUsernameConfigView", [
                 title: $.t("templates.selfservice.userQuery.name"),
                 help: $.t("templates.selfservice.userQuery.description"),
                 editable: true,
-                enabledByDefault: true
+                enabledByDefault: true,
+                icon: "user"
             }, {
                 type: "emailUsername",
                 title: $.t("templates.selfservice.emailUsername.name"),

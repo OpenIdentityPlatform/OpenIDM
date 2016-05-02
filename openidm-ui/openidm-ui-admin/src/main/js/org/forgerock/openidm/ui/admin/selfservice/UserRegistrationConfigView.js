@@ -25,7 +25,6 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
         partials: AbstractSelfServiceView.prototype.partials.concat([
             "partials/selfservice/_emailValidation.html",
             "partials/selfservice/_kbaStage.html",
-            "partials/selfservice/_selfRegistration.html",
             "partials/selfservice/_userDetails.html",
             "partials/selfservice/_captcha.html"
         ]),
@@ -86,7 +85,13 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 },
                 "storage" : "stateless"
             },
-            "saveConfig": {}
+            "saveConfig": {},
+            identityServiceURLSaveLocations: [
+                {
+                    "stepName": "selfRegistration",
+                    "stepProperty": "identityServiceUrl"
+                }
+            ]
         },
         render: function(args, callback) {
             this.data.configList = [{
@@ -117,7 +122,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView", 
                 type: "selfRegistration",
                 title: $.t("templates.selfservice.registrationForm"),
                 help: $.t("templates.selfservice.registrationFormDescription"),
-                editable: true,
+                editable: false,
                 enabledByDefault: true
             }];
 
