@@ -551,6 +551,22 @@
             </includes>
             <outputDirectory>/openidm/samples/audit-jms-sample</outputDirectory>
         </fileSet>
+        <!-- setup powershell Azure AD sample -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-azureadpowershell.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/powershell2AzureAD/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/powershell2AzureAD</outputDirectory>
+        </fileSet>
         <!-- Setup fullStack  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>

@@ -35,10 +35,22 @@
 	Must return the user unique ID (OpenICF __UID__).
 	To do so, set the <prefix>.Result.Uid property
 
-.NOTES
+.NOTES  
+    File Name      : AzureADCreate.ps1  
+    Author         : Gael Allioux (gael.allioux@forgerock.com)
     Prerequisite   : PowerShell V2 and later
+    Copyright      : 2015-2016 - ForgeRock AS    
+
+	.LINK  
+    Script posted over:  
+    http://openicf.forgerock.org
+		
+	Azure Active Directory Module for Windows PowerShell
+	https://msdn.microsoft.com/en-us/library/azure/jj151815.aspx
 #>
 
+$ErrorActionPreference = "Stop"
+$VerbosePreference = "Continue"
 
 $secutil = [Org.IdentityConnectors.Common.Security.SecurityUtil]
 
@@ -63,15 +75,8 @@ function Create-NewGroup ($attributes)
 		}
 	}
 
-	try 
-	{
-		$group = New-MsolGroup @param 
-		$group.ObjectId.ToString()
-	}
-	catch
-	{
-		throw
-	}
+	$group = New-MsolGroup @param 
+	$group.ObjectId.ToString()
 }
 
 function Create-NewUser ($attributes)
@@ -95,9 +100,10 @@ function Create-NewUser ($attributes)
 	
 	# UPN and DisplayName are mandatory on create
 	# We're going to use PowerShell Splatting
+	
 	$param = @{"UserPrincipalName" = $accessor.GetName().GetNameValue()}
 	$param.Add("DisplayName", $accessor.FindString("DisplayName"))
-	
+
 	# Standard attributes - single value String
 	$standardSingle = @("City","Country ","Department","Fax","FirstName","LastName","MobilePhone","Office", "ImmutableId",
 						"PhoneNumber","PostalCode","PreferredLanguage","State","StreetAddress","Title","UsageLocation")
@@ -128,7 +134,7 @@ function Create-NewUser ($attributes)
 	{
 		$val = $accessor.FindBoolean($name)
 		if ($val -ne $null) 
-		{	 
+		{
 			if ($val)
 			{
 				$param.Add($name,$true)
@@ -158,50 +164,46 @@ function Create-NewUser ($attributes)
 		$param.Add("Password",$secutil::Decrypt($password))
 	}
 	
-	
 	# What's left? 
     # LicenseOptions: License options for license assignment. Used to selectively disable individual service plans within a SKU.
 	# TenantId
-	try
-	{
-		$user = New-MsolUser @param
-		$user.ObjectId.ToString()
-	}
-	catch
-	{
-		throw
-	}
+	$user = New-MsolUser @param
+	$user.ObjectId.ToString()
 }
 
 try
 {
-
-    $scriptPath = split-path -parent $Connector.Configuration.CreateScriptFileName
-    . $scriptPath\AzureADCommon.ps1
-
-    if ($Connector.Operation -eq "CREATE")
-    {
-        authenticateSession($Connector)
-
-        switch ($Connector.ObjectClass.Type)
-        {
-            "__ACCOUNT__"
-            {
-                $Connector.Result.Uid = Create-NewUser $Connector.Attributes
-            }
-            "__GROUP__"
-            {
-                $Connector.Result.Uid = Create-NewGroup $Connector.Attributes
-            }
-            default {throw "Unsupported type: $($Connector.ObjectClass.Type)"}
-        }
-    }
-    else
-    {
-	    throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("CreateScript can not handle operation: $($Connector.Operation)")
-    }
-}
-catch #Re-throw the original exception
+if ($Connector.Operation -eq "CREATE")
 {
-	throw
+	if (!$Env:OpenICF_AAD) {
+		$msolcred = New-object System.Management.Automation.PSCredential $Connector.Configuration.Login, $Connector.Configuration.Password.ToSecureString()
+		connect-msolservice -credential $msolcred
+		$Env:OpenICF_AAD = $true
+		Write-Verbose -verbose "New session created"
+	}
+
+	switch ($Connector.ObjectClass.Type)
+	{
+		"__ACCOUNT__"
+		{
+			$Connector.Result.Uid = Create-NewUser $Connector.Attributes
+		}
+		"__GROUP__" 
+		{
+			$Connector.Result.Uid = Create-NewGroup $Connector.Attributes
+		}
+		default
+		{
+			throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("Unsupported type: $($Connector.ObjectClass.Type)")	
+		}
+	}
+}
+else
+{
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("CreateScript can not handle operation: $($Connector.Operation)")
+}
+}
+catch #Re-throw the original exception message within a connector exception
+{
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException($_.Exception.Message)
 }
