@@ -454,7 +454,6 @@
                 "deleteMessage" : "Are you sure you want to delete this assignment?",
                 "mappingHelp" : "Mapping to which this assignment applies",
                 "newAssignment" : "New Assignment",
-                "addAssignment" : "Add Assignment",
                 "addNewAssignment" : "Add New Assignment",
                 "noMappingAssignments" : "No assignments attached to this mapping",
                 "mapping" : "Mapping",
@@ -818,7 +817,6 @@
             "fireAndProceed": "Fire and proceed",
             "doNothing": "Do Nothing",
             "deleteSchedule": "Delete Schedule",
-            "saveSchedule": "Save Changes",
             "reconciliation": "Reconciliation",
             "liveSync": "LiveSync",
             "fireEvery": "Fire every",
@@ -1268,9 +1266,6 @@
         "connector" : {
             "backToConnectorList" : "Back to Connectors",
             "addObjectType" : "Add Object Type",
-            "saveConnector" : "Save Connector Changes",
-            "saveObjectType" : "Save Object Type Changes",
-            "saveSync" : "Save Sync Changes",
             "groovy_ScriptedConnector":"Groovy Connector",
             "groovy_ScriptedPoolableConnector":"Groovy Poolable Connector",
             "scriptedsql_ScriptedSQLConnector":"Scripted SQL Connector",
@@ -1343,8 +1338,7 @@
                 "authenticate" : "Authenticate",
                 "get" : "Get",
                 "scriptOnResource" : "Enable a script on the target",
-                "search" : "Search",
-                "updateAdvanced" : "Save Advanced Changes"
+                "search" : "Search"
             },
             "liveSync": {
                 "title": "LiveSync Options",
@@ -1655,7 +1649,6 @@
             "completeSourceObject": "Complete source object.",
             "changesPending": "Changes pending.",
             "undoAllChanges": "Undo All Changes",
-            "saveProperties": "Save Properties",
             "noPropertiesMapped": "No properties mapped.",
             "conditionScriptApplied": "Conditional update script applied.",
             "mappingExists": "Mapping for this target property already exists.",
