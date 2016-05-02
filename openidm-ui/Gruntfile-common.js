@@ -20,12 +20,12 @@ module.exports = function(grunt, options) {
             "target/dependency",
             "target/classes"
         ],
-        watchCompositionDirs = [
-            "src/main/js",
-            "src/main/resources",
+        watchCompositionDirs = options.watchCompositionDirs.concat([
             "../openidm-ui-common/src/main/js",
-            "../openidm-ui-common/src/main/resources"
-        ].concat(options.watchCompositionDirs),
+            "../openidm-ui-common/src/main/resources",
+            "src/main/js",
+            "src/main/resources"
+        ]),
         testCompositionDirs = {
             "../openidm-ui-common/src/test/qunit": "/",
             "src/test/qunit": "/tests"
