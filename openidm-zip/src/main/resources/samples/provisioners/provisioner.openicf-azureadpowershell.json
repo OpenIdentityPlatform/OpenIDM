@@ -37,14 +37,14 @@
     },
     "configurationProperties" : {
         "AuthenticateScriptFileName" : null,
-        "CreateScriptFileName" : "C:/openidm/samples/powershell2AzureAD/tools/AzureADCreate.ps1",
-        "DeleteScriptFileName" : "C:/openidm/samples/powershell2AzureAD/tools/AzureADDelete.ps1",
+        "CreateScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADCreate.ps1",
+        "DeleteScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADDelete.ps1",
         "ResolveUsernameScriptFileName" : null,
-        "SchemaScriptFileName" : "C:/openidm/samples/powershell2AzureAD/tools/AzureADSchema.ps1",
-        "SearchScriptFileName" : "C:/openidm/samples/powershell2AzureAD/tools/AzureADSearch.ps1",
+        "SchemaScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADSchema.ps1",
+        "SearchScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADSearch.ps1",
         "SyncScriptFileName" : null,
-        "TestScriptFileName" : "C:/openidm/samples/powershell2AzureAD/tools/AzureADTest.ps1",
-        "UpdateScriptFileName" : "C:/openidm/samples/powershell2AzureAD/tools/AzureADUpdate.ps1",
+        "TestScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADTest.ps1",
+        "UpdateScriptFileName" : "C:/openidm/samples/powershell2AzureAD/azureADScripts/AzureADUpdate.ps1",
         "VariablesPrefix" : "Connector",
         "QueryFilterType" : "Map",
         "ReloadScriptOnExecution" : true,
@@ -126,6 +126,19 @@
                 "Members" : {
                     "type" : "array",
                     "items" : {
+                        "type" : "object",
+                        "nativeType" : "object",
+                        "flags" : [
+                            "NOT_CREATABLE",
+                            "NOT_UPDATEABLE"
+                        ]
+                    },
+                    "nativeName" : "__MEMBERS__",
+                    "nativeType" : "object"
+                },
+                "MembersId" : {
+                    "type" : "array",
+                    "items" : {
                         "type" : "string",
                         "nativeType" : "string",
                         "flags" : [
@@ -133,33 +146,7 @@
                             "NOT_UPDATEABLE"
                         ]
                     },
-                    "nativeName" : "__MEMBERS__",
-                    "nativeType" : "string"
-                },
-                "AddMembers" : {
-                    "type" : "array",
-                    "items" : {
-                        "type" : "string",
-                        "nativeType" : "string",
-                        "flags" : [
-                            "NOT_CREATABLE",
-                            "NOT_READABLE"
-                        ]
-                    },
-                    "nativeName" : "__ADD_MEMBERS__",
-                    "nativeType" : "string"
-                },
-                "RemoveMembers" : {
-                    "type" : "array",
-                    "items" : {
-                        "type" : "string",
-                        "nativeType" : "string",
-                        "flags" : [
-                            "NOT_CREATABLE",
-                            "NOT_READABLE"
-                        ]
-                    },
-                    "nativeName" : "__REMOVE_MEMBERS__",
+                    "nativeName" : "__MEMBERS_ID__",
                     "nativeType" : "string"
                 },
                 "CommonName" : {

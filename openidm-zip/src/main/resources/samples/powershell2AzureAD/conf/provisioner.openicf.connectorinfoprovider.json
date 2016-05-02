@@ -1,0 +1,13 @@
+{
+   "remoteConnectorServers" :
+      [
+         {
+            "name" : "dotnet",
+            "host" : "localhost",
+            "port" : 8759,
+            "useSSL" : false,
+            "timeout" : 0,
+            "key" : "Passw0rd"
+         }
+      ]
+}

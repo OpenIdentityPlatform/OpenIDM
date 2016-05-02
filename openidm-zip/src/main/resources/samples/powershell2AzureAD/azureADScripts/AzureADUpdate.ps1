@@ -36,57 +36,105 @@
 	Must return the user unique ID (__UID__) if either UID or Revision has been modified 
 	To do so, set the <prefix>.Result.Uid property with the modified Uid object
 
-.NOTES
+.NOTES  
+    File Name      : AzureADUpdate.ps1  
+    Author         : Gael Allioux (gael.allioux@forgerock.com)
     Prerequisite   : PowerShell V2 and later
+    Copyright      : 2015-2016 - ForgeRock AS    
+
+	.LINK  
+    Script posted over:  
+    http://openicf.forgerock.org
+		
+	Azure Active Directory Module for Windows PowerShell
+	https://msdn.microsoft.com/en-us/library/azure/jj151815.aspx
 #>
-$attrutil = [Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeUtil]
-$secutil = [Org.IdentityConnectors.Common.Security.SecurityUtil]
+
+$ErrorActionPreference = "Stop"
+$VerbosePreference = "Continue"
+
+$secutil    = [Org.IdentityConnectors.Common.Security.SecurityUtil]
 
 function Update-Group ($attributes)
 {
 	$accessor = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributesAccessor($attributes)
+	$gid = $Connector.Uid.GetUidValue()
+	
+	# Most likely, this is a membership update
+	# According to https://msdn.microsoft.com/en-us/library/dn194129.aspx
+	# Add-MsolGroupMember -GroupMemberObjectId <Guid> -GroupObjectId <Guid> [-GroupMemberType <string>] [-TenantId <Guid>] [<CommonParameters>]
+	#
+	# According to https://msdn.microsoft.com/en-us/library/dn194107.aspx
+	# Remove-MsolGroupMember -GroupObjectId <Guid> [-GroupMemberObjectId <Guid>] [-GroupMemberType <string>] [-TenantId <Guid>] [<CommonParameters>]
+	$members = $accessor.FindList("__MEMBERS__")
+	
+	if ($null -ne $members)
+	{
+		# Convert members to a more convenient HashMap
+		# Need to be sure that ObjectId and GroupMemberType have been set correctly.
+		$newMembers = @{}
+		foreach ($member in $members)
+		{
+			if ($member.ContainsKey('ObjectId'))
+			{
+				if ($member.ContainsKey('GroupMemberType'))
+				{
+					if (($member["GroupMemberType"] -eq "User" ) -or ($member["GroupMemberType"] -eq "Group" ))
+					{
+						$newMembers.Add($member["ObjectId"], $member["GroupMemberType"])
+					}
+					else
+					{
+						Write-warning "Member has a bad GroupMemberType defined: $($member.GroupMemberType)"
+						throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.InvalidAttributeValueException("Member has a bad GroupMemberType defined: $($member.GroupMemberType)")
+					}
+				}
+				else 
+				{
+					# We assume User as the default
+					$newMembers.Add($member["ObjectId"], "User")
+				}
+			}
+			else 
+			{
+				Write-warning "Member has no ObjectId defined"
+				throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.InvalidAttributeValueException("Member has no ObjectId defined")
+			}
+		}
+		# First we need to get the current list of members
+		# and track their type (user/group) as well
+		$currentMembers = @{}
+		$toAdd = @()
+		$toRemove = @()
+		Get-MsolGroupMember -All -GroupObjectId $gid | foreach { $currentMembers.Add($_.ObjectId.ToString(), $_.GroupMemberType) }
+		
+		# Compare the 2 lists to add/remove members from the group
+		if ($currentMembers.Count -gt 0)
+		{
+			Write-verbose "Group contains $($currentMembers.Count) member(s)"
+			# To remove
+			$currentMembers.Keys | ? { ! $newMembers.ContainsKey($_) } | % { $toRemove += $_ } 
+			Write-verbose "$($toRemove.Count) member(s) to remove"
+			$toRemove | % { Remove-MsolGroupMember -GroupObjectId $gid -GroupMemberObjectId $_ -GroupMemberType $currentMembers[$_]  }
+			
+			# To add
+			$newMembers.Keys | ? { ! $currentMembers.ContainsKey($_) } | % { $toAdd += $_ }
+		}
+		# No current members, add all the new members
+		else
+		{
+			$toAdd += $newMembers.Keys
+		}
+		Write-verbose "$($toAdd.Count) member(s) to add"
+		$toAdd | % { Add-MsolGroupMember -GroupObjectId $gid -GroupMemberObjectId $_ -GroupMemberType $newMembers[$_] }
+	}
 	
 	# According to https://msdn.microsoft.com/en-us/library/azure/dn194086
 	#
 	# Set-MsolGroup [-Description <string>] [-DisplayName <string>] [-ManagedBy <string>] [-ObjectId <Guid>] [-TenantId <Guid>]
-	
 	# We're going to use PowerShell Splatting
-	$param = @{"ObjectId" = $Connector.Uid.GetUidValue()}
+	$param = @{"ObjectId" = $gid}
 	$modification = $false
-	
-	# Most likely, this is a membership update
-	$addMembers = $accessor.FindStringList("__ADD_MEMBERS__")
-	$removeMembers = $accessor.FindStringList("__REMOVE_MEMBERS__")
-	
-	if (($addMembers -ne $null) -and ($addMembers.Count -gt 0))
-	{
-		try
-		{
-			foreach($id in $addMembers)
-			{
-				$res = Add-MsolGroupMember -GroupMemberObjectId $id -GroupObjectId $Connector.Uid.GetUidValue()
-			}
-		}
-		catch
-		{
-			throw
-		}
-	}
-	
-	if (($removeMembers -ne $null) -and ($removeMembers.Count -gt 0))
-	{
-		try
-		{
-			foreach($id in $removeMembers)
-			{
-				$res = Remove-MsolGroupMember -GroupMemberObjectId $id -GroupObjectId $Connector.Uid.GetUidValue()
-			}
-		}
-		catch
-		{
-			throw
-		}
-	}
 	
 	if ($accessor.GetName() -ne $null)
 	{
@@ -108,14 +156,7 @@ function Update-Group ($attributes)
 
 	if ($modification)
 	{
-		try 
-		{
-			$group = Set-MsolGroup @param 
-		}
-		catch
-		{
-			throw
-		}
+		$group = Set-MsolGroup @param 
 	}
 	# We return the original __UID__ since no change
 	$Connector.Uid
@@ -124,6 +165,7 @@ function Update-Group ($attributes)
 function Update-User ($attributes)
 {
 	$accessor = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributesAccessor($attributes)
+	$oid = $Connector.Uid.GetUidValue()
 
 	# According to https://msdn.microsoft.com/en-us/library/azure/dn194136
 	#
@@ -135,7 +177,7 @@ function Update-User ($attributes)
 	# [-Title <string>] [-UsageLocation <string>] [-UserPrincipalName <string>] [<CommonParameters>]
 	
 	# We're going to use PowerShell Splatting
-	$param = @{"ObjectId" = $Connector.Uid.GetUidValue()}
+	$param = @{"ObjectId" = $oid}
 	$modification = $false
 	
 	# Standard attributes - single value String
@@ -157,7 +199,7 @@ function Update-User ($attributes)
 	foreach ($name in $standardMulti)
 	{
 		$val = $accessor.FindStringList($name)
-		if (($val -ne $null) -and ($val.Count -gt 0))
+		if ($null -ne $val)
 		{	
 			$param.Add($name,$val)
 			$modification = $true
@@ -184,6 +226,8 @@ function Update-User ($attributes)
 	}
 	
 	# Password change - has a dedicated cmdlet
+	# We call it first before other changes
+	# Password change is the most likely to fail.
 	# According to: https://msdn.microsoft.com/en-us/library/azure/dn194140
 	#
 	# Set-MsolUserPassword -ObjectId <Guid> [-ForceChangePassword <Boolean>] 
@@ -192,11 +236,11 @@ function Update-User ($attributes)
 	$password = $accessor.GetPassword()
 	If ($password -ne $null)
 	{
-		$pparm = @{"ObjectId" = $Connector.Uid.GetUidValue()}
+		$pparm = @{"ObjectId" = $oid}
 		$pparm.Add("NewPassword",$secutil::Decrypt($password))
 		$val = $accessor.FindBoolean("ForceChangePassword")
 		if ($val -ne $null) 
-		{	 
+		{
 			if ($val)
 			{
 				$param.Add("ForceChangePassword",$true)
@@ -206,14 +250,8 @@ function Update-User ($attributes)
 				$param.Add("ForceChangePassword",$false)
 			}
 		}
-		try
-		{
-			$user = Set-MsolUserPassword @pparm
-		}
-		catch
-		{
-			throw
-		}
+		$user = Set-MsolUserPassword @pparm
+		Write-Verbose "Password updated"
 	}
 	
 	# UserPrincipalName change - has a dedicated cmdlet
@@ -225,16 +263,10 @@ function Update-User ($attributes)
 	$upn = $accessor.GetName()
 	if ( $upn -ne $null)
 	{
-		$uparm = @{"ObjectId" = $Connector.Uid.GetUidValue()}
+		$uparm = @{"ObjectId" = $oid}
 		$uparm.Add("NewUserPrincipalName", $upn.GetNameValue())
-		try
-		{
-			$user = Set-MsolUserPrincipalName @uparm
-		}
-		catch
-		{
-			throw
-		}
+		$user = Set-MsolUserPrincipalName @uparm
+		Write-Verbose "UserPrincipalName updated"
 	}
 	
 	# What's left? 
@@ -243,14 +275,8 @@ function Update-User ($attributes)
 	
 	if($modification)
 	{
-		try
-		{
-			$user = Set-MsolUser @param
-		}
-		catch
-		{
-			throw
-		}
+		$user = Set-MsolUser @param
+		Write-Verbose "User updated"
 	}
 	# We return the original __UID__ since we did not change it
 	$Connector.Uid
@@ -258,33 +284,37 @@ function Update-User ($attributes)
 
 try
 {
-    $scriptPath = split-path -parent $Connector.Configuration.UpdateScriptFileName
-    . $scriptPath\AzureADCommon.ps1
-
-    if ($Connector.Operation -eq "UPDATE")
-    {
-        authenticateSession($Connector)
-
-        switch ($Connector.ObjectClass.Type)
-        {
-            "__ACCOUNT__"
-            {
-                $Connector.Result.Uid = Update-User $Connector.Attributes
-            }
-            "__GROUP__"
-            {
-                $Connector.Result.Uid = Update-Group $Connector.Attributes
-            }
-            default {throw "Unsupported type: $($Connector.ObjectClass.Type)"}
-        }
-    }
-    else
-    {
-        throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException(
-                "UpdateScript can not handle operation: $($Connector.Operation)")
-    }
-}
-catch #Re-throw the original exception
+if ($Connector.Operation -eq "UPDATE")
 {
-	throw
+	if (!$Env:OpenICF_AAD) {
+		$msolcred = New-object System.Management.Automation.PSCredential $Connector.Configuration.Login, $Connector.Configuration.Password.ToSecureString()
+		connect-msolservice -credential $msolcred
+		$Env:OpenICF_AAD = $true
+		Write-Verbose -verbose "New session created"
+	}
+
+	switch ($Connector.ObjectClass.Type)
+	{
+		"__ACCOUNT__"
+		{
+			$Connector.Result.Uid = Update-User $Connector.Attributes
+		}
+		"__GROUP__" 
+		{
+			$Connector.Result.Uid = Update-Group $Connector.Attributes
+		}
+		default
+		{
+			throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("Unsupported type: $($Connector.ObjectClass.Type)")	
+		}
+	}
+}
+else
+{
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("UpdateScript can not handle operation: $($Connector.Operation)")
+}
+}
+catch #Re-throw the original exception message within a connector exception
+{
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException($_.Exception.Message)
 }
