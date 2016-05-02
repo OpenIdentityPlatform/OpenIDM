@@ -99,6 +99,13 @@
      * @param newRole the updated role
      */
     exports.roleUpdate = function(oldRole, newRole) {
+        /**
+         * If the newRoles is attempting to update an oldRole with an array of temporalConstraints greater than 1 throw
+         * BadRequestException. As the implementation stands now, we only support one temporal constraint per role.
+         */
+        if (isTemporalConstraintsMultiValue(newRole)) {
+            throw {code : 400, message: "Only 1 temporal constraint is supported per role."}
+        }
         /*
          Only iterate through all of the users if we are dealing with a conditional role, and if the
          role condition has changed. And if the role's condition has been removed, the new role grantees will be only
@@ -117,6 +124,13 @@
      * @param newRole the newly-created role
      */
     exports.roleCreate = function(newRole) {
+        /**
+         * If the newRoles is attempting to update an oldRole with an array of temporalConstraints greater than 1 throw
+         * BadRequestException. As the implementation stands now, we only support one temporal constraint per role.
+         */
+        if (isTemporalConstraintsMultiValue(newRole)) {
+            throw {code : 400, message: "Only 1 temporal constraint is supported per role."}
+        }
         if (relationshipHelper.isRoleConditional(newRole)) {
             newRole.members = processCreatedConditionalRole(newRole);
         }
@@ -261,6 +275,19 @@
                 })
                 .value()
         );
+    }
+
+    exports.isTemporalConstraintsMultiValue = isTemporalConstraintsMultiValue
+    /**
+     * Determines if a role has more than one temporal constraint.
+     *
+     * @param role the role to inspect
+     * @returns {boolean} true if temporal contraints array, inside of the role object, has a size greater than 1
+     */
+    function isTemporalConstraintsMultiValue(role) {
+        if (!isNil(role.temporalConstraints)) {
+            return role.temporalConstraints.length > 1;
+        }
     }
 
     /**

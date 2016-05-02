@@ -835,13 +835,18 @@ public abstract class RelationshipProvider {
      * @return A new JsonValue containing the converted object in a format accepted by the repo
      * @see #formatResponseNoException(Context, Request)
      */
-    protected JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) {
+    protected JsonValue convertToRepoObject(final ResourcePath firstResourcePath, final JsonValue object) throws BadRequestException {
         final JsonValue properties = object.get(FIELD_PROPERTIES);
 
         if (properties != null) {
             // Remove "soft" fields that were placed in properties for the ResourceResponse
             properties.remove(FIELD_CONTENT_ID);
             properties.remove(FIELD_CONTENT_REVISION);
+            // Currently only 1 temporal constraint is allowed per grant
+            if (properties.get("temporalConstraints").isNotNull()
+                    && properties.get("temporalConstraints").expect(List.class).asList().size() > 1) {
+                throw new BadRequestException("Only 1 temporal constraint is supported per grant.");
+            }
         }
 
         if (schemaField.isReverseRelationship()) {

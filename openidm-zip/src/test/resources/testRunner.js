@@ -20,7 +20,8 @@
  */
 [ "policyFilterTest", 
   "effectiveRolesTest",
-  "temporalConstraintsTest"]
+  "temporalConstraintsTest",
+  "conditionalRolesTest"]
     .forEach(function (module) {
         require (module).test();
     });

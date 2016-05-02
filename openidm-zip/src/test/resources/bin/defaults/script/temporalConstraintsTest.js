@@ -50,20 +50,6 @@ exports.test = function() {
                     "_id" : "role2",
                     "temporalConstraints" : [
                         {
-                            "duration" : currentDuration
-                        },
-                        {
-                            "duration" : expiredDuration
-                        }
-                    ]
-                },
-                false
-            ],
-            [
-                {
-                    "_id" : "role2",
-                    "temporalConstraints" : [
-                        {
                             "duration" : pendingDuration
                         }
                     ]
@@ -80,35 +66,7 @@ exports.test = function() {
                     ]
                 },
                 true
-            ],
-            [
-                {
-                    "_id" : "role2",
-                    "temporalConstraints" : [
-                        {
-                            "duration" : expiredDuration
-                        },
-                        {
-                            "duration" : expiredDuration
-                        }
-                    ]
-                },
-                true
-            ],
-            [
-                {
-                    "_id" : "role2",
-                    "temporalConstraints" : [
-                        {
-                            "duration" : expiredDuration
-                        },
-                        {
-                            "duration" : pendingDuration
-                        }
-                    ]
-                },
-                false
-            ],
+            ]
         ].map(
             function (testcase) {
                 (function (role, expectedResult) {
