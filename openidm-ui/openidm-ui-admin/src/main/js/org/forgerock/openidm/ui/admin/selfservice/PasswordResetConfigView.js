@@ -96,7 +96,19 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 },
                 "storage": "stateless"
             },
-            "saveConfig": {}
+            "saveConfig": {},
+            identityServiceURLSaveLocations: [
+                {
+                    "stepName": "userQuery",
+                    "stepProperty": "identityServiceUrl"
+                }, {
+                    "stepName": "resetStage",
+                    "stepProperty": "identityServiceUrl"
+                }, {
+                    "stepName": "kbaSecurityAnswerVerificationStage",
+                    "stepProperty": "identityServiceUrl"
+                }
+            ]
         },
         render: function(args, callback) {
             this.data.configList = [{
@@ -110,6 +122,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 title: $.t("templates.selfservice.userQuery.name"),
                 help: $.t("templates.selfservice.userQuery.description"),
                 editable: true,
+                icon: "user",
                 enabledByDefault: true
             }, {
                 type: "emailValidation",
@@ -128,7 +141,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
                 title: $.t("templates.selfservice.passwordResetForm"),
                 help: $.t("templates.selfservice.passwordResetFormDescription"),
                 editable: true,
-                enabledByDefault: true
+                enabledByDefault: true,
+                icon: "user"
             }];
 
             this.selfServiceRender(args, callback);

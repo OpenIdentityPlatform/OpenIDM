@@ -1,6 +1,5 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form id="configDialogForm" class="form-horizontal">
-    {{> form/_basicInput value=identityServiceUrl label="templates.selfservice.resetStage.identityServiceURL" property="identityServiceUrl" noValidation="true"}}
-    {{> form/_basicInput value=identityPasswordField label="templates.selfservice.resetStage.passwordField" property="identityPasswordField" noValidation="true"}}
+    {{> form/_basicSelectize value=identityPasswordField label="templates.selfservice.resetStage.passwordField" property="identityPasswordField" options=identityServiceProperties}}
 </form>

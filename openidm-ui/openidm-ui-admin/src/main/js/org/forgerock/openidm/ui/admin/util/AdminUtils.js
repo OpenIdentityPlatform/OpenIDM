@@ -17,15 +17,44 @@
 define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
     "jquery",
     "underscore",
+    "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
 ], function ($, _,
+             Handlebars,
              AbstractConfigurationAware,
              ConfigDelegate,
              ConnectorDelegate) {
 
     var obj = {};
+
+    /**
+     * Retrieves a list of connectors and managed objects and creates an array of resources
+     *
+     * @returns {promise} promise - resolves with an array of strings
+     */
+    obj.getAvailableResourceEndpoints = function() {
+        var connectorPromise = ConnectorDelegate.currentConnectors(),
+            managedPromise = ConfigDelegate.readEntity("managed"),
+            resources = [];
+
+        return $.when(connectorPromise, managedPromise).then(_.bind(function(connectors, managedObjects) {
+            _.each(managedObjects.objects, _.bind(function(managed){
+                resources.push("managed/" + managed.name);
+            }, this));
+
+            _.each(connectors, _.bind(function(connector) {
+                _.each(connector.objectTypes, _.bind(function(ot) {
+                    if (ot !== "__ALL__") {
+                        resources.push("system/" + connector.name + "/" + ot);
+                    }
+                }, this));
+            }, this));
+
+            return resources;
+        }, this));
+    };
 
     obj.findPropertiesList = function(type, required) {
         var connectorUrl,
@@ -89,6 +118,62 @@ define("org/forgerock/openidm/ui/admin/util/AdminUtils", [
 
         return propertiesPromise;
     };
+
+    obj.toggleValue = function(e) {
+        var toggle = this.$el.find(e.target);
+        if (toggle.val() === "true") {
+            toggle.val(false);
+        } else {
+            toggle.val(true);
+        }
+    };
+
+    /**
+     * @description A handlebars helper checking if an item is contained in a list
+     *
+     * @example:
+     *
+     * {{#contains ["cat", "dog"]  "bird"}}
+     *      <span>DOES CONTAIN ITEM</span>
+     * {{else}}
+     *      <span>DOES NOT CONTAIN</span>
+     * {{/contains}}
+     */
+    Handlebars.registerHelper("contains", function(list, item, options) {
+        if (_.indexOf(list, item) >= 0) {
+            return options.fn(this);
+        } else {
+            return options.inverse(this);
+        }
+    });
+
+    /**
+     * @description A handlebars helper that "eaches" over the union of two lists
+     *
+     * @example:
+     *
+     * {{#eachTwoLists ["cat", "dog"]  ["bird", "cat", "bug"]}}
+     *      <span>{{this}}</span>
+     * {{/eachTwoLists}}
+     *
+     * Looks like: cat dog bird bug
+     */
+    Handlebars.registerHelper("eachTwoLists", function(list1, list2, options) {
+        var ret = "";
+
+        _.each(_.union(list1, list2), function(val) {
+            ret = ret + options.fn(val);
+        });
+
+        return ret;
+    });
+
+    Handlebars.registerHelper("singleSelect", function(value, options){
+        var selected = $("<select />").html(options.fn(this));
+        selected.find("[value='" + value + "']").attr({"selected":"selected"});
+
+        return selected.html();
+    });
 
     return obj;
 });

@@ -26,6 +26,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "selectize"
 ], function($, _,
             JSONEditor,
@@ -36,7 +37,8 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
             ConfigDelegate,
             InlineScriptEditor,
             ConnectorDelegate,
-            UIUtils) {
+            UIUtils,
+            AdminUtils) {
 
     var AuthenticationModuleDialogView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/AuthenticationModuleDialogTemplate.html",
@@ -72,7 +74,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
             this.model.readableName = $.t("templates.auth.modules." + this.model.config.name + ".name");
 
             // Get resources and get the JSON schema
-            $.when(this.getResources(), this.getJSONSchema(this.model.config.name)).then(_.bind(function(resources, jsonTemplate) {
+            $.when(AdminUtils.getAvailableResourceEndpoints(), this.getJSONSchema(this.model.config.name)).then(_.bind(function(resources, jsonTemplate) {
                 this.model.moduleTemplate = Handlebars.compile(jsonTemplate[0])();
                 this.model.moduleTemplate = $.parseJSON(this.model.moduleTemplate);
 
@@ -158,31 +160,6 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 url: "templates/admin/settings/authentication/" + moduleName + ".hbs",
                 type: "GET"
             });
-        },
-
-        /**
-         * Retrieves a list of connectors and managed objects and creates an array of resources
-         *
-         * @returns {promise} promise - resolves with an array of strings
-         */
-        getResources: function() {
-            var connectorPromise = ConnectorDelegate.currentConnectors(),
-                managedPromise = ConfigDelegate.readEntity("managed"),
-                resources = [];
-
-            return $.when(connectorPromise, managedPromise).then(_.bind(function(connectors, managedObjects) {
-                _.each(managedObjects.objects, _.bind(function(managed){
-                    resources.push("managed/" + managed.name);
-                }, this));
-
-                _.each(connectors, _.bind(function(connector) {
-                    _.each(connector.objectTypes, _.bind(function(ot) {
-                        resources.push("system/" + connector.name + "/" + ot);
-                    }, this));
-                }, this));
-
-                return resources;
-            }, this));
         },
 
         /**

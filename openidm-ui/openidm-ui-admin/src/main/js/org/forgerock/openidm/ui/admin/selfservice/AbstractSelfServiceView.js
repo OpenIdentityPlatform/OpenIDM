@@ -24,6 +24,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "bootstrap-dialog",
@@ -38,6 +39,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             ConfigDelegate,
             SiteConfigurationDelegate,
             UiUtils,
+            AdminUtils,
             EventManager,
             Constants,
             BootstrapDialog,
@@ -48,22 +50,29 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
     var AbstractSelfServiceView = AdminAbstractView.extend({
         events: {
             "change .all-check" : "controlAllSwitch",
+            "change .checkbox-slider-primary" : AdminUtils.toggleValue,
             "change .section-check" : "controlSectionSwitch",
+            "change #identityServiceUrl": "updateIdentityServiceURL",
             "click .save-config" : "saveConfig",
             "click .wide-card.active" : "showDetailDialog",
             "click li.disabled a" : "preventTab"
         },
         partials : [
+            "partials/selfservice/_identityServiceUrl.html",
             "partials/selfservice/_translationMap.html",
             "partials/selfservice/_translationItem.html",
+            "partials/selfservice/_steps.html",
             "partials/selfservice/_advancedoptions.html",
             "partials/selfservice/_selfserviceblock.html",
-            "partials/form/_basicInput.html"
+            "partials/form/_basicInput.html",
+            "partials/form/_basicSelectize.html",
+            "partials/form/_tagSelectize.html"
         ],
         data: {
             hideAdvanced: true,
             config: {},
-            configList: []
+            configList: [],
+            resources: null
         },
         addTranslation: function (e) {
             e.preventDefault();
@@ -144,7 +153,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                         return $(card).attr("data-type") === config.type;
                     }, this);
 
-                    if(tempConfig.enabledByDefault) {
+                    if (tempConfig.enabledByDefault) {
                         $(card).find(".section-check").prop("checked", true).trigger("change");
                     } else {
                         this.model.saveConfig.stageConfigs = _.reject(this.model.saveConfig.stageConfigs, function(stage) {
@@ -174,8 +183,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
             }
         },
         disableForm: function() {
-            this.$el.find(".section-check").attr("disabled", true);
-            this.$el.find(".save-config").attr("disabled", true);
+            this.$el.find(".section-check").prop("disabled", true);
+            this.$el.find(".save-config").prop("disabled", true);
+            this.$el.find("#identityServiceUrl").prop("disabled", true);
+            this.$el.find(".self-service-card").toggleClass("disabled", true);
+
 
             this.$el.find("#advancedTab").toggleClass("disabled", true);
             this.$el.find("#advancedTab a").removeAttr("data-toggle");
@@ -184,16 +196,27 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
             this.$el.find("#optionTab").toggleClass("disabled", true);
             this.$el.find("#optionTab a").removeAttr("data-toggle");
+
+            this.$el.find(".all-check").val(false);
+            this.$el.find(".all-check").prop("checked", false);
         },
         enableForm: function() {
-            this.$el.find(".section-check").attr("disabled", false);
-            this.$el.find(".save-config").attr("disabled", false);
+            this.$el.find(".section-check").prop("disabled", false);
+            this.$el.find(".save-config").prop("disabled", false);
+            this.$el.find("#identityServiceUrl").prop("disabled", false);
+
+            this.$el.find(".notTogglable").toggleClass("disabled", false);
 
             this.$el.find("#advancedTab a").attr("data-toggle", "tab");
             this.$el.find("#advancedTab").toggleClass("disabled", false);
 
             this.$el.find("#optionTab a").attr("data-toggle", "tab");
             this.$el.find("#optionTab").toggleClass("disabled", false);
+
+            this.$el.find(".all-check").val(true);
+            this.$el.find(".all-check").prop("checked", true);
+
+            this.updateIdentityServiceURL();
         },
         controlSectionSwitch: function(event) {
             var check = $(event.target),
@@ -211,7 +234,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
                 orderPosition = this.$el.find(".selfservice-holder .wide-card:not(.disabled)").index(card);
 
-                if(_.findWhere(this.model.saveConfig.stageConfigs, {"name" : type}) === undefined) {
+                if(_.filter(this.model.saveConfig.stageConfigs, {"name" : type}).length === 0) {
                     this.model.saveConfig.stageConfigs.splice(orderPosition, 0, _.clone(this.model.configDefault.stageConfigs[configPosition]));
                 }
             } else {
@@ -232,11 +255,27 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 this.saveConfig();
             }
         },
+
         showDetailDialog: function(event) {
             var type = $(event.target).parents(".wide-card").attr("data-type"),
                 editable = $(event.target).parents(".wide-card").attr("data-editable"),
-                currentData = _.findWhere(this.model.saveConfig.stageConfigs, {"name" : type}),
+                currentData = _.filter(this.model.saveConfig.stageConfigs, {"name" : type})[0],
+                defaultConfig = _.filter(this.data.configList, { "type": type })[0],
+                orderPosition = $(event.target).closest(".self-service-card.active").index(),
                 self = this;
+
+            // If there is no data for the selected step and icon property is present, icon property indicates the step is mandatory
+            if (!currentData && defaultConfig.icon.length > 0 ) {
+                defaultConfig = _.clone(_.filter(this.model.configDefault.stageConfigs, {"name" : type})[0]);
+
+                if (_.filter(this.model.saveConfig.stageConfigs, {"name" : type}).length === 0) {
+                    this.model.saveConfig.stageConfigs.splice(orderPosition, 0, defaultConfig);
+                }
+
+                currentData = _.filter(this.model.saveConfig.stageConfigs, {"name" : type})[0];
+            }
+
+            currentData.identityServiceProperties = this.data.identityServiceProperties;
 
             if($(event.target).parents(".checkbox").length === 0 && editable === "true") {
                 this.dialog = BootstrapDialog.show({
@@ -245,7 +284,11 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                     size: BootstrapDialog.SIZE_WIDE,
                     message: $(handlebars.compile("{{> selfservice/_" + type + "}}")(currentData)),
                     onshown: _.bind(function (dialogRef) {
-
+                        dialogRef.$modalBody.find(".basic-selectize-field").selectize({
+                            "create": true,
+                            "persist": false,
+                            "allowEmptyOption": true
+                        });
                         dialogRef.$modalBody.find(".array-selection").selectize({
                             delimiter: ",",
                             persist: false,
@@ -256,6 +299,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                                 };
                             }
                         });
+
                         dialogRef.$modalBody.on("submit", "form", function (e) {
                             e.preventDefault();
                             return false;
@@ -287,7 +331,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
                                 //Check for array items and set the values
                                 _.each(dialogRef.$modalBody.find("input.array-selection"), function (arraySelection) {
-                                    tempName = $(arraySelection).attr("data-formName");
+                                    tempName = $(arraySelection).prop("name");
                                     currentData[tempName] = $(arraySelection)[0].selectize.getValue().split(",");
                                 }, this);
 
@@ -300,28 +344,62 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 });
             }
         },
+
+        getResources: function() {
+            var resourcePromise = $.Deferred();
+
+            if (!this.data.resources) {
+                AdminUtils.getAvailableResourceEndpoints().then(_.bind(function (resources) {
+                    resourcePromise.resolve(resources);
+                }, this));
+            } else {
+                resourcePromise.resolve(this.data.resources);
+            }
+
+            return resourcePromise.promise();
+        },
+
+        getSelfServiceConfig: function() {
+            var promise = $.Deferred();
+
+            ConfigDelegate.readEntity(this.model.configUrl).always(function(result) {
+                promise.resolve(result);
+            });
+
+            return promise.promise();
+        },
+
         selfServiceRender: function(args, callback) {
             var disabledList,
                 configList = [];
 
-            ConfigDelegate.readEntity("ui/configuration").then(_.bind(function (uiConfig) {
+            this.data.defaultIdentityServiceURL = null;
+
+            $.when(
+                this.getResources(),
+                ConfigDelegate.readEntity("ui/configuration"),
+                this.getSelfServiceConfig()
+
+            ).then(_.bind(function(resources, uiConfig, selfServiceConfig) {
+                this.data.resources = resources;
                 this.model.uiConfig = uiConfig;
 
-                ConfigDelegate.readEntity(this.model.configUrl).then(_.bind(function(result){
-                    $.extend(true, this.model.saveConfig, result);
-                    $.extend(true, this.data.config, result);
+                if (selfServiceConfig) {
+
+                    $.extend(true, this.model.saveConfig, selfServiceConfig);
+                    $.extend(true, this.data.config, selfServiceConfig);
 
                     this.data.hideAdvanced = false;
 
-                    _.each(this.data.configList, function(config, pos) {
+                    _.each(this.data.configList, function (config, pos) {
                         config.index = pos;
                     });
 
-                    disabledList = _.filter(this.data.configList, function(config) {
+                    disabledList = _.filter(this.data.configList, function (config) {
                         var filterCheck = true;
 
-                        _.each(result.stageConfigs, function(stage) {
-                            if(stage.name === config.type) {
+                        _.each(selfServiceConfig.stageConfigs, function (stage) {
+                            if (stage.name === config.type) {
                                 filterCheck = false;
                             }
                         }, this);
@@ -329,52 +407,64 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                         return filterCheck;
                     });
 
-                    _.each(result.stageConfigs, function(stage) {
-                        _.each(this.data.configList, function(config){
-                            if(stage.name === config.type) {
+                    _.each(selfServiceConfig.stageConfigs, function (stage) {
+                        _.each(this.data.configList, function (config) {
+                            if (stage.name === config.type) {
                                 configList.push(config);
                             }
                         }, this);
                     }, this);
 
-                    _.each(disabledList, function(config) {
+                    _.each(disabledList, function (config) {
                         configList.splice(config.index, 0, config);
                     }, this);
 
                     this.data.configList = configList;
+                    this.data.enableSelfService = true;
 
-                    this.parentRender(_.bind(function(){
+                    // The value of the first identity service url save location
+                    this.data.defaultIdentityServiceURL = _.filter(selfServiceConfig.stageConfigs, {
+                        "name": this.model.identityServiceURLSaveLocations[0].stepName
+                    })[0][this.model.identityServiceURLSaveLocations[0].stepProperty];
+
+                    this.parentRender(_.bind(function () {
                         this.$el.find(".all-check").prop("checked", true);
-                        this.$el.find(".section-check").attr("disabled", false);
+                        this.$el.find(".all-check").val(true);
+                        this.$el.find(".section-check").prop("disabled", false);
+
+                        this.updateIdentityServiceURL();
 
                         this.model.surpressSave = true;
                         this.setSortable();
 
-                        _.each(result.stageConfigs, function(stage){
-                            this.$el.find(".wide-card[data-type='" +stage.name +"']").toggleClass("disabled", false);
-                            this.$el.find(".wide-card[data-type='" +stage.name +"'] .section-check").prop("checked", true).trigger("change");
+                        _.each(selfServiceConfig.stageConfigs, function (stage) {
+                            this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("disabled", false);
+                            this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
                         }, this);
 
                         this.model.surpressSave = false;
 
-                        if(callback) {
+                        if (callback) {
                             callback();
                         }
                     }, this));
-                }, this),
-                _.bind(function(){
+
+                } else {
                     $.extend(true, this.model.saveConfig, this.model.configDefault);
                     $.extend(true, this.data.config, this.model.configDefault);
 
-                    this.parentRender(_.bind(function(){
+                    this.data.enableSelfService = false;
+
+                    this.parentRender(_.bind(function () {
                         this.disableForm();
                         this.setSortable();
 
-                        if(callback) {
+                        if (callback) {
                             callback();
                         }
                     }, this));
-                },this));
+                }
+
             }, this));
         },
 
@@ -409,6 +499,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 this.saveConfig();
             }
         },
+
         orderCheck: function() {
             var tempConfig = {},
                 stageOrder = [];
@@ -427,11 +518,39 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
             return tempConfig;
         },
+
+        updateIdentityServiceURL: function(e) {
+            this.data.defaultIdentityServiceURL = this.$el.find("#identityServiceUrl").val();
+
+            AdminUtils.findPropertiesList(this.data.defaultIdentityServiceURL.split("/")).then(_.bind(function(properties) {
+                this.data.identityServiceProperties = _.keys(properties);
+            }, this));
+
+            if (e) {
+                this.saveConfig();
+            }
+        },
+
         saveConfig: function() {
             var formData = form2js("advancedOptions", ".", true),
-                saveData = {};
+                saveData = {},
+                tempStepConfig;
+
+            // For each key/property location that the identity service URL should be saved
+            // find the corresponding location and set it.
+            _.each(this.model.identityServiceURLSaveLocations, function(data) {
+                tempStepConfig = _.filter(this.model.saveConfig.stageConfigs, {"name": data.stepName})[0];
+                tempStepConfig[data.stepProperty] = this.data.defaultIdentityServiceURL;
+            }, this);
 
             $.extend(true, saveData, this.model.saveConfig, formData);
+
+            _.each(saveData.stageConfigs, function(step) {
+                if (_.has(step, "identityServiceProperties")) {
+                    delete step.identityServiceProperties;
+                }
+            });
+
             this.setKBAEnabled();
             return $.when(
                 ConfigDelegate.updateEntity(this.model.configUrl, saveData),
