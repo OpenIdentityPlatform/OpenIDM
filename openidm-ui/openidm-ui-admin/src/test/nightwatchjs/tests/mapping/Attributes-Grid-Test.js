@@ -93,6 +93,49 @@ module.exports = {
             .waitForElementNotPresent('@conditionFilterValueForPropertyErroneous', 1000, "There are no erroneously created select elements");
     },
 
+    'Condition Filter add button should add a comparison': function(client) {
+        var mappingPage = client.page.mapping(),
+            conditionFilterTab = mappingPage.section.conditionFilterTab;
+
+        client
+            .pause(1000);
+        mappingPage
+            .waitForElementPresent('@attributesGridFirstRow', 1000)
+            .click('@attributesGridFirstRow')
+            .waitForElementVisible('@scriptDialogUpdate', 1000)
+            .click('@conditionScriptTab')
+            .waitForElementVisible('@conditionFilter', 1000)
+            .click('@conditionFilter')
+            .waitForElementVisible('@conditionFilterSelect', 1000)
+            .click('@conditionFilterSelect')
+            .waitForElementVisible('@conditionFilterSelectOption', 1000)
+            .click('@conditionFilterSelectOption');
+
+        conditionFilterTab
+            .click('@addButton')
+            .waitForElementPresent('@comparison', 1000);
+    },
+
+    'Condition Filter should display the correct description': function(client) {
+        var mappingPage = client.page.mapping(),
+            conditionFilterTab = mappingPage.section.conditionFilterTab;
+
+            mappingPage
+                .assert.containsText('@conditionScriptEditor','Define a declarative Condition Filter or a Script to update a property.');
+    },
+
+    'Condition Filter remove button should remove a comparison': function(client) {
+        var mappingPage = client.page.mapping(),
+            conditionFilterTab = mappingPage.section.conditionFilterTab;
+
+            conditionFilterTab
+                .click('@removeButton')
+                .waitForElementNotPresent('@comparison', 1000);
+
+            mappingPage
+                .click('@scriptDialogCancel');
+    },
+
     "Grid should render sample data into row": function(client) {
         var mappingPage = client.page.mapping(),
             previewPopUpValue = mappingPage.elements.previewPopUpValue.selector;

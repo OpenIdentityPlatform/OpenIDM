@@ -790,7 +790,7 @@
             "notAvailableMsg1": "The link qualifier, ",
             "noLQdefined": "No link qualifiers defined",
             "notAvailableMsg2": " associated with this property is not available.  Add this link qualifier or update the condition.",
-            "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
+            "conditionScriptInfo": "Define a declarative Condition Filter or a Script to update a property.",
             "linkQualifierInfo": "Link one record in the source system to multiple records in the target system.",
             "linkQualifierStaticInfo" : "Static lists will apply each qualifier to every source record.",
             "linkQualifierScriptInfo" : "Dynamic scripts may return different link qualifiers for each source record; they must return all valid link qualifiers when the returnAll global variable is true. For more information, see the <a href='https://forgerock.org/openidm/doc/bootstrap/integrators-guide/#link-qualifier-object'>Integrators Guide</a>.",
