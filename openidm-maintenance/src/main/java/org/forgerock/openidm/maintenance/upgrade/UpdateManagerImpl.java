@@ -42,11 +42,8 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.Lock;
@@ -102,6 +99,8 @@ import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
 import org.osgi.framework.InvalidSyntaxException;
+import org.osgi.framework.ServiceEvent;
+import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
@@ -157,6 +156,12 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The context of this service */
     private ComponentContext context;
 
+    /** Listener for repo service used to set {@link #dbDirName} */
+    private ServiceListener repoServiceListener = null;
+
+    /** Cache of db.dirname from RepoBootService properties */
+    private volatile String dbDirName = null;
+
     public enum UpdateStatus {
         IN_PROGRESS,
         COMPLETE,
@@ -178,6 +183,21 @@ public class UpdateManagerImpl implements UpdateManager {
         this.osgiFrameworkService = (OSGiFrameworkService) serviceTracker.getService();
         this.context = compContext;
 
+        repoServiceListener = new ServiceListener() {
+            @Override
+            public void serviceChanged(ServiceEvent serviceEvent) {
+                switch(serviceEvent.getType()) {
+                    case ServiceEvent.REGISTERED:
+                        dbDirName = (String) serviceEvent.getServiceReference().getProperty("db.dirname");
+                        break;
+                    case ServiceEvent.UNREGISTERING:
+                        dbDirName = null;
+                        break;
+                }
+            }
+        };
+        this.context.getBundleContext().addServiceListener(repoServiceListener,
+                String.format("(%s=%s)", Constants.OBJECTCLASS, RepoBootService.class.getName()));
 
         if (osgiFrameworkService != null) {
             logger.debug("Obtained OSGiFrameworkService", compContext.getProperties());
@@ -186,49 +206,13 @@ public class UpdateManagerImpl implements UpdateManager {
         }
     }
 
-    /**
-     * Return the name of the db directory in db/ representing the current repo.
-     *
-     * This is retrieved from the OSGi context via the db.dirname property on the RepoBootService
-     *
-     * @return The name of the directory in db/ for the current repo or null if none exists
-     * @throws UpdateException If the repo bundle cannot be found
-     */
-    private String getDbDir() throws UpdateException {
-        try {
-            final Filter repoFilter = this.context.getBundleContext()
-                    .createFilter(String.format("(%s=%s)", Constants.OBJECTCLASS, RepoBootService.class.getName()));
-            ServiceTracker repoTracker = new ServiceTracker(this.context.getBundleContext(), repoFilter, null);
-
-            try {
-                repoTracker.open(true);
-
-                ServiceReference ref = repoTracker.getServiceReference();
-
-                if (ref == null) {
-                    throw new UpdateException("Repo bundle could not be found");
-                } else {
-                    final String dbDir = (String) ref.getProperty("db.dirname");
-
-                    if (dbDir == null) {
-                        logger.warn("No directory found in db/ for the current database.");
-                    }
-
-                    return dbDir;
-                }
-            } finally {
-                if (repoTracker != null) {
-                    repoTracker.close();
-                }
-            }
-        } catch (InvalidSyntaxException e) {
-            throw new UpdateException(e);
-        }
-    }
-
     @Deactivate
     void deactivate(ComponentContext compContext) {
+        if (repoServiceListener != null) {
+            this.context.getBundleContext().removeServiceListener(repoServiceListener);
+        }
         this.context = null;
+        this.osgiFrameworkService = null;
     }
 
     /** The update logging service */
@@ -425,13 +409,12 @@ public class UpdateManagerImpl implements UpdateManager {
      */
     private List<Path> listRequiredRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException, UpdateException {
         final List<Path> newUpdates = new ArrayList<>();
-        final String dbDir = getDbDir();
 
-        if (Strings.isNullOrEmpty(dbDir)) {
+        if (Strings.isNullOrEmpty(dbDirName)) {
             return new ArrayList<>();
         }
 
-        final Pattern updatePattern = Pattern.compile("db/"+dbDir+"/scripts/updates/v(\\d+)_(\\w+).(pg)?sql");
+        final Pattern updatePattern = Pattern.compile("db/"+dbDirName+"/scripts/updates/v(\\d+)_(\\w+).(pg)?sql");
 
         for (Path updateFile : archive.getFiles()) {
             if (updatePattern.matcher(updateFile.toString()).matches()
@@ -460,7 +443,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
     @Override
     public JsonValue listRepoUpdates(final Path archivePath) throws UpdateException {
-        if (Strings.isNullOrEmpty(getDbDir())) {
+        if (Strings.isNullOrEmpty(dbDirName)) {
             return json(array());
         }
 
@@ -924,7 +907,7 @@ public class UpdateManagerImpl implements UpdateManager {
             try {
                 final String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 final String installDir = IdentityServer.getInstance().getInstallLocation().toString();
-                final Path repoConfPath = Paths.get("db", getDbDir(), "conf");
+                final Path repoConfPath = Paths.get("db", dbDirName, "conf");
 
                 // Start by removing all files we no longer need
                 for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
