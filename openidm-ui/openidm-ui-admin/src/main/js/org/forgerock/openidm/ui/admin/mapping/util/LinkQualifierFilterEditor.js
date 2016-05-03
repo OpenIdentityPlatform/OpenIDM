@@ -91,7 +91,7 @@ define("org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor", 
             }, this));
         },
         addLinkQualifierNode : function(event) {
-            this.addNode(event, _.bind(function() {
+            this.addNodeAndReRender(event, _.bind(function() {
                 this.changeToDropdown();
             }, this));
         },

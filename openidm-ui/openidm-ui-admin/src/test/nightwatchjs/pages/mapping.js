@@ -30,6 +30,9 @@ module.exports = {
         scriptDialogUpdate: {
             selector: "#scriptDialogUpdate"
         },
+        scriptDialogCancel: {
+            selector: "#scriptDialogCancel"
+        },
         defaultValuesTab: {
             selector: 'a[href="#Default_Values"]'
         },
@@ -117,6 +120,14 @@ module.exports = {
                 secondInputName: 'li[index="1"] input.name',
                 secondInputValue: 'li[index="1"] input.value',
                 filter: '.filter'
+            }
+        },
+        conditionFilterTab: {
+            selector: "#conditionFilterHolder",
+            elements: {
+                addButton: '.add-btn',
+                removeButton: '.remove-btn',
+                comparison: 'li[index="2"]'
             }
         }
     }
