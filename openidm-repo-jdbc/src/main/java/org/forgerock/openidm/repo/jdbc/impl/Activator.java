@@ -30,6 +30,7 @@ import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.datasource.jdbc.impl.JDBCDataSourceService;
 import org.forgerock.openidm.repo.RepoBootService;
+import org.forgerock.openidm.repo.jdbc.DatabaseType;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -80,11 +81,38 @@ public class Activator implements BundleActivator {
          prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.jdbc");
          prop.put("openidm.router.prefix", "bootrepo");
          prop.put("db.type", "JDBC");
-         prop.put("db.dirname", ((JDBCRepoService)bootSvc).getDbDirname());
+         prop.put("db.dirname", getDbDirname(repoConfig));
+
          context.registerService(RepoBootService.class.getName(), bootSvc, prop);
          logger.info("Registered bootstrap repository service");
          logger.debug("JDBC bundle started", context);
      }
+
+    /**
+     * Get the name of the directory in db/ for the currently configured repo
+     * @param repoConfig The current repo configuration
+     * @return The name of the directory in db/ for the current repo
+     */
+    private String getDbDirname(JsonValue repoConfig) {
+        final DatabaseType databaseType = repoConfig.get(JDBCRepoService.CONFIG_DB_TYPE)
+                .defaultTo(DatabaseType.ANSI_SQL99.name())
+                .asEnum(DatabaseType.class);
+
+        switch (databaseType) {
+            case SQLSERVER:
+                return "mssql";
+            case MYSQL:
+            case POSTGRESQL:
+            case ORACLE:
+            case DB2:
+            case H2:
+                return databaseType.toString().toLowerCase();
+            case ANSI_SQL99:
+            case ODBC:
+            default:
+                return null;
+        }
+    }
 
      public void stop(BundleContext context) {
          logger.debug("JDBC bundle stopped", context);

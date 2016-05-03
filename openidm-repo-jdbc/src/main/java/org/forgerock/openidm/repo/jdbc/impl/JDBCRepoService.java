@@ -739,23 +739,6 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         }
     }
 
-    String getDbDirname() {
-        switch (databaseType) {
-            case SQLSERVER:
-                return "mssql";
-            case MYSQL:
-            case POSTGRESQL:
-            case ORACLE:
-            case DB2:
-            case H2:
-                return databaseType.toString().toLowerCase();
-            case ANSI_SQL99:
-            case ODBC:
-            default:
-                return null;
-        }
-    }
-
     /**
      * Performs the repo command defined by the {@code request).
      *
