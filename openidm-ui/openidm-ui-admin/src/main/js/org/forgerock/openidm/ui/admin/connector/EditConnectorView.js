@@ -183,10 +183,12 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                     this.data.resultsHandlerConfig = data.resultsHandlerConfig;
                     this.data.operationTimeout = data.operationTimeout;
 
-                    this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler = (this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler === "true" || this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler === true);
-                    this.data.resultsHandlerConfig.enableCaseInsensitiveFilter = (this.data.resultsHandlerConfig.enableCaseInsensitiveFilter === "true" || this.data.resultsHandlerConfig.enableCaseInsensitiveFilter === true);
-                    this.data.resultsHandlerConfig.enableFilteredResultsHandler = (this.data.resultsHandlerConfig.enableFilteredResultsHandler === "true" || this.data.resultsHandlerConfig.enableFilteredResultsHandler === true);
-                    this.data.resultsHandlerConfig.enableNormalizingResultsHandler = (this.data.resultsHandlerConfig.enableNormalizingResultsHandler === "true" || this.data.resultsHandlerConfig.enableNormalizingResultsHandler === true);
+                    if(this.data.resultsHandlerConfig) {
+                        this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler = (this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler === "true" || this.data.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler === true);
+                        this.data.resultsHandlerConfig.enableCaseInsensitiveFilter = (this.data.resultsHandlerConfig.enableCaseInsensitiveFilter === "true" || this.data.resultsHandlerConfig.enableCaseInsensitiveFilter === true);
+                        this.data.resultsHandlerConfig.enableFilteredResultsHandler = (this.data.resultsHandlerConfig.enableFilteredResultsHandler === "true" || this.data.resultsHandlerConfig.enableFilteredResultsHandler === true);
+                        this.data.resultsHandlerConfig.enableNormalizingResultsHandler = (this.data.resultsHandlerConfig.enableNormalizingResultsHandler === "true" || this.data.resultsHandlerConfig.enableNormalizingResultsHandler === true);
+                    }
 
                     //Store in memory version of connector details. This is to ensure we can move around tabs and keep the correct data state.
                     this.connectorDetails = data;
@@ -387,11 +389,11 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
 
              Need to check this later when form2js updates
              */
-            if(this.$el.find("#advancedForm")) {
-                mergedResults.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler = (this.$el.find("#advancedForm #advancedEnableNormalizingResultsHandler").val() === "true");
-                mergedResults.resultsHandlerConfig.enableCaseInsensitiveFilter = (this.$el.find("#advancedForm #advancedEnableFilteredResultsHandler").val() === "true");
-                mergedResults.resultsHandlerConfig.enableFilteredResultsHandler = (this.$el.find("#advancedForm #advancedEnableCaseInsensitiveFilter").val() === "true");
-                mergedResults.resultsHandlerConfig.enableNormalizingResultsHandler = (this.$el.find("#advancedForm #advancedEnableAttributesToGetSearchResultsHandler").val() === "true");
+            if(this.$el.find("#advancedForm") && mergedResults.resultsHandlerConfig) {
+                mergedResults.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler = (this.$el.find("#advancedForm #advancedEnableAttributesToGetSearchResultsHandler").val() === "true");
+                mergedResults.resultsHandlerConfig.enableCaseInsensitiveFilter = (this.$el.find("#advancedForm #advancedEnableCaseInsensitiveFilter").val() === "true");
+                mergedResults.resultsHandlerConfig.enableFilteredResultsHandler = (this.$el.find("#advancedForm #advancedEnableFilteredResultsHandler").val() === "true");
+                mergedResults.resultsHandlerConfig.enableNormalizingResultsHandler = (this.$el.find("#advancedForm #advancedEnableNormalizingResultsHandler").val() === "true");
             }
 
             //Need to convert all strings to numbers also some safety check to prevent bad values
