@@ -14,8 +14,17 @@
      * Copyright 2016 ForgeRock AS.
      */
 
-PowerShell Connector - Azure samples
+Azure AD PowerShell Connector Sample
 =========================================================================================
+
+This sample will demonstrate the capabilities of the Azure AD Powershell Connector.  In addition, this will also show 
+how these scripts get applied, in OpenIDM, with a mapping from 'AzureAD User Accounts and Groups' to 'Managed Users 
+and Roles'.
+
+A note about Group management in Azure AD.  Azure AD's API doesn't force uniqueness amongst groups. The create API
+accepts only 2 parameters, the group display name and the description.  If your system requires that groups maintained
+across all your systems need to enforce unique names, you will need to modify the scripts and/or your IDM mapping 
+configuration to enforce the uniqueness.
 
 The azureADScripts/ folder contains several sample scripts for the OpenICF PowerShell Connector.
 This sample uses the MS Azure Active Directory PowerShell module. See:
@@ -24,7 +33,7 @@ This sample uses the MS Azure Active Directory PowerShell module. See:
 A Microsoft Azure Account is required to setup an Azure Active Directory.  If you don't have one, create a Microsoft
 Azure account. See: [http://azure.microsoft.com](http://azure.microsoft.com)
 
-Follow these steps to use this sample:
+Follow these steps to setup the accounts needed to use this sample:
 
 1.	Set up an Azure AD Cloud service.
     1.	[http://azure.microsoft.com](http://azure.microsoft.com)
@@ -82,18 +91,11 @@ newly created directory.
     [https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#powershell-connector](https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#powershell-connector)
 
 1.  Copy all the azureADScripts/*.ps1 scripts to the Windows box where you installed the .NET connector server and the
-    PowerShell connector.  In the sample provisioner configuration file
-    (`samples/provisioners/provisioner.openicf-azureadpowershell.json`), files are expected to be in the folder
-    `C:/openidm/samples/powershell2AzureAD/azureADScripts/`
-
-1.  Copy the remote connector provisioner file to openidm/conf/ from
-    openidm/samples/provisioners/provisioner.openicf.connectorinfoprovider.json
-    *  Adapt to your local configuration of the Windows Box with the installed connector server.
-    *  Remove the "protocol" configuration, to be compatible with a 1.4 connector version.
+    PowerShell connector.
 
 1.  Edit the sample PowerShell connector provisioner file to suit your installation.
-    * The provisioner file is samples/provisioners/provisioner.openicf-azureadpowershell.json. You may need to 
-        change the file paths. For instance, the following may not reflect your Windows folder location. The 
+    * The provisioner file is `samples/powershell2AzureAD/conf/provisioner.openicf-azureadpowershell.json`. You may need 
+        to change the file paths. For instance, the following may not reflect your Windows script folder location. The 
         other settings should not be changed:
 
         "configurationProperties" : {
@@ -110,9 +112,11 @@ newly created directory.
     * Login and Password should be set to the credentials of the user admin of your Azure Directory.  For example:
     `admin@your_domain.onmicrosoft.com`.  Unless your azure domain is fully customized, the admin account will
     have `onmicrosoft.com` in the domain.
-1. Copy the provisioner file to the openidm/conf/ folder.
+1. Start the sample: 
 
-OpenIDM REST Calls
+        ./startup.sh -p samples/powershell2AzureAD
+
+OpenIDM Azure AD System REST Calls
 ====================================================================
 
 Note: In addition to the calls below, you may also be interested in looking at the 
@@ -276,12 +280,12 @@ This class runs through variations of the calls below and validates that the Pow
          --header 'x-openidm-username: openidm-admin' \
          --header 'x-openidm-password: openidm-admin' \
          --header 'content-type: application/json' \
-         --data '{ \
-             "UserPrincipalName" : "test_Roger.Smith@openidm.onmicrosoft.com", \
-             "LastName" : "Smith", \
-             "FirstName" : "Roger", \
-             "DisplayName" : "Mr. Smith", \
-             "PasswordNeverExpires" : false \
+         --data '{ 
+             "UserPrincipalName" : "test_Roger.Smith@openidm.onmicrosoft.com", 
+             "LastName" : "Smith", 
+             "FirstName" : "Roger", 
+             "DisplayName" : "Mr. Smith", 
+             "PasswordNeverExpires" : false 
          }'
 
     Returns:
@@ -297,19 +301,19 @@ This class runs through variations of the calls below and validates that the Pow
             "LastName" : "Smith"
         }
 
-1. Create a user: 
+1. Create a second user, expecting it to fail as a duplicate: 
 
         curl --request POST \
          --url 'http://localhost:8080/openidm/system/azureadpowershell/account?_action=create' \
          --header 'x-openidm-username: openidm-admin' \
          --header 'x-openidm-password: openidm-admin' \
          --header 'content-type: application/json' \
-         --data '{ \
-             "UserPrincipalName" : "test_Roger.Smith@openidm.onmicrosoft.com", \
-             "LastName" : "Smith", \
-             "FirstName" : "Roger", \
-             "DisplayName" : "Mr. Smith", \
-             "PasswordNeverExpires" : false \
+         --data '{ 
+             "UserPrincipalName" : "test_Roger.Smith@openidm.onmicrosoft.com",
+             "LastName" : "Smith",
+             "FirstName" : "Roger",
+             "DisplayName" : "Mr. Smith",
+             "PasswordNeverExpires" : false
          }'
 
     Returns:
@@ -347,12 +351,12 @@ This class runs through variations of the calls below and validates that the Pow
          --header 'x-openidm-password: openidm-admin' \
          --header 'content-type: application/json' \
          --header 'if-match: *' \
-         --data '[ \
-             { \
-                 "operation" : "replace", \
-                 "field" : "FirstName", \
-                 "value" : "ModifiedFirstName" \
-             } \
+         --data '[
+             {
+                 "operation" : "replace",
+                 "field" : "FirstName",
+                 "value" : "ModifiedFirstName"
+             }
          ]'
 
     Returns:
@@ -394,9 +398,9 @@ This class runs through variations of the calls below and validates that the Pow
          --header 'x-openidm-username: openidm-admin' \
          --header 'x-openidm-password: openidm-admin' \
          --header 'content-type: application/json' \
-         --data '{ \
-             "DisplayName" : "test_alpha group", \
-             "Description" : "Alpha Group Description" \
+         --data '{
+             "DisplayName" : "test_alpha group",
+             "Description" : "Alpha Group Description"
          }'
 
     Returns:
@@ -418,12 +422,12 @@ This class runs through variations of the calls below and validates that the Pow
          --header 'x-openidm-password: openidm-admin' \
          --header 'content-type: application/json' \
          --header 'if-match: *' \
-         --data '{ \
-             "Members" : [ \
-                 { \
-                     "ObjectId" : "314ab35c-4148-48a1-b028-9d63f8edf208" \
-                 } \
-             ] \
+         --data '{
+             "Members" : [
+                 {
+                     "ObjectId" : "314ab35c-4148-48a1-b028-9d63f8edf208"
+                 }
+             ]
          }'
 
     Returns:
@@ -476,20 +480,20 @@ This class runs through variations of the calls below and validates that the Pow
          --header 'x-openidm-password: openidm-admin' \
          --header 'content-type: application/json' \
          --header 'if-match: *' \
-         --data '{ \
-             "_id" : "fcf8237d-0197-4de9-8f36-aaf0ba344091", \
-             "Description" : "Alpha Group Description_updated", \
-             "Members" : [ \
-                 { \
-                     "ObjectId" : "314ab35c-4148-48a1-b028-9d63f8edf208", \
-                     "DisplayName" : "Mr. Smith", \
-                     "GroupMemberType" : "User", \
-                     "EmailAddress" : "test_Roger.Smith@openidm.onmicrosoft.com" \
-                 } \
-             ], \
-             "DisplayName" : "test_alpha group", \
-             "GroupType" : "Security", \
-             "objectId" : "fcf8237d-0197-4de9-8f36-aaf0ba344091" \
+         --data '{
+             "_id" : "fcf8237d-0197-4de9-8f36-aaf0ba344091",
+             "Description" : "Alpha Group Description_updated",
+             "Members" : [
+                 {
+                     "ObjectId" : "314ab35c-4148-48a1-b028-9d63f8edf208",
+                     "DisplayName" : "Mr. Smith",
+                     "GroupMemberType" : "User",
+                     "EmailAddress" : "test_Roger.Smith@openidm.onmicrosoft.com"
+                 }
+             ],
+             "DisplayName" : "test_alpha group",
+             "GroupType" : "Security",
+             "objectId" : "fcf8237d-0197-4de9-8f36-aaf0ba344091"
          }'
 
     Returns:
@@ -510,7 +514,7 @@ This class runs through variations of the calls below and validates that the Pow
             "objectId" : "fcf8237d-0197-4de9-8f36-aaf0ba344091"
         }
 
-1. Remove member from a group with update: (get, then update with modified members list)
+1. Remove member from a group with update: (update full group with modified members list)
 
         curl --request PUT \
          --url 'http://localhost:8080/openidm/system/azureadpowershell/group/fcf8237d-0197-4de9-8f36-aaf0ba344091' \
@@ -518,13 +522,13 @@ This class runs through variations of the calls below and validates that the Pow
          --header 'x-openidm-password: openidm-admin' \
          --header 'content-type: application/json' \
          --header 'if-match: *' \
-         --data '{ \
-             "_id" : "fcf8237d-0197-4de9-8f36-aaf0ba344091", \
-             "Description" : "Alpha Group Description_updated", \
-             "Members" : [ ], \
-             "DisplayName" : "test_alpha group", \
-             "GroupType" : "Security", \
-             "objectId" : "fcf8237d-0197-4de9-8f36-aaf0ba344091" \
+         --data '{
+             "_id" : "fcf8237d-0197-4de9-8f36-aaf0ba344091",
+             "Description" : "Alpha Group Description_updated",
+             "Members" : [ ],
+             "DisplayName" : "test_alpha group",
+             "GroupType" : "Security",
+             "objectId" : "fcf8237d-0197-4de9-8f36-aaf0ba344091"
          }'
 
     Returns:
@@ -536,4 +540,146 @@ This class runs through variations of the calls below and validates that the Pow
             "DisplayName" : "test_alpha group",
             "GroupType" : "Security",
             "objectId" : "fcf8237d-0197-4de9-8f36-aaf0ba344091"
+        }
+
+Azure AD System to OpenIDM Managed User reconciliation REST Calls
+====================================================================
+
+These calls utilize the `conf/sync.json` file which configures the reconciliation mapping between the Azure AD system 
+resource with the OpenIDM managed objects.
+
+1. Create a user: 
+
+        curl --request POST \
+         --url 'http://localhost:8080/openidm/system/azureadpowershell/account?_action=create' \
+         --header 'x-openidm-username: openidm-admin' \
+         --header 'x-openidm-password: openidm-admin' \
+         --header 'content-type: application/json' \
+         --data '{
+             "UserPrincipalName" : "Big.Cheese@openidm.onmicrosoft.com",
+             "LastName" : "Cheese",
+             "FirstName" : "Big",
+             "DisplayName" : "Mr. Cheese",
+             "PasswordNeverExpires" : false
+         }'
+
+    Returns:
+
+        {
+            "_id" : "5ac2e225-1b4b-45fb-aedd-aaf4fa1f921e",
+            "LastName" : "Cheese",
+            "LiveId" : "1003000097B68985",
+            "LastPasswordChangeTimestamp" : "5/3/2016 11:29:04 PM",
+            "UserPrincipalName" : "Big.Cheese@openidm.onmicrosoft.com",
+            "FirstName" : "Big",
+            "PasswordNeverExpires" : false,
+            "DisplayName" : "Mr. Cheese"
+        }
+
+1. Get Managed User by username
+
+        curl --request GET \
+         --url 'http://localhost:8080/openidm/managed/user?_queryFilter=userName%20eq%20%22Big.Cheese@openidm.onmicrosoft.com%22' \
+         --header 'x-openidm-username: openidm-admin' \
+         --header 'x-openidm-password: openidm-admin' 
+    Returns:
+
+        {
+            "result" : [ ],
+            "resultCount" : 0,
+            "pagedResultsCookie" : null,
+            "totalPagedResultsPolicy" : "NONE",
+            "totalPagedResults" : -1,
+            "remainingPagedResults" : -1
+        }
+
+1. Invoke recon on openidm
+
+        curl --request POST \
+         --url 'http://localhost:8080/openidm/recon?_action=recon&mapping=systemAzureadpowershellAccount_managedUser&waitForCompletion=true' \
+         --header 'x-openidm-username: openidm-admin' \
+         --header 'x-openidm-password: openidm-admin' 
+    Returns:
+
+        {
+            "_id" : "dfc57fb9-576d-4dc3-b87f-1b96617978ba-1635",
+            "state" : "SUCCESS"
+        }
+
+1. Get Managed User by username
+
+        curl --request GET \
+         --url 'http://localhost:8080/openidm/managed/user?_queryFilter=userName%20eq%20%22Big.Cheese@openidm.onmicrosoft.com%22' \
+         --header 'x-openidm-username: openidm-admin' \
+         --header 'x-openidm-password: openidm-admin' 
+    Returns:
+
+        {
+            "result" : [
+                {
+                    "_id" : "ca19ea00-6b93-449c-a8e5-50cf18942b92",
+                    "_rev" : "8",
+                    "mail" : "Big.Cheese@openidm.onmicrosoft.com",
+                    "sn" : "Cheese",
+                    "givenName" : "Big",
+                    "userName" : "Big.Cheese@openidm.onmicrosoft.com",
+                    "accountStatus" : "active",
+                    "effectiveRoles" : [ ],
+                    "effectiveAssignments" : [ ]
+                }
+            ],
+            "resultCount" : 1,
+            "pagedResultsCookie" : null,
+            "totalPagedResultsPolicy" : "NONE",
+            "totalPagedResults" : -1,
+            "remainingPagedResults" : -1
+        }
+
+1. Delete a user on the AzureAD system: 
+
+        curl --request DELETE \
+         --url 'http://localhost:8080/openidm/system/azureadpowershell/account/5ac2e225-1b4b-45fb-aedd-aaf4fa1f921e' \
+         --header 'x-openidm-username: openidm-admin' \
+         --header 'x-openidm-password: openidm-admin' 
+    Returns:
+
+        {
+            "_id" : "5ac2e225-1b4b-45fb-aedd-aaf4fa1f921e",
+            "LastName" : "Cheese",
+            "LiveId" : "1003000097B68985",
+            "LastPasswordChangeTimestamp" : "5/3/2016 11:29:04 PM",
+            "UserPrincipalName" : "Big.Cheese@openidm.onmicrosoft.com",
+            "FirstName" : "Big",
+            "PasswordNeverExpires" : false,
+            "DisplayName" : "Mr. Cheese"
+        }
+
+1. Invoke recon on to remove the user on IDM.
+
+        curl --request POST \
+         --url 'http://localhost:8080/openidm/recon?_action=recon&mapping=systemAzureadpowershellAccount_managedUser&waitForCompletion=true' \
+         --header 'x-openidm-username: openidm-admin' \
+         --header 'x-openidm-password: openidm-admin' 
+    Returns:
+
+        {
+            "_id" : "dfc57fb9-576d-4dc3-b87f-1b96617978ba-1663",
+            "state" : "SUCCESS"
+        }
+
+1. Get Managed User by username to show that it no longer exists on IDM.
+
+        curl --request GET \
+         --url 'http://localhost:8080/openidm/managed/user?_queryFilter=userName%20eq%20%22Big.Cheese@openidm.onmicrosoft.com%22' \
+         --header 'x-openidm-username: openidm-admin' \
+         --header 'x-openidm-password: openidm-admin' 
+    Returns:
+
+        {
+            "result" : [ ],
+            "resultCount" : 0,
+            "pagedResultsCookie" : null,
+            "totalPagedResultsPolicy" : "NONE",
+            "totalPagedResults" : -1,
+            "remainingPagedResults" : -1
         }

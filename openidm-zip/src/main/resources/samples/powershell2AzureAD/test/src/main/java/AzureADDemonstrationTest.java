@@ -39,7 +39,9 @@ import org.testng.annotations.Test;
  * A Test that demonstrates and validates the Azure AD Powershell Connector.
  */
 public class AzureADDemonstrationTest {
-    private static final String AZURE_ENDPOINT = "http://localhost:8080/openidm/system/azureadpowershell";
+    private static final String IDM_ENDPOINT = "http://localhost:8080/openidm";
+    private static final String AZURE_ENDPOINT = IDM_ENDPOINT + "/system/azureadpowershell";
+    private static final String MANAGED_ENDPOINT = IDM_ENDPOINT + "/managed";
     private static final String AZURE_AD_DOMAIN = "openidm.onmicrosoft.com";
     private static final String TEST_PREFIX = "test_";
 
@@ -82,12 +84,14 @@ public class AzureADDemonstrationTest {
         // Verify creating a user.
         String lastName = "Smith";
         String firstName = "Roger";
-        JsonValue smithUser = createTestUser(firstName, lastName);
+        String userPrincipalName = TEST_PREFIX + firstName + "." + lastName + "@" + AZURE_AD_DOMAIN;
+        JsonValue smithUser = createTestUser(firstName, lastName,
+                userPrincipalName);
         assertThat(smithUser).stringAt("_id").isNotEmpty();
         String smithId = smithUser.get("_id").asString();
 
         // Verify creating a user fails if duplicated.
-        JsonValue smithUserDuplicate = createTestUser(firstName, lastName);
+        JsonValue smithUserDuplicate = createTestUser(firstName, lastName, userPrincipalName);
         assertThat(smithUserDuplicate).stringAt("reason").isEqualTo("Internal Server Error");
 
         // Verify get user by ID.
@@ -110,7 +114,7 @@ public class AzureADDemonstrationTest {
         assertThat(getUserById(smithId)).stringAt("FirstName").isEqualTo("ModifiedFirstName");
 
         // Create Group
-        JsonValue testGroup = createTestGroup("alpha group", "Alpha Group Description");
+        JsonValue testGroup = createTestGroup(TEST_PREFIX + "alpha group", "Alpha Group Description");
         assertThat(testGroup).stringAt("_id").isNotEmpty();
         String groupId = testGroup.get("_id").asString();
 
@@ -132,7 +136,45 @@ public class AzureADDemonstrationTest {
         // Remove member from group via group update. (get full group, remove member from array, update group)
         JsonValue updatedGroupNoMembers = removeMemberFromGroupViaUpdate(groupId, smithId);
         assertThat(updatedGroupNoMembers).hasArray("Members").isEmpty();
+    }
 
+    /**
+     * Test that demonstrates user and group reconciliation using a sample Azure AD to OpenIDM mapping configuration.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testManagedObjectRecon() throws Exception {
+        // Create the test user on the target system.
+        String userPrincipalName = "Big.Cheese@openidm.onmicrosoft.com";
+        JsonValue testUser = createTestUser("Big", "Cheese", userPrincipalName);
+        assertThat(testUser).stringAt("_id").isNotEmpty();
+        assertThat(testUser).stringAt("UserPrincipalName").isEqualTo(userPrincipalName);
+        String testSystemUserId = testUser.get("_id").asString();
+
+        // Get managed user to show that it doesn't exist in IDM yet.
+        JsonValue managedUserByUsername = getManagedUserByUsername(userPrincipalName);
+        assertThat(managedUserByUsername).hasArray("result").isEmpty();
+
+        // Call recon.
+        JsonValue reconJson = invokeRecon("systemAzureadpowershellAccount_managedUser");
+        assertThat(reconJson).stringAt("state").isEqualTo("SUCCESS");
+
+        // Get managed user to show that it now exists in IDM
+        JsonValue foundUser = getManagedUserByUsername(userPrincipalName);
+        assertThat(foundUser).hasArray("result").hasSize(1);
+
+        // Delete the user on the target system.
+        JsonValue deletedSystemUser = deleteUser(testSystemUserId);
+        assertThat(deletedSystemUser).stringAt("_id").isEqualTo(testSystemUserId);
+
+        // Call recon.
+        JsonValue newReconJson = invokeRecon("systemAzureadpowershellAccount_managedUser");
+        assertThat(reconJson).stringAt("state").isEqualTo("SUCCESS");
+
+        // Get managed user to show that it now no longer exists in IDM
+        JsonValue notFoundUser = getManagedUserByUsername(userPrincipalName);
+        assertThat(notFoundUser).hasArray("result").hasSize(0);
     }
 
     /**
@@ -141,7 +183,7 @@ public class AzureADDemonstrationTest {
      * @return the json results
      * @throws Exception
      */
-    public JsonValue validateConnector() throws Exception {
+    private JsonValue validateConnector() throws Exception {
         System.out.println("1. Validate that the connection with the Azure connector is OK:");
         HttpResponse<String> response = Unirest.post(AZURE_ENDPOINT + "?_action=test")
                 .header("x-openidm-username", "openidm-admin")
@@ -156,7 +198,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue getTestUsers() throws Exception {
+    private JsonValue getTestUsers() throws Exception {
         System.out.println("1. Get users by query filter: ");
         HttpResponse<String> response = Unirest.get(
                 AZURE_ENDPOINT + "/account?_queryFilter=UserPrincipalName%20sw%20%22" + TEST_PREFIX + "%22")
@@ -175,7 +217,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue createTestUser(String first, String last) throws Exception {
+    private JsonValue createTestUser(String first, String last, String userPrincipalName) throws Exception {
         System.out.println("1. Create a user: ");
         HttpResponse<String> response = Unirest.post(AZURE_ENDPOINT + "/account?_action=create")
                 .header("x-openidm-username", "openidm-admin")
@@ -184,8 +226,7 @@ public class AzureADDemonstrationTest {
                 .body(writeValueAsString(
                         json(
                                 object(
-                                        field("UserPrincipalName",
-                                                TEST_PREFIX + first + "." + last + "@" + AZURE_AD_DOMAIN),
+                                        field("UserPrincipalName", userPrincipalName),
                                         field("LastName", last),
                                         field("FirstName", first),
                                         field("DisplayName", "Mr. " + last),
@@ -204,7 +245,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue getUserById(String id) throws Exception {
+    private JsonValue getUserById(String id) throws Exception {
         System.out.println("1. Get User By ID: ");
         HttpResponse<String> response = Unirest.get(AZURE_ENDPOINT + "/account/" + id)
                 .header("x-openidm-username", "openidm-admin")
@@ -220,7 +261,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue deleteUser(String id) throws Exception {
+    private JsonValue deleteUser(String id) throws Exception {
         System.out.println("1. Delete a user: ");
         HttpResponse<String> response = Unirest.delete(AZURE_ENDPOINT + "/account/" + id)
                 .header("x-openidm-username", "openidm-admin")
@@ -237,7 +278,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue patchUser(String id, JsonValue patchJson) throws Exception {
+    private JsonValue patchUser(String id, JsonValue patchJson) throws Exception {
         System.out.println("1. Patch a user: ");
         HttpResponse<String> response = Unirest.patch(AZURE_ENDPOINT + "/account/" + id)
                 .header("x-openidm-username", "openidm-admin")
@@ -257,7 +298,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue createTestGroup(String name, String description) throws Exception {
+    private JsonValue createTestGroup(String name, String description) throws Exception {
         System.out.println("1. Create a group: ");
         HttpResponse<String> response = Unirest.post(AZURE_ENDPOINT + "/group?_action=create")
                 .header("x-openidm-username", "openidm-admin")
@@ -266,7 +307,7 @@ public class AzureADDemonstrationTest {
                 .body(writeValueAsString(
                         json(
                                 object(
-                                        field("DisplayName", TEST_PREFIX + name),
+                                        field("DisplayName", name),
                                         field("Description", description)
                                 )
                         )
@@ -281,7 +322,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue getTestGroupsByFilter() throws Exception {
+    private JsonValue getTestGroupsByFilter() throws Exception {
         System.out.println("1. Get groups by filter: ");
         HttpResponse<String> response = Unirest.get(
                 AZURE_ENDPOINT + "/group?_queryFilter=DisplayName%20sw%20%22" + TEST_PREFIX + "%22")
@@ -298,7 +339,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue deleteGroup(String id) throws Exception {
+    private JsonValue deleteGroup(String id) throws Exception {
         System.out.println("1. Delete a group:");
         HttpResponse<String> response = Unirest.delete(AZURE_ENDPOINT + "/group/" + id)
                 .header("x-openidm-username", "openidm-admin")
@@ -314,7 +355,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue getGroupById(String id) throws Exception {
+    private JsonValue getGroupById(String id) throws Exception {
         System.out.println("1. Get Group by ID:");
         HttpResponse<String> response = Unirest.get(AZURE_ENDPOINT + "/group/" + id)
                 .header("x-openidm-username", "openidm-admin")
@@ -331,7 +372,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue addMemberToGroupViaUpdate(String groupId, String userId) throws Exception {
+    private JsonValue addMemberToGroupViaUpdate(String groupId, String userId) throws Exception {
         System.out.println("1. Add a member to a group by writing entire group with updated Members list:");
         HttpResponse<String> response = Unirest.put(AZURE_ENDPOINT + "/group/" + groupId)
                 .header("x-openidm-username", "openidm-admin")
@@ -357,7 +398,7 @@ public class AzureADDemonstrationTest {
      * @return the json response
      * @throws Exception
      */
-    public JsonValue updateGroup(String groupId, JsonValue groupJson) throws Exception {
+    private JsonValue updateGroup(String groupId, JsonValue groupJson) throws Exception {
         System.out.println("1. Update a group: ");
         HttpResponse<String> response = Unirest.put(AZURE_ENDPOINT + "/group/" + groupId)
                 .header("x-openidm-username", "openidm-admin")
@@ -378,7 +419,7 @@ public class AzureADDemonstrationTest {
      * @return the json response.
      * @throws Exception
      */
-    public JsonValue removeMemberFromGroupViaUpdate(String groupId, String userId) throws Exception {
+    private JsonValue removeMemberFromGroupViaUpdate(String groupId, String userId) throws Exception {
         System.out.println("1. Remove member from a group with update: (get, then update with modified members list)");
         JsonValue group = getGroupById(groupId);
         List<Map> members = group.get("Members").asList(Map.class);
@@ -392,6 +433,40 @@ public class AzureADDemonstrationTest {
         group.put("Members", updatedMembers);
 
         return updateGroup(groupId, group);
+    }
+
+    /**
+     * Uses a query filter to find the managed user with the provided username.
+     *
+     * @param username username to filter on.
+     * @return the user json.
+     * @throws Exception
+     */
+    private JsonValue getManagedUserByUsername(String username) throws Exception {
+        System.out.println("1. Get Managed User by username");
+        HttpResponse<String> response = Unirest.get(
+                MANAGED_ENDPOINT + "/user?_queryFilter=userName%20eq%20%22" + username + "%22")
+                .header("x-openidm-username", "openidm-admin")
+                .header("x-openidm-password", "openidm-admin")
+                .asString();
+        return json(readJson(response.getBody()));
+    }
+
+    /**
+     * Invokes recon on IDM.
+     *
+     * @param mappingName mapping name to perform the recon on.
+     * @return the response json of the recon.
+     * @throws Exception
+     */
+    private JsonValue invokeRecon(String mappingName) throws Exception {
+        System.out.println("1. Invoke recon on openidm");
+        HttpResponse<String> response = Unirest.post(
+                IDM_ENDPOINT + "/recon?_action=recon&mapping=" + mappingName + "&waitForCompletion=true")
+                .header("x-openidm-username", "openidm-admin")
+                .header("x-openidm-password", "openidm-admin")
+                .asString();
+        return json(readJson(response.getBody()));
     }
 
     /*
@@ -461,7 +536,7 @@ public class AzureADDemonstrationTest {
         }
 
         private RequestBodyEntityWrapper body(String payload) throws IOException {
-            System.out.println("\\\n         --data '" + writeAsString(json(readJson(payload))) + "'");
+            System.out.println("\\\n         --data '" + writeAsStringNoEolSlash(json(readJson(payload))) + "'");
             return new RequestBodyEntityWrapper(requestWithBody.body(payload));
         }
 
@@ -539,5 +614,18 @@ public class AzureADDemonstrationTest {
     private static String writeAsString(JsonValue json) throws JsonProcessingException {
         return writePrettyValueAsString(json).replaceAll("\\n", " \\\\\n         ");
     }
+
+    /**
+     * Converts the json to pretty string, the string will be copy-paste compatible for unix cmd line for when
+     * the content is contained in quotes, ie no end-of-line slash is needed.
+     *
+     * @param json the json to convert.
+     * @return the formatted json.
+     * @throws JsonProcessingException
+     */
+    private static String writeAsStringNoEolSlash(JsonValue json) throws JsonProcessingException {
+        return writePrettyValueAsString(json).replaceAll("\\n", " \\\n         ");
+    }
+
 }
 
