@@ -15,12 +15,24 @@
  */
 
 define([
-    "underscore",
+    "jquery",
+    "lodash",
+    "handlebars",
+    "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
+    "org/forgerock/openidm/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/LoginView",
+    "org/forgerock/commons/ui/common/util/OAuth",
+    "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"
-], function(_,
-            commonLoginView,
-            amLoginUtils) {
+], function($, _, Handlebars,
+    SocialDelegate,
+    Constants,
+    EventManager,
+    commonLoginView,
+    OAuth,
+    Router,
+    amLoginUtils) {
 
     var LoginView = function () {},
         obj;
@@ -29,15 +41,66 @@ define([
 
     obj = new LoginView();
 
+    obj.partials = (commonLoginView.partials || []).concat([
+        "partials/login/_loginButtons.html",
+        "partials/providers/_OAuth.html"
+    ]);
+
+    _.extend(obj.events, {
+        "click .oauth": "oauthHandler"
+    });
+
+    // TODO: share oauthHandler logic between registration and login
+    obj.oauthHandler = function (e) {
+        e.preventDefault();
+        window.location.href = OAuth.getRequestURL(
+            $(e.target).attr("authorization_endpoint"),
+            $(e.target).attr("client_id"),
+            ["openid"],
+            Router.getLink(Router.currentRoute,
+                [
+                    "&provider=" + $(e.target).val() +
+                    "&redirect_uri=" + OAuth.getRedirectURI()
+                ]
+            )
+        );
+    };
+    // TODO: share providerPartialFromType between registration and login
+    Handlebars.registerHelper("providerPartialFromType", function (type) {
+        return "providers/_" + type;
+    });
+
     obj.render = function (args, callback) {
-        var amCallback = amLoginUtils.init(this,true);
+        var amCallback = amLoginUtils.init(this,true),
+            oauthProviders = SocialDelegate.providerList(),
+            params = Router.convertCurrentUrlToJSON().params;
+
+        if (!_.isEmpty(params) &&
+            _.has(params, "provider") &&
+            _.has(params, "code") &&
+            _.has(params, "redirect_uri")) {
+
+            SocialDelegate.getAuthToken(params.provider, params.code, params.redirect_uri)
+                .then(function (authToken) {
+                    EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
+                        authToken: authToken.auth_token
+                    });
+                });
+        }
 
         commonLoginView.render.call(this, args, _.bind(function () {
+
+            oauthProviders.then(_.bind(function (response) {
+                this.$el.find("[name=loginButton]").after(
+                    Handlebars.compile("{{> login/_loginButtons}}")({providers: response.providers})
+                );
+            }, this));
+
             if (callback) {
                 callback();
             }
 
-            if(amCallback) {
+            if (amCallback) {
                 amCallback();
             }
 

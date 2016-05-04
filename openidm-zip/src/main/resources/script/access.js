@@ -60,6 +60,12 @@ var httpAccessConfig =
            "actions"    : "*"
         },
         {
+           "pattern"    : "identityProviders",
+           "roles"      : "*",
+           "methods"    : "read,action",
+           "actions"    : "getauthtoken"
+        },
+        {
             "pattern"    : "config/ui/themeconfig",
             "roles"      : "*",
             "methods"    : "read",
@@ -84,13 +90,6 @@ var httpAccessConfig =
             "methods"    : "read",
             "actions"    : "*"
         },
-        {
-            "pattern"    : "identityProviders",
-            "roles"      : "*",
-            "methods"    : "read",
-            "actions"    : "*"
-        },
-
         // externally-visisble Self-Service endpoints
         {
            "pattern"    : "selfservice/registration",

@@ -28,15 +28,27 @@ define([
 
     obj.login = function(params, successCallback, errorCallback) {
         cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
-        return UserModel.login(params.userName, params.password).then(successCallback, function (xhr) {
-            var reason = xhr.responseJSON.reason;
-            if (reason === "Unauthorized") {
-                reason = "authenticationFailed";
-            }
-            if (errorCallback) {
-                errorCallback(reason);
-            }
-        });
+        if (_.has(params, "userName") && _.has(params, "password")) {
+            return UserModel.login(params.userName, params.password).then(successCallback, function (xhr) {
+                var reason = xhr.responseJSON.reason;
+                if (reason === "Unauthorized") {
+                    reason = "authenticationFailed";
+                }
+                if (errorCallback) {
+                    errorCallback(reason);
+                }
+            });
+        } else if (_.has(params, "authToken")) {
+            return UserModel.tokenLogin(params.authToken).then(successCallback, function (xhr) {
+                var reason = xhr.responseJSON.reason;
+                if (reason === "Unauthorized") {
+                    reason = "authenticationFailed";
+                }
+                if (errorCallback) {
+                    errorCallback(reason);
+                }
+            });
+        }
     };
 
     obj.logout = function (successCallback, errorCallback) {

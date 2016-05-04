@@ -22,6 +22,7 @@ define([
     commonConstants.HEADER_PARAM_PASSWORD = "X-OpenIDM-Password";
     commonConstants.HEADER_PARAM_USERNAME = "X-OpenIDM-Username";
     commonConstants.HEADER_PARAM_NO_SESSION = "X-OpenIDM-NoSession";
+    commonConstants.HEADER_PARAM_AUTH_TOKEN = "oidc_id_token";
     commonConstants.HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
 
     commonConstants.DOC_URL = "https://forgerock.org/openidm/doc/bootstrap/";
