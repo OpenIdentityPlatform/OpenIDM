@@ -52,8 +52,8 @@ module.exports = {
                 title: {
                     selector: ".bootstrap-dialog-title"
                 },
-                form: {
-                    selector: '#auditEventHandlersForm'
+                enableField: {
+                    selector: "#auditEventHandlersForm > div.form-group:nth-child(3) p"
                 },
                 name: {
                     selector: "#eventHandlerName"
