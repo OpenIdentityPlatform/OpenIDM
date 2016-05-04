@@ -252,10 +252,13 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersView", [
         addEventHandler: function (e) {
             e.preventDefault();
             var newHandler = this.$el.find("#addAuditModuleSelect").val(),
-                found = false;
+                found = false,
+                // If this is the first event handler then it must be enabled
+                canDisable = this.data.eventHandlers.length >= 1;
             if (newHandler !== null) {
                 AuditEventHandlersDialog.render(
                     {
+                        "canDisable": canDisable,
                         "eventHandlerType": newHandler,
                         "eventHandler": {},
                         "newEventHandler": true,
