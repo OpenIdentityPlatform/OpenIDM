@@ -66,9 +66,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.commons.launcher.OSGiFrameworkService;
-import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.base.Strings;
-import org.forgerock.guava.common.collect.Collections2;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -85,7 +83,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.maintenance.impl.UpdateContext;
 import org.forgerock.openidm.repo.RepoBootService;
-import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.openidm.util.FileUtil;
@@ -98,13 +95,9 @@ import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
 import org.osgi.framework.Constants;
 import org.osgi.framework.Filter;
-import org.osgi.framework.InvalidSyntaxException;
-import org.osgi.framework.ServiceEvent;
-import org.osgi.framework.ServiceListener;
 import org.osgi.framework.ServiceReference;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.util.tracker.ServiceTracker;
-import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -156,11 +149,8 @@ public class UpdateManagerImpl implements UpdateManager {
     /** The context of this service */
     private ComponentContext context;
 
-    /** Listener for repo service used to set {@link #dbDirName} */
-    private ServiceListener repoServiceListener = null;
-
-    /** Cache of db.dirname from RepoBootService properties */
-    private volatile String dbDirName = null;
+    /** Listener for repo service used by {@link #getDbDirName()} */
+    private ServiceTracker repoServiceTracker = null;
 
     public enum UpdateStatus {
         IN_PROGRESS,
@@ -176,28 +166,15 @@ public class UpdateManagerImpl implements UpdateManager {
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating UpdateManagerImpl {}", compContext.getProperties());
         BundleContext bundleContext = compContext.getBundleContext();
-        Filter filter = bundleContext
+        Filter osgiFrameworkFilter = bundleContext
                 .createFilter("(" + Constants.OBJECTCLASS + "=org.forgerock.commons.launcher.OSGiFramework)");
-        ServiceTracker serviceTracker = new ServiceTracker(bundleContext, filter, null);
+        ServiceTracker serviceTracker = new ServiceTracker(bundleContext, osgiFrameworkFilter, null);
         serviceTracker.open(true);
         this.osgiFrameworkService = (OSGiFrameworkService) serviceTracker.getService();
         this.context = compContext;
 
-        repoServiceListener = new ServiceListener() {
-            @Override
-            public void serviceChanged(ServiceEvent serviceEvent) {
-                switch(serviceEvent.getType()) {
-                    case ServiceEvent.REGISTERED:
-                        dbDirName = (String) serviceEvent.getServiceReference().getProperty("db.dirname");
-                        break;
-                    case ServiceEvent.UNREGISTERING:
-                        dbDirName = null;
-                        break;
-                }
-            }
-        };
-        this.context.getBundleContext().addServiceListener(repoServiceListener,
-                String.format("(%s=%s)", Constants.OBJECTCLASS, RepoBootService.class.getName()));
+        repoServiceTracker = new ServiceTracker(bundleContext, RepoBootService.class.getName(), null);
+        repoServiceTracker.open(true);
 
         if (osgiFrameworkService != null) {
             logger.debug("Obtained OSGiFrameworkService", compContext.getProperties());
@@ -208,8 +185,9 @@ public class UpdateManagerImpl implements UpdateManager {
 
     @Deactivate
     void deactivate(ComponentContext compContext) {
-        if (repoServiceListener != null) {
-            this.context.getBundleContext().removeServiceListener(repoServiceListener);
+        if (repoServiceTracker != null) {
+            repoServiceTracker.close();
+            repoServiceTracker = null;
         }
         this.context = null;
         this.osgiFrameworkService = null;
@@ -410,6 +388,8 @@ public class UpdateManagerImpl implements UpdateManager {
     private List<Path> listRequiredRepoUpdates(final Archive archive, final FileStateChecker checker) throws IOException, UpdateException {
         final List<Path> newUpdates = new ArrayList<>();
 
+        final String dbDirName = getDbDirName();
+
         if (Strings.isNullOrEmpty(dbDirName)) {
             return new ArrayList<>();
         }
@@ -443,7 +423,7 @@ public class UpdateManagerImpl implements UpdateManager {
 
     @Override
     public JsonValue listRepoUpdates(final Path archivePath) throws UpdateException {
-        if (Strings.isNullOrEmpty(dbDirName)) {
+        if (Strings.isNullOrEmpty(getDbDirName())) {
             return json(array());
         }
 
@@ -907,7 +887,13 @@ public class UpdateManagerImpl implements UpdateManager {
             try {
                 final String projectDir = IdentityServer.getInstance().getProjectLocation().toString();
                 final String installDir = IdentityServer.getInstance().getInstallLocation().toString();
-                final Path repoConfPath = Paths.get("db", dbDirName, "conf");
+                final Path repoConfPath;
+
+                if (Strings.isNullOrEmpty(getDbDirName())) {
+                    repoConfPath = null;
+                } else {
+                    repoConfPath = Paths.get("db", getDbDirName(), "conf");
+                }
 
                 // Start by removing all files we no longer need
                 for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
@@ -980,7 +966,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     } else if (path.startsWith(CONF_PATH) &&
                             path.getFileName().toString().endsWith(JSON_EXT)) {
                         // a json config in the default project - ignore it
-                    } else if ((path.startsWith(CONF_PATH) || path.startsWith(repoConfPath)) &&
+                    } else if ((path.startsWith(CONF_PATH) || (repoConfPath != null && path.startsWith(repoConfPath))) &&
                             path.getFileName().toString().endsWith(PATCH_EXT)) {
                         // a patch file for a config in the repo
                         File patchFile = new File(new File(tempDirectory.toString(), "openidm").toString(),
@@ -1266,5 +1252,23 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         return targetFile.toPath();
+    }
+
+    /**
+     * Return the name of the db directory in db/ representing the current repo.
+     *
+     * This is retrieved from the OSGi context stored as the db.dirname property on the RepositoryService
+     *
+     * @return The name of the directory in db/ for the current repo or null if none exists
+     * @throws UpdateException If the repo bundle cannot be found
+     */
+    private String getDbDirName() throws UpdateException {
+        final ServiceReference repoReference = repoServiceTracker.getServiceReference();
+
+        if (repoReference == null) {
+            throw new UpdateException("Could not find repo service");
+        } else {
+            return (String) repoReference.getProperty("db.dirname");
+        }
     }
 }
