@@ -21,18 +21,18 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
 ], function ($, _, ConnectorDelegate) {
 
     var obj = {}, iconMapping = {
-        "org.identityconnectors.ldap.LdapConnector" : "fa fa-book",
-        "org.forgerock.openicf.connectors.xml.XMLConnector" : "fa fa-code",
-        "org.forgerock.openidm.salesforce": "fa fa-cloud",
-        "org.identityconnectors.databasetable.DatabaseTableConnector" : "fa fa-table",
-        "org.forgerock.openicf.csvfile.CSVFileConnector" : "fa fa-quote-right",
-        "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector" : "fa fa-google",
-        "org.forgerock.openidm.salesforce.Salesforce": "fa fa-cloud",
-        "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector": "fa fa-file-code-o",
-        "managedobject": "fa fa-database",
-        "missing" : "fa fa-question",
-        "default" : "fa fa-cubes"
-    };
+            "org.identityconnectors.ldap.LdapConnector" : "fa fa-book",
+            "org.forgerock.openicf.connectors.xml.XMLConnector" : "fa fa-code",
+            "org.forgerock.openidm.salesforce": "fa fa-cloud",
+            "org.identityconnectors.databasetable.DatabaseTableConnector" : "fa fa-table",
+            "org.forgerock.openicf.csvfile.CSVFileConnector" : "fa fa-quote-right",
+            "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector" : "fa fa-google",
+            "org.forgerock.openidm.salesforce.Salesforce": "fa fa-cloud",
+            "org.forgerock.openicf.connectors.scriptedsql.ScriptedSQLConnector": "fa fa-file-code-o",
+            "managedobject": "fa fa-database",
+            "missing" : "fa fa-question",
+            "default" : "fa fa-cubes"
+        };
 
     obj.cleanConnectorName = function(name) {
         var clearName = name.split(".");
