@@ -20,7 +20,8 @@ define("org/forgerock/openidm/ui/admin/util/ConnectorUtils", [
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate"
 ], function ($, _, ConnectorDelegate) {
 
-    var obj = {}, iconMapping = {
+    var obj = {},
+        iconMapping = {
             "org.identityconnectors.ldap.LdapConnector" : "fa fa-book",
             "org.forgerock.openicf.connectors.xml.XMLConnector" : "fa fa-code",
             "org.forgerock.openidm.salesforce": "fa fa-cloud",
