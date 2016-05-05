@@ -21,7 +21,8 @@
 [ "policyFilterTest", 
   "effectiveRolesTest",
   "temporalConstraintsTest",
-  "conditionalRolesTest"]
+  "conditionalRolesTest",
+  "managedPatchHelperTest"]
     .forEach(function (module) {
         require (module).test();
     });

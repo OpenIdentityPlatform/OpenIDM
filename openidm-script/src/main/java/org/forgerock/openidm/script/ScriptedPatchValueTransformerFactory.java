@@ -20,13 +20,13 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.*;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.patch.PatchValueTransformer;
 import org.forgerock.openidm.patch.ScriptedPatchValueTransformer;
-import org.forgerock.openidm.script.ScriptExecutor;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
@@ -66,14 +66,14 @@ public class ScriptedPatchValueTransformerFactory {
     public PatchValueTransformer getPatchValueTransformer(final Context context) {
         return new ScriptedPatchValueTransformer() {
             @Override
-            public JsonValue evalScript(JsonValue subject, JsonValue scriptConfig) throws ResourceException {
+            public JsonValue evalScript(JsonValue subject, JsonValue scriptConfig, JsonPointer field) throws ResourceException {
                 try {
                     // get script
                     ScriptEntry scriptEntry = scriptRegistry.takeScript(scriptConfig);
                     if (scriptEntry != null) {
                         // add bindings
                         Map<String, Object> bindings = new HashMap<>();
-                        bindings.put("content", subject);
+                        bindings.put("content", subject.get(field));
                         // exec script
                         return scriptExecutor.execScript(context, scriptEntry, bindings);
                     } else {

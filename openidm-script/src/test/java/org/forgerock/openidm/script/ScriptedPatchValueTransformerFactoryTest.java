@@ -83,7 +83,7 @@ public class ScriptedPatchValueTransformerFactoryTest {
                 field("value", object(
                         field("script",
                                 object(
-                                        field("source", "var source = content.key; var target = source + 'xformed'; target;"),
+                                        field("source", "var source = content; var target = source + 'xformed'; target;"),
                                         field("type", getLanguageName())
                                 ))
                 ))
