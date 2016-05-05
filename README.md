@@ -8,13 +8,6 @@ OpenIDM provides a modern UI experience that allows you to manage your data with
 standard RESTful interfaces also offer ultimate flexibility so that you can customize and develop the product to fit the
 requirements of your deployment.
 
-OpenIDM allows multiple sources of identity to be brought together for policy and workflow based management that puts 
-you in control of the data. Consume, transform and feed data to external sources in order to maintain control over 
-identity of users, devices and things.
-
-A modern UI experience that allows you manage your data without writing a single line of code, while standard RESTful 
-interfaces give you the ultimate in flexibility to develop as you see fit. 
-
 The project is led by ForgeRock who integrate the [OpenAM][openam_project_page], [OpenIDM][project_page], 
 [OpenDJ][opendj_project_page], [OpenICF][openicf_project_page], and [OpenIG][openig_project_page] open source projects 
 to provide a quality-assured [ForgeRock Identity Platform][identity_platform]. Support, professional services, and 
