@@ -1,42 +1,112 @@
 [
-    {
-        "operation" : "remove",
-        "field" : "objects/0/schema/properties/effectiveRoles/file",
-        "value" : ""
-    },
-    {
-        "operation" : "remove",
-        "field" : "objects/0/schema/properties/effectiveRoles/rolesPropName",
-        "value" : ""
-    },
-    {
-        "operation" : "add",
-        "field" : "objects/0/schema/properties/effectiveRoles/source",
-        "value" : "require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');"
-    },
-    {
-        "operation" : "remove",
-        "field" : "objects/0/onCreate/file",
-        "value" : ""
-    },
-    {
-        "operation" : "add",
-        "field" : "objects/0/onCreate/source",
-        "value" : "require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
-    },
-    {
-        "operation" : "add",
-        "field" : "objects/0/onUpdate",
-        "value" : {"type" : "text/javascript", "source" : "require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"}
-    },
-    {
-        "operation" : "add",
-        "field" : "objects/1/onCreate",
-        "value" : {"type" : "text/javascript","source" : "require('roles/conditionalRoles').roleCreate(object);"}
-    },
-    {
-        "operation" : "add",
-        "field" : "objects/1/onUpdate",
-        "value" : {"type" : "text/javascript","source" : "require('roles/conditionalRoles').roleUpdate(oldObject, object);"}
-    }
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.effectiveRoles.file');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.effectiveRoles.rolesPropName');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'schema.properties.effectiveRoles.source', \"require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');\");"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'onCreate.file');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'onCreate.source',  \"require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\");"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'onUpdate.type', 'text/javascript');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'onUpdate.source', \"require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\");"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'onCreate.type', 'text/javascript');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'onCreate.source', \"require('roles/conditionalRoles').roleCreate(object);\");"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'onUpdate.type', 'text/javascript');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'onUpdate.source',   \"require('roles/conditionalRoles').roleUpdate(oldObject, object);\");"
+         }
+      }
+   }
 ]

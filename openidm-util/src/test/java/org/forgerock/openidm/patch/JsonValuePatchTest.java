@@ -25,6 +25,7 @@ import static org.forgerock.json.JsonValue.array;
 
 import java.util.List;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
@@ -77,14 +78,14 @@ public class JsonValuePatchTest {
     }
 
     private ScriptedPatchValueTransformer transformer = new ScriptedPatchValueTransformer() {
-        public JsonValue evalScript(JsonValue content, JsonValue script) throws BadRequestException {
+        public JsonValue evalScript(JsonValue content, JsonValue script, JsonPointer field) throws BadRequestException {
             if (!script.isString()) {
                 throw new BadRequestException("The patch request is garbage.");
             }
             Context cx = Context.enter();
             try {
                 Scriptable scope = cx.initStandardObjects();
-                String finalScript = "var content = " + content.toString() + "; " + script.getObject();
+                String finalScript = "var content = " + content.get(field).toString() + "; " + script.getObject();
                 return new JsonValue(cx.evaluateString(scope, finalScript, "script", 1, null));
             } catch (Exception e) {
                 throw new BadRequestException("Failed to eval script " + script.toString());
@@ -100,7 +101,7 @@ public class JsonValuePatchTest {
                 field("operation", "transform"),
                 field("field", "/key"),
                 field("value", object(
-                        field("script", "var source = content.key; var target = source + 'xformed'; target;")
+                        field("script", "var source = content; var target = source + 'xformed'; target;")
                         )
                 ))));
         List<PatchOperation> operations = PatchOperation.valueOfList(diff);

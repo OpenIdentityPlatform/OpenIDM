@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.patch;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
@@ -30,7 +31,7 @@ public abstract class ScriptedPatchValueTransformer implements PatchValueTransfo
     @Override
     public JsonValue getTransformedValue(PatchOperation patch, JsonValue subject) throws ResourceException {
         if (patch.getValue().get(CONFIG_SCRIPT).isNotNull()) {
-            return evalScript(subject, patch.getValue().get(CONFIG_SCRIPT));
+            return evalScript(subject, patch.getValue().get(CONFIG_SCRIPT), patch.getField());
         }
         throw new BadRequestException("Expecting a " + CONFIG_SCRIPT + " member");
     }
@@ -41,9 +42,10 @@ public abstract class ScriptedPatchValueTransformer implements PatchValueTransfo
      *
      * @param subject The JsonValue to which to apply the patch operation(s).
      * @param scriptConfig The script config.
+     * @param field The script field.
      * @return A transformed JsonValue.
      * @throws BadRequestException on null subject, null scriptConfig
      * @throws ResourceException on script execution error
      */
-    public abstract JsonValue evalScript(JsonValue subject, JsonValue scriptConfig) throws ResourceException;
+    public abstract JsonValue evalScript(JsonValue subject, JsonValue scriptConfig, JsonPointer field) throws ResourceException;
 }

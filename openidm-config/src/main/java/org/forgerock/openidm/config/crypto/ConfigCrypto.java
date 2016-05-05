@@ -61,7 +61,7 @@ import com.fasterxml.jackson.databind.ObjectWriter;
 
 /**
  * Configuration encryption support
- * 
+ *
  *
  */
 public class ConfigCrypto {
@@ -69,17 +69,17 @@ public class ConfigCrypto {
 
     static ServiceTracker cryptoTracker;
     static ConfigCrypto instance;
-    
+
     BundleContext context;
     ObjectMapper mapper = new ObjectMapper();
-    
-    String alias = "openidm-config-default"; 
-    
+
+    String alias = "openidm-config-default";
+
     JSONPrettyPrint prettyPrint = new JSONPrettyPrint();
-    
+
     ProviderTracker providerTracker;
     ProviderListener delayedHandler;
-    
+
     private ConfigCrypto(BundleContext context, ProviderListener delayedHandler) {
         this.context = context;
         this.delayedHandler = delayedHandler;
@@ -88,10 +88,10 @@ public class ConfigCrypto {
         logger.info("Using keystore alias {} to handle config encryption", alias);
 
         providerTracker = new ProviderTracker(context, delayedHandler, false);
-        
+
         // TODO: add bundle listeners to track new installs and remove uninstalls
     }
-    
+
     public synchronized static ConfigCrypto getInstance(BundleContext context, ProviderListener providerListener) {
         if (instance == null) {
             instance = new ConfigCrypto(context, providerListener);
@@ -102,8 +102,8 @@ public class ConfigCrypto {
     /**
      * Check each provider for meta-data for a given pid until the first match is found
      * Requested each time configuration is changed so that meta data providers can handle additional plug-ins
-     * 
-     * @param pidOrFactory the pid or factory pid 
+     *
+     * @param pidOrFactory the pid or factory pid
      * @param factoryAlias the alias of the factory configuration instance
      * @return the list of properties to encrypt
      */
@@ -127,17 +127,17 @@ public class ConfigCrypto {
         if (lastWaitException != null) {
             throw lastWaitException;
         }
-        
+
         return null;
     }
 
     /**
      * Encrypt properties in the configuration if necessary
      * Also results in pretty print formatting of the JSON configuration.
-     * 
+     *
      * @param pidOrFactory the PID of either the managed service; or for factory configuration the PID of the Managed Service Factory
      * @param instanceAlias null for plain managed service, or the subname (alias) for the managed factory configuration instance
-     * @param config The OSGi configuration 
+     * @param config The OSGi configuration
      * @return The configuration with any properties encrypted that a component's meta data marks as encrypted
      * @throws InvalidException if the configuration was not valid JSON and could not be parsed
      * @throws InternalErrorException if parsing or encryption failed for technical, possibly transient reasons
@@ -148,16 +148,16 @@ public class ConfigCrypto {
         JsonValue parsed = parse(config, pidOrFactory);
         return encrypt(pidOrFactory, instanceAlias, config, parsed);
     }
-    
-    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonValue newConfig) 
+
+    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonValue newConfig)
             throws WaitForMetaData {
-        
+
         JsonValue parsed = newConfig;
         Dictionary encrypted = (existingConfig == null ? new Hashtable() : existingConfig); // Default to existing
-        
+
         List<JsonPointer> props = getPropertiesToEncrypt(pidOrFactory, instanceAlias, parsed);
         if (logger.isTraceEnabled()) {
-            logger.trace("Properties to encrypt for {} {}: {}", new Object[] {pidOrFactory, instanceAlias, props}); 
+            logger.trace("Properties to encrypt for {} {}: {}", new Object[] {pidOrFactory, instanceAlias, props});
         }
         if (props != null && !props.isEmpty()) {
             boolean modified = false;
@@ -172,7 +172,7 @@ public class ConfigCrypto {
                         logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {pointer,
                                 ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias});
                     }
-                    
+
                     // Encrypt and replace value
                     try {
                         JsonValue encryptedValue = crypto.encrypt(valueToEncrypt,
@@ -180,7 +180,7 @@ public class ConfigCrypto {
                         parsed.put(pointer, encryptedValue.getObject());
                         modified = true;
                     } catch (JsonCryptoException ex) {
-                        throw new InternalErrorException("Failure during encryption of configuration " 
+                        throw new InternalErrorException("Failure during encryption of configuration "
                                 + pidOrFactory + "-" + instanceAlias + " for property " + pointer.toString()
                                 + " : " + ex.getMessage(), ex);
                     }
@@ -196,7 +196,7 @@ public class ConfigCrypto {
                     + pidOrFactory + "-" + instanceAlias + " : " + ex.getMessage(), ex);
         }
 
-        encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value); 
+        encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value);
         
         if (logger.isDebugEnabled()) {
             logger.debug("Config with senstiive data encrypted {} {} : {}", 

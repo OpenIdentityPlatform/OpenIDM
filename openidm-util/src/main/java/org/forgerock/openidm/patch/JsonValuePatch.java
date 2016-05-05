@@ -155,7 +155,7 @@ public class JsonValuePatch {
         if (value == null) {
             subject.remove(operation.getField());
         } else {
-            subject.put(operation.getField(), value);
+            subject.put(operation.getField(), value.getObject());
         }
 
         return true;
