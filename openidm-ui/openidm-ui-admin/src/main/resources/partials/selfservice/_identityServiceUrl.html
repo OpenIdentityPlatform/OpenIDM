@@ -14,9 +14,9 @@
                 <div class="col-sm-6">
                     <select id="identityServiceUrl" class="form-control" name="identityServiceUrl" {{#unless enableSelfService}} disabled="true" {{/unless}}>
                         {{#each resources}}
-                            {{#singleSelect ../defaultIdentityServiceURL}}
+                            {{#staticSelect ../defaultIdentityServiceURL}}
                                 <option value="{{this}}">{{this}}</option>
-                            {{/singleSelect}}
+                            {{/staticSelect}}
                         {{/each}}
                     </select>
                 </div>
