@@ -159,12 +159,5 @@ define([
         return ret;
     });
 
-    Handlebars.registerHelper("singleSelect", function(value, options){
-        var selected = $("<select />").html(options.fn(this));
-        selected.find("[value='" + value + "']").attr({"selected":"selected"});
-
-        return selected.html();
-    });
-
     return obj;
 });
