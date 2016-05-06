@@ -131,7 +131,6 @@ define([
 
             //Get available list of connectors
             $.when(ConnectorDelegate.availableConnectors()).then(_.bind(function(connectors){
-                connectors = connectors[0];
                 this.data.connectors = connectors.connectorRef;
 
                 //Build Connector type selection

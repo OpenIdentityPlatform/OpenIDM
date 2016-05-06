@@ -92,7 +92,7 @@ require.config({
         },
         i18next: {
             deps: ["jquery", "handlebars"],
-            exports: "i18next"
+            exports: "i18n"
         },
         moment: {
             exports: "moment"
