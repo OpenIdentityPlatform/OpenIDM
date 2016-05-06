@@ -2,7 +2,7 @@
     "name" : "rolesFile",
     "connectorRef" : {
         "bundleName"    : "org.forgerock.openicf.connectors.csvfile-connector",
-        "bundleVersion" : "1.5.1.0",
+        "bundleVersion" : "1.5.1.1",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector"
     },
     "poolConfigOption" : {
