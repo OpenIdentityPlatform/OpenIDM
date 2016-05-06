@@ -522,6 +522,11 @@
             <artifactId>kerberos-connector</artifactId>
             <version>${openicf.kerberosconnector.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors</groupId>
+            <artifactId>racf-connector</artifactId>
+            <version>${openicf.racfconnector.version}</version>
+        </dependency>
         <!-- tomcat-jdbc and juli needed for scriptedsql 1.4 -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
