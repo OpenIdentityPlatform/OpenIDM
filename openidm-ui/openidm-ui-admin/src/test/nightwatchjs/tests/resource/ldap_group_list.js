@@ -5,29 +5,22 @@ module.exports = {
     },
 
     after: function(client) {
-        var connectors = client.page.connectors();
-
-        var deleteLdap = function () {
-            client
-                .refresh();
-            connectors
-                .waitForElementVisible('@ldapCard', 2000)
-                .waitForElementVisible('@ellipsis', 2000)
-                .click('@ellipsis')
-                .waitForElementVisible('@deleteLDAP', 2000)
-                .click('@deleteLDAP')
-                .waitForElementVisible('@confirmDelete', 2000)
-                .click('@confirmDelete')
-                .waitForElementVisible('#messages', 2000)
-                .waitForElementNotVisible('#messages', 4000);
-            };
+        var connectors = client.page.connectors();    
 
         connectors
             .navigate();
-
-        deleteLdap();
-        // Connector needs to be deleted twice for unknown reason
-        deleteLdap();
+        client
+            .refresh();
+        connectors
+            .waitForElementVisible('@ldapCard', 2000)
+            .waitForElementVisible('@ellipsis', 2000)
+            .click('@ellipsis')
+            .waitForElementVisible('@deleteLDAP', 2000)
+            .click('@deleteLDAP')
+            .waitForElementVisible('@confirmDelete', 2000)
+            .click('@confirmDelete')
+            .waitForElementVisible('#messages', 2000)
+            .waitForElementNotVisible('#messages', 4000);
         client
             .end();
     },

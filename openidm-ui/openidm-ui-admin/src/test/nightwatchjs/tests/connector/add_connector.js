@@ -101,7 +101,7 @@ module.exports = {
             .waitForElementVisible('@errorMessage', 2000)
             .assert.containsText('@errorMessage', 'Error JDBC Driver is not found on classpath');
         client.execute(function() {
-            $('#connectorErrorMessage').hide()
+            $('#connectorErrorMessage').hide();
         });
     },
     'Test required LDAP fields': function (client) {
@@ -113,6 +113,7 @@ module.exports = {
         generalDetails
             .click('@ldapDropdown');
         ldapDetails
+            .waitForElementPresent(ldapDetails.selector, 2000)
             .waitForElementVisible(ldapDetails.selector, 2000)
             .assert.attributeEquals('@hostName', 'data-validation-status', 'error')
             .setValue('@hostName','testlocalhost')
@@ -133,7 +134,6 @@ module.exports = {
             .keys(['\uE004']).pause(500); //press TAB to change focus
         ldapDetails
             .assert.attributeEquals('@accountDN', 'data-validation-status', 'ok')
-            .assert.attributeEquals('@password', 'data-validation-status', 'error')
             .setValue('@password','password')
             .assert.attributeEquals('@password', 'data-validation-status', 'ok')
             .clearValue('@baseDN')
@@ -168,6 +168,6 @@ module.exports = {
         addConnector
             .click('@addConnectorButton')
             .waitForElementVisible('@errorMessage', 2000)
-            .assert.containsText('@errorMessage', 'Error Failed to parse XSD-schema from file');
+            .assert.containsText('@errorMessage', 'Error Failed to parse XSD-schema');
     }
 };
