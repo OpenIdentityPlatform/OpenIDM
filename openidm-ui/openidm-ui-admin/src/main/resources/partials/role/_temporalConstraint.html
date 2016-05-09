@@ -3,6 +3,20 @@
 <div class="temporalConstraint well detailTable">
     <div class="row">
         <div class="form-group">
+          <label class="col-sm-2 control-label text-right temporalConstraintsLabel">{{t "templates.admin.RoleEdit.timezone"}}</label>
+          <div class="col-sm-4">
+              <div class="control-group">
+                  <select class="form-control selectize temporalConstraintTimezone" previousTimezone="{{timezone}}">
+                      {{#each timezones}}
+                      <option value="{{this}}" {{#equals this ../timezone}}selected{{/equals}}>{{this}}</option>
+                      {{/each}}
+                  </select>
+              </div>
+          </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="form-group">
           <label class="col-sm-2 control-label text-right temporalConstraintsLabel">{{t "templates.admin.RoleEdit.startDate"}}</label>
           <div class="col-sm-10">
               <div class="control-group">

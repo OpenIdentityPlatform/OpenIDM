@@ -445,7 +445,8 @@
                 "startDate" : "Start Date",
                 "endDate" : "End Date",
                 "grantType" : "Grant Type",
-                "conditional" : "Conditional"
+                "conditional" : "Conditional",
+                "timezone" : "Timezone"
             },
             "ResourceList":
             {

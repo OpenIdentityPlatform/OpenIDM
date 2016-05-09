@@ -145,6 +145,23 @@ module.exports = {
                 .waitForElementVisible('@changesPending', 2000)
                 .expect.element('@changesPending').text.to.equal('- Temporal Constraints');
         },
+        'Temporal Constraint timezone changed and set back to its original value': function (client) {
+            var rolesEdit = client.page.rolesEdit();
+
+            rolesEdit
+                .waitForElementPresent('@roleTemporalConstraintTimezone', 2000)
+                .waitForElementVisible('@roleTemporalConstraintTimezone', 2000)
+                .setValue('@roleTemporalConstraintTimezone','America/New_York')
+                .waitForElementVisible('@timezoneSelectionNY', 2000)
+                .click('@timezoneSelectionNY')
+                .assert.value('@roleTemporalConstraintStartDate','04/25/2016 3:00 AM', 'changing the temporal constraint timezone properly changes the startDate to reflect the new timezone')
+                .assert.value('@roleTemporalConstraintEndDate','04/30/2016 6:00 PM', 'changing the temporal constraint timezone properly changes the endDate to reflect the new timezone')
+                .setValue('@roleTemporalConstraintTimezone','America/Los_Angeles')
+                .waitForElementVisible('@timezoneSelectionLA', 2000)
+                .click('@timezoneSelectionLA')
+                .assert.value('@roleTemporalConstraintStartDate','04/25/2016 12:00 AM', 'changing the temporal constraint timezone properly changes the startDate back to the original timezone')
+                .assert.value('@roleTemporalConstraintEndDate','04/30/2016 3:00 PM', 'changing the temporal constraint timezone properly changes the endDate back to the original timezone');
+        },
         'Temporal Constraint is properly saved': function (client) {
             var rolesList = client.page.rolesList(),
                 rolesEdit = client.page.rolesEdit();
