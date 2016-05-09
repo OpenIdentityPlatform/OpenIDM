@@ -39,10 +39,16 @@ define([
 
             return builtUrl;
         },
+
         submitOAuth: function(mergedResult, editConnector) {
             var name = mergedResult.name,
-                id = mergedResult.configurationProperties.clientId,
-                url = this.buildReturnUrl(id, name);
+                id,
+                url;
+
+            mergedResult = this.cleanSpacing(mergedResult);
+
+            id = mergedResult.configurationProperties.clientId;
+            url = this.buildReturnUrl(id, name);
 
             mergedResult.configurationProperties.domain = window.location.protocol+"//"+window.location.host;
 
@@ -83,6 +89,18 @@ define([
         //This check is needed to match the existing functionality in other connectors
         getGenericState: function() {
             return false;
+        },
+
+        cleanSpacing : function(mergedResult) {
+            if(mergedResult.configurationProperties.clientId) {
+                mergedResult.configurationProperties.clientId = mergedResult.configurationProperties.clientId.trim();
+            }
+
+            if(mergedResult.configurationProperties.clientSecret && _.isString(mergedResult.configurationProperties.clientSecret)) {
+                mergedResult.configurationProperties.clientSecret = mergedResult.configurationProperties.clientSecret.trim();
+            }
+
+            return mergedResult;
         }
     });
 
