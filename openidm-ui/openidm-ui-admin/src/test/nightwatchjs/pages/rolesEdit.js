@@ -60,6 +60,15 @@ module.exports = {
         enableRoleTemporalConstraintSlider: {
             selector: '#temporalContstraintsFormContainer .enableTemporalConstraintsCheckbox'
         },
+        roleTemporalConstraintTimezone: {
+            selector: '#temporalContstraintsFormContainer .selectize-control input'
+        },
+        timezoneSelectionNY : {
+            selector: '#temporalContstraintsFormContainer .selectize-dropdown-content div[data-value="America/New_York"]'
+        },
+        timezoneSelectionLA : {
+            selector: '#temporalContstraintsFormContainer .selectize-dropdown-content div[data-value="America/Los_Angeles"]'
+        },
         roleTemporalConstraintStartDate: {
             selector: '#temporalContstraintsFormContainer .temporalConstraintStartDate'
         },

@@ -53,6 +53,7 @@ require.config({
         selectize : "libs/selectize-0.12.1-min",
         d3 : "libs/d3-3.5.5-min",
         moment: "libs/moment-2.8.1-min",
+        "moment-timezone": "libs/moment-timezone-with-data-0.5.4-min",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min",
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
@@ -124,6 +125,10 @@ require.config({
         },
         moment: {
             exports: "moment"
+        },
+        "moment-timezone": {
+            deps: ["moment"],
+            exports: "moment-timezone"
         },
         selectize: {
             deps: ["jquery"]

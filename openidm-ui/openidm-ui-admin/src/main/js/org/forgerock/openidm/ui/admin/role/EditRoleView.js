@@ -101,6 +101,9 @@ function ($, _, Handlebars,
         resourceDetailsForm.append(conditionContent);
 
         if (this.oldObject.condition && this.oldObject.condition !== "false") {
+            if (this.oldObject.condition.length) {
+                this.$el.find("#enableDynamicRoleGrantCheckbox").prop("checked",true);
+            }
             this.toggleQueryView();
         }
 
@@ -143,20 +146,18 @@ function ($, _, Handlebars,
             e.preventDefault();
         }
 
-        if (!this.$el.find("#enableDynamicRoleGrantCheckbox").attr("checked")) {
-            this.$el.find("#enableDynamicRoleGrantCheckbox").attr("checked", true);
+        if (this.$el.find("#enableDynamicRoleGrantCheckbox").prop("checked")) {
             this.$el.find("#roleConditionQueryField").show();
             this.renderEditor();
         } else {
-            this.$el.find("#enableDynamicRoleGrantCheckbox").removeAttr("checked");
             this.$el.find("#roleConditionQueryField").hide();
             this.renderEditor(true);
         }
     };
 
     EditRoleView.prototype.getFormValue = function () {
-        var conditionChecked = this.$el.find("#enableDynamicRoleGrantCheckbox").attr("checked"),
-            temporalConstraintsChecked = this.$el.find(".enableTemporalConstraintsCheckbox").attr("checked"),
+        var conditionChecked = this.$el.find("#enableDynamicRoleGrantCheckbox").prop("checked"),
+            temporalConstraintsChecked = this.$el.find(".enableTemporalConstraintsCheckbox").prop("checked"),
             condition = "",
             temporalConstraints = [],
             returnVal;

@@ -64,7 +64,7 @@ function ($, _, Handlebars,
                 refProperties = this.currentDialog.find("._refProperties:input"),
                 getRefProps = _.bind(function () {
                     var refProps = propVal._refProperties || {},
-                        temporalConstraintsChecked = this.currentDialog.find(".enableTemporalConstraintsCheckbox").attr("checked");
+                        temporalConstraintsChecked = this.currentDialog.find(".enableTemporalConstraintsCheckbox").prop("checked");
 
                     refProps.temporalConstraints = [];
                     refProps._grantType = (!_.isEmpty(this.data.propertyValue)) ? this.data.propertyValue._refProperties._grantType : "";
