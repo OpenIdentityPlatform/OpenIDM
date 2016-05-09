@@ -65,3 +65,17 @@ the _Chat Users_ groups in the corporate directory (OpenDJ). In turn,
 contractors must also have their employee type set but they will only be part
 of the _Contractors_ group (no chatting for contractors!). Roles will be used
 to set the required properties on the external resource (OpenDJ).
+
+Temporal Constraints with Roles
+-------------------------------
+Available as part of the "temporalConstraints" sample. Provides a list of operations
+that can be performed via REST or via the UI to manage temporal constraints on
+managed roles in OpenIDM. This sample like the "provroles" sample is built
+on sample2b.
+
+Use Case: To tighten up access to the _Contractors_ group, the company has imposed
+a new policy which requires there to be a start time and end time for the duration
+contractors have the contractor role assigned to them. This role will align with
+their signed contract that has a start and end date. A temporal constraint on this role
+will be added to demonstrate the time period in which the contractor will be part of
+the _Contractors_ group.
