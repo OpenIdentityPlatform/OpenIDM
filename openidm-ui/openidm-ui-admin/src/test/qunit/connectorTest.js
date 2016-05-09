@@ -16,9 +16,11 @@
 
 define([
         "org/forgerock/openidm/ui/admin/connector/EditConnectorView",
-        "lodash"
+        "lodash",
+        "org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView"
     ],
-    function (EditConnectorView, _) {
+    function (EditConnectorView, _,
+              GoogleTypeView) {
         QUnit.module('Connectors');
 
         QUnit.test("Advanced Connector Save", function () {
@@ -70,5 +72,19 @@ define([
             QUnit.equal(results.poolConfigOption.maxObjects, 25, "Pool Config successfully saved");
             QUnit.equal(results.operationTimeout.CREATE, 5, "Operation Timeout successfully saved");
             QUnit.equal(results.poolConfigOption.maxIdle, 10, "Original maxIdle exists");
+        });
+
+        QUnit.test("OAuth Connector Whitespace Trimming", function () {
+            var whiteSpaceMerge = {
+                    "configurationProperties" : {
+                        "clientSecret" : "   test  ",
+                        "clientId" : "  test     "
+                    }
+                };
+
+            whiteSpaceMerge = GoogleTypeView.cleanSpacing(whiteSpaceMerge);
+
+            QUnit.equal(whiteSpaceMerge.configurationProperties.clientSecret, "test", "ClientSecret white space trimmed");
+            QUnit.equal(whiteSpaceMerge.configurationProperties.clientId, "test", "ClientId white space trimmed");
         });
     });
