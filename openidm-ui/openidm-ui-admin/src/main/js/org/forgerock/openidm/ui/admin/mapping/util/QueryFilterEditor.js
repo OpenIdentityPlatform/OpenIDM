@@ -48,21 +48,23 @@ define([
                     };
                 }
             },
-            serialize: function (node) {
+            serialize: function(node) {
                 if (node) {
                     switch (node.op) {
                         case "expr":
                             if (node.tag === "pr") {
-                                return node.name + ' pr';
+                                return [node.name, "pr"].join(" ");
                             } else {
-                                return node.name + ' ' + (tagMap[node.tag] || node.tag) + ' "' + node.value + '"';
+                                return [node.name, (tagMap[node.tag] || node.tag), '"' + node.value + '"'].join(" ").trim();
                             }
                         case "not":
-                            return "!(" + this.serialize(node.children[0]) + " )";
+                            return "!(" + this.serialize(node.children[0]) + ")";
                         case "none":
                             return "";
                         default:
-                            return "(" + _.map(node.children, this.serialize, this).join(" " + node.op) + " )";
+                            var sc = _.map(node.children, this.serialize, this),
+                                string = "(" + sc.join(" " + node.op + " ") + ")";
+                            return string;
                     }
                 } else {
                     return "";
