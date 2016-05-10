@@ -1,0 +1,146 @@
+{
+  "name" : "ssh",
+  "displayName" : "SSHConnector",
+  "description" : "SSH connector for performing operations remotely via SSH",
+  "connectorRef" : {
+    "bundleName" : "org.forgerock.openicf.connectors.ssh-connector",
+    "bundleVersion" : "1.4.0.0",
+    "connectorName" : "org.forgerock.openicf.connectors.ssh.SSHConnector"
+  },
+  "poolConfigOption" : {
+    "maxObjects" : 1,
+    "maxIdle" : 1,
+    "maxWait" : 150000,
+    "minEvictableIdleTimeMillis" : 120000,
+    "minIdle" : 1
+  },
+  "operationTimeout" : {
+    "CREATE" : -1,
+    "TEST" : -1,
+    "AUTHENTICATE" : -1,
+    "SEARCH" : -1,
+    "UPDATE" : -1,
+    "DELETE" : -1,
+    "SYNC" : -1,
+    "SCHEMA" : -1,
+    "GET" : -1,
+    "VALIDATE" : -1,
+    "SCRIPT_ON_CONNECTOR" : -1,
+    "SCRIPT_ON_RESOURCE" : -1
+  },
+  "configurationProperties" : {
+    "host" : "<HOSTNAME OR IP>",
+    "port" : 22,
+    "user" : "<USERNAME>",
+    "password" : "<PASSWORD>",
+    "prompt" : "<Example: myusername@target:>",
+    "sudoCommand" : "/usr/bin/sudo",
+    "echoOff" : true,
+    "terminalType" : "vt102",
+    "setLocale" : false,
+    "locale" : "en_US.utf8",
+    "connectionTimeout" : 5000,
+    "expectTimeout" : 5000,
+    "authenticationType" : "PASSWORD",
+    "throwOperationTimeoutException" : true,
+    "scriptRoots" : [
+      "&{launcher.project.location}/tools"
+    ],
+    "classpath" : [
+      "&{launcher.project.location}/tools"
+    ],
+    "reloadScriptOnExecution" : false,
+    "createScriptFileName" : "Create.groovy",
+    "deleteScriptFileName" : "Delete.groovy",
+    "schemaScriptFileName" : "Schema.groovy",
+    "scriptOnResourceScriptFileName" : "ScriptOnResource.groovy",
+    "searchScriptFileName" : "Search.groovy",
+    "testScriptFileName" : "Test.groovy",
+    "updateScriptFileName" : "Update.groovy"
+  },
+  "systemActions" : [ ],
+  "syncFailureHandler" : {
+    "maxRetries" : 5,
+    "postRetryAction" : "logged-ignore"
+  },
+  "objectTypes" : {
+    "account" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "__ACCOUNT__",
+      "type" : "object",
+      "nativeType" : "__ACCOUNT__",
+      "properties" : {
+        "uid" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "__NAME__",
+          "required" : true
+        },
+        "password" : {
+          "type" : "string",
+          "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
+          "nativeName" : "__PASSWORD__",
+          "required" : true,
+          "flags" : [
+            "NOT_READABLE",
+            "NOT_RETURNED_BY_DEFAULT"
+          ]
+        },
+        "description" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "description",
+          "required" : false
+        },
+        "home" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "home",
+          "required" : false
+        },
+        "group" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "group",
+          "required" : false
+        },
+        "shell" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "shell",
+          "required" : false
+        },
+        "expiryDate" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "expiryDate",
+          "required" : false
+       }
+      }
+    },
+    "group" : {
+      "$schema" : "http://json-schema.org/draft-03/schema",
+      "id" : "__GROUP__",
+      "type" : "object",
+      "nativeType" : "__GROUP__",
+      "properties" : {
+        "gid" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "__NAME__",
+          "required" : true
+        },
+        "members" : {
+          "type" : "string",
+          "nativeType" : "string",
+          "nativeName" : "__NAME__",
+          "required" : true,
+          "flags" : [
+            "MULTIVALUED"
+          ]
+        }
+      }
+    }
+  },
+  "operationOptions" : { }
+}

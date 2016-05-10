@@ -81,6 +81,13 @@ This sample and the associated connector are only available in the Enterprise Re
 A sample showing OpenIDM together with OpenAM and OpenDJ. This sample demonstrates the entire ForgeRock Open Identity
 Stack integration.
 
+### kerberos
+A sample that demonstrates the kerberos connector.  This connector manages kerberos identities via SSH.
+
+### scriptedssh
+The scriptedssh connector supports execution of remote commands over SSH.  This sample demonstrates this
+capability by managing Linux identities.
+
 Sample Resources
 ----------------
 Below is a list of resources used by the samples. They can be used as a reference to understand certain features.
