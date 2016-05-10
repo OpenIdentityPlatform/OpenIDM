@@ -12,7 +12,7 @@
   Header, with the fields enclosed by brackets [] replaced by your own identifying
   information: "Portions Copyrighted [year] [name of copyright owner]".
 
-  Copyright (c) 2011-2015 ForgeRock AS. All rights reserved.
+  Copyright (c) 2011-2016 ForgeRock AS. All rights reserved.
 -->
 <assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
  xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
@@ -1046,6 +1046,22 @@
         </includes>
         <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
     </fileSet>
+    <!-- scriptedssh connector-->
+    <fileSet>
+        <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+        <includes>
+            <include>provisioner.openicf-ssh.json</include>
+        </includes>
+        <outputDirectory>/openidm/samples/scriptedssh/conf</outputDirectory>
+    </fileSet>
+    <fileSet>
+        <directory>${basedir}/src/main/resources</directory>
+        <includes>
+            <include>conf/**</include>
+            <include>script/**</include>
+        </includes>
+        <outputDirectory>/openidm/samples/scriptedssh</outputDirectory>
+    </fileSet>
   </fileSets>
     <!-- sample6 -->
     <files>
@@ -1055,6 +1071,7 @@
             <outputDirectory>/openidm/samples/sample6/alternatives</outputDirectory>
         </file>
     </files>
+
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
@@ -1119,6 +1136,9 @@
                 <exclude>xml-resolver:xml-resolver</exclude>
                 <exclude>org.apache.httpcomponents:httpcore-nio</exclude>
                 <exclude>org.apache.tomcat:tomcat-jdbc</exclude>
+                <exclude>com.github.cverges:expect4j:*</exclude>
+                <exclude>oro:oro:*</exclude>
+                <exclude>com.jcraft:jsch:*</exclude>
             </excludes>
         </dependencySet>
         <dependencySet>
@@ -1178,6 +1198,9 @@
                 <include>com.fasterxml:aalto-xml</include>
                 <include>org.apache.tomcat:tomcat-jdbc</include>
                 <include>org.forgerock.openicf.connectors:groovy-connector</include>
+                <include>com.github.cverges:expect4j</include>
+                <include>oro:oro</include>
+                <include>com.jcraft:jsch</include>
             </includes>
         </dependencySet>
         <dependencySet>
