@@ -2,9 +2,11 @@ module.exports = {
     before: function (client, done) {
         client.globals.login.helpers.setSession(client, done);
     },
+
     after: function (client) {
         client.end();
     },
+
     'Navigation items reflect service state': function (client) {
         // OPENIDM-4512
         var userRegistrationPage = client.page.userRegistration(),
@@ -27,5 +29,23 @@ module.exports = {
 
         // now the nav item should be disabled again
         registraionNavSection.expect.element('@toggleOff').to.be.present;
+    },
+
+    "Navigating to a disabled step": function(client) {
+        //OPENIDM-5790
+        var passwordResetPage = client.page.passwordReset();
+
+        passwordResetPage.loadPage();
+
+        passwordResetPage
+            .waitForElementPresent("@resourceDropdown", 2000)
+            .toggleSlider()
+            .toggleSlider();
+
+        passwordResetPage.click("@userQueryFormStep");
+
+        client.pause(5000);
+
+        passwordResetPage.assert.elementNotPresent("@stepEditDialog");
     }
 };

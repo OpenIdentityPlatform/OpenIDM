@@ -257,12 +257,23 @@ define([
         },
 
         showDetailDialog: function(event) {
-            var type = $(event.target).parents(".wide-card").attr("data-type"),
+            var el,
+                type = $(event.target).parents(".wide-card").attr("data-type"),
                 editable = $(event.target).parents(".wide-card").attr("data-editable"),
                 currentData = _.filter(this.model.saveConfig.stageConfigs, {"name" : type})[0],
                 defaultConfig = _.filter(this.data.configList, { "type": type })[0],
                 orderPosition = $(event.target).closest(".self-service-card.active").index(),
                 self = this;
+
+            if ($(event.target).hasClass("self-service-card")) {
+                el = $(event.target);
+            } else {
+                el = $(event.target).closest(".self-service-card");
+            }
+
+            if (el.hasClass("disabled")) {
+                return false;
+            }
 
             // If there is no data for the selected step and icon property is present, icon property indicates the step is mandatory
             if (!currentData && defaultConfig.icon.length > 0 ) {
@@ -373,7 +384,7 @@ define([
             var disabledList,
                 configList = [];
 
-            this.data.defaultIdentityServiceURL = null;
+            this.data.defaultIdentityServiceURL = "";
 
             $.when(
                 this.getResources(),
