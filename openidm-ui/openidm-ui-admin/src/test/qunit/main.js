@@ -16,10 +16,11 @@
 
 // add new test modules here:
 define([
-    "./connectorTest",
-    "./searchTest",
-    "./queryFilterEditorTest",
-    "./TemporalConstraintsUtilsTest",
+    "./ChangeAssociationDialog",
     "./ConnectorListViewTest",
-    "./RepoUpdateViewTest"
+    "./connectorTest",
+    "./queryFilterEditorTest",
+    "./RepoUpdateViewTest",
+    "./searchTest",
+    "./TemporalConstraintsUtilsTest"
 ]);
