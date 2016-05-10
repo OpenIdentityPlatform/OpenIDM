@@ -13,7 +13,8 @@ module.exports = {
         loadPage: function () {
             this
                 .navigate()
-                .waitForElementPresent("@mainEnableSlider", 2000);
+                .waitForElementPresent("@mainEnableSlider", 2000)
+                .api.pause(1000);
             return this;
         }
     }],
@@ -46,6 +47,5 @@ module.exports = {
         idInput: "#select-identityIdField +div .selectize-input",
         idInputChildren: "#select-identityIdField +div .selectize-dropdown-content div",
         dialogClose: ".btn-default"
-
     }
 };
