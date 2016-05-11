@@ -24,6 +24,7 @@
 */
 package org.forgerock.openidm.servletregistration.impl;
 
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.servlet.Filter;
@@ -42,7 +43,7 @@ public class RegisteredFilterImpl implements RegisteredFilter {
     private Integer order = null;
     private Filter filter = null;
     
-    protected RegisteredFilterImpl(JsonValue config) {
+    RegisteredFilterImpl(JsonValue config) {
         this.config = config;
         id = UUID.randomUUID();
         order = config.get(FILTER_ORDER).defaultTo(0).asInteger();
@@ -59,6 +60,11 @@ public class RegisteredFilterImpl implements RegisteredFilter {
             return getId().equals(((RegisteredFilter) filter).getId());
         }
         return false;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, config.getObject(), order, filter);
     }
 
     /**
