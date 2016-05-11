@@ -77,6 +77,7 @@ import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
+import org.forgerock.openidm.util.Utils;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -276,9 +277,9 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
         } catch (UnsupportedEncodingException e) {
             // Should never happen.
             throw new UndeclaredThrowableException(e);
-        } catch (Throwable t) {
-            logger.error("LocalManager initialisation for {} failed.", connectorsArea, t);
-            throw new ComponentException("LocalManager initialisation failed.", t);
+        } catch (Exception e) {
+            logger.error("LocalManager initialisation for {} failed.", connectorsArea, e);
+            throw new ComponentException("LocalManager initialisation failed.", e);
         }
     }
 
@@ -415,7 +416,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 } catch (UnsupportedOperationException e) {
                     jv.put("reason", "TEST UnsupportedOperation");
                     jv.put("ok", true);
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     jv.put("error", e.toString());
                     // exception -- leave "ok" : false
                 }
@@ -607,8 +608,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     return;
                 }
             }
-        } catch (Throwable t) {
-            // TODO Use the utility to adopt the exception
+        } catch (Exception e) {
+            throw Utils.adapt(e);
         }
         throw new ServiceUnavailableException("ConnectorFacade can not be initialised");
     }

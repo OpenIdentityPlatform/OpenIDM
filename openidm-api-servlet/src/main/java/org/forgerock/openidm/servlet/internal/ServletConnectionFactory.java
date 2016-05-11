@@ -141,8 +141,8 @@ public class ServletConnectionFactory implements ConnectionFactory {
             connectionFactory = newWrappedInternalConnectionFactory(Resources.newInternalConnectionFactory(
                     init(enhancedConfig.getConfigurationAsJson(context), requestHandler, auditFilter)));
             auditFilter.setConnectionFactory(connectionFactory);
-        } catch (Throwable t) {
-            logger.error("Failed to configure the Filtered Router service", t);
+        } catch (Exception e) {
+            logger.error("Failed to configure the Filtered Router service", e);
         }
 
         logger.info("Servlet ConnectionFactory created.");
