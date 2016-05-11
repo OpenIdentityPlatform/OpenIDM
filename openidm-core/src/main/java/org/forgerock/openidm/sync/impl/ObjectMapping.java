@@ -23,6 +23,7 @@ import static org.forgerock.json.resource.Requests.*;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -880,7 +881,7 @@ class ObjectMapping {
                 op.action = action;
                 op.performAction();
             } catch (SynchronizationException se) {
-                if (op.action != ReconAction.EXCEPTION) {
+                if (op != null && op.action != ReconAction.EXCEPTION) {
                     // exception was not intentional
                     status = Status.FAILURE;
                     if (reconId != null) {
@@ -983,7 +984,8 @@ class ObjectMapping {
 
             // If we will handle a target phase, pre-load all relevant target identifiers
             Collection<String> remainingTargetIds = new ArrayList<String>();
-            ResultIterable targetIterable = null;
+            ResultIterable targetIterable =
+                    new ResultIterable(Collections.<String>emptyList(), Collections.<JsonValue>emptyList());
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 reconContext.getStatistics().targetQueryStart();
                 targetIterable = reconContext.queryTarget();
@@ -1039,7 +1041,7 @@ class ObjectMapping {
 
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
-                reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);       
+                reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
                 targetIterable = targetIterable.removeNotMatchingEntries(remainingTargetIds);
                 reconContext.getStatistics().targetPhaseStart();
                 ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context,

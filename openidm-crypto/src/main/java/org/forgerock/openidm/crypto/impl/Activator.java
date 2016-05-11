@@ -92,6 +92,10 @@ public class Activator implements BundleActivator {
                 logger.trace("org.ops4j.pax.web.pax-web-jetty-bundle state: {}", bundle.getState());
             }
         }
+        if (jettyBundle == null) {
+            logger.error("jetty bundle not activated!");
+            return;
+        }
         for (org.osgi.framework.Bundle bundle : bundles) {
             if ("org.forgerock.openidm.jetty-fragment".equals(bundle.getSymbolicName())) {
                 Object expectNull = bundle.getResource("ForceResolve");

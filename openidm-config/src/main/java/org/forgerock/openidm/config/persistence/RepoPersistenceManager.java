@@ -519,9 +519,12 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                         String typeListItem = null;
                         for (Object listItem : listToInspect) {
                             if (listItem instanceof String && ((String)listItem).startsWith(OPENIDM_ORIG_ARRAY_TYPE)) {
-
                                 typeListItem = (String) listItem;
                             }
+                        }
+                        if (typeListItem == null) {
+                            throw new IOException("Found list containing " + OPENIDM_ORIG_ARRAY
+                                    + ", but no element starting with " + OPENIDM_ORIG_ARRAY_TYPE);
                         }
                         String origType = typeListItem.substring(OPENIDM_ORIG_ARRAY_TYPE.length());
                         listToInspect.remove(typeListItem); // remove this marker/meta-data entry

@@ -456,14 +456,19 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     /**
      * Updates the timestamp for this instance in the instance check-in map.
      *
-     * @ return the InstanceState object, or null if an expected failure (MVCC)
-     * was encountered
+     * @return the InstanceState object, or null if an expected failure (MVCC) was encountered
      */
     private InstanceState checkIn() {
-        InstanceState state = null;
+        final InstanceState state;
         try {
             logger.debug("Getting instance state for {}", instanceId);
             state = getInstanceState(instanceId);
+        } catch (ResourceException e) {
+            logger.info("Error retrieving instance state for {}", instanceId);
+            return null;
+        }
+
+        try {
             if (firstCheckin) {
                 state.updateStartup();
                 state.clearShutdown();
@@ -487,7 +492,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 // system may attempt to recover itself if recovery timeout has
                 // elapsed
                 logger.debug("Instance {} is in state {}, waiting for recovery attempt to finish",
-                        new Object[] { instanceId, state.getState() });
+                        instanceId, state.getState());
                 return state;
             }
             updateInstanceState(instanceId, state);
@@ -509,10 +514,16 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      */
     private void checkOut() {
         logger.debug("checkOut()");
-        InstanceState state = null;
+        final InstanceState state;
         try {
             logger.debug("Getting instance state for {}", instanceId);
             state = getInstanceState(instanceId);
+        } catch (ResourceException e) {
+            logger.info("Error retrieving instance state for {}", instanceId);
+            return;
+        }
+
+        try {
             switch (state.getState()) {
             case InstanceState.STATE_RUNNING:
                 // just update the timestamp
