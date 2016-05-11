@@ -960,8 +960,8 @@ define([
                     .append("foreignObject")
                     .attr("x", -1 * (width/2 - 1))
                     .attr("y", function(d, i) { return (i * 20 - height/7 * 3 + 8); } )
-                    .attr("width", 10)
-                    .attr("height", 10)
+                    .attr("width", 15)
+                    .attr("height", 20)
                     .html(function (d) {
                         var str = d,
                             strippedString = str.replace(/ /g, "_"),
