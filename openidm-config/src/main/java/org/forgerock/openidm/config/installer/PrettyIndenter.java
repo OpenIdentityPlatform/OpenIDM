@@ -47,7 +47,9 @@ class PrettyIndenter implements Indenter {
         String lf = null;
         try {
             lf = System.getProperty("line.separator");
-        } catch (Throwable t) { } // access exception?
+        } catch (Exception e) {
+            // access exception?
+        }
         SYSTEM_LINE_SEPARATOR = (lf == null) ? "\n" : lf;
     }
 

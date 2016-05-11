@@ -386,8 +386,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 }
                                 logger.info("OpenICF Provisioner Service component {} is activated.",
                                         systemIdentifier.getName());
-                            } catch (Throwable t) {
-                                logger.warn("Failure to activate connector.", t);
+                            } catch (Exception e) {
+                                logger.warn("Failure to activate connector.", e);
                             }
                         }
                     });
@@ -884,9 +884,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                 contextBuilder.build(), operationOptionsBuilder.build());
                     }
                     actionResult.put("result", ConnectorUtil.coercedTypeCasting(scriptResult, Object.class));
-                } catch (Throwable t) {
-                    logger.error("Script execution error.", t);
-                    actionResult.put("error", t.getMessage());
+                } catch (Exception e) {
+                    logger.error("Script execution error.", e);
+                    actionResult.put("error", e.getMessage());
                 }
                 resultList.add(actionResult);
             }
@@ -1897,7 +1897,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     jv.put("reason", "TEST UnsupportedOperation");
                 } catch (InvalidCredentialException e) {
                     jv.put("error", "Connection Error");
-                } catch (Throwable e) {
+                } catch (Exception e) {
                     jv.put("error", e.getMessage());
                     return jv.asMap();
                 }
