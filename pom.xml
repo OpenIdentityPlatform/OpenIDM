@@ -208,14 +208,12 @@
 
     <properties>
         <!-- Version management -->
-        <commons.forgerock-bom.version>7.0</commons.forgerock-bom.version>
-
-        <forgerock-audit.version>6.1.0</forgerock-audit.version>
+        <commons.commons-bom.version>20.0.0-alpha-1</commons.commons-bom.version>
 
         <!-- Commons versions -->
-        <commons.forgerock-script.version>3.2.0</commons.forgerock-script.version>
+        <commons.forgerock-script.version>3.3.0</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
-        <commons.forgerock-launcher.version>1.2.2</commons.forgerock-launcher.version>
+        <commons.forgerock-launcher.version>1.2.3</commons.forgerock-launcher.version>
 
         <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -243,7 +241,7 @@
         </openidm.osgi.import>
 
         <!-- OpenICF Framework and Connector versions -->
-        <openicf.framework.version>1.5.0.0</openicf.framework.version>
+        <openicf.framework.version>1.5.0.1-SNAPSHOT</openicf.framework.version>
         <openicf.xmlconnector.version>1.1.0.2</openicf.xmlconnector.version>
         <openicf.csvconnector.version>1.5.1.1</openicf.csvconnector.version>
         <openicf.dbtableconnector.version>1.1.0.1</openicf.dbtableconnector.version>
@@ -406,36 +404,10 @@
             <!-- Main ForgeRock Bill of Materials pom -->
             <dependency>
               <groupId>org.forgerock.commons</groupId>
-              <artifactId>forgerock-bom</artifactId>
-              <version>${commons.forgerock-bom.version}</version>
+              <artifactId>commons-bom</artifactId>
+              <version>${commons.commons-bom.version}</version>
               <scope>import</scope>
               <type>pom</type>
-            </dependency>
-
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-handler-elasticsearch</artifactId>
-                <version>${forgerock-audit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-handler-jms</artifactId>
-                <version>${forgerock-audit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-handler-csv</artifactId>
-                <version>${forgerock-audit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-core</artifactId>
-                <version>${forgerock-audit.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-audit-json</artifactId>
-                <version>${forgerock-audit.version}</version>
             </dependency>
 
             <!-- Non-BOM ForgeRock Commons artifacts -->
