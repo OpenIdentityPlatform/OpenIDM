@@ -50,18 +50,16 @@ function ($, _, Handlebars,
         var onChange;
 
         if (isNew) {
-            onChange = _.bind(function (value, newText) {
+            onChange = _.bind(function (value, oldValue, newText) {
                 this.createRelationship(value).then(_.bind(function () {
                     this.args.showChart = this.data.showChart;
                     this.render(this.args);
                 },this));
             }, this);
         } else {
-            onChange = _.bind(function (value, newText) {
-                this.deleteRelationship(value).then(_.bind(function () {
-                    this.createRelationship(value).then(_.bind(function () {
-                        this.render(this.args);
-                    }, this));
+            onChange = _.bind(function (value, oldValue, newText) {
+                this.updateRelationship(value, oldValue).then(_.bind(function () {
+                    this.render(this.args);
                 }, this));
             }, this);
         }
