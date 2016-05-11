@@ -56,60 +56,6 @@ public class FileUtilTest {
         }
     }
 
-    @Test(invocationCount = 4)
-    public void testReadLargeFile() throws Exception {
-        Random random = new Random(9999);
-        int iterations = 20;
-        long before = System.nanoTime();
-        URL testFile = FileUtilTest.class.getResource("/text1k.txt");
-        File textFile = new File(testFile.toURI());
-
-        for (int i = 0; i < iterations; i++) {
-            textFile = uncacheFile(random, textFile);
-            FileUtil.readLargeFile(textFile);
-        }
-        System.out.println("1k: " + ((System.nanoTime() - before) / 1000L / 1000L) + "ms");
-        textFile.renameTo(new File(testFile.toURI()));
-
-        testFile = FileUtilTest.class.getResource("/text8k.txt");
-        textFile = new File(testFile.toURI());
-        for (int i = 0; i < iterations; i++) {
-            textFile = uncacheFile(random, textFile);
-            FileUtil.readLargeFile(textFile);
-        }
-        System.out.println("8k: " + ((System.nanoTime() - before) / 1000L / 1000L) + "ms");
-        textFile.renameTo(new File(testFile.toURI()));
-
-        testFile = FileUtilTest.class.getResource("/text96k.txt");
-        textFile = new File(testFile.toURI());
-        for (int i = 0; i < iterations; i++) {
-            textFile = uncacheFile(random, textFile);
-            FileUtil.readLargeFile(textFile);
-        }
-        System.out.println("96k: " + ((System.nanoTime() - before) / 1000L / 1000L) + "ms");
-        textFile.renameTo(new File(testFile.toURI()));
-
-        testFile = FileUtilTest.class.getResource("/text1m.txt");
-        textFile = new File(testFile.toURI());
-        for (int i = 0; i < iterations; i++) {
-            textFile = uncacheFile(random, textFile);
-            FileUtil.readLargeFile(textFile);
-        }
-        System.out.println("1m: " + ((System.nanoTime() - before) / 1000L / 1000L) + "ms");
-        textFile.renameTo(new File(testFile.toURI()));
-
-        testFile = FileUtilTest.class.getResource("/text10m.txt");
-        textFile = new File(testFile.toURI());
-        for (int i = 0; i < iterations; i++) {
-            textFile = uncacheFile(random, textFile);
-            FileUtil.readLargeFile(textFile);
-        }
-        System.out.println("10m: " + ((System.nanoTime() - before) / 1000L / 1000L) + "ms");
-        textFile.renameTo(new File(testFile.toURI()));
-
-        System.out.println("End testReadLargeFile");
-    }
-
     private File uncacheFile(Random random, File textFile) {
         //The OS will cache any file that was recently read.
         File newFile = new File(textFile.getParentFile(), random.nextInt() + ".txt");

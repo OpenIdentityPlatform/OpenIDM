@@ -75,21 +75,6 @@ public class Utils {
     private Utils() {
     }
 
-    public static void copyURLToFile(URL in, File out) throws IOException {
-        ReadableByteChannel inChannel = Channels.newChannel(in.openStream());
-        FileChannel outChannel = new FileOutputStream(out).getChannel();
-        try {
-            outChannel.transferFrom(inChannel, 0, 1 << 24);
-        } catch (IOException e) {
-            throw e;
-        } finally {
-            if (inChannel != null)
-                inChannel.close();
-            if (outChannel != null)
-                outChannel.close();
-        }
-    }
-
     public static <T> T deepCopy(final T source) {
         if (source instanceof JsonValue) {
             return (T) new JsonValue(deepCopy(((JsonValue) source).getObject()));
