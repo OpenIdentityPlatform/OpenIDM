@@ -323,12 +323,12 @@ public class UpdateManagerImpl implements UpdateManager {
         } catch (IOException e) {
             throw new UpdateException("Cannot create temporary directory to unzip archive");
         } finally {
-            try {
-                if (tempUnzipDir != null) {
+            if (tempUnzipDir != null) {
+                try {
                     FileUtils.deleteDirectory(tempUnzipDir.toFile());
+                } catch (IOException e) {
+                    logger.error("Could not remove temporary directory: " + tempUnzipDir.toString(), e);
                 }
-            } catch (IOException e) {
-                logger.error("Could not remove temporary directory: " + tempUnzipDir.toString(), e);
             }
         }
     }
@@ -1038,12 +1038,12 @@ public class UpdateManagerImpl implements UpdateManager {
                 logger.debug("Failed to install update!", e);
                 return;
             } finally {
-                try {
-                    if (tempDirectory != null) {
+                if (tempDirectory != null) {
+                    try {
                         FileUtils.deleteDirectory(tempDirectory.toFile());
+                    } catch (IOException e) {
+                        logger.error("Could not remove temporary directory: " + tempDirectory.toString(), e);
                     }
-                } catch (IOException e) {
-                    logger.error("Could not remove temporary directory: " + tempDirectory.toString(), e);
                 }
             }
 

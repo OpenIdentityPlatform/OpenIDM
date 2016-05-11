@@ -312,17 +312,11 @@ public class SecurityResourceProvider {
      * @throws Exception
      */
     protected String getCertString(Object object) throws Exception {
-        PEMWriter pemWriter = null;
-        StringWriter sw = null;
-        try {
-            sw = new StringWriter();
-            pemWriter = new PEMWriter(sw);
+        try (StringWriter sw = new StringWriter(); PEMWriter pemWriter = new PEMWriter(sw)) {
             pemWriter.writeObject(object);
             pemWriter.flush();
-        } finally {
-            pemWriter.close();
+            return sw.getBuffer().toString();
         }
-        return sw.getBuffer().toString();
     }
 
     /**
@@ -614,22 +608,16 @@ public class SecurityResourceProvider {
      */
     public void saveStoreToRepo() throws ResourceException {
         byte [] keystoreBytes = null;
-        FileInputStream fin = null;
         File file = new File(store.getLocation());
 
-        try {
-            try {
-                fin = new FileInputStream(file);
-                keystoreBytes = new byte[(int) file.length()];
-                fin.read(keystoreBytes);
-            } finally {
-                fin.close();
-            }
+        try (FileInputStream fin = new FileInputStream(file)) {
+            keystoreBytes = new byte[(int) file.length()];
+            fin.read(keystoreBytes);
         } catch (Exception e) {
             throw new InternalServerErrorException(e.getMessage(), e);
         }
         
-        String keystoreString = new String(Base64.encode(keystoreBytes));
+        String keystoreString = Base64.encode(keystoreBytes);
         JsonValue value = new JsonValue(new HashMap<String, Object>());
         value.add("storeString", keystoreString);
         storeInRepo("security", resourceName, value);

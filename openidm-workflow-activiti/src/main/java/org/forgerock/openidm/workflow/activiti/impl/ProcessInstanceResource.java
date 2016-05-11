@@ -254,7 +254,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                             .processInstanceId(resourceId)
                             .singleResult();
                     if (executionEntity == null) {
-                         new ActivitiObjectNotFoundException(
+                         throw new ActivitiObjectNotFoundException(
                                 "Process instance with id" + resourceId + " could not be found", ProcessInstance.class);
                     }
 

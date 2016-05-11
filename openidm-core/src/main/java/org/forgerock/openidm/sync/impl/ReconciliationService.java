@@ -173,10 +173,11 @@ public class ReconciliationService
                 final String localId = request.getResourcePathObject().leaf();
                 // First try and get it from in memory
                 if (reconRuns.containsKey(localId)) {
-                	return newResourceResponse(localId, null, new JsonValue(reconRuns.get(localId).getSummary())).asPromise();
+                	return newResourceResponse(localId, null, new JsonValue(reconRuns.get(localId).getSummary()))
+                            .asPromise();
                 } else {
                     // Next, if not in memory, try and get it from audit log
-                    final Collection<ResourceResponse> queryResult = new ArrayList<>();
+                    final List<ResourceResponse> queryResult = new ArrayList<>();
                     getConnectionFactory().getConnection().query(
                             context,
                             Requests.newQueryRequest(AUDIT_RECON).setQueryFilter(
@@ -187,20 +188,17 @@ public class ReconciliationService
                             ),
                             queryResult);
                     
-                    ResourceResponse response = null;
-                    
                     if (queryResult.isEmpty()) {
                     	return new NotFoundException("Reconciliation with id " + localId + " not found." ).asPromise();
                     } else {
-                        for (ResourceResponse resource : queryResult) {
-                        	response = newResourceResponse(localId, null, 
-                                        resource.getContent().get(ReconAuditEventBuilder.MESSAGE_DETAIL).expect(Map.class));
-                        	break;
-                        }
+                        return newResourceResponse(localId, null,
+                                queryResult
+                                        .get(0)
+                                        .getContent()
+                                        .get(ReconAuditEventBuilder.MESSAGE_DETAIL)
+                                        .expect(Map.class))
+                                .asPromise();
                     }
-
-                    return response.asPromise();
-
                 }
             }
         } catch (ResourceException e) {

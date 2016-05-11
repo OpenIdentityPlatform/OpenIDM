@@ -1234,9 +1234,16 @@ public class ConnectorUtil {
             }
         } catch (Exception e) {
             if (logger.isDebugEnabled()) {
-                logger.error("Failed to coerce {} from {} to {} ", new Object[]{source, sourceClass.getCanonicalName(), targetClazz.getCanonicalName()}, e);
+                logger.error("Failed to coerce {} from {} to {} ",
+                        source,
+                        sourceClass != null ? sourceClass.getCanonicalName() : "??",
+                        targetClazz.getCanonicalName(),
+                        e);
             } else {
-                logger.error("Failed to coerce from {} to {} ", new Object[]{sourceClass.getCanonicalName(), targetClazz.getCanonicalName()}, e);
+                logger.error("Failed to coerce from {} to {} ",
+                        sourceClass != null ? sourceClass.getCanonicalName() : "??",
+                        targetClazz.getCanonicalName(),
+                        e);
             }
             throw new IllegalArgumentException(source.getClass().getCanonicalName() + " to " + targetClazz.getCanonicalName(), e);
         }

@@ -41,6 +41,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.util.JsonUtil;
+import org.forgerock.util.Reject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -117,13 +118,11 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     /**
      * {@inheritDoc}
      */
-    public JsonValue getConfigurationAsJson(ComponentContext compContext) throws InvalidException,
-            InternalErrorException {
+    public JsonValue getConfigurationAsJson(ComponentContext compContext)
+            throws InvalidException, InternalErrorException {
+        Reject.ifNull(compContext);
 
-        Dictionary dict = null;
-        if (compContext != null) {
-            dict = compContext.getProperties();
-        }
+        Dictionary dict = compContext.getProperties();
         String servicePid = (String) compContext.getProperties().get(Constants.SERVICE_PID);
 
         JsonValue conf = getConfiguration(dict, compContext.getBundleContext(), servicePid);

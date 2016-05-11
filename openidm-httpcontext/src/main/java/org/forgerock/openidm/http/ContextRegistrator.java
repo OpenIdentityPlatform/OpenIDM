@@ -117,27 +117,18 @@ public final class ContextRegistrator {
             URL entry = entries.nextElement();
             logger.trace("Handle properties file at {}", entry.getPath());
 
-            InputStream is = null;
             java.util.Properties props = new java.util.Properties();
-            try {
-                is = entry.openStream();
+            try (InputStream is = entry.openStream()) {
                 props.load(is);
             } catch (IOException ex) {
                 logger.warn("Failed to load security extension properties file", ex);
-                try {
-                    is.close();
-                } catch (Exception cex) {
-                    logger.warn("Failure during close of properties file.", cex);
-                }
             }
             logger.trace("Loaded {}: {}", entry.getPath(), props);
-            if (props != null) {
-                String clazzName = (String) props.get("security.configurator.class");
-                logger.debug("Initiating security configurator for class: {}", clazzName);
-                SecurityConfigurator configurator = instantiateSecurityConfigurator(clazzName);
-                if (configurator != null) {
-                    securityConfigurators.add(configurator);
-                }
+            String clazzName = (String) props.get("security.configurator.class");
+            logger.debug("Initiating security configurator for class: {}", clazzName);
+            SecurityConfigurator configurator = instantiateSecurityConfigurator(clazzName);
+            if (configurator != null) {
+                securityConfigurators.add(configurator);
             }
         }
     }
