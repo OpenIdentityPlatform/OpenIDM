@@ -1216,45 +1216,6 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     /**
-     * Fetch the zip file from the URL and write it to the local filesystem.
-     *
-     * @param url
-     * @return
-     * @throws UpdateException
-     */
-    private Path readZipFile(URL url) throws UpdateException {
-
-        // Download the patch file
-        final ReadableByteChannel channel;
-        try {
-            channel = Channels.newChannel(url.openStream());
-        } catch (IOException ex) {
-            throw new UpdateException("Failed to access the specified file " + url + " " + ex.getMessage(), ex);
-        }
-
-        String workingDir = "";
-        final String targetFileName = new File(url.getPath()).getName();
-        final File patchDir = ARCHIVE_PATH.toFile();
-        patchDir.mkdirs();
-        final File targetFile = new File(patchDir, targetFileName);
-        final FileOutputStream fos;
-        try {
-            fos = new FileOutputStream(targetFile);
-        } catch (FileNotFoundException ex) {
-            throw new UpdateException("Error in getting the specified file to " + targetFile, ex);
-        }
-
-        try {
-            fos.getChannel().transferFrom(channel, 0, Long.MAX_VALUE);
-            System.out.println("Downloaded to " + targetFile);
-        } catch (IOException ex) {
-            throw new UpdateException("Failed to get the specified file " + url + " to: " + targetFile, ex);
-        }
-
-        return targetFile.toPath();
-    }
-
-    /**
      * Return the name of the db directory in db/ representing the current repo.
      *
      * This is retrieved from the OSGi context stored as the db.dirname property on the RepositoryService

@@ -35,23 +35,6 @@ public final class FileUtil {
     }
 
     /**
-     * Read large > 5Mb text files to String.
-     *
-     * @param file
-     *            source file
-     * @return content of the source {@code file}
-     * @throws IOException
-     *             when the source {@code file} can not be read
-     */
-    public final static String readLargeFile(File file) throws IOException {
-        FileChannel channel = new FileInputStream(file).getChannel();
-        ByteBuffer buffer = ByteBuffer.allocate((int) channel.size());
-        channel.read(buffer);
-        channel.close();
-        return new String(buffer.array());
-    }
-
-    /**
      * Read small < 5Mb text files to String.
      *
      * @param file
