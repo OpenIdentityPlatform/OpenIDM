@@ -206,7 +206,7 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
                     reload();
 
                     Config.updateConfig(null);
-                } else if (!defaultPrivateKeyEntryExists && defaultTruststoreEntryExists) {
+                } else if (!defaultPrivateKeyEntryExists) {
                     // no default keystore entry, but truststore has default entry
                     // this should only happen if the enduser is manually editing the keystore/truststore
                     logger.error("Keystore and truststore out of sync. The keystore doesn't contain the default "
@@ -214,7 +214,7 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
                     throw new InternalServerErrorException("Keystore and truststore out of sync. The keystore "
                             + "doesn't contain the default entry, but the truststore does.");
 
-                } else if (defaultPrivateKeyEntryExists && !defaultTruststoreEntryExists) {
+                } else if (!defaultTruststoreEntryExists) {
                     // default keystore entry exists, but truststore default entry does not exist
                     // this should only happen if the enduser is manually editing the keystore/truststore
                     logger.error("Keystore and truststore out of sync. The keystore contains the default entry, but "

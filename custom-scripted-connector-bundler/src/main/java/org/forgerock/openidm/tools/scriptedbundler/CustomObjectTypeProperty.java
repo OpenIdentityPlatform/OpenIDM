@@ -130,7 +130,7 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
             return "UNKNOWN_TYPE";
         }
         return PROPERTY_TYPES.get(type) + (required
-                ? "," + (required ? " REQUIRED" : "")
+                ? ", REQUIRED"
                 : "");
     }
 

@@ -937,16 +937,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         if (null == facade) {
             throw new ServiceUnavailableException();
         }
-        OperationOptionInfoHelper operationOptionInfoHelper = null;
 
         if (null == facade.getOperation(operation)) {
             throw new NotSupportedException("Operation " + operation.getCanonicalName()
                             + " is not supported by the Connector");
-        } else if (null != operationOptionInfoHelper
-                && OperationOptionInfoHelper.OnActionPolicy.THROW_EXCEPTION
-                        .equals(operationOptionInfoHelper.getOnActionPolicy())) {
-            throw new ForbiddenException("Operation " + operation.getCanonicalName()
-                            + " is configured to be denied");
         }
         return facade;
     }
