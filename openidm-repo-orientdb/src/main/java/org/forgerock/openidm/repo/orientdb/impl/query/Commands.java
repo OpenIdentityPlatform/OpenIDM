@@ -101,38 +101,14 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
         Name eventName = getEventName(params.get(COMMAND_ID), params.get(COMMAND_EXPRESSION));
         EventEntry measure = Publisher.start(eventName, queryInfo, null);
 
-        // Disabled prepared statements until pooled usage is clarified
-        boolean tryPrepared = false;
-
         try {
-            if (tryPrepared /* queryInfo.isUsePrepared() */) {
-                result = doPreparedQuery(queryInfo, params, database);
-            } else {
-                result = doTokenSubsitutionQuery(queryInfo, params, database);
-            }
+            result = doTokenSubsitutionQuery(queryInfo, params, database);
             measure.setResult(result);
             return result;
         } catch (OQueryParsingException firstTryEx) {
-            if (tryPrepared /* queryInfo.isUsePrepared() */) {
-                // Prepared query is invalid, fall back onto add-hoc resolved query
-                try {
-                    logger.debug("Prepared version not valid, trying manual substitution");
-                    result = doTokenSubsitutionQuery(queryInfo, params, database);
-                    measure.setResult(result);
-                    // Disable use of the prepared statement as manually resolved works
-                    logger.debug("Manual substitution valid, mark not to use prepared statement");
-                    queryInfo.setUsePrepared(false);
-                } catch (OQueryParsingException secondTryEx) {
-                    // TODO: consider differentiating between bad configuration and bad request
-                    logger.debug("Failed to resolve and parse the command {} with params: {}",
-                            queryInfo.getQueryString(), params, secondTryEx);
-                    throw new BadRequestException("Failed to resolve and parse the command.");
-                }
-            } else {
-                // TODO: consider differentiating between bad configuration and bad request
-                throw new BadRequestException("Failed to resolve and parse the command "
-                        + queryInfo.getQueryString() + " with params: " + params, firstTryEx);
-            }
+            // TODO: consider differentiating between bad configuration and bad request
+            throw new BadRequestException("Failed to resolve and parse the command "
+                    + queryInfo.getQueryString() + " with params: " + params, firstTryEx);
         } catch (IllegalArgumentException ex) {
             // TODO: consider differentiating between bad configuration and bad request
             logger.debug("Command is invalid: {} {}", queryInfo.getQueryString(), ex.getMessage(), ex);
@@ -146,8 +122,6 @@ public class Commands extends ConfiguredQueries<OCommandSQL, ActionRequest, Inte
         } finally {
             measure.end();
         }
-
-        return result;
     }
 
 }

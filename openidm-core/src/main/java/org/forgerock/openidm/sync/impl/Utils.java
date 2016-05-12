@@ -16,23 +16,6 @@
  */
 package org.forgerock.openidm.sync.impl;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.nio.channels.Channels;
-import java.nio.channels.FileChannel;
-import java.nio.channels.ReadableByteChannel;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Stack;
-
-import org.forgerock.json.JsonValue;
-
 /**
  * A Utils class is a collection of common methods used in the script library.
  *
@@ -73,48 +56,7 @@ public class Utils {
     }
 
     private Utils() {
+        // prevent instantiation
     }
 
-    public static <T> T deepCopy(final T source) {
-        if (source instanceof JsonValue) {
-            return (T) new JsonValue(deepCopy(((JsonValue) source).getObject()));
-        } else if (source instanceof Collection || source instanceof Map) {
-            return (T) deepCopy(source, new Stack<Pair<Object, Object>>());
-        } else {
-            return source;
-        }
-    }
-
-    @SuppressWarnings({ "unchecked" })
-    private static Object deepCopy(Object source, final Stack<Pair<Object, Object>> valueStack) {
-        Iterator<Pair<Object, Object>> i = valueStack.iterator();
-        while (i.hasNext()) {
-            Pair<Object, Object> next = i.next();
-            if (next.fst == source) {
-                return next.snd;
-            }
-        }
-
-        if (source instanceof JsonValue) {
-            return new JsonValue(deepCopy(((JsonValue) source).getObject(), valueStack));
-        } else if (source instanceof Collection) {
-            List<Object> copy = new ArrayList<Object>(((Collection) source).size());
-            valueStack.push(Pair.of(source, (Object) copy));
-            for (Object o : (Collection) source) {
-                copy.add(deepCopy(o, valueStack));
-            }
-            // valueStack.pop();
-            return copy;
-        } else if (source instanceof Map) {
-            Map copy = new LinkedHashMap(((Map) source).size());
-            valueStack.push(Pair.of(source, (Object) copy));
-            for (Map.Entry<Object, Object> entry : ((Map<Object, Object>) source).entrySet()) {
-                copy.put(entry.getKey(), deepCopy(entry.getValue(), valueStack));
-            }
-            // valueStack.pop();
-            return copy;
-        } else {
-            return source;
-        }
-    }
 }

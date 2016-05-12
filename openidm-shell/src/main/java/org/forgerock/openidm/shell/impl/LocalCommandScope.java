@@ -106,67 +106,45 @@ public class LocalCommandScope extends CustomCommandScope {
                 if (location != null) {
                     File configFile = IdentityServer.getFileForInstallPath(location);
                     if (configFile.exists()) {
-                        FileInputStream in = null;
-                        try {
-                            in = new FileInputStream(configFile);
-                            if (null != in) {
-                                session.getConsole().append("Use KeyStore from: ")
-                                        .println(configFile.getAbsolutePath());
-                                // TODO Don't use the System in OSGi.
-                                char[] passwordArray = System.console().readPassword("Please enter the password: ");
-                                char[] passwordCopy = Arrays.copyOf(passwordArray, passwordArray.length);
-                                Arrays.fill(passwordArray, ' ');
-                                ks.load(in, passwordCopy);
-                                if (null != in) {
-                                    in.close();
-                                    in = null;
+                        try (FileInputStream in = new FileInputStream(configFile)) {
+                            session.getConsole().append("Use KeyStore from: ")
+                                    .println(configFile.getAbsolutePath());
+                            // TODO Don't use the System in OSGi.
+                            char[] passwordArray = System.console().readPassword("Please enter the password: ");
+                            char[] passwordCopy = Arrays.copyOf(passwordArray, passwordArray.length);
+                            Arrays.fill(passwordArray, ' ');
+                            ks.load(in, passwordCopy);
+                            if (doExport) {
+                                KeyStore.Entry key = ks.getEntry(alias, new KeyStore.PasswordProtection(passwordCopy));
+                                if (key instanceof KeyStore.SecretKeyEntry) {
+                                    KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) key;
+                                    session.getConsole().append("[OK] ").println(secretKeyEntry);
+                                    StringBuilder sb = new StringBuilder(secretKeyEntry.getSecretKey().getAlgorithm());
+                                    sb.append(":").append(
+                                            new BigInteger(1, secretKeyEntry.getSecretKey().getEncoded()).toString(16));
+                                    session.getConsole().println(sb);
+                                } else {
+                                    session.getConsole().println("SecretKeyEntry with this alias is not in KeyStore");
                                 }
-                                if (doExport) {
-                                    KeyStore.Entry key =
-                                            ks.getEntry(alias, new KeyStore.PasswordProtection(passwordCopy));
-                                    if (key instanceof KeyStore.SecretKeyEntry) {
-                                        KeyStore.SecretKeyEntry secretKeyEntry = (KeyStore.SecretKeyEntry) key;
-                                        session.getConsole().append("[OK] ").println(secretKeyEntry);
-                                        StringBuilder sb =
-                                                new StringBuilder(secretKeyEntry.getSecretKey().getAlgorithm());
-                                        sb.append(":").append(
-                                                new BigInteger(1, secretKeyEntry.getSecretKey().getEncoded())
-                                                        .toString(16));
-                                        session.getConsole().println(sb);
-                                    } else {
-                                        session.getConsole().println(
-                                                "SecretKeyEntry with this alias is not in KeyStore");
-                                    }
-                                } else if (doImport) {
-                                    if (ks.containsAlias(alias)) {
-                                        session.getConsole().println("KeyStore contains a key with this alias");
-                                    } else {
-                                        session.getConsole().println("Enter the key: ");
-                                        Scanner scanner = new Scanner(session.getKeyboard());
-                                        String[] tokens = scanner.nextLine().split(":");
-                                        if (tokens.length == 2) {
-                                            byte[] encoded = new BigInteger(tokens[1], 16).toByteArray();
-                                            javax.crypto.SecretKey mySecretKey = new SecretKeySpec(encoded, tokens[0]);
-                                            KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(mySecretKey);
-                                            ks.setEntry(alias, skEntry, new KeyStore.PasswordProtection(passwordCopy));
-                                            FileOutputStream fos = null;
-                                            try {
-                                                fos = new FileOutputStream(configFile);
-                                                ks.store(fos, passwordCopy);
-                                            } finally {
-                                                if (fos != null) {
-                                                    fos.close();
-                                                }
-                                            }
-                                        } else {
-                                            session.getConsole().println("Invalid key input");
+                            } else { // doImport
+                                if (ks.containsAlias(alias)) {
+                                    session.getConsole().println("KeyStore contains a key with this alias");
+                                } else {
+                                    session.getConsole().println("Enter the key: ");
+                                    Scanner scanner = new Scanner(session.getKeyboard());
+                                    String[] tokens = scanner.nextLine().split(":");
+                                    if (tokens.length == 2) {
+                                        byte[] encoded = new BigInteger(tokens[1], 16).toByteArray();
+                                        javax.crypto.SecretKey mySecretKey = new SecretKeySpec(encoded, tokens[0]);
+                                        KeyStore.SecretKeyEntry skEntry = new KeyStore.SecretKeyEntry(mySecretKey);
+                                        ks.setEntry(alias, skEntry, new KeyStore.PasswordProtection(passwordCopy));
+                                        try (FileOutputStream fos = new FileOutputStream(configFile)) {
+                                            ks.store(fos, passwordCopy);
                                         }
+                                    } else {
+                                        session.getConsole().println("Invalid key input");
                                     }
                                 }
-                            }
-                        } catch (IOException ioe) {
-                            if (null != in) {
-                                in.close();
                             }
                         }
                     } else {
