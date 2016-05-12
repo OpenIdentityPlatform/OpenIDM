@@ -227,7 +227,7 @@ define([
             sourceType = this.data.currentMappingDetails.source.split("/");
 
             AdminUtils.findPropertiesList(sourceType).then(_.bind(function(properties){
-                this.data.resourceSchema = properties;
+                this.data.resourcePropertiesList = _.chain(properties).keys().sortBy().value();
 
                 this.renderEditProperty(callback);
             }, this));
