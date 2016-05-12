@@ -534,7 +534,7 @@ define([
             this.data.defaultIdentityServiceURL = this.$el.find("#identityServiceUrl").val();
 
             AdminUtils.findPropertiesList(this.data.defaultIdentityServiceURL.split("/")).then(_.bind(function(properties) {
-                this.data.identityServiceProperties = _.keys(properties);
+                this.data.identityServiceProperties = _.chain(properties).keys().sortBy().value();
             }, this));
 
             if (e) {
