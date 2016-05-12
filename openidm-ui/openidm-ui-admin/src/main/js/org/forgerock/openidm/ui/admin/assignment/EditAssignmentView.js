@@ -106,6 +106,8 @@ define([
                 AdminUtils.findPropertiesList(systemType).then(_.bind(function(properties, connector){
                     this.data.resourceSchema = properties;
 
+                    this.data.resourcePropertiesList = _.chain(properties).keys().sortBy().value();
+
                     if(connector) {
                         this.model.connector = connector;
                     }
