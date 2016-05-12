@@ -8,8 +8,8 @@
                     <div class="attribute-name">
                         <div class="form-group ">
                             <select type="text" class="form-control select-attribute" autocomplete="off" value="{{name}}">
-                                {{#each resourceSchema}}
-                                <option value="{{@key}}">{{@key}}</option>
+                                {{#each resourcePropertiesList}}
+                                <option value="{{this}}">{{this}}</option>
                                 {{/each}}
                             </select>
                         </div>
