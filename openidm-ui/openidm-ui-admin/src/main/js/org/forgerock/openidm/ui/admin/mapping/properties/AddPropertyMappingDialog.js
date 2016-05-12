@@ -89,7 +89,7 @@ define([
             targetType = this.model.mapping.target.split("/");
 
             AdminUtils.findPropertiesList(targetType).then(_.bind(function(properties){
-                this.data.resourceSchema = properties;
+                this.data.resourcePropertiesList = _.chain(properties).keys().sortBy().value();
 
                 this.renderAddProperty(callback);
             }, this));

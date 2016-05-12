@@ -9,8 +9,8 @@
            </div>
            <div class="col-sm-5">
                <select id="addPropertySelect" name="addPropertySelect" class="form-control">
-               {{#each resourceSchema}}
-                   <option value="{{@key}}">{{@key}}</option>
+               {{#each resourcePropertiesList}}
+                   <option value="{{this}}">{{this}}</option>
                {{/each}}
                </select>
            </div>
