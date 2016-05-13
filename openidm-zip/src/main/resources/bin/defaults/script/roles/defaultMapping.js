@@ -196,12 +196,15 @@ if (lastSyncProvided(source) || oldValueProvided() && lastSyncProvided(oldSource
                             var config = getConfig(unassignmentOperation);
                             config.attributeName = oldAttribute.name;
                             config.attributeValue = oldAttribute.value;
-                            var unassignmentResult = openidm.action("script", "eval", config, {});
+                            // The result of this call should be an object with a field "value" containing the updated 
+                            // target field's value
+                            var unassignmentResultValue = openidm.action("script", "eval", config, {}).value;
                             // Update the target (working copy)
-                            target[oldAttribute.name] = unassignmentResult;
-                            // Update the existingTarget, in order to carry changes over to additional operations that may use the existingTarget
+                            target[oldAttribute.name] = unassignmentResultValue;
+                            // Update the existingTarget, in order to carry changes over to additional operations that 
+                            // may use the existingTarget
                             if (typeof existingTarget !== 'undefined' && existingTarget !== null) {
-                                existingTarget[oldAttribute.name] = unassignmentResult;
+                                existingTarget[oldAttribute.name] = unassignmentResultValue;
                             }
                         }
                     }

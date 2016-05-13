@@ -29,4 +29,9 @@
  *   targetObject, sourceObject, existingTargetObject, attributeName, attributeValue
  */
 
-targetObject[attributeName];
+//Return the result object
+var result = {
+    "value" : targetObject[attributeName]
+};
+
+result;
