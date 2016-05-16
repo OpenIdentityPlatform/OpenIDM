@@ -225,6 +225,10 @@ define([
                         items: this.data.selectedTopics
                     });
 
+                    if(_.isEmpty(schema.properties)) {
+                        this.$el.find(".jsonEditorContainer").hide();
+                    }
+
                     ValidatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
                     ValidatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
 
