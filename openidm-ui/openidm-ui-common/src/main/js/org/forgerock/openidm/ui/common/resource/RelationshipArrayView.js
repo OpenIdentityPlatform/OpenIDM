@@ -214,7 +214,7 @@ define([
                 this.$el.find('.remove-relationships-btn').prop('disabled',false);
             }
         },
-
+        
         render: function(args, callback) {
             this.args = args;
             this.element = args.element;
@@ -230,14 +230,14 @@ define([
 
             this.parentRender(function() {
 
-                this.buildRelationshipArrayGrid(this.getCols());
-
-                if(callback) {
-                    callback();
-                }
+                this.buildRelationshipArrayGrid(this.getCols(), args.onGridChange).then(function () {
+                    if(callback) {
+                        callback();
+                    }
+                });
             });
         },
-        buildRelationshipArrayGrid: function (cols) {
+        buildRelationshipArrayGrid: function (cols, onGridChange) {
             var _this = this,
                 grid_id = this.grid_id_selector,
                 url = this.getURL(),
@@ -254,6 +254,12 @@ define([
                 paginator;
 
             this.model.relationships = new RelationshipCollection();
+
+            this.model.relationships.on('sync', function(){
+                if (onGridChange) {
+                    onGridChange();
+                }
+            });
 
             relationshipGrid = new Backgrid.Grid({
                 className: "backgrid table table-hover",
@@ -291,7 +297,7 @@ define([
             this.$el.find(pager_id).append(paginator.render().el);
             this.bindDefaultHandlers();
 
-            this.model.relationships.getFirstPage();
+            return this.model.relationships.getFirstPage();
 
         },
 
