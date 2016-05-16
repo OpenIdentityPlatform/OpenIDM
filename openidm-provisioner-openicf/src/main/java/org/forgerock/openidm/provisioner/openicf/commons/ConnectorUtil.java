@@ -847,10 +847,6 @@ public class ConnectorUtil {
      */
     @SuppressWarnings("unchecked")
     public static <T> T coercedTypeCasting(Object source, Class<T> clazz) throws IllegalArgumentException {
-        if (source == null) {
-            return null;
-        }
-
         if (null == clazz) {
             throw new IllegalArgumentException("Target Class can not be null");
         }
@@ -859,10 +855,14 @@ public class ConnectorUtil {
         }
 
         Class<T> targetClazz = clazz;
-        Class sourceClass = source.getClass();
+        Class sourceClass = (source == null ? null : source.getClass());
         boolean coerced = false;
         T result = null;
         try {
+            if (source == null) {
+                return null;
+            }
+
             //Default JSON Type conversion
             if (targetClazz.equals(Object.class)) {
                 if ((Number.class.isAssignableFrom(sourceClass)) || (int.class == clazz) || (double.class == clazz) || (float.class == clazz) || (long.class == clazz)) {

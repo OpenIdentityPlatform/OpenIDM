@@ -881,7 +881,7 @@ class ObjectMapping {
                 op.action = action;
                 op.performAction();
             } catch (SynchronizationException se) {
-                if (op.action != ReconAction.EXCEPTION) {
+                if (op != null && op.action != ReconAction.EXCEPTION) {
                     // exception was not intentional
                     status = Status.FAILURE;
                     if (reconId != null) {
@@ -892,9 +892,8 @@ class ObjectMapping {
                 }
                 setLogEntryMessage(event, se);
             }
-            if (reconId != null
-                    && !ReconAction.NOREPORT.equals(action)
-                    && (status == Status.FAILURE || op.action != null)) {
+            if (reconId != null && !ReconAction.NOREPORT.equals(
+                    action) && (status == Status.FAILURE || op.action != null)) {
                 if (op instanceof SourceSyncOperation) {
                     event.setReconciling("source");
                     if (op.getTargetObject() != null) {
