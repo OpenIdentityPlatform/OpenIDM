@@ -22,5 +22,6 @@ define([
     "./queryFilterEditorTest",
     "./RepoUpdateViewTest",
     "./searchTest",
-    "./TemporalConstraintsUtilsTest"
+    "./TemporalConstraintsUtilsTest",
+    "./MembersViewTest"
 ]);
