@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -84,6 +84,11 @@ abstract class RelationshipValidator {
      */
     final void validateRelationship(final JsonValue relationshipField, Context context)
             throws ResourceException {
+        if (relationshipField.isNull()) {
+            // if the new object has the relationshipField removed, we do not need to validate the null
+            // relationshipField because there is no relationship to validate
+            return;
+        }
         if (relationshipField.isCollection()) {
             String message = format("''{0}'' is invalid as a relationship reference", relationshipField.asCollection());
             logger.debug(message);
