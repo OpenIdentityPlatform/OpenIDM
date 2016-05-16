@@ -38,7 +38,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="xmlCreateIfNotExists" type="checkbox" name="configurationProperties.createFileIfNotExists" value="false" >
+                            <input class="toggleBoolean" id="xmlCreateIfNotExists" type="checkbox" name="configurationProperties.createFileIfNotExists" value="true" {{#if connectorDefaults.configurationProperties.createFileIfNotExists}} checked {{/if}} >
                             <span></span>
                         </label>
                     </div>

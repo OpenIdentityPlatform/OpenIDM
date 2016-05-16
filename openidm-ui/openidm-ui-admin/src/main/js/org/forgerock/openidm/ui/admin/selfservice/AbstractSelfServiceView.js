@@ -49,8 +49,7 @@ define([
 
     var AbstractSelfServiceView = AdminAbstractView.extend({
         events: {
-            "change .all-check" : "controlAllSwitch",
-            "change .checkbox-slider-primary" : AdminUtils.toggleValue,
+            "click .all-check" : "controlAllSwitch",
             "change .section-check" : "controlSectionSwitch",
             "change #identityServiceUrl": "updateIdentityServiceURL",
             "click .save-config" : "saveConfig",

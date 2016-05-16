@@ -88,10 +88,5 @@ define([
         };
     };
 
-    obj.toggleValue = function(e) {
-        var element = $(e.target), oldValue = element.val() === "true";
-        element.val(!oldValue);
-    };
-
     return obj;
 });

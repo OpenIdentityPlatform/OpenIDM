@@ -26,13 +26,11 @@ module.exports = {
             dbTableDetails = addConnector.section.dbTableDetails,
             generalDetails = addConnector.section.generalDetails;
         // FireFox
-        generalDetails
-            .assert.attributeEquals('@enabledToggle', 'value', 'true');
-        dbTableDetails
-            .assert.attributeEquals('@emptyStringToggle', 'value', 'false')
-            .assert.attributeEquals('@rethrowSQLToggle', 'value', 'true')
-            .assert.attributeEquals('@nativeTimeToggle', 'value', 'false')
-            .assert.attributeEquals('@allNativeToggle', 'value', 'false');
+        generalDetails.expect.element('@enabledToggle').to.be.selected;
+        dbTableDetails.expect.element('@emptyStringToggle').to.not.be.selected;
+        dbTableDetails.expect.element('@rethrowSQLToggle').to.be.selected;
+        dbTableDetails.expect.element('@nativeTimeToggle').to.not.be.selected;
+        dbTableDetails.expect.element('@allNativeToggle').to.not.be.selected;
 
         client.elements('css selector', 'div.checkbox label', function (elements) {
             elements.value.forEach(function(element) {
@@ -41,13 +39,11 @@ module.exports = {
                 }).pause(200);
             });
         });
-        generalDetails
-            .assert.attributeEquals('@enabledToggle', 'value', 'false');
-        dbTableDetails
-            .verify.attributeEquals('@emptyStringToggle', 'value', 'true')
-            .verify.attributeEquals('@rethrowSQLToggle', 'value', 'false')
-            .verify.attributeEquals('@nativeTimeToggle', 'value', 'true')
-            .verify.attributeEquals('@allNativeToggle', 'value', 'true');
+        generalDetails.expect.element('@enabledToggle').to.not.be.selected;
+        dbTableDetails.expect.element('@emptyStringToggle').to.be.selected;
+        dbTableDetails.expect.element('@rethrowSQLToggle').to.not.be.selected;
+        dbTableDetails.expect.element('@nativeTimeToggle').to.be.selected;
+        dbTableDetails.expect.element('@allNativeToggle').to.be.selected;
     },
     'Change Connector Type to XML Connector': function (client) {
         var addConnector = client.page.connectorsAdd(),
@@ -63,13 +59,14 @@ module.exports = {
         var addConnector = client.page.connectorsAdd(),
             xmlDetails = addConnector.section.xmlDetails;
 
-        xmlDetails
-            .assert.attributeEquals('@createIfToggle', 'value', 'false');
+        xmlDetails.expect.element('@createIfToggle').to.not.be.selected;
+
         client.execute(function() {
             $('#xmlCreateIfNotExists').parent().click();
         });
+        xmlDetails.expect.element('@createIfToggle').to.be.selected;
+
         xmlDetails
-            .assert.attributeEquals('@createIfToggle', 'value', 'true')
             .click('#xmlCreateIfNotExists');
     }
 };

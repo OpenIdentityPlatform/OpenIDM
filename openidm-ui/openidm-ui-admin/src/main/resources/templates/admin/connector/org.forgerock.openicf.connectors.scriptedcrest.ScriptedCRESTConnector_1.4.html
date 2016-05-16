@@ -79,7 +79,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="recompileGroovySource" type="checkbox" name="configurationProperties.recompileGroovySource" value="false" >
+                            <input class="toggleBoolean" id="recompileGroovySource" type="checkbox" name="configurationProperties.recompileGroovySource" value="true" {{#if connectorDefaults.configurationProperties.recompileGroovySource}} checked {{/if}} >
                             <span></span>
                         </label>
                     </div>
@@ -90,7 +90,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="debug" type="checkbox" name="configurationProperties.debug" value="false" >
+                            <input class="toggleBoolean" id="debug" type="checkbox" name="configurationProperties.debug" value="true" {{#if connectorDefaults.configurationProperties.debug}} checked {{/if}} >
                             <span></span>
                         </label>
                     </div>
@@ -101,7 +101,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="verbose" type="checkbox" name="configurationProperties.verbose" value="false" >
+                            <input class="toggleBoolean" id="verbose" type="checkbox" name="configurationProperties.verbose" value="true" {{#if connectorDefaults.configurationProperties.verbose}} checked {{/if}} >
                             <span></span>
                         </label>
                     </div>
