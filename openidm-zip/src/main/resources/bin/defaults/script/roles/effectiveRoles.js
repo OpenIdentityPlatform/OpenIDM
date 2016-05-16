@@ -1,25 +1,17 @@
-/**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2014 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 /**
@@ -32,7 +24,6 @@
  * Module which calculates the effective roles
  */
 (function () {
-    var _ = require('lib/lodash');
     var relationshipHelper = require('roles/relationshipHelper');
 
     /**
@@ -41,37 +32,24 @@
      * @param object and object representing a user.
      */
     exports.calculateEffectiveRoles = function(object, rolesPropName) {
-        var grants,
-            directRoleGrants = null,
-            objectId = object._id,
-            response,
+        var roleGrants,
             effectiveRoles;
 
         logger.debug("Invoked effectiveRoles script on property {}", propertyName);
 
         logger.trace("Configured rolesPropName: {}", rolesPropName);
 
-        if (object[rolesPropName] === undefined && objectId !== undefined && objectId !== null) {
-            // User's roles are not present, so query for them
-            //logger.trace("User's " + rolesPropName + " is not present so querying the roles", rolesPropName);
-            //var path = org.forgerock.json.resource.ResourcePath.valueOf("managed/user").child(objectId).child(rolesPropName);
-            //response = openidm.query(path.toString(), {"_queryId": "find-relationships-for-resource"});
-            directRoleGrants = relationshipHelper.getGrants(object, "roles", "user");
-        } else {
-            directRoleGrants = object[rolesPropName];
-        }
+        roleGrants = relationshipHelper.getGrants(object, "roles", "user");
 
         // Filter roles by temporal constraints defined on the grant
-        directRoleGrants = directRoleGrants.filter(function(grant) {
+        roleGrants = roleGrants.filter(function(grant) {
             var properties = grant._refProperties;
             return properties !== undefined
                     ? processConstraints(grant._refProperties)
                     : true;
         });
 
-        effectiveRoles = directRoleGrants == null
-             ? []
-             : directRoleGrants.map(function(role) { return { "_ref" : role._ref }; });
+        effectiveRoles = roleGrants.map(function(role) { return { "_ref" : role._ref }; });
 
         // Filter roles by temporal constraints defined on the role
         effectiveRoles = effectiveRoles.filter(function(roleRelationship) {
