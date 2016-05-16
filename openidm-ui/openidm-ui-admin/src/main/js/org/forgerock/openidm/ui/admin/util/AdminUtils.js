@@ -119,15 +119,6 @@ define([
         return propertiesPromise;
     };
 
-    obj.toggleValue = function(e) {
-        var toggle = this.$el.find(e.target);
-        if (toggle.val() === "true") {
-            toggle.val(false);
-        } else {
-            toggle.val(true);
-        }
-    };
-
     /**
      * @description A handlebars helper checking if an item is contained in a list
      *

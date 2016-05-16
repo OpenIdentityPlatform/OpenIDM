@@ -135,9 +135,7 @@ define([
 
             _.extend(this.data.config, formData);
 
-            if (_.has(formData, "starttls") && _.has(formData.starttls, "enable")) {
-                this.data.config.starttls.enable = true;
-            } else {
+            if (!_.has(formData, "starttls") || !_.has(formData.starttls, "enable")) {
                 delete this.data.config.starttls;
             }
 
@@ -146,9 +144,7 @@ define([
                     this.data.config.auth.password = this.data.password;
                 }
 
-                if (_.has(formData.auth, "enable")) {
-                    this.data.config.auth.enable = true;
-                } else {
+                if (!_.has(formData.auth, "enable")) {
                     delete this.data.config.auth;
                 }
             }

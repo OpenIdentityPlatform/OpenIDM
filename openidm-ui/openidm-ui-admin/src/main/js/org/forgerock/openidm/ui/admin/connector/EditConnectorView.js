@@ -69,8 +69,7 @@ define([
             "change #connectorForm :input" : "connectorChangesCheck",
             "keypress #connectorForm :input" : "connectorFlowCheck",
             "paste #connectorForm :input" : "connectorFlowCheck",
-            "change #advancedForm :input" : "advancedChangesCheck",
-            "change .toggleBoolean" : connectorUtils.toggleValue
+            "change #advancedForm :input" : "advancedChangesCheck"
         },
         data: {
 
@@ -795,12 +794,6 @@ define([
                         }
                     });
                 }, this);
-            }
-
-            if (mergedResult.enabled === "true") {
-                mergedResult.enabled = true;
-            } else {
-                mergedResult.enabled = false;
             }
 
             mergedResult.objectTypes = this.userDefinedObjectTypes || this.data.objectTypes;

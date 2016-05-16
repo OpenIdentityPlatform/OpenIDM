@@ -101,7 +101,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="enableEmptyString" type="checkbox" name="configurationProperties.enableEmptyString" value="false">
+                            <input class="toggleBoolean" id="enableEmptyString" type="checkbox" name="configurationProperties.enableEmptyString" value="true" {{#if connectorDefaults.configurationProperties.enableEmptyString}} checked {{/if}}>
                             <span></span>
                         </label>
                     </div>
@@ -113,7 +113,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="rethrowAllSQLExceptions" type="checkbox" name="configurationProperties.rethrowAllSQLExceptions" value="true" checked>
+                            <input class="toggleBoolean" id="rethrowAllSQLExceptions" type="checkbox" name="configurationProperties.rethrowAllSQLExceptions" value="true" {{#if connectorDefaults.configurationProperties.rethrowAllSQLExceptions}} checked {{/if}}>
                             <span></span>
                         </label>
                     </div>
@@ -125,7 +125,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="nativeTimestamps" type="checkbox" name="configurationProperties.nativeTimestamps" value="false" >
+                            <input class="toggleBoolean" id="nativeTimestamps" type="checkbox" name="configurationProperties.nativeTimestamps" value="true" {{#if connectorDefaults.configurationProperties.nativeTimestamps}} checked {{/if}} >
                             <span></span>
                         </label>
                     </div>
@@ -137,7 +137,7 @@
                 <div class="col-sm-8">
                     <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
                         <label>
-                            <input class="toggleBoolean" id="allNative" type="checkbox" name="configurationProperties.allNative" value="false" >
+                            <input class="toggleBoolean" id="allNative" type="checkbox" name="configurationProperties.allNative" value="true" {{#if connectorDefaults.configurationProperties.allNative}} checked {{/if}} >
                             <span></span>
                         </label>
                     </div>

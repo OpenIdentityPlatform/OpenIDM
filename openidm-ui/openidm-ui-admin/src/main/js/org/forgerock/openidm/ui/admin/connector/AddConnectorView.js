@@ -46,8 +46,7 @@ define([
         template: "templates/admin/connector/AddConnectorTemplate.html",
         events: {
             "change #connectorType" : "loadConnectorTemplate",
-            "onValidate": "onValidate",
-            "change .toggleBoolean" : connectorUtils.toggleValue
+            "onValidate": "onValidate"
         },
         data: {
 
@@ -118,12 +117,6 @@ define([
                 connectorData.configurationProperties = this.connectorTypeRef.getGenericConnector();
             }
 
-            if (connectorData.enabled === "true") {
-                connectorData.enabled = true;
-            } else {
-                connectorData.enabled = false;
-            }
-
             delete connectorData.connectorType;
 
             connectorData.configurationProperties.readSchema = false;
@@ -140,7 +133,7 @@ define([
                 }
 
             }, this);
-            
+
             return mergedResult;
         },
 
