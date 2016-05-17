@@ -18,6 +18,7 @@ package org.forgerock.openidm.repo.orientdb.impl;
 import static org.forgerock.json.resource.CountPolicy.EXACT;
 import static org.forgerock.json.resource.CountPolicy.NONE;
 import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -74,6 +75,7 @@ import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.repo.orientdb.impl.query.Commands;
 import org.forgerock.openidm.repo.orientdb.impl.query.PredefinedQueries;
 import org.forgerock.openidm.repo.orientdb.impl.query.Queries;
+import org.forgerock.util.Reject;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -880,29 +882,30 @@ public class OrientDBRepoService implements RequestHandler, RepositoryService, R
     }
 
     /**
-     * Adapts a {@code Throwable} to a {@code ResourceException}. If the
-     * {@code Throwable} is an JSON {@code JsonValueException} then an
+     * Adapts an {@code Exception} to a {@code ResourceException}. If the
+     * {@code Exception} is an JSON {@code JsonValueException} then an
      * appropriate {@code ResourceException} is returned, otherwise an
      * {@code InternalServerErrorException} is returned.
      *
-     * @param t
-     *            The {@code Throwable} to be converted.
+     * @param ex
+     *            The {@code Exception} to be converted.
      * @return The equivalent resource exception.
      */
-    public ResourceException adapt(final Throwable t) {
+    private ResourceException adapt(final Exception ex) {
+        Reject.ifNull(ex);
         int resourceResultCode;
         try {
-            throw t;
-        } catch (OConcurrentModificationException ex) {
+            throw ex;
+        } catch (OConcurrentModificationException e) {
             resourceResultCode = ResourceException.VERSION_MISMATCH;
         } catch (final ResourceException e) {
             return e;
         } catch (final JsonValueException e) {
             resourceResultCode = ResourceException.BAD_REQUEST;
-        } catch (final Throwable tmp) {
+        } catch (final Exception e) {
             resourceResultCode = ResourceException.INTERNAL_ERROR;
         }
-        return ResourceException.getException(resourceResultCode, t.getMessage(), t);
+        return newResourceException(resourceResultCode, ex.getMessage(), ex);
     }
 
     /**
