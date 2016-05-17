@@ -49,8 +49,10 @@
                     .each(function (user) {
                         logger.debug("onSync-assignments will call triggerSyncCheck for {}", user);
                         // Issue triggerSyncCheck action and set fields to "*" to indicate all default fields plus any
-                        // virtual fields on the managed user, which will pick up changes to "effectiveAssignments".
-                        openidm.action(user, "triggerSyncCheck", {}, {}, ["*"]);
+                        // virtual fields on the managed user, which will pick up changes to "effectiveAssignments" and 
+                        // "effectiveRoles". Also add the roles field, so that user roles are calculated, so that
+                        // sync checks takes the roles field into consideration.
+                        openidm.action(user, "triggerSyncCheck", {}, {}, ["*", "roles"]);
                     }
                 );
             } else {
