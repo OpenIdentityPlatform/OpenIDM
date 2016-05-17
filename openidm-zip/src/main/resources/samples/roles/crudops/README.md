@@ -378,7 +378,7 @@ Now let's try and delete the Contractor role:
                --request DELETE \
                'https://localhost:8443/openidm/managed/role/c22316ba-2096-4272-af10-9b17c17e555b'
 
-               {"code":409,"reason":"Conflict","message":"Cannot delete a role that is currently assigned"}
+               {"code":409,"reason":"Conflict","message":"Cannot delete a role that is currently granted"}
 
 So, we cannot delete a role that has been assigned to one or more users. We must first deallocate that role from the 
 user entry:
