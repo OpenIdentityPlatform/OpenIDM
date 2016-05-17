@@ -145,7 +145,11 @@ function createJobsForGrantConstraints(grant) {
         var userId = resourceName.startsWith('managed/user/') 
                 ? resourceName.toString() 
                 : grant._ref,
-            scriptConfig = { 
+            // The script to enforce grant temporal constraints will issue triggerSyncCheck action and set fields to "*"
+            // to indicate all default fields plus any virtual fields on the managed user, which will pick up changes
+            // to "effectiveAssignments" and "effectiveRoles". Also add the roles field, so that user roles are
+            // also populated, so that sync checks take user roles into consideration.
+            scriptConfig = {
                 "type" : "text/javascript", 
                 "source" : "openidm.action(userId, 'triggerSyncCheck', {}, {}, ['*', 'roles']);",
                 "globals" : { 
