@@ -851,18 +851,17 @@ public class ConnectorUtil {
             throw new IllegalArgumentException("Target Class can not be null");
         }
         if (source instanceof JsonValue) {
-            source = ((JsonValue)source).getObject();
+            source = ((JsonValue) source).getObject();
+        }
+        if (source == null) {
+            return null;
         }
 
         Class<T> targetClazz = clazz;
-        Class sourceClass = (source == null ? null : source.getClass());
+        Class sourceClass = source.getClass();
         boolean coerced = false;
         T result = null;
         try {
-            if (source == null) {
-                return null;
-            }
-
             //Default JSON Type conversion
             if (targetClazz.equals(Object.class)) {
                 if ((Number.class.isAssignableFrom(sourceClass)) || (int.class == clazz) || (double.class == clazz) || (float.class == clazz) || (long.class == clazz)) {
