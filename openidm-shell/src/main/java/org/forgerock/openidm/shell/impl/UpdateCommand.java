@@ -246,7 +246,8 @@ public class UpdateCommand {
                         executionResults.setLastRecoveryStep(nextStep);
                         ExecutorStatus status = executor.execute(context, executionResults);
                         if (status.equals(ExecutorStatus.ABORT)) {
-                            return executionResults;
+                            log("WARN: Aborted from a recovery step " + nextStep + ".");
+                            break;
                         } else if (status.equals(ExecutorStatus.FAIL)) {
                             log("WARN: Failed a recovery step " + nextStep + ", continuing on with recovery.");
                         }
