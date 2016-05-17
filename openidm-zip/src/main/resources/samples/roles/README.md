@@ -1,7 +1,7 @@
     /**
      * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
      *
-     * Copyright 2015 ForgeRock AS. All rights reserved.
+     * Copyright 2015-2016 ForgeRock AS. All rights reserved.
      *
      * The contents of this file are subject to the terms
      * of the Common Development and Distribution License
@@ -33,7 +33,7 @@ UI. The following use cases are covered:
 * Create a role with an assignment (entitlement) or update an existing
   role to add an assignment to that role.
 * Query all roles and their assignments
-* Query all user and their roles (+assignments)
+* Query all user and their roles (+ assignments)
 * Sync a user who has a role with an attribute bearing entitlement to
   an external system (OpenDJ, based on sample 2b)
 * Delete a role
@@ -46,8 +46,8 @@ Available as part of the "crudops" sample. Provides a list of operations that
 can be performed via REST or via the UI to manage roles in OpenIDM.
 
 Use Case: the "Employee" and "Contractor" roles (common in most companies) will
-be created, searched, updated, assigned to a user via the REST API; the
-"Contractor" role will be deallocated from the user and deleted. That same
+be created, searched, updated, granted to a user via the REST API; the
+"Contractor" role will be ungranted from the user and deleted. That same
 Contractor role will be (re)created via the Admin UI, updated and finally
 deleted again.
 
@@ -75,7 +75,7 @@ on sample2b.
 
 Use Case: To tighten up access to the _Contractors_ group, the company has imposed
 a new policy which requires there to be a start time and end time for the duration
-contractors have the contractor role assigned to them. This role will align with
+contractors have the contractor role granted to them. This role will align with
 their signed contract that has a start and end date. A temporal constraint on this role
 will be added to demonstrate the time period in which the contractor will be part of
 the _Contractors_ group.

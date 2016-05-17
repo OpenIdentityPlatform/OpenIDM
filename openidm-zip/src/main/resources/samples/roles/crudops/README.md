@@ -1,7 +1,7 @@
     /**
      * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
      *
-     * Copyright 2015 ForgeRock AS. All rights reserved.
+     * Copyright 2015-2016 ForgeRock AS. All rights reserved.
      *
      * The contents of this file are subject to the terms
      * of the Common Development and Distribution License
@@ -30,7 +30,7 @@ UI. The following use cases are covered:
 * Create a role
 * Update a role
 * Query all roles
-* Assign a role to a user
+* Grant a role to a user
 * Delete a role
 
 Note: this sample doesn't contain any particular configuration. So OpenIDM can just be started with the following 
@@ -44,31 +44,44 @@ CRUD operations for Roles
 
 1. Creating the Employee and Contractor roles
 
-There are a couple of methods to create a new role. You can either use a PUT or a POST. The PUT request will allow you 
-to specify the resource id for the object you create.
+Like any managed object, you can use either a PUT or a POST request to 
+create a role. A PUT request allows you to specify a human-readable 
+resource ID for the object you create. With a POST request, the server 
+generates an identifier for the new object. This system-generated ID is 
+not human-readable. Although a PUT request results in a role ID that is 
+easy to read and manipulate (via curl for example) it is a _mutable_ 
+identifier. Therefore any renaming will potentially create conflicts and 
+referential integrity issues.
 
-        $ curl --insecure \
-               --header "Content-type: application/json" \
+In production systems, you should use POST requests with a 
+system-generated ID. The examples in this sample use system-generated IDs 
+as best practice.
+
+Create a role named "Employee":
+
+        $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
-               --header "If-None-Match: *" \
-               --request PUT \
+               --request POST \
                --data '{
                  "name" : "Employee",
                  "description": "Role assigned to workers on the payroll."
                }' \
-               https://localhost:8443/openidm/managed/role/Employee
+               http://localhost:8080/openidm/managed/role?_action=create
 
-               {"name":"Employee","description":"Role assigned to workers on the payroll.","_id":"Employee","_rev":"1"}
+               {
+                 "_id": "ad19979e-adbb-4d35-8320-6db50646b432",
+                 "_rev": "1",
+                 "name": "Employee",
+                 "description": "Role assigned to workers on the payroll."
+               }
 
+Note the generated role ID (ad19979e-adbb-4d35-8320-6db50646b432 in this 
+example).
 
-In this case the role's identifier, as shown by the response above, will be: "Employee".
+Now create a role named "Contractor":
 
-But you can also use a POST request, in which case the server will automatically generate an identifier for the new 
-object.
-
-        $ curl --insecure \
-               --header "Content-type: application/json" \
+        $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request POST \
@@ -76,98 +89,116 @@ object.
                  "name" : "Contractor",
                  "description": "Role assigned to contract workers."
                }' \
-               https://localhost:8443/openidm/managed/role?_action=create
+               http://localhost:8080/openidm/managed/role?_action=create
 
-               {"name":"Contractor","description":"Role assigned to contract workers.","_id":"c22316ba-2096-4272-af10-9b17c17e555b","_rev":"1"}
+               {
+                 "_id": "b02d2531-5066-415e-bc90-31fe57e02322",
+                 "_rev": "1",
+                 "name": "Contractor",
+                 "description": "Role assigned to contract workers."
+               }
 
-The system generated identifier is not human readable.
-
-So, while a PUT request might result in a role id that is very easy to read and manipulate (via curl for example) it is 
-a _mutable_ identifier. Therefore any renaming will potentially create conflicts and referential integrity issues.
+Again, note the generated role ID (b02d2531-5066-415e-bc90-31fe57e02322 
+in this example).
 
 2. Reading (and searching) the Employee and Contractor roles
 
-It is a simple process to read the Employee role:
+To read the Employee or Contractor roles, you can include the role ID in 
+the URL. To read the Employee role:
 
-        $ curl --insecure \
-               --header "X-OpenIDM-Username: openidm-admin" \
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
-               https://localhost:8443/openidm/managed/role/Employee
-
-               {"name":"Employee","description":"Role assigned to workers on the payroll.","_id":"Employee","_rev":"1"}
-
-... but it is a little more complicated to read the Contractor role. Of course the same query can be applied by using 
-the system-generated identifier, but it is rather unsightly:
-
-        $ curl --insecure \
-               --header "X-OpenIDM-Username: openidm-admin" \
-               --header "X-OpenIDM-Password: openidm-admin" \
-               --request GET \
-               https://localhost:8443/openidm/managed/role/c22316ba-2096-4272-af10-9b17c17e555b
-
-               {"name":"Contractor","description":"Role assigned to contract workers.","_id":"c22316ba-2096-4272-af10-9b17c17e555b","_rev":"1"}
-
-An easier way to retrieve a role with a server side (or system) generated identifier is to use the query filter facility 
-(see the section "Common Filter Expressions" in the Integrator's guide: 
-https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#query-filters).
-
-The following query uses a filter expression to retrieve a role with a name equal to "Contractor", and displays the 
-result in a clear format:
-
-        $ curl --insecure \
-               --header "X-OpenIDM-Username: openidm-admin" \
-               --header "X-OpenIDM-Password: openidm-admin" \
-               --request GET \
-               'https://localhost:8443/openidm/managed/role?_queryFilter=/name+eq+"Contractor"&_prettyPrint=true'
+               http://localhost:8080/openidm/managed/role/ad19979e-adbb-4d35-8320-6db50646b432
 
                {
-                 "result" : [ {
-                   "name" : "Contractor",
-                   "description" : "Role assigned to contract workers.",
-                   "_id" : "c22316ba-2096-4272-af10-9b17c17e555b",
-                   "_rev" : "1"
-                 } ],
-                 "resultCount" : 1,
-                 "pagedResultsCookie" : null,
-                 "remainingPagedResults" : -1
+                 "_id": "ad19979e-adbb-4d35-8320-6db50646b432",
+                 "_rev": "1",
+                 "name": "Employee",
+                 "description": "Role assigned to workers on the payroll."
                }
 
-In addition we can retrieve all the managed roles currently available by using the following query filter request:
+To read the Contractor role:
 
-        $ curl --insecure \
-               --header "X-OpenIDM-Username: openidm-admin" \
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
-               'https://localhost:8443/openidm/managed/role?_queryFilter=true&_prettyPrint=true'
+               http://localhost:8080/openidm/managed/role/b02d2531-5066-415e-bc90-31fe57e02322
+
+               {
+                 "_id": "b02d2531-5066-415e-bc90-31fe57e02322",
+                 "_rev": "1",
+                 "name": "Contractor",
+                 "description": "Role assigned to contract workers."
+               }
+
+An easier way to retrieve a role with a server side (or system) generated 
+identifier is to use the query filter facility (see the section 
+"Common Filter Expressions" in the Integrator's guide: 
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#query-filters).
+
+The following query uses a filter expression to retrieve a role with a 
+name equal to "Contractor", and uses the prettyPrint parameter to 
+display the result in a clear format:
+
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
+               --header "X-OpenIDM-Password: openidm-admin" \
+               --request GET \
+               'http://localhost:8080/openidm/managed/role?_queryFilter=/name+eq+"Contractor"&_prettyPrint=true'
+
+              {
+                "result": [
+                  {
+                    "_id": "b02d2531-5066-415e-bc90-31fe57e02322",
+                    "_rev": "1",
+                    "name": "Contractor",
+                    "description": "Role assigned to contract workers."
+                  }
+                ],
+                "resultCount": 1,
+                "pagedResultsCookie": null,
+                "totalPagedResultsPolicy": "NONE",
+                "totalPagedResults": -1,
+                "remainingPagedResults": -1
+              }
+
+In addition we can retrieve all the managed roles currently available by 
+using the following query filter request:
+
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
+               --header "X-OpenIDM-Password: openidm-admin" \
+               --request GET \
+               'http://localhost:8080/openidm/managed/role?_queryFilter=true&_prettyPrint=true'
 
                {
                  "result" : [ {
+                   "_id" : "ad19979e-adbb-4d35-8320-6db50646b432",
+                   "_rev" : "1",
                    "name" : "Employee",
-                   "description" : "Role assigned to workers on the payroll.",
-                   "_id" : "Employee",
-                   "_rev" : "1"
-                 },
-                 {
+                   "description" : "Role assigned to workers on the payroll."
+                 }, {
+                   "_id" : "b02d2531-5066-415e-bc90-31fe57e02322",
+                   "_rev" : "1",
                    "name" : "Contractor",
-                   "description" : "Role assigned to contract workers.",
-                   "_id" : "c22316ba-2096-4272-af10-9b17c17e555b",
-                   "_rev" : "1"
+                   "description" : "Role assigned to contract workers."
                  } ],
                  "resultCount" : 2,
                  "pagedResultsCookie" : null,
+                 "totalPagedResultsPolicy" : "NONE",
+                 "totalPagedResults" : -1,
                  "remainingPagedResults" : -1
                }
 
-3. Assigning the Employee role to a user
+3. Grant the Employee role to a user
 
-The queries above allowed us to see how easy it is to create roles through the REST interface, but by themselves they 
-don't do very much. A role becomes somewhat more meaningful when a user is assigned that role.
+The queries above allowed us to see how easy it is to create roles 
+through the REST interface, but by themselves they don't do very much. A 
+role becomes somewhat more meaningful when a user is granted that role.
 
-Let's use Felicitas Doe, the user we encounter in sample2b, as our test user:
+Let's create a new user, Felicitas Doe (the user we encounter in 
+sample2b), as our test user:
 
-        $ curl --insecure \
-               --header "Content-type: application/json" \
+        $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request POST \
@@ -180,130 +211,11 @@ Let's use Felicitas Doe, the user we encounter in sample2b, as our test user:
                   "description":"Felicitas Doe",
                   "displayName":"fdoe"
                 }' \
-               'https://localhost:8443/openidm/managed/user?_action=create'
+               'http://localhost:8080/openidm/managed/user?_action=create'
                
-               {  "_id": "be30da0b-4c84-42c9-81bd-348a7779e840",
-                  "_rev": "1",
-                  "mail": "fdoe@example.com",
-                  "sn": "Doe",
-                  "telephoneNumber": "555-1234",
-                  "userName": "fdoe",
-                  "givenName": "Felicitas",
-                  "description": "Felicitas Doe",
-                  "displayName": "fdoe",
-                  "accountStatus": "active",
-                  "effectiveRoles": null,
-                  "effectiveAssignments": [],
-                  "roles": []
-               }
-
-As can be seen from the result output, our new user has no entries under "roles".
-
-So, how do we assign the Employee role to this new user who is now on the payroll? We need to update the user entry via 
-a PATCH request and add a pointer to the role itself:
-
-        $ curl --insecure \
-               --header "Content-type: application/json" \
-               --header "X-OpenIDM-Username: openidm-admin" \
-               --header "X-OpenIDM-Password: openidm-admin" \
-               --header "If-Match: *" \
-               --request PATCH \
-               --data '[
-                   {
-                       "operation" : "add",
-                       "field" : "/roles/-",
-                       "value" : {"_ref": "managed/role/Employee"}
-                   }
-                 ]' \
-               'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
-
                {
-                 "_id":"be30da0b-4c84-42c9-81bd-348a7779e840",
-                 "_rev":"2",
-                 "mail":"fdoe@example.com",
-                 "sn":"Doe",
-                 "telephoneNumber":"555-1234",
-                 "userName":"fdoe",
-                 "givenName":"Felicitas",
-                 "description":"Felicitas Doe",
-                 "displayName":"fdoe",
-                 "accountStatus":"active",
-                 "effectiveRoles":[
-                   {
-                     "_ref":"managed/role/Employee"
-                   }
-                 ],
-                 "effectiveAssignments":[],
-                 "roles":[
-                   {
-                     "_ref":"managed/role/Employee",
-                     "_refProperties":{
-                       "_id":"4ad55750-a7be-431c-a104-2938afb322e7",
-                       "_rev":"1"
-                     }
-                   }
-                 ]
-               }
-
-Let's take a closer look at Felicitas' entry using the query filter mechanism:
-
-        $ curl --insecure \
-               --header "X-OpenIDM-Username: openidm-admin" \
-               --header "X-OpenIDM-Password: openidm-admin" \
-               --request GET \
-               'https://localhost:8443/openidm/managed/user?_queryFilter=/givenName+eq+"Felicitas"&_fields=_id,userName,roles,effectiveRoles&_prettyPrint=true'
-
-               {
-                 "result" : [ {
-                   "_id" : "be30da0b-4c84-42c9-81bd-348a7779e840",
-                   "_rev" : "2",
-                   "userName" : "fdoe",
-                   "roles" : [ {
-                     "_ref" : "managed/role/Employee",
-                     "_refProperties" : {
-                       "_id" : "4ad55750-a7be-431c-a104-2938afb322e7",
-                       "_rev" : "1"
-                     }
-                   } ],
-                   "effectiveRoles": [
-                     {
-                       "_ref": "managed/role/Employee"
-                     }
-                   ]
-                 }],
-                 "resultCount" : 1,
-                 "pagedResultsCookie" : null,
-                 "totalPagedResultsPolicy" : "NONE",
-                 "totalPagedResults" : -1,
-                 "remainingPagedResults" : -1
-               }
-
-We can see that the Employee role is now part of Felicitas' _roles_ attribute. But we also observe that the same role is 
-present in the _effectiveRoles_ attribute. This attribute is calculated based on the roles assigned to the user.
-
-4. Removing the Employee role from a user
-
-Let's imagine that the Employee role was erroneously assigned to Felicitas. We now need to remove this role from her 
-entry. To do that we need to use a JSON Patch _remove_ operation. Since the role is part of an array, and is the first 
-element in that array, the resulting PATCH request would look as follows:
-
-        $ curl --insecure \
-               --header "Content-type: application/json" \
-               --header "X-OpenIDM-Username: openidm-admin" \
-               --header "X-OpenIDM-Password: openidm-admin" \
-               --header "If-Match: *" \
-               --request PATCH \
-               --data '[
-                   {
-                       "operation" : "remove",
-                       "field" : "/roles/0"
-                   }
-                 ]' \
-               'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
-
-               {
-                 "_id": "be30da0b-4c84-42c9-81bd-348a7779e840",
-                 "_rev": "3",
+                 "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+                 "_rev": "1",
                  "mail": "fdoe@example.com",
                  "sn": "Doe",
                  "telephoneNumber": "555-1234",
@@ -313,37 +225,32 @@ element in that array, the resulting PATCH request would look as follows:
                  "displayName": "fdoe",
                  "accountStatus": "active",
                  "effectiveRoles": [],
-                 "effectiveAssignments": [],
-                 "roles": []
+                 "effectiveAssignments": []
                }
-               
-Our user no longer has the _Employee_ role in her _roles_ or _effectiveRoles_ attribute.
 
-5. Deleting the Contractor role
+As can be seen from the result output, our new user has not been granted 
+any roles, so her "effectiveRoles" attribute is empty.
 
-The final step in role management is to remove an existing role. This is what we will do with the Contractor role. But 
-first let's take a look at what would happen if we tried to remove a role already assigned to a user.
+So, how do we grant the Employee role to this new user who is now on the 
+payroll? We need to update the user entry via a PATCH request and add a 
+pointer to the role ID:
 
-Let's, temporarily, add the Contractor role to Felicitas -- notice the role with server-side generated identifier:
-
-        $ curl --insecure \
-               --header "Content-type: application/json" \
+        $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
-               --header "If-Match: *" \
                --request PATCH \
                --data '[
                    {
                        "operation" : "add",
                        "field" : "/roles/-",
-                       "value" : {"_ref":"managed/role/c22316ba-2096-4272-af10-9b17c17e555b"}
+                       "value" : {"_ref": "managed/role/ad19979e-adbb-4d35-8320-6db50646b432"}
                    }
                  ]' \
-               'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
-               
+               'http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3'
+
                {
-                 "_id": "be30da0b-4c84-42c9-81bd-348a7779e840",
-                 "_rev": "3",
+                 "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+                 "_rev": "2",
                  "mail": "fdoe@example.com",
                  "sn": "Doe",
                  "telephoneNumber": "555-1234",
@@ -354,41 +261,58 @@ Let's, temporarily, add the Contractor role to Felicitas -- notice the role with
                  "accountStatus": "active",
                  "effectiveRoles": [
                    {
-                     "_ref": "managed/role/c22316ba-2096-4272-af10-9b17c17e555b"
+                     "_ref": "managed/role/ad19979e-adbb-4d35-8320-6db50646b432"
                    }
                  ],
-                 "effectiveAssignments": [],
-                 "roles": [
-                   {
-                     "_ref": "managed/role/c22316ba-2096-4272-af10-9b17c17e555b",
-                     "_refProperties": {
-                       "_id": "38f8613a-5402-4dec-8b46-89837d1f9490",
-                       "_rev": "2"
-                     }
-                   }
-                 ]
+                 "effectiveAssignments": []
                }
 
-Now let's try and delete the Contractor role:
+Let's take a closer look at Felicitas' entry using the query filter mechanism:
 
-        $ curl --insecure \
-               --header "Content-type: application/json" \
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
+               --header "X-OpenIDM-Password: openidm-admin" \
+               --request GET \
+               'http://localhost:8080/openidm/managed/user?_queryFilter=/givenName+eq+"Felicitas"&_fields=_id,userName,roles,effectiveRoles&_prettyPrint=true'
+
+               {
+                 "result" : [ {
+                   "_id" : "837085ae-766e-417c-9b7e-c36eee4352a3",
+                   "_rev" : "2",
+                   "userName" : "fdoe",
+                   "roles" : [ {
+                     "_ref" : "managed/role/ad19979e-adbb-4d35-8320-6db50646b432",
+                     "_refProperties" : {
+                       "_id" : "4a42cd0b-d5d0-47e9-81e7-513aed74f6bc",
+                       "_rev" : "1"
+                     }
+                   } ],
+                   "effectiveRoles" : [ {
+                     "_ref" : "managed/role/ad19979e-adbb-4d35-8320-6db50646b432"
+                   } ]
+                 } ],
+                 "resultCount" : 1,
+                 "pagedResultsCookie" : null,
+                 "totalPagedResultsPolicy" : "NONE",
+                 "totalPagedResults" : -1,
+                 "remainingPagedResults" : -1
+               }
+
+We can see that the Employee role (with ID ad19979e-adbb-4d35-8320-6db50646b432) 
+is now part of Felicitas' _roles_ attribute. But we also observe that 
+the same role is present in the _effectiveRoles_ attribute. This attribute 
+is calculated based on the roles that have been granted to the user.
+
+4. Removing the Employee role from a user
+
+Let's imagine that the Employee role was erroneously assigned to Felicitas. 
+We now need to remove this role from her entry. To do that we need to use 
+a JSON Patch _remove_ operation. Since the role is part of an array, and 
+is the first element in that array, the resulting PATCH request would 
+look as follows:
+
+        $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
-               --request DELETE \
-               'https://localhost:8443/openidm/managed/role/c22316ba-2096-4272-af10-9b17c17e555b'
-
-               {"code":409,"reason":"Conflict","message":"Cannot delete a role that is currently granted"}
-
-So, we cannot delete a role that has been assigned to one or more users. We must first deallocate that role from the 
-user entry:
-
-
-        $ curl --insecure \
-               --header "Content-type: application/json" \
-               --header "X-OpenIDM-Username: openidm-admin" \
-               --header "X-OpenIDM-Password: openidm-admin" \
-               --header "If-Match: *" \
                --request PATCH \
                --data '[
                    {
@@ -396,11 +320,11 @@ user entry:
                        "field" : "/roles/0"
                    }
                  ]' \
-               'https://localhost:8443/openidm/managed/user/be30da0b-4c84-42c9-81bd-348a7779e840'
+               'http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3'
 
                {
-                 "_id": "be30da0b-4c84-42c9-81bd-348a7779e840",
-                 "_rev": "4",
+                 "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+                 "_rev": "3",
                  "mail": "fdoe@example.com",
                  "sn": "Doe",
                  "telephoneNumber": "555-1234",
@@ -410,40 +334,134 @@ user entry:
                  "displayName": "fdoe",
                  "accountStatus": "active",
                  "effectiveRoles": [],
-                 "effectiveAssignments": [],
-                 "roles": []
+                 "effectiveAssignments": []
+               }
+               
+Our user no longer has the _Employee_ role in her _effectiveRoles_ 
+attribute.
+
+5. Deleting the Contractor role
+
+The final step in role management is to remove an existing role. This is 
+what we will do with the Contractor role. But first let's take a look at 
+what would happen if we tried to remove a role already granted to a user.
+
+Let's, temporarily, add the Contractor role (ID b02d2531-5066-415e-bc90-31fe57e02322) 
+to Felicitas:
+
+        $ curl --header "Content-type: application/json" \
+               --header "X-OpenIDM-Username: openidm-admin" \
+               --header "X-OpenIDM-Password: openidm-admin" \
+               --request PATCH \
+               --data '[
+                   {
+                       "operation" : "add",
+                       "field" : "/roles/-",
+                       "value" : {"_ref":"managed/role/b02d2531-5066-415e-bc90-31fe57e02322"}
+                   }
+                 ]' \
+               'http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3'
+               
+               {
+                 "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+                 "_rev": "4",
+                 "mail": "fdoe@example.com",
+                 "sn": "Doe",
+                 "telephoneNumber": "555-1234",
+                 "userName": "fdoe",
+                 "givenName": "Felicitas",
+                 "description": "Felicitas Doe",
+                 "displayName": "fdoe",
+                 "accountStatus": "active",
+                 "effectiveRoles": [
+                   {
+                     "_ref": "managed/role/b02d2531-5066-415e-bc90-31fe57e02322"
+                   }
+                 ],
+                 "effectiveAssignments": []
+               }
+
+Now let's try and delete the Contractor role:
+
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
+               --header "X-OpenIDM-Password: openidm-admin" \
+               --request DELETE \
+               'http://localhost:8080/openidm/managed/role/b02d2531-5066-415e-bc90-31fe57e02322'
+
+               {
+                 "code": 409,
+                 "reason": "Conflict",
+                 "message": "Cannot delete a role that is currently granted"
+               }
+
+So, we cannot delete a role that has been granted to one or more users. 
+We must first deallocate that role from the user entry:
+
+        $ curl --header "Content-type: application/json" \
+               --header "X-OpenIDM-Username: openidm-admin" \
+               --header "X-OpenIDM-Password: openidm-admin" \
+               --request PATCH \
+               --data '[
+                   {
+                       "operation" : "remove",
+                       "field" : "/roles/0"
+                   }
+                 ]' \
+               'http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3'
+
+               {
+                 "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
+                 "_rev": "5",
+                 "mail": "fdoe@example.com",
+                 "sn": "Doe",
+                 "telephoneNumber": "555-1234",
+                 "userName": "fdoe",
+                 "givenName": "Felicitas",
+                 "description": "Felicitas Doe",
+                 "displayName": "fdoe",
+                 "accountStatus": "active",
+                 "effectiveRoles": [],
+                 "effectiveAssignments": []
                }
                
 Now let's try and delete the Contractor role again:
 
-        $ curl --insecure \
-               --header "Content-type: application/json" \
-               --header "X-OpenIDM-Username: openidm-admin" \
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request DELETE \
-               'https://localhost:8443/openidm/managed/role/c22316ba-2096-4272-af10-9b17c17e555b'
+               'http://localhost:8080/openidm/managed/role/b02d2531-5066-415e-bc90-31fe57e02322'
 
-               {"properties":{"name":"Contractor","description":"Role assigned to contract workers."},"_id":"c22316ba-2096-4272-af10-9b17c17e555b","_rev":"1"}
+               {
+                 "_id": "b02d2531-5066-415e-bc90-31fe57e02322",
+                 "_rev": "1",
+                 "name": "Contractor",
+                 "description": "Role assigned to contract workers."
+               }
 
 Let's verify that the Contractor role has been deleted:
 
-        $ curl --insecure \
-               --header "X-OpenIDM-Username: openidm-admin" \
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
                --request GET \
-               'https://localhost:8443/openidm/managed/role?_queryFilter=true&_prettyPrint=true'
+               'http://localhost:8080/openidm/managed/role?_queryFilter=true&_prettyPrint=true'
 
                {
-                 "result" : [ {
-                   "name" : "Employee",
-                   "description" : "Role assigned to workers on the payroll.",
-                   "_id" : "Employee",
-                   "_rev" : "1"
-                 } ],
-                 "resultCount" : 1,
-                 "pagedResultsCookie" : null,
-                 "remainingPagedResults" : -1
+                 "result": [
+                   {
+                     "_id": "ad19979e-adbb-4d35-8320-6db50646b432",
+                     "_rev": "1",
+                     "name": "Employee",
+                     "description": "Role assigned to workers on the payroll."
+                   }
+                 ],
+                 "resultCount": 1,
+                 "pagedResultsCookie": null,
+                 "totalPagedResultsPolicy": "NONE",
+                 "totalPagedResults": -1,
+                 "remainingPagedResults": -1
                }
+
+Only the Employee role remains.
 
 
 Managing Roles from the Admin UI
@@ -453,7 +471,7 @@ All management operations on Roles performed above via REST are possible via the
 
 1. Create the Contractor role again
 
-Login to the Admin UI at:
+Log in to the Admin UI at:
 https://localhost:8443/admin
 (or whatever applies for the hostname where OpenIDM is deployed.)
 
@@ -480,21 +498,26 @@ By clicking on each role name, you're able to see the details of each role.
 
 Selecting "Back to Role List" under a role properties page brings you back to the table that lists all the roles.
 
-3. Assigning the Contractor role to a user
+3. Granting the Contractor role to a user
 
-This time we will assign the Contractor role to Felicitas. Select Manage > User and click fdoe's entry. On fdoe's 
-profile page, select the Provisioning Roles tab. Select the Contractor role from the dropdown list and click Add Role.  
+This time we will grant the Contractor role to Felicitas. Select Manage > User 
+and click fdoe's entry. On fdoe's profile page, select the Provisioning Roles 
+tab. Click Add Provisioning Roles, select the Contractor role from the dropdown 
+list and click Add.  
 
-Click Save. Felicitas now has the Contractor role in her list of roles.
+Felicitas now has the Contractor role in her list of roles.
 
 4. Removing the Contractor role from a user
 
-To remove the Contractor role from Felicitas's entry, select Manage > User and click fdoe's entry. On fdoe's profile 
-page, select the Provisioning Roles tab. Click X next to the Contractor role, then click Save. 
+To remove the Contractor role from Felicitas's entry, select Manage > User 
+and click fdoe's entry. On fdoe's profile page, select the Provisioning Roles 
+tab. Select the checkbox next to the Contractor role, then click 
+Remove Selected Provisioning Roles.
 
 5. Deleting the Contractor role.
 
-Select Manage Role to display the "Role List" page. Select the checkbox next to Contractor (don't click on the role 
-itself). Click on "Delete Selected" and the Contractor role will be deleted.
+Select Manage Role to display the "Role List" page. Select the checkbox 
+next to Contractor (don't click on the role itself). Click on "Delete Selected" 
+and the Contractor role will be deleted.
 
 See the other samples for more information on roles!
