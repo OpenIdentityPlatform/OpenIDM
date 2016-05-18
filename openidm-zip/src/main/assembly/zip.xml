@@ -1225,6 +1225,7 @@
                 <include>com.fasterxml:aalto-xml</include>
                 <include>org.apache.tomcat:tomcat-jdbc</include>
                 <include>org.forgerock.openicf.connectors:groovy-connector</include>
+                <include>org.forgerock.openicf.connectors:ssh-connector</include>
                 <include>com.github.cverges:expect4j</include>
                 <include>oro:oro</include>
                 <include>com.jcraft:jsch</include>
