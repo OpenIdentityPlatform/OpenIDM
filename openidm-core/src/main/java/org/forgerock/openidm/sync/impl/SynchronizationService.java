@@ -68,7 +68,6 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.sync.ReconAction;
-import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -438,6 +437,28 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                                         ? resourcePath(target).child(link.get("secondId").asString())
                                         : resourcePath(source).child(link.get("firstId").asString());
 
+                                final List<Object> relatedMappings = FluentIterable.from(mappings)
+                                        .filter(new Predicate<ObjectMapping>() {
+                                            @Override
+                                            public boolean apply(ObjectMapping mapping) {
+                                                return mapping.getName().equals(linkType)
+                                                        || mapping.getLinkTypeName().equals(linkType);
+                                            }
+                                        })
+                                        .transform(new Function<ObjectMapping, Object>() {
+                                            @Override
+                                            public Object apply(ObjectMapping mapping) {
+                                                return object(
+                                                        field("name", mapping.getName()),
+                                                        // the type is how the linkedResourceName relates to the main
+                                                        // resourceName in the context of a particular mapping.
+                                                        field("type", mapping.isSourceObject(resourceContainer, resourceId)
+                                                                ? "target"
+                                                                : "source"));
+                                            }
+                                        })
+                                        .toList();
+
                                 // Read the linked resource asynchronously so Promises can be executed in parallel.
                                 return connection.readAsync(context, newReadRequest(linkedResourcePath))
                                         // transform the ResourceResponse into the format this endpoint desires
@@ -455,25 +476,22 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                                                                 field("content", linkedResource.getObject()),
                                                                 field("linkQualifier", link.get("linkQualifier").asString()),
                                                                 field("linkType", linkType),
-                                                                field("mappings", FluentIterable.from(mappings)
-                                                                        .filter(new Predicate<ObjectMapping>() {
-                                                                            @Override
-                                                                            public boolean apply(ObjectMapping mapping) {
-                                                                                return mapping.getName().equals(linkType)
-                                                                                        || mapping.getLinkTypeName().equals(linkType);
-                                                                            }
-                                                                        })
-                                                                        .transform(new Function<ObjectMapping, Object>() {
-                                                                            @Override
-                                                                            public Object apply(ObjectMapping mapping) {
-                                                                                return object(
-                                                                                        field("name", mapping.getName()),
-                                                                                        // the type is how the linkedResourceName relates to the main
-                                                                                        // resourceName in the context of a particular mapping.
-                                                                                        field("type", mapping.isSourceObject(resourceContainer, resourceId)? "target" : "source"));
-                                                                            }
-                                                                        })
-                                                                        .toList()))))
+                                                                field("mappings", relatedMappings))))
+                                                       .asPromise();
+                                            }
+                                        }, new AsyncFunction<ResourceException, ResourceResponse, ResourceException>() {
+                                            @Override
+                                            public Promise<ResourceResponse, ResourceException> apply(ResourceException error) throws ResourceException {
+                                                return newResourceResponse(
+                                                        "0",
+                                                        null,
+                                                        json(object(
+                                                                field("resourceName", linkedResourcePath.toString()),
+                                                                field("content", null),
+                                                                field("error", error.getMessage()),
+                                                                field("linkQualifier", link.get("linkQualifier").asString()),
+                                                                field("linkType", linkType),
+                                                                field("mappings", relatedMappings))))
                                                         .asPromise();
                                             }
                                         });
