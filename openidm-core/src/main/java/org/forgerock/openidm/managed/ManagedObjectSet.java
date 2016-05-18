@@ -458,15 +458,20 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     }
 
     /**
-     * Update a resource as part of an update or patch request.
+     * Update a resource as part of an update or patch request. This method will also be invoked from a triggerSyncCheck
+     * (via the updateInstance method). Its fundamental concern is to perform diff logic between between the oldValue, which
+     * is obtained via a repo read, and the newValue, which is provided by the caller, and to trigger the appropriate
+     * repo persistence and sync actions as dictated by the specific differences between the oldValue and newValue.
      *
      * @param context the current Context
      * @param request the source Request
      * @param resourceId the resource id of the object being modified
      * @param rev the revision of hte object being modified
-     * @param oldValue the old value of the object
-     * @param newValue the new value of the object
-     * @param relationshipFields a set of relationship fields to persist
+     * @param oldValue the old value of the object, as read from the repo
+     * @param newValue the new value of the object, as specified by the user, or as constituted via a router read request
+     *                 in the triggerSyncCheck action.
+     * @param relationshipFields a set of relationship fields to persist. These fields must match the relationship
+     *                           fields present in the oldValue JsonValue.
      * @return a {@link ResourceResponse} object representing the updated resource
      * @throws ResourceException
      */
@@ -830,32 +835,56 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
     }
 
+    /**
+     * Called from the triggerSyncCheck action, or as part of the CollectionResourceProvider contract. When called from
+     * triggerSyncCheck, the UpdateRequest will contain the ManagedObject as populated via a router READ - i.e. with
+     * the virtual attributes, and any necessary relationships, populated. This method will read the specified resource
+     * from the repo, and pass this (old) object, and the (new) object passed in the UpdateRequest parameter, to the update
+     * method, so that the appropriate fields can be updated and synced.
+     * Note that it is important to the diff logic in the update method that the repo-read (old) object and the caller-dispatched
+     * (new) object reference the same fields - in particular relationship fields.
+     * @param context the caller's context
+     * @param resourceId the resource identifier
+     * @param request the updated resource representation, as specified by the caller
+     * @return the updated resource, referencing the fields as specified in the UpdateRequest.
+     */
     @Override
     public Promise<ResourceResponse, ResourceException>  updateInstance(final Context context, final String resourceId,
     		final UpdateRequest request) {
         logger.debug("update {} ", "name=" + name + " id=" + resourceId + " rev=" + request.getRevision());
         Context managedContext = new ManagedObjectContext(context);
 
+        /*
+        First constitute the repo read request, including all fields specified in the UpdateRequest, minus the relationship
+        fields, as these are stored in a separate table.
+         */
         try {
-            ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
+            ReadRequest repoReadRequest = Requests.newReadRequest(repoId(resourceId));
             for (JsonPointer pointer : request.getFields()) {
                 if (pointer.equals(SchemaField.FIELD_ALL)) {
-                    readRequest.addField("");
+                    repoReadRequest.addField("");
                 } else if (!pointer.equals(SchemaField.FIELD_ALL_RELATIONSHIPS)) {
-                    readRequest.addField(pointer);
+                    repoReadRequest.addField(pointer);
                 }
             }
-            ResourceResponse readResponse = connectionFactory.getConnection().read(managedContext, readRequest);
-            
-            // Populate the relationship fields in the read resource
-            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, readRequest.getFields());
-            readResponse.getContent().asMap().putAll(relationships.asMap());
+            ResourceResponse repoReadResponse = connectionFactory.getConnection().read(managedContext, repoReadRequest);
 
+            /*
+            Now populate the relationship fields as specified in the UpdateRequest.
+             */
+            final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
+            repoReadResponse.getContent().asMap().putAll(relationships.asMap());
+
+            /*
+            Now call the update method, passing the repo-read object as the old object, and the caller-specified object
+            as the new object, so that the update method can perform the appropriate diff logic and the resulting sync
+            actions.
+             */
             ResourceResponse updatedResponse = update(managedContext, request, resourceId, request.getRevision(),
-            		readResponse.getContent(), request.getContent(), relationshipProviders.keySet());
+            		repoReadResponse.getContent(), request.getContent(), relationshipProviders.keySet());
             
-            activityLogger.log(managedContext, request, "update", managedId(readResponse.getId()).toString(),
-                    readResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
+            activityLogger.log(managedContext, request, "update", managedId(repoReadResponse.getId()).toString(),
+                    repoReadResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
 
             return prepareResponse(managedContext, updatedResponse, request.getFields()).asPromise();
         } catch (ResourceException e) {
@@ -1173,7 +1202,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     return newActionResponse(patchResponse.getContent()).asPromise();
                 case triggerSyncCheck:
                     // Sync changes if required
-                    // Read in managed object to get updated virtual attributes. The result of the read request will be 
+                    // Read in managed object via the router to get updated virtual attributes. The result of the read request will be
                     // compared against the last sync'd value stored in the repository (in the updateInstance() request 
                     // below) to determine an update/sync is required.
                     final List<JsonPointer> requestFields = request.getFields();
