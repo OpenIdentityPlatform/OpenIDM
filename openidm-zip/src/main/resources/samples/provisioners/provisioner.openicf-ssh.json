@@ -50,13 +50,13 @@
       "&{launcher.project.location}/tools"
     ],
     "reloadScriptOnExecution" : false,
-    "createScriptFileName" : "Create.groovy",
-    "deleteScriptFileName" : "Delete.groovy",
-    "schemaScriptFileName" : "Schema.groovy",
-    "scriptOnResourceScriptFileName" : "ScriptOnResource.groovy",
-    "searchScriptFileName" : "Search.groovy",
-    "testScriptFileName" : "Test.groovy",
-    "updateScriptFileName" : "Update.groovy"
+    "createScriptFileName" : "CreateLinux.groovy",
+    "deleteScriptFileName" : "DeleteLinux.groovy",
+    "schemaScriptFileName" : "SchemaLinux.groovy",
+    "scriptOnResourceScriptFileName" : "ScriptOnResourceLinux.groovy",
+    "searchScriptFileName" : "SearchLinux.groovy",
+    "testScriptFileName" : "TestLinux.groovy",
+    "updateScriptFileName" : "UpdateLinux.groovy"
   },
   "systemActions" : [ ],
   "syncFailureHandler" : {
