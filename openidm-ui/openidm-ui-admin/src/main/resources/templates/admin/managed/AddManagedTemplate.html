@@ -18,7 +18,7 @@
                 <div class="form-group has-feedback">
                     <label for="managedObjectName" class="col-sm-3 control-label">{{t "templates.managed.managedObjectName"}}</label>
                     <div class="col-sm-8">
-                        <input class="form-control" type="text" id="managedObjectName" name="name" value="" data-validator="spaceCheck" data-validator-event="keyup blur" required autofocus/>
+                        <input class="form-control" type="text" id="managedObjectName" name="name" value="" data-validator="spaceCheck restrictedCharacters" restrictedCharacters=";-_%" data-validator-event="keyup blur" required autofocus/>
                         <div class="validation-message"></div>
                         <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     </div>

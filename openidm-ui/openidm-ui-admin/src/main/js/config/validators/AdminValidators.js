@@ -124,6 +124,28 @@ define([
                     callback([$.t("common.form.validation.unique")]);
                 }
             }
+        },
+        "restrictedCharacters": {
+            "name": "Cannot contain any of the following characters ;",
+            "dependencies": [
+            ],
+            "validator": function(el, input, callback) {
+                var v = input.val(),
+                    characters = $(input).attr("restrictedCharacters").split(""),
+                    characterCheck = true;
+
+                _.each(characters, (character) => {
+                    if(v.match(character)) {
+                        characterCheck = false;
+                    }
+                });
+
+                if (characterCheck) {
+                    callback();
+                } else {
+                    callback([$.t("common.form.validation.CANNOT_CONTAIN_CHARACTERS", { "forbiddenChars": characters.join(" ")})]);
+                }
+            }
         }
     };
 
