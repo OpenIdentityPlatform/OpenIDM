@@ -32,6 +32,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.Iterator;
+import java.util.Arrays;
 import static java.util.Arrays.asList;
 
 import org.apache.felix.service.command.CommandSession;
@@ -239,7 +241,10 @@ public class UpdateCommand {
             log("ERROR: Error during execution. Last Attempted step was " + executionResults.getLastAttemptedStep() +
                     ". Will now attempt recovery steps.", e);
         } finally {
-            for (UpdateStep nextStep : recoverySequence) {
+            final Iterator<UpdateStep> it = Arrays.asList(recoverySequence).iterator();
+            boolean abortRecovery = false;
+            while (it.hasNext() && !abortRecovery) {
+                final UpdateStep nextStep = it.next();
                 try {
                     StepExecutor executor = executorRegistry.get(nextStep);
                     if (null != executor && executor.onCondition(executionResults)) {
@@ -247,7 +252,7 @@ public class UpdateCommand {
                         ExecutorStatus status = executor.execute(context, executionResults);
                         if (status.equals(ExecutorStatus.ABORT)) {
                             log("WARN: Aborted from a recovery step " + nextStep + ".");
-                            break;
+                            abortRecovery = true;
                         } else if (status.equals(ExecutorStatus.FAIL)) {
                             log("WARN: Failed a recovery step " + nextStep + ", continuing on with recovery.");
                         }
