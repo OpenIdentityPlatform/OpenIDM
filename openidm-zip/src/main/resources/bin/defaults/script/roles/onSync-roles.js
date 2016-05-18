@@ -39,8 +39,10 @@
                 _.each(members, function (user) {
                     logger.debug("onSync-roles will call triggerSyncCheck for {}", user._ref);
                     // Issue triggerSyncCheck action and set fields to "*" to indicate all default fields plus any
-                    // virtual fields on the managed user, which will pick up changes to "effectiveAssignments".
-                    openidm.action(user._ref, "triggerSyncCheck", {}, {}, ["*"]);
+                    // virtual fields on the managed user, which will pick up changes to "effectiveAssignments" and 
+                    // "effectiveRoles". Also add the roles field, so that user roles are calculated, so that
+                    // sync checks takes the roles field into consideration.
+                    openidm.action(user._ref, "triggerSyncCheck", {}, {}, ["*", "roles"]);
                 });
             } else {
                 logger.debug("onSync-roles will NOT call triggerSyncCheck the users", resourceName.toString());
@@ -49,7 +51,9 @@
 
     /**
      * Returns true if the oldValue and newValue fully match, or if the only changes are in fields other than any of the
-     * ignoredProperties.
+     * ignoredProperties. The rationale for this logic is as follows: if the roles are different, then the relationship
+     * logic will sync the role members. If they are equal, or differ only in the ignored fields, then the sync won't
+     * be propagated to the users, and thus must be triggered manually in this script. 
      * @param oldValue old state of the resource
      * @param newValue updated state of the resource
      * @param ignoredProperties if only change is one of the ignoreProperties, then no sync is needed.
