@@ -128,6 +128,7 @@ public class UpdateManagerImpl implements UpdateManager {
     private static final Path ARCHIVE_PATH = Paths.get("bin/update");
     private static final String LICENSE_PATH = "legal-notices/Forgerock_License.txt";
     private static final String BUNDLE_BACKUP_EXT = ".old-";
+    private static final Pattern UI_DEFAULT_PATTER = Pattern.compile("^ui/.+/default/.*$");
     static final String PRODUCT_NAME = "OpenIDM";
 
     static final JsonPointer ORIGIN_PRODUCT = new JsonPointer("/origin/product");
@@ -1140,8 +1141,7 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     private boolean isReadOnly(Path path) {
-        Pattern uiDefaults = Pattern.compile("^ui/*/default");
-        return path.startsWith("bin") || uiDefaults.matcher(path.toString()).find();
+        return path.startsWith("bin") || UI_DEFAULT_PATTER.matcher(path.toString()).find();
     }
 
     private void logUpdate(UpdateLogEntry entry) throws UpdateException {
