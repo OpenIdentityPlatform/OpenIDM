@@ -86,12 +86,13 @@ define([
         },
         render: function(args, callback) {
             var syncConfig = syncDelegate.mappingDetails(),
-                mappingDetails = [],
-                cleanName;
+                managedPromise = configDelegate.readEntity("managed"),
+                mappingDetails = [];
 
-            syncConfig.then(_.bind(function(sync) {
+            $.when(syncConfig, managedPromise).then((sync, managedDetails) => {
                 this.data.mappingConfig = sync.mappings;
                 this.data.docHelpUrl = constants.DOC_URL;
+                this.model.managedDetails = managedDetails;
 
                 this.cleanConfig = _.chain(sync.mappings)
                     .map(function (m) {
@@ -106,7 +107,7 @@ define([
                     mappingDetails.push(connectorUtils.getMappingDetails(sync.sourceType, sync.targetType));
                 }, this);
 
-                $.when.apply($, mappingDetails).then(_.bind(function () {
+                $.when.apply($, mappingDetails).then(_.bind(function() {
                     var results = arguments,
                         Mappings = Backbone.Collection,
                         mappingGrid,
@@ -122,48 +123,16 @@ define([
                         this.data.mappingConfig[index].targetConnector = mappingInfo.targetConnector;
                         this.data.mappingConfig[index].sourceConnector = mappingInfo.sourceConnector;
 
-                        if (this.data.mappingConfig[index].sourceConnector){
-                            this.data.mappingConfig[index].sourceConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mappingConfig[index].sourceConnector.connectorRef.connectorName));
-
-                            cleanName = this.data.mappingConfig[index].sourceConnector.config.split("/");
-                            cleanName = cleanName[1] +"_" +cleanName[2];
-
-                            this.data.mappingConfig[index].sourceConnector.url = "#connectors/edit/" + cleanName +"/";
-                        } else {
-                            if (this.data.mappingConfig[index].sourceType === "managed") {
-                                this.data.mappingConfig[index].sourceConnector = {
-                                    "displayName" : $.t("templates.connector.managedObjectType"),
-                                    "url" : "#managed/edit/" +this.data.mappingConfig[index].source.split("/")[1] +"/"
-                                };
-                            } else {
-                                this.data.mappingConfig[index].sourceConnector = {
-                                    "displayName" : this.data.mappingConfig[index].sourceType,
-                                    "isMissing" : true
-                                };
-                            }
+                        if(!this.data.mappingConfig[index].sourceConnector) {
+                            this.data.mappingConfig[index].sourceConnector = {};
                         }
 
-                        if (this.data.mappingConfig[index].targetConnector){
-                            this.data.mappingConfig[index].targetConnector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(this.data.mappingConfig[index].targetConnector.connectorRef.connectorName));
-
-                            cleanName = this.data.mappingConfig[index].targetConnector.config.split("/");
-                            cleanName = cleanName[1] +"_" +cleanName[2];
-
-                            this.data.mappingConfig[index].targetConnector.url = "#connectors/edit/" + cleanName +"/";
-                        } else {
-                            if (this.data.mappingConfig[index].sourceType === "managed") {
-                                this.data.mappingConfig[index].targetConnector = {
-                                    "displayName" : $.t("templates.connector.managedObjectType"),
-                                    "url" : "#managed/edit/" +this.data.mappingConfig[index].target.split("/")[1] +"/"
-                                };
-                            } else {
-                                this.data.mappingConfig[index].targetConnector = {
-                                    "displayName" : this.data.mappingConfig[index].targetType,
-                                    "isMissing" : true
-                                };
-                            }
-
+                        if(!this.data.mappingConfig[index].targetConnector) {
+                            this.data.mappingConfig[index].targetConnector = {};
                         }
+
+                        this.data.mappingConfig[index].sourceConnector = this.setCardState(this.data.mappingConfig[index].sourceConnector, this.data.mappingConfig[index].sourceType, this.data.mappingConfig[index].source, this.model.managedDetails);
+                        this.data.mappingConfig[index].targetConnector = this.setCardState(this.data.mappingConfig[index].targetConnector, this.data.mappingConfig[index].targetType, this.data.mappingConfig[index].target, this.model.managedDetails);
 
                         this.model.mappingCollection.add(this.data.mappingConfig[index]);
                     }, this);
@@ -318,7 +287,7 @@ define([
                         }
                     }, this));
                 }, this));
-            }, this));
+            });
         },
         syncType: function(type) {
             var tempType = type.split("/");
@@ -330,6 +299,54 @@ define([
             }
 
             return type;
+        },
+        /**
+         * This function is to detect what state a resource is in before generating a card. If it is determined to be missing it will display
+         * properly letting the user know that resource is no longer available.
+         *
+         * @param resource - Details about the connector or managed object
+         * @param type - A string of managed or connector
+         * @param location - Path to managed object or connector (managed/roles or system/ldap/account)
+         * @param managedDetails - Array of current available managed objects
+         * @returns {*} returns the config state for the card display
+         */
+        setCardState: function(resource, type, location, managedDetails) {
+            var cleanName,
+                managedName,
+                managedCheck;
+
+            if (!_.isEmpty(resource)){
+                resource.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(resource.connectorRef.connectorName));
+
+                cleanName = resource.config.split("/");
+                cleanName = cleanName[1] +"_" +cleanName[2];
+
+                resource.url = "#connectors/edit/" + cleanName +"/";
+            } else {
+                if (type === "managed") {
+                    managedName = location.split("/")[1];
+
+                    _.each(managedDetails.objects, (managedObject) => {
+                        if(managedObject.name === managedName) {
+                            managedCheck = true;
+                        }
+                    });
+
+                    resource.displayName = $.t("templates.connector.managedObjectType");
+
+                    if(managedCheck) {
+                        resource.url = "#managed/edit/" +location.split("/")[1] +"/";
+                    } else {
+                        resource.isMissing = true;
+                    }
+                } else {
+                    resource.displayName = type;
+                    resource.isMissing = true;
+                }
+
+            }
+
+            return resource;
         },
         deleteMapping: function(event) {
             var selectedEl = $(event.target).parents(".mapping-config-body"),
