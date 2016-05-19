@@ -27,6 +27,7 @@ import java.util.List;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.ResourceException;
@@ -42,39 +43,319 @@ import org.testng.annotations.Test;
 public class JsonValuePatchTest {
     private JsonValue subject = json(object(field("key", "value")));
 
+    // "add" is always #putPermissive, so ...
+
+    // ... if the key doesn't exist, it will be added with the given value
     @Test
-    public void testMapReplace() throws ResourceException {
-        JsonValue object = json(object(field("key", "value")));
-        final List<PatchOperation> operations = PatchOperation.valueOfList(
-                json(array(
-                        object(
-                                field("operation", "replace"),
-                                field("field", "/key"),
-                                field("value", "pineapple")
-                        )
-                )));
+    public void addShouldResultInNewKeyValue() throws ResourceException {
+        JsonValue object = json(object());
+        final List<PatchOperation> operations = buildPatchOperation("add", "/key", "pineapple");
 
         final boolean result = JsonValuePatch.apply(object, operations);
+
         assertThat(result).isTrue();
         assertThat(object).stringAt("key").isEqualTo("pineapple");
     }
 
-    // OPENIDM-3097
+    // ... if the key does exist, its value will be overwritten with the new value
     @Test
-    public void testArrayReplaceAtIndex() throws ResourceException {
-        JsonValue object = json(object(field("fruits", array("apple", "kiwi", "pear", "strawberry"))));
-        final List<PatchOperation> operations = PatchOperation.valueOfList(
-                json(array(
-                        object(
-                                field("operation", "replace"),
-                                field("field", "/fruits/1"),
-                                field("value", "pineapple")
-                        )
-                )));
+    public void permissiveAddShouldResultInUpdatedKeyValue() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("add", "/key", "pineapple");
 
         final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).stringAt("key").isEqualTo("pineapple");
+    }
+
+    // ... even if the old value was an array (or an object)
+    @Test
+    public void addOnMultiValueAttributeShouldReplace() throws ResourceException {
+        JsonValue object = json(object(field("key", array("apple", "kiwi", "pear", "strawberry"))));
+        final List<PatchOperation> operations = buildPatchOperation("add", "/key", "pineapple");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).stringAt("key").isEqualTo("pineapple");
+    }
+
+    // "hypen"-syntax on the field has special behaviors:
+
+    // 1) it throws an exception on a scalar
+    @Test(expectedExceptions = JsonValueException.class)
+    public void addUsingHyphenOnScalarThrowsException() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("add", "/key/-", "pineapple");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isFalse();
+    }
+
+    // 2) adds the element to an array
+    @Test
+    public void addUsingHyphenOnMultiValuedAttributeShouldAddElement() throws ResourceException {
+        JsonValue object = json(object(field("key", array("apple", "kiwi", "pear", "strawberry"))));
+        final List<PatchOperation> operations = buildPatchOperation("add", "/key/-", "pineapple");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("key").containsOnly("apple", "kiwi", "pear", "strawberry", "pineapple");
+    }
+
+    // 3) adds a new field ("-", value) to a map
+    @Test
+    public void addUsingHyphenOnMapShouldAddKeyValuePairWithHyphenKey() throws ResourceException {
+        JsonValue object = json(object(field("key", object(field("a", "1"), field("b", "2")))));
+        final List<PatchOperation> operations = buildPatchOperation("add", "/key/-", "pineapple");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).stringAt("key/-").isEqualTo("pineapple");
+    }
+
+    @Test
+    public void removeShouldResultInKeyRemoval() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/key");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasNull("key");
+    }
+
+    @Test
+    public void removeWithValueThatMatchesShouldResultInKeyRemoval() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/key", "value");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasNull("key");
+    }
+
+    @Test
+    public void removeFromMultiValuedAttributeWithValueThatMatchesElementShouldResultInElementRemoval() throws ResourceException {
+        JsonValue object = json(object(field("key", array("a", "b", "c"))));
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/key", "b");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("key").containsOnly("a", "c");
+    }
+
+    // CUI-140 test case
+    @Test
+    public void removeWithComplexValueThatMatchesShouldResultInKeyRemoval() throws ResourceException {
+        JsonValue object = json(object(field("favorites", array(
+                object(field("type", "candy"), field("flavor", "lemon")),
+                object(field("type", "candy"), field("flavor", "cherry"))
+        ))));
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/favorites",
+                object(field("type", "candy"), field("flavor", "cherry")));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("favorites").containsOnly(
+                object(field("type", "candy"), field("flavor", "lemon")));
+
+    }
+
+    @Test
+    public void removeWhenKeyDoesNotExistShouldReturnFalse() throws ResourceException {
+        JsonValue object = json(object());
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/key");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void removeWithScalarValueThatDoesNotMatchDoesNotResultInKeyRemoval() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/key", "anothervalue");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isFalse();
+        assertThat(object).stringAt("key").isEqualTo("value");
+    }
+
+    @Test
+    public void removeWithComplexValueThatDoesNotMatchDoesNotResultInKeyRemoval() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/key",
+                object(field("innerKey", "innerValue")));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isFalse();
+        assertThat(object).stringAt("key").isEqualTo("value");
+    }
+
+    @Test
+    public void removeWithComplexValueThatDoesNotMatchShouldReturnFalse() throws ResourceException {
+        JsonValue object = json(object(field("key", object(field("subattribute", "value")))));
+        final List<PatchOperation> operations = buildPatchOperation("remove", "/key", object(field("somekey", "somevalue")));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void replaceValueAtKey() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("replace", "/key", "pineapple");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).stringAt("key").isEqualTo("pineapple");
+    }
+
+    @Test
+    public void replaceMultiValuedAttributeAtKey() throws ResourceException {
+        JsonValue object = json(object(field("key", array("value1", "value2", "value3"))));
+        final List<PatchOperation> operations = buildPatchOperation("replace", "/key", array("a", "b", "c"));
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("key").containsOnly("a", "b", "c");
+    }
+
+    // OPENIDM-3097
+    @Test
+    public void replaceAtIndexOnMultiValuedAttribute() throws ResourceException {
+        JsonValue object = json(object(field("fruits", array("apple", "kiwi", "pear", "strawberry"))));
+        final List<PatchOperation> operations = buildPatchOperation("replace", "/fruits/1", "pineapple");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
         assertThat(result).isTrue();
         assertThat(object).hasArray("fruits").containsSequence("apple", "pineapple", "pear", "strawberry");
+    }
+
+    @Test
+    public void incrementOnIntegerValue() throws ResourceException {
+        JsonValue object = json(object(field("key", 1)));
+        final List<PatchOperation> operations = buildPatchOperation("increment", "/key", 1);
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).integerAt("key").isEqualTo(2);
+    }
+
+    @Test
+    public void incrementOnDoubleValue() throws ResourceException {
+        JsonValue object = json(object(field("key", 1.0)));
+        final List<PatchOperation> operations = buildPatchOperation("increment", "/key", 1.0);
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).doubleAt("key").isEqualTo(2.0);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class)
+    public void incrementOnMissingKey() throws ResourceException {
+        JsonValue object = json(object());
+        final List<PatchOperation> operations = buildPatchOperation("increment", "/key", 1);
+
+        JsonValuePatch.apply(object, operations);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class)
+    public void incrementOnNonNumericValue() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildPatchOperation("increment", "/key", 1);
+
+        JsonValuePatch.apply(object, operations);
+    }
+
+    @Test
+    public void incrementOnMultiValuedAttribute() throws ResourceException {
+        JsonValue object = json(object(field("key", array(1, 2, 3))));
+        final List<PatchOperation> operations = buildPatchOperation("increment", "/key", 1);
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("key").containsSequence(2, 3, 4);
+    }
+
+    @Test
+    public void incrementOnMixedNumericMultiValuedAttribute() throws ResourceException {
+        JsonValue object = json(object(field("key", array(1, 2.0, 3))));
+        final List<PatchOperation> operations = buildPatchOperation("increment", "/key", 1);
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasArray("key").containsSequence(2, 3.0, 4);
+    }
+
+    @Test(expectedExceptions = BadRequestException.class)
+    public void incrementOnMixedNonNumericMultiValuedAttribute() throws ResourceException {
+        JsonValue object = json(object(field("key", array(1, "value", 3))));
+        final List<PatchOperation> operations = buildPatchOperation("increment", "/key", 1);
+
+        JsonValuePatch.apply(object, operations);
+    }
+
+    @Test
+    public void moveValueAtKey() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildMoveOperation("/key", "/new");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).hasNull("key");
+        assertThat(object).stringAt("new").isEqualTo("value");
+    }
+
+    @Test
+    public void moveValueAtKeyNotPresent() throws ResourceException {
+        JsonValue object = json(object(field("ki", "value")));
+        final List<PatchOperation> operations = buildMoveOperation("/key", "/new");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isFalse();
+    }
+
+    @Test
+    public void copyValueAtKey() throws ResourceException {
+        JsonValue object = json(object(field("key", "value")));
+        final List<PatchOperation> operations = buildCopyOperation("/key", "/new");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isTrue();
+        assertThat(object).stringAt("key").isEqualTo("value");
+        assertThat(object).stringAt("new").isEqualTo("value");
+    }
+
+    @Test
+    public void copyValueAtKeyNotPresent() throws ResourceException {
+        JsonValue object = json(object(field("ki", "value")));
+        final List<PatchOperation> operations = buildCopyOperation("/key", "/new");
+
+        final boolean result = JsonValuePatch.apply(object, operations);
+
+        assertThat(result).isFalse();
     }
 
     private ScriptedPatchValueTransformer transformer = new ScriptedPatchValueTransformer() {
@@ -97,14 +378,9 @@ public class JsonValuePatchTest {
 
     @Test
     public void testScriptedPatchValueTransformer() throws ResourceException {
-        JsonValue diff = json(array(object(
-                field("operation", "transform"),
-                field("field", "/key"),
-                field("value", object(
-                        field("script", "var source = content; var target = source + 'xformed'; target;")
-                        )
-                ))));
-        List<PatchOperation> operations = PatchOperation.valueOfList(diff);
+        List<PatchOperation> operations = buildPatchOperation("transform", "/key",
+                object(field("script", "var target = content + 'xformed'; target;")));
+
         boolean modified = JsonValuePatch.apply(subject, operations, transformer);
 
         assertThat(subject.get("key").isString()).isTrue();
@@ -114,29 +390,59 @@ public class JsonValuePatchTest {
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testNullScriptedPatchValueTransformer() throws ResourceException {
-        JsonValue diff = json(array(object(
-                field("operation", "transform"),
-                field("field", "/key"),
-                field("value", object(
-                        field("script", null)
-                        )
-                ))));
+        List<PatchOperation> operations = buildPatchOperation("transform", "/key", object(field("script", null)));
 
-        List<PatchOperation> operations = PatchOperation.valueOfList(diff);
         JsonValuePatch.apply(subject, operations, transformer);
     }
 
     @Test(expectedExceptions = BadRequestException.class)
     public void testBadScriptedPatchValueTransformer() throws ResourceException {
-        JsonValue diff = json(array(object(
-                field("operation", "transform"),
-                field("field", "/key"),
-                field("value", object(
-                        field("script", "hello")
-                        )
-                ))));
+        List<PatchOperation> operations = buildPatchOperation("transform", "/key", object(field("script", "hello")));
 
-        List<PatchOperation> operations = PatchOperation.valueOfList(diff);
         JsonValuePatch.apply(subject, operations, transformer);
+    }
+
+    private List<PatchOperation> buildPatchOperation(String operation, String field) throws BadRequestException {
+        return PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", operation),
+                                field("field", field)
+                        )
+                )));
+    }
+
+    private List<PatchOperation> buildPatchOperation(String operation, String field, Object value)
+            throws BadRequestException {
+        return PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", operation),
+                                field("field", field),
+                                field("value", value)
+                        )
+                )));
+    }
+
+    private List<PatchOperation> buildMoveOperation(String from, String field) throws BadRequestException {
+        return PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", "move"),
+                                field("field", field),
+                                field("from", from)
+                        )
+                )));
+    }
+
+    private List<PatchOperation> buildCopyOperation(String from, String field) throws BadRequestException {
+        return PatchOperation.valueOfList(
+                json(array(
+                        object(
+                                field("operation", "copy"),
+                                field("field", field),
+                                field("from", from)
+                        )
+                )));
     }
 }
