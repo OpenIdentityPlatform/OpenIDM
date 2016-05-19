@@ -36,9 +36,20 @@
     stashedRequire.original(["main"], function () {
         // after main from the app is loaded, restore the require object and start testing
         window.require = stashedRequire.original;
-        require(["../qunit/tests/main"], function () {
-            QUnit.start();
-        });
+
+        require([
+            "org/forgerock/commons/ui/common/main/i18nManager"
+        ], function (i18nManager) {
+            i18nManager.init({
+                paramLang: {
+                    locale: "en"
+                }
+            });
+
+            require(["../qunit/tests/main"], function () {
+                QUnit.start();
+            });
+        })
     });
 
 }());
