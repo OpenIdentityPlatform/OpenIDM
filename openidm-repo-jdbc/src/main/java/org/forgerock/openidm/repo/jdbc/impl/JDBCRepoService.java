@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -347,12 +347,12 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
                         retry = true;
-                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                        logger.debug("Retryable exception encountered, retry attempt {} of {} : {}", tryCount, maxTxRetry, ex.getMessage());
                     }
                 }
                 if (!retry) {
-                    throw new InternalServerErrorException("Creating object failed " + "("
-                            + ex.getErrorCode() + "-" + ex.getSQLState() + ")" + ex.getMessage(),
+                    throw new InternalServerErrorException("Creating object failed after " + tryCount + " attempts ("
+                            + ex.getErrorCode() + "-" + ex.getSQLState() + "): " + ex.getMessage(),
                             ex);
                 }
             } catch (ResourceException ex) {
@@ -434,11 +434,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
                         retry = true;
-                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                        logger.debug("Retryable exception encountered, retry attempt {} of {} : {}", tryCount, maxTxRetry, ex.getMessage());
                     }
                 }
                 if (!retry) {
-                    throw new InternalServerErrorException("Updating object failed "
+                    throw new InternalServerErrorException("Updating object failed after " + tryCount + " attempts: "
                             + ex.getMessage(), ex);
                 }
             } catch (ResourceException ex) {
@@ -540,11 +540,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
                         retry = true;
-                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                        logger.debug("Retryable exception encountered, retry attempt {} of {} : {}", tryCount, maxTxRetry, ex.getMessage());
                     }
                 }
                 if (!retry) {
-                    throw new InternalServerErrorException("Deleting object failed "
+                    throw new InternalServerErrorException("Deleting object failed after " + tryCount + " attempts: "
                             + ex.getMessage(), ex);
                 }
             } catch (RuntimeException ex) {
@@ -778,11 +778,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                 if (handler.isRetryable(ex, connection)) {
                     if (tryCount <= maxTxRetry) {
                         retry = true;
-                        logger.debug("Retryable exception encountered, retry {}", ex.getMessage());
+                        logger.debug("Retryable exception encountered, retry attempt {} of {} : {}", tryCount, maxTxRetry, ex.getMessage());
                     }
                 }
                 if (!retry) {
-                    throw new InternalServerErrorException("Command failed " + ex.getMessage(), ex);
+                    throw new InternalServerErrorException("Command failed after " + tryCount + " attempts: " + ex.getMessage(), ex);
                 }
             } catch (ResourceException ex) {
                 logger.debug("ResourceException in command on {}", request.getResourcePath(), ex);
@@ -1000,7 +1000,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         case SQLSERVER:
             return
                     new MSSQLTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
-                            new DefaultSQLExceptionHandler());
+                            new MSSQLExceptionHandler());
         case H2:
             return
                     new H2TableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
@@ -1045,7 +1045,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
         case SQLSERVER:
             return
                     new MSSQLMappedTableHandler(table, objectToColumn, dbSchemaName,
-                            explicitQueries, explicitCommands, new DefaultSQLExceptionHandler(),
+                            explicitQueries, explicitCommands, new MSSQLExceptionHandler(),
                             cryptoServiceAccessor);
         default:
             return
