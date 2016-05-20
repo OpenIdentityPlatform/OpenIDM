@@ -33,6 +33,11 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.schema.validator.Constants;
 import org.forgerock.json.schema.validator.exceptions.SchemaException;
+import org.forgerock.openicf.framework.async.AsyncConnectorInfoManager;
+import org.forgerock.openicf.framework.remote.AsyncRemoteConnectorInfoManager;
+import org.forgerock.openicf.framework.remote.FailoverLoadBalancingAlgorithmFactory;
+import org.forgerock.openicf.framework.remote.LoadBalancingAlgorithmFactory;
+import org.forgerock.openicf.framework.remote.RoundRobinLoadBalancingAlgorithmFactory;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -99,7 +104,13 @@ public class ConnectorUtil {
     public static final String OPENICF_NATIVE_NAME = "nativeName";
     public static final String OPENICF_NATIVE_TYPE = "nativeType";
 
+    // remote connector server groups
+    public static final String OPENICF_GROUP_ALGORITHM = "algorithm";
+    public static final String OPENICF_GROUP_SERVERS_LIST = "serversList";
+
+
     public static final String OPENICF_REMOTE_CONNECTOR_SERVERS = "remoteConnectorServers";
+    public static final String OPENICF_REMOTE_CONNECTOR_GROUPS = "remoteConnectorServersGroups";
 
     public static final String JAVA_TYPE_BIGDECIMAL = "JAVA_TYPE_BIGDECIMAL";
     public static final String JAVA_TYPE_BIGINTEGER = "JAVA_TYPE_BIGINTEGER";
@@ -578,6 +589,33 @@ public class ConnectorUtil {
         return result;
     }
 
+    /**
+     * @param info
+     * @return
+     * @throws IllegalArgumentException if the configuration can not be read from {@code info}
+     */
+    public static LoadBalancingAlgorithmFactory getLoadBalancingInfo(JsonValue info,  Map <String, AsyncConnectorInfoManager> serverInfo) {
+        LoadBalancingAlgorithmFactory lbf;
+
+        String _algorithm = info.get(OPENICF_GROUP_ALGORITHM).required().asString();
+        if ("failover".equalsIgnoreCase(_algorithm)){
+            lbf = new FailoverLoadBalancingAlgorithmFactory();
+        }
+        else if ("roundrobin".equalsIgnoreCase(_algorithm)){
+            lbf = new RoundRobinLoadBalancingAlgorithmFactory();
+        }
+        else {
+            throw new IllegalArgumentException("Bad algorithm name: " + _algorithm);
+        }
+
+        for(Object server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList()) {
+            AsyncConnectorInfoManager aim = serverInfo.get((String)server);
+            if (null != aim && aim instanceof AsyncRemoteConnectorInfoManager){
+                lbf.addAsyncRemoteConnectorInfoManager((AsyncRemoteConnectorInfoManager)aim);
+            }
+        }
+        return lbf;
+    }
 
     public static ConnectorReference getConnectorReference(JsonValue configuration) throws JsonValueException {
         JsonValue connectorRef = configuration.get(OPENICF_CONNECTOR_REF).required().expect(Map.class);

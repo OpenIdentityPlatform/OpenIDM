@@ -65,6 +65,7 @@ import org.forgerock.openicf.framework.ConnectorFrameworkFactory;
 import org.forgerock.openicf.framework.async.AsyncConnectorInfoManager;
 import org.forgerock.openicf.framework.client.RemoteWSFrameworkConnectionInfo;
 import org.forgerock.openicf.framework.local.AsyncLocalConnectorInfoManager;
+import org.forgerock.openicf.framework.remote.LoadBalancingAlgorithmFactory;
 import org.forgerock.openicf.framework.remote.ReferenceCountedObject;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
@@ -210,6 +211,22 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     remoteConnectorHosts, e);
             throw new ComponentException("Invalid configuration, service can not be started", e);
         }
+
+        JsonValue remoteConnectorGroups = null;
+        try {
+            remoteConnectorGroups =
+                    configuration.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_GROUPS).expect(
+                            List.class);
+            if (!remoteConnectorGroups.isNull()) {
+                initialiseGroups(remoteConnectorGroups);
+            }
+        } catch (JsonValueException e) {
+            logger.error("Invalid configuration remoteConnectorServersGroups must be list or null. {}",
+                    remoteConnectorGroups, e);
+            throw new ComponentException("Invalid configuration, service can not be started", e);
+        }
+
+
         isOSGiServiceInstance = true;
         logger.info("ConnectorInfoProviderService with OpenICF {} is activated.", FrameworkUtil
                 .getFrameworkVersion());
@@ -238,6 +255,21 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 } else {
                     logger.error("RemoteFrameworkConnectionInfo has no name");
                 }
+            } catch (IllegalArgumentException e) {
+                logger.error("RemoteFrameworkConnectionInfo can not be read", e);
+            }
+        }
+    }
+
+    protected void initialiseGroups(JsonValue remoteConnectorGroups) throws JsonValueException {
+        for (JsonValue info : remoteConnectorGroups) {
+            try {
+                LoadBalancingAlgorithmFactory algorithmFactory =
+                        ConnectorUtil.getLoadBalancingInfo(info.expect(Map.class), remoteFrameworkConnectionInfo);
+
+                final String name = info.get("name").required().asString();
+                remoteFrameworkConnectionInfo.put(name, connectorFramework.get().getRemoteManager(algorithmFactory));
+
             } catch (IllegalArgumentException e) {
                 logger.error("RemoteFrameworkConnectionInfo can not be read", e);
             }
