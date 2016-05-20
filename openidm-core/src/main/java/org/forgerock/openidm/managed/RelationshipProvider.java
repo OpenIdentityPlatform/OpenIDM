@@ -28,6 +28,8 @@ import static org.forgerock.openidm.util.ResourceUtil.*;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -755,14 +757,10 @@ public abstract class RelationshipProvider {
         // Do activity logging.
         activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue, null, 
                 Status.SUCCESS);
-
-        // Execute the postUpdate script of the managed object
-        managedObjectSetService.executePostUpdate(context, newUpdateRequest(managedId, afterValue), managedId, 
-                beforeValue, afterValue);
         
-        // Changes to the relationship will trigger sync on the managed object that this field belongs to.
-        managedObjectSetService.performSyncAction(context, request, managedId, notifyUpdate, 
-                beforeValue, afterValue);
+        // Perform an update on the managed object
+        managedObjectSetService.update(context, newUpdateRequest(managedId, afterValue), managedId, null, beforeValue, 
+                afterValue, new HashSet<JsonPointer>(Arrays.asList(propertyPtr)));
     }
 
     /**
