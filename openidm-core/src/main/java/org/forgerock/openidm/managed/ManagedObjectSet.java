@@ -459,23 +459,24 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
     /**
      * Update a resource as part of an update or patch request. This method will also be invoked from a triggerSyncCheck
-     * (via the updateInstance method). Its fundamental concern is to perform diff logic between between the oldValue, which
-     * is obtained via a repo read, and the newValue, which is provided by the caller, and to trigger the appropriate
-     * repo persistence and sync actions as dictated by the specific differences between the oldValue and newValue.
+     * (via the updateInstance method). Its fundamental concern is to perform diff logic between between the oldValue, 
+     * which is obtained via a repo read, and the newValue, which is provided by the caller, and to trigger the 
+     * appropriate repo persistence and sync actions as dictated by the specific differences between the oldValue and 
+     * newValue.
      *
      * @param context the current Context
      * @param request the source Request
      * @param resourceId the resource id of the object being modified
-     * @param rev the revision of hte object being modified
+     * @param rev the revision of the object being modified
      * @param oldValue the old value of the object, as read from the repo
-     * @param newValue the new value of the object, as specified by the user, or as constituted via a router read request
-     *                 in the triggerSyncCheck action.
+     * @param newValue the new value of the object, as specified by the user, or as constituted via a router read 
+     *                 request in the triggerSyncCheck action.
      * @param relationshipFields a set of relationship fields to persist. These fields must match the relationship
      *                           fields present in the oldValue JsonValue.
      * @return a {@link ResourceResponse} object representing the updated resource
      * @throws ResourceException
      */
-    private ResourceResponse update(final Context context, Request request, String resourceId, String rev,
+    public ResourceResponse update(final Context context, Request request, String resourceId, String rev,
     		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
             throws ResourceException {
 
@@ -1474,7 +1475,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         return stripped;
     }
 
-    @Override
     public void performSyncAction(final Context context, final Request request, final String resourceId,
             final SynchronizationService.SyncServiceAction action, final JsonValue oldValue, final JsonValue newValue)
         throws ResourceException {
