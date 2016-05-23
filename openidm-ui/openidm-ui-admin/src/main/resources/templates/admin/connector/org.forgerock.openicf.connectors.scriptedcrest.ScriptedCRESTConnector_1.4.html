@@ -29,7 +29,8 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="password">{{t "templates.connector.scriptedCrest.password"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" />
+                    <!-- autocomplete="new-password" is required to prevent chrome from auto-completing these form fields -->
+                    <input class="form-control" type="password" id="password" autocomplete="new-password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" />
                 </div>
             </div>
             <div class="form-group">
@@ -189,7 +190,7 @@
 <div class="panel panel-default panel-collapse">
     <div class="panel-heading" role="tab" id="groupDisabledGlobalASTTransformationsHeading">
         <h4 class="panel-title">
-            <a data-toggle="collapse" href="#groupScriptExtensions" aria-expanded="true" aria-controls="groupDisabledGlobalASTTransformationsHeading" class="">{{t "templates.connector.scriptedShared.disabledGlobalAst"}}</a>
+            <a data-toggle="collapse" href="#groupDisabledGlobalASTTransformations" aria-expanded="true" aria-controls="groupDisabledGlobalASTTransformationsHeading" class="">{{t "templates.connector.scriptedShared.disabledGlobalAst"}}</a>
         </h4>
     </div>
     <div id="groupDisabledGlobalASTTransformations" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="groupDisabledGlobalASTTransformations" aria-expanded="true">
