@@ -5,7 +5,9 @@
   "private": true,
   "devDependencies": {
     "babel-eslint": "6.0.3",
+    "babel-plugin-check-es2015-constants": "^6.8.0",
     "babel-plugin-transform-es2015-arrow-functions": "6.5.2",
+    "babel-plugin-transform-es2015-block-scoping": "^6.9.0",
     "eslint": "1.10.3",
     "eslint-config-forgerock": "1.1.1",
     "eslint-formatter-warning-summary": "1.0.1",
