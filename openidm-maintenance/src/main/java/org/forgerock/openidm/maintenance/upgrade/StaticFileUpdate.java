@@ -89,6 +89,12 @@ class StaticFileUpdate {
         } catch (NoSuchFileException e) {
             // this is ok, just install the new file
         }
+
+        // Create parent directories if missing
+        if (!path.getParent().toFile().exists()) {
+            Files.createDirectories(path.getParent());
+        }
+
         archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
             @Override
             public Void apply(InputStream inputStream) throws IOException {
@@ -119,6 +125,11 @@ class StaticFileUpdate {
         final Path destination = root.resolve(changed
                 ? path.toString() + NEW_SUFFIX + timestamp
                 : path.toString());
+
+        // Create parent directories if missing
+        if (!destination.getParent().toFile().exists()) {
+            Files.createDirectories(destination.getParent());
+        }
 
         archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
             @Override
