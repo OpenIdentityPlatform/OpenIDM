@@ -40,7 +40,8 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="password">{{t "templates.connector.databaseTableConnector.password"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" data-validator-event="keyup blur" data-validator="required" />
+                    <!-- autocomplete="new-password" is required to prevent chrome from auto-completing these form fields -->
+                    <input class="form-control" type="password" id="password" autocomplete="new-password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" data-validator-event="keyup blur" data-validator="required" />
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
