@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
@@ -217,7 +217,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             remoteConnectorGroups =
                     configuration.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_GROUPS).expect(
                             List.class);
-            if (!remoteConnectorGroups.isNull()) {
+            if (remoteConnectorGroups.isNotNull()) {
                 initialiseGroups(remoteConnectorGroups);
             }
         } catch (JsonValueException e) {
