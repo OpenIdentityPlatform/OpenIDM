@@ -24,5 +24,6 @@ define([
     "./searchTest",
     "./MembersViewTest",
     "./TemporalConstraintsUtilsTest",
-    "./MappingListViewTest"
+    "./MappingListViewTest",
+    "./SelfService"
 ]);
