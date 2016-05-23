@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * Copyright 2011-2016 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -106,8 +106,9 @@ public class ConnectorUtil {
 
     // remote connector server groups
     public static final String OPENICF_GROUP_ALGORITHM = "algorithm";
+    public static final String OPENICF_GROUP_ALGORITHM_FAILOVER = "failover";
+    public static final String OPENICF_GROUP_ALGORITHM_ROUNDROBIN = "roundrobin";
     public static final String OPENICF_GROUP_SERVERS_LIST = "serversList";
-
 
     public static final String OPENICF_REMOTE_CONNECTOR_SERVERS = "remoteConnectorServers";
     public static final String OPENICF_REMOTE_CONNECTOR_GROUPS = "remoteConnectorServersGroups";
@@ -590,6 +591,15 @@ public class ConnectorUtil {
     }
 
     /**
+     * Get the load balancing information from the configuration. The algorithm
+     * used can be either "failover" or "roundrobin".
+     *
+     * failover: will always try to send the request to the first server in the list.
+     * If it fails, it will try with the second etc...
+     *
+     * rounrobin: will always distribute the request to the lists of servers
+     * in a round robin fashion.
+     *
      * @param info
      * @return
      * @throws IllegalArgumentException if the configuration can not be read from {@code info}
@@ -597,19 +607,19 @@ public class ConnectorUtil {
     public static LoadBalancingAlgorithmFactory getLoadBalancingInfo(JsonValue info,  Map <String, AsyncConnectorInfoManager> serverInfo) {
         LoadBalancingAlgorithmFactory lbf;
 
-        String _algorithm = info.get(OPENICF_GROUP_ALGORITHM).required().asString();
-        if ("failover".equalsIgnoreCase(_algorithm)){
+        final String algorithm = info.get(OPENICF_GROUP_ALGORITHM).required().asString();
+        if (OPENICF_GROUP_ALGORITHM_FAILOVER.equalsIgnoreCase(algorithm)){
             lbf = new FailoverLoadBalancingAlgorithmFactory();
         }
-        else if ("roundrobin".equalsIgnoreCase(_algorithm)){
+        else if (OPENICF_GROUP_ALGORITHM_ROUNDROBIN.equalsIgnoreCase(algorithm)){
             lbf = new RoundRobinLoadBalancingAlgorithmFactory();
         }
         else {
-            throw new IllegalArgumentException("Bad algorithm name: " + _algorithm);
+            throw new IllegalArgumentException("Bad algorithm name: " + algorithm);
         }
 
-        for(Object server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList()) {
-            AsyncConnectorInfoManager aim = serverInfo.get((String)server);
+        for(String server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList(String.class)) {
+            AsyncConnectorInfoManager aim = serverInfo.get(server);
             if (null != aim && aim instanceof AsyncRemoteConnectorInfoManager){
                 lbf.addAsyncRemoteConnectorInfoManager((AsyncRemoteConnectorInfoManager)aim);
             }
