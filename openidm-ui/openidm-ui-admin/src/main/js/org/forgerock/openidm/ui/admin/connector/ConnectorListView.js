@@ -54,7 +54,6 @@ define([
         render: function(args, callback) {
             var connectorPromise,
                 splitConfig,
-                tempIconClass,
                 ConnectorModel = Backbone.Model.extend({}),
                 Connectors = Backbone.Collection.extend({ model: ConnectorModel }),
                 connectorGrid,
@@ -80,7 +79,8 @@ define([
 
             $.when(connectorPromise).then(_.bind(function(connectors){
                 _.each(connectors, _.bind(function(connector){
-                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName);
+                    let tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName);
+
                     connector.iconClass = tempIconClass.iconClass;
                     connector.iconSrc = tempIconClass.src;
 
