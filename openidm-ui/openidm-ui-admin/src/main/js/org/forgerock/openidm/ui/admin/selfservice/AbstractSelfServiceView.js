@@ -347,7 +347,8 @@ define([
                 currentData = _.filter(this.model.saveConfig.stageConfigs, {"name" : type})[0],
                 defaultConfig = _.filter(this.data.configList, { "type": type })[0],
                 orderPosition = $(event.target).closest(".self-service-card.active").index(),
-                self = this;
+                self = this,
+                resetList = [];
 
             if ($(event.target).hasClass("self-service-card")) {
                 el = $(event.target);
@@ -371,6 +372,10 @@ define([
             }
 
             currentData.identityServiceProperties = this.data.identityServiceProperties;
+
+            if(this.filterPropertiesList) {
+                currentData.identityServiceProperties = this.filterPropertiesList(currentData.identityServiceProperties, type, this.data.identityServicePropertiesDetails);
+            }
 
             if($(event.target).parents(".checkbox").length === 0 && editable === "true") {
                 this.dialog = BootstrapDialog.show({
@@ -673,6 +678,7 @@ define([
 
             AdminUtils.findPropertiesList(this.data.defaultIdentityServiceURL.split("/")).then(_.bind(function(properties) {
                 this.data.identityServiceProperties = _.chain(properties).keys().sortBy().value();
+                this.data.identityServicePropertiesDetails = properties;
             }, this));
 
             if (e) {
@@ -699,6 +705,7 @@ define([
             _.each(saveData.stageConfigs, function(step) {
                 if (_.has(step, "identityServiceProperties")) {
                     delete step.identityServiceProperties;
+                    delete step.identityServicePropertiesDetails;
                 }
             });
 
