@@ -1047,6 +1047,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     JsonPointer field = new JsonPointer(operation.getField().get(0));
                     SchemaField schemaField = schema.getField(field);
                     if (schemaField != null && schemaField.isRelationship()) {
+                        if (schemaField.isArray() && operation.getValue().isNull()) {
+                            throw new BadRequestException("Cannot delete collection: " + field.toString());
+                        }
                         patchedRelationshipFields.add(field);
                     }
                 }
