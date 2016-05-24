@@ -1,18 +1,26 @@
 <!-- Copyright 2015 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-
 <div class="translationMapGroup well" field="{{fieldName}}">
     <h2 class="panel-title">{{t label}}</h2>
     <ul class="list-unstyled">
-    {{#each property}}
-        {{> selfservice/_translationItem locale=@key text=this}}
-    {{/each}}
+        {{#each property}}
+            {{> selfservice/_translationItem locale=@key text=this useCodeMirror=../useCodeMirror}}
+        {{/each}}
     </ul>
-    <div class="col-sm-2">
-        <input type="text" class="newTranslationLocale form-control" placeholder="{{t "templates.selfservice.locale"}}"/>
+
+    <div class="form-group">
+        <div class="col-sm-3">
+            <input type="text" class="newTranslationLocale form-control" placeholder="{{t "templates.selfservice.locale"}}"/>
+        </div>
+
+        <div class="col-sm-8">
+            {{#if useCodeMirror}}
+                <textarea class="email-message-code-mirror newTranslationText form-control" placeholder="{{t "templates.selfservice.localText"}}"></textarea>
+            {{else}}
+                <input type="text" class="newTranslationText form-control" placeholder="{{t "templates.selfservice.localText"}}"/>
+            {{/if}}
+        </div>
+
+        <button type="button" class="col-sm-1 btn btn-primary add">{{t "common.form.add"}}</button>
     </div>
-    <div class="col-sm-6">
-        <input type="text" class="newTranslationText form-control" placeholder="{{t "templates.selfservice.localText"}}"/>
-    </div>
-    <button type="button" class="btn btn-primary add">{{t "common.form.add"}}</button>
 </div>

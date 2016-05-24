@@ -30,7 +30,10 @@ define([
     "bootstrap-dialog",
     "selectize",
     "org/forgerock/commons/ui/common/util/AutoScroll",
-    "dragula"
+    "dragula",
+    "libs/codemirror/lib/codemirror",
+    "libs/codemirror/mode/xml/xml",
+    "libs/codemirror/addon/display/placeholder"
 ], function($, _,
             bootstrap,
             handlebars,
@@ -45,7 +48,8 @@ define([
             BootstrapDialog,
             selectize,
             AutoScroll,
-            dragula) {
+            dragula,
+            codeMirror) {
 
     var AbstractSelfServiceView = AdminAbstractView.extend({
         events: {
@@ -71,7 +75,16 @@ define([
             hideAdvanced: true,
             config: {},
             configList: [],
-            resources: null
+            resources: null,
+            codeMirrorConfig: {
+                lineNumbers: true,
+                autofocus: false,
+                viewportMargin: Infinity,
+                theme: "forgerock",
+                mode: "xml",
+                htmlMode: true,
+                lineWrapping: true
+            }
         },
         addTranslation: function (e) {
             e.preventDefault();
@@ -80,19 +93,25 @@ define([
                 currentStageConfig = e.data.currentStageConfig,
                 field = translationMapGroup.attr("field"),
                 locale = translationMapGroup.find(".newTranslationLocale"),
-                text = translationMapGroup.find(".newTranslationText");
+                text = this.cmBox.getValue();
 
             if (!_.has(currentStageConfig[field][locale.val()])) {
-                currentStageConfig[field][locale.val()] = text.val();
+                currentStageConfig[field][locale.val()] = text;
                 translationMapGroup
                     .find("ul")
                     .append(
-                        handlebars.compile("{{> selfservice/_translationItem}}")({
+                        handlebars.compile("{{> selfservice/_translationItem useCodeMirror=true}}")({
                             locale: locale.val(),
-                            text: text.val()
+                            text: text
                         })
                     );
-                text.val("");
+
+                codeMirror.fromTextArea(
+                    translationMapGroup.find(".email-message-code-mirror-disabled:last")[0],
+                    _.extend({readOnly: true, cursorBlinkRate: -1}, this.data.codeMirrorConfig)
+                );
+
+                this.cmBox.setValue("");
                 locale.val("").focus();
             }
         },
@@ -294,11 +313,18 @@ define([
                     size: BootstrapDialog.SIZE_WIDE,
                     message: $(handlebars.compile("{{> selfservice/_" + type + "}}")(currentData)),
                     onshown: _.bind(function (dialogRef) {
+                        _.each(dialogRef.$modalBody.find(".email-message-code-mirror-disabled"), (instance) => {
+                            codeMirror.fromTextArea(instance, _.extend({readOnly: true, cursorBlinkRate: -1}, this.data.codeMirrorConfig));
+                        });
+
+                        this.cmBox = codeMirror.fromTextArea(dialogRef.$modalBody.find(".email-message-code-mirror")[0], this.data.codeMirrorConfig);
+
                         dialogRef.$modalBody.find(".basic-selectize-field").selectize({
                             "create": true,
                             "persist": false,
                             "allowEmptyOption": true
                         });
+
                         dialogRef.$modalBody.find(".array-selection").selectize({
                             delimiter: ",",
                             persist: false,

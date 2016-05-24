@@ -2,8 +2,16 @@
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <li locale="{{locale}}">
     <div class="form-group">
-        <strong class="col-sm-2">{{locale}}</strong>
-        <p class="col-sm-7 localizedText">{{text}}</p>
-        <button class="btn btn-link delete"><i class="fa fa-times"></i></button>
+        <strong class="col-sm-3">{{locale}}</strong>
+
+        <div class="col-sm-8">
+            {{#if useCodeMirror}}
+            <textarea class="email-message-code-mirror-disabled localizedText form-control" disabled="true">{{text}}</textarea>
+            {{else}}
+            <p class="localizedText">{{text}}</p>
+            {{/if}}
+        </div>
+
+        <button class="col-sm-1 btn btn-link delete"><i class="fa fa-times"></i></button>
     </div>
 </li>
