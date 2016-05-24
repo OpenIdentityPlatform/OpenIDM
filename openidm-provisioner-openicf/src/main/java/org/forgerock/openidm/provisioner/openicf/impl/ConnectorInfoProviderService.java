@@ -214,9 +214,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
 
         JsonValue remoteConnectorGroups = null;
         try {
-            remoteConnectorGroups =
-                    configuration.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_GROUPS).expect(
-                            List.class);
+            remoteConnectorGroups = configuration.get(ConnectorUtil.OPENICF_REMOTE_CONNECTOR_GROUPS).expect(List.class);
             if (remoteConnectorGroups.isNotNull()) {
                 initialiseGroups(remoteConnectorGroups);
             }
@@ -269,7 +267,6 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
 
                 final String name = info.get("name").required().asString();
                 remoteFrameworkConnectionInfo.put(name, connectorFramework.get().getRemoteManager(algorithmFactory));
-
             } catch (IllegalArgumentException e) {
                 logger.error("RemoteFrameworkConnectionInfo can not be read", e);
             }
