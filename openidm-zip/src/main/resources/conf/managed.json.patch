@@ -108,5 +108,15 @@
             "source" : "require('managedPatchHelper').add(content, 'role', 'onUpdate.source',   \"require('roles/conditionalRoles').roleUpdate(oldObject, object);\");"
          }
       }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'onUpdate.source', \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);\");"
+         }
+      }
    }
 ]
