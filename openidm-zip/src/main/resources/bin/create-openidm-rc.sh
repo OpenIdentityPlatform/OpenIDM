@@ -47,17 +47,11 @@ fi
 
 CLASSPATH="\$OPENIDM_HOME"/bin/*
 
-
-START_CMD="nohup \$JAVA_BIN \$LOGGING_CONFIG \$JAVA_OPTS \$OPENIDM_OPTS \\
-		-Djava.endorsed.dirs=\$JAVA_ENDORSED_DIRS \\
-		-classpath \\"\$CLASSPATH\\" \\
-		-Djava.awt.headless=true \\
-                -Dopenidm.system.server.root=\$OPENIDM_HOME \\
-		org.forgerock.commons.launcher.Main -c bin/launcher.json > logs/server.out 2>&1 &"
+START_CMD="PATH=$(dirname $JAVA_BIN):$PATH;nohup $OPENIDM_HOME/startup.sh >$OPENIDM_HOME/logs/server.out 2>&1 &"
 
 case "\${1}" in
 start)
-	su \$OPENIDM_USER -c "\$START_CMD eval echo \\$\! > \$OPENIDM_PID_FILE"
+	su $OPENIDM_USER -c "\$START_CMD"
   	exit \${?}
   ;;
 stop)
@@ -66,7 +60,7 @@ stop)
   ;;
 restart)
 	./shutdown.sh > /dev/null
-	su \$OPENIDM_USER -c "\$START_CMD eval echo \\$\! > \$OPENIDM_PID_FILE"
+	su $OPENIDM_USER -c "\$START_CMD"
   	exit \${?}
   ;;
 *)

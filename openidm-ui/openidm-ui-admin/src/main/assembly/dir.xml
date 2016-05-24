@@ -39,6 +39,7 @@
               <include>lib/codemirror.js</include>
               <include>mode/javascript/javascript.js</include>
               <include>mode/groovy/groovy.js</include>
+              <include>mode/xml/xml.js</include>
               <include>addon/display/placeholder.js</include>
             </includes>
             <fileMode>0640</fileMode>
