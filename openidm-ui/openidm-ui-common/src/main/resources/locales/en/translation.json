@@ -1287,6 +1287,7 @@
             "scriptedcrest_ScriptedCRESTConnector" : "Scripted CREST Connector",
             "scriptedrest_ScriptedRESTConnector" : "Scripted REST Connector",
             "ssh_SSHConnector" : "Scripted SSH Connector",
+            "kerberos_KerberosConnector": "Kerberos Connector",
             "connectorName" : "Connector Name",
             "connectorEnabled" : "Enabled",
             "connectorType" : "Connector Type",
@@ -1563,6 +1564,13 @@
                     "invalidCredentials" : "Invalid Username or Password",
                     "badBaseContext" : "Bad Base Context(s)"
                 }
+            },
+            "kerberos": {
+                "kerberosSpecificConfig": "Kerberos Specific Details",
+                "customConfiguration": "Custom Configuration",
+                "customConfigurationHelp": "Groovy string with kadmin settings (full path to command, user, realm)",
+                "customSensitiveConfiguration": "Custom Sensitive Configuration",
+                "customSensitiveConfigurationHelp": "Groovy string representing sensitive kadmin settings (e.g. \"kadmin { password = 'PASSWORD' }\")"
             },
             "google" : {
                 "listHeader" : "You must grant this project access to all of the following APIs:",

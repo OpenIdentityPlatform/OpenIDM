@@ -1,7 +1,7 @@
 <!-- Copyright 2016 ForgeRock AS.
     License terms: https://forgerock.org/cddlv1-0/ -->
 <!-- Base Details panel -->
-<div class="panel panel-default panel-collapse" id="forSSHConnector">
+<div class="panel panel-default panel-collapse" id="{{#if isKerberos}}forKerberosConnector{{else}}forSSHConnector{{/if}}">
     <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
         <h4 class="panel-title">
             <a data-toggle="collapse" href="#connectorSpecificBase" aria-expanded="true" aria-controls="connectorSpecificBase" class="">{{t "templates.connector.baseTitle"}}</a>
@@ -57,10 +57,43 @@
                     <span class="help-block">{{t "templates.connector.ssh.authenticationTypeHelp"}}</span>
                 </div>
             </div>
-
         </div>
     </div>
 </div>
+{{#if isKerberos}}
+<!-- Kerberos Specific Details panel -->
+<div class="panel panel-default panel-collapse">
+    <div class="panel-heading" role="tab" id="kerberosSpecificConfigHeading">
+        <div  class="pull-right help-link">
+            <a href="{{docHelpUrl}}connectors-guide#chap-kerberos" target="_blank">{{t "templates.connector.help"}} <i class="fa fa-question-circle"></i></a>
+        </div>
+        <h4 class="panel-title">
+            <a data-toggle="collapse" href="#kerberosSpecificConfig" aria-expanded="true" aria-controls="kerberosSpecificConfig" class="">{{t "templates.connector.kerberos.kerberosSpecificConfig"}}</a>
+        </h4>
+
+    </div>
+    <div id="kerberosSpecificConfig" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="kerberosSpecificConfigHeading" aria-expanded="true">
+        <div class="panel-body connector-array-component" id="kerberosSpecificConfigWrapper">
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="customConfiguration">{{t "templates.connector.kerberos.customConfiguration"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="customConfiguration" name="configurationProperties.customConfiguration" value="{{connectorDefaults.configurationProperties.customConfiguration}}" />
+                    <span class="help-block">{{t "templates.connector.kerberos.customConfigurationHelp"}}</span>
+                </div>
+
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="customSensitiveConfiguration">{{t "templates.connector.kerberos.customSensitiveConfiguration"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="customSensitiveConfiguration" name="configurationProperties.customSensitiveConfiguration" value="" />
+                    <span class="help-block">{{t "templates.connector.kerberos.customSensitiveConfigurationHelp"}}</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{{/if}}
 <!-- script roots panel -->
 <div class="panel panel-default panel-collapse">
     <div class="panel-heading" role="tab" id="scriptRootsHeading">
@@ -71,7 +104,6 @@
     <div id="scriptRoots" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptRootsHeading" aria-expanded="true">
         <div class="panel-body connector-array-component" id="scriptRootWrapper">
             <div>
-                <!-- <p>{{t "templates.connector.ssh.scriptRootNote"}}</p>-->
                 <button type="button" field_type="scriptRoot" id="addScriptRootButton" name="scriptRootButton" class="btn btn-primary add-btn"><i class="fa fa-plus"></i><span>{{t "templates.connector.ssh.scriptRootAdd"}}</span></button>
             </div>
 
@@ -80,13 +112,11 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ssh.scriptRoot"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" autocomplete="off" type="text" name="configurationProperties.scriptRoots[]" value="{{value}}" />
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <input class="form-control" data-validator="required" data-validator-event="keyup blur" autocomplete="off" type="text" name="configurationProperties.scriptRoots[]" value="{{value}}" />
                     <div class="input-group-addon">
                         <button field_type="scriptRoot" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/each_with_index}}
             {{else}}
@@ -94,12 +124,10 @@
                 <label class="control-label col-sm-3">{{t "templates.connector.ssh.scriptRoot"}}</label>
                 <div class="input-group col-sm-8">
                     <input class="form-control" id="scriptRoot" data-validator-event="keyup blur" data-validator="required" autocomplete="off" type="text" name="configurationProperties.scriptRoots[]" value="{{value}}"/>
-                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <div class="input-group-addon">
                         <button field_type="scriptRoot" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
                 </div>
-                <div class="validation-message"></div>
             </div>
             {{/if}}
         </div>
@@ -115,7 +143,6 @@
     <div id="classpath" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="classpathHeading" aria-expanded="true">
         <div class="panel-body connector-array-component" id="classpathWrapper">
             <div>
-                <!-- <p>{{t "templates.connector.ssh.classpathNote"}}</p> -->
                 <button type="button" field_type="classpath" id="addclasspathButton" name="addclasspathButton" class="btn btn-primary add-btn"><i class="fa fa-plus"></i><span>{{t "templates.connector.ssh.classpathAdd"}}</span></button>
             </div>
 
@@ -149,10 +176,10 @@
 <div class="panel panel-default panel-collapse">
     <div class="panel-heading" role="tab" id="filesHeading">
         <h4 class="panel-title">
-            <a data-toggle="collapse" href="#files" aria-expanded="true" aria-controls="files" class="">{{t "templates.connector.ssh.FileNameTitle"}}</a>
+            <a data-toggle="collapse" href="#files" aria-expanded="{{#unless isKerberos}}true{{else}}false{{/unless}}" aria-controls="files" class="">{{t "templates.connector.ssh.FileNameTitle"}}</a>
         </h4>
     </div>
-    <div id="files" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="filesHeading" aria-expanded="true">
+    <div id="files" class="panel-collapse collapse {{#unless isKerberos}}in{{/unless}}" role="tabpanel" aria-labelledby="filesHeading" aria-expanded="{{#unless isKerberos}}true{{else}}false{{/unless}}">
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="reloadScriptOnExecution">{{t "templates.connector.ssh.reloadScriptOnExecution"}}</label>
                 <div class="col-sm-8">
