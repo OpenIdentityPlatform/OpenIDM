@@ -19,11 +19,14 @@ define([
     "./ChangeAssociationDialog",
     "./ConnectorListViewTest",
     "./connectorTest",
+    "./MappingListViewTest",
+    "./MembersViewTest",
     "./queryFilterEditorTest",
     "./RepoUpdateViewTest",
+    "./ResourceCollection",
     "./searchTest",
-    "./MembersViewTest",
+    "./SelfService",
     "./TemporalConstraintsUtilsTest",
-    "./MappingListViewTest",
-    "./SelfService"
+    "./UserModel",
+    "./WorkflowForms"
 ]);

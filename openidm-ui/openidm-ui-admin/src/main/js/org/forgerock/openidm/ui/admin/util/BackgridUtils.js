@@ -42,20 +42,17 @@ define([
 
         return params.length === 0 ? true : params.join(" AND ");
     };
-    
+
     obj.getQueryParams = function (data, isSystemResource) {
         data = data || {};
         var queryParams = {
-            _sortKeys: this.sortKeys,
             _queryFilter: function () {
                 return obj.queryFilter.call(this, { _queryFilter: data._queryFilter });
             },
             _fields: data._fields || "",
-            pageSize: "_pageSize",
-            _pagedResultsOffset: this.pagedResultsOffset,
             _totalPagedResultsPolicy: "ESTIMATE"
         };
-        
+
         if (isSystemResource) {
             delete queryParams._fields;
         }
@@ -74,7 +71,7 @@ define([
         }
         return state;
     };
-    
+
     obj.escapedStringCell = function (prop) {
         return Backgrid.Cell.extend({
             render: function () {
@@ -87,7 +84,7 @@ define([
             }
         });
     };
-    
+
     return obj;
 
 });
