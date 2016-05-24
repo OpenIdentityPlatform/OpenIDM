@@ -479,6 +479,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public ResourceResponse update(final Context context, Request request, String resourceId, String rev,
     		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
             throws ResourceException {
+        Context managedContext = new ManagedObjectContext(context);
 
         JsonValue decryptedNew = decrypt(newValue);
         JsonValue decryptedOld = decrypt(oldValue);
@@ -497,7 +498,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         updateRelationshipFields(context, resourceId, relationshipFields, decryptedOld, decryptedNew);
 
         // Validate relationships before persisting
-        validateRelationshipFields(context, decryptedOld, decryptedNew);
+        validateRelationshipFields(managedContext, decryptedOld, decryptedNew);
 
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, request, decryptedNew);
@@ -518,10 +519,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         responseContent.asMap().putAll(strippedRelationshipFields.asMap());
 
         // Persists all relationship fields that are present in the new value and updates their values.
-        responseContent.asMap().putAll(persistRelationships(false, context, resourceId, oldValue, responseContent, relationshipFields)
+        responseContent.asMap().putAll(persistRelationships(false, managedContext, resourceId, oldValue, responseContent, relationshipFields)
                 .asMap());
 
         // Execute the postUpdate script if configured
+
         executePostUpdate(context, request, resourceId, decryptedOld, responseContent);
 
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
