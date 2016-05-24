@@ -545,6 +545,8 @@
             "registrationSteps" : "Registration Steps",
             "passwordSteps" : "Password Reset Steps",
             "usernameSteps" : "Forgotten Username Steps",
+            "noEmailConfig": "Outbound email is disabled.",
+            "emailConfigLink": "Configure it here.",
 
             "emailValidation" : "Email Validation",
             "emailValidationDescription" : "Verify that the user has access to the email account",
