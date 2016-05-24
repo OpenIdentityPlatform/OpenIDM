@@ -89,33 +89,83 @@ define([
                 lineWrapping: true
             }
         },
+
+        checkAddTranslation: function(e) {
+            var container,
+                locale,
+                translation,
+                btn,
+                usesCodeMirror = false;
+
+            if (_.has(e, "currentTarget")) {
+                container = $(e.currentTarget).closest(".translationMapGroup");
+                if (container.attr("data-uses-codemirror")) {
+                    usesCodeMirror = true;
+                }
+            // This function was triggered from the codeMirror onchange
+            } else {
+                container = $(this.cmBox.getTextArea()).closest(".translationMapGroup");
+                usesCodeMirror = true;
+            }
+
+            btn = container.find(".add");
+
+            if (usesCodeMirror) {
+                translation = this.cmBox.getValue();
+            } else {
+                translation = container.find(".newTranslationText").val();
+            }
+
+            locale = container.find(".newTranslationLocale").val();
+
+            if (translation.length > 0 && locale.length > 0) {
+                btn.prop( "disabled", false);
+            } else {
+                btn.prop( "disabled", true );
+            }
+        },
+
         addTranslation: function (e) {
             e.preventDefault();
 
             var translationMapGroup = $(e.target).closest(".translationMapGroup"),
+                useCodeMirror = translationMapGroup.attr("data-uses-codemirror") || false,
+                addBtn = translationMapGroup.find(".add"),
                 currentStageConfig = e.data.currentStageConfig,
                 field = translationMapGroup.attr("field"),
                 locale = translationMapGroup.find(".newTranslationLocale"),
+                text = "";
+
+            if (useCodeMirror) {
                 text = this.cmBox.getValue();
+            } else {
+                text = translationMapGroup.find(".newTranslationText").val();
+            }
 
             if (!_.has(currentStageConfig[field][locale.val()])) {
                 currentStageConfig[field][locale.val()] = text;
                 translationMapGroup
                     .find("ul")
                     .append(
-                        handlebars.compile("{{> selfservice/_translationItem useCodeMirror=true}}")({
+                        handlebars.compile("{{> selfservice/_translationItem useCodeMirror="+ useCodeMirror +"}}")({
                             locale: locale.val(),
                             text: text
                         })
                     );
 
-                codeMirror.fromTextArea(
-                    translationMapGroup.find(".email-message-code-mirror-disabled:last")[0],
-                    _.extend({readOnly: true, cursorBlinkRate: -1}, this.data.codeMirrorConfig)
-                );
+                if (useCodeMirror) {
+                    codeMirror.fromTextArea(
+                        translationMapGroup.find(".email-message-code-mirror-disabled:last")[0],
+                        _.extend({readOnly: true, cursorBlinkRate: -1}, this.data.codeMirrorConfig)
+                    );
 
-                this.cmBox.setValue("");
+                    this.cmBox.setValue("");
+
+                } else {
+                    translationMapGroup.find(".newTranslationText").val("");
+                }
                 locale.val("").focus();
+                addBtn.attr("disabled", true);
             }
         },
         deleteTranslation: function (e) {
@@ -335,6 +385,9 @@ define([
 
                         if (dialogRef.$modalBody.find(".email-message-code-mirror")[0]) {
                             this.cmBox = codeMirror.fromTextArea(dialogRef.$modalBody.find(".email-message-code-mirror")[0], this.data.codeMirrorConfig);
+                            this.cmBox.on("change", () => {
+                                this.checkAddTranslation();
+                            });
                         }
 
                         dialogRef.$modalBody.find(".basic-selectize-field").selectize({
@@ -365,6 +418,11 @@ define([
                         dialogRef.$modalBody.on("click", ".translationMapGroup button.delete",
                             {currentStageConfig: currentData},
                             _.bind(this.deleteTranslation, this));
+
+
+                        dialogRef.$modalBody.on("keyup", ".translationMapGroup .newTranslationLocale, .translationMapGroup .newTranslationText",
+                            {currentStageConfig: currentData},
+                            _.bind(this.checkAddTranslation, this));
                     }, this),
                     buttons: [
                         {

@@ -1,6 +1,6 @@
 <!-- Copyright 2015 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="translationMapGroup well" field="{{fieldName}}">
+<div class="translationMapGroup well" field="{{fieldName}}" data-uses-codemirror="{{useCodeMirror}}">
     <h2 class="panel-title">{{t label}}</h2>
     <ul class="list-unstyled">
         {{#each property}}
@@ -21,6 +21,6 @@
             {{/if}}
         </div>
 
-        <button type="button" class="col-sm-1 btn btn-primary add">{{t "common.form.add"}}</button>
+        <button type="button" disabled class="col-sm-1 btn btn-primary add">{{t "common.form.add"}}</button>
     </div>
 </div>
