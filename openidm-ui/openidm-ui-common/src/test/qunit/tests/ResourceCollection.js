@@ -13,22 +13,23 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-
+/*globals QUnit */
 define([
     "lodash",
-    "org/forgerock/commons/ui/common/main/AbstractModel",
-    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
-    "org/forgerock/commons/ui/common/main/AbstractCollection"
-], function(_, AbstractModel, BackgridUtils, AbstractCollection) {
-    var ResourceCollection = AbstractCollection.extend({
-        initialize: function(models, options) {
-            this.url = options.url;
-            this.model = AbstractModel.extend({ "url": options.url });
-            this.state = options.state;
-            _.extend(this.queryParams, BackgridUtils.getQueryParams({
-                _queryFilter: options._queryFilter
-            }, options.isSystemResource));
-        }
+    "sinon",
+    "org/forgerock/openidm/ui/common/resource/ResourceCollection"
+], function (_, sinon, ResourceCollection) {
+    QUnit.module('ResourceCollection Functions');
+
+    QUnit.test("initialize properly", function () {
+        var rc = new ResourceCollection([], {
+            url: "/testEndpoint",
+            _queryFilter: 'true',
+            isSystemResource: true
+        });
+        QUnit.equal(rc.queryParams.sortKey, "_sortKeys", "queryParams uses _sortKeys");
+        QUnit.equal(rc.queryParams.pageSize, "_pageSize", "queryParams uses _pageSize");
+        QUnit.equal(rc.queryParams._totalPagedResultsPolicy, "ESTIMATE", "queryParams uses _totalPagedResultsPolicy=ESTIMATE");
     });
-    return ResourceCollection;
+
 });

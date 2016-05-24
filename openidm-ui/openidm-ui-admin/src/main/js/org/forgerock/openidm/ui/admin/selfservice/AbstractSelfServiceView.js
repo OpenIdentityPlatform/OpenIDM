@@ -76,6 +76,9 @@ define([
             config: {},
             configList: [],
             resources: null,
+            emailRequired: false,
+            emailConfigured: false,
+            EMAIL_STEPS: ["emailUsername", "emailValidation"],
             codeMirrorConfig: {
                 lineNumbers: true,
                 autofocus: false,
@@ -161,7 +164,7 @@ define([
 
             this.data.enableSelfService = check.is(":checked");
 
-            if(check.is(":checked")) {
+            if (check.is(":checked")) {
                 this.enableForm();
 
                 this.model.surpressSave = true;
@@ -199,6 +202,10 @@ define([
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Delete");
                 }, this));
             }
+
+            tempConfig = this.showHideEmailWarning(this.model.saveConfig.stageConfigs, this.data.EMAIL_STEPS, this.data.emailConfigured);
+            this.data.emailRequired = tempConfig.emailRequired;
+            this.$el.find("#emailStepWarning").toggle(tempConfig.showWarning);
         },
         disableForm: function() {
             this.$el.find(".section-check").prop("disabled", true);
@@ -217,6 +224,8 @@ define([
 
             this.$el.find(".all-check").val(false);
             this.$el.find(".all-check").prop("checked", false);
+
+            this.$el.find("#emailStepWarning").hide();
         },
         enableForm: function() {
             this.$el.find(".section-check").prop("disabled", false);
@@ -242,6 +251,7 @@ define([
                 type = card.attr("data-type"),
                 removeConfig = false,
                 orderPosition,
+                tempConfig,
                 configPosition = _.findIndex(this.model.configDefault.stageConfigs, function (defaultStage) {
                     return defaultStage.name === type;
                 });
@@ -269,7 +279,13 @@ define([
                 });
             }
 
-            if(!this.model.surpressSave && !removeConfig) {
+            if (_.indexOf(this.data.EMAIL_STEPS, type) > -1) {
+                tempConfig = this.showHideEmailWarning(this.model.saveConfig.stageConfigs, this.data.EMAIL_STEPS, this.data.emailConfigured);
+                this.data.emailRequired = tempConfig.emailRequired;
+                this.$el.find("#emailStepWarning").toggle(tempConfig.showWarning);
+            }
+
+            if (!this.model.surpressSave && !removeConfig) {
                 this.saveConfig();
             }
         },
@@ -289,7 +305,7 @@ define([
                 el = $(event.target).closest(".self-service-card");
             }
 
-            if (el.hasClass("disabled")) {
+            if (el.hasClass("disabled") && !this.$el.find(".all-check").val()) {
                 return false;
             }
 
@@ -317,7 +333,9 @@ define([
                             codeMirror.fromTextArea(instance, _.extend({readOnly: true, cursorBlinkRate: -1}, this.data.codeMirrorConfig));
                         });
 
-                        this.cmBox = codeMirror.fromTextArea(dialogRef.$modalBody.find(".email-message-code-mirror")[0], this.data.codeMirrorConfig);
+                        if (dialogRef.$modalBody.find(".email-message-code-mirror")[0]) {
+                            this.cmBox = codeMirror.fromTextArea(dialogRef.$modalBody.find(".email-message-code-mirror")[0], this.data.codeMirrorConfig);
+                        }
 
                         dialogRef.$modalBody.find(".basic-selectize-field").selectize({
                             "create": true,
@@ -405,6 +423,33 @@ define([
             return promise.promise();
         },
 
+        /**
+         * @param stageConfigs {Array.<Object>}
+         * @param EMAIL_STEPS {Array.<String>}
+         * @param emailConfigured {boolean}
+         *
+         * @returns {{emailRequired: boolean, showWarning: boolean}}
+         */
+        showHideEmailWarning: function(stageConfigs, EMAIL_STEPS, emailConfigured) {
+            var emailRequired = false,
+                show = false;
+
+            _.each(stageConfigs, (stage) => {
+                if (_.indexOf(EMAIL_STEPS, stage.name) > -1) {
+                    emailRequired = true;
+                }
+            });
+
+            if (emailRequired && !emailConfigured) {
+                show = true;
+            }
+
+            return {
+                "emailRequired": emailRequired,
+                "showWarning": show
+            };
+        },
+
         selfServiceRender: function(args, callback) {
             var disabledList,
                 configList = [];
@@ -417,90 +462,100 @@ define([
                 this.getSelfServiceConfig()
 
             ).then(_.bind(function(resources, uiConfig, selfServiceConfig) {
-                this.data.resources = resources;
-                this.model.uiConfig = uiConfig;
+                ConfigDelegate.readEntity("external.email").always((config) => {
+                    this.data.emailConfigured = !_.isUndefined(config) && _.has(config, "host");
+                    this.data.resources = resources;
+                    this.model.uiConfig = uiConfig;
 
-                if (selfServiceConfig) {
+                    if (selfServiceConfig) {
 
-                    $.extend(true, this.model.saveConfig, selfServiceConfig);
-                    $.extend(true, this.data.config, selfServiceConfig);
+                        $.extend(true, this.model.saveConfig, selfServiceConfig);
+                        $.extend(true, this.data.config, selfServiceConfig);
 
-                    this.data.hideAdvanced = false;
+                        this.data.hideAdvanced = false;
 
-                    _.each(this.data.configList, function (config, pos) {
-                        config.index = pos;
-                    });
+                        _.each(this.data.configList, function (config, pos) {
+                            config.index = pos;
+                        });
 
-                    disabledList = _.filter(this.data.configList, function (config) {
-                        var filterCheck = true;
+                        disabledList = _.filter(this.data.configList, (config) => {
+                            var filterCheck = true;
 
-                        _.each(selfServiceConfig.stageConfigs, function (stage) {
-                            if (stage.name === config.type) {
-                                filterCheck = false;
-                            }
-                        }, this);
+                            _.each(selfServiceConfig.stageConfigs, function (stage) {
+                                if (stage.name === config.type) {
+                                    filterCheck = false;
 
-                        return filterCheck;
-                    });
+                                    // If a step is enabled and it is an email step, require the email config
+                                    if (_.indexOf(this.data.EMAIL_STEPS, config.type) > -1) {
+                                        this.data.emailRequired = true;
+                                    }
+                                }
+                            }, this);
 
-                    _.each(selfServiceConfig.stageConfigs, function (stage) {
-                        _.each(this.data.configList, function (config) {
-                            if (stage.name === config.type) {
-                                configList.push(config);
-                            }
-                        }, this);
-                    }, this);
-
-                    _.each(disabledList, function (config) {
-                        configList.splice(config.index, 0, config);
-                    }, this);
-
-                    this.data.configList = configList;
-                    this.data.enableSelfService = true;
-
-                    // The value of the first identity service url save location
-                    this.data.defaultIdentityServiceURL = _.filter(selfServiceConfig.stageConfigs, {
-                        "name": this.model.identityServiceURLSaveLocations[0].stepName
-                    })[0][this.model.identityServiceURLSaveLocations[0].stepProperty];
-
-                    this.parentRender(_.bind(function () {
-                        this.$el.find(".all-check").prop("checked", true);
-                        this.$el.find(".all-check").val(true);
-                        this.$el.find(".section-check").prop("disabled", false);
-
-                        this.updateIdentityServiceURL();
-
-                        this.model.surpressSave = true;
-                        this.setSortable();
+                            return filterCheck;
+                        });
 
                         _.each(selfServiceConfig.stageConfigs, function (stage) {
-                            this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("disabled", false);
-                            this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
+                            _.each(this.data.configList, function (config) {
+                                if (stage.name === config.type) {
+                                    configList.push(config);
+                                }
+                            }, this);
                         }, this);
 
-                        this.model.surpressSave = false;
+                        _.each(disabledList, function (config) {
+                            configList.splice(config.index, 0, config);
+                        }, this);
 
-                        if (callback) {
-                            callback();
-                        }
-                    }, this));
+                        this.data.configList = configList;
+                        this.data.enableSelfService = true;
 
-                } else {
-                    $.extend(true, this.model.saveConfig, this.model.configDefault);
-                    $.extend(true, this.data.config, this.model.configDefault);
+                        // The value of the first identity service url save location
+                        this.data.defaultIdentityServiceURL = _.filter(selfServiceConfig.stageConfigs, {
+                            "name": this.model.identityServiceURLSaveLocations[0].stepName
+                        })[0][this.model.identityServiceURLSaveLocations[0].stepProperty];
 
-                    this.data.enableSelfService = false;
+                        this.data.hideEmailError = !this.data.emailRequired || (this.data.emailConfigured && this.data.emailRequired);
 
-                    this.parentRender(_.bind(function () {
-                        this.disableForm();
-                        this.setSortable();
+                        this.parentRender(_.bind(function () {
+                            this.$el.find(".all-check").prop("checked", true);
+                            this.$el.find(".all-check").val(true);
+                            this.$el.find(".section-check").prop("disabled", false);
 
-                        if (callback) {
-                            callback();
-                        }
-                    }, this));
-                }
+                            this.updateIdentityServiceURL();
 
+                            this.model.surpressSave = true;
+                            this.setSortable();
+
+                            _.each(selfServiceConfig.stageConfigs, function (stage) {
+                                this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("disabled", false);
+                                this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
+                            }, this);
+
+                            this.model.surpressSave = false;
+
+                            if (callback) {
+                                callback();
+                            }
+                        }, this));
+
+                    } else {
+                        $.extend(true, this.model.saveConfig, this.model.configDefault);
+                        $.extend(true, this.data.config, this.model.configDefault);
+
+                        this.data.enableSelfService = false;
+
+                        this.parentRender(_.bind(function () {
+                            this.disableForm();
+                            this.setSortable();
+
+                            if (callback) {
+                                callback();
+                            }
+                        }, this));
+                    }
+
+                });
             }, this));
         },
 
@@ -576,7 +631,9 @@ define([
             // find the corresponding location and set it.
             _.each(this.model.identityServiceURLSaveLocations, function(data) {
                 tempStepConfig = _.filter(this.model.saveConfig.stageConfigs, {"name": data.stepName})[0];
-                tempStepConfig[data.stepProperty] = this.data.defaultIdentityServiceURL;
+                if (tempStepConfig) {
+                    tempStepConfig[data.stepProperty] = this.data.defaultIdentityServiceURL;
+                }
             }, this);
 
             $.extend(true, saveData, this.model.saveConfig, formData);
