@@ -18,6 +18,10 @@ module.exports = {
         }
     }],
     elements: {
-        mainEnableSlider: ".toggle-header .checkbox-slider"
+        mainEnableSlider: ".toggle-header .checkbox-slider",
+        emailValidationCard: ".self-service-card[data-type='emailValidation']",
+        subjectLocale: ".translationMapGroup[field='subjectTranslations'] .newTranslationLocale",
+        subjectTranslation: ".translationMapGroup[field='subjectTranslations'] .newTranslationText",
+        subjectAddBtn: ".translationMapGroup[field='subjectTranslations'] .add"
     }
 };
