@@ -251,6 +251,9 @@
                         "returnByDefault" : false,
                         "items" : {
                             "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "authzMembers",
+                            "validate" : true,
                             "properties" : {
                                 "_ref" : {
                                     "type" : "string"
@@ -616,6 +619,49 @@
                             ]
                         }
                     },
+                    "authzMembers" : {
+                        "description" : "",
+                        "title" : "Authorization Role Members",
+                        "viewable" : true,
+                        "type" : "array",
+                        "returnByDefault" : false,
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "authzRoles",
+                            "validate" : true,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : {
+                                        "_id" : {
+                                            "type" : "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/user",
+                                    "label" : "User",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "userName",
+                                            "givenName",
+                                            "sn"
+                                        ],
+                                        "sortKeys" : [
+                                            "userName"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "assignments" : {
                         "description" : "",
                         "title" : "Managed Assignments",
@@ -693,7 +739,8 @@
                     "description",
                     "assignments",
                     "members",
-                    "condition"
+                    "condition",
+                    "temporalConstraints"
                 ]
             }
         },
