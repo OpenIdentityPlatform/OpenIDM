@@ -105,10 +105,10 @@ public class ConnectorUtil {
     public static final String OPENICF_NATIVE_TYPE = "nativeType";
 
     // remote connector server groups
-    public static final String OPENICF_GROUP_ALGORITHM = "algorithm";
-    public static final String OPENICF_GROUP_ALGORITHM_FAILOVER = "failover";
-    public static final String OPENICF_GROUP_ALGORITHM_ROUNDROBIN = "roundrobin";
-    public static final String OPENICF_GROUP_SERVERS_LIST = "serversList";
+    private static final String OPENICF_GROUP_ALGORITHM = "algorithm";
+    private static final String OPENICF_GROUP_ALGORITHM_FAILOVER = "failover";
+    private static final String OPENICF_GROUP_ALGORITHM_ROUNDROBIN = "roundrobin";
+    private static final String OPENICF_GROUP_SERVERS_LIST = "serversList";
 
     public static final String OPENICF_REMOTE_CONNECTOR_SERVERS = "remoteConnectorServers";
     public static final String OPENICF_REMOTE_CONNECTOR_GROUPS = "remoteConnectorServersGroups";
@@ -610,18 +610,16 @@ public class ConnectorUtil {
         final String algorithm = info.get(OPENICF_GROUP_ALGORITHM).required().asString();
         if (OPENICF_GROUP_ALGORITHM_FAILOVER.equalsIgnoreCase(algorithm)){
             lbf = new FailoverLoadBalancingAlgorithmFactory();
-        }
-        else if (OPENICF_GROUP_ALGORITHM_ROUNDROBIN.equalsIgnoreCase(algorithm)){
+        } else if (OPENICF_GROUP_ALGORITHM_ROUNDROBIN.equalsIgnoreCase(algorithm)) {
             lbf = new RoundRobinLoadBalancingAlgorithmFactory();
-        }
-        else {
+        } else {
             throw new IllegalArgumentException("Bad algorithm name: " + algorithm);
         }
 
-        for(String server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList(String.class)) {
+        for (String server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList(String.class)) {
             AsyncConnectorInfoManager aim = serverInfo.get(server);
-            if (null != aim && aim instanceof AsyncRemoteConnectorInfoManager){
-                lbf.addAsyncRemoteConnectorInfoManager((AsyncRemoteConnectorInfoManager)aim);
+            if (null != aim && aim instanceof AsyncRemoteConnectorInfoManager) {
+                lbf.addAsyncRemoteConnectorInfoManager((AsyncRemoteConnectorInfoManager) aim);
             }
         }
         return lbf;
