@@ -21,7 +21,6 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -30,8 +29,6 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.nio.channels.Channels;
-import java.nio.channels.ReadableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -1132,7 +1129,9 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     private boolean isReadOnly(Path path) {
-        return path.startsWith("bin") || UI_DEFAULT_PATTER.matcher(path.toString()).find();
+        // Replace any \ with / in the path to support windows along with everyone else.  'File.separator' does not
+        // work in the pattern matcher as the \'s would escape the regex characters.
+        return path.startsWith("bin") || UI_DEFAULT_PATTER.matcher(path.toString().replace("\\", "/")).find();
     }
 
     private void logUpdate(UpdateLogEntry entry) throws UpdateException {
