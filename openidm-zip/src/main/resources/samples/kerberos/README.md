@@ -118,7 +118,7 @@ Run the Sample in OpenIDM
     }
     ```
 
-3. Create a managed user
+3. Create two managed users
 
     ```bash
     $ curl --header "Content-Type: application/json" \
@@ -131,7 +131,7 @@ Run the Sample in OpenIDM
                 "sn" : "Jensen",
                 "password" : "Passw0rd",
                 "displayName" : "Barbara Jensen",
-                "mail" : "bjensen@the.net"
+                "mail" : "bjensen@sample.com"
             }' \
             "http://localhost:8080/openidm/managed/user?_action=create&_prettyPrint=true"
     ```
@@ -144,12 +144,45 @@ Run the Sample in OpenIDM
         "givenName" : "Barbara",
         "sn" : "Jensen",
         "displayName" : "Barbara Jensen",
-        "mail" : "bjensen@the.net",
+        "mail" : "bjensen@sample.com",
         "accountStatus" : "active",
         "effectiveRoles" : [ ],
         "effectiveAssignments" : [ ]
     }
     ```
+    
+    ```bash
+    $ curl --header "Content-Type: application/json" \
+            --header "X-OpenIDM-Username: openidm-admin" \
+            --header "X-OpenIDM-Password: openidm-admin" \
+            --request POST \
+            --data '{
+             "userName": "scarter",
+             "givenName": "Steven",
+             "sn" : "Carter",
+             "password" : "Passw0rd",
+             "displayName" : "Steven Carter",
+             "mail" : "scarter@sample.com"
+            }' \
+            "http://localhost:8080/openidm/managed/user?_action=create&_prettyPrint=true"
+    ```
+    
+    ```json
+    {
+      "_id": "a204ca60-b0fc-42f8-bf93-65bb30131361",
+      "_rev": "2",
+      "userName": "scarter",
+      "givenName": "Steven",
+      "sn": "Carter",
+      "displayName": "Steven Carter",
+      "mail": "scarter@sample.com",
+      "accountStatus": "active",
+      "effectiveRoles": [],
+      "effectiveAssignments": []
+    }
+    ```    
+    
+    
 
 4. Run reconciliation from managed user to kerberos
 
@@ -158,7 +191,7 @@ Run the Sample in OpenIDM
       "https://localhost:8443/openidm/recon?_action=recon&mapping=managedUser_systemKerberos"
     ```
     
-5. Retrieve the list of all users in kerberos again to see the reconciled user
+5. Retrieve the list of all users in kerberos again to see the reconciled users
 
     ```bash
     $ curl -k -u "openidm-admin:openidm-admin" --request GET \
@@ -179,6 +212,10 @@ Run the Sample in OpenIDM
             {
                 "_id": "bjensen@SAMPLE.COM",
                 "principal": "bjensen@SAMPLE.COM"
+            },
+            {
+                "_id": "scarter@SAMPLE.COM",
+                "principal": "scarter@SAMPLE.COM"
             },
             {
                 "_id": "kadmin/admin@SAMPLE.COM",
@@ -299,6 +336,10 @@ Run the Sample in OpenIDM
                 "_id": "adam/admin@SAMPLE.COM",
                 "principal": "adam/admin@SAMPLE.COM"
             },
+            {
+                "_id": "scarter@SAMPLE.COM",
+                "principal": "scarter@SAMPLE.COM"
+            },            
             {
                 "_id": "kadmin/admin@SAMPLE.COM",
                 "principal": "kadmin/admin@SAMPLE.COM"
