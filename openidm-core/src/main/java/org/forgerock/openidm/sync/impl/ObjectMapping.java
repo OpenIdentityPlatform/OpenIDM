@@ -2208,9 +2208,6 @@ class ObjectMapping {
                     assessSituation();
                 } finally {
                     measureSituation.end();
-                    if (targetObjectAccessor != null) {
-                        oldTargetValue = targetObjectAccessor.getObject();
-                    }
                 }
                 EventEntry measureDetermine = Publisher.start(EVENT_SOURCE_DETERMINE_ACTION, getSourceObjectId(), null);
                 boolean linkExisted = (getLinkId() != null);
@@ -2219,6 +2216,11 @@ class ObjectMapping {
                     determineAction(getContext());
                 } finally {
                     measureDetermine.end();
+                    
+                    // Retain oldTargetValue before performing any actions
+                    if (targetObjectAccessor != null && action != ReconAction.IGNORE) {
+                        oldTargetValue = targetObjectAccessor.getObject();
+                    }
                 }
                 EventEntry measurePerform = Publisher.start(EVENT_SOURCE_PERFORM_ACTION, getSourceObjectId(), null);
                 try {
