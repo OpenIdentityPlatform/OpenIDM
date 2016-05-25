@@ -86,7 +86,7 @@ exports.test = function() {
     testAdd();
 
     function testAdd() {
-        // test cases for remove
+        // test cases for add
         [
             [
                 [
