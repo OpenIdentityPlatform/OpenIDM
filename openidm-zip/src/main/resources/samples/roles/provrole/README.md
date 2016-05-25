@@ -157,7 +157,7 @@ The next step is to add the assignment to the Employee role. Since we already ha
                  "description": "Role assigned to workers on the payroll."
                }
                
-2. Allocate the Employee role to bjensen
+2. Grant the Employee role to bjensen
 
 In order to fully leverage _sample2b_ we will use Barbara Jensen as the employee. 
 Let's take another look at the roles we have right now, to obtain their 
@@ -648,34 +648,22 @@ Again, we take a look at jdoe's entry to find out about its state:
                  "remainingPagedResults" : -1
                }
 
-We need to remove the 1st element of the roles array (index = 0) in order 
-to remove the Contractor role from jdoe's entry:
+To remove the Contractor role from jdoe's entry, we can use a DELETE 
+operation on the _roles_ property with the ID of the relationship 
+retrieved in the previous step:
 
         $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
-               --request PATCH \
-               --data '[
-                   {
-                       "operation" : "remove",
-                       "field" : "/roles/0"
-                   }
-                 ]' \
-               'http://localhost:8080/openidm/managed/user/92680be0-82f9-4297-9e00-c35c7cf700d2'
+               --request DELETE \
+               'http://localhost:8080/openidm/managed/user/92680be0-82f9-4297-9e00-c35c7cf700d2/roles/093fc34b-0694-478e-952e-98d0a828b1ac'
 
                {
-                 "_id": "92680be0-82f9-4297-9e00-c35c7cf700d2",
-                 "_rev": "6",
-                 "displayName": "John Doe",
-                 "description": "Created for OpenIDM",
-                 "givenName": "John",
-                 "mail": "jdoe@example.com",
-                 "telephoneNumber": "1-415-599-1100",
-                 "sn": "Doe",
-                 "userName": "jdoe",
-                 "accountStatus": "active",
-                 "effectiveRoles": [],
-                 "effectiveAssignments": []
+                 "_ref": "managed/role/e7f649ad-8013-4673-a52a-bdcac7483111",
+                 "_refProperties": {
+                     "_id": "093fc34b-0694-478e-952e-98d0a828b1ac",
+                     "_rev": "0"
+                 }
                }
 
 This results in jdoe's entry in OpenDJ not belonging to the Contractors group anymore and in his employee type being 
