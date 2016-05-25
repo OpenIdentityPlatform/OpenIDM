@@ -323,6 +323,7 @@ define([
 
             paginator = new Backgrid.Extension.Paginator({
                 collection: this.model.resources,
+                goBackFirstOnSort: false,
                 windowSize: 0
             });
 
