@@ -304,41 +304,47 @@ is calculated based on the roles that have been granted to the user.
 
 4. Removing the Employee role from a user
 
-Let's imagine that the Employee role was erroneously assigned to Felicitas. 
-We now need to remove this role from her entry. To do that we need to use 
-a JSON Patch _remove_ operation. Since the role is part of an array, and 
-is the first element in that array, the resulting PATCH request would 
-look as follows:
+Let's imagine that the Employee role was erroneously granted to Felicitas.
+We now need to remove this role from her entry. To do that we can use a
+DELETE operation on the _roles_ property with the ID of the relationship
+retrieved in the previous step:
 
         $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
                --header "X-OpenIDM-Password: openidm-admin" \
-               --request PATCH \
-               --data '[
-                   {
-                       "operation" : "remove",
-                       "field" : "/roles/0"
-                   }
-                 ]' \
-               'http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3'
+               --request DELETE \
+               'http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3/roles/4a42cd0b-d5d0-47e9-81e7-513aed74f6bc'
 
                {
-                 "_id": "837085ae-766e-417c-9b7e-c36eee4352a3",
-                 "_rev": "3",
-                 "mail": "fdoe@example.com",
-                 "sn": "Doe",
-                 "telephoneNumber": "555-1234",
-                 "userName": "fdoe",
-                 "givenName": "Felicitas",
-                 "description": "Felicitas Doe",
-                 "displayName": "fdoe",
-                 "accountStatus": "active",
-                 "effectiveRoles": [],
-                 "effectiveAssignments": []
+                 "_ref": "managed/role/ad19979e-adbb-4d35-8320-6db50646b432",
+                 "_refProperties": {
+                     "_id": "4a42cd0b-d5d0-47e9-81e7-513aed74f6bc",
+                     "_rev": "0"
+                 }
                }
                
 Our user no longer has the _Employee_ role in her _effectiveRoles_ 
-attribute.
+attribute:
+
+        $ curl --header "X-OpenIDM-Username: openidm-admin" \
+               --header "X-OpenIDM-Password: openidm-admin" \
+               --request GET \
+               'http://localhost:8080/openidm/managed/user?_queryFilter=/givenName+eq+"Felicitas"&_fields=_id,userName,roles,effectiveRoles&_prettyPrint=true'
+
+               {
+                 "result" : [ {
+                   "_id" : "837085ae-766e-417c-9b7e-c36eee4352a3",
+                   "_rev" : "3",
+                   "userName" : "fdoe",
+                   "roles" : [],
+                   "effectiveRoles" : []
+                 } ],
+                 "resultCount" : 1,
+                 "pagedResultsCookie" : null,
+                 "totalPagedResultsPolicy" : "NONE",
+                 "totalPagedResults" : -1,
+                 "remainingPagedResults" : -1
+               }
 
 5. Deleting the Contractor role
 
@@ -395,7 +401,9 @@ Now let's try and delete the Contractor role:
                }
 
 So, we cannot delete a role that has been granted to one or more users. 
-We must first deallocate that role from the user entry:
+We must first deallocate that role from the user entry.  To do that we 
+use a JSON Patch _remove_ operation setting the _value_ to an empty array
+as we know the user has only one role:
 
         $ curl --header "Content-type: application/json" \
                --header "X-OpenIDM-Username: openidm-admin" \
@@ -403,8 +411,9 @@ We must first deallocate that role from the user entry:
                --request PATCH \
                --data '[
                    {
-                       "operation" : "remove",
-                       "field" : "/roles/0"
+                       "operation" : "replace",
+                       "field" : "/roles",
+                       "value" : []
                    }
                  ]' \
                'http://localhost:8080/openidm/managed/user/837085ae-766e-417c-9b7e-c36eee4352a3'
