@@ -99,7 +99,7 @@ Run the Sample in OpenIDM
     }
     ```
 
-3. Create a managed user
+3. Create two managed users
 
     ```bash
     $ curl --header "Content-Type: application/json" \
@@ -131,6 +131,36 @@ Run the Sample in OpenIDM
         "effectiveAssignments" : [ ]
     }
     ```
+    ```bash
+    $ curl --header "Content-Type: application/json" \
+            --header "X-OpenIDM-Username: openidm-admin" \
+            --header "X-OpenIDM-Password: openidm-admin" \
+            --request POST \
+            --data '{
+             "userName": "scarter",
+             "givenName": "Steven",
+             "sn" : "Carter",
+             "password" : "Passw0rd",
+             "displayName" : "Steven Carter",
+             "mail" : "scarter@sample.com"
+            }' \
+            "http://localhost:8080/openidm/managed/user?_action=create&_prettyPrint=true"
+    ```
+    
+    ```json
+    {
+      "_id": "a204ca60-b0fc-42f8-bf93-65bb30131361",
+      "_rev": "2",
+      "userName": "scarter",
+      "givenName": "Steven",
+      "sn": "Carter",
+      "displayName": "Steven Carter",
+      "mail": "scarter@sample.com",
+      "accountStatus": "active",
+      "effectiveRoles": [],
+      "effectiveAssignments": []
+    }
+    ```        
 
 4. Run reconciliation from managed user to Linux
 
@@ -141,7 +171,7 @@ Run the Sample in OpenIDM
       "http://localhost:8080/openidm/recon?_action=recon&mapping=managedUser_systemSshAccount"
     ```
     
-5. Retrieve the list of all users in Linux again to see the reconciled user
+5. Retrieve the list of all users in Linux again to see the reconciled users
 
     ```bash
     $ curl --header "X-OpenIDM-Username: openidm-admin" \
@@ -171,7 +201,11 @@ Run the Sample in OpenIDM
             {
                 "_id": "bjensen",
                 "uid": "bjensen"
-            }
+            },
+            {
+                "_id": "scarter",
+                "uid": "scarter"
+            },            
         ],
         "resultCount": 45,
         "pagedResultsCookie": null,
@@ -285,7 +319,11 @@ Run the Sample in OpenIDM
             {
                 "_id": "sshd",
                 "uid": "sshd"
-            }
+            },
+            {
+                "_id": "scarter",
+                "uid": "scarter"
+            }            
         ],
         "resultCount": 44,
         "pagedResultsCookie": null,
