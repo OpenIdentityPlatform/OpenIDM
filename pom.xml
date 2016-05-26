@@ -208,12 +208,12 @@
 
     <properties>
         <!-- Version management -->
-        <commons.commons-bom.version>20.0.0-alpha-1</commons.commons-bom.version>
+        <commons.commons-bom.version>20.0.0-alpha-4</commons.commons-bom.version>
 
         <!-- Commons versions -->
-        <commons.forgerock-script.version>3.3.0</commons.forgerock-script.version>
+        <commons.forgerock-script.version>3.4.0</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
-        <commons.forgerock-launcher.version>1.2.3</commons.forgerock-launcher.version>
+        <commons.forgerock-launcher.version>1.2.4</commons.forgerock-launcher.version>
 
         <!-- Third party dependencies -->
         <orientdb.version>1.7.10</orientdb.version>
