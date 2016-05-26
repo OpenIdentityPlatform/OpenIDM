@@ -186,7 +186,10 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
     @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config)
             throws WaitForMetaData, NotConfiguration {
-        return SalesforceConnectorUtil.PROPERTIES_TO_ENCRYPT;
+        if (SalesforceConfigurationHelper.PID.equalsIgnoreCase(pidOrFactory)) {
+            return SalesforceConnectorUtil.PROPERTIES_TO_ENCRYPT;
+        }
+        return null;
     }
 
     @Override
