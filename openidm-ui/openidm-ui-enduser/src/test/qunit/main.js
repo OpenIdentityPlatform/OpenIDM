@@ -16,6 +16,13 @@
 
 // add new test modules here:
 define([
-    "./UserModel",
-    "./WorkflowForms"
+    //idm common tests
+    "./org/forgerock/openidm/ui/common/UserModelTest",
+    "./org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsViewTest",
+
+    //idm enduser tests
+    "./org/forgerock/openidm/ui/dashboard/DashboardTest",
+    "./org/forgerock/openidm/ui/user/anonymousProcess/PasswordResetViewTest",
+    "./org/forgerock/openidm/ui/user/anonymousProcess/SelfRegistrationViewTest",
+    "./org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegateTest"
 ]);
