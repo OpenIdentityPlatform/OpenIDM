@@ -954,7 +954,8 @@ public class UpdateManagerImpl implements UpdateManager {
                             path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
                         // a json config in the current project - ignore it
                     } else if (path.startsWith(CONF_PATH) &&
-                            path.getFileName().toString().endsWith(JSON_EXT)) {
+                            path.getFileName().toString().endsWith(JSON_EXT) &&
+                            fileStateChecker.getCurrentFileState(path) != FileState.NONEXISTENT) {
                         // a json config in the default project - ignore it
                     } else if ((path.startsWith(CONF_PATH) || (repoConfPath != null && path.startsWith(repoConfPath))) &&
                             path.getFileName().toString().endsWith(PATCH_EXT)) {
