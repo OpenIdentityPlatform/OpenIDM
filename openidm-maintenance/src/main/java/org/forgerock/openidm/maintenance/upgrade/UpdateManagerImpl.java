@@ -1175,10 +1175,17 @@ public class UpdateManagerImpl implements UpdateManager {
      * Given a zip file, this will read data in UPDATE_CONFIG_FILE.
      * @param file the zip file given
      * @return jsonValue that holds data read from UPDATE_CONFIG_FILE.
-     * @throws UpdateException
+     * @throws InvalidArchiveUpdateException if unable to read {@link #UPDATE_CONFIG_FILE}
      */
-    JsonValue readUpdateConfig(File file) throws UpdateException {
-        Path tmpDir = extractFileToDirectory(file, Paths.get("openidm/" + UPDATE_CONFIG_FILE));
+    JsonValue readUpdateConfig(File file) throws InvalidArchiveUpdateException {
+        final Path tmpDir;
+
+        try {
+            tmpDir = extractFileToDirectory(file, Paths.get("openidm/" + UPDATE_CONFIG_FILE));
+        } catch (UpdateException e) {
+            throw new InvalidArchiveUpdateException(file.toString(), "Unable to load " + UPDATE_CONFIG_FILE + ".", e);
+        }
+
         try (InputStream inp = new FileInputStream(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE)) {
             StringBuilder sb = new StringBuilder();
             Reader reader = new InputStreamReader(inp, "UTF-8");
@@ -1190,7 +1197,7 @@ public class UpdateManagerImpl implements UpdateManager {
             }
             return JsonUtil.parseStringified(sb.toString());
         } catch (IOException e) {
-            throw new UpdateException("Unable to load " + UPDATE_CONFIG_FILE + ".", e);
+            throw new InvalidArchiveUpdateException(file.toString(), "Unable to load " + UPDATE_CONFIG_FILE + ".", e);
         } finally {
             new File(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE).delete();
         }
