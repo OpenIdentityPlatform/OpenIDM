@@ -393,16 +393,18 @@ define([
                     text = $.t("templates.mapping.notYetSynced");
                     type = "DANGER";
                 }
-                if (mapping.sourceType !== "managed") {
-                    if (!mapping.sourceConnector.connectorRef) {
-                        text = $.t("templates.mapping.missingSourceConnector");
-                        type = "DANGER";
-                    }
-                    if (!mapping.targetConnector.connectorRef) {
-                        text = $.t("templates.mapping.missingTargetConnector");
-                        type = "DANGER";
-                    }
+
+                if (mapping.sourceConnector.isMissing && mapping.targetConnector.isMissing) {
+                    text = $.t("templates.mapping.missingBoth");
+                    type = "DANGER";
+                } else if (mapping.sourceConnector.isMissing){
+                    text = $.t("templates.mapping.missingSourceConnector");
+                    type = "DANGER";
+                } else if (mapping.targetConnector.isMissing) {
+                    text = $.t("templates.mapping.missingTargetConnector");
+                    type = "DANGER";
                 }
+
 
                 parent.removeClass("text-success text-danger text-muted");
                 icon.removeClass("fa-exclamation-circle fa-check-circle fa-question-circle");
