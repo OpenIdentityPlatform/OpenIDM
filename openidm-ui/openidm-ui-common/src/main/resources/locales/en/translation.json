@@ -1696,6 +1696,7 @@
             "connectorNotFound" : "Connector not found",
             "missingSourceConnector" : "Source Connector is missing",
             "missingTargetConnector" : "Target Connector is missing",
+            "missingBoth" : "Both Connectors are missing",
             "noManagedObjects" : "No managed objects available.",
             "noResourceSelected" : "No resource selected.",
             "createMapping" : "Create mapping",
