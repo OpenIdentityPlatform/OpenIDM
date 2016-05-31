@@ -1,3 +1,5 @@
+var config = require("./configHelper");
+
 module.exports = {
         baseUrl: "http://localhost:8080/admin/",
         login: {
@@ -88,5 +90,7 @@ module.exports = {
                         }
                     );
             }
-        }
+        },
+
+    config: config
 };

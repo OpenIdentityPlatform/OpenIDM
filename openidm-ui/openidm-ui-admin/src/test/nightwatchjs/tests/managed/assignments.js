@@ -1,12 +1,15 @@
 module.exports = {
         before : function (client, done) {
             client.globals.login.helpers.setSession(client, function () {
-                done();
+                client.globals.config.read("managed", function() {
+                    done();
+                });
             });
         },
-        after : function (client) {
-            client.config.resetAll(function(data) {
+        after : function (client, done) {
+            client.globals.config.resetAll(function(data) {
                 client.end();
+                done();
             });
         },
         'Add Assignment': function (client) {

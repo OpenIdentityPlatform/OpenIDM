@@ -4,28 +4,20 @@ module.exports = {
         //must create a session before tests can begin
         client.globals.login.helpers.setSession(client, function () {
             //read all configs that need to have the originals cached
-            client.config.read("sync", function () {
-                client.config.update("sync", {
-                    "mappings" : [
-                        {
-                            "name" : "testMapping",
-                            "source" : "managed/user",
-                            "target" : "managed/user",
-                            "properties" : [
-                                {
-                                    "source" : "_id",
-                                    "target" : "_id"
-                                }
-                            ]
-                        }
-                    ]
-                }, done)
-            });
+            client.globals.config.update("sync", {
+                "mappings" : [ {
+                    "name" : "testMapping",
+                    "source" : "managed/user",
+                    "target" : "managed/user",
+                    "properties" : [ { "source" : "_id", "target" : "_id" } ]
+                }]
+            }, done, true);
         });
     },
-    after : function(client) {
-        client.config.resetAll(function () {
+    after : function(client, done) {
+        client.globals.config.resetAll(function () {
             client.end();
+            done()
         });
     },
     'Save correctly after reauth': function (client) {

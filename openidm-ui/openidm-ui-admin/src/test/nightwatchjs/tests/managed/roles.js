@@ -3,15 +3,18 @@ module.exports = {
             client.globals.login.helpers.setSession(client, function () {
                 //add a dummy user for use in a test where a user is needed in a dropdown
                 client.globals.user.createDummyUser(client, function () {
-                    done();
+                    client.globals.config.read("managed", function() {
+                        done();
+                    });
                 });
             });
         },
-        after : function (client) {
-            client.config.resetAll(function(data) {
+        after : function (client, done) {
+            client.globals.config.resetAll(function(data) {
                 //remove the dummy user
                 client.globals.user.removeDummyUser(client, function () {
                     client.end();
+                    done();
                 });
             });
         },

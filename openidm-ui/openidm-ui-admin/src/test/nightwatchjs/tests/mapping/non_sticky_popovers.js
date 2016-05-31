@@ -3,21 +3,11 @@ var iSelector = 'i[data-title="Source object correlates to multiple target objec
         "_id": "sync",
         "mappings": [
             {
-              "target": "managed/role",
-              "source": "managed/assignment",
-              "name": "managedAssignment_managedRole",
-              "properties": [
-                  {
-                      "source": "email",
-                      "target": "mail"
-                  }
-              ],
-              "policies": [
-                    {
-                      "action": "ASYNC",
-                      "situation": "ABSENT"
-                    }
-                ]
+                "target": "managed/role",
+                "source": "managed/assignment",
+                "name": "managedAssignment_managedRole",
+                "properties": [{ "source": "email", "target": "mail" }],
+                "policies": [{  "action": "ASYNC",  "situation": "ABSENT" }]
             }
         ]
     };
@@ -25,14 +15,13 @@ var iSelector = 'i[data-title="Source object correlates to multiple target objec
 module.exports = {
     before: function(client, done) {
         client.globals.login.helpers.login(client);
-        client.config.read("sync", function(result) {
-            client.config.update("sync", mapping, done);
-        });
+        client.globals.config.update("sync", mapping, done, true);
     },
-    after: function(client) {
-        client
-            .config.resetAll()
-            .end();
+    after: function(client, done) {
+        client.globals.config.resetAll(function() {
+            client.end();
+            done();
+        });
     },
 
     "It should trigger on hover": function(client) {

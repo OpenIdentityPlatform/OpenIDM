@@ -9,14 +9,14 @@ module.exports = {
         managedEditPage = client.page.configureManagedObjectsEdit();
 
         client.globals.login.helpers.setSession(client, function() {
-            client.config.read('managed', done);
+            client.globals.config.read('managed', done);
         });
 
 
     },
 
     after: function(client, done) {
-        client.config.reset('managed', function() {
+        client.globals.config.reset('managed', function() {
             client.end();
             done();
         });
@@ -95,8 +95,8 @@ module.exports = {
     "Filtering works in both views ": function(client) {
 
         // reset managed config to have the three objects back
-        client.config.reset('managed', function () {
-            client.config.read('managed', function() {
+        client.globals.config.reset('managed', function () {
+            client.globals.config.read('managed', function() {
                 var gridRows = managedListPage.elements.gridRows.selector,
                     cards = managedListPage.elements.cards.selector;
 

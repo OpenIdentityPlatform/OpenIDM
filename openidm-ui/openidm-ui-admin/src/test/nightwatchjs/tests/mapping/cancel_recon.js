@@ -5,19 +5,16 @@ module.exports = {
     before: function(client, done) {
 
         client.globals.login.helpers.setSession(client, function () {
-
-            client.config.read('sync', function() {
-                client.config.update('sync', mockMapping, function() {
-                    done();
-                });
-            });
+            client.globals.config.update('sync', mockMapping, done, true);
         });
 
+
     },
-    after: function(client) {
-        client
-            .config.reset('sync')
-            .end();
+    after: function(client, done) {
+        client.globals.config.resetAll(function(){
+            client.end();
+            done();
+        });
     },
     "It should navigate to mapping": function(client) {
         var mapping = client.page.mapping(),

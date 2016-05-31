@@ -7,18 +7,18 @@ var resetMapping,
 module.exports = {
     before: function(client, done) {
         client.globals.login.helpers.login(client);
-        client.config.update("sync", singleMapping, function() {
+        client.globals.config.update("sync", singleMapping, function() {
             mappingPage = client.page.mapping();
             behaviorsTab = mappingPage.section.behaviorsTab;
             modalBody = mappingPage.section.modalBody;
             client
                 .url(client.globals.baseUrl + '#behaviors/managedAssignment_managedRole/');
             done();
-        });
+        }, true);
     },
 
     after: function(client, done) {
-        client.config.update("sync", resetMapping, function() {
+        client.globals.config.resetAll(function() {
             client.end();
             done();
         });

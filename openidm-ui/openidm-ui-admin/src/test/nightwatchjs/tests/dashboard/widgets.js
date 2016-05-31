@@ -12,14 +12,14 @@ module.exports = {
         //must create a session before tests can begin
         client.globals.login.helpers.setSession(client, function () {
             //read all configs that need to have the originals cached
-            client.config.read("ui/configuration", function (data) {
+            client.globals.config.read("ui/configuration", function (data) {
                 done();
             });
         });
     },
 
     after: function(client) {
-        client.config.resetAll(function(data) {
+        client.globals.config.resetAll(function(data) {
             client.end();
         });
     },

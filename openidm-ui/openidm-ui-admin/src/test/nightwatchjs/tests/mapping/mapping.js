@@ -43,11 +43,14 @@ module.exports = {
                 }, ["test"], function() {}
             );
 
-            client.config.read("sync");
+            client.globals.config.read("sync");
         },
-        after: function(client) {
-            client.config.resetAll();
-            client.end();
+        after: function(client, done) {
+            client.globals.config.resetAll(function() {
+                client.end();
+                done();
+            });
+
         },
         'Add mapping': function (client) {
             var mapping = client.page.mappings(),

@@ -7,7 +7,7 @@ var resetMapping,
 module.exports = {
     before: function(client, done) {
         client.globals.login.helpers.login(client);
-        client.config.update("sync", singleMapping, function() {
+        client.globals.config.update("sync", singleMapping, function() {
             mappingPage = client.page.mapping();
             advancedTab = mappingPage.section.advancedTab;
             client
@@ -17,7 +17,7 @@ module.exports = {
     },
 
     after: function(client, done) {
-        client.config.reset("sync", function() {
+        client.globals.config.resetAll(function() {
             client.end();
             done();
         });

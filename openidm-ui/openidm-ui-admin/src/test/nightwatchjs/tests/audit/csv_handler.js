@@ -5,15 +5,18 @@ module.exports = {
         eventHandlersDialog = audit.section.eventHandlersDialog;
 
         client.globals.login.helpers.setSession(client, function () {
-            audit.navigate();
-            done();
+            client.globals.config.read("audit", function() {
+                audit.navigate();
+                done();
+            });
         });
 
     },
 
-    after: function(client) {
-        client.config.resetAll(function(data) {
+    after: function(client, done) {
+        client.globals.config.resetAll(function(data) {
             client.end();
+            done();
         });
     },
 
