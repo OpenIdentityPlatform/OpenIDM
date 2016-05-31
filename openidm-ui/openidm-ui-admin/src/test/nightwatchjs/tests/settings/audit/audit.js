@@ -1,17 +1,18 @@
 module.exports = {
-        before : function(client, done) {
+        before: function(client, done) {
             //must create a session before tests can begin
             client.globals.login.helpers.setSession(client, function () {
                 //read all configs that need to have the originals cached
-                client.config.read("audit", function () {
+                client.globals.config.read("audit", function (data) {
                     done();
                 });
             });
         },
 
-        after : function(client) {
-            client.config.resetAll(function () {
+        after: function(client, done) {
+            client.globals.config.resetAll(function () {
                 client.end();
+                done();
             });
         },
 

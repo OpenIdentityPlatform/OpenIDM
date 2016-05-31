@@ -28,7 +28,7 @@ module.exports = {
                      userName: "50.cent"
                  }]
              },
-             readResults: {  
+             readResults: {
                  "_id":"daddc508-7692-464e-a2d2-40b53005f00e",
                  "_rev":"2",
                  "mail":"50.cent@getmoney.com",
@@ -36,18 +36,18 @@ module.exports = {
                  "givenName":"50",
                  "userName":"50.cent",
                  "accountStatus":"active",
-                 "effectiveRoles":[  
-                    {  
+                 "effectiveRoles":[
+                    {
                        "_ref":"managed/role/5729a57a-788c-45ea-8ee8-980886181aeb"
                     }
                  ],
-                 "effectiveAssignments":[  
+                 "effectiveAssignments":[
 
                  ],
-                 "roles":[  
-                    {  
+                 "roles":[
+                    {
                        "_ref":"managed/role/5729a57a-788c-45ea-8ee8-980886181aeb",
-                       "_refProperties":{  
+                       "_refProperties":{
                           "_id":"55ef3114-a249-4953-98e6-7beb9441a080",
                           "_rev":"2"
                        },
@@ -58,10 +58,10 @@ module.exports = {
                     }
                  ],
                  "manager":null,
-                 "reports":[  
-                    {  
+                 "reports":[
+                    {
                        "_ref":"managed/user/4d4c21fd-0711-41ca-acce-0bf3a0a3700f",
-                       "_refProperties":{  
+                       "_refProperties":{
                           "_id":"83989cc7-baf6-416f-8507-c229f3a01f23",
                           "_rev":"2"
                        },
@@ -70,22 +70,22 @@ module.exports = {
                        "givenName":"Timba",
                        "userName":"timba.land",
                        "accountStatus":"active",
-                       "effectiveRoles":[  
-                          {  
+                       "effectiveRoles":[
+                          {
                              "_ref":"managed/role/5729a57a-788c-45ea-8ee8-980886181aeb"
                           }
                        ],
-                       "effectiveAssignments":[  
+                       "effectiveAssignments":[
 
                        ],
                        "_id":"4d4c21fd-0711-41ca-acce-0bf3a0a3700f",
                        "_rev":"2"
                     }
                  ],
-                 "authzRoles":[  
-                    {  
+                 "authzRoles":[
+                    {
                        "_ref":"repo/internal/role/openidm-authorized",
-                       "_refProperties":{  
+                       "_refProperties":{
                           "_id":"01e76375-673a-4496-96b1-758466e6c7a3",
                           "_rev":"2"
                        }
@@ -95,11 +95,11 @@ module.exports = {
         },
         before : function(client, done) {
             var _this = this;
-            
+
             //must create a session before tests can begin
             client.globals.login.helpers.setSession(client, function () {
                 //read all configs that need to have the originals cached
-                client.config.read("ui/configuration", function (uiConfig) {
+                client.globals.config.read("ui/configuration", function (uiConfig) {
                     _this.data.uiConfigOriginal = uiConfig;
                     client.page.dashboard().navigate();
                     done();
@@ -108,15 +108,15 @@ module.exports = {
         },
         'Relationship Widget is displayed' : function (client) {
             /*
-             * change the ui-configuration file "adminDashboard" property 
+             * change the ui-configuration file "adminDashboard" property
              * to only have the relationship widget in the default dashboard
              */
             var _ = require('lodash'),
                 newConfig = this.data.uiConfigOriginal;
-            
+
             newConfig.configuration.adminDashboards = this.data.adminDashboards;
-            
-            client.config.update("ui/configuration", newConfig, function () {
+
+            client.globals.config.update("ui/configuration", newConfig, function () {
                 client
                     .refresh()
                     .waitForElementPresent("h4.relationshipChartObjectHeader", 2000)
@@ -150,8 +150,8 @@ module.exports = {
                         }
                     );
                     return true;
-                }, 
-                [_this.data], 
+                },
+                [_this.data],
                 function() {
                     client
                         .setValue("input[placeholder='User Search']", "50")
@@ -164,7 +164,10 @@ module.exports = {
             );
         },
 
-        after : function(client) {
-            client.config.resetAll().end();
+        after : function(client, done) {
+            client.globals.config.resetAll(function() {
+                client.end();
+                done();
+            });
         }
 };

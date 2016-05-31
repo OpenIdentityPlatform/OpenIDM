@@ -6,17 +6,17 @@ var resetMapping,
 module.exports = {
     before: function(client, done) {
         client.globals.login.helpers.login(client);
-        client.config.update("sync", singleMapping, function() {
+        client.globals.config.update("sync", singleMapping, function() {
             mappingPage = client.page.mapping();
             targetQuery = mappingPage.section.targetQuery;
             client
                 .url(client.globals.baseUrl + "#association/managedAssignment_managedRole/");
             done();
-        });
+        }, true);
     },
 
     after: function(client, done) {
-        client.config.update("sync", resetMapping, function() {
+        client.globals.config.resetAll(function() {
             client.end();
             done();
         });

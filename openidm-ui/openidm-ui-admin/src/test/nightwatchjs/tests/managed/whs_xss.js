@@ -4,19 +4,16 @@ module.exports = {
     before: function(client, done) {
 
         client.globals.login.helpers.setSession(client, function() {
-            client.config.read('managed', function() {
-                client.config.update('managed', whsObj, done);
-            });
+            client.globals.config.update('managed', whsObj, done, true);
         });
 
     },
     after: function(client, done) {
 
-        client
-            .config.reset('managed', function() {
-                client.end();
-                done();
-            });
+        client.globals.config.resetAll(function() {
+            client.end();
+            done();
+        });
     },
     "It should not allow xss attacks on page": function(client) {
 

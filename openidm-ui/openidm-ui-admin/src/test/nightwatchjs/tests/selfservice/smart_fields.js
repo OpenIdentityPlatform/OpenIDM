@@ -5,7 +5,7 @@ module.exports = {
     before: function (client, done) {
         client.globals.login.helpers.setSession(client, done);
 
-        client.config.read("managed" , function(config) {
+        client.globals.config.read("managed" , function(config) {
             client.execute(function(name, config) {
                 return _.size(_.filter(config.objects, {"name": name})[0].schema.properties);
             }, ["user", config], function(num) {
@@ -20,8 +20,11 @@ module.exports = {
         });
 
     },
-    after: function (client) {
-        client.end();
+    after: function (client, done) {
+        client.globals.config.resetAll(function() {
+            client.end();
+            done();
+        });
     },
     "Password reset smart fields are present": function (client) {
         var passwordResetPage = client.page.passwordReset();
@@ -99,5 +102,3 @@ module.exports = {
 
     }
 };
-
-

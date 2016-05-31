@@ -3,12 +3,12 @@ var connector;
 module.exports = {
     before: function(client, done) {
         client.globals.login.helpers.setSession(client, function() {
-            client.config.read('sync', done);
+            client.globals.config.read('sync', done);
         });
     },
 
     after: function(client, done) {
-        client.config.reset('sync', function() {
+        client.globals.config.reset('sync', function() {
             client.end();
             done();
         });
@@ -59,7 +59,7 @@ module.exports = {
                 // this checks that the resulting mapping matches 'system' for the connector
                 client.assert.ok(result.value.match(/(system).+(_managedUser)/));
             });
-        }
+    }
 };
 
 connector = {

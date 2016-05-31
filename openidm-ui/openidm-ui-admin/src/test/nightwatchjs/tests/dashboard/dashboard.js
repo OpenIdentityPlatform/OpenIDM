@@ -10,14 +10,17 @@ module.exports = {
         //must create a session before tests can begin
         client.globals.login.helpers.setSession(client, function () {
             //read all configs that need to have the originals cached
-            client.config.read("ui/configuration", function (data) {
+            client.globals.config.read("ui/configuration", function (data) {
                 done();
             });
         });
     },
 
-    after: function(client) {
-        client.end();
+    after: function(client, done) {
+        client.globals.config.resetAll(function() {
+            client.end();
+            done();
+        });
     },
 
     "Add a dashboard": function(client) {
