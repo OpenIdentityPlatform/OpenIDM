@@ -616,7 +616,7 @@ public class ConnectorUtil {
             throw new IllegalArgumentException("Bad algorithm name: " + algorithm);
         }
 
-        for (Map server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList(Map.class)) {
+        for (Map<String, Object> server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList(Map.class)) {
             AsyncConnectorInfoManager aim = serverInfo.get(server.get("name"));
             if (null != aim && aim instanceof AsyncRemoteConnectorInfoManager) {
                 lbf.addAsyncRemoteConnectorInfoManager((AsyncRemoteConnectorInfoManager) aim);
