@@ -231,6 +231,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     protected void initialiseRemoteManager(JsonValue remoteConnectorHosts) throws JsonValueException {
+        logger.debug("Initialising remote managers");
         for (JsonValue info : remoteConnectorHosts) {
             try {
                 RemoteFrameworkConnectionInfo rfi =
@@ -241,10 +242,12 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                     if (info.expect(Map.class).isDefined("protocol")
                             && "websocket".equalsIgnoreCase(info.get("protocol").asString())) {
                         // uses protocol from ICF 1.5.x to connect
+                        logger.debug("Initialising {} with websocket", name);
                         remoteFrameworkConnectionInfo.put(name, connectorFramework.get()
                                 .getRemoteManager(RemoteWSFrameworkConnectionInfo.newBuilderFrom(rfi).build()));
                     } else {
                         // uses protocol from ICF 1.4.x to connect
+                        logger.debug("Initialising {}", name);
                         remoteFrameworkConnectionInfo.put(name, connectorFramework.get().getRemoteManager(rfi));
                     }
                     final Pair<String, Integer> key =
@@ -260,12 +263,14 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     }
 
     protected void initialiseGroups(JsonValue remoteConnectorGroups) throws JsonValueException {
+        logger.debug("Initialising remote connector groups");
         for (JsonValue info : remoteConnectorGroups) {
             try {
                 LoadBalancingAlgorithmFactory algorithmFactory =
                         ConnectorUtil.getLoadBalancingInfo(info.expect(Map.class), remoteFrameworkConnectionInfo);
 
                 final String name = info.get("name").required().asString();
+                logger.debug("Initialising {}", name);
                 remoteFrameworkConnectionInfo.put(name, connectorFramework.get().getRemoteManager(algorithmFactory));
             } catch (IllegalArgumentException e) {
                 logger.error("RemoteFrameworkConnectionInfo can not be read", e);
