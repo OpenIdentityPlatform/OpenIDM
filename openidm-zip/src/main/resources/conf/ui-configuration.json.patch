@@ -1,0 +1,10 @@
+[
+   {
+        "operation" : "remove",
+        "field" : "/configuration/dashboard"
+   },
+   {
+        "operation" : "remove",
+        "field" : "/configuration/adminDashboards"
+   }
+]
