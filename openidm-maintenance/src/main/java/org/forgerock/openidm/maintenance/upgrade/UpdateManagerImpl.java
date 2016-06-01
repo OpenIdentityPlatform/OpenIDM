@@ -1186,9 +1186,9 @@ public class UpdateManagerImpl implements UpdateManager {
             throw new InvalidArchiveUpdateException(file.toString(), "Unable to load " + UPDATE_CONFIG_FILE + ".", e);
         }
 
-        try (InputStream inp = new FileInputStream(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE)) {
+        try (InputStream inp = new FileInputStream(tmpDir.toString() + "/" + UPDATE_CONFIG_FILE);
+                Reader reader = new InputStreamReader(inp, "UTF-8")) {
             StringBuilder sb = new StringBuilder();
-            Reader reader = new InputStreamReader(inp, "UTF-8");
             char[] buf = new char[1024];
             int chr = reader.read(buf);
             while(chr > 0) {
