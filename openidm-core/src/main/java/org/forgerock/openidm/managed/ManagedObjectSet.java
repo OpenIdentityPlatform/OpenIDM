@@ -1001,9 +1001,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
         // Get the oldest value for diffing in the log
         // JsonValue oldValue = new JsonValue(cryptoService.getRouter().read(repoId(id)));
-        ReadRequest readRequest = Requests.newReadRequest(repoId(resourceId));
-        ResourceResponse resource = connectionFactory.getConnection().read(context, readRequest);
-
+        ResourceResponse resource = readResource(context, repoId(resourceId));
         return patchResource(context, request, resource, revision, patchOperations);
     }
 
@@ -1102,6 +1100,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     }
                 }
 
+                if (forceUpdate) {
+                    newValue.put("_rev", rev);
+                }
                 ResourceResponse patchedResource =
                         update(context, request, resource.getId(), rev, oldValue, newValue, patchedRelationshipFields);
 
@@ -1114,6 +1115,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
                     logger.debug("Unable to update due to revision conflict. Retrying.");
+                    resource = readResource(context, repoId(resource.getId()));
                 } else {
                     // If it fails and we're not trying to force an update, we gave it our best shot
                     throw e;
@@ -1308,7 +1310,19 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public String getTemplate() {
         return name.indexOf('/') == 0 ? name : '/' + name;
     }
-    
+
+    /**
+     * Read a resource from the repo by id
+     *
+     * @param context the current ServerContext
+     * @param resourceId the id of the resource to obtain
+     * @return The resource object
+     * @throws ResourceException
+     */
+    private ResourceResponse readResource(Context context, String resourceId) throws ResourceException {
+        ReadRequest readRequest = Requests.newReadRequest(resourceId);
+        return connectionFactory.getConnection().read(context, readRequest);
+    }
 
     /**
      * Prepares the response contents by removing the following: any private properties (if the request is from an 
