@@ -55,6 +55,9 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.ReferenceStrategy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.openidm.datasource.DataSourceService;
+import org.forgerock.openidm.smartevent.EventEntry;
+import org.forgerock.openidm.smartevent.Name;
+import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.patch.JsonPatch;
@@ -821,7 +824,12 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
     }
 
     Connection getConnection() throws SQLException {
-        return dataSourceService.getDataSource().getConnection();
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/JDBCRepoService/getConnection"), null, null);
+        try {
+            return dataSourceService.getDataSource().getConnection();
+        } finally {
+            measure.end();
+        }
     }
 
     TableHandler getTableHandler(String type) {

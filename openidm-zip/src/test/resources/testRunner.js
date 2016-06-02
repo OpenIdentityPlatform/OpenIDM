@@ -22,7 +22,8 @@
   "effectiveRolesTest",
   "temporalConstraintsTest",
   "conditionalRolesTest",
-  "managedPatchHelperTest"]
+  "managedPatchHelperTest",
+  "connectionPoolPatchHelperTest"]
     .forEach(function (module) {
         require (module).test();
     });
