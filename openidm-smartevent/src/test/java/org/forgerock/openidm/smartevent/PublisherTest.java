@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.smartevent;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.lang.management.ManagementFactory;
 
 import java.text.DecimalFormat;
@@ -26,11 +28,8 @@ import javax.management.MBeanServer;
 import javax.management.ObjectName;
 
 import org.forgerock.json.JsonValue;
-
-import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.smartevent.core.StatisticsHandler;
 
-import org.testng.Assert;
 import org.testng.annotations.Test;
 
 /**
@@ -62,9 +61,10 @@ public class PublisherTest {
         measure.end();
         Thread.currentThread().sleep(100); // Statistics is not necessarily updated in a synchronous fashion
         Object totals = mbs.getAttribute(getStatisticsMBean(), "Totals");
-        Assert.assertTrue(totals instanceof Map);
+        assertThat(totals).isInstanceOf(Map.class);
         Object statisticsEntry = ((Map)totals).get(EVENT_BASIC_TEST.asString());
-        Assert.assertNotNull(statisticsEntry, "Expected a statistic entry for " + EVENT_BASIC_TEST + ", but is null.");
+        assertThat(statisticsEntry).isNotNull()
+                .overridingErrorMessage("Expected a statistic entry for " + EVENT_BASIC_TEST + ", but is null.");
     }
     
     /**
@@ -103,7 +103,9 @@ public class PublisherTest {
                 + "Each start/end event took approx: " + MILLISEC_FORMAT.format(diff/(double)iterations)
                 + ". This smoke test allows max " + maxTimeToAllow + " ms ");
         
-        Assert.assertTrue(diff < maxTimeToAllow, "Performance warning: " + iterations + " did not complete in the expected max " + maxTimeToAllow + " ms");
+        assertThat(diff).isLessThan(maxTimeToAllow)
+                .overridingErrorMessage("Performance warning: " + iterations + " did not complete in the expected max "
+                        + maxTimeToAllow + " ms");
     }
     
 }

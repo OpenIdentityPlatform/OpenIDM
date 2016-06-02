@@ -29,7 +29,7 @@ import org.testng.annotations.Test;
 
 import org.forgerock.json.JsonPointer;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.util.query.QueryFilter.*;
 
 /**

@@ -32,7 +32,7 @@ import org.forgerock.json.resource.BadRequestException;
 
 import org.testng.annotations.Test;
 
-import static org.testng.Assert.assertEquals;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class TokenHandlerTest {
 
@@ -46,13 +46,13 @@ public class TokenHandlerTest {
     @Test(dependsOnMethods = {"initTokenHandler"})
     public void replaceTokensWithValues() throws BadRequestException {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
-        Map params = new HashMap();
+        Map<String, String> params = new HashMap<>();
         params.put("_fields", "*");
         params.put("_resource", "managed/user");
         params.put("firstname", "John");
         params.put("lastname", "D");
         String result = tokenHandler.replaceTokensWithValues(queryString, params);
-        assertEquals(result, "select * from managed/user where firstname = 'John' and lastname like 'D%'");
+        assertThat(result).isEqualTo("select * from managed/user where firstname = 'John' and lastname like 'D%'");
     }
     
     // Disabled as CREST 2.x supports param values only
@@ -60,7 +60,7 @@ public class TokenHandlerTest {
     public void replaceTokensWithListValues() throws BadRequestException {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
 
-        List fieldList = Arrays.asList(new String[] {"firstname", "lastname", "email"});
+        List fieldList = Arrays.asList("firstname", "lastname", "email");
         
         Map params = new HashMap();
         params.put("_fields", fieldList);
@@ -68,49 +68,49 @@ public class TokenHandlerTest {
         params.put("firstname", "John");
         params.put("lastname", "D");
         String result = tokenHandler.replaceTokensWithValues(queryString, params);
-        assertEquals(result, "select firstname,lastname,email from managed/user where firstname = 'John' and lastname like 'D%'");
+        assertThat(result).isEqualTo("select firstname,lastname,email from managed/user where firstname = 'John' and lastname like 'D%'");
     }
 
     @Test(dependsOnMethods = {"initTokenHandler"})
     public void replaceTokenWithDotNotationAbsolute() throws BadRequestException {
         String queryString = "select ${dotnotation:jsonpath} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
-        Map params = new HashMap();
+        Map<String, String> params = new HashMap<>();
         params.put("jsonpath", "/sunset/date");
         params.put("_resource", "managed/user");
         params.put("firstname", "John");
         params.put("lastname", "D");
         String result = tokenHandler.replaceTokensWithValues(queryString, params);
-        assertEquals(result, "select sunset.date from managed/user where firstname = 'John' and lastname like 'D%'");
+        assertThat(result).isEqualTo("select sunset.date from managed/user where firstname = 'John' and lastname like 'D%'");
     }
 
     @Test(dependsOnMethods = {"initTokenHandler"})
     public void replaceTokenWithDotNotationRelative() throws BadRequestException {
         String queryString = "select ${dotnotation:jsonpath} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
-        Map params = new HashMap();
+        Map<String, String> params = new HashMap<>();
         params.put("jsonpath", "sunset/date");
         params.put("_resource", "managed/user");
         params.put("firstname", "John");
         params.put("lastname", "D");
         String result = tokenHandler.replaceTokensWithValues(queryString, params);
-        assertEquals(result, "select sunset.date from managed/user where firstname = 'John' and lastname like 'D%'");
+        assertThat(result).isEqualTo("select sunset.date from managed/user where firstname = 'John' and lastname like 'D%'");
     }
 
     @Test(dependsOnMethods = {"initTokenHandler"}, expectedExceptions = BadRequestException.class )
     public void valueReplaceMissingToken() throws BadRequestException {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
-        Map params = new HashMap();
+        Map<String, String> params = new HashMap<>();
         params.put("_fields", "*");
         params.put("_resource", "managed/user");
         // don't define firstname, should fail
         params.put("lastname", "D");
         String result = tokenHandler.replaceTokensWithValues(queryString, params);
-        assertEquals(result, "select * from managed/user where firstname = 'John' and lastname like 'D%'");
+        assertThat(result).isEqualTo("select * from managed/user where firstname = 'John' and lastname like 'D%'");
     }
     
     @Test(dependsOnMethods = {"initTokenHandler"})
     public void replaceTokensWithOrientToken() throws PrepareNotSupported {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like ${lastname}";
         String result = tokenHandler.replaceTokensWithOrientToken(queryString);
-        assertEquals(result, "select :_fields from :_resource where firstname = :firstname and lastname like :lastname");
+        assertThat(result).isEqualTo("select :_fields from :_resource where firstname = :firstname and lastname like :lastname");
     }
 }

@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.scheduler;
 
-import static org.testng.Assert.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -44,7 +44,7 @@ public class ScheduleConfigServiceTest {
         ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(config));
 
         // Basic sanity check on one property
-        assertNotNull(scheduleConfig.getStartTime());
+        assertThat(scheduleConfig.getStartTime()).isNotNull();
     }
 
     @Test(enabled = false, expectedExceptions = ResourceException.class)

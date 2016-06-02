@@ -24,12 +24,11 @@
 
 package org.forgerock.openidm.core;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
 
 import org.testng.annotations.Test;
 
@@ -44,17 +43,16 @@ public class SystemPropertyAccessorTest {
         PropertyAccessor delegate = mock(PropertyAccessor.class);
         PropertyAccessor testable = new SystemPropertyAccessor(delegate);
         System.setProperty("testable", "testvalue");
-        assertEquals(testable.getProperty("testable", null, String.class), "testvalue");
-        assertEquals(testable.getProperty("testable", "defaultValue", String.class), "testvalue");
-        assertEquals(testable.getProperty("pirospaprika", "voroshagyma", null), "voroshagyma");
-        assertEquals(testable.getProperty("pirospaprika", "voroshagyma", Object.class),
-                "voroshagyma");
+        assertThat(testable.getProperty("testable", null, String.class)).isEqualTo("testvalue");
+        assertThat(testable.getProperty("testable", "defaultValue", String.class)).isEqualTo("testvalue");
+        assertThat(testable.getProperty("pirospaprika", "voroshagyma", null)).isEqualTo("voroshagyma");
+        assertThat(testable.getProperty("pirospaprika", "voroshagyma", Object.class)).isEqualTo("voroshagyma");
         verifyZeroInteractions(delegate);
-        assertNull(testable.getProperty(null, null, null));
+        assertThat(testable.getProperty(null, null, null)).isNull();
         verify(delegate, times(1)).getProperty(null, null, null);
-        assertNull(testable.getProperty("testable", 1, null));
+        assertThat(testable.getProperty("testable", 1, null)).isNull();
         verify(delegate, times(1)).getProperty("testable", 1, null);
-        assertNull(testable.getProperty("testable", null, Integer.class));
+        assertThat(testable.getProperty("testable", null, Integer.class)).isNull();
         verify(delegate, times(1)).getProperty("testable", null, Integer.class);
     }
 }
