@@ -23,9 +23,9 @@
  */
 package org.forgerock.openidm.repo.util;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.openidm.repo.util.Clauses.where;
 import static org.forgerock.openidm.repo.util.Clauses.not;
-import static org.fest.assertions.api.Assertions.assertThat;
 
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;

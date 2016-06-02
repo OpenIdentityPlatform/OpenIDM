@@ -23,6 +23,9 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.data.MapEntry.entry;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
@@ -44,9 +47,6 @@ import org.forgerock.json.resource.ConflictException;
 
 import org.testng.annotations.*;
 
-import static org.testng.Assert.*;
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.fest.assertions.api.Assertions.entry;
 
 public class DocumentUtilTest {
 
@@ -79,7 +79,7 @@ public class DocumentUtilTest {
 
     @Test
     public void docToMapNullTest() {
-        assertNull(DocumentUtil.toMap(null));
+        assertThat(DocumentUtil.toMap(null)).isNull();
     }
 
     @Test
@@ -96,7 +96,7 @@ public class DocumentUtilTest {
         doc.field("present", Boolean.FALSE);
         doc.field("somedate", new Date());
 
-        Map result = DocumentUtil.toMap(doc);
+        Map<String, Object> result = DocumentUtil.toMap(doc);
         
         assertThat(result).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
@@ -110,13 +110,14 @@ public class DocumentUtilTest {
                 entry("present", false));
         
         Object somedate = result.get("somedate");
-        assertNotNull(somedate, "somedate entry null");
+        assertThat(somedate).isNotNull().overridingErrorMessage("somedate entry null");
         assertThat(somedate).isInstanceOf(Date.class);
         
         // The ID should appear in map not as the key we use for OrientDB internal
-        assertFalse(result.containsKey(DocumentUtil.ORIENTDB_PRIMARY_KEY), "DB layer internal key " + DocumentUtil.ORIENTDB_PRIMARY_KEY 
-                + " should not appear in map, but did.");
-
+        assertThat(result.containsKey(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+                .isFalse()
+                .overridingErrorMessage("DB layer internal key " + DocumentUtil.ORIENTDB_PRIMARY_KEY
+                        + " should not appear in map, but did.");
     }
     
     @Test
@@ -138,14 +139,16 @@ public class DocumentUtilTest {
                 entry("lastname", "Doe"));
 
         Object city = result.get("city");
-        assertNotNull(city, "city map entry null");
+        assertThat(city).isNotNull().overridingErrorMessage("city map entry null");
         assertThat(city).isInstanceOf(Map.class);
         assertThat((Map)city)
                 .hasSize(2)
                 .contains(entry("name", "Paris"), entry("country", "France"));
         
         Object phonenumbers = result.get("phonenumbers");
-        assertNotNull(phonenumbers, "phonenumbers map entry null");
+        assertThat(phonenumbers)
+                .isNotNull()
+                .overridingErrorMessage("phonenumbers map entry null");
         assertThat(phonenumbers).isInstanceOf(Map.class);
         assertThat((Map)phonenumbers)
                 .hasSize(2)
@@ -161,11 +164,11 @@ public class DocumentUtilTest {
         doc.field("lastname", "Doe");
         doc.field("city", new ODocument().field("name","Paris").field("country", "France"));
         List<ODocument> addresses = new ArrayList<ODocument>();
-        addresses.add(new ODocument().field("type", "home").field("street", "Main st.").field("city", "San Franciso") );
+        addresses.add(new ODocument().field("type", "home").field("street", "Main st.").field("city", "San Francisco") );
         addresses.add(new ODocument().field("type", "business").field("street", "Wall st.").field("city", "New York") );
         doc.field("addresses",  addresses, OType.EMBEDDED); 
         
-        Map result = DocumentUtil.toMap(doc);
+        Map<String, Object> result = DocumentUtil.toMap(doc);
         
         assertThat(result).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
@@ -174,18 +177,18 @@ public class DocumentUtilTest {
                 entry("lastname", "Doe"));
 
         Object addrResult = result.get("addresses");
-        assertNotNull(addrResult, "addresses map entry null");
+        assertThat(addrResult).isNotNull().overridingErrorMessage("addresses map entry null");
         assertThat(addrResult).isInstanceOf(List.class);
         List addr = (List)addrResult;
         assertThat(addr)
                 .hasSize(2);
 
         assertThat(addr.get(0)).isInstanceOf(Map.class);
-        Map firstEntry = (Map) addr.get(0); 
+        Map firstEntry = (Map) addr.get(0);
         assertThat(firstEntry).contains(
                 entry("type", "home"),
                 entry("street", "Main st."),
-                entry("city", "San Franciso"));
+                entry("city", "San Francisco"));
         Map secondEntry = (Map) addr.get(1); 
         assertThat(secondEntry).contains(
                 entry("type", "business"),
@@ -202,7 +205,7 @@ public class DocumentUtilTest {
         List<ODocument> addresses = new ArrayList<ODocument>();
         ODocument status1 = new ODocument("inventory", 10);
         ODocument status2 = new ODocument("inventory", 20);
-        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Franciso").field("status", status1, OType.EMBEDDED));
+        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Francisco").field("status", status1, OType.EMBEDDED));
         addresses.add(new ODocument().field("street", "Wall st.").field("city", "New York").field("status", status2, OType.EMBEDDED));
         detail.add(new ODocument().field("locations", addresses, OType.EMBEDDED));
         
@@ -224,7 +227,7 @@ public class DocumentUtilTest {
         System.out.println(resultAddress2);
         Map resultStatus = (Map) resultAddress2.get("status");
         Integer resultInventory = (Integer) resultStatus.get("inventory");
-        assertEquals(resultInventory.intValue(), 20);
+        assertThat(resultInventory.intValue()).isEqualTo(20);
     }    
     
     @Test
@@ -236,12 +239,12 @@ public class DocumentUtilTest {
         Set<ODocument> addresses = new HashSet<ODocument>();
         ODocument status1 = new ODocument("inventory", 10);
         ODocument status2 = new ODocument("inventory", 20);
-        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Franciso").field("status", status1, OType.EMBEDDED));
+        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Francisco").field("status", status1, OType.EMBEDDED));
         detail.add(new ODocument().field("locations", addresses, OType.EMBEDDED));
         
         doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
         
-        Map result = DocumentUtil.toMap(doc);
+        Map<String, Object> result = DocumentUtil.toMap(doc);
         
         assertThat(result).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"),
@@ -257,8 +260,8 @@ public class DocumentUtilTest {
         System.out.println(resultAddress1);
         Map resultStatus = (Map) resultAddress1.get("status");
         Integer resultInventory = (Integer) resultStatus.get("inventory");
-        assertEquals(resultInventory.intValue(), 10);
-    }   
+        assertThat(resultInventory.intValue()).isEqualTo(10);
+    }
 
     @Test
     public void deepNestingMixedODocAndMapToMap() {
@@ -269,7 +272,7 @@ public class DocumentUtilTest {
         List<ODocument> addresses = new ArrayList<ODocument>();
         ODocument status1 = new ODocument("inventory", 10);
         ODocument status2 = new ODocument("inventory", 20);
-        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Franciso").field("status", status1, OType.EMBEDDED));
+        addresses.add(new ODocument().field("street", "Main st.").field("city", "San Francisco").field("status", status1, OType.EMBEDDED));
         addresses.add(new ODocument().field("street", "Wall st.").field("city", "New York").field("status", status2, OType.EMBEDDED));
         Map<String, Object> locationsMap = new HashMap<String, Object>();
         locationsMap.put("locations", addresses);
@@ -293,12 +296,12 @@ public class DocumentUtilTest {
         System.out.println(resultAddress2);
         Map resultStatus = (Map) resultAddress2.get("status");
         Integer resultInventory = (Integer) resultStatus.get("inventory");
-        assertEquals(resultInventory.intValue(), 20);
+        assertThat(resultInventory.intValue()).isEqualTo(20);
     }    
     
     @Test
     public void mapToDocNullTest() throws ConflictException {
-        assertNull(DocumentUtil.toDocument(null, null, getDatabase(), orientDocClass, false, true));
+        assertThat((Object) DocumentUtil.toDocument(null, null, getDatabase(), orientDocClass, false, true)).isNull();
     }
     
     @Test
@@ -318,18 +321,27 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
-        assertEquals(result.field("firstname"), "Sam", "unexpected firstname");
-        assertEquals(result.field("lastname"), "Iam", "unexpected lastname");
-        assertEquals(result.field("telephone"), "(555) 123-4567", "unexpected telephone");
-        assertEquals(result.field("age"), 20, "unexpected age");
-        assertEquals(result.field("longnumber"), Long.MAX_VALUE, "unexpected longnumber");
-        assertEquals(result.field("amount"), 12345678.89f, "unexpected amount");
-        assertEquals(result.field("present"), false, "unexpected present boolean");
-        assertEquals(result.getVersion(), 1, "Version not as expected");
+        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY)).isEqualTo("client-assigned-id")
+                .overridingErrorMessage("unexpected ID");
+        assertThat(result.field("firstname")).isEqualTo("Sam")
+                .overridingErrorMessage("unexpected firstname");
+        assertThat(result.field("lastname")).isEqualTo("Iam")
+                .overridingErrorMessage("unexpected lastname");
+        assertThat(result.field("telephone")).isEqualTo("(555) 123-4567")
+                .overridingErrorMessage("unexpected telephone");
+        assertThat(result.field("age")).isEqualTo(20)
+                .overridingErrorMessage("unexpected age");
+        assertThat(result.field("longnumber")).isEqualTo(Long.MAX_VALUE)
+                .overridingErrorMessage("unexpected longnumber");
+        assertThat(result.field("amount")).isEqualTo(12345678.89f)
+                .overridingErrorMessage("unexpected amount");
+        assertThat(result.field("present")).isEqualTo(false)
+                .overridingErrorMessage("unexpected present boolean");
+        assertThat(result.getVersion()).isEqualTo(1)
+                .overridingErrorMessage( "Version not as expected");
         Object somedate = result.field("somedate");
-        assertNotNull(somedate, "somedate entry null");
-        assertTrue((somedate instanceof Date), "Date not of expected type.");
+        assertThat(somedate).isNotNull().overridingErrorMessage("somedate entry null");
+        assertThat(somedate).isInstanceOf(Date.class).overridingErrorMessage("Date not of expected type.");
     }
 
     @Test
@@ -361,22 +373,32 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, existingDoc, getDatabase(), orientDocClass);
         
-        assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
-        assertEquals(result.field("firstname"), "Sam", "unexpected firstname");
-        assertEquals(result.field("lastname"), "Iam", "unexpected lastname");
-        assertEquals(result.field("telephone"), "(555) 123-4567", "unexpected telephone");
-        assertEquals(result.field("age"), 20, "unexpected age");
-        assertEquals(result.field("longnumber"), Long.MAX_VALUE, "unexpected longnumber");
-        assertEquals(result.field("amount"), 12345678.89f, "unexpected amount");
-        assertEquals(result.field("present"), false, "unexpected present boolean");
-        assertFalse(result.containsField("fieldtoberemoved"), "Field 'fieldtoberemoved' not removed as expected");
-        assertFalse(result.containsField("AnotherFieldToBeRemoved"), "Field 'AnotherFieldToBeRemoved' not removed as expected");
-        assertEquals(result.getVersion(), 1, "Version not as expected");
+        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY)).isEqualTo("client-assigned-id")
+                .overridingErrorMessage("unexpected ID");
+        assertThat(result.field("firstname")).isEqualTo("Sam")
+                .overridingErrorMessage("unexpected firstname");
+        assertThat(result.field("lastname")).isEqualTo("Iam")
+                .overridingErrorMessage( "unexpected lastname");
+        assertThat(result.field("telephone")).isEqualTo("(555) 123-4567")
+                .overridingErrorMessage( "unexpected telephone");
+        assertThat(result.field("age")).isEqualTo(20)
+                .overridingErrorMessage("unexpected age");
+        assertThat(result.field("longnumber")).isEqualTo(Long.MAX_VALUE)
+                .overridingErrorMessage( "unexpected longnumber");
+        assertThat(result.field("amount")).isEqualTo(12345678.89f)
+                .overridingErrorMessage( "unexpected amount");
+        assertThat(result.field("present")).isEqualTo(false)
+                .overridingErrorMessage( "unexpected present boolean");
+        assertThat(result.containsField("fieldtoberemoved")).isFalse()
+                .overridingErrorMessage("Field 'fieldtoberemoved' not removed as expected");
+        assertThat(result.containsField("AnotherFieldToBeRemoved")).isFalse()
+                .overridingErrorMessage("Field 'AnotherFieldToBeRemoved' not removed as expected");
+        assertThat(result.getVersion()).isEqualTo(1)
+                .overridingErrorMessage("Version not as expected");
         Object somedate = result.field("somedate");
-        assertNotNull(somedate, "somedate entry null");
-        assertTrue((somedate instanceof Date), "Date not of expected type.");
-
-    }    
+        assertThat(somedate).isNotNull().overridingErrorMessage("somedate entry null");
+        assertThat(somedate).isInstanceOf(Date.class).overridingErrorMessage("date not of expected type.");
+    }
     
     @Test
     public void mapToNewDocExistingRevision() throws ConflictException {
@@ -386,9 +408,15 @@ public class DocumentUtilTest {
         map.put("firstname", "John");
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
-        assertEquals(result.field("firstname"), "John", "unexpected firstname");
-        assertEquals(result.getVersion(), 100, "Version not as expected");
+        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+                .isEqualTo("client-assigned-id")
+                .overridingErrorMessage("unexpected ID");
+        assertThat(result.field("firstname"))
+                .isEqualTo("John")
+                .overridingErrorMessage("unexpected firstname");
+        assertThat(result.getVersion())
+                .isEqualTo(100)
+                .overridingErrorMessage("Version not as expected");
     }
     
     @Test
@@ -411,17 +439,30 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
-        assertEquals(result.field("firstname"), "John", "unexpected firstname");
-        assertEquals(result.field("lastname"), "Doe", "unexpected lastname");
-        assertEquals(result.getVersion(), 0, "Version not as expected");
+        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+                .isEqualTo("client-assigned-id")
+                .overridingErrorMessage("unexpected ID");
+        assertThat(result.field("firstname"))
+                .isEqualTo("John")
+                .overridingErrorMessage("unexpected firstname");
+        assertThat(result.field("lastname"))
+                .isEqualTo("Doe")
+                .overridingErrorMessage("unexpected lastname");
+        assertThat(result.getVersion())
+                .isEqualTo(0)
+                .overridingErrorMessage("Version not as expected");
 
-        ODocument phonenumbers = (ODocument)result.field("phonenumbers");
-        assertNotNull(phonenumbers, "phonenumbers map entry null");
-        assertEquals(phonenumbers.field("home"), "555-666-7777", "unexpected home phone");
-        assertEquals(phonenumbers.field("mobile"), "555-111-2222", "unexpected mobile phone");
-        assertThat((ODocument)phonenumbers)
-                .hasSize(2);
+        ODocument phonenumbers = (ODocument) result.field("phonenumbers");
+        assertThat((Object) phonenumbers)
+                .isNotNull()
+                .overridingErrorMessage("phonenumbers map entry null");
+        assertThat(phonenumbers.field("home"))
+                .isEqualTo("555-666-7777")
+                .overridingErrorMessage("unexpected home phone");
+        assertThat(phonenumbers.field("mobile"))
+                .isEqualTo("555-111-2222")
+                .overridingErrorMessage("unexpected mobile phone");
+        assertThat((Iterable) phonenumbers).hasSize(2);
     }
     
     @Test
@@ -446,19 +487,37 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
-        assertFalse(result.containsField("firstname"), "Firstname should have been removed but is present");
-        assertEquals(result.field("lastname"), "Doe", "unexpected lastname");
-        assertEquals(result.getVersion(), 0, "Version not as expected");
+        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+                .isEqualTo("client-assigned-id")
+                .overridingErrorMessage("unexpected ID");
+        assertThat(result.containsField("firstname"))
+                .isFalse()
+                .overridingErrorMessage("Firstname should have been removed but is present");
+        assertThat(result.field("lastname"))
+                .isEqualTo("Doe")
+                .overridingErrorMessage("unexpected lastname");
+        assertThat(result.getVersion())
+                .isEqualTo(0)
+                .overridingErrorMessage("Version not as expected");
 
-        assertFalse(result.containsField("city"), "City map should have been removed but is present.");
+        assertThat(result.containsField("city"))
+                .isFalse()
+                .overridingErrorMessage("City map should have been removed but is present.");
         
         ODocument phonenumbers = (ODocument)result.field("phonenumbers");
-        assertNotNull(phonenumbers, "phonenumbers map entry null");
-        assertEquals(phonenumbers.field("work"), "666-777-8888", "unexpected work phone");
-        assertEquals(phonenumbers.field("mobile"), "555-111-2229", "unexpected mobile phone");
-        assertFalse(phonenumbers.containsField("home"), "Home phone should have been removed but is present.");
-        assertThat((ODocument)phonenumbers)
+        assertThat((Object) phonenumbers)
+                .isNotNull()
+                .overridingErrorMessage("phonenumbers map entry null");
+        assertThat(phonenumbers.field("work"))
+                .isEqualTo("666-777-8888")
+                .overridingErrorMessage("unexpected work phone");
+        assertThat(phonenumbers.field("mobile"))
+                .isEqualTo("555-111-2229")
+                .overridingErrorMessage("unexpected mobile phone");
+        assertThat(phonenumbers.containsField("home"))
+                .isFalse()
+                .overridingErrorMessage("Home phone should have been removed but is present.");
+        assertThat((Iterable) phonenumbers)
                 .hasSize(2);
     }    
     
@@ -482,20 +541,34 @@ public class DocumentUtilTest {
         
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
         
-        assertEquals(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY), "client-assigned-id", "unexpected ID");
-        assertEquals(result.field("firstname"), "John", "unexpected firstname");
-        assertEquals(result.field("lastname"), "Doe", "unexpected lastname");
-        assertEquals(result.getVersion(), 0, "Version not as expected");
+        assertThat(result.field(DocumentUtil.ORIENTDB_PRIMARY_KEY))
+                .isEqualTo("client-assigned-id")
+                .overridingErrorMessage("unexpected ID");
+        assertThat(result.field("firstname"))
+                .isEqualTo("John")
+                .overridingErrorMessage("unexpected firstname");
+        assertThat(result.field("lastname"))
+                .isEqualTo("Doe")
+                .overridingErrorMessage("unexpected lastname");
+        assertThat(result.getVersion())
+                .isEqualTo(0)
+                .overridingErrorMessage("Version not as expected");
         
         Object resultCities = result.field("cities");
         assertThat(resultCities).isInstanceOf(List.class);
-        assertThat((List)resultCities).containsOnly("Paris", "St. Louis");
+        assertThat((List) resultCities).containsOnly("Paris", "St. Louis");
 
         ODocument phonenumbers = (ODocument)result.field("phonenumbers");
-        assertNotNull(phonenumbers, "phonenumbers map entry null");
-        assertEquals(phonenumbers.field("home"), "555-666-7777", "unexpected home phone");
-        assertEquals(phonenumbers.field("mobile"), "555-111-2222", "unexpected mobile phone");
-        assertThat((ODocument)phonenumbers)
+        assertThat((Object) phonenumbers)
+                .isNotNull()
+                .overridingErrorMessage("phonenumbers map entry null");
+        assertThat(phonenumbers.field("home"))
+                .isEqualTo("555-666-7777")
+                .overridingErrorMessage("unexpected home phone");
+        assertThat(phonenumbers.field("mobile"))
+                .isEqualTo("555-111-2222")
+                .overridingErrorMessage("unexpected mobile phone");
+        assertThat((Iterable) phonenumbers)
                 .hasSize(2);
     }
     
@@ -507,7 +580,7 @@ public class DocumentUtilTest {
         map.put(DocumentUtil.TAG_REV, "invalid-version"); // OrientDB revisions are ints
         map.put("firstname", "John");
         ODocument result = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
-        assertTrue(false, "Invalid Revision must trigger failure");
+        assertThat(false).isTrue().overridingErrorMessage("Invalid Revision must trigger failure");
     }
     
     @Test
@@ -539,14 +612,18 @@ public class DocumentUtilTest {
                 entry("lastname", "Doe"));
 
         Object checkCity = result.get("city");
-        assertNotNull(checkCity, "city map entry null");
+        assertThat(checkCity)
+                .isNotNull()
+                .overridingErrorMessage("city map entry null");
         assertThat(checkCity).isInstanceOf(Map.class);
         assertThat((Map)checkCity)
                 .hasSize(2)
                 .contains(entry("name", "Paris"), entry("country", "France"));
         
         Object phonenumbers = result.get("phonenumbers");
-        assertNotNull(phonenumbers, "phonenumbers map entry null");
+        assertThat(phonenumbers)
+                .isNotNull()
+                .overridingErrorMessage("phonenumbers map entry null");
         assertThat(phonenumbers).isInstanceOf(Map.class);
         assertThat((Map)phonenumbers)
                 .hasSize(2)
@@ -556,13 +633,13 @@ public class DocumentUtilTest {
     @Test
     public void parseValidRevision() throws ConflictException {
         int ver = DocumentUtil.parseVersion("98765");
-        assertEquals(ver, 98765);
+        assertThat(ver).isEqualTo(98765);
     }
     
     @Test(expectedExceptions = ConflictException.class) 
     public void parseInvalidRevision() throws ConflictException {
         int ver = DocumentUtil.parseVersion("some-text-98765");
-        assertTrue(false, "Parsing of invalid revision must fail, but did not.");
+        assertThat(false).isTrue().overridingErrorMessage("Parsing of invalid revision must fail, but did not.");
     }
 
     @Test

@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.security.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert.assertThat;
 
 import org.apache.commons.lang3.StringUtils;
@@ -55,7 +57,6 @@ import java.security.cert.CertificateEncodingException;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.fest.assertions.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.mockito.Mockito.mock;
 
@@ -215,11 +216,11 @@ public class KeystoreResourceProviderTest {
     }
 
     private void checkResultForRequiredFields(final JsonValue result) {
-        assertThat(result != null && !result.isNull());
-        assertThat(!result.get("_id").isNull());
-        assertThat(!result.get("type").isNull());
-        assertThat(!result.get("cert").isNull());
-        assertThat(!result.get("publicKey").isNull());
+        assertThat(result).isNotNull();
+        assertThat(result).hasString("_id");
+        assertThat(result).hasString("type");
+        assertThat(result).hasString("cert");
+        assertThat(result).hasObject("publicKey");
     }
 
     private void checkKeyStoreEntry(final JsonValue result)
@@ -229,7 +230,7 @@ public class KeystoreResourceProviderTest {
                 (KeyStore.PrivateKeyEntry) keyStoreHandler
                         .getStore()
                         .getEntry(TEST_CERT_ALIAS, new KeyStore.PasswordProtection(KEYSTORE_PASSWORD.toCharArray()));
-        assertThat(privateKeyEntry != null);
+        assertThat(privateKeyEntry).isNotNull();
 
         Certificate certificate = privateKeyEntry.getCertificate();
         assertThat(certificate != null);

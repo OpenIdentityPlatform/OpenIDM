@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.scheduler.impl;
 
-import static org.fest.assertions.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;

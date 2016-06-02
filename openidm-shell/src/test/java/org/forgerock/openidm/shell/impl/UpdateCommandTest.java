@@ -15,13 +15,13 @@
  */
 package org.forgerock.openidm.shell.impl;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.*;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
-import static org.testng.Assert.*;
 
 import org.apache.felix.service.command.CommandSession;
 import org.forgerock.json.JsonValue;
@@ -86,9 +86,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), PREVIEW_ARCHIVE);
-        assertNull(executionState.getCompletedInstallStatus());
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(PREVIEW_ARCHIVE);
+        assertThat(executionState.getCompletedInstallStatus()).isNull();
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     @Test
@@ -118,9 +118,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), PREVIEW_ARCHIVE);
-        assertNull(executionState.getCompletedInstallStatus());
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(PREVIEW_ARCHIVE);
+        assertThat(executionState.getCompletedInstallStatus()).isNull();
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     @Test
@@ -148,9 +148,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), PAUSING_SCHEDULER);
-        assertNull(executionState.getCompletedInstallStatus());
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(PAUSING_SCHEDULER);
+        assertThat(executionState.getCompletedInstallStatus()).isNull();
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     @Test
@@ -185,9 +185,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_JOBS_TO_COMPLETE);
-        assertNull(executionState.getCompletedInstallStatus());
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(WAIT_FOR_JOBS_TO_COMPLETE);
+        assertThat(executionState.getCompletedInstallStatus()).isNull();
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
 
         //now that timeout testing worked, test that is can pass waiting for jobs to complete
         resource = mockResource(
@@ -221,9 +221,9 @@ public class UpdateCommandTest {
         updateCommand = new UpdateCommand(session, resource, config);
         executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), ENTER_MAINTENANCE_MODE);
-        assertNull(executionState.getCompletedInstallStatus());
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(ENTER_MAINTENANCE_MODE);
+        assertThat(executionState.getCompletedInstallStatus()).isNull();
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     @Test
@@ -265,9 +265,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), INSTALL_ARCHIVE);
-        assertNull(executionState.getCompletedInstallStatus());
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(INSTALL_ARCHIVE);
+        assertThat(executionState.getCompletedInstallStatus()).isNull();
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     //@Test
@@ -318,9 +318,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
-        assertNull(executionState.getCompletedInstallStatus());
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(WAIT_FOR_INSTALL_DONE);
+        assertThat(executionState.getCompletedInstallStatus()).isNull();
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     @Test
@@ -375,9 +375,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), MARK_REPO_UPDATES_COMPLETE);
-        assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_FAILED);
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(MARK_REPO_UPDATES_COMPLETE);
+        assertThat(executionState.getCompletedInstallStatus()).isEqualTo(UPDATE_STATUS_FAILED);
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     @Test
@@ -436,9 +436,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), MARK_REPO_UPDATES_COMPLETE);
-        assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_COMPLETE);
-        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(MARK_REPO_UPDATES_COMPLETE);
+        assertThat(executionState.getCompletedInstallStatus()).isEqualTo(UPDATE_STATUS_COMPLETE);
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(ENABLE_SCHEDULER);
     }
 
     @Test
@@ -497,9 +497,9 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), MARK_REPO_UPDATES_COMPLETE);
-        assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_COMPLETE);
-        assertEquals(executionState.getLastRecoveryStep(), FORCE_RESTART);
+        assertThat(executionState.getLastAttemptedStep()).isEqualTo(MARK_REPO_UPDATES_COMPLETE);
+        assertThat(executionState.getCompletedInstallStatus()).isEqualTo(UPDATE_STATUS_COMPLETE);
+        assertThat(executionState.getLastRecoveryStep()).isEqualTo(FORCE_RESTART);
     }
 
     private HttpRemoteJsonResource mockResource(MockCriteria... mockCriterion) throws ResourceException {

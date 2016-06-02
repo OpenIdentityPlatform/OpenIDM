@@ -23,14 +23,13 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import org.forgerock.json.resource.BadRequestException;
 import org.testng.annotations.Test;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
 
 public class QueriesTest {
 
@@ -39,9 +38,9 @@ public class QueriesTest {
         Map<String,String> queryStrings = new HashMap<String, String>();
         Queries queries = new Queries();
         queries.setConfiguredQueries(queryStrings);
-        assertTrue(queries.queryIdExists("query-all-ids"));
-        assertEquals(queries.findQueryInfo("test", "query-all-ids", null).getQueryString(),
-                "select _openidm_id from ${unquoted:_resource}");
+        assertThat(queries.queryIdExists("query-all-ids")).isTrue();
+        assertThat(queries.findQueryInfo("test", "query-all-ids", null).getQueryString())
+                .isEqualTo("select _openidm_id from ${unquoted:_resource}");
     }
     
     @Test
@@ -50,8 +49,8 @@ public class QueriesTest {
         queryStrings.put("query-all-ids", "select _id from ${unquoted:_resource}");
         Queries queries = new Queries();
         queries.setConfiguredQueries(queryStrings);
-        assertTrue(queries.queryIdExists("query-all-ids"));
-        assertEquals(queries.findQueryInfo("test", "query-all-ids", null).getQueryString(),
-                "select _id from ${unquoted:_resource}");
+        assertThat(queries.queryIdExists("query-all-ids")).isTrue();
+        assertThat(queries.findQueryInfo("test", "query-all-ids", null).getQueryString())
+                .isEqualTo("select _id from ${unquoted:_resource}");
     }
 }
