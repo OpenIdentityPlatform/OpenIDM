@@ -85,6 +85,7 @@ public class UpdateService extends AbstractRequestHandler {
     private static final String ARCHIVE_NAME = "archive";
     private static final String UPDATE_ID = "updateId";
     private static final String ARCHIVE_DIRECTORY = "/bin/update/";
+    private static final String ACCEPT_LICENSE = "acceptLicense";
 
     @Reference(policy=ReferencePolicy.STATIC)
     private UpdateManager updateManager;
@@ -216,6 +217,9 @@ public class UpdateService extends AbstractRequestHandler {
         try {
             if (!parameters.containsKey(ARCHIVE_NAME)) {
                 return new BadRequestException("Archive name not specified.").asPromise();
+            }
+            if (!Boolean.parseBoolean(parameters.get(ACCEPT_LICENSE))) {
+                return new BadRequestException("This update requires accepting the license.").asPromise();
             }
 
             try {
