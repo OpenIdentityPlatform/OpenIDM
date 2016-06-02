@@ -77,7 +77,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="jdbcDriver">{{t "templates.connector.databaseTableConnector.jdbcDriver"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdbcDriver" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" data-validator="required" value={{t "templates.connector.databaseTableConnector.jdbcDefaultDriver"}} />
+                    <input class="form-control" type="text" id="jdbcDriver" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" data-validator="required" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" />
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcDriverHelp"}}</span>
                 </div>
@@ -85,7 +85,7 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="jdbcUrlTemplate">{{t "templates.connector.databaseTableConnector.jdbcUrlTemplate"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdbcUrlTemplate" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" data-validator="required" value={{t "templates.connector.databaseTableConnector.jdbcDefaultUrl"}} />
+                    <input class="form-control" type="text" id="jdbcUrlTemplate" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" data-validator="required" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" />
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcUrlTemplateHelp"}}</span>
                 </div>
