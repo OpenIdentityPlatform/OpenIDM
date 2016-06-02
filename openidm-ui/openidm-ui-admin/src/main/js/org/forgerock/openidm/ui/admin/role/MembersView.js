@@ -61,39 +61,9 @@ function ($, _, Handlebars,
     };
 
     MembersView.openResourceCollectionDialog = function (propertyValue) {
-        var isNew = !propertyValue,
-            opts = {
-                property: this.data.prop,
-                propertyValue: propertyValue,
-                schema: this.schema,
-                onChange: this.getOnChangeCallback(isNew)
-            };
+        var opts = this.getResourceCollectionDialogOptions(propertyValue);
 
         new MembersDialog().renderDialog(opts);
-    };
-    /*
-    * @param isNew {boolean} - a boolean flag used to decide how to construct the function being returned
-    * @returns {function} - a function to be used as the onChange event for this view
-    */
-    MembersView.getOnChangeCallback = function (isNew) {
-        var onChange;
-
-        if (isNew) {
-            onChange = _.bind(function (value, oldValue, newText) {
-                this.createRelationship(value).then(_.bind(function () {
-                    this.args.showChart = this.data.showChart;
-                    this.render(this.args);
-                },this));
-            }, this);
-        } else {
-            onChange = _.bind(function (value, oldValue, newText) {
-                this.updateRelationship(value, oldValue).then(_.bind(function () {
-                    this.render(this.args);
-                }, this));
-            }, this);
-        }
-
-        return onChange;
     };
 
     return MembersView;

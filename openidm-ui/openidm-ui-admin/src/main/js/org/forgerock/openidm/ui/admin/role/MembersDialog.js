@@ -56,12 +56,8 @@ function ($, _, Handlebars,
 
             this.render(opts, renderCallback);
         },
-        getNewVal: function () {
+        getNewValArray: function () {
             var propVal = this.data.propertyValue,
-                typeValue = this.currentDialog.find("#select_" + this.data.property.propName + "_Type").val(),
-                relationshipValue = this.currentDialog.find("#select_" + this.data.property.propName).val(),
-                readPath = typeValue + "/" + relationshipValue,
-                refProperties = this.currentDialog.find("._refProperties:input"),
                 getRefProps = _.bind(function () {
                     var refProps = propVal._refProperties || {},
                         temporalConstraintsChecked = this.currentDialog.find(".enableTemporalConstraintsCheckbox").prop("checked");
@@ -73,13 +69,9 @@ function ($, _, Handlebars,
                         refProps.temporalConstraints = TemporalConstraintsUtils.getTemporalConstraintsValue(this.currentDialog.find('.temporalConstraintsForm'));
                     }
                     return refProps;
-                }, this),
-                newVal = _.extend(propVal, { "_ref": readPath , "_refProperties" : getRefProps() });
+                }, this);
 
-            return {
-                val: newVal,
-                text: this.currentDialog.find(".selectize-input:eq(1)").find("[data-value]").text()
-            };
+            return ResourceCollectionSearchDialog.prototype.getNewValArray.call(this, getRefProps());
         },
         addTemporalConstraintsForm : function () {
             var _this = this,
