@@ -27,6 +27,15 @@ public class UpdateException extends Exception {
      */
     public UpdateException() {
     }
+
+    /**
+     * Construct a new exception wrapping an existing exception
+     * @see Exception#Exception(Throwable)
+     * @param ex
+     */
+    public UpdateException(Throwable ex) {
+        super(ex);
+    }
     
     /**
      * Constructs a new exception with the specified detail message.

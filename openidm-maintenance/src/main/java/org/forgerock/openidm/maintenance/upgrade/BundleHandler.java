@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
+
 package org.forgerock.openidm.maintenance.upgrade;
 
 import org.osgi.framework.Bundle;
@@ -22,11 +23,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -84,9 +88,9 @@ public class BundleHandler {
      * @param bundle Location where the Bundle is installed.
      * @return Path to location where Bundle is located.
      */
-    private Path getBundlePath(Bundle bundle) throws UpdateException {
+    private Path getBundlePath(Bundle bundle) throws UpdateException, MalformedURLException {
         try {
-            return Paths.get(new URI(bundle.getLocation()).getPath());
+            return Paths.get(new URL(bundle.getLocation()).toURI());
         } catch (URISyntaxException e) {
             throw new UpdateException(e.getMessage(), e);
         }
@@ -205,8 +209,20 @@ public class BundleHandler {
      */
     public void installBundle(Path path) throws UpdateException {
         try {
-            systemBundleContext.installBundle(path.toUri().toString());
-        } catch (BundleException e) {
+            if (systemBundleContext.getBundles().length > 1) {
+                /* Resolve the path of the new file against the first non-system bundle.  The system bundle
+                    has no parent and cannot be used for this.
+                 */
+                Files.copy(path,
+                        getBundlePath(systemBundleContext.getBundles()[1]).getParent().resolve(path.getFileName()),
+                        StandardCopyOption.REPLACE_EXISTING);
+
+                systemBundleContext.installBundle(path.toUri().toString());
+            } else {
+                throw new UpdateException("Unable to install bundle " + path.toUri().toString() +
+                        ", cannot resolve path to running installation");
+            }
+        } catch (IOException | BundleException e) {
             throw new UpdateException("Cannot install bundle " + path.toUri().toString(), e);
         }
 

@@ -131,7 +131,7 @@ public class ServletConnectionFactory implements ConnectionFactory {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig = null;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.maintenance)")
+    @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.maintenance.filter)")
     private Filter maintenanceFilter = null;
 
     @Activate

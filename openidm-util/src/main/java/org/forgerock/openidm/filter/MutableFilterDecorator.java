@@ -11,9 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.openidm.maintenance.impl;
+package org.forgerock.openidm.filter;
 
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -33,48 +33,64 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
- * Passthrough filter passes all requests through verbatim.
+ * A CREST {@link Filter} decorator that allows the decorated implementation (delegate) to be changed
+ * at runtime.  Initially, this decorator wraps a {@link PassthroughFilter}.
  */
-class PassthroughFilter implements Filter {
+public class MutableFilterDecorator implements Filter {
+
+    /** the delegate filter */
+    private volatile Filter delegate = PassthroughFilter.PASSTHROUGH_FILTER;
+
+    /**
+     * Set the delegate delegate to the given {@link Filter}.
+     *
+     * @param delegate the delegate @{link Filter} to wrap
+     */
+    public synchronized void setDelegate(Filter delegate) {
+        if (delegate != null) {
+            this.delegate = delegate;
+        }
+    }
+
     @Override
     public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest actionRequest,
             RequestHandler requestHandler) {
-        return requestHandler.handleAction(context, actionRequest);
+        return delegate.filterAction(context, actionRequest, requestHandler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest createRequest,
             RequestHandler requestHandler) {
-        return requestHandler.handleCreate(context, createRequest);
+        return delegate.filterCreate(context, createRequest, requestHandler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest deleteRequest,
             RequestHandler requestHandler) {
-        return requestHandler.handleDelete(context, deleteRequest);
+        return delegate.filterDelete(context, deleteRequest, requestHandler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest patchRequest,
             RequestHandler requestHandler) {
-        return requestHandler.handlePatch(context, patchRequest);
+        return delegate.filterPatch(context, patchRequest, requestHandler);
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest queryRequest,
             QueryResourceHandler queryResourceHandler, RequestHandler requestHandler) {
-        return requestHandler.handleQuery(context, queryRequest, queryResourceHandler);
+        return delegate.filterQuery(context, queryRequest, queryResourceHandler, requestHandler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest readRequest,
             RequestHandler requestHandler) {
-        return requestHandler.handleRead(context, readRequest);
+        return delegate.filterRead(context, readRequest, requestHandler);
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest updateRequest,
             RequestHandler requestHandler) {
-        return requestHandler.handleUpdate(context, updateRequest);
+        return delegate.filterUpdate(context, updateRequest, requestHandler);
     }
 }

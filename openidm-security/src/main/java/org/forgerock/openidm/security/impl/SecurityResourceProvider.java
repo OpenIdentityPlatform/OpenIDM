@@ -72,7 +72,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.cluster.ClusterUtils;
+import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -143,7 +143,7 @@ public class SecurityResourceProvider {
         this.cryptoAlias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
         this.cryptoCipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
         this.instanceType = IdentityServer.getInstance().getProperty(
-                "openidm.instance.type", ClusterUtils.TYPE_STANDALONE);
+                "openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
     }
     /**
      * Returns a PEM String representation of a object.
@@ -312,17 +312,11 @@ public class SecurityResourceProvider {
      * @throws Exception
      */
     protected String getCertString(Object object) throws Exception {
-        PEMWriter pemWriter = null;
-        StringWriter sw = null;
-        try {
-            sw = new StringWriter();
-            pemWriter = new PEMWriter(sw);
+        try (StringWriter sw = new StringWriter(); PEMWriter pemWriter = new PEMWriter(sw)) {
             pemWriter.writeObject(object);
             pemWriter.flush();
-        } finally {
-            pemWriter.close();
+            return sw.getBuffer().toString();
         }
-        return sw.getBuffer().toString();
     }
 
     /**
@@ -576,7 +570,7 @@ public class SecurityResourceProvider {
      * @throws ResourceException
      */
     protected void saveStore() throws ResourceException {
-        if (!instanceType.equals(ClusterUtils.TYPE_STANDALONE)) {
+        if (!instanceType.equals(ClusterUtil.TYPE_STANDALONE)) {
             saveStoreToRepo();
         }
     }
@@ -614,22 +608,16 @@ public class SecurityResourceProvider {
      */
     public void saveStoreToRepo() throws ResourceException {
         byte [] keystoreBytes = null;
-        FileInputStream fin = null;
         File file = new File(store.getLocation());
 
-        try {
-            try {
-                fin = new FileInputStream(file);
-                keystoreBytes = new byte[(int) file.length()];
-                fin.read(keystoreBytes);
-            } finally {
-                fin.close();
-            }
+        try (FileInputStream fin = new FileInputStream(file)) {
+            keystoreBytes = new byte[(int) file.length()];
+            fin.read(keystoreBytes);
         } catch (Exception e) {
             throw new InternalServerErrorException(e.getMessage(), e);
         }
         
-        String keystoreString = new String(Base64.encode(keystoreBytes));
+        String keystoreString = Base64.encode(keystoreBytes);
         JsonValue value = new JsonValue(new HashMap<String, Object>());
         value.add("storeString", keystoreString);
         storeInRepo("security", resourceName, value);

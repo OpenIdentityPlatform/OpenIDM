@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
@@ -27,7 +27,7 @@ public interface UpdateLogService {
      * @param entry a new update entry.
      * @throws ResourceException
      */
-    public void logUpdate(UpdateLogEntry entry) throws ResourceException;
+    void logUpdate(UpdateLogEntry entry) throws ResourceException;
 
     /**
      * Update an existing update entry in the repo
@@ -35,5 +35,5 @@ public interface UpdateLogService {
      * @param entry the entry to update.
      * @throws ResourceException
      */
-    public void updateUpdate(UpdateLogEntry entry) throws ResourceException;
+    void updateUpdate(UpdateLogEntry entry) throws ResourceException;
 }

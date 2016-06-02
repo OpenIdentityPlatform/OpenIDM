@@ -1,3 +1,19 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2016 ForgeRock AS.
+ */
+
 UI Endpoints for Update Process
 
 1. Get list of update archives in openidm/update:
@@ -5,20 +21,51 @@ UI Endpoints for Update Process
 	ACTION openidm/maintenance/update?_action=available
 
 	returns:
-	[
-        {
-            "archive" : "OpenIDM-4.5.0.zip",
-            "fileSize" : 84372957,
-            "fileDate" : "2015-12-31T23:59:59",
-            "version" : "OpenIDM v4.5.0",
-            "checksum" : "bleeblooblah",
-            "description" : "Full product installation",
-            "resource" : "<url for online docs>",
-            "restartRequired" : true | false
-        }, {
-            ...
+    {
+        "updates":
+            [
+                {
+                    "archive": "OpenIDM-4.2.0.zip",
+                    "fileSize": 80681980,
+                    "fileDate": "Wed Feb 24 12:51:05 PST 2016",
+                    "checksum": "D754CCCFAF336509D20DA66D6ECC74FB",
+                    "fromProduct": "OpenIDM",
+                    "fromVersion": [
+                        "4.1.0"
+                    ],
+                    "toProduct": "OpenIDM",
+                    "toVersion": "4.2.0",
+                    "description": "Full product installation",
+                    "resource": "https://forgerock.org/openidm/doc/bootstrap/integrators-guide/",
+                    "restartRequired": true
+                }, {
+                    ...
+                }
+	        ],
+        "rejects":
+            [
+                {
+                  "archive": "update.xyz",
+                  "reason": "File does not have '.zip' extension."
+                },
+                {
+                  "archive": "update.zip",
+                  "reason": "The archive update.zip can be used only to upgrade version '8.8.8' and you are running
+                  version 4.1.0-SNAPSHOT"
+                },
+                {
+                  "archive": "update_bad.zip",
+                  "reason": "Unable to read or find package.properties within update_bad.zip",
+                  "errorMessage": "Possible exception message."
+                },
+                {
+                  "archive": "update_XXX.zip",
+                  "reason": "The archive update_XXX.zip can be used only to upgrade product 'OpenXXX' and you are
+                  running product OpenIDM"
+                }
+            ]
         }
-	]
+    }
 
 2. Get list of file changes for a given update archive:
 
@@ -34,7 +81,7 @@ UI Endpoints for Update Process
 		}
 	]
 
-2b. Get applicable license for an update archive:
+2a. Get applicable license for an update archive:
 
 	ACTION openidm/maintenance/update?_action=getLicense&archive=OpenIDM-4.5.0.zip
 
@@ -42,6 +89,37 @@ UI Endpoints for Update Process
     {
         "license" : "<WALL O' TEXT>"
     }
+
+2b. Get list of repo updates (for the current db type) for a given update archive
+    ACTION openidm/maintenance/update?_action=listRepoUpdates&archive=OpenIDM-4.5.0.zip
+
+    returns:
+    [
+        {
+            "file": "v1_shorten_link_columns.sql",
+            "path": "db/postgresql/scripts/updates/v1_shorten_link_columns.sql"
+        },
+        {
+            "file": "v2_some_change.sql",
+            "path": "db/postgresql/scripts/updates/v2_some_change.sql"
+        },
+        {
+            "file": "v3_more_changes.sql",
+            "path": "db/postgresql/scripts/updates/v3_more_changes.sql"
+        }
+    ]
+
+2c. Get repo update file(s) from archive
+    GET openidm/maintenance/update/archives/{archive}/{path...}
+    GET openidm/maintenance/update/archives/OpenIDM-4.5.0.zip/db/postgresql/scripts/updates/v1_shorten_link_columns.sql?_fields=/contents&_mimeType=text/plain
+
+    returns:
+
+        -- Column lengths are stored as N+4 for legacy reasons
+        -- Much faster way of updating column length in postgres
+        -- Instant change vs full-rewrite with ALTER
+        UPDATE pg_attribute SET atttypmod = 54 WHERE attrelid = 'links'::regclass AND attname = 'linktype';
+        UPDATE pg_attribute SET atttypmod = 54 WHERE attrelid = 'links'::regclass AND attname = 'linkqualifier';
 
 3. Perform update using a given update archive
 
@@ -53,6 +131,42 @@ UI Endpoints for Update Process
 		"status" : "IN_PROGRESS" (see below for possible states),
 		"statusMessage" : "Initializing",
 		"completedTasks" : 0,
+		"totalTasks" : 350,
+		"startDate" : "2016-04-01 12:00:00",
+		"user" : "openidm-admin"
+	}
+
+3a. List pending repo updates for the currently running update (identical to 2a sans archive)
+    ACTION openidm/maintenance/update?_action=listRepoUpdates
+
+    returns:
+    [
+        {
+            "file": "v1_shorten_link_columns.sql",
+            "path": "db/postgresql/scripts/updates/v1_shorten_link_columns.sql"
+        },
+        {
+            "file": "v2_some_change.sql",
+            "path": "db/postgresql/scripts/updates/v2_some_change.sql"
+        },
+        {
+            "file": "v3_more_changes.sql",
+            "path": "db/postgresql/scripts/updates/v3_more_changes.sql"
+        }
+    ]
+
+3b. Get the repo update script (see 2c)
+
+3c. Mark repo updates as complete for a PENDING_REPO_UPDATES update
+
+    ACTION openidm/maintenance/update?_action=markComplete&updateId=someIDstring
+
+	returns:
+	{
+		"_id" : "someIDstring",
+		"status" : "COMPLETE",
+		"statusMessage" : "All done!",
+		"completedTasks" : 350,
 		"totalTasks" : 350,
 		"startDate" : "2016-04-01 12:00:00",
 		"user" : "openidm-admin"
@@ -73,10 +187,31 @@ UI Endpoints for Update Process
 		"user" : "openidm-admin"
 	}
 
+	(while main update complete but repo updates must be run):
+    {
+        "_id" : "someIDstring",
+        "status" : "PENDING_REPO_UPDATES",
+        "statusMessage" : "Repo updates required",
+        "completedTasks" : 350,
+        "totalTasks" : 350,
+        "startDate" : "2016-04-01 12:00:00",
+        "endDate" : "2016-04-01 13:00:00",
+        "user" : "openidm-admin",
+        "nodeId" : "node3",
+        "files" : [
+            {
+                "filePath" : "bin/defaults/script/access.js",
+                "fileState" : "REPLACED" (see Post-Update File States below),
+                "backup" : "bin/defaults/script/access.js.<update id>"
+            },
+            ...
+        ]
+    }
+
 	(while in terminal state):
 	{
 		"_id" : "someIDstring",
-		"status" : "COMPLETE" | "REVERTED",
+		"status" : "COMPLETE",
 		"statusMessage" : "Something went horribly wrong",
 		"completedTasks" : 15,
 		"totalTasks" : 350,
@@ -87,15 +222,12 @@ UI Endpoints for Update Process
 		"files" : [
 			{
 				"filePath" : "bin/defaults/script/access.js",
-				"fileState" : "UNEXPECTED" (states from FileState.java),
+				"fileState" : "REPLACED" (see Post-Update File States below),
 				"backup" : "bin/defaults/script/access.js.<update id>"
 			},
 			...
 		]
 	}
-
-	Note that if the final status was unsuccessful and the update was reverted the "backup" attribute will not be
-	present (backups have been removed as part of the revert).
 
 5. Get list of updates
 
@@ -138,6 +270,25 @@ UI Endpoints for Update Process
         "lastUpdateId" : "<value>"
     }
 
+8. Fetch a summary list of all installed updates
+
+    POST openidm/maintenance/update?_action=installed
+
+    returns:
+    [
+      {
+        "archive": "OpenIDM-4.1.0.zip",
+        "status": "FAILED",
+        "completedTasks": 523,
+        "totalTasks": 2821,
+        "startDate": "2016-02-23T12:46:30.8-08:00",
+        "endDate": "2016-02-23T12:46:56.478-08:00",
+        "userName": "openidm-admin",
+        "statusMessage": "Update failed."
+      }, {
+        ...
+      }
+    ]
 
 
 FileState States:
@@ -152,21 +303,26 @@ FileState States:
     DELETED,
     /** The file on disk has been changed since the original deployment in a read-only directory. */
     DIFFERS,
-    /** The file on disk has been changed in a user-modifiable directory. */
-    PRESERVED,
     /** The file is unchanged from the original distribution. */
     UNCHANGED
 
-Update Stati:
+Update Statuses:
 
-    IN_PROGRESS     Update has started but not yet completed
-    COMPLETE        Update has completed
-    FAILED          Update failed but has not yet reverted
-    REVERTED        Update failed and was reverted
+    IN_PROGRESS             Update has started, not yet completed
+    PENDING_REPO_UPDATES    Update is completed, repo updates pending
+    COMPLETE                Update is complete
+    FAILED                  Update failed
 
     Note that it is possible an update could remain in IN_PROGRESS or FAILED state forever if the thread/process
-    died before the update could reach COMPLETE or REVERTED, the two "terminal states".  Updates are not reentrant
-    at this time.
+    died before the update could reach COMPLETE, the "terminal state".  Updates are not reentrant at this time.
+
+Post-Update File States:
+
+    REPLACED        Original file was replaced with new file. If original file had user changes it was renamed with
+                    a -old extension.
+    PRESERVED       Original file contained user changes and was preserved. New file added with -new extension.
+    APPLIED         A patch was applied to the configuration of the same name.
+
 
 
 Other

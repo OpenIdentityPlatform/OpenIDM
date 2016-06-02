@@ -57,12 +57,30 @@ public interface UpdateManager {
     JsonValue upgrade(final Path archiveFile, final Path installDir, final String userName) throws UpdateException;
 
     /**
+     * Mark repo updates for a given update as having been performed.
+     *
+     * @param updateId The id of the update log entry to complete
+     * @return a json response containing the updated log entry
+     * @throws UpdateException
+     */
+    JsonValue completeRepoUpdates(String updateId) throws UpdateException;
+
+    /**
      * List the applicable update archives found in the update directory.
      *
      * @return a json list of objects describing each applicable update archive.
      * @throws UpdateException on failure to generate archive list.
      */
     JsonValue listAvailableUpdates() throws UpdateException;
+
+    /**
+     * List repo updates present in a given archive or the currently pending update
+     *
+     * @param archiveFile The archive file to list repo updates for or null to use the the currently pending update
+     * @return A json list of objects representing each repo update
+     * @throws UpdateException on failure to generate repo update list
+     */
+    JsonValue listRepoUpdates(final Path archiveFile) throws UpdateException;
 
     /**
      * Return the license for a given update archive.  Defaults to the license found in the current OpenIDM
@@ -73,6 +91,15 @@ public interface UpdateManager {
      * @throws UpdateException on failure to provide a license.
      */
     JsonValue getLicense(Path archive) throws UpdateException;
+
+    /**
+     * Get the contents of an archive file as a string
+     * @param archive
+     * @param file
+     * @return
+     * @throws UpdateException
+     */
+    JsonValue getArchiveFile(Path archive, Path file) throws UpdateException;
 
     /**
      * Restart IDM now, interrupting a sleeping UpdateThread if it exists

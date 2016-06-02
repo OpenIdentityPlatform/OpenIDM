@@ -1,28 +1,24 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2016 ForgeRock AS.
  */
-
 package org.forgerock.openidm.maintenance.upgrade;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.NEW_SUFFIX;
+import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.OLD_SUFFIX;
+import static org.mockito.Mockito.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,12 +38,6 @@ import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import static org.fest.assertions.api.Assertions.assertThat;
-import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.NEW_SUFFIX;
-import static org.forgerock.openidm.maintenance.upgrade.StaticFileUpdate.OLD_SUFFIX;
-import static org.mockito.Mockito.*;
-import static org.testng.AssertJUnit.assertFalse;
 
 /**
  * Tests updating static files.
@@ -122,8 +112,8 @@ public class StaticFileUpdateTest {
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         update.replace(tempFile);
         assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
-        assertFalse(Files.exists(getOldVersionPath(tempFile)));
-        assertFalse(Files.exists(getNewVersionPath(tempFile)));
+        assertThat(Files.exists(getOldVersionPath(tempFile))).isFalse();
+        assertThat(Files.exists(getNewVersionPath(tempFile))).isFalse();
     }
 
     /**
@@ -139,12 +129,11 @@ public class StaticFileUpdateTest {
         update.replace(tempFile);
         assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
         assertThat(Files.readAllBytes(getOldVersionPath(tempFile))).isEqualTo(oldBytes);
-        assertFalse(Files.exists(getNewVersionPath(tempFile)));
+        assertThat(Files.exists(getNewVersionPath(tempFile))).isFalse();
     }
 
     /**
-     * Test keeping a file with no differences.  This should throw an exception as there are no differences
-     * to keep.
+     * Test keeping a file with no differences.  This should simply write the new file.
      */
     @Test
     public void testKeepIsUnchanged() throws IOException {
@@ -153,6 +142,7 @@ public class StaticFileUpdateTest {
         when(fileStateChecker.getCurrentFileState(tempFile)).thenReturn(FileState.UNCHANGED);
         StaticFileUpdate update = getStaticFileUpdate(fileStateChecker);
         assertThat(update.keep(tempFile)).isNull();
+        assertThat(Files.readAllBytes(tempFile)).isEqualTo(newBytes);
     }
 
     /**
@@ -168,6 +158,6 @@ public class StaticFileUpdateTest {
         update.keep(tempFile);
         assertThat(Files.readAllBytes(tempFile)).isEqualTo(oldBytes);
         assertThat(Files.readAllBytes(getNewVersionPath(tempFile))).isEqualTo(newBytes);
-        assertFalse(Files.exists(getOldVersionPath(tempFile)));
+        assertThat(Files.exists(getOldVersionPath(tempFile))).isFalse();
     }
 }
