@@ -1,0 +1,11 @@
+[
+      "operation" : "transform",
+      "field" : "/connectionPool",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('connectionPoolPatchHelper').upgradeConnectionPool(content,
+                {"type" : "bonecp", "partitionCount" : 4, "maxConnectionsPerPartition" : 25, "minConnectionsPerPartition" : 5});"
+         }
+      }
+]

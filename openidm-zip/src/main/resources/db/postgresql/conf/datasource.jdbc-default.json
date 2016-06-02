@@ -6,6 +6,9 @@
     "password" : "openidm",
     "connectionTimeout" : 30000,
     "connectionPool" : {
-        "type" : "bonecp"
+        "type" : "bonecp",
+        "partitionCount" : 4,
+        "maxConnectionsPerPartition" : 25,
+        "minConnectionsPerPartition" : 5
     }
 }

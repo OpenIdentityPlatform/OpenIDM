@@ -848,12 +848,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      */
     private void validateRelationshipFields(Context context, JsonValue oldValue, JsonValue newValue)
             throws ResourceException {
-        for (JsonPointer field : schema.getRelationshipFields()) {
-            if (schema.getField(field).isValidationRequired()) {
-                relationshipProviders.get(field).validateRelationshipField(context,
-                        oldValue.get(field) == null ? json(null) : oldValue.get(field),
-                        newValue.get(field) == null ? json(null) : newValue.get(field));
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/managedObjectSet/validateRelationshipFields"), null, null);
+        try {
+            for (JsonPointer field : schema.getRelationshipFields()) {
+                if (schema.getField(field).isValidationRequired()) {
+                    relationshipProviders.get(field).validateRelationshipField(context,
+                            oldValue.get(field) == null ? json(null) : oldValue.get(field),
+                            newValue.get(field) == null ? json(null) : newValue.get(field));
+                }
             }
+        } finally {
+            measure.end();
         }
     }
 
