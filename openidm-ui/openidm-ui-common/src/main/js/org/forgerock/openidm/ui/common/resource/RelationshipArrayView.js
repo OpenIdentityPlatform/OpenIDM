@@ -421,29 +421,41 @@ define([
             }
         },
         openResourceCollectionDialog: function (propertyValue) {
-            var _this = this,
+            var opts = this.getResourceCollectionDialogOptions(propertyValue);
+
+            new ResourceCollectionSearchDialog().render(opts);
+        },
+        getResourceCollectionDialogOptions: function (propertyValue) {
+            var isNew = !propertyValue,
                 opts = {
-                    property: _this.data.prop,
+                    property: this.data.prop,
                     propertyValue: propertyValue,
-                    schema: _this.schema
+                    schema: this.schema,
+                    /*
+                     * if there is no propertyValue this is an "add new"
+                     * in this case allow the ability to add multiple relationships
+                     */
+                    multiSelect: (isNew) ? true : false
                 };
 
-            if (!propertyValue) {
-                opts.onChange = function (value, oldValue, newText) {
-                    _this.createRelationship(value).then(function () {
-                        _this.args.showChart = _this.data.showChart;
-                        _this.render(_this.args);
+            if (isNew) {
+                opts.onChange = (value, oldValue, newText, isFinalPromise) => {
+                    return this.createRelationship(value).then( () => {
+                        if (isFinalPromise) {
+                            this.args.showChart = this.data.showChart;
+                            this.render(this.args);
+                        }
                     });
                 };
             } else {
-                opts.onChange = function (value, oldValue, newText) {
-                    _this.updateRelationship(value, oldValue).then(function () {
-                        _this.render(_this.args);
+                opts.onChange = (value, oldValue, newText) => {
+                    return this.updateRelationship(value, oldValue).then( () => {
+                        this.render(this.args);
                     });
                 };
             }
 
-            new ResourceCollectionSearchDialog().render(opts);
+            return opts;
         },
         loadChart: function(models) {
             this.$el.find("#relationshipGraphBody-" + this.data.prop.propName).empty();

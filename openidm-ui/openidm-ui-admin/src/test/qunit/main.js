@@ -18,6 +18,7 @@
 define([
     //idm common tests
     "./org/forgerock/openidm/ui/common/resource/ResourceCollectionTest",
+    "./org/forgerock/openidm/ui/common/resource/RelationshipArrayViewTest",
     "./org/forgerock/openidm/ui/common/delegates/SearchDelegateTest",
     "./org/forgerock/openidm/ui/common/UserModelTest",
     "./org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsViewTest",

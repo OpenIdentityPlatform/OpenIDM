@@ -68,6 +68,7 @@ define([
                 searchField: obj.autocompleteProps(prop, resourceCollectionIndex),
                 create: false,
                 preload: true,
+                hideSelected: true,
                 placeholder: $.t("templates.admin.ResourceEdit.search",{ objectTitle: prop.title || prop.name }),
                 render: {
                     item: function(item, escape) {

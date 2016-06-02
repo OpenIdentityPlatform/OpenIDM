@@ -35,6 +35,7 @@ define([
          *     propertyValue = either null or the value of the property being set (Can be either an actual JSON object or a raw text representation of a JSON object)
          *     schema = the schema for the current resource
          *     onChange = a function that gets called after the save button is pressed
+         *     multiSelect = a boolean flag to tell selectize it can select multiple items
          */
         render: function(opts, onLoadCallback) {
             var _this = this,
@@ -46,6 +47,7 @@ define([
             this.currentDialog = $('<div id="resourceCollectionSearchDialog"></div>');
             this.schema = opts.schema;
             this.onChange = opts.onChange;
+            this.maxSelectionItems = (opts.multiSelect) ? 10 : 1;
 
             this.data.property = opts.property;
             this.data.propertyValue = {};
@@ -86,9 +88,21 @@ define([
                         cssClass: "btn-primary",
                         id: "resourceCollectionSearchDialogSaveBtn",
                         action: function(dialogRef) {
+                            var promise,
+                                newValueArray;
+
                             if (_this.currentDialog.find("#select_" + _this.data.property.propName).val()) {
-                                var newVal = _this.getNewVal();
-                                opts.onChange(newVal.val, _this.data.originalPropertyValue, newVal.text);
+                                newValueArray = _this.getNewValArray();
+                                _.each(newValueArray, function (item, index) {
+                                    var isFinalPromise = index === newValueArray.length - 1;
+                                    if (!promise) {
+                                        promise = opts.onChange(item.val, _this.data.originalPropertyValue, item.text, isFinalPromise);
+                                    } else {
+                                        promise = promise.then( () => {
+                                            return opts.onChange(item.val, _this.data.originalPropertyValue, item.text, isFinalPromise);
+                                        });
+                                    }
+                                });
                                 dialogRef.close();
                             }
                         }
@@ -220,18 +234,23 @@ define([
             }
 
             if ((resourceTypeValue && resourceTypeValue.length) || resourceCollectionIndex === 0) {
-                resourceCollectionUtils.setupAutocompleteField(autocompleteField, this.data.property, {}, resourceCollectionIndex, this.data.propertyValue );
+                resourceCollectionUtils.setupAutocompleteField(autocompleteField, this.data.property, { maxItems : this.maxSelectionItems }, resourceCollectionIndex, this.data.propertyValue );
                 this.currentDialog.find("#relationshipForm").show();
             } else {
                 this.currentDialog.find("#relationshipForm").hide();
             }
         },
-        getNewVal: function () {
+        /**
+        *  this function gathers all the info from the dialog and returns an array of relationship objects
+        *
+        *   @param {object} refPropsOverride - optional parameter used to override the default functionality for getting _refProperties
+        *   @returns {array} - an array of relationship objects
+        */
+        getNewValArray: function (refPropsOverride) {
             var propVal = this.data.propertyValue,
-                typeValue = $("#select_" + this.data.property.propName + "_Type").val(),
-                relationshipValue = $("#select_" + this.data.property.propName).val(),
-                readPath = typeValue + "/" + relationshipValue,
-                refProperties = $("._refProperties:input"),
+                typeValue = this.currentDialog.find("#select_" + this.data.property.propName + "_Type").val(),
+                relationshipValue = this.currentDialog.find("#select_" + this.data.property.propName).val(),
+                refProperties = this.currentDialog.find("._refProperties:input"),
                 getRefProps = function () {
                     var refProps = propVal._refProperties || {};
                     _.map(refProperties, function (refProp) {
@@ -239,12 +258,27 @@ define([
                     });
                     return refProps;
                 },
-                newVal = _.extend(propVal, { "_ref": readPath , "_refProperties" : getRefProps() });
+                valueArray = [],
+                relationshipValuePath;
 
-            return {
-                val: newVal,
-                text: this.currentDialog.find(".selectize-input:eq(1)").find("[data-value]").text()
-            };
+            //if the propVal is not an empty object this is an update and there is only one value
+            if (!_.isEmpty(propVal)) {
+                relationshipValuePath = typeValue + "/" + relationshipValue;
+                valueArray.push({
+                    val: _.extend(propVal, { "_ref": relationshipValuePath , "_refProperties" : refPropsOverride || getRefProps() }),
+                    text: this.currentDialog.find(".selectize-input:eq(1)").find("[data-value]").text()
+                });
+            } else {
+                _.each(relationshipValue, (val) => {
+                    var readPath = typeValue + "/" + val;
+
+                    valueArray.push({
+                        val: { "_ref": readPath , "_refProperties" : refPropsOverride || getRefProps() }
+                    });
+                });
+            }
+
+            return valueArray;
         }
     });
 
