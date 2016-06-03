@@ -30,7 +30,8 @@ define([
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "faiconpicker",
-    "bootstrap-tabdrop"
+    "bootstrap-tabdrop",
+    "org/forgerock/openidm/ui/admin/managed/schema/SchemaEditorView"
 ], function($, _,
             handlebars,
             form2js,
@@ -45,7 +46,8 @@ define([
             ModuleLoader,
             UIUtils,
             faiconpicker,
-            tabdrop) {
+            tabdrop,
+            SchemaEditorView) {
 
     var EditManagedView = AbstractManagedView.extend({
         template: "templates/admin/managed/EditManagedTemplate.html",
@@ -53,7 +55,6 @@ define([
             "submit #managedObjectDetailsForm" : "saveManagedDetails",
             "submit #managedObjectScriptsForm" : "saveManagedScripts",
             "submit #managedObjectPropertiesForm" : "saveManagedProperties",
-            "submit #managedObjectSchemaForm" : "saveManagedSchema",
             "onValidate": "onValidate",
             "click #addManagedProperties": "addProperty",
             "click .property-remove" : "removeProperty",
@@ -85,7 +86,7 @@ define([
                 docHelpUrl : Constants.DOC_URL,
                 noSchema: true
             };
-            
+
             if (this.args[1] && this.args[1] === "showSchema") {
                 this.data.showSchema = true;
             }
@@ -143,630 +144,6 @@ define([
             }, this));
         },
 
-        loadSchema: function() {
-            var JSONEditorDefaults = {
-                    disable_edit_json: true,
-                    disable_array_delete_all: true,
-                    disable_array_reorder: false,
-                    disable_collapse: true,
-                    disable_properties: true,
-                    show_errors: 'always',
-                    template: 'handlebars',
-                    no_additional_properties: true,
-                    additionalItems: false,
-                    required_by_default: true
-                },
-                JSONEditorSchema = {
-                    "title": "Managed Object",
-                    "type": "object",
-                    "headerTemplate": "{{self.title}}",
-                    "definitions": {
-                        "oneOfTypes": {
-                            "oneOf": [
-                                {
-                                    "title": "String",
-                                    "type": "string",
-                                    "format": "hidden"
-                                }, {
-                                    "title": "Array",
-                                    "type": "object",
-                                    "properties": {
-                                        "itemType": {
-                                            "title":"Item Type",
-                                            "$ref": "#/definitions/oneOfTypes"
-                                        }
-                                    }
-                                }, {
-                                    "title": "Boolean",
-                                    "type": "string",
-                                    "displayType" : "Boolean",
-                                    "format": "hidden"
-                                }, {
-                                    "title": "Integer",
-                                    "type": "string",
-                                    "format": "hidden"
-                                }, {
-                                    "title": "Number",
-                                    "type": "string",
-                                    "format": "hidden"
-                                },{
-                                    "title": "Object",
-                                    "$ref": "#/definitions/managedObject"
-                                },
-                                {
-                                    "title": "Relationship",
-                                    "$ref": "#/definitions/relationship"
-                                }
-                            ]
-                        },
-                        "managedObject": {
-                            "type": "array",
-                            "format": "tabs",
-                            "items": {
-                                "type": "object",
-                                "title": "Property",
-                                "headerTemplate": "{{self.propertyName}}",
-                                "properties": {
-                                    "propertyName": {
-                                        "title": "Property Name",
-                                        "type": "string",
-                                        "propertyOrder": 1
-                                    },
-                                    "title": {
-                                        "title": "Readable Title",
-                                        "type": "string",
-                                        "propertyOrder": 2
-                                    },
-                                    "description": {
-                                        "title": "Description",
-                                        "type": "string",
-                                        "format": "textarea",
-                                        "propertyOrder": 3
-                                    },
-                                    "viewable": {
-                                        "title": "Viewable",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": true,
-                                        "propertyOrder": 4
-                                    },
-                                    "searchable": {
-                                        "title": "Searchable",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 5
-                                    },
-                                    "userEditable": {
-                                        "title": "End users allowed to edit?",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 6
-                                    },
-                                    "minLength": {
-                                        "title": "Minimum Length",
-                                        "type": "string",
-                                        "propertyOrder": 7
-                                    },
-                                    "pattern": {
-                                        "title": "Pattern",
-                                        "type": "string",
-                                        "propertyOrder": 8
-                                    },
-                                    "policies": {
-                                        "title": "Validation policies",
-                                        "type": "array",
-                                        "required": true,
-                                        "items": {
-                                            "type": "object",
-                                            "properties": {
-                                                "policyId": {
-                                                    "type": "string",
-                                                    "title": "Policy"
-                                                },
-                                                "params": {
-                                                    "$ref": "#/definitions/policyParams"
-                                                }
-                                            }
-                                        },
-                                        "default": [],
-                                        "propertyOrder": 9
-                                    },
-                                    "required": {
-                                        "title": "Required",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 10
-                                    },
-                                    "returnByDefault": {
-                                        "title": "Return by Default",
-                                        "type": "boolean",
-                                        "required": true,
-                                        "default": false,
-                                        "propertyOrder": 11
-                                    },
-                                    "type": {
-                                        "title": "Type",
-                                        "$ref": "#/definitions/oneOfTypes",
-                                        "propertyOrder": 13
-                                    }
-                                }
-                            }
-                        },
-                        "relationship": {
-                            "type": "object",
-                            "properties": {
-                                "reverseRelationship": {
-                                    "title": "Reverse Relationship",
-                                    "type": "boolean",
-                                    "default": false
-                                },
-                                "reversePropertyName": {
-                                    "title": "Reverse Property Name",
-                                    "type": "string",
-                                    "required": true
-                                },
-                                "validate": {
-                                    "title": "Validate",
-                                    "type": "boolean",
-                                    "required": true,
-                                    "default": false
-                                },
-                                "properties": {
-                                    "title": "Properties",
-                                    "type": "object",
-                                    "properties": {
-                                        "_ref": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "string"
-                                                }
-                                            }
-                                        },
-                                        "_refProperties": {
-                                            "type": "object",
-                                            "properties": {
-                                                "type": {
-                                                    "type": "string",
-                                                    "default": "object"
-                                                },
-                                                "properties": {
-                                                    "$ref": "#/definitions/_refProperties"
-                                                }
-                                            }
-                                        }
-
-                                    }
-                                },
-                                "resourceCollection": {
-                                    "title": "Resource Collection",
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/definitions/resourceCollection"
-                                    }
-                                }
-                            }
-                        },
-                        "_refProperties": {
-                            "title": "Properties",
-                            "type": "array",
-                            "format": "tabs",
-                            "items": {
-                                "type": "object",
-                                "headerTemplate": "{{self.propertyName}}",
-                                "properties": {
-                                    "propertyName": {
-                                        "title": "Property Name",
-                                        "type": "string"
-                                    },
-                                    "type": {
-                                        "title": "Type",
-                                        "type": "string",
-                                        "default": "string"
-                                    },
-                                    "label": {
-                                        "title": "Label",
-                                        "type": "string",
-                                        "default": ""
-                                    }
-                                }
-                            },
-                            "default": [{
-                                "propertyName": "_id",
-                                "type": "string",
-                                "label": ""
-                            }]
-                        },
-                        "policyParams": {
-                            "title": "Params",
-                            "type": "array",
-                            "format": "tabs",
-                            "items": {
-                                "type": "object",
-                                "properties": {
-                                    "paramName": {
-                                        "title": "Param Name",
-                                        "type": "string"
-                                    },
-                                    "value": {
-                                        "title": "Value",
-                                        "type": "string"
-                                    }
-                                }
-                            }
-                        },
-                        "resourceCollection": {
-                            "title": "Resource Collection",
-                            "type": "object",
-                            "properties": {
-                                "path": {
-                                    "type": "string",
-                                    "title": "Path"
-                                },
-                                "label": {
-                                    "type": "string",
-                                    "title": "Label"
-                                },
-                                "query": {
-                                    "type": "object",
-                                    "title": "Query",
-                                    "properties": {
-                                        "queryFilter": {
-                                            "title": "Query Filter",
-                                            "type": "string"
-                                        },
-                                        "fields": {
-                                            "title": "Fields",
-                                            "type": "array",
-                                            "format": "table",
-                                            "items": {
-                                                "title": "Field",
-                                                "type": "string"
-                                            }
-                                        },
-                                        "sortKeys": {
-                                            "title": "Sort Keys",
-                                            "type": "array",
-                                            "format": "table",
-                                            "items": {
-                                                "title": "Sort Key",
-                                                "type": "string"
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    },
-                    "properties": {
-                        "title": {
-                            "title": "Readable Title",
-                            "type": "string"
-                        },
-                        "description": {
-                            "title": "Description",
-                            "type": "string"
-                        },
-                        "properties": {
-                            "title": "Schema Properties",
-                            "$ref": "#/definitions/managedObject"
-                        }
-                    }
-                };
-            
-            // This function needs to be re-written for the ability to set the value of oneOf type
-            // enumerations.  Before "type" would take a value and never set the title(dropdown)
-            // Now the setValue val is an object containing a value and a title.
-
-            // This function needs to be restored for other instances of JSONEditor after load.
-
-            this.data.jsonEditorProto = _.clone(JSONEditor.defaults.editors.multiple.prototype);
-
-            JSONEditor.defaults.editors.multiple.prototype.setValue = function(val,initial) {
-                if (_.isObject(val) && !_.isNull(val)) {
-                    this.switcher.value = val.display;
-                    this.type = _.indexOf(this.display_text, val.display);
-                    this.switchEditor(this.type);
-                    this.editors[this.type].setValue(val.val, initial);
-                    this.refreshValue();
-                }
-            };
-
-            this.data.managedObjectSchema = new JSONEditor(this.$el.find(".schemaEditor")[0], _.extend({
-                schema: JSONEditorSchema
-            }, JSONEditorDefaults));
-
-            this.data.managedObjectSchema.on("change", _.bind(function () {
-                $(".schemaEditor input[type='hidden']").parent().hide();
-            }, this));
-
-            this.setDefaultData();
-
-            JSONEditor.defaults.editors.multiple.prototype.setValue = this.data.jsonEditorProto.setValue;
-        },
-
-        setDefaultData: function() {
-            var managedSchema = this.data.currentManagedObject.schema,
-                jsonSchema = {};
-
-            if (managedSchema) {
-                jsonSchema = {
-                    title: managedSchema.title,
-                    description:  managedSchema.description,
-                    properties: []
-                };
-
-                jsonSchema.properties = this.translateSubProperties(managedSchema.properties, managedSchema.order, managedSchema.required);
-            }
-
-            this.data.managedObjectSchema.setValue(jsonSchema);
-        },
-
-        translateSubProperties: function(properties, order, required, forArray) {
-            var jsonEditorProperties = [];
-
-            _.each(order, function(propertyName) {
-                jsonEditorProperties.push(this.getType(properties[propertyName], propertyName, required, forArray));
-            }, this);
-
-            return jsonEditorProperties;
-        },
-
-        getType: function(property, name, required, forArray) {
-            var tempProperty = {},
-                toModify;
-
-            _.extend(tempProperty, _.omit(property, ["type", "order", "required", "items", "resourceCollection", "properties"]));
-
-            // Copy over object Key as a property
-            tempProperty.propertyName = name;
-            tempProperty.required = _.indexOf(required, name) >= 0;
-
-            // Copy over advanced properties
-            switch (property.type) {
-                case "boolean":
-                case "integer":
-                case "number":
-                    if (forArray) {
-                        tempProperty.itemType = {
-                            "val": property.type,
-                            "display": this.toProperCase(property.type)
-                        };
-                    } else {
-                        tempProperty.type = {
-                            "val": property.type,
-                            "display": this.toProperCase(property.type)
-                        };
-                    }
-                    break;
-
-                case "string":
-                    tempProperty.type = {
-                        "val": property.type,
-                        "display": this.toProperCase(property.type)
-                    };
-                    break;
-
-                case "array":
-                    if (forArray) {
-                        toModify = tempProperty.itemType = {
-                            "val": {},
-                            "display": "Array"
-                        };
-                    } else {
-                        toModify = tempProperty.type = {
-                            "val": {},
-                            "display": "Array"
-                        };
-                    }
-
-                    if (_.has(property, "items")) {
-                        toModify.val  = this.getType(property.items, null, null, true);
-                    }
-                    break;
-
-                case "object":
-                    if (forArray) {
-                        tempProperty.itemType = {
-                            "val": this.translateSubProperties(property.properties, property.order, property.required, false),
-                            "display": this.toProperCase(property.type)
-                        };
-
-                        forArray = false;
-                    } else {
-                        tempProperty.type = {
-                            "val": this.translateSubProperties(property.properties, property.order, property.required, false),
-                            "display": this.toProperCase(property.type)
-                        };
-                    }
-                    break;
-
-                case "relationship":
-                    if (forArray) {
-                        tempProperty.itemType = {
-                            "val": this.translateRelationship(property),
-                            "display": this.toProperCase(property.type)
-                        };
-
-                        forArray = false;
-                    } else {
-                        tempProperty.type = {
-                            "val": this.translateRelationship(property),
-                            "display": this.toProperCase(property.type)
-                        };
-                    }
-                    break;
-            }
-
-            return this.translatePolicies(tempProperty);
-        },
-        
-        translateRelationship: function (property) {
-            var refProps = [];
-            
-            _.map(property.properties._refProperties.properties, function (val,key) {
-                refProps.push({
-                    "propertyName": key,
-                    "type": val.type,
-                    "label": val.label
-                });
-            });
-            
-            property.properties._refProperties.properties = refProps;
-            
-            return property;
-        },
-        
-        translatePolicies: function (property) {
-            if (property.policies) {
-                _.map(property.policies, function (policy) {
-                    var policyParams = [];
-                    _.each(policy.params, function (val,key) {
-                        policyParams.push({
-                            "paramName": key,
-                            "value": val
-                        });
-                    });
-                    
-                    policy.params = policyParams;
-                });
-            }
-            
-            return property;
-        },
-
-        toProperCase: function(toConvert) {
-            return toConvert.charAt(0).toUpperCase() + toConvert.slice(1);
-        },
-
-        /**
-         * Recursively retrieves the type of a value
-         *
-         * @param node (root.properties.0.type or root.properties.0.type.itemType)
-         * @param property (schema.properties.myPropertyName or schema.properties.myPropertyName.items
-         * @param value - If this is an object leaf node or resource collection there is a value to provide
-         * @param editor
-         */
-        addType: function(node, property, value) {
-            var nodeSelect = $("[data-schemapath='"+node+"'] select:first"),
-                nodeType =  nodeSelect.val();
-
-            switch (nodeType) {
-                case "String":
-                case "Boolean":
-                case "Integer":
-                case "Number":
-                    property.type = nodeType.toLowerCase();
-                    break;
-
-                case "Array":
-                    property.type = "array";
-                    property.items = {};
-                    this.addType(node + ".itemType", property.items, this.data.managedObjectSchema.editors[node + ".itemType"].value);
-                    break;
-
-                case "Object":
-                    property.type = "object";
-                    _.extend(property, this.getObjectProperties(value, node));
-                    break;
-
-                case "Relationship":
-                    property.type = "relationship";
-                    _.extend(property, this.getRelationshipProperties(value));
-                    break;
-            }
-        },
-
-        getRelationshipProperties: function(props) {
-            var refProps = {};
-            
-            _.each(props.properties._refProperties.properties, function (prop) {
-                refProps[prop.propertyName] = {
-                    "type": prop.type,
-                    "label": prop.label
-                };
-            });
-            
-            props.properties._refProperties.properties = refProps;
-            
-            return props;
-        },
-
-        getObjectProperties: function(props, node) {
-            var data = {
-                "properties": {},
-                "required": [],
-                "order": []
-            };
-            _.each(props, function(property, index) {
-                var convertPolicyParams = function (policies) {
-                    _.each(policies, function (policy) {
-                        var policyParams = {};
-                        _.each(policy.params, function (param, key) {
-                            var val;
-                            try {
-                                val = $.parseJSON(param.value);
-                            } catch (e) {
-                                val = param.value;
-                            }
-
-                            if (val && val.paramName) {
-                                policyParams[val.paramName] = val.value;
-                            } else if (!val) {
-                                policyParams[key] = param;
-                            } else {
-                                policyParams[param.paramName] = val;
-                            }
-                        });
-                        policy.params = policyParams;
-                    });
-
-                    return policies;
-                };
-                    
-                data.properties[property.propertyName] = {
-                    "description": property.description,
-                    "title": property.title,
-                    "viewable": property.viewable,
-                    "searchable": property.searchable,
-                    "userEditable": property.userEditable,
-                    "policies": convertPolicyParams(property.policies),
-                    "returnByDefault": property.returnByDefault,
-                    "minLength": property.minLength,
-                    "pattern": property.pattern
-                };
-
-                if (!node) {
-                    this.addType("root.properties."+ index +".type", data.properties[property.propertyName], property.type);
-                } else {
-                    this.addType(node + "." + index + ".type", data.properties[property.propertyName], property.type);
-                }
-
-
-                if (property.required) {
-                    data.required.push(property.propertyName);
-                }
-
-                data.order.push(property.propertyName);
-            }, this);
-
-            return data;
-        },
-
-        getManagedSchema: function() {
-            return _.extend({
-                "$schema": "http://forgerock.org/json-schema#",
-                "type": "object",
-                "title": this.data.managedObjectSchema.getValue().title,
-                "description": this.data.managedObjectSchema.getValue().description,
-                "icon": this.$el.find("#managedObjectIcon").val()
-            }, this.getObjectProperties(this.data.managedObjectSchema.getValue().properties));
-        },
-
         managedRender: function(callback) {
             this.parentRender(_.bind(function () {
                 validatorsManager.bindValidators(this.$el);
@@ -774,48 +151,49 @@ define([
 
                 this.propertiesCounter = this.$el.find(".add-remove-block").length;
 
-                this.loadSchema();
+                SchemaEditorView.render([this], () => {
+                    this.$el.find('#managedObjectIcon').iconpicker({
+                        hideOnSelect: true
+                    });
 
-                this.$el.find('#managedObjectIcon').iconpicker({
-                    hideOnSelect: true
-                });
-
-                this.model.managedScripts = ScriptList.generateScriptList({
-                    element: this.$el.find("#managedScripts"),
-                    label: $.t("templates.managed.addManagedScript"),
-                    selectEvents: this.data.selectEvents,
-                    addedEvents:this.data.addedEvents,
-                    currentObject: this.data.currentManagedObject,
-                    hasWorkflow: true,
-                    workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")                
-                });
-
-                _.each(this.$el.find("#managedPropertyWrapper .small-field-block"), function(managedProperty, index) {
-                    this.propertyHooks.push([]);
-
-                    this.model.propertyScripts.push(ScriptList.generateScriptList({
-                        element: $(managedProperty).find(".managedPropertyEvents"),
-                        label: $.t("templates.managed.addPropertyScript"),
-                        selectEvents: this.data.currentManagedObject.properties[index].selectEvents,
-                        addedEvents:this.data.currentManagedObject.properties[index].addedEvents,
-                        currentObject: this.data.currentManagedObject.properties[index],
+                    this.model.managedScripts = ScriptList.generateScriptList({
+                        element: this.$el.find("#managedScripts"),
+                        label: $.t("templates.managed.addManagedScript"),
+                        selectEvents: this.data.selectEvents,
+                        addedEvents:this.data.addedEvents,
+                        currentObject: this.data.currentManagedObject,
                         hasWorkflow: true,
-                        workflowContext: _.pluck(this.data.managedObjectSchema.getValue().properties, "propertyName")
-                    }));
+                        workflowContext: _.pluck(SchemaEditorView.data.managedObjectSchema.getValue().properties, "propertyName")
+                    });
 
-                }, this);
+                    _.each(this.$el.find("#managedPropertyWrapper .small-field-block"), function(managedProperty, index) {
+                        this.propertyHooks.push([]);
 
-                this.$el.find(".nav-tabs").tabdrop();
-                
-                if(this.data.currentManagedObject.properties) {
-                    _.each(this.data.currentManagedObject.properties, function (property, index) {
-                        this.setPropertyHashToggle(index);
+                        this.model.propertyScripts.push(ScriptList.generateScriptList({
+                            element: $(managedProperty).find(".managedPropertyEvents"),
+                            label: $.t("templates.managed.addPropertyScript"),
+                            selectEvents: this.data.currentManagedObject.properties[index].selectEvents,
+                            addedEvents:this.data.currentManagedObject.properties[index].addedEvents,
+                            currentObject: this.data.currentManagedObject.properties[index],
+                            hasWorkflow: true,
+                            workflowContext: _.pluck(SchemaEditorView.data.managedObjectSchema.getValue().properties, "propertyName")
+                        }));
+
                     }, this);
-                }
 
-                if (callback) {
-                    callback();
-                }
+                    this.$el.find(".nav-tabs").tabdrop();
+
+                    if(this.data.currentManagedObject.properties) {
+                        _.each(this.data.currentManagedObject.properties, function (property, index) {
+                            this.setPropertyHashToggle(index);
+                        }, this);
+                    }
+
+                    if (callback) {
+                        callback();
+                    }
+                });
+
             }, this));
         },
 
@@ -850,12 +228,12 @@ define([
 
         saveManagedProperties: function(event) {
             event.preventDefault();
-            
+
             var data = form2js('managedObjectPropertiesForm', '.', true),
                 properties = [];
 
-            this.data.currentManagedObject.schema = this.getManagedSchema();
-            
+            this.data.currentManagedObject.schema = SchemaEditorView.getManagedSchema();
+
             _.each(data.properties, function (prop, index) {
                 if (prop.encryption) {
                     prop.encryption = {
@@ -884,16 +262,16 @@ define([
                 } else {
                     delete prop.secureHash;
                 }
-                
+
                 delete prop.algorithm;
 
                 _.extend(prop, this.model.propertyScripts[index].getScripts());
-                
+
                 if (prop.name) {
                     properties.push(prop);
                 }
             }, this);
-            
+
             this.data.currentManagedObject.properties = properties;
 
             this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
@@ -913,15 +291,6 @@ define([
             }, this);
 
             this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
-        },
-
-        saveManagedSchema: function(event) {
-            event.preventDefault();
-
-            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.bind(function () {
-                this.args.push("showSchema");
-                this.render(this.args);
-            }, this));
         },
 
         deleteManaged: function(event) {
@@ -967,9 +336,9 @@ define([
                 field,
                 input;
 
-            field = $(handlebars.compile("{{> managed/_property}}")({ 
+            field = $(handlebars.compile("{{> managed/_property}}")({
                 availableProperties : this.data.availableProperties,
-                availableHashes : this.data.availableHashes 
+                availableHashes : this.data.availableHashes
             }));
             field.removeAttr("id");
             input = field.find('.properties_name_selection');
@@ -1012,19 +381,19 @@ define([
             this.$el.find('#managedPropertyWrapper').append(field);
             this.setPropertyHashToggle(this.propertiesCounter);
         },
-        
+
         setPropertyHashToggle: function (index) {
             var encryption_cb = this.$el.find("#" + index + "_encryption_cb"),
                 secureHash_cb = this.$el.find("#" + index + "_secureHash_cb"),
                 secureHash_selection = this.$el.find("#" + index + "_secureHash_selection");
-            
+
             encryption_cb.click(function(){
                 if ($(this).is(":checked")) {
                     secureHash_selection.hide();
                     secureHash_cb.attr("checked",false);
                 }
             });
-            
+
             secureHash_cb.click(function(){
                 if ($(this).is(":checked")) {
                     secureHash_selection.show();
