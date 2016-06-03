@@ -699,7 +699,30 @@
             "managedSchema": "Schema",
             "addPropertyScript": "Add script for property events.",
             "addManagedScript": "Add script for managed events.",
-            "resourceCollectionRelationshipDescription": "The Label setting defines how the UI refers to this relationship. *Note: It is only used when the path to this resourceCollection is the same a the parent object's path."
+            "resourceCollectionRelationshipDescription": "The Label setting defines how the UI refers to this relationship. *Note: It is only used when the path to this resourceCollection is the same a the parent object's path.",
+            "schemaEditor" : {
+                "addResourceCollection" : "Add Resource Collection",
+                "editResourceCollection" : "Edit Resource Collection",
+                "propertyName" : "Property Name",
+                "label" : "Label",
+                "undo" : "Undo",
+                "name" : "Name",
+                "selectProperty" : "Select Property",
+                "resource" : "Resource",
+                "selectResource" : "Please Select a Resource",
+                "queryFilter" : "Query Filter",
+                "displayProperties" : "Display Properties",
+                "sortKeys" : "Sort Keys",
+                "twoWayRelationship" : "Two-way Relationship",
+                "twoWayRelationshipHelp" : "Indicates whether a relationship is bi-directional",
+                "targetRelationshipProperty" : "Target Relationship Property",
+                "targetRelationshipPropertyHelp" : "From the remote Managed Object",
+                "validateRelationship" : "Validate Relationship",
+                "validateRelationshipHelp" : "Indicates whether a relationship between two objects must be validated when created or updated",
+                "relationshipProperties" : "Relationship Properties",
+                "resourceCollections" : "Resource Collections",
+                "addResourceCollection" : "Add Resource Collection"
+            }
         },
         "scriptEditor": {
             "scriptDelete" : "Are you sure you want to delete this script?",

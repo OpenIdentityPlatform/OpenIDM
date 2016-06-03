@@ -95,7 +95,7 @@ define([
                     propertiesPromise.resolve([]);
                 }
             }, this));
-        } else {
+        } else if (type[0] === "managed") {
             ConfigDelegate.readEntity("managed").then(_.bind(function(managed) {
                 properties = _.find(managed.objects, function(managedObject) {
                     return managedObject.name === type[1];
@@ -124,9 +124,32 @@ define([
                     propertiesPromise.resolve([]);
                 }
             }, this));
+        } else {
+            propertiesPromise.resolve([]);
         }
 
         return propertiesPromise;
+    };
+
+    /**
+     * @param availableProps {array} - array of a resource's availableProps objects from findPropertiesList
+     * @param existingFields {array} - properties to be filtered out
+     * @returns {array}
+     *
+     * This function filters out the all props that are named "_id", are not of type string,
+     * are encrypted, or are already existing in the current list of availableProps
+     */
+    obj.filteredPropertiesList = function(availableProps, existingFields) {
+        return _.chain(availableProps)
+                    .omit((prop, key) => {
+                        return prop.type !== "string" ||
+                               key === "_id" ||
+                               _.has(prop, "encryption") ||
+                               _.contains(existingFields, key);
+                    })
+                    .keys()
+                    .sortBy()
+                    .value();
     };
 
     /**
