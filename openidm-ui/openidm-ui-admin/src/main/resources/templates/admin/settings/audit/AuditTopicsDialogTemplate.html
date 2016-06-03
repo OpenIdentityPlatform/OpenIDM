@@ -11,7 +11,7 @@
                data-unique-list="{{stringify usedNames}}"
                value="{{defaults.eventName}}"
                {{#if defaults.newEvent}}
-               data-validator="unique"
+               data-validator="uniqueShortList"
                data-validator-event="keyup blur"
                {{else}}
                disabled

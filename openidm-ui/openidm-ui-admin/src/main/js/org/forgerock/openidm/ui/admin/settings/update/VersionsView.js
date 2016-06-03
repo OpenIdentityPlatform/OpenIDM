@@ -81,11 +81,17 @@ define("org/forgerock/openidm/ui/admin/settings/update/VersionsView", [
 
                 MaintenanceDelegate.availableUpdateVersions().then(_.bind(function(data) {
 
-                    _.each(data, function (model) {
-                        Versions.add(model);
-                    });
+                    _.each(data, function (models) {
+                        _.each(models, function (model) {
+                            if (model.reason) {
+                                this.data.errorMessage = model.reason;
+                                this.data.revision = $.t("templates.update.versions.badRevision");
+                            }
+                            Versions.add(model);
+                        }, this);
+                    }, this);
 
-                    this.data.noVersions = data.length === 0;
+                    this.data.noVersions = data.updates.length === 0;
 
                     ClusterDelegate.getClusters().then(_.bind(function(data) {
 
@@ -144,10 +150,18 @@ define("org/forgerock/openidm/ui/admin/settings/update/VersionsView", [
                             cell: Backgrid.Cell.extend({
                                 className: "col-md-5",
                                 render: function () {
+                                    var date;
+
+                                    if (this.model.get("fileDate")) {
+                                        date = DateUtil.formatDate(this.model.get("fileDate"), "MMM dd, yyyy");
+                                    } else {
+                                        date = "";
+                                    }
+
                                     this.$el.html(Handlebars.compile("{{> settings/_updateVersionGridArchive}}")({
                                         "archive": this.model.get("archive"),
-                                        "version": this.model.get("version"),
-                                        "date": DateUtil.formatDate(this.model.get("fileDate"), "MMM dd, yyyy")
+                                        "version": this.model.get("toVersion"),
+                                        "date": date
                                     }));
 
                                     return this;
@@ -160,7 +174,13 @@ define("org/forgerock/openidm/ui/admin/settings/update/VersionsView", [
                             cell: Backgrid.Cell.extend({
                                 className: "col-md-5",
                                 render: function () {
-                                    this.$el.html("<span class='version-description'>" + this.model.get("description") + "</span>");
+                                    var description;
+                                    if (this.model.get("description")) {
+                                        description = this.model.get("description");
+                                    } else {
+                                        description = $.t("templates.update.versions.badBinary");
+                                    }
+                                    this.$el.html("<span class='version-description'>" + description + "</span>");
                                     return this;
                                 }
                             }),
@@ -175,7 +195,13 @@ define("org/forgerock/openidm/ui/admin/settings/update/VersionsView", [
                                 className: "col-md-2",
 
                                 render: function () {
-                                    var button = '<button type="button" class="test pull-right btn btn-primary btn-sm">' + $.t("templates.update.versions.install") + '</button>';
+                                    var disable,
+                                        button;
+
+                                    if (this.model.get("reason")) {
+                                        disable = "disabled";
+                                    }
+                                    button = '<button type="button" class="test pull-right btn btn-primary btn-sm"' + disable + '>' + $.t("templates.update.versions.install") + '</button>';
 
                                     this.$el.html(button);
                                     this.delegateEvents();

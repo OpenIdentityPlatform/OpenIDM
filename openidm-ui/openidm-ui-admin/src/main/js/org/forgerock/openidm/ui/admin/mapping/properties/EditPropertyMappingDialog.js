@@ -252,6 +252,7 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
             BootstrapDialog.show({
                 title: settings.title,
+                closable: false,
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
@@ -286,7 +287,6 @@ define("org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDia
 
                             _this.$el.find(".details-tooltip").popover({
                                 content: function () { return $(this).find(".tooltip-details").clone().show();},
-                                trigger:'hover',
                                 placement:'right',
                                 container: 'body',
                                 html: 'true',

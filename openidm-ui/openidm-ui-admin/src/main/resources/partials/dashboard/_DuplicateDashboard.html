@@ -1,0 +1,22 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="bootstrap-dialog-message" id="DuplicateDashboardDialog">
+    <p>{{t "dashboard.renameDesc"}}</p>
+
+    <form class="form-horizontal" role="form">
+        <div class="form-group required">
+            <label class="col-sm-4 control-label">{{t "dashboard.newName"}}</label>
+            <div class="col-sm-8">
+                <input class="form-control"
+                       type="text"
+                       id="DashboardName"
+                       value="{{defaultName}}"
+                       data-validator="uniqueShortList"
+                       data-validator-event="keyup blur"
+                       data-unique-list="{{stringify existingDashboards}}"/>
+                <div class="validation-message"></div>
+                <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+            </div>
+        </div>
+    </form>
+</div>

@@ -86,13 +86,6 @@
 
         <dependency>
             <groupId>org.forgerock.commons.ui.libs</groupId>
-            <artifactId>jquery-nestingSortable</artifactId>
-            <version>0.9.12</version>
-            <type>js</type>
-        </dependency>
-
-        <dependency>
-            <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>jsoneditor</artifactId>
             <version>0.7.9</version>
             <classifier>min</classifier>
@@ -169,6 +162,28 @@
         </dependency>
 
         <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>dragula</artifactId>
+            <version>3.6.7</version>
+            <classifier>min</classifier>
+            <type>css</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap-datetimepicker</artifactId>
+            <version>4.14.30</version>
+            <classifier>min</classifier>
+            <type>js</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>bootstrap-datetimepicker</artifactId>
+            <version>4.14.30</version>
+            <classifier>min</classifier>
+            <type>css</type>
+        </dependency>
+
+        <dependency>
           <groupId>org.apache.servicemix.bundles</groupId>
           <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
         </dependency>
@@ -185,6 +200,14 @@
             <groupId>org.forgerock.commons.ui.libs</groupId>
             <artifactId>r</artifactId>
             <version>2.1.10</version>
+            <type>js</type>
+        </dependency>
+
+        <dependency>
+            <groupId>org.forgerock.commons.ui.libs</groupId>
+            <artifactId>moment-timezone-with-data</artifactId>
+            <version>0.5.4</version>
+            <classifier>min</classifier>
             <type>js</type>
         </dependency>
 

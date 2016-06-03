@@ -27,7 +27,7 @@
                         <div class="form-group has-feedback">
                             <label for="emailHost" class="col-sm-3 control-label">{{t "templates.emailConfig.host"}}</label>
                             <div class="col-sm-6">
-                                <input id="emailHost" type="text" class="form-control" name="host" value="{{config.host}}" data-validator="required" data-validator-event="keyup blur"/>
+                                <input id="emailHost" type="text" class="form-control" name="host" value="{{config.host}}" data-validator="required" data-validator-event="keyup blur validate"/>
                                 <div class="validation-message"></div>
                                 <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                             </div>
@@ -36,7 +36,7 @@
                         <div class="form-group has-feedback">
                             <label for="emailPort" class="col-sm-3 control-label">{{t "templates.emailConfig.port"}}</label>
                             <div class="col-sm-6">
-                                <input id="emailPort" type="text" class="form-control" name="port" value="{{config.port}}" data-validator="required" data-validator-event="keyup blur"/>
+                                <input id="emailPort" type="text" class="form-control" name="port" value="{{config.port}}" data-validator="required" data-validator-event="keyup blur validate"/>
                                 <div class="validation-message"></div>
                                 <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                             </div>
@@ -92,10 +92,9 @@
             </div>
         </div>
     </div>
-</form>
-
-<div class="panel-footer">
-    <div class="clearfix form-button-bar">
-        <input type="button" name="saveEmailConfig" class="btn btn-primary pull-right" id="saveEmailConfig" value="Save"/>
+    <div class="panel-footer">
+        <div class="clearfix form-button-bar">
+            <input type="submit" name="saveEmailConfig" class="btn btn-primary pull-right" id="saveEmailConfig" value="Save"/>
+        </div>
     </div>
-</div>
+</form>

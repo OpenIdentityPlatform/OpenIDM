@@ -11,123 +11,181 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 /*global define */
 
 define("org/forgerock/openidm/ui/admin/role/EditRoleView", [
     "jquery",
-    "underscore",
-    "form2js",
-    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
-    "org/forgerock/commons/ui/common/components/Messages",
-    "org/forgerock/openidm/ui/admin/role/RoleUsersView",
-    "org/forgerock/openidm/ui/admin/role/RoleEntitlementsListView",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function($, _,
-            form2js,
-            AdminAbstractView,
-            eventManager,
-            constants,
-            resourceDelegate,
-            messagesManager,
-            roleUsersView,
-            roleEntitlementsListView,
-            UIUtils) {
-    var EditRoleView = AdminAbstractView.extend({
-        template: "templates/admin/role/EditRoleViewTemplate.html",
+    "lodash",
+    "handlebars",
+    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/common/resource/GenericEditResourceView",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/openidm/ui/admin/role/util/UserQueryFilterEditor",
+    "org/forgerock/openidm/ui/admin/role/util/TemporalConstraintsUtils",
+    "org/forgerock/openidm/ui/admin/role/TemporalConstraintsFormView",
+    "org/forgerock/openidm/ui/admin/role/MembersView"
+],
+function ($, _, Handlebars,
+    AbstractView,
+    GenericEditResourceView,
+    ValidatorsManager,
+    UserQueryFilterEditor,
+    TemporalConstraintsUtils,
+    TemporalConstraintsFormView,
+    MembersView
+  ) {
+    var EditRoleView = function () {
+            return AbstractView.apply(this, arguments);
+        };
 
-        events: {
-            "click .saveRole": "saveRole",
-            "click #deleteRole": "deleteRole"
-        },
-        render: function(args, callback) {
-            var rolePromise,
-                schemaPromise = resourceDelegate.getSchema(args),
-                roleId = args[2],
-                assignment = args[3];
+    EditRoleView.prototype = Object.create(GenericEditResourceView);
+    EditRoleView.prototype.tabViewOverrides.members = MembersView;
+    EditRoleView.prototype.events = _.extend({
+        "change .expressionTree :input": "showPendingChanges",
+        "blur :input.datetimepicker": "showPendingChanges",
+        "change #enableDynamicRoleGrantCheckbox": "toggleQueryView"
+    }, GenericEditResourceView.events);
 
-            this.data.args = args;
-            this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
+    EditRoleView.prototype.partials = GenericEditResourceView.partials.concat(["partials/role/_conditionForm.html"]);
 
-            if(roleId){
-                rolePromise = resourceDelegate.readResource(this.data.serviceUrl, roleId);
-                this.data.newRole = false;
-            } else {
-                rolePromise = $.Deferred().resolve({});
-                this.data.newRole = true;
-            }
-
-            $.when(rolePromise, schemaPromise).then(_.bind(function(role, schema){
-                if(role.length && !role[0].assignments) {
-                    role[0].assignments = {};
+    EditRoleView.prototype.render = function (args, callback) {
+        GenericEditResourceView.render.call(this, args, _.bind(function () {
+        if (_.has(this.data.schema.properties, "temporalConstraints")) {
+            if (!this.data.newObject && !this.$el.find('#temporalConstraintsForm').length) {
+                    this.addTemporalConstraintsForm();
                 }
-                this.data.role = role[0];
-                this.parentRender(_.bind(function(){
-                    if(!this.data.newRole) {
-                        roleUsersView.render(this.data.args, this.data.role);
-                        roleEntitlementsListView.render(this.data.args, this.data.role, _.bind(function() {
-                            if(assignment) {
-                                this.$el.find('[href="#role-entitlements"]').click();
-                                this.$el.find("#edit-assignment-" + assignment).click();
-                            }
-                        }, this));
-                    }
-
-                    this.$el.find(":input.form-control:first").focus();
-
-                    if(callback) {
-                        callback();
-                    }
-                },this));
-            },this));
-        },
-        saveRole: function(e, callback){
-            var formVal = form2js(this.$el.find('form#addEditRoleForm')[0], '.', true),
-                successCallback = _.bind(function(role){
-                    var msg = (this.data.newRole) ? "templates.admin.ResourceEdit.addSuccess" : "templates.admin.ResourceEdit.editSuccess";
-                    messagesManager.messages.addMessage({"message": $.t(msg,{ objectTitle: this.data.args[1] })});
-                    if(this.data.newRole) {
-                        this.data.args.push(role._id);
-                        eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminEditManagedObjectView", args: this.data.args});
-                    } else {
-                        this.data.role._rev++;
-                    }
-                    this.render(this.data.args, callback);
-                }, this);
-
-            if(e) {
-                e.preventDefault();
+            }
+            if (_.has(this.data.schema.properties, "condition") && !this.$el.find("#condition").length ) {
+                if (!this.data.newObject && !this.$el.find('#conditionFilterForm').length) {
+                    this.addConditionForm();
+                }
             }
 
-            if(this.data.newRole){
-                resourceDelegate.createResource(this.data.serviceUrl, null, formVal.role, successCallback);
-            } else {
-                resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.data.role._id, rev: this.data.role._rev}, this.data.role, formVal.role, successCallback);
+
+            if (callback) {
+                callback();
             }
-        },
-        deleteRole: function(e, callback){
-            if(e) {
-                e.preventDefault();
-            }
+        }, this));
+    };
 
-            UIUtils.confirmDialog($.t("templates.admin.ResourceEdit.confirmDelete",{ objectTitle: this.data.args[1] }),  "danger", _.bind(function(){
-                resourceDelegate.deleteResource(this.data.serviceUrl, this.data.role._id, _.bind(function(){
-                    messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.deleteSuccess",{ objectTitle: this.data.role.properties.name })});
+    EditRoleView.prototype.addTemporalConstraintsForm = function () {
+        var _this = this,
+            resourceDetailsForm = this.$el.find("#resource-details form"),
+            formContainerId = "temporalContstraintsFormContainer",
+            formContainer = $("<div id='" + formContainerId + "'></div>"),
+            temporalConstraints = [],
+            temporalConstraintsView = new TemporalConstraintsFormView();
 
-                    eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "adminListManagedObjectView", args: ["managed","role"]});
-
-                    if(callback) {
-                        callback();
-                    }
-                }, this));
-            }, this));
+        if (this.oldObject.temporalConstraints) {
+            temporalConstraints = _.map(this.oldObject.temporalConstraints, function (constraint) {
+                return TemporalConstraintsUtils.convertFromIntervalString(constraint.duration);
+            });
         }
-    });
+
+        resourceDetailsForm.append(formContainer);
+
+        temporalConstraintsView.render({
+            element: "#" + formContainerId,
+            toggleCallback: function () {
+                _this.showPendingChanges();
+            },
+            temporalConstraints: temporalConstraints
+        });
+    };
+
+    EditRoleView.prototype.addConditionForm = function () {
+        var resourceDetailsForm = this.$el.find("#resource-details form"),
+            conditionContent = Handlebars.compile("{{> role/_conditionForm}}");
+
+        resourceDetailsForm.append(conditionContent);
+
+        if (this.oldObject.condition && this.oldObject.condition !== "false") {
+            if (this.oldObject.condition.length) {
+                this.$el.find("#enableDynamicRoleGrantCheckbox").prop("checked",true);
+            }
+            this.toggleQueryView();
+        }
+
+        /*
+         * get rid of any existing queryEditors that may be polluting this view
+         * if this is not done pending changes does not work properly
+         */
+        delete this.queryEditor;
+
+        this.queryEditor = this.renderEditor();
+    };
+
+    EditRoleView.prototype.renderEditor = function (clearFilter) {
+        var _this = this,
+            editor = new UserQueryFilterEditor(),
+            filter = "";
+
+        if (this.oldObject.condition !== undefined && this.oldObject.condition !== "false" && !clearFilter) {
+            filter = _this.oldObject.condition;
+        }
+
+        editor.render(
+                {
+                    "queryFilter": filter,
+                    "element": "#conditionFilterHolder",
+                    "resource": "managed/role"
+                },
+                function () {
+                    if (filter.length || clearFilter) {
+                      _this.showPendingChanges();
+                    }
+                }
+        );
+
+        return editor;
+    };
+
+    EditRoleView.prototype.toggleQueryView = function (e) {
+        if (e) {
+            e.preventDefault();
+        }
+
+        if (this.$el.find("#enableDynamicRoleGrantCheckbox").prop("checked")) {
+            this.$el.find("#roleConditionQueryField").show();
+            this.renderEditor();
+        } else {
+            this.$el.find("#roleConditionQueryField").hide();
+            this.renderEditor(true);
+        }
+    };
+
+    EditRoleView.prototype.getFormValue = function () {
+        var conditionChecked = this.$el.find("#enableDynamicRoleGrantCheckbox").prop("checked"),
+            temporalConstraintsChecked = this.$el.find(".enableTemporalConstraintsCheckbox").prop("checked"),
+            condition = "",
+            temporalConstraints = [],
+            returnVal;
+
+        if (conditionChecked && this.queryEditor) {
+            condition = this.queryEditor.getFilterString();
+        } else {
+            condition = undefined;
+        }
+
+        if (temporalConstraintsChecked) {
+            temporalConstraints = TemporalConstraintsUtils.getTemporalConstraintsValue(this.$el.find('.temporalConstraintsForm'));
+        } else {
+            temporalConstraints = undefined;
+        }
+
+            returnVal = _.extend(
+                {
+                    "condition": condition,
+                    "temporalConstraints": temporalConstraints
+                },
+                GenericEditResourceView.getFormValue.call(this)
+            );
+
+        return returnVal;
+    };
 
     return new EditRoleView();
 });

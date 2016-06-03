@@ -1,26 +1,39 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015-2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="list-grid">
-    <div class="row">
-        {{#each cards}}
-        <div class="col-sm-6 col-md-3">
-            <div class="card-container card-container-sm">
-                <div class="card">
-                    <div class="card-body">
-                        <a {{#if href}}href="{{href}}"{{else}} href="#"{{/if}} id="{{uid}}">
-                        <div class="image circle circle-sm">
-                            <i class="fa {{icon}}"></i>
-                        </div>
-                        <div class="content">
-                            <div class="main">
-                                <h3 class="name">{{name}}</h3>
+{{> dashboard/_widgetHeader}}
+<div class="panel-body widget-body">
+    <div class="list-grid">
+        {{#if cards}}
+        <div class="row">
+            {{#each cards}}
+            <div class="col-sm-6 col-md-3">
+                <div class="card-container card-container-sm">
+                    <div class="card">
+                        <div class="card-body">
+                            <a {{#if href}}href="{{href}}"{{else}} href="#"{{/if}}>
+                            <div class="image circle circle-sm">
+                                <i class="fa {{icon}}"></i>
                             </div>
+                            <div class="content">
+                                <div class="main">
+                                    <h3 class="name">{{name}}</h3>
+                                </div>
+                            </div>
+                            </a>
                         </div>
-                        </a>
                     </div>
                 </div>
             </div>
+            {{/each}}
         </div>
-        {{/each}}
+        {{else}}
+        <div class="well recon-message">
+            <div class="message-icon text-primary"><i class="fa fa-link"></i></div>
+            <h3>{{t 'dashboard.quickStart.quickStartEmpty'}}</h3>
+            <p>
+                {{t 'dashboard.quickStart.quickStartEmptyText'}}
+            </p>
+        </div>
+        {{/if}}
     </div>
 </div>

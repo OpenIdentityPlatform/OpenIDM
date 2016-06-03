@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsDialog", [
             conf,
             InlineScriptEditor,
             constants,
-            validatorsManager,
+            ValidatorsManager,
             BootstrapDialog,
             JSONEditor) {
 
@@ -43,8 +43,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsDialog", [
         template: "templates/admin/settings/audit/AuditTopicsDialogTemplate.html",
         el: "#dialogs",
         events: {
-            "onValidate": "onValidate",
-            "customValidate": "customValidate",
             "change .watchedFields": "updateWatchedFields",
             "change .passwordFields": "updatePasswordFields",
             "change .filterActions": "updateFilterAction",
@@ -200,9 +198,8 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsDialog", [
                 this.$el,
                 _.extend({}, conf.globalData, data),
                 _.bind(function(data) {
-                    validatorsManager.bindValidators(this.$el.find("#auditEventsForm"));
-                    validatorsManager.validateAllFields(this.$el.find("#auditEventsForm"));
-
+                    ValidatorsManager.bindValidators(this.$el.find("#auditEventsForm"));
+                    ValidatorsManager.validateAllFields(this.$el.find("#auditEventsForm"));
 
                     var jsonOptions = {};
 
@@ -335,12 +332,20 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditTopicsDialog", [
             this.renderTemplate(this.data);
         },
 
-        customValidate: function() {
-            this.validationResult = validatorsManager.formValidated(this.$el.find("#auditEventsForm"));
-            this.$el.parentsUntil(".model-content").find("#submitAuditEvent").prop('disabled', !this.validationResult);
-            if (this.validationResult) {
+        validationSuccessful: function (event) {
+            AuditAdminAbstractView.prototype.validationSuccessful(event);
+
+            if(ValidatorsManager.formValidated(this.$el.find("#auditEventsForm"))) {
+                this.$el.parentsUntil(".model-content").find("#submitAuditEvent").prop('disabled', false);
+
                 this.data.defaults.eventName = this.$el.find("#eventName").val().trim();
             }
+        },
+
+        validationFailed: function (event, details) {
+            AuditAdminAbstractView.prototype.validationFailed(event, details);
+
+            this.$el.parentsUntil(".model-content").find("#submitAuditEvent").prop('disabled', true);
         },
 
         updateFilter: function(prop, value) {

@@ -20,15 +20,20 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
     "jquery",
     "underscore",
     "dimple",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate"
-], function($, _, dimple, AbstractView, eventManager, constants, conf, SystemHealthDelegate) {
+], function($, _,
+            dimple,
+            AbstractWidget,
+            eventManager,
+            constants,
+            conf,
+            SystemHealthDelegate) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/dashboard/widget/DashboardSingleWidgetTemplate.html",
             model: {
                 cpuChart: null,
@@ -45,16 +50,23 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
                 dangerChartColor: "#a94442",
                 defaultChartColor: "#519387"
             },
-            data: {
 
-            },
-            render: function(args, callback) {
-                this.element = args.element;
-                this.data.widgetTitle = $.t("dashboard.cpuUsage");
-                this.cpuUsageWidget(callback);
-            },
-            cpuUsageWidget: function(callback) {
-                $(window).unbind("resize.cpuChart");
+            widgetRender: function(args, callback) {
+                this.data.widgetTextDetails = $.t("dashboard.cpuUsage");
+
+                this.events["click .refresh-health-info"] = "refresh";
+
+                if(args.widget.simpleWidget) {
+                    this.data.simpleWidget = true;
+                } else {
+                    this.data.simpleWidget = false;
+                }
+
+                this.data.menuItems = [{
+                    "icon" : "fa-refresh",
+                    "menuClass" : "refresh-health-info",
+                    "title" : "Refresh"
+                }];
 
                 this.parentRender(_.bind(function(){
                     this.model.currentData = [];
@@ -116,7 +128,11 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget", [
                 }, this));
             },
 
-            refresh: function() {
+            refresh: function(event) {
+                if(event) {
+                    event.preventDefault();
+                }
+
                 SystemHealthDelegate.getOsHealth().then(_.bind(function(widgetData) {
                     var percent = Math.round((widgetData.systemLoadAverage / widgetData.availableProcessors) * 100),
                         usedCpu = this.$el.find(".used-cpu");

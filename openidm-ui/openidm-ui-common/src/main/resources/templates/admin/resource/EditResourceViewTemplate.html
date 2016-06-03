@@ -37,7 +37,7 @@
                 </li>
                 <li id="resourceDetailsTabHeader" class="active"><a href="#resource-details" role="tab" data-toggle="tab" aria-expanded="true">{{t "templates.admin.ResourceEdit.details"}}</a></li>
                 <li id="linkedSystemsTabHeader" style="display:none;" {{#if newObject}}style="display:none;"{{/if}}><a href="#resource-linkedSystems" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.admin.ResourceEdit.linkedSystems"}}</a></li>
-                <li id="tabHeaderTemplate"><a href="" role="tab" data-toggle="tab" aria-expanded="false"></a></li>
+                <li id="tabHeaderTemplate" style="display:none;"><a href="" role="tab" data-toggle="tab" aria-expanded="false"></a></li>
             </ul>
         </div>
         <!-- Tab panes -->
@@ -47,7 +47,9 @@
                     <div class="panel-collapse-group">
                         <div class="panel panel-default panel-collapse">
                             <div class="panel-body">
-                                <div id="resource" class="jsonEditor"></div>
+                                <form class="form">
+                                    <div id="resource" class="jsonEditor"></div>
+                                </form>
                             </div>
                         </div>
                     </div>

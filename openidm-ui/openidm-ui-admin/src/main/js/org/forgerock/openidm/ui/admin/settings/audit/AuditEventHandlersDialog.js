@@ -39,17 +39,14 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
             conf,
             InlineScriptEditor,
             constants,
-            validatorsManager,
+            ValidatorsManager,
             BootstrapDialog,
             JSONEditor) {
 
     var AuditEventHandlersDialog = AuditAdminAbstractView.extend({
         template: "templates/admin/settings/audit/AuditEventHandlersDialogTemplate.html",
         el: "#dialogs",
-        events: {
-            "onValidate": "onValidate",
-            "customValidate": "customValidate"
-        },
+        events: {},
         model: {},
 
         render: function(args, callback) {
@@ -72,6 +69,9 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                 if (_.has(this.data.eventHandler.config, "enabled")) {
                     this.data.enabled = this.data.eventHandler.config.enabled;
                     delete this.data.eventHandler.config.enabled;
+                // When the property enabled is not present but a handler is, treat it as enabled.
+                } else {
+                    this.data.enabled = true;
                 }
             }
 
@@ -95,7 +95,7 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                     size: BootstrapDialog.SIZE_WIDE,
                     type: BootstrapDialog.TYPE_DEFAULT,
                     message: this.model.currentDialog,
-                    onshown: _this.renderTemplate(_this.data),
+                    onshown: function(){_this.renderTemplate(_this.data);},
                     buttons: [
                         {
                             label: $.t("common.form.cancel"),
@@ -120,7 +120,6 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                                 data.eventHandler.config.name = this.$el.find("#eventHandlerName").val();
                                 data.eventHandler.config.topics = this.$el.find(".topics").val();
                                 data.eventHandler.config.enabled = this.$el.find("#enabled").is(":checked");
-                                data.useForQueries = this.$el.find(".useForQueries").is(":checked");
 
                                 if (callback) {
                                     callback(data);
@@ -158,11 +157,26 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                 _.extend({}, conf.globalData, data),
                 _.bind(function(data) {
                     var schema = {};
+
                     if (_.has(this.data.handler, "config")) {
                         schema = this.data.handler.config;
+
+                        //override the endOfLineSymbols in the csv handler
+                        if (schema.properties && schema.properties.formatting && schema.properties.formatting.properties && schema.properties.formatting.properties.endOfLineSymbols) {
+                            schema.properties.formatting.properties.endOfLineSymbols.enum = [
+                                String.fromCharCode(10),
+                                String.fromCharCode(13),
+                                String.fromCharCode(13) + String.fromCharCode(10)
+                            ];
+                            schema.properties.formatting.properties.endOfLineSymbols.options = {
+                                "enum_titles": [
+                                    $.t("templates.audit.eventHandlers.endOfLineSymbols.linefeed"),
+                                    $.t("templates.audit.eventHandlers.endOfLineSymbols.carriageReturn"),
+                                    $.t("templates.audit.eventHandlers.endOfLineSymbols.carriageReturnLinefeed")
+                                ]
+                            };
+                        }
                     }
-                    validatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
-                    validatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
 
                     if (!_.isEmpty(schema)) {
 
@@ -176,19 +190,33 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                             delete schema.properties.enabled;
                         }
 
+                        // default value for signatureInterval
+                        if (_.has(schema, "properties.security.properties.signatureInterval") &&
+                                (
+                                    _.has(this.data.eventHandler, "config") &&
+                                    (
+                                        !_.has(this.data.eventHandler.config, "security.signatureInterval") ||
+                                        !this.data.eventHandler.config.security.signatureInterval
+                                     )
+                                )
+                        ) {
+                            this.data.eventHandler.config.security = this.data.eventHandler.config.security || {};
+                            this.data.eventHandler.config.security.signatureInterval = "1 hour";
+                        }
+
                         this.translateDescriptions(schema);
                         this.data.schemaEditor = new JSONEditor(this.$el.find("#auditEventHandlerConfig")[0], {
                             "schema": schema,
                             "disable_edit_json": true,
                             "disable_array_reorder": false,
                             "disable_collapse": true,
-                            "disable_properties": true,
+                            "disable_properties": false,
                             "show_errors": "never",
                             "template": "handlebars",
                             "iconlib": "fontawesome4",
                             "theme": "bootstrap3",
-                            "no_additional_properties": true,
-                            "additionalItems": false,
+                            "no_additional_properties": false,
+                            "additionalItems": true,
                             "required_by_default": true
                         });
 
@@ -202,14 +230,26 @@ define("org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialog",
                         items: this.data.selectedTopics
                     });
 
+                    ValidatorsManager.bindValidators(this.$el.find("#auditEventHandlersForm"));
+                    ValidatorsManager.validateAllFields(this.$el.find("#auditEventHandlersForm"));
+
                 }, this),
                 "replace"
             );
         },
 
-        customValidate: function() {
-            this.validationResult = validatorsManager.formValidated(this.$el.find("#auditEventHandlersForm"));
-            this.$el.parentsUntil(".model-content").find("#submitAuditEventHandlers").prop('disabled', !this.validationResult);
+        validationSuccessful: function (event) {
+            AuditAdminAbstractView.prototype.validationSuccessful(event);
+
+            if(ValidatorsManager.formValidated(this.$el.find("#auditEventHandlersForm"))) {
+                this.$el.parentsUntil(".model-content").find("#submitAuditEventHandlers").prop('disabled', false);
+            }
+        },
+
+        validationFailed: function (event, details) {
+            AuditAdminAbstractView.prototype.validationFailed(event, details);
+
+            this.$el.parentsUntil(".model-content").find("#submitAuditEventHandlers").prop('disabled', true);
         }
     });
 

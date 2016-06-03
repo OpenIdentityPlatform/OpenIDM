@@ -23,17 +23,22 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", 
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/util/TreeGridUtils",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/SpinnerManager"
+    "org/forgerock/commons/ui/common/main/SpinnerManager",
+    "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate"
 
 ], function($, _, Handlebars,
             AdminAbstractView,
             TreeGridUtils,
             UIUtils,
+            DateUtil,
             Constants,
-            SpinnerManager) {
+            SpinnerManager,
+            MaintenanceDelegate
+        ) {
 
-    var VersionsView = AdminAbstractView.extend({
+    var InstallationReportView = AdminAbstractView.extend({
         template: "templates/admin/settings/update/InstallationReportTemplate.html",
         element: "#installationReportView",
         noBaseTemplate: true,
@@ -47,7 +52,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", 
             "partials/settings/_updateTreeGrid.html"
         ],
         data: {
-            "treeGrid" : {},
+            "treeGrid": {},
             "responseB64": "",
             "version": ""
         },
@@ -62,39 +67,47 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", 
          * @param [callback]
          */
         render: function(configs, callback) {
+
             // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
             SpinnerManager.showSpinner();
 
             this.model = configs;
             this.data = _.extend(this.data, _.pick(this.model, ["treeGrid", "responseB64", "version"]));
 
-            // The delay is to ensure that the spinner is rendered before any resource heavy rendering
-            // beings, otherwise the spinner may not show at all.
-            _.delay(_.bind(function() {
-                // This partial is used before the parent render where it would normally be loaded.
-                UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(_.bind(function() {
-                    this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(), ["filePath", "actionTaken"]);
+            if (configs.isHistoricalInstall) {
+                this.data.isHistoricalInstall = true;
+                this.data.date = DateUtil.formatDate(this.model.response.endDate, "MMM dd, yyyy");
+                this.data.user = this.model.response.userName;
+            }
 
-                    if (this.model.response) {
-                        this.data.responseB64 = window.btoa(JSON.stringify(this.model.response));
-                    }
+            MaintenanceDelegate.getLogDetails(this.model.runningID)
+            .then(function(logData) {
+                this.model.response.files = logData.files;
 
-                    this.parentRender(_.bind(function() {
-                        SpinnerManager.hideSpinner();
+                    UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(_.bind(function() {
+                        this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(), ["filePath", "actionTaken"]);
 
-                        this.$el.find('[data-toggle="popover"]').popover({
-                            trigger:'hover',
-                            placement:'top',
-                            container: 'body',
-                            title: ''
-                        });
-
-                        if (callback) {
-                            callback();
+                        if (this.model.response) {
+                            this.data.responseB64 = window.btoa(JSON.stringify(this.model.response));
                         }
+
+                        this.parentRender(_.bind(function() {
+                            SpinnerManager.hideSpinner();
+
+                            this.$el.find('[data-toggle="popover"]').popover({
+                                placement: 'top',
+                                container: 'body',
+                                title: ''
+                            });
+
+                            if (callback) {
+                                callback();
+                            }
+                        }, this));
                     }, this));
-                }, this));
-            }, this), 1);
+
+            }.bind(this));
+
         },
 
         back: function(e) {
@@ -154,29 +167,30 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationReportView", 
             var formattedFileList,
                 files = _.clone(this.model.response.files, true);
 
-            formattedFileList = _.map(files, function (file) {
-                var temp = file.filePath.split("/");
-                file.actionTaken = Handlebars.compile("{{> settings/_updateStatePopover}}")({
-                    "desc": $.t("templates.update.review.actionTaken." + file.actionTaken + ".desc"),
-                    "name": $.t("templates.update.review.actionTaken." + file.actionTaken + ".reportName")
+                formattedFileList = _.map(files, function (file) {
+                    var temp = file.filePath.split("/");
+                    file.actionTaken = Handlebars.compile("{{> settings/_updateStatePopover}}")({
+                        "desc": $.t("templates.update.review.actionTaken." + file.actionTaken + ".desc"),
+                        "name": $.t("templates.update.review.actionTaken." + file.actionTaken + ".reportName")
+                    });
+                    file.fileName = _.last(temp);
+                    file.partialFilePath = _.take(temp, temp.length - 1).join("");
+                    return file;
                 });
-                file.fileName = _.last(temp);
-                file.partialFilePath = _.take(temp, temp.length-1).join("");
-                return file;
-            });
 
-            return _.sortByAll(formattedFileList, [
-                function(i) {
-                    if (i.partialFilePath.length > 0) {
-                        return i.partialFilePath.toLowerCase();
-                    } else {
-                        return false;
-                    }
-                },
-                function(i) { return i.fileName.toLowerCase();}
-            ]);
+                return _.sortByAll(formattedFileList, [
+                    function(i) {
+                        if (i.partialFilePath.length > 0) {
+                            return i.partialFilePath.toLowerCase();
+                        } else {
+                            return false;
+                        }
+                    },
+                    function(i) { return i.fileName.toLowerCase();}
+                ]);
+
         }
     });
 
-    return new VersionsView();
+    return new InstallationReportView();
 });

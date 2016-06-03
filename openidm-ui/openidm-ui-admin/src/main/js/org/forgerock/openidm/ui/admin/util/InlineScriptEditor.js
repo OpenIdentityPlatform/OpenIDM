@@ -47,9 +47,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 "click .add-passed-variables" : "addEmptyPassedVariable",
                 "click .passed-variables-holder .btn-delete-attribute" : "deletePassedVariable",
                 "blur .passed-variables-holder input" : "passedVariableBlur",
-                "onValidate": "onValidate",
-                "click .script-tabs button" : "changeScriptTab",
-                "customValidate": "customValidate"
+                "click .script-tabs button" : "changeScriptTab"
             },
             model : {
                 autoFocus: true,
@@ -140,10 +138,15 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     });
 
 
-                    if (this.data.scriptData && this.data.scriptData.file === "workflow/triggerWorkflowGeneric.js") {
-                        workflowName = this.data.scriptData.globals.workflowName;
-                        workflowParams = this.data.scriptData.globals.params;
+                    if (this.data.scriptData) {
+                        if(this.data.scriptData.file === "workflow/triggerWorkflowGeneric.js") {
+                            workflowName = this.data.scriptData.globals.workflowName;
+                            workflowParams = this.data.scriptData.globals.params;
+                        }
+
+                        this.$el.find(".event-select").val(this.data.scriptData.type);
                     }
+
                     if (this.model.hasWorkflow) {
                         this.workflow = WorkflowWidget.generateWorkflowWidget({
                             "element": this.$el.find(".workflow-body"),
@@ -218,7 +221,7 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     }
 
                     if (this.model.onChange) {
-                        this.$el.find("input:radio, .scriptFilePath").bind("change", _.bind(function () {
+                        this.$el.on("change", "input:radio, .scriptFilePath, .event-select, .passed-variables-holder :input", _.bind(function () {
                             this.model.onChange();
                         }, this));
                     }
@@ -226,14 +229,6 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                     if (this.model.onBlur) {
                         this.$el.find("input:radio, .scriptFilePath").bind("blur", _.bind(function () {
                             this.model.onBlur();
-                        }, this));
-                    }
-
-                    if (this.model.onChange){
-                        this.$el.find(".event-select").bind("change", _.bind(function(){
-
-                            this.model.onChange();
-
                         }, this));
                     }
 
@@ -416,6 +411,18 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
                 }
             },
 
+            validationSuccessful: function (event) {
+                AbstractView.prototype.validationSuccessful(event);
+
+                this.customValidate();
+            },
+
+            validationFailed: function (event, details) {
+                AbstractView.prototype.validationFailed(event, details);
+
+                this.customValidate();
+            },
+
             customValidate: function() {
                 this.validationResult = validatorsManager.formValidated(this.$el.find(".script-body"));
 
@@ -534,6 +541,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 editor.on('change', _.bind(function () {
                     this.$el.find(".compactJSON div.form-control>:input").addClass("form-control");
+                    if (this.model.onChange) {
+                        this.model.onChange();
+                    }
                 }, this));
 
                 if(value) {
@@ -562,6 +572,9 @@ define("org/forgerock/openidm/ui/admin/util/InlineScriptEditor", [
 
                 if (this.model.onDeletePassedVariable) {
                     this.model.onDeletePassedVariable();
+                }
+                if (this.model.onChange) {
+                    this.model.onChange();
                 }
             }
         });

@@ -11,9 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
-
+ 
 /*global define */
 
 define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
@@ -54,7 +54,7 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
     ) {
     var EditResourceView = AbstractView.extend({
         template: "templates/admin/resource/EditResourceViewTemplate.html",
-
+        tabViewOverrides : {},
         events: {
             "click #saveBtn": "save",
             "click #backBtn": "backToList",
@@ -73,16 +73,16 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
             resourceDelegate.getSchema(args).then(_.bind(function (schema) {
                 var readUrl;
-                
+
                 this.data.args = args;
 
                 this.data.objectType = args[0];
                 this.data.isSystemResource = false;
                 this.objectName = args[1];
                 this.data.serviceUrl = resourceDelegate.getServiceUrl(args);
-                
+
                 readUrl = this.data.serviceUrl +"/" + objectId + "?_fields=" + resourceCollectionUtils.getFieldsToExpand(schema.properties);
-                
+
 
                 if (this.data.objectType === "system") {
                     this.data.isSystemResource = true;
@@ -173,14 +173,14 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
             }
 
             JSONEditor.defaults.options = {
-                    theme: "bootstrap3",
-                    iconlib: "fontawesome4",
-                    disable_edit_json: true,
-                    disable_array_reorder: true,
-                    disable_collapse: true,
-                    disable_properties: true,
-                    show_errors: "never",
-                    formHorizontal: true
+                theme: "bootstrap3",
+                iconlib: "fontawesome4",
+                disable_edit_json: true,
+                disable_array_reorder: true,
+                disable_collapse: true,
+                disable_properties: true,
+                show_errors: "never",
+                formHorizontal: true
             };
 
             if(schema.order){
@@ -210,8 +210,10 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 this.editor.on('change', _.bind(function() {
                     this.showPendingChanges();
                 }, this));
+
+                this.$el.find(".json-editor-btn-collapse").prop("disabled", true);
             }, this));
-            
+
             if (this.data.isSystemResource) {
                 this.$el.find(".row select").hide();
                 this.$el.find(".row input").prop("disabled", true);
@@ -222,8 +224,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 newValue = _.extend({},this.oldObject, this.getFormValue());
 
             if(_.isEqual(newValue, this.oldObject)) {
-                this.$el.find("#saveBtn").prop("disabled", true);
-                this.$el.find("#resetBtn").prop("disabled", true);
+                this.$el.find("#saveBtn").attr("disabled", true);
+                this.$el.find("#resetBtn").attr("disabled", true);
                 this.$el.find("#resourceChangesPending").hide();
             } else {
                 if(!this.data.newObject) {
@@ -231,8 +233,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                         var relationshipType = this.data.schema.properties[key] && this.data.schema.properties[key].typeRelationship,
                             hasVal = val && val.length;
                         if(
-                                (!this.oldObject[key] && hasVal) || 
-                                (!relationshipType && (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) || 
+                                (!this.oldObject[key] && hasVal) ||
+                                (!relationshipType && (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) ||
                                 (relationshipType && hasVal && !_.isEqual(JSON.parse(val), this.oldObject[key]))
                           ) {
                             if(this.data.schema.properties && this.data.schema.properties[key] && this.data.schema.properties[key].title && this.data.schema.properties[key].title.length) {
@@ -252,6 +254,8 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                         this.$el.find("#resourceChangesPending").show();
                     } else {
                         this.$el.find("#resourceChangesPending").hide();
+                        this.$el.find("#saveBtn").attr("disabled", true);
+                        this.$el.find("#resetBtn").attr("disabled", true);
                     }
                 } else {
                     this.$el.find("#saveBtn").removeAttr("disabled");
@@ -277,25 +281,31 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
          * </div>
          *
          */
-        addTooltips: function(){
+        addTooltips: function() {
             var propertyDescriptionSpan = this.$el.find("p.help-block"),
                 objectHeader = this.$el.find("#resource").find("h3:eq(0)"),
-                objectDescriptionSpan = objectHeader.next();
+                objectDescriptionSpan = objectHeader.next(),
+                // this text escaped since it's being inserted into an attribute
+                tipDescription = handlebars.Utils.escapeExpression(objectDescriptionSpan.text()),
+                iconElement = $('<i class="fa fa-info-circle info" />');
 
-            $.each(propertyDescriptionSpan, function(){
-                $(this).parent().find("label").after(' <i class="fa fa-info-circle info" title="' + $(this).text() + '"/>');
+            $.each(propertyDescriptionSpan, function() {
+                // this text escaped since it's being inserted into an attribute
+                var tipDescription = handlebars.Utils.escapeExpression($(this).text());
+                iconElement.attr('title', tipDescription);
+                $(this).parent().find("label").after(iconElement);
                 $(this).empty();
             });
 
-            if(objectDescriptionSpan.text().length > 0){
-                objectHeader.append('<i class="fa fa-info-circle info" title="' + objectDescriptionSpan.text() + '"/>');
+            if (objectDescriptionSpan.text().length > 0) {
+                iconElement.attr('title', tipDescription);
+                objectHeader.append(iconElement);
                 objectDescriptionSpan.empty();
             }
 
             this.$el.find(".info").popover({
                 content: function () { return $(this).attr("data-original-title");},
-                trigger:'hover',
-                placement:'top',
+                placement: 'top',
                 container: 'body',
                 html: 'true',
                 template: '<div class="popover popover-info" role="tooltip"><div class="popover-content"></div></div>'
@@ -313,15 +323,17 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 This loop filters out previously null values that have not been changed.
                 */
                 _.each(_.keys(formVal), function(key){
-                    if(!_.has(this.oldObject, key) && (!formVal[key] || !formVal[key].length)){
-                        delete formVal[key];
+                    if ((this.oldObject[key] === null || this.oldObject[key] === undefined) && (!formVal[key] || !formVal[key].length)){
+                        formVal[key] = this.oldObject[key];
                     }
                 }, this);
             } else {
                 _.each(this.$el.find(".resourceCollectionValue"), function(element) {
                     try {
                         formVal[$(element).attr("propname")] = JSON.parse($(element).val());
-                    } catch (e) {}
+                    } catch (e) {
+                        // Ignored
+                    }
                 });
             }
 
@@ -348,6 +360,10 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                 e.preventDefault();
             }
 
+            if ($(e.currentTarget).attr("disabled") === "disabled" ) {
+                return false;
+            }
+
             if(this.data.newObject){
                 formVal = _.omit(formVal,function (val) { return val === "" || val === null; });
                 resourceDelegate.createResource(this.data.serviceUrl, formVal._id, formVal, successCallback);
@@ -358,10 +374,12 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
 
                         if (val.length) {
                             val = JSON.parse($(element).val());
+                        } else {
+                            val = null;
                         }
                         formVal[$(element).attr("propname")] = val;
                     });
-                    resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, formVal, successCallback);
+                    resourceDelegate.patchResourceDifferences(this.data.serviceUrl, {id: this.oldObject._id, rev: this.oldObject._rev}, this.oldObject, _.extend({}, this.oldObject, formVal), successCallback);
                 } else {
                     resourceDelegate.updateResource(this.data.serviceUrl, this.oldObject._id, formVal, successCallback);
                 }
@@ -379,6 +397,10 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
         reset: function(e){
             if (e) {
                 e.preventDefault();
+            }
+
+            if ($(e.currentTarget).attr("disabled") === "disabled" ) {
+                return false;
             }
 
             this.render(this.data.args);
@@ -403,145 +425,145 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
          * the JSONEditor representation of the field to a relationship UI in the case of singleton relationships
          * or in the case of arrays of relationships it converts that into its own tab with it's own grid of data
          * and actions
-         * 
+         *
          * @param {Object} filteredObject
          * @param {Object} schema
          * @returns {promise}
          */
         convertResourceCollectionFields: function(filteredObject,schema){
-                var _this = this,
-                    getFields,
-                    convertField,
-                    convertArrayField,
-                    showRelationships,
-                    addTab;
+            var _this = this,
+                getFields,
+                convertField,
+                convertArrayField,
+                showRelationships,
+                addTab;
 
-                getFields = function(properties, parent) {
-                    var promises;
+            getFields = function(properties, parent) {
+                var promises;
 
-                    promises = _.map(properties, function(prop,key) {
-                        prop.propName = key;
-                        if (prop.type === "object") {
-                            if (parent) {
-                                parent += "\\." + key;
-                            } else {
-                                parent = "\\." + key;
-                            }
-                            return getFields(prop.properties, parent);
-                        }
-
+                promises = _.map(properties, function(prop,key) {
+                    prop.propName = key;
+                    if (prop.type === "object") {
                         if (parent) {
-                            prop.selector =  parent + "\\." + key;
+                            parent += "\\." + key;
                         } else {
-                            prop.selector = "\\." + key;
+                            parent = "\\." + key;
                         }
-
-                        if (prop.type === "array") {
-                            if(prop.items.resourceCollection && _.has(filteredObject,key)) {
-                                prop.parentObjectId =  _this.objectId;
-                                prop.relationshipUrl = _this.data.objectType + "/" + _this.objectName + "/" + _this.objectId + "/" + prop.propName;
-                                prop.typeRelationship = true;
-                                prop.parentDisplayText = _this.data.objectDisplayText;
-                                return convertArrayField(prop);
-                            }
-                        }
-
-                        if (prop.resourceCollection) {
-                            return convertField(prop);
-                        }
-
-                        // nothing special needed for this field
-                        return $.Deferred().resolve();
-                    });
-
-                    return $.when.apply($, promises);
-                };
-                
-                /**
-                 * converts a singleton relationship field into a button that opens an instance of ResourceCollectionSearchDialog
-                 * if the property has no value the button will be a create button
-                 * if the property has a value the button will be a link button with the related resource's display text and the resource's icon
-                 */
-                convertField = function (prop) {
-                    var el = _this.$el.find("#0-root" + prop.selector.replace(/\./g, "-")),//this is the JSONEditor field to be hidden and changed by the button/dialog
-                        buttonId = "relationshipLink-" + prop.propName,
-                        button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({ 
-                                "newRelationship": true, 
-                                "displayText" : $.t("templates.admin.ResourceEdit.addResource",{ resource: prop.title }),
-                                "buttonId" : buttonId
-                             })),
-                        propertyValuePath,
-                        iconClass,
-                        resourceCollectionSchema,
-                        resourceEditPath = function () {
-                            var val = JSON.parse(el.val()),
-                                route = "resource/",
-                                pathArray = val._ref.split("/");
-                            
-                            pathArray.pop();
-                            
-                            route += pathArray.join("/") + "/edit/" + val._id;
-                            
-                            return route;
-                        };
-                    
-                    if (el.val().length) {
-                        propertyValuePath = resourceCollectionUtils.getPropertyValuePath(JSON.parse(el.val()));
-                        resourceCollectionSchema = _.findWhere(_this.data.schema.allSchemas, { name : propertyValuePath.split("/")[propertyValuePath.split("/").length - 1] });
-                        
-                        if (resourceCollectionSchema) {
-                            iconClass = resourceCollectionSchema.schema.icon;
-                        }
-
-                        button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({ 
-                            "iconClass": iconClass || "fa-cube", 
-                            "displayText": resourceCollectionUtils.getDisplayText(prop, JSON.parse(el.val()), resourceCollectionUtils.getResourceCollectionIndex(_this.data.schema,propertyValuePath, prop.propName)),
-                            "editButtonText": $.t("templates.admin.ResourceEdit.updateResource",{ resource: prop.title }),
-                            "propName": prop.propName,
-                            "resourceEditPath": resourceEditPath()
-                         }));
-                       
+                        return getFields(prop.properties, parent);
                     }
 
-                    button.click(function (e) {
-                        var opts = {
-                                property: prop,
-                                propertyValue: el.val(),
-                                schema: _this.data.schema,
-                                onChange: function (value, newText) {
-                                    _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue(JSON.stringify(value));
-                                    button.remove();
-                                    convertField(prop);
-                                    _this.$el.find("#resourceEditLink-" + prop.propName).text(newText);
-                                }
-                        };
-                        
-                        if ($(e.target).attr("id") === buttonId || $(e.target).closest(".updateRelationshipButton").attr("id") === buttonId) {
-                            e.preventDefault();
-                            ResourceCollectionSearchDialog.render(opts);
-                        }
-                    });
-    
-                    el.attr("style","display: none !important");
-                    el.attr("propname",prop.propName);
-                    el.addClass("resourceCollectionValue");
-                    el.after(button);
-    
-                    return $.Deferred().resolve();
-                };
+                    if (parent) {
+                        prop.selector =  parent + "\\." + key;
+                    } else {
+                        prop.selector = "\\." + key;
+                    }
 
-                convertArrayField = function(prop) {
+                    if (prop.type === "array") {
+                        if(prop.items.resourceCollection && _.has(filteredObject,key)) {
+                            prop.parentObjectId =  _this.objectId;
+                            prop.relationshipUrl = _this.data.objectType + "/" + _this.objectName + "/" + _this.objectId + "/" + prop.propName;
+                            prop.typeRelationship = true;
+                            prop.parentDisplayText = _this.data.objectDisplayText;
+                            return convertArrayField(prop);
+                        }
+                    }
+
+                    if (prop.resourceCollection) {
+                        return convertField(prop);
+                    }
+
+                    // nothing special needed for this field
+                    return $.Deferred().resolve();
+                });
+
+                return $.when.apply($, promises);
+            };
+
+            /**
+             * converts a singleton relationship field into a button that opens an instance of ResourceCollectionSearchDialog
+             * if the property has no value the button will be a create button
+             * if the property has a value the button will be a link button with the related resource's display text and the resource's icon
+             */
+            convertField = function (prop) {
+                var el = _this.$el.find("#0-root" + prop.selector.replace(/\./g, "-")),//this is the JSONEditor field to be hidden and changed by the button/dialog
+                    buttonId = "relationshipLink-" + prop.propName,
+                    button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({
+                        "newRelationship": true,
+                        "displayText" : $.t("templates.admin.ResourceEdit.addResource",{ resource: prop.title }),
+                        "buttonId" : buttonId
+                    })),
+                    propertyValuePath,
+                    iconClass,
+                    resourceCollectionSchema,
+                    resourceEditPath = function () {
+                        var val = JSON.parse(el.val()),
+                            route = "resource/",
+                            pathArray = val._ref.split("/");
+
+                        pathArray.pop();
+
+                        route += pathArray.join("/") + "/edit/" + val._id;
+
+                        return route;
+                    };
+
+                if (el.val().length) {
+                    propertyValuePath = resourceCollectionUtils.getPropertyValuePath(JSON.parse(el.val()));
+                    resourceCollectionSchema = _.findWhere(_this.data.schema.allSchemas, { name : propertyValuePath.split("/")[propertyValuePath.split("/").length - 1] });
+
+                    if (resourceCollectionSchema) {
+                        iconClass = resourceCollectionSchema.schema.icon;
+                    }
+
+                    button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({
+                        "iconClass": iconClass || "fa-cube",
+                        "displayText": resourceCollectionUtils.getDisplayText(prop, JSON.parse(el.val()), resourceCollectionUtils.getResourceCollectionIndex(_this.data.schema,propertyValuePath, prop.propName)),
+                        "editButtonText": $.t("templates.admin.ResourceEdit.updateResource",{ resource: prop.title }),
+                        "propName": prop.propName,
+                        "resourceEditPath": resourceEditPath()
+                    }));
+                }
+
+                button.click(function (e) {
+                    var opts = {
+                        property: prop,
+                        propertyValue: el.val(),
+                        schema: _this.data.schema,
+                        onChange: function (value, newText) {
+                            _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue(JSON.stringify(value));
+                            button.remove();
+                            convertField(prop);
+                            _this.$el.find("#resourceEditLink-" + prop.propName).text(newText);
+                        }
+                    };
+
+                    if ($(e.target).attr("id") === buttonId || $(e.target).closest(".updateRelationshipButton").attr("id") === buttonId) {
+                        e.preventDefault();
+                        new ResourceCollectionSearchDialog().render(opts);
+                    }
+                });
+
+                el.attr("style","display: none !important");
+                el.attr("propname",prop.propName);
+                el.addClass("resourceCollectionValue");
+                el.after(button);
+
+                return $.Deferred().resolve();
+            };
+
+            convertArrayField = function(prop) {
+                var doConversion = function (tabView) {
                     _this.editor.getEditor('root' + prop.selector.replace("\\","")).destroy();
-                    
-                    //in case this relationship array field is returned by default 
+
+                    //in case this relationship array field is returned by default
                     //remove it from the original version of the resource
                     if (_this.oldObject[prop.propName]) {
                         delete _this.oldObject[prop.propName];
                     }
-                    
+
                     return addTab(prop, {
                         templateId : "tabContentTemplate",
-                        tabView: new RelationshipArrayView(),
+                        tabView: tabView,
                         viewId: "relationshipArray-" + prop.propName,
                         contentId: "resource-" + prop.propName,
                         contentClass: "resourceCollectionArray",
@@ -549,43 +571,52 @@ define("org/forgerock/openidm/ui/common/resource/GenericEditResourceView", [
                     });
                 };
 
-                showRelationships = function(prop) {
-                    return addTab(prop, {
-                        templateId : "relationshipsTemplate",
-                        tabView: new ResourceCollectionRelationshipsView(),
-                        viewId: "resourceCollectionRelationship-" + prop.propName,
-                        contentId: "relationship-" + prop.propName,
-                        contentClass: "resourceCollectionRelationships",
-                        headerText: prop.resourceCollection.label
-                    });
-                };
+                //check for tabViewOverride
+                if (_this.tabViewOverrides[prop.propName]) {
+                    doConversion(_this.tabViewOverrides[prop.propName]);
+                } else {
+                    doConversion(new RelationshipArrayView());
+                }
+            };
 
-                addTab = function(prop, opts) {
-                    var tabHeader = _this.$el.find("#tabHeaderTemplate").clone(),
-                        tabContent = _this.$el.find("#" + opts.templateId).clone(),
-                        promise = $.Deferred();
+            showRelationships = function(prop) {
+                return addTab(prop, {
+                    templateId : "relationshipsTemplate",
+                    tabView: new ResourceCollectionRelationshipsView(),
+                    viewId: "resourceCollectionRelationship-" + prop.propName,
+                    contentId: "relationship-" + prop.propName,
+                    contentClass: "resourceCollectionRelationships",
+                    headerText: prop.resourceCollection.label
+                });
+            };
 
-                    if (!_this.data.newObject) {
-                        tabHeader.attr("id", "tabHeader_" + opts.contentId);
-                        tabHeader.find("a").attr("href","#" + opts.contentId).text(opts.headerText);
+            addTab = function(prop, opts) {
+                var tabHeader = _this.$el.find("#tabHeaderTemplate").clone(),
+                    tabContent = _this.$el.find("#" + opts.templateId).clone(),
+                    promise = $.Deferred();
 
-                        tabContent.attr("id",opts.contentId);
-                        tabContent.find("." + opts.contentClass).attr("id", opts.viewId);
+                if (!_this.data.newObject) {
+                    tabHeader.attr("id", "tabHeader_" + opts.contentId);
+                    tabHeader.find("a").attr("href","#" + opts.contentId).text(opts.headerText);
+                    tabHeader.show();
 
-                        _this.$el.find("#linkedSystemsTabHeader").before(tabHeader);
-                        _this.$el.find("#resource-linkedSystems").before(tabContent);
+                    tabContent.attr("id",opts.contentId);
+                    tabContent.find("." + opts.contentClass).attr("id", opts.viewId);
 
-                        opts.tabView.render({ element: "#" + opts.viewId, prop: prop, schema: schema, onChange: opts.onChange }, function () {
-                            promise.resolve();
-                        });
-                    } else {
+                    _this.$el.find("#linkedSystemsTabHeader").before(tabHeader);
+                    _this.$el.find("#resource-linkedSystems").before(tabContent);
+
+                    opts.tabView.render({ element: "#" + opts.viewId, prop: prop, schema: schema, onChange: opts.onChange }, function () {
                         promise.resolve();
-                    }
+                    });
+                } else {
+                    promise.resolve();
+                }
 
-                    return promise;
-                };
+                return promise;
+            };
 
-                return getFields(schema.properties);
+            return getFields(schema.properties);
         }
     });
 

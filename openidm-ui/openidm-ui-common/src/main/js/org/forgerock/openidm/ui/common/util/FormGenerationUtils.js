@@ -262,5 +262,20 @@ define("org/forgerock/openidm/ui/common/util/FormGenerationUtils", [
         }
     };
 
+    obj.validateForm = function(options, validatorsManager, callback) {
+        var baseEntity = this.$el.find(options.element).attr(options.attribute);
+        validatorsManager.bindValidators(this.$el, baseEntity, function() {
+            validatorsManager.validateAllFields(this.$el);
+
+            this.$el.find("select").toggleClass("form-control", true);
+
+            if (callback) {
+                callback();
+            }
+        }.bind(this));
+
+
+    };
+
     return obj;
 });

@@ -22,15 +22,24 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
+    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/components/Navigation"
-], function($, _, AbstractDelegate, conf, commonSiteConfigurationDelegate, eventManager, Constants, Navigation) {
+], function($, _,
+            AbstractDelegate,
+            conf,
+            commonSiteConfigurationDelegate,
+            ConfigDelegate,
+            eventManager,
+            Constants,
+            Navigation) {
 
     var SiteConfigurationDelegate = function (url) {
-        AbstractDelegate.call(this, url);
-        return this;
-    };
+            AbstractDelegate.call(this, url);
+            return this;
+        },
+        currentSelfServiceStates = { };
 
     SiteConfigurationDelegate.prototype = Object.create(commonSiteConfigurationDelegate);
 
@@ -44,23 +53,49 @@ define("org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate", [
         });
     };
 
+    SiteConfigurationDelegate.prototype.updateConfiguration = function (callback) {
+        this.getConfiguration(function(result) {
+            conf.globalData = result;
+
+            if (callback) {
+                callback();
+            }
+        });
+    };
+
     SiteConfigurationDelegate.prototype.checkForDifferences = function(){
         var promise = $.Deferred();
 
-        if (conf.loggedUser && _.contains(conf.loggedUser.uiroles,"ui-admin") &&
-            Navigation.configuration.links && Navigation.configuration.links.admin &&
-            Navigation.configuration.links.admin.urls &&
-            Navigation.configuration.links.admin.urls.managed &&
-            Navigation.configuration.links.admin.urls.managed.urls &&
-            Navigation.configuration.links.admin.urls.managed.urls.length === 0) {
+        if (conf.loggedUser) {
 
-            eventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION,
-                {
-                    callback: function () {
-                        promise.resolve();
-                    }
+            ConfigDelegate.readEntity("ui/configuration").then(function (uiConfig) {
+
+                if (
+                    (_.contains(conf.loggedUser.uiroles,"ui-admin") &&
+                    Navigation.configuration.links && Navigation.configuration.links.admin &&
+                    Navigation.configuration.links.admin.urls &&
+                    Navigation.configuration.links.admin.urls.managed &&
+                    Navigation.configuration.links.admin.urls.managed.urls &&
+                    Navigation.configuration.links.admin.urls.managed.urls.length === 0)
+
+                    ||
+
+                    !_.isEqual(currentSelfServiceStates, _.pick(uiConfig.configuration, ["passwordReset","selfRegistration","forgotUsername"]))
+                ) {
+                    currentSelfServiceStates = _.pick(uiConfig.configuration, ["passwordReset","selfRegistration","forgotUsername"]);
+
+                    eventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION,
+                        {
+                            callback: function () {
+                                promise.resolve();
+                            }
+                        }
+                    );
+                } else {
+                    promise.resolve();
                 }
-            );
+
+            });
 
         } else {
             promise.resolve();

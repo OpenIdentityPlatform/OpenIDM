@@ -22,14 +22,16 @@ define("org/forgerock/openidm/ui/admin/user/EditUserView", [
     "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/openidm/ui/common/resource/GenericEditResourceView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/openidm/ui/admin/role/MembersView"
 ],
-function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsManager) {
+function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsManager, MembersView) {
     var EditUserView = function () {
         return AbstractView.apply(this, arguments);
     };
 
     EditUserView.prototype = Object.create(GenericEditResourceView);
+    EditUserView.prototype.tabViewOverrides.roles = MembersView;
     EditUserView.prototype.events = _.extend({
         "change #password :input": "showPendingChanges",
         "keyup #password :input": "showPendingChanges"
@@ -54,6 +56,7 @@ function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsMan
 
         tabHeader.attr("id", "tabHeader_password");
         tabHeader.find("a").attr("href","#password").text($.t('common.user.password'));
+        tabHeader.show();
 
         this.$el.find("#resourceDetailsTabHeader").after(tabHeader);
         this.$el.find("#resource-details").after(tabContent);
@@ -65,9 +68,11 @@ function ($, _, Handlebars, AbstractView, GenericEditResourceView, ValidatorsMan
     };
 
     EditUserView.prototype.getFormValue = function () {
-        if (ValidatorsManager.formValidated(this.$el.find("#password"))) {
+        var passwordText = this.$el.find("#input-password").val();
+
+        if (ValidatorsManager.formValidated(this.$el.find("#password")) && passwordText && passwordText.length) {
             return _.extend({
-                    "password": this.$el.find("#input-password").val()
+                    "password": passwordText
                 },
                 GenericEditResourceView.getFormValue.call(this)
             );

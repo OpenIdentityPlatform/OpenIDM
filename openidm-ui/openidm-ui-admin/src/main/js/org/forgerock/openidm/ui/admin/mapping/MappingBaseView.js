@@ -116,7 +116,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                         this.$el.find("#stopSyncButton").prop("disabled",false);
                     } else {
                         this.data.syncCanceled = true;
-                        this.setSyncCanceled(true);
+                        this.setSyncCancelled(true);
                         this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
                     }
 
@@ -265,7 +265,7 @@ define("org/forgerock/openidm/ui/admin/mapping/MappingBaseView", [
                                 if (this.data.recon.ended) {
                                     if(this.data.recon.state === "CANCELED"){
                                         this.data.syncCanceled = true;
-                                        this.setSyncCanceled(true);
+                                        this.setSyncCancelled(true);
                                         this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
                                         this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
                                     } else {

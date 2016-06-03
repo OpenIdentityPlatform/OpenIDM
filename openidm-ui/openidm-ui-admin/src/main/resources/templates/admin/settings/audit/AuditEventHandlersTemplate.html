@@ -17,13 +17,16 @@
             <td>{{config.name}}</td>
             <td>{{class}}</td>
             <td>{{config.topics}}</td>
+
             <td>
+                {{#if isUsableForQueries}}
                 <input type="radio" name="useForQueries" class="useForQueries" data-name="{{config.name}}"{{#if useForQueries}} checked{{/if}}>
+                {{/if}}
             </td>
             <td>
                 <div class="btn-group pull-right">
                     <button class="btn btn-link editEventHandler" data-name="{{config.name}}"><i class="fa fa-pencil"></i></button>
-                    <button class="btn btn-link deleteEventHandler" data-name="{{config.name}}"><i class="fa fa-times"></i></button>
+                    <button class="btn btn-link deleteEventHandler{{#unless deletable}} disabled{{/unless}}" data-name="{{config.name}}"><i class="fa fa-times"></i></button>
                 </div>
             </td>
         </tr>

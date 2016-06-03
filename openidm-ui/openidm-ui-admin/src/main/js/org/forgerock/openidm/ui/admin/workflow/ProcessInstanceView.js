@@ -82,6 +82,9 @@ define("org/forgerock/openidm/ui/admin/workflow/ProcessInstanceView", [
 
                     if (this.data.processInstance.startUserId) {
                         startedBy.id = this.data.processInstance.startUserId;
+                        if (startedBy.id === 'openidm-admin') {
+                            startedBy.url = '/openidm/repo/internal/user';
+                        }
                         fetchArr.push(startedBy.fetch());
                     }
 

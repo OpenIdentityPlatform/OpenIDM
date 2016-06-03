@@ -81,7 +81,15 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                     }
                 },
                 load: function(query, callback) {
-                    searchDelegate.searchResults(pathToResource, obj.autocompleteProps(prop, resourceCollectionIndex, true), query).then(function(result) {
+                    var queryFilter;
+
+                    if(prop.items) {
+                        queryFilter = prop.items.resourceCollection[resourceCollectionIndex].query.queryFilter;
+                    } else {
+                        queryFilter = prop.resourceCollection[resourceCollectionIndex].query.queryFilter;
+                    }
+
+                    searchDelegate.searchResults(pathToResource, obj.autocompleteProps(prop, resourceCollectionIndex, true), query, null, queryFilter).then(function(result) {
                             var convertNestedProps = function(item) {
                                     _.each(obj.autocompleteProps(prop, resourceCollectionIndex), function(propName) {
                                         if(propName.indexOf(".") > -1) {
@@ -93,7 +101,7 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                                 modifiedResult = _.map(result, function(item){
                                     return convertNestedProps(item);
                                 });
-                                
+
                             if (prop.parentObjectId) {
                                 //filter out any values that are the same as the parentObjectId
                                 modifiedResult = _.reject(modifiedResult, function (mr) { return mr._id === prop.parentObjectId; });
@@ -114,12 +122,12 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                     }
                 }
             };
-        
+
         if(autocompleteField[0].selectize) {
             autocompleteField[0].selectize = null;
             autocompleteField.next().remove();
         }
-        
+
         autocompleteField.selectize(_.extend({}, defaultOpts, opts || {}));
     };
 
@@ -145,14 +153,14 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: args});
         }
     };
-    
-    
+
+
     /**
-     * convertRelationshipTypes loops over every property looking for 
+     * convertRelationshipTypes loops over every property looking for
      * arrays of relationship types or single value relationship types
      * once found the type is converted to "string" for jsonEditor and the
      * typeRelationship flag is set to true
-     * 
+     *
      * this function is recursive...when a property is an object the function
      * calls itself to deal with cases where relationship types are nested
      *
@@ -177,15 +185,15 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                 prop.typeRelationship = true;
             }
         });
-        
+
         return properties;
     };
-    
+
     /**
      * getFieldsToExpand loops over every property looking for single value relationship types
-     * once found a string of a list of properties defined in the resourceCollection.query.fields property 
+     * once found a string of a list of properties defined in the resourceCollection.query.fields property
      * is constructed for the use in the _fields parameter of a query url
-     * 
+     *
      * this function is recursive...when a property is an object the function
      * calls itself to deal with cases where relationship types are nested
      *
@@ -200,11 +208,11 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                     if (field.indexOf("/") > 0) {
                         field = field.split("/")[0];
                     }
-                    
+
                     fieldsArray.push(propName + "/" + field);
                 });
             };
-        
+
         _.each(properties, function(prop,key) {
             if (prop.type === "object") {
                 prop = obj.getFieldsToExpand(prop.properties);
@@ -218,29 +226,29 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
                 }
             }
         });
-        
+
         return fieldsArray.join(",");
     };
     /**
      * takes in a relationship object, turns the _ref property into an array,
      * drops off the last array item (the _id of the object), and returns
      * just the path to the resource collection it comes from
-     * 
+     *
      * example: passing in "managed/user/88b0a909-9b19-4bc0-bd83-902ad1d20439"
      *          returns "managed/user"
-     *  
+     *
      *
      * @param {Object} propertyValue
      * @returns {string}
      */
     obj.getPropertyValuePath = function (propertyValue) {
         var propertyValuePathArr = propertyValue._ref.split("/");
-        
+
         propertyValuePathArr.pop();
-        
+
         return propertyValuePathArr.join("/");
     };
-    
+
 
     /**
      * finds the index of the resource collection in a relationship property's schema definition
@@ -251,23 +259,23 @@ define("org/forgerock/openidm/ui/common/util/ResourceCollectionUtils", [
      * @param {string} propName
      * @returns {int}
      */
-    
+
     obj.getResourceCollectionIndex = function (schema, propertyValuePath, propName) {
         var resourceCollections = schema.properties[propName].resourceCollection,
             resourceCollectionIndex;
-        
+
         if (schema.properties[propName].items) {
             resourceCollections = schema.properties[propName].items.resourceCollection;
         }
-        
-        resourceCollectionIndex = _.findIndex(resourceCollections, _.bind(function (resourceCollection) { 
-            return resourceCollection.path === propertyValuePath; 
+
+        resourceCollectionIndex = _.findIndex(resourceCollections, _.bind(function (resourceCollection) {
+            return resourceCollection.path === propertyValuePath;
         }, this));
-        
+
         if (resourceCollectionIndex === -1) {
             resourceCollectionIndex = 0;
         }
-        
+
         return resourceCollectionIndex;
     };
 

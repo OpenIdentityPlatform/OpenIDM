@@ -22,16 +22,17 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
     "backbone",
     "backgrid",
     "handlebars",
+    "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationAbstractView",
     "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationModuleDialogView",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
-    "org/forgerock/commons/ui/common/components/ChangesPending",
-    "jquerySortable"
+    "org/forgerock/commons/ui/common/components/ChangesPending"
 
 ], function($, _,
             Backbone,
             Backgrid,
             Handlebars,
+            Configuration,
             AuthenticationAbstractView,
             AuthenticationModuleDialogView,
             BackgridUtils,
@@ -59,7 +60,15 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 "OPENID_CONNECT": null,
                 "PASSTHROUGH": null,
                 "TRUSTED_ATTRIBUTE": null
-            }
+            },
+            amUIProperties: [
+                "openamLoginUrl",
+                "openamLoginLinkText",
+                "openamUseExclusively"
+            ],
+            amTruststoreType : "&{openidm.truststore.type}",
+            amTruststoreFile : "&{openidm.truststore.location}",
+            amTruststorePassword : "&{openidm.truststore.password}"
         },
 
         /**
@@ -75,6 +84,8 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                 configs,
                 this.getAuthenticationData()
             );
+
+            this.addOpenAMUISettings();
 
             // this.model.authModules should not be altered until a save is done.  Use this.model.changes for the local copy.
             if (!_.has(this.model, "changes")) {
@@ -151,7 +162,6 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                     content: function () {
                         return $(this).attr("data-title");
                     },
-                    trigger: 'hover click',
                     placement: 'top',
                     container: 'body',
                     html: 'true',
@@ -196,7 +206,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
 
         makeSortable: function() {
             BackgridUtils.sortable({
-                "grid": this.$el.find("#authModuleGrid table"),
+                "containers": [this.$el.find("#authModuleGrid tbody")[0]],
                 "rows": _.clone(this.model.changes, true)
             }, _.bind(function(newOrder) {
                 this.model.changes = newOrder;
@@ -214,7 +224,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
          * If an AM session module is present the session configurations may need to be altered
          */
         checkHasAM: function() {
-            var amExists = _.findWhere(this.model.changes, {"name": "OPENAM_SESSION"});
+            var amExists = _.findWhere(this.model.changes, {"name": "OPENAM_SESSION", "enabled": true});
 
             if (amExists) {
                 this.model.addedOpenAM();
@@ -228,6 +238,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                     this.model.changes[this.getClickedRowIndex(e)] = config;
                     this.render(this.model);
                     this.checkChanges();
+                    this.handleOpenAMUISettings(config);
                 }, this)
             }, _.noop);
         },
@@ -247,6 +258,7 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
                         this.model.changes.push(config);
                         this.render(this.model);
                         this.checkChanges();
+                        this.handleOpenAMUISettings(config);
                     }, this)
                 }, _.noop);
             }
@@ -270,6 +282,34 @@ define("org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationMod
             });
 
             return index;
+        },
+
+        handleOpenAMUISettings: function (config) {
+            var prom = $.Deferred(),
+                amAuthIndex = _.findIndex(this.model.changes, { name: "OPENAM_SESSION" }),
+                amSettings = _.pick(config.properties, this.data.amUIProperties, "openamDeploymentUrl");
+
+            amSettings.openamAuthEnabled = config.enabled;
+            delete amSettings.enabled;
+
+            this.model.amSettings = amSettings;
+
+            //before saving these properties need to be changed back to the untranslated versions
+            this.model.changes[amAuthIndex].properties.truststoreType = this.data.amTruststoreType;
+            this.model.changes[amAuthIndex].properties.truststoreFile = this.data.amTruststoreFile;
+            this.model.changes[amAuthIndex].properties.truststorePassword = this.data.amTruststorePassword;
+        },
+
+        addOpenAMUISettings: function () {
+            var amAuthIndex = _.findIndex(this.model.authModules, { name: "OPENAM_SESSION" });
+
+            if (!this.model.changes && amAuthIndex >= 0) {
+                //add amUIProperties
+                this.model.authModules[amAuthIndex].properties = _.extend(
+                    this.model.authModules[amAuthIndex].properties,
+                    _.pick(Configuration.globalData, this.data.amUIProperties)
+                );
+            }
         }
 
     });

@@ -1,6 +1,6 @@
-<!-- Copyright 2015 ForgeRock AS.
-	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="panel panel-default panel-collapse">
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="panel panel-default panel-collapse" id="forDatabaseTableConnector">
     <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
         <h4 class="panel-title">
             <a data-toggle="collapse" href="#connectorSpecificBase" aria-expanded="true" aria-controls="connectorSpecificBaseHeading" class="">{{t "templates.connector.baseTitle"}}</a>
@@ -17,43 +17,55 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="host">{{t "templates.connector.databaseTableConnector.host"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="host" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" />
+                    <input class="form-control" type="text" id="host" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.dbHostnameOrIP"}}</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="port">{{t "templates.connector.databaseTableConnector.port"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="port" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
+                    <input class="form-control" type="text" id="port" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="user">{{t "templates.connector.databaseTableConnector.user"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="user" name="configurationProperties.user" value="{{connectorDefaults.configurationProperties.user}}" />
+                    <input class="form-control" type="text" id="user" name="configurationProperties.user" value="{{connectorDefaults.configurationProperties.user}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.dbUsername"}}</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="password">{{t "templates.connector.databaseTableConnector.password"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="password" id="password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" />
+                    <!-- autocomplete="new-password" is required to prevent chrome from auto-completing these form fields -->
+                    <input class="form-control" type="password" id="password" autocomplete="new-password" name="configurationProperties.password" value="{{connectorDefaults.configurationProperties.password}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="database">{{t "templates.connector.databaseTableConnector.database"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="database" name="configurationProperties.database" value="{{connectorDefaults.configurationProperties.database}}" />
+                    <input class="form-control" type="text" id="database" name="configurationProperties.database" value="{{connectorDefaults.configurationProperties.database}}" data-validator-event="keyup blur" data-validator="required"  />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group has-feedback has-error">
                 <label class="col-sm-3 control-label" for="table">{{t "templates.connector.databaseTableConnector.table"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="table" name="configurationProperties.table" value="{{connectorDefaults.configurationProperties.table}}" />
+                    <input class="form-control" type="text" id="table" name="configurationProperties.table" value="{{connectorDefaults.configurationProperties.table}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.tableNameWithAccounts"}}</span>
                 </div>
             </div>
-            <div class="form-group">
+            <div class="form-group has-feedback has-error">
                 <label class="col-sm-3 control-label" for="keyColumn">{{t "templates.connector.databaseTableConnector.keyColumn"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="keyColumn" name="configurationProperties.keyColumn" value="{{connectorDefaults.configurationProperties.keyColumn}}" />
+                    <input class="form-control" type="text" id="keyColumn" name="configurationProperties.keyColumn" value="{{connectorDefaults.configurationProperties.keyColumn}}" data-validator-event="keyup blur" data-validator="required" />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.uidForTableRows"}}</span>
                 </div>
             </div>
             <div class="form-group">
@@ -65,81 +77,93 @@
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="jdbcDriver">{{t "templates.connector.databaseTableConnector.jdbcDriver"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdbcDriver" name="configurationProperties.jdbcDriver" value="{{connectorDefaults.configurationProperties.jdbcDriver}}" />
+                    <input class="form-control" type="text" id="jdbcDriver" name="configurationProperties.jdbcDriver" data-validator-event="keyup blur" data-validator="required" value={{t "templates.connector.databaseTableConnector.jdbcDefaultDriver"}} />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcDriverHelp"}}</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="jdbcUrlTemplate">{{t "templates.connector.databaseTableConnector.jdbcUrlTemplate"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="jdbcUrlTemplate" name="configurationProperties.jdbcUrlTemplate" value="{{connectorDefaults.configurationProperties.jdbcUrlTemplate}}" />
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label" for="enableEmptyString">{{t "templates.connector.databaseTableConnector.enableEmptyString"}}</label>
-                <div class="col-sm-8">
-                    <select id="enableEmptyString" class="form-control" name="configurationProperties.enableEmptyString">
-                        {{#staticSelect connectorDefaults.configurationProperties.enableEmptyString}}
-                        <option value="true">{{t "common.form.true"}}</option>
-                        <option value="false">{{t "common.form.false"}}</option>
-                        {{/staticSelect}}
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label" for="rethrowAllSQLExceptions">{{t "templates.connector.databaseTableConnector.rethrowSQL"}}</label>
-                <div class="col-sm-8">
-                    <select id="rethrowAllSQLExceptions" class="form-control" name="configurationProperties.rethrowAllSQLExceptions">
-                        {{#staticSelect connectorDefaults.configurationProperties.rethrowAllSQLExceptions}}
-                        <option value="true">{{t "common.form.true"}}</option>
-                        <option value="false">{{t "common.form.false"}}</option>
-                        {{/staticSelect}}
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label" for="nativeTimestamps">{{t "templates.connector.databaseTableConnector.nativeTimestamps"}}</label>
-                <div class="col-sm-8">
-                    <select id="nativeTimestamps" class="form-control" name="configurationProperties.nativeTimestamps">
-                        {{#staticSelect connectorDefaults.configurationProperties.nativeTimestamps}}
-                        <option value="true">{{t "common.form.true"}}</option>
-                        <option value="false">{{t "common.form.false"}}</option>
-                        {{/staticSelect}}
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label" for="allNative">{{t "templates.connector.databaseTableConnector.allNative"}}</label>
-                <div class="col-sm-8">
-                    <select id="allNative" class="form-control" name="configurationProperties.allNative">
-                        {{#staticSelect connectorDefaults.configurationProperties.nativeTimestamps}}
-                        <option value="true">{{t "common.form.true"}}</option>
-                        <option value="false">{{t "common.form.false"}}</option>
-                        {{/staticSelect}}
-                    </select>
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label" for="validConnectionQuery">{{t "templates.connector.databaseTableConnector.validConnectionQuery"}}</label>
-                <div class="col-sm-8">
-                    <input class="form-control" type="text" id="validConnectionQuery" name="configurationProperties.validConnectionQuery" value="{{connectorDefaults.configurationProperties.validConnectionQuery}}" />
-                </div>
-            </div>
-            <div class="form-group">
-                <label class="col-sm-3 control-label" for="changeLogColumn">{{t "templates.connector.databaseTableConnector.changeLogColumn"}}</label>
-                <div class="col-sm-8">
-                    <input class="form-control" type="text" id="changeLogColumn" name="configurationProperties.changeLogColumn" value="{{connectorDefaults.configurationProperties.changeLogColumn}}" />
+                    <input class="form-control" type="text" id="jdbcUrlTemplate" name="configurationProperties.jdbcUrlTemplate" data-validator-event="keyup blur" data-validator="required" value={{t "templates.connector.databaseTableConnector.jdbcDefaultUrl"}} />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcUrlTemplateHelp"}}</span>
                 </div>
             </div>
             <div class="form-group">
                 <label class="col-sm-3 control-label" for="dataSource">{{t "templates.connector.databaseTableConnector.dataSource"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="dataSource" name="configurationProperties.dataSource" value="{{connectorDefaults.configurationProperties.dataSource}}" />
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.jdbcPath"}}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="enableEmptyString">{{t "templates.connector.databaseTableConnector.enableEmptyString"}}</label>
+                <div class="col-sm-8">
+                    <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                        <label>
+                            <input class="toggleBoolean" id="enableEmptyString" type="checkbox" name="configurationProperties.enableEmptyString" value="false">
+                            <span></span>
+                        </label>
+                    </div>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.emptyStringHelp"}}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="rethrowAllSQLExceptions">{{t "templates.connector.databaseTableConnector.rethrowSQL"}}</label>
+                <div class="col-sm-8">
+                    <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                        <label>
+                            <input class="toggleBoolean" id="rethrowAllSQLExceptions" type="checkbox" name="configurationProperties.rethrowAllSQLExceptions" value="true" checked>
+                            <span></span>
+                        </label>
+                    </div>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.rethrowSqlHelp"}}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="nativeTimestamps">{{t "templates.connector.databaseTableConnector.nativeTimestamps"}}</label>
+                <div class="col-sm-8">
+                    <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                        <label>
+                            <input class="toggleBoolean" id="nativeTimestamps" type="checkbox" name="configurationProperties.nativeTimestamps" value="false" >
+                            <span></span>
+                        </label>
+                    </div>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.nativeTimestampsHelp"}}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="allNative">{{t "templates.connector.databaseTableConnector.allNative"}}</label>
+                <div class="col-sm-8">
+                    <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                        <label>
+                            <input class="toggleBoolean" id="allNative" type="checkbox" name="configurationProperties.allNative" value="false" >
+                            <span></span>
+                        </label>
+                    </div>
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.allNativeHelp"}}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="validConnectionQuery">{{t "templates.connector.databaseTableConnector.validConnectionQuery"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="validConnectionQuery" name="configurationProperties.validConnectionQuery" value="{{connectorDefaults.configurationProperties.validConnectionQuery}}" />
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.validConnectionQueryHelp"}}</span>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-sm-3 control-label" for="changeLogColumn">{{t "templates.connector.databaseTableConnector.changeLogColumn"}}</label>
+                <div class="col-sm-8">
+                    <input class="form-control" type="text" id="changeLogColumn" name="configurationProperties.changeLogColumn" value="{{connectorDefaults.configurationProperties.changeLogColumn}}" />
+                    <span class="help-block">{{t "templates.connector.databaseTableConnector.dbChangeTime"}}</span>
                 </div>
             </div>
            <div class="form-group">
                <label class="col-sm-3 control-label" for="jndiProperties">{{t "templates.connector.databaseTableConnector.jndiProperties"}}</label>
                <div class="col-sm-8">
                    <input class="form-control" type="text" id="jndiProperties" name="configurationProperties.jndiProperties" value="{{connectorDefaults.configurationProperties.jndiProperties}}" />
+                   <span class="help-block">{{t "templates.connector.databaseTableConnector.jndiPropertiesHelp"}}</span>
                </div>
            </div>
         </div>

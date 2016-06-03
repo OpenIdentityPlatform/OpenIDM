@@ -1,0 +1,20 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="conditionFilter temporalConstraintsForm">
+  <div class="row">
+      <label for="selectEnabled" class="{{#if dialogView}}col-sm-3{{else}}col-sm-2{{/if}} control-label text-right conditionFilterLabel">{{t "templates.admin.RoleEdit.temporalConstraints"}}</label>
+      <div class="{{#if dialogView}}col-sm-7{{else}}col-sm-10{{/if}}">
+          <div class="control-group">
+              <div class="checkbox checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary" id="enableTemporalConstraints">
+                  <label>
+                      <input type="checkbox" class="enableTemporalConstraintsCheckbox" {{#if hasTemporalConstraints}}checked{{/if}}><span></span>
+                  </label>
+              </div>
+          </div>
+          <span class="help-block">{{t "templates.admin.RoleEdit.temporalConstraintsDescription"}}</span>
+      </div>
+  </div>
+  <div class="temporalConstraintsFields" style="display:none;">
+
+  </div>
+</div>

@@ -11,17 +11,37 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 /*
   Dashboard
 */
+.widget-empty-state {
+  text-align: center;
+  padding: 60px;
+  margin-top: 30px;
+}
+
 .widget-section-title {
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  font-size: 13px;
-  font-weight: 500;
+  border-bottom: 1px solid #ddd;
+  padding:15px;
+
+  .widget-title {
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  button {
+    padding:0px;
+    color: #777;
+  }
+
+  button:hover {
+    color: #3f7269;
+  }
 }
 
 .page-header.widget-section-title {
@@ -51,6 +71,15 @@
 /*
   Workflow
 */
+
+#dashboardWorkflow {
+  .panel-heading {
+    .widget-section-title {
+      border-bottom: none;
+      padding: 0px;
+    }
+  }
+}
 
 #taskDetails {
   padding-top:15px;
@@ -123,7 +152,7 @@
 */
 .widget-header.donut-header {
   position: absolute;
-  top: 120px;
+  top: 122px;
   left: 50%;
   margin-left: -100px;
   width: 200px;
@@ -152,6 +181,8 @@
 }
 
 .widget-body {
+  overflow: auto;
+
   .widget-icons {
     height:16px;
   }
@@ -163,20 +194,6 @@
   top: 50px;
 }
 
-/*
-  Health Widget
-*/
-
-.refresh-health-info {
-  cursor:pointer;
-  opacity: .7;
-  float:right;
-  margin-right:35px;
-}
-
-.refresh-health-info:hover {
-  opacity: 1;
-}
 /*
   Recon Widget
 */
@@ -221,8 +238,11 @@
 
   .recon-widget-header {
     .title {
-      cursor: pointer;
       float:left;
+
+      &.selectable-title {
+        cursor:pointer;
+      }
 
       .fa-map-marker {
         margin-right: 5px;
@@ -381,9 +401,18 @@
 #dashboardWidgets {
   margin-bottom: 50px;
 
-  .panel-body .card-container {
-    margin-bottom: 0px;
+  iframe {
+    border:none;
   }
+}
+
+#cancelQuickLink,
+#createQuickLink {
+  margin-right:5px;
+}
+
+#addQuickLink {
+  margin-left:15px;
 }
 
 @media (max-width: @screen-sm) {
@@ -402,8 +431,30 @@
       }
     }
   }
+}
 
-  .widget-header.donut-header {
-    top: 105px;
+/*
+  Relationship widget
+*/
+
+#relationshipToolbar {
+  .btn-group.btn-align-top {
+    vertical-align: top;
   }
+
+  .selectize-holder .selectize-control {
+    margin-top: 0px;
+  }
+}
+
+#roundRelationshipGraph a:hover {
+  text-decoration:none;
+}
+
+#roundRelationshipGraph {
+    height: 600px;
+    #roundRelationshipGraphStatus {
+        margin-top: 150px;
+        text-align: center;
+    }
 }

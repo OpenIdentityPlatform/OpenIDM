@@ -1,5 +1,5 @@
-<!-- Copyright 2015 ForgeRock AS.
-	License terms: https://forgerock.org/cddlv1-0/ -->
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
 <section>
     <div class="container">
         <div class="page-header">
@@ -10,7 +10,7 @@
             </h1>
         </div>
         <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
-            <div class="btn-group left-group" role="group" aria-label="...">
+            <div class="btn-group pull-left left-group" role="group" aria-label="...">
                 <a href="#mapping/add/">
                     <button type="button" class="btn btn-primary" id="addMapping">
                         <i class="fa fa-plus"></i>
@@ -18,15 +18,27 @@
                     </button>
                 </a>
             </div>
+            <div class="pull-right">
+                <div class="btn-group btn-icon" data-toggle="btns">
+                    <a class="btn toggle-view-btn fr-btn-secondary active" href="#mappingConfigHolder" data-toggle="tab"><i class="fa fa-th"></i></a>
+                    <a class="btn toggle-view-btn fr-btn-secondary" href="#mappingConfigGridHolder" data-toggle="tab"><i class="fa fa-list"></i></a>
+                </div>
+                <div class="toolbar-search">
+                    <div class="form-group has-feedback has-feedback-left">
+                        <input type="text" class="form-control filter-input" aria-label="Mapping Filter" placeholder="Filter...">
+                        <div class="form-control-feedback "><i class="fa fa-search"></i></div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
         </div>
     </div>
 </section>
 <div class="container">
     {{#if mappingConfig.length}}
-    <div id="mappingConfigHolder" class="mapping-listing mappings-list">
-        <ul>
-        {{#each mappingConfig}}
-            <li>
+    <div class="tab-content tab-content-transparent">
+        <div id="mappingConfigHolder" class="mapping-listing mappings-list tab-pane active">
+            {{#each mappingConfig}}
                 <div class="wide-card card mapping mapping-config-body" mapping="{{name}}">
                     <div class="panel panel-default">
                         <div class="row">
@@ -80,7 +92,8 @@
                                             {{name}}
                                         </h2>
                                         <div class="connector-status text-danger">
-                                            <span id="{{name}}_syncStatus"></span>
+                                            <i class="{{name}}_syncStatus_icon fa"></i>
+                                            <span class="{{name}}_syncStatus"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -92,15 +105,23 @@
                                             <button type="button" class="btn btn-link button icon-button delete-button"><i class="fa fa-times"></i> <span>{{t "common.form.delete"}}</span></button>
                                         </div>
                                     </div>
+                                    <ul class="dropdown-menu pull-right" role="menu">
+                                        <li><a href="#properties/{{name}}/"><i class="fa fa-pencil"></i>{{t "common.form.edit"}}</a></li>
+                                        <li class="delete-button mapping-delete"><span><i class="fa fa-times"></i>{{t "common.form.delete"}}</span></li>
+                                    </ul>
                                 </div>
                             </div>
                         </div>
 
                     </div>
                 </div>
-            </li>
-        {{/each}}
-        </ul>
+            {{/each}}
+        </div>
+        <div id="mappingConfigGridHolder" class="tab-pane">
+            <div class="panel panel-default">
+                <div class="panel-body" id="mappingGrid"></div>
+            </div>
+        </div>
     </div>
     {{/if}}
 

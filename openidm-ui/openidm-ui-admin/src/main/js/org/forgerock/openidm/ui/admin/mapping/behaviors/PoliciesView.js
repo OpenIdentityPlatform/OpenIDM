@@ -119,7 +119,6 @@ define("org/forgerock/openidm/ui/admin/mapping/behaviors/PoliciesView", [
                         content: function () {
                             return $(this).attr("data-title");
                         },
-                        trigger: 'hover click',
                         placement: 'top',
                         container: 'body',
                         html: 'true',

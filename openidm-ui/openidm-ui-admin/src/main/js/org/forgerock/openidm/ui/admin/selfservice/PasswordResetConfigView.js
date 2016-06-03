@@ -18,8 +18,9 @@
 
 define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
     "jquery",
+    "lodash",
     "org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView"
-], function($, AbstractSelfServiceView) {
+], function($, _, AbstractSelfServiceView) {
     var PasswordResetConfigView = AbstractSelfServiceView.extend({
         template: "templates/admin/selfservice/PasswordResetConfigTemplate.html",
         partials: AbstractSelfServiceView.prototype.partials.concat([
@@ -137,6 +138,24 @@ define("org/forgerock/openidm/ui/admin/selfservice/PasswordResetConfigView", [
             }];
 
             this.selfServiceRender(args, callback);
+        },
+        setKBAVerificationEnabled: function () {
+            this.model.uiConfig.configuration.kbaVerificationEnabled =
+                !!_.find(this.model.saveConfig.stageConfigs, function (stage) {
+                    return stage.name === "kbaSecurityAnswerVerificationStage";
+                });
+        },
+        createConfig: function () {
+            this.setKBAVerificationEnabled();
+            return AbstractSelfServiceView.prototype.createConfig.call(this);
+        },
+        deleteConfig: function () {
+            this.setKBAVerificationEnabled();
+            return AbstractSelfServiceView.prototype.deleteConfig.call(this);
+        },
+        saveConfig: function () {
+            this.setKBAVerificationEnabled();
+            return AbstractSelfServiceView.prototype.saveConfig.call(this);
         }
     });
 

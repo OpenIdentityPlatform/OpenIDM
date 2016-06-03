@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define, window*/
@@ -20,6 +20,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
     "jquery",
     "underscore",
     "handlebars",
+    "backbone",
     "bootstrap",
     "bootstrap-dialog",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
@@ -29,7 +30,10 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
     "org/forgerock/commons/ui/common/main/SpinnerManager",
     "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate"
 
-], function($, _, Handlebars, Bootstrap, BootstrapDialog,
+], function($, _, Handlebars,
+            Backbone,
+            Bootstrap,
+            BootstrapDialog,
             AdminAbstractView,
             TreeGridUtils,
             UIUtils,
@@ -37,7 +41,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
             SpinnerManager,
             MaintenanceDelegate) {
 
-    var VersionsView = AdminAbstractView.extend({
+    var InstallPreviewView = AdminAbstractView.extend({
         template: "templates/admin/settings/update/InstallationPreviewTemplate.html",
         element: "#installationPreviewView",
         noBaseTemplate: true,
@@ -51,12 +55,14 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
             "click .expand-treegrid": "expandTreegrid"
         },
         partials: [
-            "partials/settings/_updateTreeGrid.html"
+            "partials/settings/_updateTreeGrid.html",
+            "partials/settings/_updateReposGrid.html"
         ],
         data: {
             "version": "",
             "link": false,
             "modifiedFilesExist": true,
+            "repoUpdatesExist": false,
             "all": false,
             "treeGrid": {}
         },
@@ -72,6 +78,9 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
          * @param [callback]
          */
         render: function(configs, callback) {
+
+            this.model = configs;
+
             // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
             SpinnerManager.showSpinner();
 
@@ -80,11 +89,10 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
             _.delay(_.bind(function() {
                 // This partial is used before the parent render where it would normally be loaded.
                 UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(_.bind(function () {
-                    this.model = configs;
 
                     this.data = _.extend(this.data, _.pick(this.model, ["modifiedFilesExist", "all", "treeGrid"]));
                     this.data.link = this.model.archiveModel.get("resource");
-                    this.data.version = this.model.archiveModel.get("version");
+                    this.data.version = this.model.archiveModel.get("toVersion");
 
                     if (this.data.all && _.has(this.model, "allTreeGrid")) {
                         this.data.treeGrid = this.model.allTreeGrid;
@@ -105,12 +113,10 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
                     this.parentRender(_.bind(function () {
                         SpinnerManager.hideSpinner();
 
-                        this.$el.find('[data-toggle="popover"]').popover({
-                            trigger: 'hover click',
-                            placement: 'top',
-                            container: 'body',
-                            title: ''
-                        });
+                        if (this.data.repoUpdatesExist) {
+                            this.$el.find('#previewWrapper').hide();
+                            this.model.repoUpdates({"model": this.model, "data": this.data});
+                        }
 
                         if (callback) {
                             callback();
@@ -119,6 +125,26 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
 
                 }, this));
             },this), 1);
+        },
+
+        showUpdatesOrInstall: function() {
+            var repoUpdates = new Backbone.Collection();
+
+            MaintenanceDelegate.getRepoUpdates(this.model.archiveModel.get("archive")).then(
+                _.bind(function(data) {
+                    if (data && data.length > 0) {
+                        this.data.repoUpdatesList = data;
+                        this.data.repoUpdatesExist = true;
+
+                        _.each(data, function (model) {
+                            repoUpdates.add(model);
+                        }, this);
+                        this.model.repoUpdates({"archiveModel": this.model.archiveModel, "data": this.data, "files": this.model.files});
+                    } else {
+                        this.model.install(this.model.archiveModel, this.data.repoUpdatesList);
+                    }
+                }, this)
+            );
         },
 
         showModifiedTreegrid: function(e) {
@@ -170,13 +196,13 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
                                     cssClass: "btn-primary",
                                     action: _.bind(function (dialog) {
                                         dialog.close();
-                                        this.model.install(self.model.archiveModel);
+                                        self.showUpdatesOrInstall();
                                     }, this)
                                 }
                             ]
                         });
                     } else {
-                        this.model.install(this.model.archiveModel);
+                        this.showUpdatesOrInstall();
                     }
                 }, this),
                 _.bind(function() {
@@ -281,5 +307,5 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallationPreviewView",
         }
     });
 
-    return new VersionsView();
+    return new InstallPreviewView();
 });

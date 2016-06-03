@@ -54,6 +54,10 @@
   }
 }
 
+.panel.has-border {
+  border:1px solid #ddd;
+}
+
 .row.no-gutters {
   padding:0px;
 }
@@ -69,10 +73,6 @@ h3.block-header {
   margin-top: 0;
   border-bottom: 1px solid #ddd;
   margin-bottom: 20px;
-}
-
-.ui-jqgrid {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif !important;
 }
 
 .border-bottom {
@@ -110,6 +110,10 @@ h3.block-header {
   text-align: left;
 }
 
+.toggle-chart-buttons .btn .fa {
+  width:14px;
+}
+
 .dropdown-toggle .fa {
   text-align: right;
 }
@@ -138,12 +142,31 @@ h3.block-header {
   }
 
   li.ui-menu-item {
-    padding:5px;
+    padding: 5px;
   }
 }
 
 .section-help {
-  margin-bottom:20px;
+  margin-bottom: 20px;
+}
+
+/*
+  Inline Edit Well
+*/
+
+.well.fr-edit-well {
+  padding: 15px;
+  border: none;
+
+  .fr-edit-well-header {
+    font-size: 16px;
+    margin-bottom: 10px;
+    margin-bottom: 10px;
+  }
+
+  .fr-edit-well-bottom-bar {
+    margin:0 0;
+  }
 }
 
 /*
@@ -261,35 +284,36 @@ h3.block-header {
 }
 
 /*
-  jQuery Sortable
+  Dragula
 */
-.smallScreenCell .dragToSort {
+.smallScreenCell .fa-arrows {
   display: none;
 }
-.dragToSort {
-  margin: 2px 10px 0 0;
-  color: #999;
-  cursor: move;
 
+.gu-mirror {
+  position: fixed !important;
+  margin: 0 !important;
+  z-index: 9999 !important;
+}
+.gu-hide {
+  display: none !important;
 }
 
-body.dragging, body.dragging * {
-  cursor: move !important;
+.gu-transit {
+  opacity: 0.2;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+  filter: alpha(opacity=20);
 }
-
-.dragged {
-  position: absolute;
-  background-color: #f3f3f3 !important;
-  z-index: 2000;
-}
-
-table.placeholder {
-  position: relative;
-
-  &:before {
-    position: absolute;
+.gu-mirror {
+  .smallScreenCell {
+    display: none;
   }
+  opacity: 0.6;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=60)";
+  filter: alpha(opacity=60);
+  background-color: #eee;
 }
+
 
 /*
   Toolbar
@@ -417,34 +441,6 @@ table.placeholder {
 
   .ui-widget-content {
     border-color:transparent !important;
-  }
-
-  .ui-jqgrid {
-    margin: auto;
-    margin-top: 10px;
-    border: 1px solid #eee;
-
-    .ui-state-default {
-      border-color:transparent;
-    }
-    tr.ui-row-ltr td {
-      padding: 14px;
-    }
-    tr.ui-row-ltr :first-child {
-      padding: 12px;
-    }
-    .ui-jqgrid-sortable {
-      text-transform: uppercase;
-    }
-    .ui-jqgrid-pager {
-      background-color: #fff;
-    }
-    thead {
-      border-bottom: 2px solid #ddd;
-      tr td {
-        padding-bottom: 10px;
-      }
-    }
   }
 }
 
@@ -759,6 +755,11 @@ Dialog Catch
     -webkit-box-shadow: none;
     box-shadow: none;
   }
+  
+  #conditionFilterHolder .well {
+    background-color: #f5f5f5;
+    border-color: #e3e3e3;
+  }
 
   li.resourceListItem:hover {
     background-color: #ededed;
@@ -770,6 +771,9 @@ Dialog Catch
 }
 
 .editResourceViewContainer, #assignmentHolder {
+  .unEditable {
+    cursor: default;
+  }
   .resourceEditLink {
     color: @base-theme-color !important;
   }

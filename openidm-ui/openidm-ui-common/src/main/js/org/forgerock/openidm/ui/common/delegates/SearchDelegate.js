@@ -24,37 +24,49 @@ define("org/forgerock/openidm/ui/common/delegates/SearchDelegate", [
 
     var obj = new AbstractDelegate(constants.host + "/openidm");
 
-    obj.searchResults = function (resource, props, searchString, comparisonOperator) {
-        var operator = (comparisonOperator) ? comparisonOperator : "sw",
-            maxPageSize = 10,
-            conditions = _(props)
-                .reject(function(p){ return !p; })
-                .map(function(p){
-                    var op = operator;
-
-                    if(p === "_id" && op !== "neq"){
-                        op = "eq";
-                    }
-
-                    if(op !== "pr") {
-                        return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
-                    } else {
-                        return p + ' pr';
-                    }
-                })
-                .value();
+    obj.searchResults = function (resource, props, searchString, comparisonOperator, additionalQuery) {
+        var maxPageSize = 10;
 
         return this.serviceCall({
             "type": "GET",
-            "url":  "/" + resource + "?_sortKeys=" + props[0] + "&_pageSize=" + maxPageSize + "&_queryFilter=" + conditions.join(" or (") + new Array(conditions.length).join(")")// [a,b] => "a or (b)"; [a,b,c] => "a or (b or (c))"
+            "url":  "/" + resource + "?_sortKeys=" + props[0] + "&_pageSize=" + maxPageSize + "&_queryFilter=" + obj.generateQueryFilter(props, searchString, additionalQuery, comparisonOperator)// [a,b] => "a or (b)"; [a,b,c] => "a or (b or (c))"
         }).then(
             function (qry) {
-                return _.take(qry.result,maxPageSize);//we never want more than 10 results from search in case _pageSize does not work
+                return _.take(qry.result, maxPageSize);//we never want more than 10 results from search in case _pageSize does not work
             },
             function (error){
                 console.error(error);
             }
         );
+    };
+
+    obj.generateQueryFilter = function(props, searchString, additionalQuery, comparisonOperator) {
+        var operator = (comparisonOperator) ? comparisonOperator : "sw",
+            queryFilter,
+            conditions = _(props)
+            .reject(function(p){ return !p; })
+            .map(function(p){
+                var op = operator;
+
+                if(p === "_id" && op !== "neq"){
+                    op = "eq";
+                }
+
+                if(op !== "pr") {
+                    return p + ' ' + op + ' "' + encodeURIComponent(searchString) + '"';
+                } else {
+                    return p + ' pr';
+                }
+            })
+            .value();
+
+        queryFilter = "(" + conditions.join(" or (") + new Array(conditions.length).join(")") +")";
+
+        if(additionalQuery) {
+            queryFilter = "(" +queryFilter+" and (" +additionalQuery +"))";
+        }
+
+        return queryFilter;
     };
 
     return obj;

@@ -9,12 +9,13 @@
                    data-unique-list="{{stringify usedEventHandlerNames}}"
                    id="eventHandlerName"
                    {{#if newEventHandler}}
-                   data-validator="unique"
+                   data-validator="uniqueShortList"
                    data-validator-event="keyup blur"
                    {{else}}
                    disabled
                    {{/if}}/>
             <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
         </div>
     </div>
 
@@ -30,26 +31,21 @@
     </div>
 
     <div class="form-group">
-        <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.useForQueries"}}</label>
+        <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.enabled"}}</label>
         <div class="col-sm-6">
+
             <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+            {{#if canDisable}}
                 <label>
-                    <input id="useForQueries" class="changes-watched section-check useForQueries" name="useForQueries" type="checkbox" {{#if useForQueries}}checked{{/if}}><span></span>
+                    <input id="enabled" class="changes-watched section-check" name="enabled" type="checkbox" {{#if enabled}}checked{{/if}}><span></span>
                 </label>
+            {{else }}
+                <p class="text-muted">{{t "templates.audit.eventHandlers.cannotDisableMsg"}}</p>
+            {{/if}}
             </div>
         </div>
     </div>
 
-    <div class="form-group">
-        <label class="col-sm-3 control-label">{{t "templates.audit.eventHandlers.enabled"}}</label>
-        <div class="col-sm-6">
-            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
-                <label>
-                    <input id="enabled" class="changes-watched section-check" name="enabled" type="checkbox" {{#if enabled}}checked{{/if}}><span></span>
-                </label>
-            </div>
-        </div>
-    </div>
 
     <div id="auditEventHandlerConfig" class="jsonEditorContainer panel-body"></div>
 </form>

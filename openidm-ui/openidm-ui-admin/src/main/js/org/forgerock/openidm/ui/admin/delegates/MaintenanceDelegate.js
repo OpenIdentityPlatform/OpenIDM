@@ -11,16 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 /*global define */
 
 define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
     "jquery",
+    "lodash",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function($, constants, AbstractDelegate) {
+], function($, _, constants, AbstractDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/maintenance");
 
@@ -45,13 +46,6 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
         });
     };
 
-    obj.getUpdateLogs = function () {
-        return obj.serviceCall({
-            url: "/update/log/?_queryFilter=true",
-            type: "GET"
-        });
-    };
-
     obj.availableUpdateVersions = function () {
         return obj.serviceCall({
             url: "/update?_action=available",
@@ -66,6 +60,27 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
         });
     };
 
+    obj.getRepoUpdates = function (archive) {
+        return obj.serviceCall({
+            url: "/update?_action=listRepoUpdates&archive=" + archive,
+            type: "POST"
+        });
+    };
+
+    obj.getUpdateFile = function(archive, path) {
+        return obj.serviceCall({
+            url: "/update/archives/" + archive + "/" + path + "?_fields=/contents",
+            type: "GET"
+        });
+    };
+
+    obj.markComplete = function (updateId) {
+        return obj.serviceCall({
+            url: "/update?_action=markComplete&updateId=" + updateId,
+            type: "POST"
+        });
+    };
+
     obj.preview = function (archive) {
         return obj.serviceCall({
             url: "/update?_action=preview&archive=" + archive,
@@ -76,6 +91,13 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
     obj.update = function (archive) {
         return obj.serviceCall({
             url: "/update?_action=update&archive=" + archive,
+            type: "POST"
+        });
+    };
+
+    obj.restartIDM = function () {
+        return obj.serviceCall({
+            url: "/update?_action=restart",
             type: "POST"
         });
     };
@@ -101,11 +123,40 @@ define("org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate", [
         });
     };
 
-    obj.restartIDM = function () {
+    obj.getUpdateLogs = function (options) {
+        var queryString = this.parseQueryOptions(this.getUpdateLogFields(), options, true);
         return obj.serviceCall({
-            url: "/update?_action=restart",
-            type: "POST"
+            url: "/update/log/?_queryFilter=true" + queryString,
+            type: "GET"
         });
+    };
+
+    obj.getUpdateLogFields = function() {
+        return [
+            'archive',
+            'completedTasks',
+            'endDate',
+            'files',
+            'nodeId',
+            'startDate',
+            'status',
+            'statusMessage',
+            'totalTasks',
+            'userName'
+        ];
+    };
+
+    obj.parseQueryOptions = function(fields, options) {
+        if (options) {
+            if (options.fields) {
+                return '&_fields=' + options.fields.join(',');
+            } else if (options.excludeFields) {
+                return '&_fields=' + fields.filter(function(field) {
+                    return options.excludeFields.indexOf(field) === -1;
+                }).join(',');
+            }
+        }
+        return '';
     };
 
     return obj;

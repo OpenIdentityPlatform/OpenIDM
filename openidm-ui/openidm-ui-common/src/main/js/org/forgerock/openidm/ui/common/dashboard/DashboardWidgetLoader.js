@@ -66,53 +66,38 @@ define("org/forgerock/openidm/ui/common/dashboard/DashboardWidgetLoader", [
                 this.element = args.element;
 
                 this.model.widgetList = {
-                    lifeCycleMemoryBoth: {
-                        name : $.t("dashboard.memoryUsageBoth")
-                    },
                     lifeCycleMemoryHeap: {
-                        name : $.t("dashboard.memoryUsageHeap")
+                        name : $.t("dashboard.memoryUsageHeap"),
+                        widget : MemoryUsageWidget
                     },
                     lifeCycleMemoryNonHeap: {
-                        name : $.t("dashboard.memoryUsageNonHeap")
+                        name : $.t("dashboard.memoryUsageNonHeap"),
+                        widget : MemoryUsageWidget
                     },
                     reconUsage: {
-                        name: $.t("dashboard.reconProcesses")
+                        name: $.t("dashboard.reconProcesses"),
+                        widget : ReconProcessesWidget
                     },
                     cpuUsage: {
-                        name: $.t("dashboard.cpuUsage")
+                        name: $.t("dashboard.cpuUsage"),
+                        widget : CPUUsageWidget
                     },
                     quickStart: {
-                        name: $.t("dashboard.quickStart.quickStartTitle")
+                        name: $.t("dashboard.quickStart.quickStartTitle"),
+                        widget : QuickStartWidget
                     }
                 };
 
                 this.data.widgetType = args.widget.type;
+
                 this.data.widget = this.model.widgetList[args.widget.type];
 
                 this.parentRender(_.bind(function(){
-                    args.element = this.$el.find(".widget-body");
+                    args.element = this.$el.find(".widget");
+                    args.title = this.data.widget.name;
+                    args.showConfigButton = false;
 
-                    switch(args.widget.type) {
-                        case "lifeCycleMemoryHeap":
-                        case "lifeCycleMemoryBoth":
-                        case "lifeCycleMemoryNonHeap":
-                            this.model.widget = MemoryUsageWidget.generateWidget(args, callback);
-                            break;
-                        case "reconUsage":
-                            this.model.widget = ReconProcessesWidget.generateWidget(args, callback);
-                            break;
-                        case "cpuUsage":
-                            this.model.widget = CPUUsageWidget.generateWidget(args, callback);
-                            break;
-                        case "systemHealthFull":
-                            this.model.widget = FullHealthWidget.generateWidget(args, callback);
-                            break;
-                        case "quickStart":
-                            args.icons = args.widget.icons;
-
-                            this.model.widget = QuickStartWidget.generateWidget(args, callback);
-                            break;
-                    }
+                    this.model.widget = this.model.widgetList[this.data.widgetType].widget.generateWidget(args, callback);
                 }, this));
             }
         });

@@ -1,0 +1,8 @@
+{
+  "src_folders" : [
+    "tests"
+  ],
+  "output_folder" : "reports",
+  "page_objects_path" : "pages",
+  "globals_path" : "data/devGlobals.js"
+}

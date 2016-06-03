@@ -22,25 +22,23 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidg
     "bootstrap",
     "handlebars",
     "dimple",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "form2js",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/openidm/ui/admin/delegates/ReconDelegate",
     "org/forgerock/commons/ui/common/util/DateUtil",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "moment"
 ], function($, _, bootstrap, handlebars,
             dimple,
-            AbstractView,
+            form2js,
+            AbstractWidget,
             ReconDelegate,
             DateUtil,
             SyncDelegate,
             moment) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/admin/dashboard/widgets/MappingReconResultsWidgetTemplate.html",
-            partials: [
-              "partials/_popover.html"
-            ],
             model : {
                 lookup: {
                     "SOURCE_MISSING": "Source Missing",
@@ -65,13 +63,16 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidg
                 "chartMarginBottom" : "125px",
                 "goodColor" : "#70a796",
                 "warningColor" : "#e6bf24",
-                "dangerColor" : "#ca3127"
+                "dangerColor" : "#ca3127",
+                "overrideTemplate" : "dashboard/widget/_reconResultConfig"
             },
-            render: function(args, callback) {
-                var currentMapping = null;
 
-                this.element = args.element;
+            widgetRender: function(args, callback) {
+                var currentMapping = null;
                 this.model.barchart = args.widget.barchart;
+
+                this.partials.push("partials/dashboard/widget/_reconResultConfig.html");
+                this.partials.push("partials/_popover.html");
 
                 SyncDelegate.mappingDetails().then(_.bind(function(sync){
                     this.data.sync = sync;
@@ -145,7 +146,7 @@ define("org/forgerock/openidm/ui/admin/dashboard/widgets/MappingReconResultsWidg
                     }
 
                     //This piece of code builds and adds the barchart
-                    if(recon && this.model.barchart) {
+                    if(recon && (this.model.barchart === true || this.model.barchart === "true")) {
                         _.each(recon.situationSummary, function(value, key) {
                             this.data.situationDetails.push({
                                 "Situation": this.model.lookup[key],

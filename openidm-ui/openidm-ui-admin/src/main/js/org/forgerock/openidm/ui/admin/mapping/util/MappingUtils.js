@@ -88,7 +88,7 @@ define("org/forgerock/openidm/ui/admin/mapping/util/MappingUtils", [
                     }
                 },
                 load: function(query, callback) {
-                    if (!query.length || query.length < 2) {
+                    if (!query.length || query.length < 2 || !autocompleteProps.length) {
                         return callback();
                     }
 

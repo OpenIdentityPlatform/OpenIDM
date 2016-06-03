@@ -69,7 +69,7 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
         formSubmit: function(event) {
             event.preventDefault();
 
-            if(validatorsManager.formNotInvalid(this.$el)) {
+            if(validatorsManager.formValidated(this.$el)) {
                 var params = form2js(this.$el.attr("id"), '.', false), param, typeName, paramValue, date, dateFormat;
                 delete params.startProcessButton;
                 for (param in params) {
@@ -91,6 +91,11 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
         },
 
         render: function(id, category, callback) {
+            var formValidateOptions = {
+                element: ".workflowFormContainer",
+                attribute: "data-validationbaseentity"
+            };
+
             this.parentRender(function() {
                 validatorsManager.bindValidators(this.$el);
                     workflowManager.getProcessDefinition(id, _.bind(function(definition) {
@@ -98,32 +103,20 @@ define("org/forgerock/openidm/ui/common/workflow/processes/StartProcessView", [
                         this.processDefinition = definition;
                         delete this.definitionFormPropertyMap;
 
-                        if(template === false && definition.formResourceKey) {
+                        if (template === false && definition.formResourceKey) {
                             ModuleLoader.load(formManager.getViewForForm(definition.formResourceKey)).then(function (view) {
                                 view.render(definition, {}, {}, callback);
                             });
-                        } else if(template !== false) {
-                            templateStartProcessForm.render(definition, {}, template, _.bind(function() {
-                                validatorsManager.bindValidators(this.$el);
-                                validatorsManager.validateAllFields(this.$el);
-
-                                if(callback) {
-                                    callback();
-                                }
-                            }, this));
+                        } else if (template !== false) {
+                            templateStartProcessForm.render(definition, {}, template,
+                                _.bind(formGenerationUtils.validateForm, this, formValidateOptions, validatorsManager, callback)
+                            );
                             return;
                         } else {
                             this.definitionFormPropertyMap = formGenerationUtils.buildPropertyTypeMap(definition.formProperties);
-                            templateStartProcessForm.render({"formProperties": definition.formProperties.formPropertyHandlers}, {}, formGenerationUtils.generateTemplateFromFormProperties(definition), _.bind(function() {
-                                validatorsManager.bindValidators(this.$el);
-                                validatorsManager.validateAllFields(this.$el);
-
-                                this.$el.find("select").toggleClass("form-control", true);
-
-                                if(callback) {
-                                    callback();
-                                }
-                            }, this));
+                            templateStartProcessForm.render({"formProperties": definition.formProperties.formPropertyHandlers}, {}, formGenerationUtils.generateTemplateFromFormProperties(definition),
+                                _.bind(formGenerationUtils.validateForm, this, formValidateOptions, validatorsManager, callback)
+                            );
                             return;
                         }
                     }, this));

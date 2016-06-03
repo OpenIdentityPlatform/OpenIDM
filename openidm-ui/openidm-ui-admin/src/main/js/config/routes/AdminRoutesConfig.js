@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -23,7 +23,13 @@ define("config/routes/AdminRoutesConfig", [
         "dashboardView" : {
             view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
             role: "ui-admin",
-            url: "dashboard/"
+            url: /^dashboard\/(.*)$/,
+            pattern: "dashboard/?"
+        },
+        "newDashboardView" : {
+            view: "org/forgerock/openidm/ui/admin/dashboard/NewDashboard",
+            role: "ui-admin",
+            url: "newDashboard/"
         },
         "userRegistrationView" : {
             view: "org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView",
@@ -203,7 +209,6 @@ define("config/routes/AdminRoutesConfig", [
         }
     };
 
-    obj.landingPage = obj.dashboardView;
     commonRoutes["default"].role = "ui-admin";
     return obj;
 });

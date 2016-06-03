@@ -40,19 +40,23 @@ require.config({
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
         jquery: "libs/jquery-2.1.1-min",
-        jqueryui: "libs/jquery-ui-1.11.1-min",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-3.0.3-min",
+        handlebars: "libs/handlebars-4.0.5",
         bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
         moment: "libs/moment-2.8.1-min",
         contentflow: "libs/contentflow",
         selectize : "libs/selectize-0.12.1-min",
+        "backgrid": "libs/backgrid.min-0.3.5-min",
+        "backgrid-filter": "libs/backgrid-filter.min-0.3.5-min",
+        "backgrid-paginator": "libs/backgrid-paginator.min-0.3.5-min",
+        faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
         d3 : "libs/d3-3.5.5-min",
         dimple : "libs/dimple-2.1.2-min",
-        jsonEditor: "libs/jsoneditor-0.7.9-min"
+        jsonEditor: "libs/jsoneditor-0.7.9-min",
+        dragula : "libs/dragula-3.6.7-min"
     },
 
     shim: {
@@ -102,9 +106,6 @@ require.config({
         d3: {
             exports: "d3"
         },
-        jqueryui: {
-            deps: ["jquery"]
-        },
         selectize: {
             deps: ["jquery"]
         },
@@ -116,6 +117,16 @@ require.config({
         },
         placeholder: {
             deps: ["jquery"]
+        },
+        "backgrid": {
+            deps: ["jquery", "underscore", "backbone"],
+            exports: "Backgrid"
+        },
+        "backgrid-filter": {
+            deps: ["backgrid"]
+        },
+        "backgrid-paginator": {
+            deps: ["backgrid", "backbone.paginator"]
         }
     }
 });
@@ -125,7 +136,7 @@ require([
     "org/forgerock/commons/ui/common/main/EventManager",
 
     "org/forgerock/commons/ui/common/main",
-    "org/forgerock/openidm/ui/util/delegates/SiteConfigurationDelegate",
+    "org/forgerock/openidm/ui/common/main",
     "config/main",
 
     "jquery",
@@ -136,5 +147,5 @@ require([
     "spin",
     "placeholder"
 ], function (Constants, EventManager) {
-    EventManager.sendEvent(Constants.EVENT_DEPENDECIES_LOADED);
+    EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);
 });

@@ -19,48 +19,48 @@
 define("org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget", [
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/MemoryUsageWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/CPUUsageWidget"
 ], function($, _,
-            AbstractView,
+            AbstractWidget,
             MemoryUsageWidget,
             CPUUsageWidget) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/dashboard/widget/DashboardTripleWidgetTemplate.html",
-            model : {
 
-            },
-            events: {
-                "click .refresh-health-info": "refreshHealth"
-            },
-            render: function(args, callback) {
-                this.element = args.element;
-
-                this.data.icons = [{
+            widgetRender: function(args, callback) {
+                this.data.menuItems = [{
                     "icon" : "fa-refresh",
-                    "iconClass": "refresh-health-info"
+                    "menuClass" : "refresh-health-info",
+                    "title" : "Refresh"
                 }];
+
+                this.events["click .refresh-health-info"] = "refreshHealth";
 
                 this.parentRender(_.bind(function(){
                     this.model.cpuWidget = CPUUsageWidget.generateWidget({
                         element: this.$el.find(".left-chart"),
-                        widget: args.widget
+                        widget: {
+                            type: "cpuUsage",
+                            simpleWidget: true
+                        }
                     });
 
                     this.model.memoryHeapWidget = MemoryUsageWidget.generateWidget({
                         element: this.$el.find(".center-chart"),
                         widget: {
-                            type: "lifeCycleMemoryHeap"
+                            type: "lifeCycleMemoryHeap",
+                            simpleWidget: true
                         }
                     });
 
                     this.model.memoryNonHeapWidget = MemoryUsageWidget.generateWidget({
                         element: this.$el.find(".right-chart"),
                         widget: {
-                            type: "lifeCycleMemoryNonHeap"
+                            type: "lifeCycleMemoryNonHeap",
+                            simpleWidget: true
                         }
                     });
 
@@ -69,12 +69,16 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/FullHealthWidget", [
                     }
                 }, this));
             },
+
             resize : function() {
                 this.model.cpuWidget.resize();
                 this.model.memoryHeapWidget.resize();
                 this.model.memoryNonHeapWidget.resize();
             },
-            refreshHealth: function() {
+
+            refreshHealth: function(event) {
+                event.preventDefault();
+
                 this.model.cpuWidget.refresh();
                 this.model.memoryHeapWidget.refresh();
                 this.model.memoryNonHeapWidget.refresh();

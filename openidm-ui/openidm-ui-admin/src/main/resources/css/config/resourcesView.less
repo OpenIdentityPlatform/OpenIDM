@@ -16,7 +16,6 @@
 
 /* entire container, keeps perspective */
 
-#addManagedObjectForm,
 #managedDetailsContainer,
 #managedScriptsContainer,
 #managedPropertiesContainer,
@@ -55,19 +54,22 @@
 }
 
 .connector-delete,
-.managed-delete {
+.managed-delete,
+.mapping-delete {
   padding: 3px 20px;
 }
 
 .connector-delete:hover,
-.managed-delete:hover {
+.managed-delete:hover,
+.mapping-delete:hover {
   cursor:pointer;
   color:white;
   background-color: @base-theme-color;
 }
 
 #connectorGrid .backgrid td,
-#managedGrid .backgrid td {
+#managedGrid .backgrid td,
+#mappingGrid .backgrid td {
   position: relative;
   top: 1px;
   padding-top:18px;
@@ -76,7 +78,8 @@
 }
 
 .connector-delete:hover,
-.managed-delete:hover {
+.managed-delete:hover,
+.mapping-delete:hover {
   cursor:pointer;
   color:white;
   background-color: @base-theme-color;
@@ -147,7 +150,18 @@
     }
   }
 }
-
+.conditionFilter {
+  .conditionFilterLabel {
+    margin-top:15px;
+  }
+  .temporalConstraintsLabel {
+    margin-top:7px;
+  }
+  .datetimepicker {
+      margin-bottom: 10px;
+      width: 250px;
+  }
+}
 /*
   Managed Object
 */

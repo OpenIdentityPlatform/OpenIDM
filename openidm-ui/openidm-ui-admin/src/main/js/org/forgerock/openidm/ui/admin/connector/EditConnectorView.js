@@ -11,11 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
-/*global define */
 
+/*global define */
 define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
     "jquery",
     "underscore",
@@ -56,11 +56,9 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
         template: "templates/admin/connector/EditConnectorTemplate.html",
         events: {
             "change #connectorType" : "loadConnectorTemplate",
-            "onValidate": "onValidate",
             "click #updateObjectTypes" : "objectTypeFormSubmit",
             "click #updateSync" : "syncFormSubmit",
             "click .addLiveSync" : "addLiveSync",
-            "customValidate": "customValidate",
             "click .edit-objectType" : "editObjectType",
             "click .delete-objectType" : "deleteObjectType",
             "click #addObjectType" : "addObjectType",
@@ -71,7 +69,8 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
             "change .postRetryAction": "postRetryActionChange",
             "change #connectorForm :input" : "connectorChangesCheck",
             "keypress #connectorForm :input" : "connectorFlowCheck",
-            "paste #connectorForm :input" : "connectorFlowCheck"
+            "paste #connectorForm :input" : "connectorFlowCheck",
+            "change .toggleBoolean" : connectorUtils.toggleValue
         },
         data: {
 
@@ -173,6 +172,10 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                     this.data.connectorName = data.name;
                     this.data.connectorTypeName = data.connectorRef.connectorName;
                     this.data.enabled = data.enabled;
+
+                    if(_.isUndefined(this.data.enabled)) {
+                        this.data.enabled = true;
+                    }
 
                     //Store in memory version of connector details. This is to ensure we can move around tabs and keep the correct data state.
                     this.connectorDetails = data;
@@ -474,7 +477,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
                         // TODO: Use queryFilters to avoid having to pull back all schedules and sifting through them.  //
                         //                                                                                              //
                         //////////////////////////////////////////////////////////////////////////////////////////////////
-                        if (schedule.invokeContext.action === "liveSync") {
+                        if (schedule && schedule.invokeContext.action === "liveSync") {
 
                             sourcePieces = schedule.invokeContext.source.split("/");
 
@@ -702,7 +705,7 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
 
                 //Added logic to ensure array parts correctly add and delete what is set
                 _.each(arrayComponents, function (component) {
-                    tempArrayObject = form2js($(component).prop("id"), ".", false);
+                    tempArrayObject = form2js($(component).prop("id"), ".", true);
 
                     _.each(tempArrayObject.configurationProperties, function(item, key) {
                         mergedResult.configurationProperties[key] = item;
@@ -749,12 +752,16 @@ define("org/forgerock/openidm/ui/admin/connector/EditConnectorView", [
         },
 
         //Since we are using tab panels we need custom validate to correctly enable / disable the connector submit
-        customValidate: function() {
-            if(validatorsManager.formValidated(this.$el.find("#connectorForm"))) {
-                this.$el.find("#submitConnector").attr("disabled", false);
-            } else {
-                this.$el.find("#submitConnector").attr("disabled", true);
-            }
+        validationSuccessful: function (event) {
+            AbstractConnectorView.prototype.validationSuccessful(event);
+
+            this.$el.find("#submitConnector").attr("disabled", false);
+        },
+
+        validationFailed: function (event, details) {
+            AbstractConnectorView.prototype.validationFailed(event, details);
+
+            this.$el.find("#submitConnector").attr("disabled", true);
         },
 
         //When clicking the pencil for an object type

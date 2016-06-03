@@ -1,64 +1,67 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015-2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="panel-body">
-    <div class="alert alert-success">
-        <i class="fa fa-check"></i>
-        <strong>{{t "templates.update.preview.ready"}}</strong> {{t "templates.update.preview.versionIsReady"}} {{version}}. {{#if link}}<a href="{{link}}" class="alert-link"> {{t "templates.update.preview.releaseNotes"}}</a>{{/if}}
+<div id="repoUpdateWrapper"></div>
+<div id="previewWrapper">
+    <div class="panel-body">
+        <div class="alert alert-success">
+            <i class="fa fa-check"></i>
+            <strong>{{t "templates.update.preview.ready"}}</strong> {{t "templates.update.preview.versionIsReady"}} {{version}}. {{#if link}}{{t "templates.update.preview.helpHead"}}<a href="{{link}}" class="alert-link"> {{t "templates.update.preview.releaseNotes"}}</a>{{t "templates.update.preview.helpTail"}}{{/if}}
+        </div>
+
+        <hr/>
+
+        <h3>{{t "templates.update.preview.header"}}</h3>
+
+        <p class="panel-description">
+            {{t "templates.update.preview.description"}}
+        </p>
+
+
+        <div class="form-inline toolbar">
+            <div class="pull-right ">
+                <button class="btn btn-default" id="cancelUpdate">{{t "common.form.cancel"}}</button>
+                <button class="btn btn-primary" id="installUpdate" type="button">{{t "templates.update.preview.installUpdateBtn"}}</button>
+            </div>
+            {{#if modifiedFilesExist}}
+                <div class="form-group modified-all-group">
+                    <label class="form-label">{{t "templates.update.preview.view"}}: </label>
+                    <div class="btn-group" data-toggle="btns">
+                        <a class="btn toggle-view-btn fr-btn-secondary filter-file-list show-modified-files{{#unless all}} active{{/unless}}" href="#" data-toggle="tab" aria-expanded="true">{{t "templates.update.preview.modified"}}</a>
+                        <a class="btn toggle-view-btn fr-btn-secondary filter-file-list show-all-files{{#if all}} active{{/if}}" href="#" data-toggle="tab" aria-expanded="true">{{t "templates.update.preview.allFiles"}}</a>
+                    </div>
+                </div>
+            {{/if}}
+            <div class="form-group expand-collapse-group">
+                <div class="btn-group">
+                    <button type="button" class="btn toggle-view-btn fr-btn-secondary expand-treegrid"><i class="fa fa-plus-circle"></i>{{t "templates.update.preview.expand"}}</button>
+                    <button type="button" class="btn toggle-view-btn fr-btn-secondary collapse-treegrid"><i class="fa fa-minus-circle"></i>{{t "templates.update.preview.collapse"}}</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="treegrid">
+            <div class="header clearfix">
+                <div class="col-sm-12 smallScreenCell">
+                   {{t "templates.update.preview.file"}}
+                </div>
+
+                <div class="col-sm-10 normalCells">
+                   {{t "templates.update.preview.file"}}
+                </div>
+
+                <div class="col-sm-2 normalCells">
+                    {{t "templates.update.preview.status"}}
+                </div>
+
+            </div>
+            {{> settings/_updateTreeGrid context=treeGrid depth=0}}
+        </div>
     </div>
 
-    <hr/>
-
-    <h3>{{t "templates.update.preview.header"}}</h3>
-
-    <p class="panel-description">
-        {{t "templates.update.preview.description"}}
-    </p>
-
-
-    <div class="form-inline toolbar">
+    <div class="panel-footer clearfix" id="installFooter">
         <div class="pull-right ">
             <button class="btn btn-default" id="cancelUpdate">{{t "common.form.cancel"}}</button>
             <button class="btn btn-primary" id="installUpdate" type="button">{{t "templates.update.preview.installUpdateBtn"}}</button>
         </div>
-        {{#if modifiedFilesExist}}
-            <div class="form-group modified-all-group">
-                <label class="form-label">{{t "templates.update.preview.view"}}: </label>
-                <div class="btn-group" data-toggle="btns">
-                    <a class="btn toggle-view-btn fr-btn-secondary filter-file-list show-modified-files{{#unless all}} active{{/unless}}" href="#" data-toggle="tab" aria-expanded="true">{{t "templates.update.preview.modified"}}</a>
-                    <a class="btn toggle-view-btn fr-btn-secondary filter-file-list show-all-files{{#if all}} active{{/if}}" href="#" data-toggle="tab" aria-expanded="true">{{t "templates.update.preview.allFiles"}}</a>
-                </div>
-            </div>
-        {{/if}}
-        <div class="form-group expand-collapse-group">
-            <div class="btn-group">
-                <button type="button" class="btn toggle-view-btn fr-btn-secondary expand-treegrid"><i class="fa fa-plus-circle"></i>{{t "templates.update.preview.expand"}}</button>
-                <button type="button" class="btn toggle-view-btn fr-btn-secondary collapse-treegrid"><i class="fa fa-minus-circle"></i>{{t "templates.update.preview.collapse"}}</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="treegrid">
-        <div class="header clearfix">
-            <div class="col-sm-12 smallScreenCell">
-               {{t "templates.update.preview.file"}}
-            </div>
-
-            <div class="col-sm-10 normalCells">
-               {{t "templates.update.preview.file"}}
-            </div>
-
-            <div class="col-sm-2 normalCells">
-                {{t "templates.update.preview.status"}}
-            </div>
-
-        </div>
-        {{> settings/_updateTreeGrid context=treeGrid depth=0}}
-    </div>
-</div>
-
-<div class="panel-footer clearfix" id="installFooter">
-    <div class="pull-right ">
-        <button class="btn btn-default" id="cancelUpdate">{{t "common.form.cancel"}}</button>
-        <button class="btn btn-primary" id="installUpdate" type="button">{{t "templates.update.preview.installUpdateBtn"}}</button>
     </div>
 </div>

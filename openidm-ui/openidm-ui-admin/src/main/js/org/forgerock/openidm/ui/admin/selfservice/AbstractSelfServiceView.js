@@ -24,24 +24,29 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
     "form2js",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "bootstrap-dialog",
     "selectize",
-    "jquerySortable"
+    "org/forgerock/commons/ui/common/util/AutoScroll",
+    "dragula"
 ], function($, _,
             bootstrap,
             handlebars,
             form2js,
             AdminAbstractView,
             ConfigDelegate,
+            SiteConfigurationDelegate,
             UiUtils,
             EventManager,
             Constants,
             BootstrapDialog,
             selectize,
-            jquerySortable) {
+            AutoScroll,
+            dragula) {
+
     var AbstractSelfServiceView = AdminAbstractView.extend({
         events: {
             "change .all-check" : "controlAllSwitch",
@@ -104,16 +109,26 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
         },
         createConfig: function () {
+            this.setKBAEnabled();
             return $.when(
                 ConfigDelegate.createEntity(this.model.configUrl, this.orderCheck()),
                 ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
-            );
+            ).then(function () {
+                SiteConfigurationDelegate.updateConfiguration(function () {
+                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                });
+            });
         },
         deleteConfig: function () {
+            this.setKBAEnabled();
             return $.when(
                 ConfigDelegate.deleteEntity(this.model.configUrl),
                 ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
-            );
+            ).then(function () {
+                SiteConfigurationDelegate.updateConfiguration(function () {
+                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                });
+            });
         },
         controlAllSwitch: function(event) {
             var check = $(event.target),
@@ -196,7 +211,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 card.toggleClass("disabled", false);
                 card.toggleClass("active", true);
 
-                orderPosition = this.$el.find(".selfservice-holder ul li:not(.disabled)").index(card);
+                orderPosition = this.$el.find(".selfservice-holder .wide-card:not(.disabled)").index(card);
 
                 if(_.findWhere(this.model.saveConfig.stageConfigs, {"name" : type}) === undefined) {
                     this.model.saveConfig.stageConfigs.splice(orderPosition, 0, _.clone(this.model.configDefault.stageConfigs[configPosition]));
@@ -338,8 +353,8 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                         this.setSortable();
 
                         _.each(result.stageConfigs, function(stage){
-                            this.$el.find("li[data-type='" +stage.name +"']").toggleClass("disabled", false);
-                            this.$el.find("li[data-type='" +stage.name +"'] .section-check").prop("checked", true).trigger("change");
+                            this.$el.find(".wide-card[data-type='" +stage.name +"']").toggleClass("disabled", false);
+                            this.$el.find(".wide-card[data-type='" +stage.name +"'] .section-check").prop("checked", true).trigger("change");
                         }, this);
 
                         this.model.surpressSave = false;
@@ -366,31 +381,24 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
         },
 
         setSortable: function() {
-            var startIndex,
-                _this = this;
+            var start,
+                dragDropInstance = dragula([$(".selfservice-holder")[0]]);
 
-            this.$el.find(".selfservice-holder ul").nestingSortable({
-                handle: "div",
-                items: "li",
-                toleranceElement: "ul",
-                placeholder: "<li class='placeholder well'></li>",
-                onMousedown: function ($item, _super, event) {
-                    startIndex = _this.$el.find(".selfservice-holder ul li:not(.disabled)").index($item);
+            dragDropInstance.on("drag", _.bind(function(el, container) {
+                start = this.$el.find(".selfservice-holder .card").not(".disabled").index($(el));
 
-                    if (!event.target.nodeName.match(/^(input|select)$/i)) {
-                        event.preventDefault();
-                        return true;
-                    }
-                },
-                onDrop: function ($item, container, _super, event) {
-                    var endIndex = _this.$el.find(".selfservice-holder ul li:not(.disabled)").index($item);
+                AutoScroll.startDrag();
+            }, this));
 
-                    _super($item, container, _super, event);
+            dragDropInstance.on("dragend", _.bind(function(el) {
+                var stop = this.$el.find(".selfservice-holder .card").not(".disabled").index($(el));
 
-                    _this.setOrder(startIndex, endIndex);
-                }
-            });
+                AutoScroll.endDrag();
+
+                this.setOrder(start, stop);
+            }, this));
         },
+
         setOrder: function(start, end) {
             var movedElement = this.model.saveConfig.stageConfigs[start];
 
@@ -409,7 +417,7 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
 
             $.extend(true, tempConfig, this.model.saveConfig);
 
-            _.each(this.$el.find(".selfservice-holder ul li"), function(config) {
+            _.each(this.$el.find(".selfservice-holder .wide-card"), function(config) {
                 _.each(tempConfig.stageConfigs, function(stage){
                     if(stage.name === $(config).attr("data-type")) {
                         stageOrder.push(_.clone(stage));
@@ -426,10 +434,21 @@ define("org/forgerock/openidm/ui/admin/selfservice/AbstractSelfServiceView", [
                 saveData = {};
 
             $.extend(true, saveData, this.model.saveConfig, formData);
-
-            return ConfigDelegate.updateEntity(this.model.configUrl, saveData).then(_.bind(function() {
+            this.setKBAEnabled();
+            return $.when(
+                ConfigDelegate.updateEntity(this.model.configUrl, saveData),
+                ConfigDelegate.updateEntity("ui/configuration", this.model.uiConfig)
+            ).then(_.bind(function() {
+                SiteConfigurationDelegate.updateConfiguration(function () {
+                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                });
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
             }, this));
+        },
+        setKBAEnabled: function () {
+            this.model.uiConfig.configuration.kbaEnabled =
+                !!this.model.uiConfig.configuration.kbaDefinitionEnabled ||
+                !!this.model.uiConfig.configuration.kbaVerificationEnabled;
         },
         preventTab: function(event) {
             event.preventDefault();

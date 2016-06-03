@@ -1,5 +1,5 @@
-<!-- Copyright 2015 ForgeRock AS.
-	License terms: https://forgerock.org/cddlv1-0/ -->
+<!-- Copyright 2016 ForgeRock AS.
+....License terms: https://forgerock.org/cddlv1-0/ -->
 <div class="panel panel-default panel-collapse">
     <div class="panel-heading" role="tab" id="connectorSpecificBaseHeading">
         <h4 class="panel-title">
@@ -9,19 +9,19 @@
     <div id="connectorSpecificBase" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="connectorSpecificBase" aria-expanded="true">
         <div class="panel-body">
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="warningLevel">{{t "templates.connector.groovyPoolableConnector.warningLevel"}}</label>
+                <label class="col-sm-3 control-label" for="warningLevel">{{t "templates.connector.scriptedShared.warningLevel"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="warningLevel" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.warningLevel}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="minimumRecompilationInterval">{{t "templates.connector.groovyPoolableConnector.minimumRecompilationInterval"}}</label>
+                <label class="col-sm-3 control-label" for="minimumRecompilationInterval">{{t "templates.connector.scriptedShared.minimumRecompilationInterval"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="minimumRecompilationInterval" name="configurationProperties.warningLevel" value="{{connectorDefaults.configurationProperties.minimumRecompilationInterval}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="debug">{{t "templates.connector.groovyPoolableConnector.debug"}}</label>
+                <label class="col-sm-3 control-label" for="debug">{{t "templates.connector.scriptedShared.debug"}}</label>
                 <div class="col-sm-8">
                     <select id="debug" class="form-control" name="configurationProperties.debug">
                         {{#staticSelect connectorDefaults.configurationProperties.debug}}
@@ -32,7 +32,7 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="verbose">{{t "templates.connector.groovyPoolableConnector.verbose"}}</label>
+                <label class="col-sm-3 control-label" for="verbose">{{t "templates.connector.scriptedShared.verbose"}}</label>
                 <div class="col-sm-8">
                     <select id="verbose" class="form-control" name="configurationProperties.verbose">
                         {{#staticSelect connectorDefaults.configurationProperties.verbose}}
@@ -43,37 +43,37 @@
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="recompileGroovySource">{{t "templates.connector.groovyPoolableConnector.recompileGroovySource"}}</label>
+                <label class="col-sm-3 control-label" for="recompileGroovySource">{{t "templates.connector.scriptedShared.recompileGroovySource"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="recompileGroovySource" name="configurationProperties.recompileGroovySource" value="{{connectorDefaults.configurationProperties.recompileGroovySource}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="tolerance">{{t "templates.connector.groovyPoolableConnector.tolerance"}}</label>
+                <label class="col-sm-3 control-label" for="tolerance">{{t "templates.connector.scriptedShared.tolerance"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="tolerance" name="configurationProperties.tolerance" value="{{connectorDefaults.configurationProperties.tolerance}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="sourceEncoding">{{t "templates.connector.groovyPoolableConnector.sourceEncoding"}}</label>
+                <label class="col-sm-3 control-label" for="sourceEncoding">{{t "templates.connector.scriptedShared.sourceEncoding"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="sourceEncoding" name="configurationProperties.sourceEncoding" value="{{connectorDefaults.configurationProperties.sourceEncoding}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="targetDirectory">{{t "templates.connector.groovyPoolableConnector.targetDirectory"}}</label>
+                <label class="col-sm-3 control-label" for="targetDirectory">{{t "templates.connector.scriptedShared.targetDirectory"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="targetDirectory" name="configurationProperties.targetDirectory" value="{{connectorDefaults.configurationProperties.targetDirectory}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="disabledGlobalAst">{{t "templates.connector.groovyPoolableConnector.disabledGlobalAst"}}</label>
+                <label class="col-sm-3 control-label" for="disabledGlobalAst">{{t "templates.connector.scriptedShared.disabledGlobalAst"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="disabledGlobalAst" name="configurationProperties.disabledGlobalAst" value="{{connectorDefaults.configurationProperties.disabledGlobalAst}}" />
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-sm-3 control-label" for="disabledGlobalAst">{{t "templates.connector.groovyPoolableConnector.disabledGlobalAst"}}</label>
+                <label class="col-sm-3 control-label" for="disabledGlobalAst">{{t "templates.connector.scriptedShared.disabledGlobalAst"}}</label>
                 <div class="col-sm-8">
                     <input class="form-control" type="text" id="disabledGlobalAst" name="configurationProperties.disabledGlobalAst" value="{{connectorDefaults.configurationProperties.disabledGlobalAst}}" />
                 </div>
@@ -122,19 +122,19 @@
 <div class="panel panel-default panel-collapse">
     <div class="panel-heading" role="tab" id="classpathHolderHeading">
         <h4 class="panel-title">
-            <a data-toggle="collapse" href="#classpathHolder" aria-expanded="true" aria-controls="classpathHolderHeading" class="">{{t "templates.connector.scriptedCrest.classpath"}}</a>
+            <a data-toggle="collapse" href="#classpathHolder" aria-expanded="true" aria-controls="classpathHolderHeading" class="">{{t "templates.connector.scriptedShared.classpath"}}</a>
         </h4>
     </div>
     <div id="classpathHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="classpathHolder" aria-expanded="true">
         <div class="panel-body connector-array-component" id="classpathWrapper">
             <div>
-                <button type="button" field_type="classpath" id="addClasspathButton" name="addClasspathButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedCrest.addClasspath"}}</span><i class="fa fa-plus"></i></button>
+                <button type="button" field_type="classpath" id="addClasspathButton" name="addClasspathButton" class="btn btn-primary add-btn"><span>{{t "templates.connector.scriptedShared.addClasspath"}}</span><i class="fa fa-plus"></i></button>
             </div>
 
             {{#if connectorDefaults.configurationProperties.classpath.length}}
             {{#each_with_index connectorDefaults.configurationProperties.classpath}}
             <div class="form-group field">
-                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.classpath"}}</label>
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedShared.classpath"}}</label>
                 <div class="input-group col-sm-8">
                     <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value="{{value}}" />
                     <div class="input-group-addon">
@@ -145,7 +145,7 @@
             {{/each_with_index}}
             {{else}}
             <div class="form-group field">
-                <label class="control-label col-sm-3">{{t "templates.connector.scriptedCrest.classpath"}}</label>
+                <label class="control-label col-sm-3">{{t "templates.connector.scriptedShared.classpath"}}</label>
                 <div class="input-group col-sm-8">
                     <input class="form-control" autocomplete="off" type="text" name="configurationProperties.classpath[]" placeholder="cn=Users,dc=company,dc=com" value="" />
                     <div class="input-group-addon">
@@ -160,78 +160,78 @@
 <div class="panel panel-default panel-collapse">
     <div class="panel-heading" role="tab" id="scriptHolderHeading">
         <h4 class="panel-title">
-            <a data-toggle="collapse" href="#scriptHolder" aria-expanded="true" aria-controls="scriptHolderHeading" class="">{{t "templates.connector.groovyPoolableConnector.scriptTitle"}}</a>
+            <a data-toggle="collapse" href="#scriptHolder" aria-expanded="true" aria-controls="scriptHolderHeading" class="">{{t "templates.connector.scriptedShared.scriptTitle"}}</a>
         </h4>
     </div>
     <div id="scriptHolder" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="scriptHolder" aria-expanded="true">
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.groovyPoolableConnector.createScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="createScriptFileName">{{t "templates.connector.scriptedShared.createScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="createScriptFileName" name="configurationProperties.createScriptFileName" value="{{connectorDefaults.configurationProperties.createScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.groovyPoolableConnector.testScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="testScriptFileName">{{t "templates.connector.scriptedShared.testScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="testScriptFileName" name="configurationProperties.testScriptFileName" value="{{connectorDefaults.configurationProperties.testScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.groovyPoolableConnector.searchScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="searchScriptFileName">{{t "templates.connector.scriptedShared.searchScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="searchScriptFileName" name="configurationProperties.searchScriptFileName" value="{{connectorDefaults.configurationProperties.searchScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.groovyPoolableConnector.authenticateScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="authenticateScriptFileName">{{t "templates.connector.scriptedShared.authenticateScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="authenticateScriptFileName" name="configurationProperties.authenticateScriptFileName" value="{{connectorDefaults.configurationProperties.authenticateScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.groovyPoolableConnector.deleteScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="deleteScriptFileName">{{t "templates.connector.scriptedShared.deleteScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="deleteScriptFileName" name="configurationProperties.deleteScriptFileName" value="{{connectorDefaults.configurationProperties.deleteScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.groovyPoolableConnector.updateScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="updateScriptFileName">{{t "templates.connector.scriptedShared.updateScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="updateScriptFileName" name="configurationProperties.updateScriptFileName" value="{{connectorDefaults.configurationProperties.updateScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.groovyPoolableConnector.syncScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="syncScriptFileName">{{t "templates.connector.scriptedShared.syncScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="syncScriptFileName" name="configurationProperties.syncScriptFileName" value="{{connectorDefaults.configurationProperties.syncScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.groovyPoolableConnector.schemaScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="schemaScriptFileName">{{t "templates.connector.scriptedShared.schemaScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="schemaScriptFileName" name="configurationProperties.schemaScriptFileName" value="{{connectorDefaults.configurationProperties.schemaScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="scriptBaseClass">{{t "templates.connector.groovyPoolableConnector.scriptBaseClass"}}</label>
+            <label class="col-sm-3 control-label" for="scriptBaseClass">{{t "templates.connector.scriptedShared.scriptBaseClass"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="scriptBaseClass" name="configurationProperties.scriptBaseClass" value="{{connectorDefaults.configurationProperties.scriptBaseClass}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="customizerScriptFileName">{{t "templates.connector.groovyPoolableConnector.customizerScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="customizerScriptFileName">{{t "templates.connector.scriptedShared.customizerScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" type="text" id="customizerScriptFileName" name="configurationProperties.customizerScriptFileName" value="{{connectorDefaults.configurationProperties.customizerScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="resolveUsernameScriptFileName">{{t "templates.connector.groovyPoolableConnector.resolveUsernameScriptFileName"}}</label>
+            <label class="col-sm-3 control-label" for="resolveUsernameScriptFileName">{{t "templates.connector.scriptedShared.resolveUsernameScriptFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" id="resolveUsernameScriptFileName" type="text" name="configurationProperties.resolveUsernameScriptFileName" value="{{connectorDefaults.configurationProperties.resolveUsernameScriptFileName}}" />
             </div>
         </div>
         <div class="form-group">
-            <label class="col-sm-3 control-label" for="scriptOnResourceFileName">{{t "templates.connector.groovyPoolableConnector.scriptOnResourceFileName"}}</label>
+            <label class="col-sm-3 control-label" for="scriptOnResourceFileName">{{t "templates.connector.scriptedShared.scriptOnResourceFileName"}}</label>
             <div class="col-sm-8">
                 <input class="form-control" id="scriptOnResourceFileName" type="text" name="configurationProperties.scriptOnResourceFileName" value="{{connectorDefaults.configurationProperties.scriptOnResourceFileName}}" />
             </div>

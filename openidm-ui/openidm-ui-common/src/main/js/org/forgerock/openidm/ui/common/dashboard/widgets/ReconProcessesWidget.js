@@ -20,15 +20,20 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
     "jquery",
     "underscore",
     "dimple",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/openidm/ui/common/dashboard/widgets/AbstractWidget",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SystemHealthDelegate"
-], function($, _, dimple, AbstractView, eventManager, constants, conf, SystemHealthDelegate) {
+], function($, _,
+            dimple,
+            AbstractWidget,
+            eventManager,
+            constants,
+            conf,
+            SystemHealthDelegate) {
     var widgetInstance = {},
-        Widget = AbstractView.extend({
-            noBaseTemplate: true,
+        Widget = AbstractWidget.extend({
             template: "templates/dashboard/widget/DashboardSingleWidgetTemplate.html",
             model: {
                 reconChart: null,
@@ -43,16 +48,7 @@ define("org/forgerock/openidm/ui/common/dashboard/widgets/ReconProcessesWidget",
                 canvasHeight: 390,
                 refreshSpeed : 5000
             },
-            data: {
-
-            },
-            render: function(args, callback) {
-                this.element = args.element;
-                this.data.widgetType = args.type;
-
-                this.reconUsageWidget(callback);
-            },
-            reconUsageWidget: function(callback) {
+            widgetRender: function(args, callback) {
                 var areaSeries,
                     svg;
 

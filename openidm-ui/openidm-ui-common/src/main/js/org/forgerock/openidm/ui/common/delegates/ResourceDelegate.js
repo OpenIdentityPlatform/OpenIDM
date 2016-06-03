@@ -22,8 +22,9 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/commons/ui/common/components/Messages"
-], function($, _, constants, AbstractDelegate, configDelegate, messagesManager) {
+    "org/forgerock/commons/ui/common/components/Messages",
+    "org/forgerock/commons/ui/common/util/ObjectUtil"
+], function($, _, constants, AbstractDelegate, configDelegate, messagesManager, ObjectUtil) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/");
 
@@ -110,8 +111,10 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             }
         });
     };
-    obj.patchResourceDifferences = function (serviceUrl) {
-        return AbstractDelegate.prototype.patchEntityDifferences.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), _.toArray(arguments).slice(1));
+    obj.patchResourceDifferences = function (serviceUrl, queryParameters, oldObject, newObject, successCallback, errorCallback) {
+        var patchDefinition = ObjectUtil.generatePatchSet(newObject, oldObject);
+        
+        return AbstractDelegate.prototype.patchEntity.apply(_.extend({}, AbstractDelegate.prototype, this, {"serviceUrl": serviceUrl}), [queryParameters, patchDefinition, successCallback, errorCallback]);
     };
 
     obj.getServiceUrl = function(args) {
@@ -148,6 +151,25 @@ define("org/forgerock/openidm/ui/common/delegates/ResourceDelegate", [
             url: id,
             type: "GET"
         });
+    };
+
+    obj.queryStringForSearchableFields = function (searchFields, query) {
+        var queryFilter = "",
+            queryFilterArr = [];
+        /*
+         * build up the queryFilterArr based on searchFields
+         */
+        _.each(searchFields, function (field) {
+            queryFilterArr.push(field + " sw \"" + query + "\"");
+        });
+
+        queryFilter = queryFilterArr.join(" or ") + "&_pageSize=10&_fields=*";
+
+        return queryFilter;
+    };
+
+    obj.getResource = function (url) {
+        return obj.serviceCall({ url: url });
     };
 
     return obj;

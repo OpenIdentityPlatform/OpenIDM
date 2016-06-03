@@ -1,9 +1,11 @@
 <!-- Copyright 2015 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-{{#if mapping}}
+{{> dashboard/_widgetHeader}}
+<div class="panel-body widget-body">
+    {{#if mapping}}
     {{#if recon}}
     <div class="recon-widget-header clearfix">
-        <div class="title text-primary">
+        <div class="title {{#if showPopover}} selectable-title {{/if}} text-primary">
             <i class="fa fa-map-marker"></i>{{mapping.name}}{{#if showPopover}}<i class="fa fa-caret-down"></i>{{/if}}
         </div>
         <div class="timestamp">
@@ -55,7 +57,7 @@
         <a href="#mapping/"><button class="btn btn-default btn-transparent"><i class="fa fa-map-marker"></i>{{t "dashboard.reconWidget.selectAMapping"}}</button></a>
     </div>
     {{/if}}
-{{else}}
+    {{else}}
     <div class="well recon-message">
         <div class="message-icon text-primary"><i class="fa fa-flag"></i></div>
         <h3>{{t "dashboard.reconWidget.getStartedTitle"}}</h3>
@@ -65,4 +67,5 @@
         <a href="#mapping/add/"><button class="btn btn-default btn-transparent"><i class="fa fa-plus"></i>{{t "dashboard.reconWidget.newMapping"}}</button></a>
         <a href="#connectors/add/"><button class="btn btn-default btn-transparent"><i class="fa fa-plus"></i>{{t "dashboard.reconWidget.newConnector"}}</button></a>
     </div>
-{{/if}}
+    {{/if}}
+</div>

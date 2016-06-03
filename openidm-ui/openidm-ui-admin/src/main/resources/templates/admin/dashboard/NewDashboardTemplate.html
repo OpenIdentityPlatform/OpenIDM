@@ -1,0 +1,51 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="container">
+    <div class="page-header">
+        <h1>{{t "dashboard.new.title"}}</h1>
+    </div>
+</div>
+
+<div class="container">
+    <div class="panel no-margin-bottom has-border">
+        <form id="NewDashboardForm" class="form-horizontal">
+
+            <div class="panel-body">
+                <div class="form-group">
+                    <label for="DashboardName" class="col-sm-3 control-label">{{t "dashboard.new.name"}}</label>
+                    <div class="col-sm-8">
+                        <input class="form-control"
+                               type="text"
+                               id="DashboardName"
+                               value=""
+                               data-validator="uniqueShortList"
+                               data-validator-event="keyup blur"
+                               data-unique-list="{{stringify existingDashboards}}"/>
+                        <div class="validation-message"></div>
+                        <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="DefaultDashboard" class="col-sm-3 control-label" >{{t "dashboard.setAsDefault"}}</label>
+                    <div class="col-sm-8">
+                        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                            <label>
+                                <input type="checkbox" name="defaultDashboard" id="DefaultDashboard"/><span></span>
+                            </label>
+                            <span class="help-block">{{t "dashboard.new.defaultDesc"}}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-footer clearfix">
+                <div class="pull-right">
+                    <a href="#dashboard/" class="btn btn-default">{{t "common.form.cancel"}}</a>
+                    <input type="submit" name="AddNewDashboard" value='{{t "dashboard.new.submit"}}' class="btn btn-primary" disabled="true">
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>

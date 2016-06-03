@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 /*global define*/
@@ -26,6 +26,38 @@ define("config/messages/AdminMessages", [
         },
         "connectorSaved": {
             msg: "config.messages.ConnectorMessages.connectorSaved",
+            type: "info"
+        },
+        "newDashboardCreated": {
+            msg: "config.messages.dashboardMessages.newDashboardCreated",
+            type: "info"
+        },
+        "dashboardDeleted": {
+            msg: "config.messages.dashboardMessages.dashboardDeleted",
+            type: "info"
+        },
+        "dashboardDefaulted": {
+            msg: "config.messages.dashboardMessages.dashboardDefaulted",
+            type: "info"
+        },
+        "dashboardDuplicated": {
+            msg: "config.messages.dashboardMessages.dashboardDuplicated",
+            type: "info"
+        },
+        "dashboardRenamed": {
+            msg: "config.messages.dashboardMessages.dashboardRenamed",
+            type: "info"
+        },
+        "dashboardWidgetAdded": {
+            msg: "config.messages.dashboardMessages.dashboardWidgetAdded",
+            type: "info"
+        },
+        "dashboardWidgetsRearranged": {
+            msg: "config.messages.dashboardMessages.dashboardWidgetsRearranged",
+            type: "info"
+        },
+        "dashboardWidgetConfigurationSaved": {
+            msg: "config.messages.dashboardMessages.dashboardWidgetConfigurationSaved",
             type: "info"
         },
         "objectTypeSaved": {

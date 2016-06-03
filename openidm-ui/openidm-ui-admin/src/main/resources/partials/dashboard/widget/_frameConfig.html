@@ -1,0 +1,35 @@
+<!-- Copyright 2015 ForgeRock AS.
+License terms: https://forgerock.org/cddlv1-0/ -->
+<form id="widgetConfigForm" class="form-horizontal">
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="widgetSize">{{t "dashboard.generalConfig.widgetSize"}}</label>
+        <div class="col-sm-8">
+            <select id="widgetSize" class="form-control" name="size" required>
+                {{#staticSelect size}}
+                <option value="x-small">{{t "dashboard.generalConfig.xsmall"}}</option>
+                <option value="small">{{t "dashboard.generalConfig.small"}}</option>
+                <option value="medium">{{t "dashboard.generalConfig.medium"}}</option>
+                <option value="large">{{t "dashboard.generalConfig.large"}}</option>
+                {{/staticSelect}}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="frameUrl">{{t "dashboard.frameWidget.url"}}</label>
+        <div class="col-sm-8">
+            <input class="form-control" type="text" id="frameUrl" name="frameUrl" value="{{frameUrl}}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="frameHeight">{{t "dashboard.frameWidget.height"}}</label>
+        <div class="col-sm-8">
+            <input class="form-control" type="text" id="frameHeight" name="height" value="{{height}}" />
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="frameWidth">{{t "dashboard.frameWidget.title"}}</label>
+        <div class="col-sm-8">
+            <input class="form-control" type="text" id="frameWidth" name="title" value="{{title}}" />
+        </div>
+    </div>
+</form>

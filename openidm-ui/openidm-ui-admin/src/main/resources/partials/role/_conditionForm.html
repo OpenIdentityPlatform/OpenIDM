@@ -1,0 +1,27 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<div id="conditionFilterForm" class="conditionFilter">
+    <div class="row">
+        <label for="selectEnabled" class="col-sm-2 control-label text-right conditionFilterLabel">{{t "templates.admin.ResourceEdit.condition"}}</label>
+        <div class="col-sm-10">
+          <div class="control-group">
+              <div class="checkbox checkbox-slider checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary" id="enableDynamicRoleGrant">
+                  <label>
+                      <input type="checkbox" id="enableDynamicRoleGrantCheckbox"><span></span>
+                  </label>
+              </div>
+          </div>
+          <span class="help-block">{{t "templates.admin.RoleEdit.conditionTabDescription"}}</span>
+        </div>
+    </div>
+    <div id="roleConditionQueryField" style="display:none;">
+        <div class="well detailTable">
+            <div class="row">
+                <div class="form-group">
+                    <label class="col-sm-2 control-label text-right">Query</label>
+                    <div class="col-sm-10 filter-form form-horizontal" id="conditionFilterHolder"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

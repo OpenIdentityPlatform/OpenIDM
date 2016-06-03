@@ -42,23 +42,26 @@ require.config({
         form2js: "libs/form2js-2.0",
         spin: "libs/spin-2.0.1-min",
         jquery: "libs/jquery-2.1.1-min",
-        jquerySortable: "libs/jquery-nestingSortable-0.9.12",
         gentleSelect: "libs/jquery-gentleSelect-0.1.3.1-min",
         cron: "libs/jquery-cron-r2427",
         xdate: "libs/xdate-0.8-min",
         doTimeout: "libs/jquery.ba-dotimeout-1.0-min",
-        handlebars: "libs/handlebars-3.0.3-min",
+        handlebars: "libs/handlebars-4.0.5",
         "bootstrap-tabdrop": "libs/bootstrap-tabdrop-1.0",
         bootstrap: "libs/bootstrap-3.3.5-custom",
         "bootstrap-dialog": "libs/bootstrap-dialog-1.34.4-min",
+        "bootstrap-datetimepicker": "libs/bootstrap-datetimepicker-4.14.30-min",
         placeholder: "libs/jquery.placeholder-2.0.8",
         selectize : "libs/selectize-0.12.1-min",
         d3 : "libs/d3-3.5.5-min",
         moment: "libs/moment-2.8.1-min",
+        "moment-timezone": "libs/moment-timezone-with-data-0.5.4-min",
         jsonEditor: "libs/jsoneditor-0.7.9-min",
         "ldapjs-filter": "libs/ldapjs-filter-2253-min",
         faiconpicker: "libs/fontawesome-iconpicker-1.0.0-min",
-        dimple : "libs/dimple-2.1.2-min"
+        dimple : "libs/dimple-2.1.2-min",
+        sinon : "libs/sinon-1.15.4",
+        dragula : "libs/dragula-3.6.7-min"
     },
 
     shim: {
@@ -108,9 +111,6 @@ require.config({
         gentleSelect: {
             deps: ["jquery"]
         },
-        jquerySortable: {
-            deps: ["jquery"]
-        },
         xdate: {
             exports: "xdate"
         },
@@ -128,18 +128,29 @@ require.config({
         moment: {
             exports: "moment"
         },
+        "moment-timezone": {
+            deps: ["moment"],
+            exports: "moment-timezone"
+        },
         selectize: {
             deps: ["jquery"]
         },
         d3: {
             exports: "d3"
         },
+        sinon: {
+            exports: "sinon"
+        },
         dimple: {
             exports: "dimple",
             deps: ["d3"]
         },
         bootstrap: {
-            deps: ["jquery"]
+            deps: ["jquery"],
+            init: function ($) {
+                $.fn.popover.Constructor.DEFAULTS.trigger = 'hover focus';
+                return this.bootstrap;
+            }
         },
         placeholder: {
             deps: ["jquery"]
@@ -177,7 +188,7 @@ require([
     EventManager,
     JSONEditor) {
 
-    EventManager.sendEvent(Constants.EVENT_DEPENDECIES_LOADED);
+    EventManager.sendEvent(Constants.EVENT_DEPENDENCIES_LOADED);
 
     JSONEditor.defaults.options.theme = 'bootstrap3';
     JSONEditor.defaults.options.iconlib = "fontawesome4";

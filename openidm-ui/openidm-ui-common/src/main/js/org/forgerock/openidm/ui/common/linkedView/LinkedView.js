@@ -63,14 +63,10 @@ define("org/forgerock/openidm/ui/common/linkedView/LinkedView", [
 
         cleanLinkName: function(name, linkQualifier){
             var cleanName = name.split("/");
-
-            if(cleanName[0] === "system" || cleanName[0] === "managed") {
-                cleanName.splice(0 ,1);
-            }
-
+            
             cleanName.pop();
 
-            cleanName = cleanName.join(" ");
+            cleanName = cleanName.join("/");
 
             if(linkQualifier) {
                 cleanName = cleanName +" - " +linkQualifier;

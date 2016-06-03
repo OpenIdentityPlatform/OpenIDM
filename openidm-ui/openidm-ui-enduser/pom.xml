@@ -73,6 +73,30 @@
 
     <dependency>
         <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>backgrid.min</artifactId>
+        <version>0.3.5</version>
+        <classifier>min</classifier>
+        <type>js</type>
+    </dependency>
+
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>backgrid-paginator.min</artifactId>
+        <version>0.3.5</version>
+        <classifier>min</classifier>
+        <type>js</type>
+    </dependency>
+
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>backgrid-filter.min</artifactId>
+        <version>0.3.5</version>
+        <classifier>min</classifier>
+        <type>js</type>
+    </dependency>
+
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
         <artifactId>d3</artifactId>
         <version>3.5.5</version>
         <classifier>min</classifier>
@@ -86,6 +110,22 @@
         <classifier>min</classifier>
         <type>js</type>
     </dependency>
+
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>fontawesome-iconpicker</artifactId>
+        <version>1.0.0</version>
+        <classifier>min</classifier>
+        <type>js</type>
+    </dependency>
+
+    <dependency>
+        <groupId>org.forgerock.commons.ui.libs</groupId>
+        <artifactId>fontawesome-iconpicker</artifactId>
+        <version>1.0.0</version>
+        <classifier>min</classifier>
+        <type>css</type>
+     </dependency>
 
     <dependency>
         <groupId>org.forgerock.commons.ui.libs</groupId>

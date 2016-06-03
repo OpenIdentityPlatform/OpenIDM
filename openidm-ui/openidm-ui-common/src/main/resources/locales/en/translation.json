@@ -1,8 +1,40 @@
 {
     "dashboard" : {
+        "new": {
+            "title": "Create New Dashboard",
+            "name": "Name",
+            "default": "Default",
+            "defaultDesc": "The default dashboard is the landing page.",
+            "submit": "Create Dashboard"
+        },
+        "duplicateOf": "Duplicate of ",
+        "addWidgets": "Add Widgets",
+        "duplicate": "Duplicate",
+        "delete": "Delete",
+        "setAsDefault": "Set as Default",
+        "rename": "Rename",
+        "duplicateTitle": "Duplicate Dashboard Name",
+        "renameTitle": "Rename Dashboard",
+        "renameDesc": "Enter a unique dashboard name.",
+        "newName": "Dashboard Name",
+        "noWidgets": "Add widget(s) to customize your dashboard.",
+        "addAWidget": "Add a widget",
+        "widgetDescriptions": {
+            "lifeCycleMemoryHeap": "Storage for Java Objects",
+            "lifeCycleMemoryNonHeap": "Storage for loaded classes and related meta-data",
+            "systemHealthFull": "JVM life cycle memory usage and CPU load",
+            "cpuUsage": "Load relative to a single CPU",
+            "lastRecon" : "Reconciliation statistics",
+            "resourceList": "Connectors, Mappings, and Managed Objects",
+            "quickStart": "Links to common tasks",
+            "frame": "Add external content",
+            "userRelationship": "Links between accounts",
+            "relationship": "Links between objects"
+        },
         "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
         "memoryUsageHeap" : "Memory Usage (JVM Heap)",
         "memoryUsageNonHeap" : "Memory Usage (JVM NonHeap)",
+        "widgetDelete" : "Are you sure you want to delete this widget?",
         "reconProcesses" : "Recon Processes",
         "cpuUsage" : "CPU Usage",
         "resources" : "Resources",
@@ -15,21 +47,27 @@
         "pause" : "Pause",
         "start" : "Start",
         "refresh" : "Refresh",
+        "generalConfig" : {
+            "xsmall" : "Extra-Small",
+            "small" : "Small",
+            "medium" : "Medium",
+            "large" : "Large",
+            "widgetSize" : "Widget Size"
+        },
         "quickStart" : {
-            "addANewConnector" : "Add Connector",
-            "createANewMapping" : "Create Mapping",
-            "createANewRole" : "Create Role",
-            "createAUser" : "Create User",
-            "manageRole" : "Manage Role",
-            "addANewDevice" : "Add Device",
-            "setupRegistration" : "Set up Registration",
-            "setupPasswordReset" : "Set up Password Reset",
-            "setupAuthentication" : "Set up Authentication",
-            "manageUser" : "Manage User",
-            "setupSystem" : "Set up System",
+            "quickStartTitle" : "Quick Start",
+            "quickStartEmpty" : "Quick Start Links",
+            "quickStartEmptyText" : "No Quick Start Links Added.",
+            "addQuickLink" : "Add Quick Link",
+            "addALink" : "Add a Link",
+            "name" : "Name",
+            "destinationUrl" : "Destination URL",
+            "icon" : "Icon",
+            "noQuickStartLinks" : "No Quick Start Links",
+            "updateQuicklink" : "Update Quick Link",
+            "addQuicklink" : "Add Quick Link",
             "viewProfile" : "View Profile",
-            "changePassword" : "Change Password",
-            "quickStartTitle" : "Quick Start"
+            "changePassword" : "Change Password"
         },
         "reconWidget" : {
             "editMapping" : "Edit Mapping",
@@ -60,6 +98,27 @@
             "noManagedObjectTitle" : "No managed objects have been added.",
             "noManagedObjectMessage" : "Configure data objects to be managed by OpenIDM.",
             "newManagedObject" : "New Managed Object"
+        },
+        "relationshipWidget" : {
+            "selectAUser" : "Select a User",
+            "relationshipTitle" : "Identity Relationships",
+            "relationshipsChart": "Relationships Chart",
+            "links" : "Links",
+            "title" : "Title",
+            "defaultObject" : "Default Object",
+            "searchProperty" : "Display/Search Property",
+            "configureWidget": "Widget not yet configured",
+            "displaySubRelationships": "Display sub-relationships",
+            "findA" : "Find a",
+            "inTheSearchFieldAbove" : "in the search field above",
+            "gatheringRelationshipData" : "Gathering relationship data"
+        },
+        "frameWidget" : {
+            "frameWidgetTitle" : "Embed Web Page",
+            "url" : "URL",
+            "height" : "Height",
+            "width" : "Width",
+            "title" : "Title"
         }
     },
     "config" : {
@@ -70,6 +129,16 @@
             "dayNamesShort" : "Sun. , Mon., Tue., Wed., Thu., Fri., Sat."
         },
         "messages" : {
+            "dashboardMessages": {
+                "newDashboardCreated": "New dashboard created",
+                "dashboardDeleted": "Existing dashboard deleted",
+                "dashboardDefaulted": "Current dashboard is now the default",
+                "dashboardDuplicated": "Current dashboard duplicated",
+                "dashboardRenamed": "Current dashboard renamed",
+                "dashboardWidgetsRearranged": "Widgets Rearranged",
+                "dashboardWidgetAdded": "Widget added to dashboard",
+                "dashboardWidgetConfigurationSaved": "Widget configuration saved"
+            },
             "WorkflowMessages" : {
                 "cancelActiveProcess" : "Workflow Process canceled."
             },
@@ -184,7 +253,8 @@
         "AppConfiguration" : {
             "Navigation" : {
                 "links" : {
-                    "dashboard" : "Dashboard",
+                    "dashboard" : "Dashboards",
+                    "newDashboard": "New Dashboard",
                     "systemPref" : "System Preferences",
                     "managedObjects" : "Managed Objects",
                     "manage" : "Manage",
@@ -362,7 +432,20 @@
                 "type": "Type",
                 "showChart": "Show Chart",
                 "showList": "Show List",
-                "conflictWithExistingRelationship": "Conflict with Existing Relationship"
+                "conflictWithExistingRelationship": "Conflict with Existing Relationship",
+                "condition": "Condition",
+                "enableCondition": "Enable Condition",
+                "query": "Query"
+            },
+            "RoleEdit": {
+                "conditionTabDescription" : "Dynamically assign members to this role based on a query filter.",
+                "temporalConstraints" : "Temporal Constraint",
+                "temporalConstraintsDescription" : "Enable role only during a selected temporal constraint.",
+                "startDate" : "Start Date",
+                "endDate" : "End Date",
+                "grantType" : "Grant Type",
+                "conditional" : "Conditional",
+                "timezone" : "Timezone"
             },
             "ResourceList":
             {
@@ -378,8 +461,8 @@
                 "noMappingAssignments" : "No assignments attached to this mapping",
                 "mapping" : "Mapping",
                 "value" : "Value",
-                "onAssignment" : "On assignment",
-                "unAssignment" : "On unassignment",
+                "onAssignment" : "On Assignment",
+                "unAssignment" : "On Unassignment",
                 "mappingAssignmentHelp" : "View target resource properties defined by assignments.",
                 "addAttribute": "Add an attribute",
                 "linkQualifiers" : "Link Qualifiers",
@@ -492,7 +575,7 @@
                 "captchaTitle" : "reCAPTCHA for Registration"
             },
             "username" : {
-                "captchaTitle" : "reCAPTCHA for Forgotten Username",
+                "captchaTitle" : "reCAPTCHA for Username Retrieval",
                 "userQueryTitle" : "Configure User Lookup Form",
                 "emailUsernameTitle" : "Configure Email Username",
                 "retrieveUsernameTitle" : "Display Username"
@@ -522,7 +605,7 @@
             },
             "userQuery" : {
                 "name" : "User Query Form",
-                "description": "Configure form used to find users during password reset",
+                "description": "Configure form to find usernames",
                 "validQueryFields" : "Valid Query Fields",
                 "queryFieldsHelp" : "",
                 "identityIdField" : "Identity Id Field",
@@ -704,10 +787,10 @@
             "notAvailableMsg1": "The link qualifier, ",
             "noLQdefined": "No link qualifiers defined",
             "notAvailableMsg2": " associated with this property is not available.  Add this link qualifier or update the condition.",
-            "conditionScriptInfo": "Define how to conditionally update a property, using either a link qualifier or a script.",
+            "conditionScriptInfo": "Define a declarative Condition Filter or a Script to update a property.",
             "linkQualifierInfo": "Link one record in the source system to multiple records in the target system.",
             "linkQualifierStaticInfo" : "Static lists will apply each qualifier to every source record.",
-            "linkQualifierScriptInfo" : "Dynamic scripts may return different qualifiers for each source record.",
+            "linkQualifierScriptInfo" : "Dynamic scripts may return different link qualifiers for each source record; they must return all valid link qualifiers when the returnAll global variable is true. For more information, see the <a href='https://forgerock.org/openidm/doc/bootstrap/integrators-guide/#link-qualifier-object'>Integrators Guide</a>.",
             "noCondition": "No Condition",
             "undo": "Undo",
             "query": {
@@ -822,9 +905,15 @@
                 "addOption": "Add an event handler...",
                 "addButton": "Add Event Handler",
                 "enabled": "Enabled",
+                "cannotDisableMsg": "Hander required for queries",
                 "dialog": {
                     "add": "Add Audit Event Handler",
                     "edit": "Edit Audit Event Handler"
+                },
+                "endOfLineSymbols": {
+                    "linefeed": "Linefeed (\\n)",
+                    "carriageReturn": "Carriage Return (\\r)",
+                    "carriageReturnLinefeed": "Carriage Return + Linefeed (\\r\\n)"
                 }
             },
             "events": {
@@ -888,6 +977,22 @@
         },
         "update": {
             "title": "Update",
+            "repoUpdates" : {
+                "header": "Repository Update Script Preview",
+                "headerText": "Review repository updates to be performed manually below.",
+                "description": "OpenIDM will stay in maintenance mode until repository updates are complete.",
+                "tableHeader": "DATABASE FILE",
+                "continue": "Continue",
+                "cancel": "Cancel",
+                "link": "LINK",
+                "complete": "Mark Complete",
+                "paused": "Update paused.",
+                "processManual": "Process all repository updates manually before resuming.",
+                "headerFinal": "Repository Updates",
+                "details": "OpenIDM will restart when repository updates are marked complete",
+                "preview": "Repository update preview.",
+                "download": "Download"
+            },
             "versions": {
                 "header": "Available Updates",
                 "noVersions": "To update OpenIDM, download the desired binary (in zip format), and copy it to the openidm/bin/update directory.",
@@ -896,7 +1001,7 @@
                 "cli2": "here",
                 "description": "You can update OpenIDM with one of the binaries found in the openidm/bin/update/ directory.",
                 "refresh": "Refresh",
-                "error": "You can restart the update process here or via the CLI",
+                "error": "Resolve errors then restart the update process",
                 "failedClusterInfo": "Failed to retrieve cluster information.",
                 "noVersionsBG": "There are no versions available",
                 "file": "File",
@@ -905,7 +1010,16 @@
                 "install": "Install",
                 "enableMaintenanceMode": "Enable Maintenance Mode",
                 "enableMaintenanceModeDesc": "When you confirm, OpenIDM allows running jobs to finish. Scheduled jobs are paused and OpenIDM goes into maintenance mode.",
-                "confirmAndInstall": "Confirm and Install"
+                "confirmAndInstall": "Confirm and Install",
+                "badBinary": "Invalid binary file",
+                "badRevision": "Cannot be applied",
+                "checkForUpdates": "Check for updates"
+            },
+            "history": {
+                "header": "Update History",
+                "description": "Previous updates",
+                "updatedBy": "Updated by",
+                "viewDetails": "View details"
             },
             "maintenanceMode": {
                 "shuttingDownScheduler": "Pausing scheduler...",
@@ -922,8 +1036,10 @@
             },
             "preview": {
                 "ready": "Ready to update",
+                "helpHead": "See",
+                "helpTail": ", for a list of changes.",
                 "versionIsReady": "You're ready to update to",
-                "releaseNotes": "View release notes",
+                "releaseNotes": "the following",
                 "header": "Installation Preview",
                 "description": "Review files to be replaced below. OpenIDM will save customized files for future access.",
                 "installUpdateBtn": "Install Update",
@@ -982,7 +1098,7 @@
             "review": {
                 "noFilesError": "There are no files to report on.",
                 "successHeader": "Installation complete.",
-                "successMsg": "You have successfully update OpenIDM to version",
+                "successMsg": "You have successfully updated OpenIDM to version",
                 "header": "Installation Report",
                 "desc": "All files were successfully installed. Modified files were backed up to locations specified below.  You will need to refresh your browser to see any UI changes.",
                 "expand": "Expand All",
@@ -1168,6 +1284,8 @@
             "ldap_LdapConnector":"LDAP Connector",
             "scriptedcrest_ScriptedCRESTConnector" : "Scripted CREST Connector",
             "scriptedrest_ScriptedRESTConnector" : "Scripted REST Connector",
+            "ssh_SSHConnector" : "Scripted SSH Connector",
+            "kerberos_KerberosConnector": "Kerberos Connector",
             "connectorName" : "Connector Name",
             "connectorEnabled" : "Enabled",
             "connectorType" : "Connector Type",
@@ -1211,7 +1329,6 @@
                 "noName": "You must specify a name for the connector before you can add LiveSync schedules.",
                 "noObjects": "There are no available objects.  Please validate your connector to retrieve any default objects.  You might have to manually add objects after validating.",
                 "addLiveSync": "Add a LiveSync schedule for:"
-
             },
             "objectTypes": {
                 "saveObjectType": "Save Object Type and Close",
@@ -1234,6 +1351,33 @@
                 "invalidCredentials" : "Invalid Username or Password",
                 "badBaseContext" : "Bad Base Context(s)"
             },
+            "scriptedShared" : {
+                "createScriptFileName" : "Create Script File Name",
+                "testScriptFileName" : "Test Script File Name",
+                "searchScriptFileName" : "Search Script File Name",
+                "authenticateScriptFileName" : "Authenicate Script File Name",
+                "deleteScriptFileName" : "Delete Script File Name",
+                "updateScriptFileName" : "Update Script File Name",
+                "syncScriptFileName" : "Sync Script File Name",
+                "schemaScriptFileName" :  "Schema Script File Name",
+                "debug" : "Debug",
+                "addClasspath" : "Add Classpath",
+                "classpath" : "Classpath",
+                "scriptTitle" : "Script Files",
+                "scriptBaseClass" : "Script Base Class",
+                "targetDirectory" : "Target Directory",
+                "resolveUsernameScriptFileName" : "Resolve Username Script File Name",
+                "scriptOnResourceFileName" : "Script On Resource File Name",
+                "customizerScriptFileName" : "Customizer Script File Name",
+                "sourceEncoding" : "Source Encoding",
+                "minimumRecompilationInterval" : "Minimum Recompilation Interval",
+                "warningLevel" : "Warning Level",
+                "tolerance" : "Tolerance",
+                "recompileGroovySource" : "Recompile Groovy Source",
+                "scriptExtensions" : "Script Extension",
+                "verbose" : "Verbose",
+                "disabledGlobalAst" : "Disabled Global AST Transformation"
+            },
             "scriptedCrest" : {
                 "serviceAddress" : "Service Address",
                 "proxyAddress" : "Proxy Address",
@@ -1241,86 +1385,15 @@
                 "password" : "Password",
                 "defaultAuthMethod":"Default Authentication Method",
                 "defaultContentType" : "Default Content Type",
-                "sourceEncoding":"Source Encoding",
-                "minimumRecompilationInterval" : "Minimum Recompilation Interval",
-                "warningLevel" : "Warning Level",
-                "tolerance" : "Tolerance",
-                "targetDirectory" : "Target Directory",
-                "recompileGroovySource" : "Recompile Groovy Source",
-                "debug" : "Debug",
-                "verbose" : "Verbose",
                 "defaultHeadersTitle" : "Default Request Headers",
                 "addDefaultRequestHeaders" : "Add Request Header",
                 "defaultRequestHeaders" : "Default Request Header",
-                "scriptExtensionsTitle" : "Script Extensions",
-                "addScriptExtensions" : "Add Script Extension",
-                "scriptExtensions" : "Script Extension",
-                "disabledGlobalASTTransformationsTitle" : "Disabled Global AST Transformations",
-                "addDisabledGlobalASTTransformations" : "Add AST",
-                "disabledGlobalASTTransformations" : "Disabled Global AST Transformation",
-                "classpathTitle" : "Classpaths",
-                "classpath" : "Classpath",
-                "addClasspath" : "Add Classpath"
-            },
-            "groovyConnector": {
-                "scriptTitle":"Script Files",
-                "classpath" : "Classpath",
-                "authenticateScriptFileName" : "Authenticate Script",
-                "createScriptFileName" : "Create Script",
-                "deleteScriptFileName" : "Delete Script",
-                "resolveUsernameScriptFileName" : "Resolve Username Script",
-                "schemaScriptFileName" : "Schema Script File",
-                "scriptResourceFileName" : "Script On Resource Script File Name",
-                "searchScriptFileName" : "Search Script File Name",
-                "syncScriptFileName" : "SYNC Script File Name",
-                "testScriptFileName" : "Test Script File Name",
-                "updateScriptFileName" : "Update Script File Name"
-            },
-            "groovyPoolableConnector" : {
-                "scriptTitle":"Script Files",
-                "authenticateScriptFileName" : "Authenticate Script File Name",
-                "warningLevel" : "Warning Level",
-                "minimumRecompilationInterval" : "Minimum Recompilation Interval",
-                "deleteScriptFileName" : "Delete Script File Name",
-                "schemaScriptFileName" : "Schema Script File Name",
-                "customizerScriptFileName" : "Customizer Script File Name",
-                "resolveUsernameScriptFileName" : "Resolve Username Script File Name",
-                "debug" : "Debug",
-                "targetDirectory" : "Target Directory",
-                "disabledGlobalAst" : "Disabled Global ASTTransformations",
-                "classpath" : "Classpath",
                 "scriptExtensions" : "Script Extensions",
-                "testScriptFileName" : "Test Script File Name",
-                "updateScriptFileName" : "Update Script File Name",
-                "sourceEncoding" : "Source Encoding",
-                "searchScriptFileName" : "Search Script File Name",
-                "scriptOnResourceFileName" : "Script On Resource Script File Name",
-                "scriptBaseClass" : "Script Base Class",
-                "verbose" : "Verbose",
-                "createScriptFileName" : "Create Script File Name",
-                "recompileGroovySource" : "Recompile Groovy Source",
-                "tolerance" : "Tolerance",
-                "syncScriptFileName" : "Sync Script File Name"
+                "addScriptExtensions" : "Add Script Extension",
+                "addDisabledGlobalASTTransformations" : "Add AST"
             },
-            "csvConnector" : {
-                "filePath" : "File Path",
-                "uniqueAttribute" : "Unique Attribute",
-                "nameAttribute" : "Name Attribute",
-                "passwordAttribute" : "Password Attribute",
-                "csvFile" : "CSV File",
-                "headerUid" : "Header UID",
-                "headerName" : "Header Name",
-                "headerPassword" : "Header Password",
-                "quoteCharacter" : "Quote Character",
-                "fieldDelimiter" : "Field Delimiter",
-                "newlineString" : "Newline String",
-                "syncFileRetentionCount" : "Sync Retention Count"
-            },
-            "xmlConnector" : {
-                "xsdicfFilePath" : "XSD ICF File Path",
-                "xsdFilePath" : "XSD File Path",
-                "xmlFilePath" : "XML File Path",
-                "createIfNotExists" : "Create file if it does not exist."
+            "groovyConnector" : {
+                "scriptResourceFileName" : "Scripted Resource Filename"
             },
             "scriptedSQLConnector" : {
                 "host" : "Host",
@@ -1334,27 +1407,44 @@
                 "jdbcConnectionUrl" : "JDBC Connection Url",
                 "url" : "Url",
                 "jdbcUrlTemplate" : "JDBC Url Template",
-                "createScriptFileName" : "Create File Name",
-                "testScriptFileName" : "Test File Name",
-                "searchScriptFileName" : "Search File Name",
-                "authenticateScriptFileName" : "Authentication File Name",
-                "deleteScriptFileName" : "Delete File Name",
-                "updateScriptFileName" : "Update File Name",
-                "syncScriptFileName" : "Sync File Name",
-                "schemaScriptFileName" : "Schema File Name",
                 "driverClassName" : "Driver Class Name",
-                "addClasspath" : "Add Classpath",
-                "classpath" : "Classpath",
                 "autoCommit": "Auto Commit",
-                "scriptFiles": "Script Files"
+                "scriptRoots" : "Script Roots",
+                "scriptFiles" : "Script Files"
+            },
+            "csvConnector" : {
+                "filePath" : "File Path",
+                "uniqueAttribute" : "Unique Attribute",
+                "nameAttribute" : "Name Attribute",
+                "passwordAttribute" : "Password Attribute",
+                "csvFile" : "CSV File",
+                "headerUid" : "Header UID",
+                "headerName" : "Header Username",
+                "headerPassword" : "Header Password",
+                "quoteCharacter" : "Quote Character",
+                "fieldDelimiter" : "Field Delimiter",
+                "newlineString" : "Newline String",
+                "syncFileRetentionCount" : "Sync Retention Count",
+                "resourcePath" : "Full path to external resource data file",
+                "headerHelpText": "Column name in CSV file",
+                "primaryKey" : "Column name in CSV file, primary search key"
+            },
+            "xmlConnector" : {
+                "xsdicfFilePath" : "XSD ICF File Path",
+                "xsdFilePath" : "XSD File Path",
+                "xmlFilePath" : "XML File Path",
+                "createIfNotExists" : "Create file if it does not exist",
+                "xmlBaseSchema" : "Base XML schema definition",
+                "xmlCustomSchema" : "Custom XML schema definition",
+                "xmlAccountDB" : "Account database in XML format"
             },
             "databaseTableConnector" : {
-                "quoting" : "Quoting",
+                "quoting" : "Quote Characters",
                 "host" : "Host",
                 "port" : "Port",
-                "user" : "User",
+                "user" : "Username",
                 "password" : "Password",
-                "database" : "Database",
+                "database" : "Database Name",
                 "table" : "Table",
                 "keyColumn" : "Key Column",
                 "passwordColumn" : "Password Column",
@@ -1366,8 +1456,24 @@
                 "allNative" : "All Native",
                 "validConnectionQuery" : "Valid Connection Query",
                 "changeLogColumn" : "Change Log Column",
-                "dataSource" : "Data Source",
-                "jndiProperties" : "JNDI Properties"
+                "dataSource" : "JDBC Data Source",
+                "jndiProperties" : "JNDI Properties",
+                "dbHostnameOrIP" : "Database hostname or IP address",
+                "dbUsername" : "Database username",
+                "tableNameWithAccounts" : "Table name with accounts",
+                "uidForTableRows" : "Unique identifier for table rows",
+                "jdbcDriverHelp" : "JDBC Driver class name",
+                "jdbcUrlTemplateHelp" : "Connection URL template of the JDBC Driver",
+                "emptyStringHelp" : "Allows empty strings instead of null values, except for OracleSQL",
+                "rethrowSqlHelp" : "If enabled, show SQL Exceptions with code = 0",
+                "nativeTimestampsHelp" : "Retrieves timestamp data",
+                "allNativeHelp" : "Retrieves in a database native format",
+                "validConnectionQueryHelp" : "SQL statement to validate the connection",
+                "dbChangeTime" : "Latest database change time",
+                "jdbcPath" : "JDBC path, ‘jdbc/SampleDataSourceName’",
+                "jndiPropertiesHelp" : "Java Naming Directory Interface context factory, in key = value format",
+                "jdbcDefaultDriver" : "com.mysql.jdbc.Driver",
+                "jdbcDefaultUrl" : "jdbc:mysql:@%h:%p:%d"
             },
             "ldapConnector" : {
                 "noFilter": "No user filter added...",
@@ -1389,8 +1495,8 @@
                 "password": "Password",
                 "accountUserNameAttributes": "Attribute used for login",
                 "baseContextTitle":"Base Context",
-                "baseContext": "Enter your base DN",
-                "baseContextNote": "Be sure to add base contexts which include both your users and your groups.",
+                "baseContext": "Base DN",
+                "baseContextNote": "Be sure to add base contexts which include both your users and your groups",
                 "baseContextAdd":"Add Base Context",
                 "accountObjectClasses" : "Object Classes for users",
                 "addAccountObjectClasses" : "Add Object Class",
@@ -1408,6 +1514,13 @@
                 "hideCert": "Hide certificate",
                 "showCert": "Show certificate",
                 "filterTitle": "Update __type__",
+                "loginAccountDN" : "Login Account DN",
+                "filterLdapAttr" : "Filter by LDAP attribute",
+                "groupFilter" : "Group Filter",
+                "defaultPort" : "1389",
+                "baseDN" : "cn=Users,dc=company,dc=com",
+                "group" : "Group",
+                "account" : "Account",
                 "errorMessages": {
                     "unknownHost" : "Unknown Host",
                     "portOutOfRange" : "Port Out of Range",
@@ -1417,6 +1530,13 @@
                     "invalidCredentials" : "Invalid Username or Password",
                     "badBaseContext" : "Bad Base Context(s)"
                 }
+            },
+            "kerberos": {
+                "kerberosSpecificConfig": "Kerberos Specific Details",
+                "customConfiguration": "Custom Configuration",
+                "customConfigurationHelp": "Groovy string with kadmin settings (full path to command, user, realm)",
+                "customSensitiveConfiguration": "Custom Sensitive Configuration",
+                "customSensitiveConfigurationHelp": "Groovy string representing sensitive kadmin settings (e.g. \"kadmin { password = 'PASSWORD' }\")"
             },
             "google" : {
                 "listHeader" : "You must grant this project access to all of the following APIs:",
@@ -1445,6 +1565,54 @@
                 "base" : "Base OAuth Details",
                 "clientSecret": "Client Secret",
                 "clientId" : "Client ID"
+            },
+            "ssh" : {
+                "hostDisplay": "Host Name or IP",
+                "hostHelp": "The hostname to connect to",
+            	"portDisplay": "Port",
+            	"portHelp": "TCP port to use",
+            	"userDisplay": "Username",
+            	"userHelp": "The username used to login to remote server",
+            	"passwordDisplay": "Password",
+            	"passwordHelp": "The password used to login to remote server",
+            	"passphraseDisplay": "The passphrase to the key store",
+            	"passphraseHelp": "The passphrase used to read the private key when using Public Key authentication",
+            	"privateKeyDisplay": "The private key",
+            	"privateKeyHelp": "The base 64 encoded value (PEM) of the private key used for Public Key authentication",
+            	"authenticationTypeDisplay": "Authentication type",
+            	"authenticationTypeHelp": "Defines which authentication type should be use: PASSWORD or PUBKEY",
+            	"promptDisplay": "Default prompt",
+            	"promptHelp": "A string representing the exact remote SSH session prompt (defaults to 'root@localhost:# ')",
+            	"sudoCommandDisplay": "Sudo command",
+            	"sudoCommandHelp": "A string representing the full path to the sudo command",
+            	"echoOffDisplay": "Turn Echo Off",
+            	"echoOffHelp": "Disable the input command echo",
+            	"terminalTypeDisplay": "Terminal Type",
+            	"terminalTypeHelp": "Defines the terminal type to use for the session",
+            	"localeDisplay": "Locale",
+            	"setLocaleDisplay": "Set the Locale",
+            	"setLocaleHelp": "Defines if the environment locale should be changed",
+            	"connectionTimeoutDisplay": "Server Connection Timeout (ms)",
+            	"expectTimeoutDisplay": "Server Response Timeout (ms)",
+            	"throwOperationTimeoutExceptionDisplay": "Throw Operation Timeout Exception",
+            	"throwOperationTimeoutExceptionHelp": "Throws exception if Server Response Timeout is exceeded",
+                "scriptRootsTitle": "Script Roots",
+                "scriptRoots": "Full Path To Script Files",
+                "scriptRoot": "Path",
+                "scriptRootAdd": "Add Script Directory Path",
+                "classpath": "Classpath",
+                "classpathAdd": "Add Classpath",
+                "classpathTitle": "Classpath",
+                "reloadScriptOnExecution": "Reload Script On Execution",
+                "createScriptFileName": "Create Script",
+                "deleteScriptFileName": "Delete Script",
+                "schemaScriptFileName": "Schema Script",
+                "scriptOnResourceScriptFileName": "Run On Resource Script",
+                "searchScriptFileName": "Search Script",
+                "testScriptFileName": "Test Script",
+                "updateScriptFileName": "Update Script",
+                "FileNameTitle": "Script File Names",
+                "additionalOptions" : "Additional Options"
             }
         },
         "mapping": {
@@ -1504,7 +1672,7 @@
             "confirmDeleteMapping": "Are you sure you want to delete the &quot;__mappingName__&quot; mapping?<br/><br/>**Caution: this action cannot be reversed.",
             "noMappingsDefined": "No mappings defined.",
             "addProperty": "Add property",
-            "sampleSource": "Sample source.",
+            "sampleSource": "Sample source",
             "confirmRemoveProperty": "Are you sure you want to remove the &quot;__property__&quot; property mapping?",
             "transformRequiredForMulti": "A transformation script is required when mapping from a multiple-value source to a single-value target.",
             "validPropertyRequired": "You must select a valid property name.",
@@ -1528,7 +1696,7 @@
                 "valueMapping": "Value Mapping",
                 "valuePrecedence": "Value Precedence",
                 "valuePrecedenceNote": "Since the values mapped might result in multiple values, sort them here to establish which should take precedence (the first value matched will be used).",
-                "propertyListLabel": "Enter or select the source property that you need",
+                "propertyListLabel": "Enter or select the source property; clear the text box to use the complete object.",
                 "propertyListHeader": "Property List",
                 "transformationHeader": "Transformation Script",
                 "conditionalUpdateHeader": "Conditional Updates",
@@ -1645,7 +1813,7 @@
             "reset" : "Reset",
             "confirm": "Confirm",
             "ok": "Ok",
-            "copyright" : "Copyright 2010-15 ForgeRock AS.",
+            "copyright" : "Copyright 2010-16 ForgeRock AS.",
             "sessionExpired" : "Session Expired",
             "enableCookies" : "Cookies must be enabled to login",
             "reloadGrid" : "Reload Grid",
@@ -2104,6 +2272,96 @@
                 },
                 "rotationRetentionCheckInterval": {
                     "help": "Interval for periodically checking file rotation and retention policies"
+                }
+            },
+            "elasticsearch": {
+                "connection": {
+                    "help": "Elasticsearch audit event handler",
+                    "useSSL": {
+                        "help": "Use SSL/TLS to connect to Elasticsearch"
+                    },
+                    "host": {
+                        "help": "Hostname or IP address of Elasticsearch (default: localhost)"
+                    },
+                    "port": {
+                        "help": "Port used by Elasticsearch (default: 9200)"
+                    },
+                    "username": {
+                        "help": "Username when Basic Authentication is enabled via Elasticsearch Shield"
+                    },
+                    "password": {
+                        "help": "Password when Basic Authentication is enabled via Elasticsearch Shield"
+                    }
+                },
+                "indexMapping": {
+                    "help": "",
+                    "indexName": {
+                        "help": "Index Name (default: audit) for events. Change if 'audit' conflicts with an existing Elasticsearch index"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for buffering events and sending in batches (increases write-throughput)",
+                    "enabled": {
+                        "help": "Use event buffering (recommended)"
+                    },
+                    "maxSize": {
+                        "help": "Fixed maximum number of events that can be buffered (default: 10000)"
+                    },
+                    "writeInterval": {
+                        "help": "Interval (default: 1 s) at which buffered events are written to Elasticsearch (units of 'ms' or 's' are recommended)"
+                    },
+                    "maxBatchedEvents": {
+                        "help": "Maximum number of events per batch-write to Elasticsearch for each Write Interval (default: 500)"
+                    }
+
+                }
+            },
+            "jms": {
+                "deliveryMode": {
+                    "help": "JMS mode to deliver the messages in, either PERSISTENT or NON_PERSISTENT"
+                },
+                "sessionMode": {
+                    "help": "JMS session acknowledgement mode: AUTO, CLIENT, or DUPS_OK"
+                },
+                "batch": {
+                    "help": "Batch configuration settings to be utilized if batch is enabled"
+                },
+                "publisher": {
+                    "batch": {
+                        "batchEnabled": {
+                            "help": "Boolean for batch delivery of audit events"
+                        },
+                        "capacity": {
+                            "help": "Maximum event count in the batch queue; additional events are dropped"
+                        },
+                        "threadCount": {
+                            "help": "Number of concurrent threads that pull events from the batch queue"
+                        },
+                        "maxBatchedEvents": {
+                            "help": "Maximum number of events per batch"
+                        },
+                        "insertTimeoutSec": {
+                            "help": "Waiting period (seconds) for available capacity, when a new event enters the queue"
+                        },
+                        "pollTimeoutSec": {
+                            "help": "Worker thread waiting period (seconds) for the next event, before going idle"
+                        },
+                        "shutdownTimeoutSec": {
+                            "help": "Application waiting period (seconds) for worker thread termination"
+                        }
+                    }
+                },
+                "jndi": {
+                    "help": "JNDI initial context settings"
+                },
+                "contextProperties": {
+                    "help": "Settings to populate the JNDI initial context with"
+                },
+                "topicName": {
+                    "help": "JNDI lookup name for the JMS topic"
+                },
+                "connectionFactoryName": {
+                    "help": "JNDI lookup name for the JMS connection factory"
                 }
             }
         },

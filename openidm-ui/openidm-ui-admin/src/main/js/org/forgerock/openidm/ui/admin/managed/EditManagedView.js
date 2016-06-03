@@ -59,7 +59,8 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
             "onValidate": "onValidate",
             "click #addManagedProperties": "addProperty",
             "click .property-remove" : "removeProperty",
-            "click #deleteManaged": "deleteManaged"
+            "click #deleteManaged": "deleteManaged",
+            "click .tab-menu li": "changeTabs"
         },
         eventHooks: [],
         propertyHooks: [],
@@ -77,13 +78,14 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                 repoCheckPromise,
                 eventKeys,
                 propertiesEventList = ["onValidate", "onRetrieve", "onStore"];
-            
+
             this.args = args;
             this.data = {
                 selectEvents: [],
                 addedEvents: [],
                 propertiesEventList: propertiesEventList,
-                docHelpUrl : Constants.DOC_URL
+                docHelpUrl : Constants.DOC_URL,
+                noSchema: true
             };
             
             if (this.args[1] && this.args[1] === "showSchema") {
@@ -105,6 +107,8 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
                         this.data.currentManagedObject = managedObject;
                         this.data.currentManagedObjectIndex = iterator;
                         this.splitSchemaAndProperties();
+
+                        this.data.noSchema = _.isEmpty(this.data.currentManagedObject.schema.properties);
                     }
                 }, this));
 
@@ -1047,6 +1051,12 @@ define("org/forgerock/openidm/ui/admin/managed/EditManagedView", [
 
                 clickedEle.remove();
             },this));
+        },
+
+        changeTabs: function(e) {
+            if ($(e.currentTarget).hasClass("disabled")) {
+                return false;
+            }
         }
     });
 

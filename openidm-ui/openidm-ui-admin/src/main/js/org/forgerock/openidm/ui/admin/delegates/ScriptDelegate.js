@@ -25,19 +25,20 @@ define("org/forgerock/openidm/ui/admin/delegates/ScriptDelegate", [
     var obj = new AbstractDelegate(constants.host + "/openidm/script");
 
     obj.evalScript = function(script, additionalGlobals) {
+        var scriptDetails = _.cloneDeep(script);
 
-        if(_.isUndefined(script.globals) || _.isNull(script.globals)) {
-            script.globals = {};
+        if(_.isUndefined(scriptDetails.globals) || _.isNull(scriptDetails.globals)) {
+            scriptDetails.globals = {};
         }
 
         if(additionalGlobals) {
-            script.globals = _.extend(script.globals, additionalGlobals);
+            scriptDetails.globals = _.extend(scriptDetails.globals, additionalGlobals);
         }
 
         return obj.serviceCall({
             url: "?_action=eval",
             type: "POST",
-            data: JSON.stringify(script),
+            data: JSON.stringify(scriptDetails),
             errorsHandlers : {
                 "error": {
                     status: "500"
@@ -51,6 +52,16 @@ define("org/forgerock/openidm/ui/admin/delegates/ScriptDelegate", [
         script.globals.returnAll = true;
 
         return obj.evalScript(script);
+    };
+
+    obj.parseQueryFilter = function (filterString) {
+        return obj.evalScript({
+            "type" : "text/javascript",
+            "source" : "org.forgerock.json.resource.QueryFilters.parse(queryFilter).accept(new org.forgerock.util.query.MapFilterVisitor(), null);",
+            "globals": {
+                "queryFilter": filterString
+            }
+        });
     };
 
     return obj;

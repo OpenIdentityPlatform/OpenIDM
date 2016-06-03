@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 /*global define */
@@ -40,7 +40,8 @@ define("config/AppConfiguration", [
                 moduleClass: "org/forgerock/openidm/ui/common/resource/ResourceEditViewRegistry",
                 configuration: {
                     "resource-assignment" : "org/forgerock/openidm/ui/admin/assignment/AssignmentView",
-                    "resource-user" : "org/forgerock/openidm/ui/admin/user/EditUserView"
+                    "resource-user" : "org/forgerock/openidm/ui/admin/user/EditUserView",
+                    "resource-role" : "org/forgerock/openidm/ui/admin/role/EditRoleView"
                 }
             },
             {
@@ -124,7 +125,8 @@ define("config/AppConfiguration", [
                                 "dashboard": {
                                     "name": "config.AppConfiguration.Navigation.links.dashboard",
                                     "icon": "fa fa-dashboard",
-                                    "url": "#dashboard/"
+                                    "dropdown": true,
+                                    "urls": []
                                 },
                                 "configuration": {
                                     "name": "Configure",
@@ -205,7 +207,6 @@ define("config/AppConfiguration", [
             {
                 moduleClass: "org/forgerock/commons/ui/common/main/ValidatorsManager",
                 configuration: {
-                    policyDelegate: "org/forgerock/openidm/ui/common/delegates/PolicyDelegate",
                     validators: { },
                     loader: [
                         {"validators":"config/validators/CommonValidators"},

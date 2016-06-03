@@ -35,7 +35,7 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
             },
             events: {
                 "change .expressionTree :input": "updateNodeValue",
-                "click .expressionTree .add-btn": "addNode",
+                "click .expressionTree .add-btn": "addNodeAndReRender",
                 "click .expressionTree .remove-btn": "removeNode"
             },
             getExpressionContext: function (e) {
@@ -60,65 +60,98 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
 
                 return {current: node, parent: previousNode, path: objectPath};
             },
-            removeNode: function (e, callback) {
-                var context = this.getExpressionContext(e);
+
+            removeNode: function(e, callback) {
+                this.deleteNode(e);
+                this.renderExpressionTree(callback);
+            },
+
+            deleteNode: function(e, callback) {
+                var context = this.getExpressionContext(e),
+                    parent,
+                    children;
 
                 if (!_.isNull(context.parent)) {
-                    context.parent.children = _.reject(context.parent.children, function (c) { return c === context.current; });
-                    if (context.parent.children.length !== 0) {
-                        this.data.filterString = this.getFilterString();
+                    children = context.children;
+
+                    children = _.reject(children, function(c) { return c === context.current; });
+                    if (children.length !== 0) {
+                        this.setFilterString();
                     } else {
                         e.target = $(":input:first", $(e.target).parents(".node[index]")[1])[0];
                         return this.removeNode(e);
                     }
                 } else {
-                    this.data.filter = { "op": "none", "children": []};
-                    this.data.filterString = "";
+                    context.current.children.pop();
                 }
-
-                this.renderExpressionTree(callback);
             },
-            addNode: function (e, callback) {
+
+            createNode: function(e) {
                 var context = this.getExpressionContext(e),
                     node = context.current;
-
+                if (!node.children) {
+                    node.children = [];
+                }
                 node.children.push({name: "", value: "", tag: "equalityMatch", children: [], op: "expr"});
+                this.setFilterString();
+            },
 
-                this.data.filterString = this.getFilterString();
-
+            addNodeAndReRender: function(e, callback) {
+                this.createNode(e);
                 this.renderExpressionTree(callback);
             },
-            updateNodeValue: function (e, callback) {
+
+            updateNodeValue: function(e, callback) {
                 var context = this.getExpressionContext(e),
                     node = context.current,
                     field = $(e.target),
+                    createNode = this.createNode.bind(this, e),
+                    deleteNode = this.deleteNode.bind(this, e),
                     redrawContainer = false;
 
+                // handle field types
                 if (field.hasClass("op")) {
                     redrawContainer = true;
                     node.op = field.val();
-                    if (node.op === "expr") {
+
+                    if (node.op === "none") {
+                        _.times(node.children.length, deleteNode);
+                    } else if (node.op === "expr") {
                         node.name = "";
                         node.value = "";
                         node.tag = "equalityMatch";
                         node.children = [];
-                    } else if (node.op === "none") {
-                        node.children = [];
-                    } else if (!node.children || !node.children.length) {
-                        node.children = [{name: "", value: "", tag: "equalityMatch", children: [], op: "expr"}];
+                    } else if (node.op === "not") {
+                        if (!node.children || !node.children.length) {
+                            this.createNode(e);
+                        } else {
+                            _.times(node.children.length, deleteNode);
+                            this.createNode(e);
+                        }
+                    } else if (node.op === "and" || node.op === "or") {
+                        if (node.children) {
+                            if (node.children.length < 2) {
+                                // add as many as it takes to get to 2 nodes
+                                _.times(2 - node.children.length, createNode);
+                            }
+                        } else {
+                            _.times(2, createNode);
+                        }
                     }
+                // end of op handlers
                 } else if (field.hasClass("name")) {
-
                     if (field.parent().siblings(".tag-body").find(".tag").val() === "extensibleMatchAND") {
-                        node.extensible.matchType=field.val();
+                        node.extensible.matchType = field.val();
                         node.name = field.val() + ":1.2.840.113556.1.4.803";
                     } else if (field.parent().siblings(".tag-body").find(".tag").val() === "extensibleMatchOR") {
                         node.extensible.matchType = field.val();
                         node.name = field.val() + ":1.2.840.113556.1.4.804";
                     } else {
-                        node.name = field.val();
+                        if (node) {
+                            node.name = field.val();
+                        }
                     }
-
+                // end of name handlers
                 } else if (field.hasClass("tag")) {
 
                     switch (field.val()) {
@@ -157,7 +190,7 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                             node.name = field.parent().siblings(".name-body").find(".name").val();
                             node.tag = field.val();
                     }
-
+                // end of tag handlers
                 } else if (field.hasClass("value")) {
                     if (field.parent().siblings(".tag-body").find(".tag").val().match(/^extensibleMatch/)) {
                         node.extensible.value = field.val();
@@ -165,11 +198,12 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
 
                     node.value = field.val();
                 }
+                // end of field type control flow.
 
-                if (node.op !== "none") {
-                    this.data.filterString = this.getFilterString();
+                if (node && node.op !== "none") {
+                    this.setFilterString();
                 } else {
-                    this.data.filterString = "";
+                    this.setFilterString("");
                 }
 
                 if (redrawContainer) {
@@ -179,11 +213,19 @@ define("org/forgerock/openidm/ui/admin/util/FilterEditor", [
                 }
             },
 
-            renderExpressionTree: function (callback) {
-                if(callback) {
+            renderExpressionTree: function(callback) {
+                if (callback) {
                     uiUtils.renderTemplate(this.template, this.$el, _.extend({}, conf.globalData, this.data), callback, "replace");
                 } else {
                     uiUtils.renderTemplate(this.template, this.$el, _.extend({}, conf.globalData, this.data), $.noop(), "replace");
+                }
+            },
+
+            setFilterString: function(string) {
+                if (string) {
+                    this.data.filterString = string;
+                } else {
+                    this.data.filterString = this.getFilterString();
                 }
             }
         }),
