@@ -68,6 +68,7 @@ public class UpdateCommand {
     static final String UPDATE_STATUS_COMPLETE = "COMPLETE";
     static final String UPDATE_STATUS_PENDING_REPO_UPDATES = "PENDING_REPO_UPDATES";
     static final String UPDATE_STATUS_IN_PROGRESS = "IN_PROGRESS";
+    static final String ACCEPT_LICENSE_PARAMETER = "acceptLicense";
     static final List<String> TERMINAL_STATE = asList(UPDATE_STATUS_COMPLETE, UPDATE_STATUS_FAILED,
             UPDATE_STATUS_PENDING_REPO_UPDATES);
 
@@ -666,7 +667,8 @@ public class UpdateCommand {
                 // Invoke the installation process.
                 ActionResponse response = resource.action(context,
                         Requests.newActionRequest(UPDATE_ROUTE, UPDATE_ACTION_UPDATE)
-                                .setAdditionalParameter(UPDATE_PARAM_ARCHIVE, config.getUpdateArchive()));
+                                .setAdditionalParameter(UPDATE_PARAM_ARCHIVE, config.getUpdateArchive())
+                                .setAdditionalParameter(ACCEPT_LICENSE_PARAMETER, "true"));
                 // Read response from install call.
                 JsonValue installResponse = response.getJsonContent();
                 if (installResponse.get("status").isNull()) {
