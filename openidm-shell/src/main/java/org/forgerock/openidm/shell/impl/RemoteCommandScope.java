@@ -1,27 +1,18 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
-
 package org.forgerock.openidm.shell.impl;
 
 import java.io.File;
@@ -62,9 +53,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
     private static final String DOTTED_PLACEHOLDER = "............................................";
 
-    private static final String IDM_PORT_DEFAULT = "8080";
-    private static final String IDM_PORT_DESC =
-            "Port of OpenIDM REST service. This will override any port in --url. Default " + IDM_PORT_DEFAULT;
+    private static final String IDM_PORT_DESC = "Port of OpenIDM REST service. This will override any port in --url.";
     private static final String IDM_PORT_METAVAR = "PORT";
 
     private static final String IDM_URL_DEFAULT = "http://localhost:8080/openidm/";
@@ -77,6 +66,15 @@ public class RemoteCommandScope extends CustomCommandScope {
 
     private static final String REPLACE_ALL_DESC =
             "Replace the entire config set by deleting the additional configuration";
+
+    private static final String RETRIES_DESC =
+            "Number of retries between attempts to update configuration if OpenIDM is not ready";
+    private static final String RETRIES_METAVAR = "RETRIES";
+
+    private static final String RETRY_DELAY_DESC =
+            "Delay in milliseconds between config update retries if OpenIDM is not ready";
+    private static final String RETRY_DELAY_METAVAR = "DELAY";
+
 
     private final HttpRemoteJsonResource resource = new HttpRemoteJsonResource();
 
@@ -156,13 +154,18 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = {"-P", "--port"}, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = {"-P", "--port"}, absentValue = "")
             final String idmPort,
 
             @Descriptor("Automatically accepts the product license (if present). " +
-                    "Defaults to 'false' to ask for acceptance.")
+                    "Defaults to 'false' to preview update.")
             @Parameter(names = {"--acceptLicense"}, presentValue = "true", absentValue = "false")
             final boolean acceptLicense,
+
+            @Descriptor("Skip repo update preview. " +
+                    "Should only be used if you have already obtained a copy of repo update scripts.")
+            @Parameter(names = {"--skipRepoUpdatePreview"}, presentValue = "true", absentValue = "false")
+            final boolean skipRepoUpdatePreview,
 
             @Descriptor("Timeout value to wait for jobs to finish. " +
                     "Defaults to -1 to exit immediately if jobs are running.")
@@ -181,23 +184,31 @@ public class RemoteCommandScope extends CustomCommandScope {
             final String logFilePath,
 
             @Descriptor("Log only to the log file.")
-            @Parameter(names = {"-Q", "--Quiet"}, presentValue = "true", absentValue = "false")
+            @Parameter(names = {"-Q", "--quiet"}, presentValue = "true", absentValue = "false")
             final boolean quietMode,
 
             @Descriptor("Filename of the Update archive within bin/update.")
-            String archive) {
+            String archive) throws ResourceException {
 
         processOptions(userPass, idmUrl, idmPort);
+
         UpdateCommandConfig config = new UpdateCommandConfig()
                 .setUpdateArchive(archive)
                 .setLogFilePath(logFilePath)
                 .setQuietMode(quietMode)
                 .setAcceptedLicense(acceptLicense)
+                .setSkipRepoUpdatePreview(skipRepoUpdatePreview)
                 .setMaxJobsFinishWaitTimeMs(maxJobsFinishWaitTimeMs)
                 .setMaxUpdateWaitTimeMs(maxUpdateWaitTimeMs);
 
-        new UpdateCommand(session, resource, config)
-                .execute(new RootContext());
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        // If in quiet mode, check for repo updates, if there is update, exit and throw error
+        if (config.isQuietMode() && !updateCommand.fetchRepoUpdates(new RootContext()).asList().isEmpty()) {
+            System.err.println("Quiet mode not supported. " +
+                    "Quiet mode may only be used when archives do not contain repository updates. ");
+            return;
+        }
+        updateCommand.execute(new RootContext());
     }
 
     /**
@@ -225,13 +236,21 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor(REPLACE_ALL_DESC)
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true", absentValue = "false")
-            final boolean replaceall) {
-        configimport(session, userPass, idmUrl, idmPort, replaceall, "conf");
+            final boolean replaceall,
+
+            @Descriptor(RETRIES_DESC)
+            @Parameter(names = { "--retries" }, absentValue = "10")
+            final int retries,
+
+            @Descriptor(RETRY_DELAY_DESC)
+            @Parameter(names = { "--retryDelay" }, absentValue = "500")
+            final int retryDelay) {
+        configimport(session, userPass, idmUrl, idmPort, replaceall, retries, retryDelay, "conf");
     }
 
     /**
@@ -260,16 +279,28 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor(REPLACE_ALL_DESC)
             @Parameter(names = { "-r", "--replaceall", "--replaceAll" }, presentValue = "true",  absentValue = "false")
             final boolean replaceall,
 
+            @Descriptor(RETRIES_DESC)
+            @MetaVar(RETRIES_METAVAR)
+            @Parameter(names = { "--retries" }, absentValue = "10")
+            final int retries,
+
+            @Descriptor(RETRY_DELAY_DESC)
+            @MetaVar(RETRY_DELAY_METAVAR)
+            @Parameter(names = { "--retryDelay" }, absentValue = "500")
+            final int retryDelay,
+
             @Descriptor("source directory")
             final String source) {
         processOptions(userPass, idmUrl, idmPort);
+        resource.setRetries(retries);
+        resource.setRetryDelay(retryDelay);
 
         PrintStream console = session.getConsole();
         File file = IdentityServer.getFileForPath(source);
@@ -407,7 +438,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort) {
         configexport(session, userPass, idmUrl, idmPort, "conf");
     }
@@ -438,7 +469,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor("target directory")
@@ -514,7 +545,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor(IDM_PORT_DESC)
             @MetaVar(IDM_PORT_METAVAR)
-            @Parameter(names = { "-P", "--port" }, absentValue = IDM_PORT_DEFAULT)
+            @Parameter(names = { "-P", "--port" }, absentValue = "")
             final String idmPort,
 
             @Descriptor("Name of the new connector configuration.")

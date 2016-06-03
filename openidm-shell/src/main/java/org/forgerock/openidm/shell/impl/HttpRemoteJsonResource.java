@@ -25,15 +25,14 @@
 package org.forgerock.openidm.shell.impl;
 
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,7 +92,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     public static final Method PATCH = new Method("PATCH");
 
-    /**Base reference used for requesting this resource. */
+    /** Base reference used for requesting this resource. */
     private Reference baseReference;
 
     /** Username used for authentication when accessing the resource. */
@@ -102,6 +101,11 @@ public class HttpRemoteJsonResource implements Connection {
     /** Password used for authentication when accessing the resource. */
     private String password = "";
 
+    /** Number of retries if the config update does not "take" */
+    private int retries = 10;
+
+    /** Delay between retries */
+    private int retryDelay = 500;
     /**
      * Construct the HttpRemoteJsonResource.
      */
@@ -152,7 +156,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public ResourceResponse create(Context context, CreateRequest request) throws ResourceException {
-        JsonValue response = handle(request, request.getResourcePathObject().child(request.getNewResourceId()).toString(), null);
+        JsonValue response = handle(request, request.getResourcePathObject().toString(), null);
         return newResourceResponse(response.get("_id").asString(), response.get("_rev").asString(), response);
     }
 
@@ -314,46 +318,57 @@ public class HttpRemoteJsonResource implements Connection {
             // ETag
             Conditions conditions = new Conditions();
 
-            switch (request.getRequestType()) {
-            case CREATE:
-                conditions.setNoneMatch(Arrays.asList(Tag.ALL));
-                clientResource.getRequest().setConditions(conditions);
-                response = clientResource.put(representation);
-                break;
-            case READ:
-                response = clientResource.get();
-                break;
-            case UPDATE:
-                conditions.setMatch(getTag(((UpdateRequest) request).getRevision()));
-                clientResource.getRequest().setConditions(conditions);
-                response = clientResource.put(representation);
-                break;
-            case DELETE:
-                conditions.setMatch(Arrays.asList(Tag.ALL));
-                clientResource.getRequest().setConditions(conditions);
-                response = clientResource.delete();
-                break;
-            case PATCH:
-                conditions.setMatch(getTag(((PatchRequest) request).getRevision()));
-                clientResource.getRequest().setConditions(conditions);
-                clientResource.setMethod(PATCH);
-                clientResource.getRequest().setEntity(representation);
-                response = clientResource.handle();
-                break;
-            case QUERY:
-                response = clientResource.get();
-                break;
-            case ACTION:
-                clientResource.setQueryValue("_action", ((ActionRequest) request).getAction());
-                response = clientResource.post(representation);
-                break;
-            default:
-                throw new BadRequestException();
+            for (int retry = 0; retry < retries; retry++ ) {
+                try {
+                    switch (request.getRequestType()) {
+                        case CREATE:
+                            conditions.setNoneMatch(Collections.singletonList(Tag.ALL));
+                            clientResource.getRequest().setConditions(conditions);
+                            response = clientResource.put(representation);
+                            break;
+                        case READ:
+                            response = clientResource.get();
+                            break;
+                        case UPDATE:
+                            conditions.setMatch(getTag(((UpdateRequest) request).getRevision()));
+                            clientResource.getRequest().setConditions(conditions);
+                            response = clientResource.put(representation);
+                            break;
+                        case DELETE:
+                            conditions.setMatch(Collections.singletonList(Tag.ALL));
+                            clientResource.getRequest().setConditions(conditions);
+                            response = clientResource.delete();
+                            break;
+                        case PATCH:
+                            conditions.setMatch(getTag(((PatchRequest) request).getRevision()));
+                            clientResource.getRequest().setConditions(conditions);
+                            clientResource.setMethod(PATCH);
+                            clientResource.getRequest().setEntity(representation);
+                            response = clientResource.handle();
+                            break;
+                        case QUERY:
+                            response = clientResource.get();
+                            break;
+                        case ACTION:
+                            clientResource.setQueryValue("_action", ((ActionRequest) request).getAction());
+                            response = clientResource.post(representation);
+                            break;
+                        default:
+                            throw new BadRequestException();
+                    }
+                    break;
+                } catch (org.restlet.resource.ResourceException e) {
+                    // wait and try again
+                    if (retry >= retries) {
+                        throw e;
+                    }
+                    Thread.sleep(retryDelay);
+                }
             }
 
             if (!clientResource.getStatus().isSuccess()) {
-                throw org.forgerock.json.resource.ResourceException.getException(clientResource
-                        .getStatus().getCode(), clientResource.getStatus().getDescription(),
+                throw newResourceException(clientResource.getStatus().getCode(),
+                        clientResource.getStatus().getDescription(),
                         clientResource.getStatus().getThrowable());
             }
             return (null != response && !(response instanceof EmptyRepresentation)
@@ -370,7 +385,7 @@ public class HttpRemoteJsonResource implements Connection {
                     // unable to add response text to exception message, proceed without
                 }
             }
-            throw ResourceException.getException(e.getStatus().getCode(), sb.toString(), e.getCause());
+            throw newResourceException(e.getStatus().getCode(), sb.toString(), e.getCause());
         } catch (Exception e) {
             throw new InternalServerErrorException(e);
         } finally {
@@ -466,4 +481,23 @@ public class HttpRemoteJsonResource implements Connection {
     public void setBaseUri(final String baseUri) {
         baseReference = new Reference(baseUri);
     }
+
+    /**
+     * Sets the number of retries.
+     *
+     * @param retries the number of retries
+     */
+    public void setRetries(int retries) {
+        this.retries = retries;
+    }
+
+    /**
+     * Sets the delay between retries.
+     *
+     * @param retryDelay the delay between retries (in milliseconds)
+     */
+    public void setRetryDelay(int retryDelay) {
+        this.retryDelay = retryDelay;
+    }
+
 }

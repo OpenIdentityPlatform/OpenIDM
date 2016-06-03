@@ -11,42 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.shell.impl;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.MAINTENANCE_ACTION_DISABLE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.MAINTENANCE_ACTION_ENABLE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.MAINTENANCE_ROUTE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.SCHEDULER_ACTION_LIST_JOBS;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.SCHEDULER_ACTION_PAUSE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.SCHEDULER_ACTION_RESUME_JOBS;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.SCHEDULER_ROUTE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_ACTION_AVAIL;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_ACTION_GET_LICENSE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_ACTION_UPDATE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_LOG_ROUTE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_ROUTE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_STATUS_COMPLETE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UPDATE_STATUS_FAILED;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.ENABLE_SCHEDULER;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.ENTER_MAINTENANCE_MODE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.FORCE_RESTART;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.INSTALL_ARCHIVE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.PAUSING_SCHEDULER;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.PREVIEW_ARCHIVE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.WAIT_FOR_INSTALL_DONE;
-import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.WAIT_FOR_JOBS_TO_COMPLETE;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.openidm.shell.impl.UpdateCommand.*;
+import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNull;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 
 import org.apache.felix.service.command.CommandSession;
 import org.forgerock.json.JsonValue;
@@ -91,7 +66,11 @@ public class UpdateCommandTest {
     @Test
     public void testCantFindArchive() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
-                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL, json(array(object(field("archive", "xyz.zip"))))),
+                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
+                        json(object(
+                                field("updates", array(object(field("archive", "xyz.zip")))),
+                                field("rejects", array())
+                        ))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
@@ -101,6 +80,39 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
+                .setMaxJobsFinishWaitTimeMs(1000L)
+                .setMaxUpdateWaitTimeMs(1000L);
+        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+        UpdateExecutionState executionState = updateCommand.execute(new RootContext());
+
+        assertEquals(executionState.getLastAttemptedStep(), PREVIEW_ARCHIVE);
+        assertNull(executionState.getCompletedInstallStatus());
+        assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
+    }
+
+    @Test
+    public void testCantFindValidArchive() throws Exception {
+        HttpRemoteJsonResource resource = mockResource(
+                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
+                        json(object(
+                                field("updates", array()),
+                                field("rejects",
+                                        array(object(
+                                                field("archive", "test.zip"),
+                                                field("reason", "Fake failed message.")
+                                        )))
+                        ))),
+                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
+        );
+
+        UpdateCommandConfig config = new UpdateCommandConfig()
+                .setUpdateArchive("test.zip")
+                .setLogFilePath(null)
+                .setQuietMode(false)
+                .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(1000L)
                 .setMaxUpdateWaitTimeMs(1000L);
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
@@ -114,7 +126,11 @@ public class UpdateCommandTest {
     @Test
     public void testCantPauseScheduler() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
-                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL, json(array(object(field("archive", "test.zip"))))),
+                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
+                        json(object(
+                                field("updates", array(object(field("archive", "test.zip")))),
+                                field("rejects", array())
+                        ))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", false)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
@@ -126,6 +142,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(1000L)
                 .setMaxUpdateWaitTimeMs(1000L);
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
@@ -139,7 +156,11 @@ public class UpdateCommandTest {
     @Test
     public void testWaitForRunningJobsToFinish() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
-                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL, json(array(object(field("archive", "test.zip"))))),
+                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
+                        json(object(
+                                field("updates", array(object(field("archive", "test.zip")))),
+                                field("rejects", array())
+                        ))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 // mock our running jobs listing responses, with jobs running.
@@ -157,6 +178,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(10L)
                 .setCheckJobsRunningFrequency(20L)
                 .setMaxUpdateWaitTimeMs(1000L);
@@ -169,7 +191,11 @@ public class UpdateCommandTest {
 
         //now that timeout testing worked, test that is can pass waiting for jobs to complete
         resource = mockResource(
-                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL, json(array(object(field("archive", "test.zip"))))),
+                mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
+                        json(object(
+                                field("updates", array(object(field("archive", "test.zip")))),
+                                field("rejects", array())
+                        ))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 // mock our running jobs listing responses, with 3 iterations of mocked responses.
@@ -188,6 +214,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(200L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(1000L);
@@ -203,7 +230,16 @@ public class UpdateCommandTest {
     public void testEnterMaintenanceMode() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
+                        json(object(
+                                field("updates",
+                                        array(object(
+                                                field("archive", "test.zip"),
+                                                field("restartRequired", false)
+                                        ))
+                                ),
+                                field("rejects", array())
+                        ))
+                ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
@@ -222,6 +258,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(50L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(1000L);
@@ -233,11 +270,20 @@ public class UpdateCommandTest {
         assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
 
-    @Test
+    //@Test
     public void testTimeoutInstallUpdateArchive() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
+                        json(object(
+                                field("updates",
+                                        array(object(
+                                                field("archive", "test.zip"),
+                                                field("restartRequired", false)
+                                        ))
+                                ),
+                                field("rejects", array())
+                        ))
+                ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array())),
@@ -264,6 +310,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(50L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(10L)
@@ -280,7 +327,16 @@ public class UpdateCommandTest {
     public void testFailedInstallUpdateArchive() throws Exception {
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
+                        json(object(
+                                field("updates",
+                                        array(object(
+                                                field("archive", "test.zip"),
+                                                field("restartRequired", false)
+                                        ))
+                                ),
+                                field("rejects", array())
+                        ))
+                ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
@@ -311,6 +367,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(50L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(100L)
@@ -318,7 +375,7 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
+        assertEquals(executionState.getLastAttemptedStep(), MARK_REPO_UPDATES_COMPLETE);
         assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_FAILED);
         assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
@@ -328,7 +385,16 @@ public class UpdateCommandTest {
 
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "false"))))),
+                        json(object(
+                                field("updates",
+                                        array(object(
+                                                field("archive", "test.zip"),
+                                                field("restartRequired", false)
+                                        ))
+                                ),
+                                field("rejects", array())
+                        ))
+                ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
@@ -362,6 +428,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(50L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(200L)
@@ -369,7 +436,7 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
+        assertEquals(executionState.getLastAttemptedStep(), MARK_REPO_UPDATES_COMPLETE);
         assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_COMPLETE);
         assertEquals(executionState.getLastRecoveryStep(), ENABLE_SCHEDULER);
     }
@@ -379,7 +446,16 @@ public class UpdateCommandTest {
 
         HttpRemoteJsonResource resource = mockResource(
                 mc(UPDATE_ROUTE, UPDATE_ACTION_AVAIL,
-                        json(array(object(field("archive", "test.zip"), field("restartRequired", "true"))))),
+                        json(object(
+                                field("updates",
+                                        array(object(
+                                                field("archive", "test.zip"),
+                                                field("restartRequired", true)
+                                        ))
+                                ),
+                                field("rejects", array())
+                        ))
+                ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
@@ -413,6 +489,7 @@ public class UpdateCommandTest {
                 .setLogFilePath(null)
                 .setQuietMode(false)
                 .setAcceptedLicense(true)
+                .setSkipRepoUpdatePreview(true)
                 .setMaxJobsFinishWaitTimeMs(50L)
                 .setCheckJobsRunningFrequency(10L)
                 .setMaxUpdateWaitTimeMs(200L)
@@ -420,7 +497,7 @@ public class UpdateCommandTest {
         UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
         UpdateExecutionState executionState = updateCommand.execute(new RootContext());
 
-        assertEquals(executionState.getLastAttemptedStep(), WAIT_FOR_INSTALL_DONE);
+        assertEquals(executionState.getLastAttemptedStep(), MARK_REPO_UPDATES_COMPLETE);
         assertEquals(executionState.getCompletedInstallStatus(), UPDATE_STATUS_COMPLETE);
         assertEquals(executionState.getLastRecoveryStep(), FORCE_RESTART);
     }
