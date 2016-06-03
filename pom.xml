@@ -208,7 +208,7 @@
 
     <properties>
         <!-- Version management -->
-        <commons.commons-bom.version>20.0.0-alpha-4</commons.commons-bom.version>
+        <commons.commons-bom.version>20.0.0-alpha-5</commons.commons-bom.version>
 
         <!-- Commons versions -->
         <commons.forgerock-script.version>3.4.0</commons.forgerock-script.version>
