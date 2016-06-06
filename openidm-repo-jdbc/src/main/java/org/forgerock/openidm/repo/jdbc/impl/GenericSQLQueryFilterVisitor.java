@@ -147,7 +147,7 @@ class GenericSQLQueryFilterVisitor extends AbstractSQLQueryFilterVisitor<Clause,
                 // assume String
                 valueClause = buildStringValueClause(propTable, operand, value);
             }
-            builder.join("${_dbSchema}.${_propTable}", propTable)
+            builder.leftJoin("${_dbSchema}.${_propTable}", propTable)
                     .on(where(propTable + ".${_mainTable}_id = obj.id").and(where(propTable + ".propkey = ${" + key + "}")));
             return valueClause;
         }
