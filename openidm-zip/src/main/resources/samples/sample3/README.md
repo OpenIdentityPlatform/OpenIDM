@@ -52,7 +52,7 @@ user is created or updated in the external repo. In both cases the script is
 explicitly included in the sync.json file but could just as easily have referenced
 an external file for the script source instead. For more information see:
 
-https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#appendix-scripting
+https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#chap-scripting
 
 The scripted connector supports any number of custom scripted endpoints. These are
 configured via the provisioner script and currently support only Groovy. See
