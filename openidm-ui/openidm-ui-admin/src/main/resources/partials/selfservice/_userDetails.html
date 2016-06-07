@@ -1,5 +1,6 @@
 <!-- Copyright 2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <form id="configDialogForm" class="form-horizontal">
-    {{> form/_basicSelectize value=identityEmailField label="templates.selfservice.userDetails.identityEmailField" property="identityEmailField" options=identityServiceProperties}}
+    {{> form/_basicSelectize value=identityServiceUrl label="templates.selfservice.userDetails.identityResource" helpKey="templates.selfservice.userDetails.identityResourceHelp" property="identityServiceUrl" options=identityServiceOptions}}
+    {{> form/_basicSelectize value=identityEmailField label="templates.selfservice.userDetails.identityEmailField" helpKey="templates.selfservice.userDetails.identityEmailFieldHelp" property="identityEmailField" options=identityEmailOptions}}
 </form>

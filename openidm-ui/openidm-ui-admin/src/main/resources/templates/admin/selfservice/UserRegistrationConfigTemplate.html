@@ -12,7 +12,55 @@
             </label>
         </div>
     </div>
-    {{> selfservice/_steps this}}
+    <div>
+        <ul class="nav nav-tabs" role="tablist">
+            <li role="presentation" id="optionTab" class="active"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
+            <li role="presentation" id="advancedTab"><a href="#advanced" data-toggle="tab" aria-controls="advanced" role="tab">{{t "templates.selfservice.advanced"}}</a></li>
+        </ul>
+        <div class="tab-content">
+            <div role="tabpanel" class="tab-pane active" id="options">
+                <div id="stepsBody">
+                    <div class="panel-body">
+                        <div role="alert" id="emailStepWarning" class="alert alert-danger" {{#if hideEmailError}} style="display:none !important;" {{/if}}>
+                        <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
+                        <span class="message">{{t "templates.selfservice.noEmailConfig"}} <a href="#settings/email/">{{t "templates.selfservice.emailConfigLink"}}</a></span>
+                    </div>
+
+                    <div class="selfservice-holder">
+                        <div class="simple-section clearfix">
+                            <label class="col-sm-3 control-label">{{t "templates.selfservice.storageLookup"}}</label>
+                            <div class="col-sm-7">
+                                {{#each storageLookup}}
+                                {{> _toggleIconBlock this}}
+                                {{/each}}
+                            </div>
+                        </div>
+
+                        <div class="simple-section clearfix">
+                            <label class="col-sm-3 control-label">{{t "templates.selfservice.userVerification"}}</label>
+                            <div class="col-sm-7">
+                                {{#each userverification}}
+                                {{> _toggleIconBlock this}}
+                                {{/each}}
+                            </div>
+                        </div>
+                        <div class="simple-section clearfix">
+                            <label class="col-sm-3 control-label">{{t "templates.selfservice.securityQuestions"}}</label>
+                            <div class="col-sm-7">
+                                {{#each securityQuestions}}
+                                {{> _toggleIconBlock this}}
+                                {{/each}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{> selfservice/_advancedoptions}}
+    </div>
 </div>
+
+
+
 
 
