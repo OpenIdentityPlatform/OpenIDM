@@ -207,6 +207,7 @@ public class AuditFilter implements Filter {
      * @param <R> the type of Response
      * @return a Promise of either the request response or exception
      */
+    @SuppressWarnings("rawtypes")
     <R extends Response> Promise<R, ResourceException> logAuditAccessEntry(
             final Context context, final Request request,
             final AsyncFunction<Void, R, ResourceException> handleRequest) {

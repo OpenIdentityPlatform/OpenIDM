@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.audit.impl;
 
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.EnumSet;
@@ -119,7 +121,7 @@ public class AuditLogFilters {
         private ActionFilter(final Class<A> clazz, final Set<A> actionsToLog) {
             super(FIELD_ACTION, actionsToLog, new JsonValueObjectConverter<A>() {
                 public A apply(JsonValue value) throws JsonValueException {
-                    return value.asEnum(clazz);
+                    return value.as(enumConstant(clazz));
                 }
             });
         }
@@ -152,7 +154,7 @@ public class AuditLogFilters {
         private OperationFilter(final Class<A> clazz, final Set<A> actionsToLog) {
             super(OPERATION, actionsToLog, new JsonValueObjectConverter<A>() {
                 public A apply(JsonValue value) throws JsonValueException {
-                    return value.asEnum(clazz);
+                    return value.as(enumConstant(clazz));
                 }
             });
         }
@@ -337,7 +339,7 @@ public class AuditLogFilters {
 
         for (JsonValue action : actions) {
             try {
-                filter.add(action.asEnum(actionClass));
+                filter.add(action.as(enumConstant(actionClass)));
             } catch (IllegalArgumentException e) {
                 logger.warn("Action value {} is not a known filter action", new Object[] { action.toString() });
             }

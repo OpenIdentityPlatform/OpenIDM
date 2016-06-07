@@ -57,7 +57,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.events.handlers.impl.PassThroughAuditEventHandler;
 import org.forgerock.openidm.audit.util.AuditTestUtils;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.script.Script;
