@@ -3,13 +3,13 @@
     {
       "name" : "google",
       "type" : "openid_connect",
-      "icon" : "",
+      "icon" : "google",
       "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
       "token_endpoint" : "https://www.googleapis.com/oauth2/v4/token",
       "userinfo_endpoint" : "https://www.googleapis.com/oauth2/v3/userinfo",
       "discovery_url" : "https://accounts.google.com/.well-known/openid-configuration",
       "client_id" : "configure_me",
-      "client_secret" : "configure_me"
+      "client_secret" : ""
     }
   ]
 }

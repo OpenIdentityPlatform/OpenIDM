@@ -237,6 +237,14 @@ define([
         "deleteAssignmentFail": {
             msg: "config.messages.assignmentMessages.deleteAssignmentFail",
             type: "error"
+        },
+        "saveSocialProvider" : {
+            msg: "config.messages.socialProviders.save",
+            type: "info"
+        },
+        "deleteSocialProvider" : {
+            msg: "config.messages.socialProviders.delete",
+            type: "error"
         }
     };
 

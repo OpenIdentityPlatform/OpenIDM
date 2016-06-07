@@ -24,6 +24,7 @@ define([
     "org/forgerock/openidm/ui/admin/settings/SelfServiceView",
     "org/forgerock/openidm/ui/admin/settings/EmailConfigView",
     "org/forgerock/openidm/ui/admin/settings/UpdateView",
+    "org/forgerock/openidm/ui/admin/settings/SocialConfigView",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -38,6 +39,7 @@ define([
             SelfServiceView,
             EmailConfigView,
             UpdateView,
+            SocialConfigView,
             Router,
             Constants,
             EventManager,
@@ -78,6 +80,7 @@ define([
                     AuditView.render();
                     SelfServiceView.render();
                     EmailConfigView.render({}, _.noop);
+                    SocialConfigView.render();
                 }
 
                 UpdateView.render({step: "version"}, _.bind(function() {

@@ -249,6 +249,10 @@
                 "saveSuccess" : "Assignment successfully saved.",
                 "deleteAssignmentSuccess" : "Assignment has been deleted.",
                 "deleteAssignmentFail" : "Failed to delete assignment."
+            },
+            "socialProviders" : {
+                "save" : "Social provider configuration saved",
+                "delete" : "Social provider configuration deleted"
             }
         },
         "AppConfiguration" : {
@@ -904,6 +908,19 @@
             "actionPhrase": "Perform this <strong>Action</strong>",
             "onCompletePhrase": "And <strong>On Complete</strong>",
             "actionAlert": "You must provide a value for the action."
+        },
+        "socialProviders" : {
+            "provider" : "Provider",
+            "sectionDetails" : "Enable social identity providers for user authentication and registration.",
+            "configureProvider" : "Configure provider for social provisioning",
+            "clientId" : "Client ID",
+            "clientSecret" : "Client Secret",
+            "authorizationEndpoint" : "Authorization Endpoint",
+            "tokenEndpoint" : "Token Endpoint",
+            "userInfoEndpoint" : "User Info Endpoint",
+            "title" : "Social ID Provider",
+            "discoveryUrl" : "Discovery URL",
+            "scope" : "Scope"
         },
         "audit": {
             "eventHandlers": {

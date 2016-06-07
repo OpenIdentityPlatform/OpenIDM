@@ -32,6 +32,10 @@
                 <a data-toggle="tab" data-route="update" href="#updateContainer">{{t "templates.update.title"}}</a>
                 </li>
 
+                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "social"}}active{{/sw}}">
+                <a data-toggle="tab" data-route="social" href="#socialContainer">{{t "templates.socialProviders.title"}}</a>
+                </li>
+
             </ul>
         </div>
     </div>
@@ -43,6 +47,7 @@
             <div id="selfServiceContainer" class="tab-pane{{#sw tabName "selfService"}} active{{/sw}}" role="tabpanel"></div>
             <div id="emailContainer" class="tab-pane{{#sw tabName "email"}} active{{/sw}}" role="tabpanel"></div>
             <div id="updateContainer" class="tab-pane {{#if maintenanceMode}} active{{else}}{{#sw tabName "update"}} active{{/sw}}{{/if}}" role="tabpanel"></div>
+            <div id="socialContainer" class="tab-pane{{#sw tabName "social"}} active{{/sw}}" role="tabpanel"></div>
         </div>
     </div>
 

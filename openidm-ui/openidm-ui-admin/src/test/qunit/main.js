@@ -111,6 +111,7 @@ define([
     "./org/forgerock/openidm/ui/admin/settings/EmailConfigViewTest",
     "./org/forgerock/openidm/ui/admin/settings/SelfServiceViewTest",
     "./org/forgerock/openidm/ui/admin/settings/SettingsViewTest",
+    "./org/forgerock/openidm/ui/admin/settings/SocialConfigViewTest",
     "./org/forgerock/openidm/ui/admin/settings/UpdateViewTest",
     "./org/forgerock/openidm/ui/admin/settings/audit/AuditAdminAbstractViewTest",
     "./org/forgerock/openidm/ui/admin/settings/audit/AuditEventHandlersDialogTest",

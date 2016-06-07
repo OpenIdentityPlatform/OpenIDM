@@ -1,0 +1,16 @@
+<form id="socialDialogForm" class="form-horizontal">
+    {{> form/_basicInput value=client_id label="templates.socialProviders.clientId" property="client_id" noValidation="true"}}
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="inputClientSecret">{{t "templates.socialProviders.clientSecret"}}</label>
+        <div class="col-sm-6">
+            <input id="inputClientSecret" class="form-control" name="client_secret" type="text" {{#if client_secret}} placeholder="********" {{/if}} />
+        </div>
+    </div>
+
+    {{> form/_basicInput value=authorization_endpoint label="templates.socialProviders.authorizationEndpoint" property="authorization_endpoint" noValidation="true"}}
+    {{> form/_basicInput value=token_endpoint label="templates.socialProviders.tokenEndpoint" property="token_endpoint" noValidation="true"}}
+    {{> form/_basicInput value=userinfo_endpoint label="templates.socialProviders.userInfoEndpoint" property="userinfo_endpoint" noValidation="true"}}
+    {{> form/_basicInput value=discovery_url label="templates.socialProviders.discoveryUrl" property="discovery_url" noValidation="true"}}
+    {{> form/_tagSelectize value=scope label="templates.socialProviders.scope" property="scope" noValidation="true"}}
+</form>
