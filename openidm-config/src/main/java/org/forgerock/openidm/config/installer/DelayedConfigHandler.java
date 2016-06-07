@@ -73,9 +73,11 @@ public class DelayedConfigHandler implements ProviderListener {
                     props = config.configCrypto.getPropertiesToEncrypt(config.pidOrFactory, config.factoryAlias, config.parsedConfig);
                     try {
                         // Meta data now found, handle it
-                        config.configInstaller.setConfig(config.newConfig, new String[] {config.pidOrFactory, config.factoryAlias}, config.file);
+                        config.configInstaller.setConfig(config.newConfig,
+                                new String[] { config.pidOrFactory, config.factoryAlias },
+                                config.file);
                     } catch (Exception ex) {
-                        logger.warn("Setting delayed configuration failed for {} {}", new Object[] {config.pidOrFactory, config.factoryAlias, ex});
+                        logger.warn("Setting delayed configuration failed for {} {}", config.pidOrFactory, config.factoryAlias, ex);
                     }
                 } catch (WaitForMetaData ex) {
                     // Still not available for this config, leave it in delayed config

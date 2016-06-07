@@ -246,7 +246,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                             "No configuration exists for id " + resourcePath.toString())
                             .asPromise();
                 }
-                Dictionary props = config.getProperties();
+                Dictionary<String, Object> props = config.getProperties();
                 result =  enhancedConfig.getConfiguration(props, resourcePath.toString(), false);
                 result.put("_id", resourcePath.toString());
                 logger.debug("Read configuration for service {}", resourcePath);
@@ -441,7 +441,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         try {
             Configuration config = findExistingConfiguration(parsedId);
 
-            Dictionary existingConfig = (config == null ? null : config.getProperties());
+            Dictionary<String, Object> existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
                 return new NotFoundException("No existing configuration found for " + resourcePath.toString() +
                         ", can not update the configuration.").asPromise();
@@ -534,7 +534,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                                 + ", can not delete the configuration.").asPromise();
             }
 
-            Dictionary existingConfig = config.getProperties();
+            Dictionary<String, Object> existingConfig = config.getProperties();
             JsonValue value = enhancedConfig.getConfiguration(existingConfig, resourcePath.toString(), false);
 
             if (existingConfig == null) {
@@ -590,7 +590,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         try {
             Configuration config = findExistingConfiguration(parsedId);
 
-            Dictionary existingConfig = (config == null ? null : config.getProperties());
+            Dictionary<String, Object> existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
                 throw new NotFoundException("No existing configuration found for "
                         + resourcePath.toString()
@@ -709,7 +709,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         }
         logger.trace("List configurations with filter: {}", filter);
         Configuration[] configurations = configAdmin.listConfigurations(filter);
-        logger.debug("Configs found: {}", configurations);
+        logger.debug("Configs found: {}", (Object[]) configurations);
         if (configurations != null && configurations.length > 0) {
             return configurations[0];
         } else {
@@ -732,29 +732,34 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     public boolean handleEvent(ClusterEvent event) {
         switch (event.getType()) {
             case CUSTOM:
-                try {
-                    JsonValue details = event.getDetails();
-                    ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
-                    ResourcePath resourcePath = ResourcePath.valueOf(details.get(EVENT_RESOURCE_PATH).asString());
-                    String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
-                    JsonValue obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT);
-                    switch (action) {
-                        case CREATE:
-                            create(resourcePath, id, obj, true);
-                            break;
-                        case UPDATE:
-                            update(resourcePath, null, obj);
-                            break;
-                        case DELETE:
-                            delete(resourcePath, null);
-                            break;
-                    }
-                } catch (Exception e) {
-                    logger.error("Error handling cluster event: " + e.getMessage(), e);
-                    return false;
-                }
+                return handleCustomEvent(event);
             default:
                 return true;
+        }
+    }
+
+    private boolean handleCustomEvent(ClusterEvent event) {
+        try {
+            JsonValue details = event.getDetails();
+            ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
+            ResourcePath resourcePath = ResourcePath.valueOf(details.get(EVENT_RESOURCE_PATH).asString());
+            String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
+            JsonValue obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT);
+            switch (action) {
+                case CREATE:
+                    create(resourcePath, id, obj, true);
+                    break;
+                case UPDATE:
+                    update(resourcePath, null, obj);
+                    break;
+                case DELETE:
+                    delete(resourcePath, null);
+                    break;
+            }
+            return true;
+        } catch (Exception e) {
+            logger.error("Error handling cluster event: " + e.getMessage(), e);
+            return false;
         }
     }
 

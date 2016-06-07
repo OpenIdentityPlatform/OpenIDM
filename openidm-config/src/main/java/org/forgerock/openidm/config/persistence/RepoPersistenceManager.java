@@ -92,7 +92,8 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
     private final boolean requireRepository = Boolean.valueOf(System.getProperty("openidm.config.repo.enabled", "true"));
 
     // Fall-back is in-memory store of configurations
-    Map<String, Dictionary> tempStore = new HashMap<String, Dictionary>();
+    @SuppressWarnings("rawtypes")
+    Map<String, Dictionary> tempStore = new HashMap<>();
 
     public RepoPersistenceManager(final BundleContext ctx) {
         this.ctx = ctx;
@@ -104,11 +105,11 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      */
     public void checkReady() throws BootstrapFailure {
         if (requireRepository) {
-            ServiceTracker repoTracker = null;
+            ServiceTracker<?, ?> repoTracker = null;
             try {
                 if (repo == null) {
                     Filter filter = ctx.createFilter("(" + Constants.OBJECTCLASS + "=" + RepoBootService.class.getName() + ")");
-                    repoTracker = new ServiceTracker(ctx, filter, null);
+                    repoTracker = new ServiceTracker<>(ctx, filter, null);
                     repoTracker.open();
                     logger.debug("Bootstrapping repository");
                     RepoBootService rawRepo = (RepoBootService) repoTracker.waitForService(5000);
@@ -193,6 +194,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      *      <code>IOException</code> must also be thrown if no dictionary
      *      exists for the given identifier. 
      */
+    @SuppressWarnings("rawtypes")
     public Dictionary load(String pid) throws IOException {
         logger.debug("Config load call for {}", pid);
         Dictionary result = null;
@@ -244,6 +246,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * 
      * @throws IOException If an error occurrs getting the dictionaries.
      */
+    @SuppressWarnings("rawtypes")
     public Enumeration getDictionaries() throws IOException {
         if (isReady(5)) {
             logger.debug("Config getDictionaries call from repository");
@@ -318,6 +321,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      *      exception is thrown, it is expected, that
      *      {@link #exists(String) exists(pid} returns <code>false</code>.
      */
+    @SuppressWarnings("rawtypes")
     public void store(String pid, Dictionary properties) throws IOException {
         logger.debug("Store call for {} {}", pid, properties);
 
@@ -465,6 +469,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * @param dict the (OSGi configuration) dictionary
      * @return the converted map
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     Map<String,Object> dictToMap(Dictionary dict) {
         Map<String,Object> convert = new HashMap<String,Object>();
         Enumeration keysEnum = dict.keys();
@@ -501,6 +506,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
      * @return converted to legacy types
      * @throws IOException if the conversion failed 
      */
+    @SuppressWarnings({ "rawtypes", "unchecked" })
     Dictionary mapToDict(Map properties) throws IOException {
         if (properties instanceof Dictionary) {
             return (Dictionary) properties;
@@ -572,6 +578,7 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
         }
     }
 
+    @SuppressWarnings("unchecked")
     private Map<Object, Object> deserializeConfig(String configString) throws InvalidException {
         try {
             if (configString != null && configString.trim().length() > 0) {

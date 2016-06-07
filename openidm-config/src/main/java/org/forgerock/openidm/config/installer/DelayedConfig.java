@@ -40,8 +40,8 @@ public class DelayedConfig {
     public String pidOrFactory;
     public String factoryAlias;
     public File file;
-    public Dictionary oldConfig;
-    public Dictionary newConfig;
+    public Dictionary<String, Object> oldConfig;
+    public Dictionary<String, Object> newConfig;
     public JsonValue parsedConfig;
     public JSONConfigInstaller configInstaller;
     public ConfigCrypto configCrypto;

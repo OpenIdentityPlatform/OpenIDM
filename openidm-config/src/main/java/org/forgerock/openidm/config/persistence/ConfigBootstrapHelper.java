@@ -127,7 +127,7 @@ public class ConfigBootstrapHelper {
 
         File loadedFile = null;
         try {
-            Dictionary rawConfig = null;
+            final Dictionary<String, Object> rawConfig;
             if (unqualified.exists()) {
                 rawConfig = JSONConfigInstaller.loadConfigFile(unqualified);
                 loadedFile = unqualified;
@@ -236,9 +236,9 @@ public class ConfigBootstrapHelper {
 
         Configuration config = configAdmin.createFactoryConfiguration(FELIX_FILEINSTALL_PID, null);
         
-        Dictionary props = config.getProperties();
+        Dictionary<String, Object> props = config.getProperties();
         if (props == null) {
-            props = new Hashtable();
+            props = new Hashtable<>();
         }
         
         if ("true".equals(enabled)) {
