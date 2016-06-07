@@ -20,6 +20,7 @@ import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.ATTRIBUTE_AUTH_CONTEXT;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.openidm.auth.modules.MappingRoleCalculator.GroupComparison;
@@ -214,7 +215,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                                 .asMapOfList(String.class);
                         MappingRoleCalculator.GroupComparison groupComparison = properties.get(GROUP_COMPARISON_METHOD)
                                 .defaultTo(MappingRoleCalculator.GroupComparison.equals.name())
-                                .asEnum(MappingRoleCalculator.GroupComparison.class);
+                                .as(enumConstant(MappingRoleCalculator.GroupComparison.class));
 
                         // a function to perform the user detail query on the router
                         queryExecutor =
@@ -406,6 +407,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
         getContextMap(messageInfo).put("ipAddress", ipAddress);
     }
 
+    @SuppressWarnings("unchecked")
     private Map<String, Object> getContextMap(MessageInfoContext messageInfo) {
         return (Map<String, Object>) messageInfo.getRequestContextMap().get(ATTRIBUTE_AUTH_CONTEXT);
     }

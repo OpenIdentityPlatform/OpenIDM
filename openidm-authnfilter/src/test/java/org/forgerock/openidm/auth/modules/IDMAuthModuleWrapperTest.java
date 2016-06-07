@@ -52,6 +52,7 @@ import org.testng.annotations.Test;
  * Tests IDMUserAuthModule using "internal/user" resource/query
  *
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class IDMAuthModuleWrapperTest {
 
     private ConnectionFactory connectionFactory;

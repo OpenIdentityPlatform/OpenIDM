@@ -72,6 +72,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
@@ -323,7 +324,7 @@ public class AuthenticationService implements SingletonResourceProvider {
 
         AsyncServerAuthModule module;
         if (moduleConfig.isDefined(AUTH_MODULE_NAME_KEY)) {
-            module = moduleConfig.get(AUTH_MODULE_NAME_KEY).asEnum(IDMAuthModule.class)
+            module = moduleConfig.get(AUTH_MODULE_NAME_KEY).as(enumConstant(IDMAuthModule.class))
                     .newInstance(toAuthenticatorFromProperties);
         } else if (moduleConfig.isDefined(AUTH_MODULE_CLASS_NAME_KEY)) {
             module = constructAuthModuleByClassName(moduleConfig.get(AUTH_MODULE_CLASS_NAME_KEY).asString());

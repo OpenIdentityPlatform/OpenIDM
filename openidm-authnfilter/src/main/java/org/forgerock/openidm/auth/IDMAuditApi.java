@@ -20,13 +20,14 @@ import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.CONTEXT
 import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.ENTRIES;
 import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.PRINCIPAL;
 import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.RESULT;
+import static org.forgerock.audit.events.AuthenticationAuditEventBuilder.authenticationEvent;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 import org.forgerock.audit.events.AuditEvent;
-import org.forgerock.audit.events.AuthenticationAuditEventBuilder;
 import org.forgerock.audit.events.AuthenticationAuditEventBuilder.Status;
 import org.forgerock.caf.authentication.framework.AuditApi;
 import org.forgerock.json.JsonValue;
@@ -90,11 +91,11 @@ public class IDMAuditApi implements AuditApi {
             trackingIds.add(auditMessage.get(SESSION_ID).asString());
         }
 
-        AuditEvent auditEvent = new AuthenticationAuditEventBuilder()
+        AuditEvent auditEvent = authenticationEvent()
                 .context(auditMessage.get(CONTEXT).asMap())
                 .entries(auditMessage.get(ENTRIES).asList())
                 .principal(principals)
-                .result(auditMessage.get(RESULT).asEnum(Status.class))
+                .result(auditMessage.get(RESULT).as(enumConstant(Status.class)))
                 .userId(username)
                 .trackingIds(trackingIds)
                 .transactionId(getTransactionId(auditMessage))
