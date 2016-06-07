@@ -33,7 +33,6 @@ import java.util.Map;
 
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.http.SecurityContextFactory;
 
 /**
  * A JsonValue-wrapper to contain the security context information before the SecurityContext proper is built.
@@ -48,11 +47,13 @@ class SecurityContextMapper {
     public static final String AUTHORIZATION = "authorization";
 
     /** the MessageInfo auth context-backing map */
+    @SuppressWarnings("rawtypes")
     private Map messageInfoMap;
 
     /** a JsonValue view of the auth context data */
     private final JsonValue authData;
 
+    @SuppressWarnings({ "unchecked", "deprecation" })
     private SecurityContextMapper(MessageInfoContext messageInfo) {
         messageInfoMap = messageInfo.getRequestContextMap();
         Map<String, Object> contextMap = (Map<String, Object>) messageInfoMap.get(ATTRIBUTE_AUTH_CONTEXT);
@@ -61,7 +62,8 @@ class SecurityContextMapper {
             messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, contextMap);
         }
         // create the JsonValue auth-data wrapper around the AUTHCID value
-        authData = json(object(field(AUTHENTICATION_ID, messageInfoMap.get(SecurityContextFactory.ATTRIBUTE_AUTHCID))));
+        authData = json(object(field(AUTHENTICATION_ID, messageInfoMap.get(
+                org.forgerock.json.resource.http.SecurityContextFactory.ATTRIBUTE_AUTHCID))));
         // and the auth context map
         authData.put(AUTHORIZATION, contextMap);
     }
@@ -83,10 +85,11 @@ class SecurityContextMapper {
      * @param authcId the authenticationId
      * @return the SecurityContextMapper
      */
+    @SuppressWarnings({ "unchecked", "deprecation" })
     SecurityContextMapper setAuthenticationId(String authcId) {
         authData.put(AUTHENTICATION_ID, authcId);
         // when setting the authenticationId, make sure to update it in the MessageInfo backing-map as well
-        messageInfoMap.put(SecurityContextFactory.ATTRIBUTE_AUTHCID, authcId);
+        messageInfoMap.put(org.forgerock.json.resource.http.SecurityContextFactory.ATTRIBUTE_AUTHCID, authcId);
         return this;
     }
 
@@ -96,6 +99,7 @@ class SecurityContextMapper {
      * @param authorizationId the authorization context data
      * @return the SecurityContextMapper
      */
+    @SuppressWarnings("unchecked")
     SecurityContextMapper setAuthorizationId(Map<String, Object> authorizationId) {
         authData.put(AUTHORIZATION, authorizationId);
         messageInfoMap.put(ATTRIBUTE_AUTH_CONTEXT, authorizationId);
