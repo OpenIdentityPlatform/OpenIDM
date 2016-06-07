@@ -71,6 +71,23 @@ define([
         }
     };
 
+    /**
+     *
+     * @param url {string}
+     * @returns promise {object}
+     *
+     * This should be used as an alternative to a simple readEntity when you need the results back regardless of success or failure.
+     */
+    obj.readEntityAlways = function (url) {
+        var promise = $.Deferred();
+
+        obj.readEntity(url).always(function(result) {
+            promise.resolve(result);
+        });
+
+        return promise.promise();
+    };
+
     obj.updateEntity = function(id, objectParam, successCallback, errorCallback) {
         // _id is not needed in calls to the config service, and can sometimes cause problems by being there.
         delete objectParam._id;

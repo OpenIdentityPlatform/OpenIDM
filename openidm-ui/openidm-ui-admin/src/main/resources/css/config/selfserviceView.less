@@ -72,6 +72,10 @@
     padding-top:5px;
   }
 
+  .panel-body.no-toggle {
+    padding-left:0px;
+  }
+
   .panel-footer {
     position: absolute;
     right: 10px;
@@ -149,10 +153,33 @@
 
 
 .selfservice-holder {
-  position:relative;
+  position: relative;
 
   .details h3 {
       text-transform: none;
+  }
+
+  .logo-holder {
+    float: left;
+    margin-right: 15px;
+  }
+
+  .logo-details {
+    overflow: hidden;
+  }
+
+  .control-label {
+    text-align: right;
+  }
+
+  .simple-section {
+    margin-bottom: 15px;
+  }
+
+  &.disabled {
+    .control-label {
+      color: #C7C9CA;
+    }
   }
 }
 

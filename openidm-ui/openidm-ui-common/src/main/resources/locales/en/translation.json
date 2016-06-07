@@ -524,6 +524,7 @@
             "locale" : "locale",
             "localText" : "Localized Text",
             "emailValidationPasswordDialog" : "Configure Password Email Validation",
+            "error" : "Error",
 
             "passwordSelfServiceHelp" : "Configure the end-user password reset experience.",
             "usernameSelfServiceHelp" : "Configure the end-user forgotten username retrieval experience.",
@@ -565,6 +566,9 @@
             "storage" : "Storage",
             "snapshotToken" : "Snapshot Token",
             "tokenExpire" : "Token LifeTime (seconds)",
+            "storageLookup" : "User Storage & Lookup",
+            "userVerification" : "User Verification",
+            "securityQuestions" : "Security Questions",
             "password" : {
                 "resetStageTitle" : "Configure Password Reset Form",
                 "emailValidationTitle" : "Configure Validation Email",
@@ -639,8 +643,10 @@
                 "emailVerificationLinkHelp" : "Include verification link in the email"
             },
             "userDetails" : {
+                "identityResource" : "Identity Resource",
+                "identityResourceHelp" : "Repository for newly registered users.",
                 "identityEmailField" : "Identity Email Field",
-                "identityEmailFieldHelp" : ""
+                "identityEmailFieldHelp" : "Unique field required to identify user."
             },
             "resetStage" : {
                 "passwordField" : "Password Field",
