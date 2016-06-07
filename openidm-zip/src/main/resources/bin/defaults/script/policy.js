@@ -1,7 +1,7 @@
 /*! @license
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2012-2016 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -56,6 +56,11 @@ var _ = require('lib/lodash'),
             "policyExec" : "regexpMatches",
             "clientValidation": true,
             "policyRequirements" : ["MATCH_REGEXP"]
+        },
+        {
+            "policyId" : "valid-type",
+            "policyExec" : "validType",
+            "policyRequirements": ["VALID_TYPE"]
         },
         {
             "policyId" : "valid-date",
@@ -178,6 +183,26 @@ policyImpl = (function (){
             return [ {"policyRequirement": "MATCH_REGEXP", "regexp": params.regexp, params: params, "flags": params.flags}];
         }
 
+        return [];
+    };
+    
+    policyFunctions.validType = function(fullObject, value, params, property) {
+        var type = _.isNull(value) 
+                ? "null" 
+                : (Array.isArray(value) || Object.prototype.toString.call(value) === "[object ScriptableList]") 
+                        ? "array" 
+                        : typeof(value);
+        if (value !== undefined && !_.contains(params.types, type)) {
+            return [ 
+                { 
+                    "policyRequirement" : "VALID_TYPE", 
+                    "params" : { 
+                        "invalidType" : type, 
+                        "validTypes" : params.types 
+                    } 
+                } 
+            ];
+        }
         return [];
     };
 
@@ -362,7 +387,7 @@ policyImpl = (function (){
     };
 
     policyFunctions.validEmailAddressFormat = function(fullObject, value, params, property) {
-        var pattern = /^([A-Za-z0-9_\-\.])+\@([A-Za-z0-9_\-\.])+\.([A-Za-z]{2,4})$/,
+        var pattern = /.+@.+\..+/i,
             isRequired = _.find(this.failedPolicyRequirements, function (fpr) {
                 return fpr.policyRequirement === "REQUIRED";
             }),
@@ -765,7 +790,8 @@ policyProcessor = (function (policyConfig,policyImpl){
                         var customPolicies = _.map(pair[1].policies), // will always result in a standard array
                             conditionalPoliciesx = pair[1].conditionalPolicies,
                             fallbackPoliciesx = pair[1].fallbackPolicies,
-                            standardPolicies = [];
+                            standardPolicies = [],
+                            types = [];
 
                         if (_.contains(obj.schema.required, pair[0])) {
                             standardPolicies.push({
@@ -801,6 +827,27 @@ policyProcessor = (function (policyConfig,policyImpl){
                             }
 
                         }
+                        
+                        if (_.isString(pair[1].type)) {
+                            types.push(pair[1].type);
+                        } else {
+                            for (var index in pair[1].type) {
+                                types.push(pair[1].type[index]);
+                            }
+                        }
+                        // treat a relationship type as an object
+                        types = _.map(types, function (type) {
+                            if (type === "relationship") {
+                                return "object";
+                            }
+                            return type;
+                        });
+                        standardPolicies.push({
+                            "policyId" : "valid-type",
+                            "params" : {
+                                "types" : types
+                            }
+                        })
 
                         return {
                             name: pair[0],

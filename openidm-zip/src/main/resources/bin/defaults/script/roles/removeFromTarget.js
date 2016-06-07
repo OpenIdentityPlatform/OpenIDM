@@ -29,6 +29,10 @@
  *   targetObject, sourceObject, existingTargetObject, attributeName, attributeValue
  */
 
+var result = {
+        "value" : null
+    };
+
 function removeValues(target, name, value) {
     if (target[name] != null) {
         var targetValue = target[name];
@@ -51,7 +55,7 @@ function removeValues(target, name, value) {
 
 if (existingTargetObject !== null && existingTargetObject !== undefined) {
     removeValues(existingTargetObject, attributeName, attributeValue);
-    existingTargetObject[attributeName];
-} else {
-    null;
+    result.value = existingTargetObject[attributeName];
 }
+
+result;

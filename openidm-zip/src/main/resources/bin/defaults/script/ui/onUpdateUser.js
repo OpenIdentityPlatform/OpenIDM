@@ -11,22 +11,16 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
-/**
- * Prevents roles from being deleted that are currently assigned to users
- */
-
-/*global object */
-
-// Query members of a role
-var resourcePath = "managed/role/" +  org.forgerock.http.util.Uris.urlEncodePathElement(object._id) + "/members";
-var users = openidm.query(resourcePath, {"_queryFilter": "true"}, ["*"]).result;
-
-if (users.length > 0) {
-    throw {
-        "code" : 409,
-        "message" : "Cannot delete a role that is currently granted"
-    };
-}
+(function () {
+    exports.preserveLastSync = function (object, oldObject, request) {
+        if (request.getResourcePath !== "managed/user"
+            && request.method === "update"
+            && object.lastSync === undefined
+            && oldObject.lastSync) {
+            object.lastSync = oldObject.lastSync;
+        }
+    }
+}());
