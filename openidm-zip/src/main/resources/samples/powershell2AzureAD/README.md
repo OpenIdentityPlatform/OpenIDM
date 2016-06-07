@@ -88,7 +88,7 @@ newly created directory.
     See: [https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#install-.net-connector](https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#install-.net-connector)
 
 1.  Install the PowerShell connector on the Windows box. See:
-    [https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#powershell-connector](https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#powershell-connector)
+    [https://forgerock.org/openidm/doc/bootstrap/connectors-guide/#powershell-connector-setup](https://forgerock.org/openidm/doc/bootstrap/connectors-guide/#powershell-connector-setup)
 
 1.  Copy all the azureADScripts/*.ps1 scripts to the Windows box where you installed the .NET connector server and the
     PowerShell connector.
