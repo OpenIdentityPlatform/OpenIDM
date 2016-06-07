@@ -56,6 +56,16 @@ define([
         }, this));
     };
 
+    /**
+     * @param name
+     * @returns {string}
+     *
+     * This function takes in a word and capitalizes the first letter
+     */
+    obj.capitalizeName = function(name) {
+        return name.charAt(0).toUpperCase() + name.substr(1);
+    };
+
     obj.findPropertiesList = function(type, required) {
         var connectorUrl,
             properties,

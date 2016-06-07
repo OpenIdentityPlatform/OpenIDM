@@ -57,12 +57,6 @@
 .gu-mirror.self-service-card, {
   height:125px;
 
-  &.disabled{
-    button {
-      display:none;
-    }
-  }
-
   .panel-heading {
     padding: 5px 15px 0 0;
   }
@@ -96,32 +90,6 @@
     }
   }
 
-  &.disabled {
-    cursor:default;
-
-    &:hover {
-      border-color:#ddd;
-    }
-
-    h3 {
-      color:#777;
-    }
-
-    .btn-link {
-      cursor:default;
-
-      &:hover {
-        color:#777;
-      }
-    }
-
-    label {
-      span {
-        cursor: default;
-      }
-    }
-  }
-
   .switch-holder {
     position:absolute;
 
@@ -149,9 +117,22 @@
     text-align: right;
     margin-right: 10px;
   }
-}
 
+  .social-logo {
+    max-width:100px;
+    margin-left: 20px;
+    margin-top: 10px;
+  }
 
+  .logo-holder {
+    float:left;
+  }
+
+  .logo-details {
+    float:left;
+    margin-left:20px;
+  }
+  
 .selfservice-holder {
   position: relative;
 
@@ -183,7 +164,40 @@
   }
 }
 
+  &.disabled {
+    cursor:default;
 
+    button {
+      display:none;
+    }
+
+    &:hover {
+      border-color:#ddd;
+    }
+
+    h3 {
+      color:#777;
+    }
+
+    .btn-link {
+      cursor:default;
+
+      &:hover {
+        color:#777;
+      }
+    }
+
+    label {
+      span {
+        cursor: default;
+      }
+    }
+
+    .social-logo {
+      opacity: .5;
+    }
+  }
+}
 
 .nav-tabs>li.disabled {
   >a {
