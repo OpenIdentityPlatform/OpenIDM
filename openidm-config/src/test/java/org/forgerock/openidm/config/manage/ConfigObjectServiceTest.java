@@ -18,6 +18,8 @@ package org.forgerock.openidm.config.manage;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.resource.Requests.newQueryRequest;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.config.manage.ConfigObjectService.asConfigQueryFilter;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
@@ -38,7 +40,9 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.services.TransactionId;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonPointer;
@@ -48,7 +52,6 @@ import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilters;
-import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
@@ -56,6 +59,8 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.services.context.TransactionIdContext;
 import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -75,7 +80,7 @@ import org.testng.annotations.Test;
 public class ConfigObjectServiceTest {
 
     @SuppressWarnings("rawtypes")
-	private Dictionary properties = null;
+	private Dictionary<String, Object> properties = null;
     private ConfigObjectService configObjectService;
 
     private ResourcePath rname;
@@ -114,8 +119,12 @@ public class ConfigObjectServiceTest {
         // Init the ConfigCrypto instance used by ConfigObjectService
         ConfigCrypto.getInstance(bundleContext, mock(ProviderListener.class));
 
+        Connection connection = mock(Connection.class);
+        when(connection.create(any(Context.class), any(CreateRequest.class)))
+                .thenReturn(newResourceResponse("", "", json(object())));
+
         IDMConnectionFactory connectionFactory = mock(IDMConnectionFactory.class);
-        when(connectionFactory.getConnection()).thenReturn(mock(Connection.class));
+        when(connectionFactory.getConnection()).thenReturn(connection);
 
         enhancedConfig = mock(EnhancedConfig.class);
         configObjectService.bindEnhancedConfig(enhancedConfig);
@@ -125,7 +134,7 @@ public class ConfigObjectServiceTest {
 
         rname = new ResourcePath("testobject");
         id = "testid";
-        config = new HashMap<String,Object>();
+        config = new HashMap<>();
     }
 
     @AfterTest
@@ -217,7 +226,7 @@ public class ConfigObjectServiceTest {
         assertNotNull(config);
         assertNotNull(config.getProperties());
 
-        Dictionary properties = config.getProperties();
+        Dictionary<String, Object> properties = config.getProperties();
         EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         JsonValue value = enhancedConfig.getConfiguration(properties, rname.toString(), false);
         assertTrue(value.keys().contains("property1"));
@@ -230,6 +239,7 @@ public class ConfigObjectServiceTest {
         throw new Exception("Duplicate object not detected");
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
     @Test(priority=5)
     public void testCreateDupeOk() throws Exception {
         when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false)))
@@ -243,7 +253,7 @@ public class ConfigObjectServiceTest {
         assertNotNull(config.getProperties());
     }
 
-    @SuppressWarnings("rawtypes")
+    @SuppressWarnings({"unchecked", "rawtypes"})
 	@Test(priority=6)
     public void testUpdate() throws Exception {
         config.put("property1", "newvalue1");
@@ -268,10 +278,11 @@ public class ConfigObjectServiceTest {
 
     @Test(priority=7)
     public void testQuery() throws Exception {
-        configObjectService.handleQuery(mock(Context.class),
-                mock(QueryRequest.class), mock(QueryResourceHandler.class)).getOrThrow();
+        configObjectService.handleQuery(new TransactionIdContext(new RootContext(), new TransactionId()),
+                newQueryRequest(""), mock(QueryResourceHandler.class)).getOrThrow();
     }
 
+    @SuppressWarnings("unchecked")
     @Test(priority=8)
     public void testDelete() throws Exception {
         when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false))).thenReturn(
@@ -346,7 +357,7 @@ public class ConfigObjectServiceTest {
     @SuppressWarnings("rawtypes")
     private class MockConfiguration implements Configuration {
         String pid = "pid";
-		Dictionary dictionary = null;
+		Dictionary<String, Object> dictionary = null;
         Boolean deleted = false;
 
         String bundleLocation = "root";
@@ -357,13 +368,14 @@ public class ConfigObjectServiceTest {
         }
 
         @Override
-        public Dictionary getProperties() {
+        public Dictionary<String, Object> getProperties() {
             return deleted ? null : dictionary;
         }
 
         @Override
-        public void update(Dictionary properties) throws IOException {
-            dictionary = properties;
+        @SuppressWarnings("unchecked")
+        public void update(Dictionary<String, ?> properties) throws IOException {
+            dictionary = (Dictionary<String, Object>) properties;
         }
 
         @Override

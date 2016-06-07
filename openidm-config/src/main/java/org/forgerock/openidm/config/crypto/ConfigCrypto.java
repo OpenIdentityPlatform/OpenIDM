@@ -65,9 +65,9 @@ import com.fasterxml.jackson.databind.ObjectWriter;
  *
  */
 public class ConfigCrypto {
-    final static Logger logger = LoggerFactory.getLogger(ConfigCrypto.class);
+    private static final Logger logger = LoggerFactory.getLogger(ConfigCrypto.class);
 
-    static ServiceTracker cryptoTracker;
+    static ServiceTracker<CryptoService, CryptoService> cryptoTracker;
     static ConfigCrypto instance;
 
     BundleContext context;
@@ -142,43 +142,42 @@ public class ConfigCrypto {
      * @throws InvalidException if the configuration was not valid JSON and could not be parsed
      * @throws InternalErrorException if parsing or encryption failed for technical, possibly transient reasons
      */
-    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary config)
+    public Dictionary<String, Object> encrypt(String pidOrFactory, String instanceAlias, Dictionary<String, Object> config)
             throws InvalidException, InternalErrorException, WaitForMetaData {
 
         JsonValue parsed = parse(config, pidOrFactory);
         return encrypt(pidOrFactory, instanceAlias, config, parsed);
     }
 
-    public Dictionary encrypt(String pidOrFactory, String instanceAlias, Dictionary existingConfig, JsonValue newConfig)
-            throws WaitForMetaData {
+    public Dictionary<String, Object> encrypt(String pidOrFactory, String instanceAlias, Dictionary<String, Object> existingConfig,
+            JsonValue newConfig) throws WaitForMetaData {
 
-        JsonValue parsed = newConfig;
-        Dictionary encrypted = (existingConfig == null ? new Hashtable() : existingConfig); // Default to existing
+        Dictionary<String, Object> encrypted = (existingConfig == null
+                ? new Hashtable<String, Object>()
+                : existingConfig); // Default to existing
 
-        List<JsonPointer> props = getPropertiesToEncrypt(pidOrFactory, instanceAlias, parsed);
+        List<JsonPointer> props = getPropertiesToEncrypt(pidOrFactory, instanceAlias, newConfig);
         if (logger.isTraceEnabled()) {
-            logger.trace("Properties to encrypt for {} {}: {}", new Object[] {pidOrFactory, instanceAlias, props});
+            logger.trace("Properties to encrypt for {} {}: {}", pidOrFactory, instanceAlias, props);
         }
         if (props != null && !props.isEmpty()) {
-            boolean modified = false;
             CryptoService crypto = getCryptoService(context);
             for (JsonPointer pointer : props) {
                 logger.trace("Handling property to encrypt {}", pointer);
 
-                JsonValue valueToEncrypt = parsed.get(pointer);
+                JsonValue valueToEncrypt = newConfig.get(pointer);
                 if (null != valueToEncrypt && !valueToEncrypt.isNull() && !crypto.isEncrypted(valueToEncrypt)) {
 
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Encrypting {} with cipher {} and alias {}", new Object[] {pointer,
-                                ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias});
+                        logger.trace("Encrypting {} with cipher {} and alias {}",
+                                pointer, ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias);
                     }
 
                     // Encrypt and replace value
                     try {
                         JsonValue encryptedValue = crypto.encrypt(valueToEncrypt,
                                 ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER, alias);
-                        parsed.put(pointer, encryptedValue.getObject());
-                        modified = true;
+                        newConfig.put(pointer, encryptedValue.getObject());
                     } catch (JsonCryptoException ex) {
                         throw new InternalErrorException("Failure during encryption of configuration "
                                 + pidOrFactory + "-" + instanceAlias + " for property " + pointer.toString()
@@ -187,10 +186,10 @@ public class ConfigCrypto {
                 }
             }
         }
-        String value = null;
+        final String value;
         try {
             ObjectWriter writer = prettyPrint.getWriter();
-            value = writer.writeValueAsString(parsed.asMap());
+            value = writer.writeValueAsString(newConfig.asMap());
         } catch (Exception ex) {
             throw new InternalErrorException("Failure in writing formatted and encrypted configuration "
                     + pidOrFactory + "-" + instanceAlias + " : " + ex.getMessage(), ex);
@@ -199,8 +198,7 @@ public class ConfigCrypto {
         encrypted.put(JSONConfigInstaller.JSON_CONFIG_PROPERTY, value);
         
         if (logger.isDebugEnabled()) {
-            logger.debug("Config with senstiive data encrypted {} {} : {}", 
-                    new Object[] {pidOrFactory, instanceAlias, encrypted});
+            logger.debug("Config with senstiive data encrypted {} {} : {}", pidOrFactory, instanceAlias, encrypted);
         }
         
         return encrypted;
@@ -220,23 +218,18 @@ public class ConfigCrypto {
         JsonValue jv = new JsonValue(new HashMap<String, Object>());
         
         if (dict != null) {
-            Map<String, Object> parsedConfig = null;
             String jsonConfig = (String) dict.get(JSONConfigInstaller.JSON_CONFIG_PROPERTY);
 
             try {
                 if (jsonConfig != null && jsonConfig.trim().length() > 0) {
-                    parsedConfig = mapper.readValue(jsonConfig, Map.class);
+                    jv = new JsonValue(mapper.readValue(jsonConfig, Map.class));
                 }
-            } catch (Exception ex) {
-                throw new InvalidException("Configuration for " + serviceName
-                                + " could not be parsed and may not be valid JSON : " + ex.getMessage(), ex);
-            }
-
-            try {
-                jv = new JsonValue(parsedConfig);
             } catch (JsonValueException ex) {
                 throw new InvalidException("Component configuration for " + serviceName
-                                + " is invalid: " + ex.getMessage(), ex);
+                        + " is invalid: " + ex.getMessage(), ex);
+            } catch (Exception ex) {
+                throw new InvalidException("Configuration for " + serviceName
+                        + " could not be parsed and may not be valid JSON : " + ex.getMessage(), ex);
             }
         }
         logger.debug("Parsed configuration for {}", serviceName);
@@ -246,7 +239,7 @@ public class ConfigCrypto {
 
     private CryptoService getCryptoService(BundleContext context)
             throws InternalErrorException {
-        CryptoService crypto = null;
+        final CryptoService crypto;
 
         try {
             synchronized (JSONEnhancedConfig.class) {
@@ -254,13 +247,12 @@ public class ConfigCrypto {
                     Filter cryptoFilter = context.createFilter("("
                             + Constants.OBJECTCLASS + "="
                             + CryptoService.class.getName() + ")");
-                    cryptoTracker = new ServiceTracker(context, cryptoFilter,
-                            null);
+                    cryptoTracker = new ServiceTracker<>(context, cryptoFilter, null);
                     cryptoTracker.open();
                 }
             }
 
-            crypto = (CryptoService) cryptoTracker.waitForService(5000);
+            crypto = cryptoTracker.waitForService(5000);
             if (crypto != null) {
                 logger.trace("Obtained crypto service");
             } else {

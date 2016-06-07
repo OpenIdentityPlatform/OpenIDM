@@ -24,6 +24,8 @@
  */
 package org.forgerock.openidm.metadata.impl;
 
+import static org.forgerock.json.JsonValue.json;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.Collection;
@@ -31,6 +33,7 @@ import java.util.Enumeration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentSkipListMap;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
@@ -48,10 +51,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 /**
  * Keep track of meta data providers, either declared in bundle meta-data, or registered as services.
  */
-public class ProviderTracker implements ServiceTrackerListener {
+public class ProviderTracker implements ServiceTrackerListener<MetaDataProvider, MetaDataProvider> {
     final static Logger logger = LoggerFactory.getLogger(ProviderTracker.class);
 
-    static ServiceTracker providerTracker;
+    static ServiceTracker<MetaDataProvider, MetaDataProvider> providerTracker;
     ProviderListener providerListener;
     BundleContext context;
     ObjectMapper mapper = new ObjectMapper();
@@ -60,7 +63,7 @@ public class ProviderTracker implements ServiceTrackerListener {
     // Long type key are bundle identifiers
     // String keys are service pids
     // This map MUST be thread safe to avoid the java.util.ConcurrentModificationException
-    Map<String, MetaDataProvider> providers = new ConcurrentSkipListMap<String, MetaDataProvider>();
+    Map<String, MetaDataProvider> providers = new ConcurrentSkipListMap<>();
 
     /**
      * Constructor
@@ -90,26 +93,29 @@ public class ProviderTracker implements ServiceTrackerListener {
                     URL entryUrl = entries.nextElement();
                     logger.trace("Found metadata file, load and parse {}", entryUrl);
                     InputStream in = entryUrl.openStream();
-                    Map metaConfig = mapper.readValue(in, Map.class);
+                    JsonValue metaConfig = json(mapper.readValue(in, Map.class));
                     in.close();
-                    String providerClazzName = (String) metaConfig.get("metaDataProvider");
+                    String providerClazzName = metaConfig.get("metaDataProvider").asString();
                     logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
                     if (providerClazzName == null) {
-                        logger.trace("No MetaDataProvider class declared in meta data file {} for {}", entryUrl, bundle.getSymbolicName());
+                        logger.trace("No MetaDataProvider class declared in meta data file {} for {}",
+                                entryUrl, bundle.getSymbolicName());
                     } else {
                         logger.trace("Loading declared MetaDataProvider {}", providerClazzName);
-                        Class providerClazz = bundle.loadClass(providerClazzName);
+                        Class<?> providerClazz = bundle.loadClass(providerClazzName);
                         MetaDataProvider provider = (MetaDataProvider) providerClazz.newInstance();
                         String id = Long.valueOf(bundle.getBundleId()).toString();
                         // Instantiate and set the provider callback
                         provider.setCallback(new ProviderTrackerCallback(provider, id));
                         // Add the provider to the listener
                         addProvider(id, provider, notifyDuringInit);
-                        logger.debug("Registered MetaDataProvider {} for {}", providerClazzName, bundle.getSymbolicName());
+                        logger.debug("Registered MetaDataProvider {} for {}",
+                                providerClazzName, bundle.getSymbolicName());
                     }
                 }
             } catch (Exception ex) {
-                logger.warn("Failed to obtain meta-data on handling configuration for {}", bundle.getSymbolicName(), ex);
+                logger.warn("Failed to obtain meta-data on handling configuration for {}",
+                        bundle.getSymbolicName(), ex);
             }
         }
     }
@@ -122,29 +128,29 @@ public class ProviderTracker implements ServiceTrackerListener {
         }
     }
 
-    private ServiceTracker initServiceTracker(BundleContext context) {
-        ServiceTracker tracker = new ServiceTrackerNotifier(context, MetaDataProvider.class.getName(), null, this);
+    private ServiceTracker<MetaDataProvider, MetaDataProvider> initServiceTracker(BundleContext context) {
+        ServiceTracker<MetaDataProvider, MetaDataProvider> tracker =
+                new ServiceTrackerNotifier<>(context, MetaDataProvider.class.getName(), null, this);
         tracker.open();
         return tracker;
     }
 
-    public void addedService(ServiceReference reference, Object service) {
+    public void addedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
         String pid = (String) reference.getProperty(Constants.SERVICE_PID);
-        MetaDataProvider provider = (MetaDataProvider) service;
         // Instantiate and set the provider callback
-        provider.setCallback(new ProviderTrackerCallback(provider, pid));
+        service.setCallback(new ProviderTrackerCallback(service, pid));
         // Add the provider to the listener
-        addProvider(pid, provider, true);
+        addProvider(pid, service, true);
     }
 
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
         String pid = (String) reference.getProperty(Constants.SERVICE_PID);
         providers.remove(pid);
     }
 
-    public void modifiedService(ServiceReference reference, Object service) {
+    public void modifiedService(ServiceReference<MetaDataProvider> reference, MetaDataProvider service) {
         String pid = (String) reference.getProperty(Constants.SERVICE_PID);
-        modifiedProvider(pid, (MetaDataProvider) service, true);
+        modifiedProvider(pid, service, true);
     }
     
     public void modifiedProvider(String pid, MetaDataProvider provider, boolean notify) {

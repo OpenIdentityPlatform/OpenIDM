@@ -20,6 +20,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
@@ -33,7 +34,6 @@ import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 import org.apache.felix.fileinstall.ArtifactInstaller;
@@ -95,6 +95,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         }
     }
 
+    @SuppressWarnings("unused")
     public void stop(BundleContext ctx) {
         this.context = null;
         this.configAdmin = null;
@@ -133,13 +134,13 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         deleteConfig(artifact);
     }
 
-    public void configurationEvent(ConfigurationEvent configurationEvent) {    
-        logger.debug("ConfigurationEvent {}, pid: {}, factoryPid: {}, type: {}", 
-                new Object[] {configurationEvent, configurationEvent.getPid(), 
-                configurationEvent.getFactoryPid(), configurationEvent.getType()});
+    public void configurationEvent(ConfigurationEvent configurationEvent) {
+        logger.debug("ConfigurationEvent {}, pid: {}, factoryPid: {}, type: {}",
+                configurationEvent, configurationEvent.getPid(), configurationEvent.getFactoryPid(),
+                configurationEvent.getType());
         // Check if writing back configurations has been disabled.
-        Object obj = this.context.getProperty( DirectoryWatcher.DISABLE_CONFIG_SAVE );
-        if (obj instanceof String) {
+        Object obj = this.context.getProperty(DirectoryWatcher.DISABLE_CONFIG_SAVE);
+        if (obj != null) {
             obj = Boolean.valueOf((String) obj);
         }
         if (Boolean.FALSE.equals(obj)) {
@@ -155,9 +156,9 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         if (configurationEvent.getType() == ConfigurationEvent.CM_UPDATED) {
             try {
                 Configuration config = getConfigurationAdmin().getConfiguration(pid, factoryPid);
-                Dictionary dict = config.getProperties();
+                Dictionary<String, Object> dict = config.getProperties();
                 if (dict == null) {
-                    dict = new Properties();
+                    dict = new Hashtable<>();
                 }
                 String fileName = (String) dict.get( DirectoryWatcher.FILENAME );
                 String confDir = ConfigBootstrapHelper.getConfigFileInstallDir();
@@ -193,7 +194,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                         synchronized(this) { // With rapid changes prevent conflicting writes to a file
                             boolean isUpToDate = false;
                             if (file.exists()) {
-                                Hashtable existingCfg = loadConfigFile(file);
+                                Hashtable<String, Object> existingCfg = loadConfigFile(file);
                                 isUpToDate = isConfigSame(dict, existingCfg, true);
                             }
                             if (isUpToDate) {
@@ -206,11 +207,8 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                                 if (entry != null) {
                                     jsonConfig = entry.toString(); 
                                 }
-                                Writer writer = new OutputStreamWriter(new FileOutputStream(file), fileEncoding);
-                                try {
+                                try (Writer writer = new OutputStreamWriter(new FileOutputStream(file), fileEncoding)) {
                                     writer.write(jsonConfig);
-                                } finally {
-                                    writer.close();
                                 }
                                 logger.debug("Completed update of configuration file {}", fileName);
                             }
@@ -243,10 +241,10 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     public static ConfigurationAdmin lookupConfigAdmin(BundleContext context) {
         ConfigurationAdmin confAdmin = null;
         if (context != null) {
-            ServiceReference configurationAdminReference = 
-                    context.getServiceReference(ConfigurationAdmin.class.getName()); 
+            ServiceReference<ConfigurationAdmin> configurationAdminReference =
+                    context.getServiceReference(ConfigurationAdmin.class);
             if (configurationAdminReference != null) {
-                confAdmin = (org.osgi.service.cm.ConfigurationAdmin) context.getService(configurationAdminReference);
+                confAdmin = context.getService(configurationAdminReference);
             }
         }
         return confAdmin;
@@ -276,24 +274,21 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * @return
      * @throws java.io.IOException
      */
-    @SuppressWarnings("unchecked")
-    public static Hashtable loadConfigFile(final File f) throws IOException {
+    public static Hashtable<String, Object> loadConfigFile(final File f) throws IOException {
         logger.debug("Loading configuration from {}", f);
-        final Hashtable ht = new Hashtable();
+        final Hashtable<String, Object> ht = new Hashtable<>();
 
         if (f.getName().endsWith(ConfigBootstrapHelper.JSON_CONFIG_FILE_EXT)) {
 
             StringBuilder fileBuf = new StringBuilder(1024);
-            BufferedReader reader = new BufferedReader(new InputStreamReader(
-                    new FileInputStream(f), fileEncoding));
-            try {
+            try (InputStream is = new FileInputStream(f);
+                    InputStreamReader isr = new InputStreamReader(is, fileEncoding);
+                    BufferedReader reader = new BufferedReader(isr)) {
                 char[] buf = new char[1024];
-                int numRead = 0;
-                while((numRead = reader.read(buf)) != -1){
+                int numRead;
+                while ((numRead = reader.read(buf)) != -1) {
                     fileBuf.append(buf, 0, numRead);
                 }
-            } finally {
-                reader.close();
             }
 
             ht.put(JSON_CONFIG_PROPERTY, fileBuf.toString());
@@ -305,16 +300,14 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
     /**
      * Set the configuration based on the config file.
      *
-     * @param f
-     *            Configuration file
-     * @return
+     * @param f configuration file
+     * @return whether the configuration was updated
      * @throws Exception
      */
-    @SuppressWarnings("unchecked")
     synchronized boolean setConfig(final File f) throws Exception {
         boolean updated = false;
         try {
-            Dictionary ht = loadConfigFile(f);
+            Dictionary<String, Object> ht = loadConfigFile(f);
             String pid[] = parsePid(f.getName());
             updated = setConfig(ht, pid, f);
         } catch (Exception ex) {
@@ -323,11 +316,11 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
         return updated;
     }
 
-    synchronized boolean setConfig(Dictionary ht, final String[] pid, final File f) throws Exception {
-        boolean updated = false;
+    synchronized boolean setConfig(Dictionary<String, Object> ht, final String[] pid, final File f) throws Exception {
+        final boolean updated;
         Configuration config = getConfiguration(toConfigKey(f), pid[0], pid[1], true);
 
-        Dictionary props = config.getProperties();
+        Dictionary<String, Object> props = config.getProperties();
         if (!isConfigSame(ht, props, false)) {
             try {
                 ht = configCrypto.encrypt(pid[0], pid[1], ht);
@@ -341,8 +334,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 if (pid[1] == null) {
                     logger.info("Loaded changed configuration for {} from {}", pid[0], f.getName());
                 } else {
-                    logger.info("Loaded changed configuration for {} {} from {}", 
-                            new Object[] {pid[0], pid[1], f.getName()});
+                    logger.info("Loaded changed configuration for {} {} from {}", pid[0], pid[1], f.getName());
                 }
                 config.update(ht);
             } catch (WaitForMetaData ex) {
@@ -414,16 +406,16 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
      * @param strict Whether to compare the _id and _rev attributes
      * @return true if the JSON config is the same
      */
-    boolean isConfigSame(Dictionary newCfg, Dictionary oldCfg, boolean strict) {
+    boolean isConfigSame(Dictionary<String, Object> newCfg, Dictionary<String, Object> oldCfg, boolean strict) {
         if (newCfg == null || oldCfg == null) {
             return oldCfg == newCfg;
         }
         
-        Dictionary newCompare = new Hashtable(new DictionaryAsMap(newCfg));
+        Dictionary<String, Object> newCompare = new Hashtable<>(new DictionaryAsMap<>(newCfg));
         String newPropVal = (String)newCompare.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
         JsonValue newJsonConfig = JsonUtil.parseStringified(newPropVal);
 
-        Dictionary oldCompare = new Hashtable(new DictionaryAsMap(oldCfg));
+        Dictionary<String, Object> oldCompare = new Hashtable<>(new DictionaryAsMap<>(oldCfg));
         String oldPropVal = (String)oldCompare.get(JSONEnhancedConfig.JSON_CONFIG_PROPERTY);
         JsonValue oldJsonConfig = JsonUtil.parseStringified(oldPropVal);
         
