@@ -72,8 +72,10 @@ public class EmailClient {
         JsonValue authConfig = config.get(CONFIG_MAIL_SMTP_AUTH);
         if (!authConfig.isNull()) {
             smtpAuth = authConfig.get(CONFIG_MAIL_SMTP_AUTH_ENABLE).defaultTo(false).asBoolean();
-            username = authConfig.get(CONFIG_MAIL_SMTP_AUTH_USERNAME).required().asString();
-            password = authConfig.get(CONFIG_MAIL_SMTP_AUTH_PASSWORD).required().asString();
+            if (smtpAuth) {
+                username = authConfig.get(CONFIG_MAIL_SMTP_AUTH_USERNAME).required().asString();
+                password = authConfig.get(CONFIG_MAIL_SMTP_AUTH_PASSWORD).required().asString();
+            }
             props.put("mail.smtp.auth", String.valueOf(smtpAuth));
         }
         
