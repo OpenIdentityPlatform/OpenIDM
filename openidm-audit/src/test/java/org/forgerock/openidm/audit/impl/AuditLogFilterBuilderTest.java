@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.listOf;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.AS_SINGLE_FIELD_VALUES_FILTER;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.NEVER_FILTER;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.TYPE_ACTIVITY;
@@ -418,7 +419,7 @@ public class AuditLogFilterBuilderTest {
                         new AuditLogFilters.JsonValueObjectConverter<AuditLogFilter>() {
                             @Override
                             public AuditLogFilter apply(JsonValue filterConfig) {
-                                return newAndCompositeFilter(filterConfig.asList(AS_SINGLE_FIELD_VALUES_FILTER));
+                                return newAndCompositeFilter(filterConfig.as(listOf(AS_SINGLE_FIELD_VALUES_FILTER)));
                             }
                         });
     }

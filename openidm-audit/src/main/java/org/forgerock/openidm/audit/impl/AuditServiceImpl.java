@@ -24,6 +24,7 @@
 package org.forgerock.openidm.audit.impl;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValueFunctions.listOf;
 import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.openidm.audit.impl.AuditLogFilters.*;
 
@@ -172,8 +173,7 @@ public class AuditServiceImpl implements AuditService {
                 // "summary" ] }
                 JsonValue fieldConfig = fieldsConfig.get(eventType);
                 filters.add(newEventTypeFilter(eventType,
-                        newAndCompositeFilter(fieldConfig.asList
-                                (AS_SINGLE_FIELD_VALUES_FILTER))));
+                        newAndCompositeFilter(fieldConfig.as(listOf(AS_SINGLE_FIELD_VALUES_FILTER)))));
             }
             return newOrCompositeFilter(filters);
         }
