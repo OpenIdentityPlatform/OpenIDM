@@ -925,6 +925,7 @@ public class UpdateManagerImpl implements UpdateManager {
                         });
 
                 for (final Path path : archive.getFiles()) {
+                    logger.trace("processing archive file: {}", path);
                     if (path.startsWith(BUNDLE_PATH)) {
                         Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
                         String symbolicName = null;
@@ -1082,9 +1083,10 @@ public class UpdateManagerImpl implements UpdateManager {
             if (n > 0) {
                 String factoryPid = pid.substring(n + 1);
                 pid = pid.substring(0, n);
+                return ConfigBootstrapHelper.qualifyPid(pid) + "/" + factoryPid;
+            } else {
+                return ConfigBootstrapHelper.qualifyPid(pid);
             }
-            pid = ConfigBootstrapHelper.qualifyPid(pid);
-            return pid;
         }
 
         /**
