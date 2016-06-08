@@ -82,11 +82,11 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = HealthService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
         description = "OpenIDM Health Service", immediate = true)
-@Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Health Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/health/*")})
+@Service(value = { HealthInfo.class, RequestHandler.class })
 public class HealthService
         implements HealthInfo, ClusterEventListener, ServiceTrackerListener, RequestHandler {
 

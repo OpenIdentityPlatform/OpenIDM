@@ -1,27 +1,18 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
-
 package org.forgerock.openidm.script;
 
 import java.util.Dictionary;
@@ -33,6 +24,8 @@ import javax.script.ScriptException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.osgi.ComponentContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -47,16 +40,14 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.script.Scope;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptEvent;
 import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptName;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.script.source.SourceUnit;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceRegistration;
+import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,18 +99,6 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         this.mask = mask;
     }
 
-    /**
-     * Get the {@link ServerConstants#ROUTER_PREFIX} value.
-     * <p/>
-     * If it return null then the {@link ServerConstants#ROUTER_PREFIX} won't be
-     * changed in the service registration properties.
-     * 
-     * @param factoryPid
-     * @param configuration
-     * @return null or String or String[]
-     */
-    protected abstract Object getRouterPrefixes(String factoryPid, JsonValue configuration);
-
     protected abstract BundleContext getBundleContext();
 
     protected ScriptCustomizer getScriptCustomizer() {
@@ -130,64 +109,46 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         return properties;
     }
 
-    protected void setProperties(Dictionary<String, Object> properties) {
-        this.properties = properties;
+    protected void setProperties(ComponentContext context) {
+        // make a copy of the properties as the argument is [often] unmodifiable 
+        // and we may need to add other properties
+        this.properties = ComponentContextUtil.getModifiableProperties(context);
     }
 
-    protected Scope activate(final BundleContext context, final String factoryPid,
-            final JsonValue configuration) {
+    protected void setProperty(String key, Object value) {
+        this.properties.put(key, value);
+    }
 
-        Dictionary<String, Object> prop = getProperties();
-        if (null != prop) {
-            Object o = getRouterPrefixes(factoryPid, configuration);
-            if (null != o) {
-                prop.put(ServerConstants.ROUTER_PREFIX, o);
-            }
-        }
-
+    protected void registerService(final BundleContext context, final JsonValue configuration) {
         try {
             ScriptEntry scriptEntry = scriptRegistry.takeScript(configuration);
-            if (null == scriptEntry) {
-                logger.error("Failed to get the script {}:{}", configuration
-                        .get(SourceUnit.ATTR_NAME), configuration.get(SourceUnit.ATTR_TYPE));
-                throw new NullPointerException();
-            }
             scriptEntry.addScriptListener(this);
             scriptName = scriptEntry.getName();
-
             embeddedHandler = new ScriptedRequestHandler(scriptEntry, getScriptCustomizer());
-
-            selfRegistration = context.registerService(RequestHandler.class, embeddedHandler, prop);
-
-            return embeddedHandler;
+            selfRegistration = context.registerService(RequestHandler.class, embeddedHandler, getProperties());
         } catch (ScriptException e) {
+            final String factoryPid = configuration.get(ServerConstants.CONFIG_FACTORY_PID).defaultTo("").asString();
             throw new ComponentException("Failed to take script: " + factoryPid, e);
         }
     }
 
-    protected Scope modified(final String factoryPid, final JsonValue configuration) {
+    protected void updateScriptHandler(final JsonValue configuration) {
         try {
             ScriptEntry scriptEntry = scriptRegistry.takeScript(configuration);
-            if (null == scriptEntry) {
-                logger.error("Failed to get the script {}:{}", configuration
-                        .get(SourceUnit.ATTR_NAME), configuration.get(SourceUnit.ATTR_TYPE));
-                throw new NullPointerException();
-            }
             if (null != scriptName) {
                 scriptRegistry.deleteScriptListener(scriptName, this);
             }
             scriptEntry.addScriptListener(this);
             scriptName = scriptEntry.getName();
-
             embeddedHandler.setScriptEntry(scriptEntry);
-            return embeddedHandler;
         } catch (ScriptException e) {
             logger.error("Failed to modify the ScriptedService", e);
+            final String factoryPid = configuration.get(ServerConstants.CONFIG_FACTORY_PID).defaultTo("").asString();
             throw new ComponentException("Failed to take script: " + factoryPid, e);
         }
     }
 
-    protected void deactivate() {
+    protected void unregisterService() {
         try {
             if (null != selfRegistration) {
                 selfRegistration.unregister();

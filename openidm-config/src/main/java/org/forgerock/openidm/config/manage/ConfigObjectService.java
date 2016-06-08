@@ -1,26 +1,19 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
+
 
 package org.forgerock.openidm.config.manage;
 
@@ -51,6 +44,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.openidm.repo.QueryConstants;
+import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.ResourcePath;
@@ -115,12 +109,12 @@ import org.slf4j.LoggerFactory;
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/config*")
 })
-@Service
+@Service(value = { RequestHandler.class })
 public class ConfigObjectService implements RequestHandler, ClusterEventListener {
 
     final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
     final static ConfigAuditEventLogger auditLogger = new ConfigAuditEventLogger();
-    
+
     final static QueryFilterVisitor<QueryFilter<JsonPointer>, Object, JsonPointer> VISITOR = new ConfigQueryFilterVisitor<Object>();
 
     final static String CONFIG_KEY = "jsonconfig";
@@ -137,12 +131,12 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Reference
     ConfigurationAdmin configAdmin;
-    
+
     /**
      * The ClusterManagementService used for sending and receiving cluster events
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    ClusterManagementService clusterManagementService;
+    volatile ClusterManagementService clusterManagementService;
 
     public void bindClusterManagementService(final ClusterManagementService clusterManagementService) {
         this.clusterManagementService = clusterManagementService;
@@ -153,23 +147,27 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         this.clusterManagementService.unregister(EVENT_LISTENER_ID);
         this.clusterManagementService = null;
     }
-    
+
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC)
     private IDMConnectionFactory connectionFactory;
 
     protected void bindConnectionFactory(IDMConnectionFactory connectionFactory) {
-    	this.connectionFactory = connectionFactory;
+        this.connectionFactory = connectionFactory;
     }
+
+    /** Scripted Patch Value Trasnformer Factory. */
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile ScriptedPatchValueTransformerFactory scriptedPatchValueTransformerFactory;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
     protected void bindEnhancedConfig(EnhancedConfig enhancedConfig) {
-    	this.enhancedConfig = enhancedConfig;
+        this.enhancedConfig = enhancedConfig;
     }
-    
+
     private ConfigCrypto configCrypto;
 
     @Override
@@ -222,7 +220,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         Map<String, Object> configEntry = new LinkedHashMap<>();
 
                         String alias = null;
-						Dictionary properties = conf.getProperties();
+                        Dictionary properties = conf.getProperties();
                         if (properties != null) {
                             alias = (String) properties.get(JSONConfigInstaller.SERVICE_FACTORY_PID_ALIAS);
                         }
@@ -267,7 +265,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(final Context context,
-            final CreateRequest request) {
+                                                                     final CreateRequest request) {
         return create(request.getResourcePathObject(), request.getNewResourceId(), request.getContent(), false)
                 .thenAsync(
                         new AsyncFunction<ConfigAuditState, ResourceResponse, ResourceException>() {
@@ -306,7 +304,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      */
     @SuppressWarnings({ "rawtypes", "unchecked" })
     public Promise<ConfigAuditState, ResourceException> create(ResourcePath resourcePath, String id,
-            JsonValue obj, boolean allowExisting) {
+                                                               JsonValue obj, boolean allowExisting) {
         logger.debug("Invoking create configuration {} {} {}", resourcePath.toString(), id, obj);
         if (id == null || id.length() == 0) {
             return new BadRequestException("The passed identifier to create is null").asPromise();
@@ -380,7 +378,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
-            final UpdateRequest request) {
+                                                                     final UpdateRequest request) {
 
         return update(request.getResourcePathObject(), request.getRevision(), request.getContent())
                 .thenAsync(
@@ -424,7 +422,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      */
     @SuppressWarnings("rawtypes")
     public Promise<ConfigAuditState, ResourceException> update(ResourcePath resourcePath, String rev,
-            JsonValue obj) {
+                                                               JsonValue obj) {
         logger.debug("Invoking update configuration {} {}", resourcePath.toString(), rev);
         if (resourcePath.isEmpty()) {
             return new BadRequestException("The passed identifier to update is empty").asPromise();
@@ -448,6 +446,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                 return new NotFoundException("No existing configuration found for " + resourcePath.toString() +
                         ", can not update the configuration.").asPromise();
             }
+
+            // Strip the _rev and _id properties from the config
+            obj.remove(ResourceResponse.FIELD_CONTENT_ID);
+            obj.remove(ResourceResponse.FIELD_CONTENT_REVISION);
 
             JsonValue before = enhancedConfig.getConfiguration(config.getProperties(), resourcePath.toString(), false);
             existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig,
@@ -483,8 +485,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ResourceResponse, ResourceException> handleDelete(final Context context,
-            final DeleteRequest request) {
-            String rev = request.getRevision();
+                                                                     final DeleteRequest request) {
+        String rev = request.getRevision();
         return delete(request.getResourcePathObject(), rev)
                 .thenAsync(
                         new AsyncFunction<ConfigAuditState, ResourceResponse, ResourceException>() {
@@ -518,7 +520,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      */
     @SuppressWarnings("rawtypes")
     public Promise<ConfigAuditState, ResourceException> delete(ResourcePath resourcePath,
-            String rev) {
+                                                               String rev) {
         logger.debug("Invoking delete configuration {} {}", resourcePath.toString(), rev);
         if (resourcePath.isEmpty()) {
             return new BadRequestException("The passed identifier to delete is null").asPromise();
@@ -531,7 +533,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         "No existing configuration found for " + resourcePath.toString()
                                 + ", can not delete the configuration.").asPromise();
             }
-            
+
             Dictionary existingConfig = config.getProperties();
             JsonValue value = enhancedConfig.getConfiguration(existingConfig, resourcePath.toString(), false);
 
@@ -597,7 +599,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
             final JsonValue before = enhancedConfig.getConfiguration(existingConfig, request.getResourcePath(), false);
             final JsonValue after = before.copy();
-            JsonValuePatch.apply(after, request.getPatchOperations());
+            JsonValuePatch.apply(after, request.getPatchOperations(), scriptedPatchValueTransformerFactory.getPatchValueTransformer(context));
 
             existingConfig = configCrypto.encrypt(
                     parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, after);
@@ -634,7 +636,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
-            final QueryResourceHandler handler) {
+                                                                 final QueryResourceHandler handler) {
         logger.debug("Invoking query");
         final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
         QueryFilter<JsonPointer> filter = request.getQueryFilter();
@@ -676,7 +678,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         }
                     });
         } catch (ResourceException e) {
-        	return e.asPromise();
+            return e.asPromise();
         }
     }
 
@@ -729,36 +731,36 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     @Override
     public boolean handleEvent(ClusterEvent event) {
         switch (event.getType()) {
-        case CUSTOM:
-            try {
-                JsonValue details = event.getDetails();
-                ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
-                ResourcePath resourcePath = ResourcePath.valueOf(details.get(EVENT_RESOURCE_PATH).asString());
-                String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
-                JsonValue obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT);
-                switch (action) {
-                case CREATE:
-                    create(resourcePath, id, obj, true);
-                    break;
-                case UPDATE:
-                    update(resourcePath, null, obj);
-                    break;
-                case DELETE:
-                    delete(resourcePath, null);
-                    break;
+            case CUSTOM:
+                try {
+                    JsonValue details = event.getDetails();
+                    ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
+                    ResourcePath resourcePath = ResourcePath.valueOf(details.get(EVENT_RESOURCE_PATH).asString());
+                    String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
+                    JsonValue obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT);
+                    switch (action) {
+                        case CREATE:
+                            create(resourcePath, id, obj, true);
+                            break;
+                        case UPDATE:
+                            update(resourcePath, null, obj);
+                            break;
+                        case DELETE:
+                            delete(resourcePath, null);
+                            break;
+                    }
+                } catch (Exception e) {
+                    logger.error("Error handling cluster event: " + e.getMessage(), e);
+                    return false;
                 }
-            } catch (Exception e) {
-                logger.error("Error handling cluster event: " + e.getMessage(), e);
-                return false;
-            }
-        default:
-            return true;
+            default:
+                return true;
         }
     }
 
     /**
      * Creates and sends a ClusterEvent representing a config operation for a specified resource
-     * 
+     *
      * @param action The action that was performed on the resource (create, update, or delete)
      * @param name The resource name
      * @param id The new resource id (used for create)
@@ -772,26 +774,26 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                     field(EVENT_RESOURCE_ID, id),
                     field(EVENT_RESOURCE_OBJECT, obj == null ? null : obj.getObject())));
             ClusterEvent event = new ClusterEvent(
-                    ClusterEventType.CUSTOM, 
+                    ClusterEventType.CUSTOM,
                     clusterManagementService.getInstanceId(),
                     EVENT_LISTENER_ID,
                     details);
             clusterManagementService.sendEvent(event);
         }
     }
-    
+
     String getParsedId(String resourcePath) throws ResourceException {
         return new ParsedId(ResourcePath.valueOf(resourcePath)).toString();
     }
-    
+
     boolean isFactoryConfig(String resourcePath) throws ResourceException {
         return new ParsedId(ResourcePath.valueOf(resourcePath)).isFactoryConfig();
     }
-    
+
     static QueryFilter<JsonPointer> asConfigQueryFilter(QueryFilter<JsonPointer> filter) {
         return filter.accept(VISITOR, null);
     }
-    
+
     /**
      * A {@link QueryFilterVisitor} implementation which modifies the {@link JsonPointer} fields by prepending them
      * with the appropriate key where the full config object is located.
@@ -866,11 +868,11 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         public QueryFilter<JsonPointer> visitStartsWithFilter(P parameter, JsonPointer field, Object valueAssertion) {
             return QueryFilter.startsWith(getConfigPointer(field), valueAssertion);
         }
-        
+
         /**
          * Visits each {@link QueryFilter} in a list of filters and returns a list of the
          * visited filters.
-         * 
+         *
          * @param subFilters a list of the filters to visit
          * @return a list of visited filters
          */
@@ -885,7 +887,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         /**
          * Prepends the fields in the configuration object with the key where the object is stored.  
          * Will not modify fields outside of the configuration object.
-         * 
+         *
          * @param field a {@link JsonPointer} representing the field to modify.
          * @return a {@link JsonPointer} representing the modified field
          */

@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.script.impl;
@@ -61,6 +53,8 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ResourceFunctions;
+import org.forgerock.openidm.util.Scripts;
+import org.forgerock.openidm.script.ScriptExecutor;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -111,7 +105,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-
 /**
  *
  */
@@ -137,7 +130,7 @@ import org.slf4j.LoggerFactory;
             bind = "bindFunction", unbind = "unbindFunction",
             cardinality = ReferenceCardinality.OPTIONAL_MULTIPLE, policy = ReferencePolicy.DYNAMIC,
             target = "(" + ScriptRegistryService.SCRIPT_NAME + "=*)") })
-public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService {
+public class ScriptRegistryService extends ScriptRegistryImpl implements RequestHandler, ScheduledService, ScriptExecutor {
 
     public static final Set<String> reservedNames;
 
@@ -189,7 +182,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    private EnhancedConfig enhancedConfig;
+    private volatile EnhancedConfig enhancedConfig;
 
 
     private final ConcurrentMap<String, Object> openidm = new ConcurrentHashMap<String, Object>();
@@ -204,7 +197,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     @Activate
     protected void activate(ComponentContext context) throws Exception {
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
-
+        JsonValue jsConfig = configuration.get("ECMAScript").required();
+        jsConfig.put("javascript.exception.debug.info",
+                Boolean.parseBoolean(IdentityServer.getInstance().getProperty("javascript.exception.debug.info", "false")));
         setConfiguration(configuration.required().asMap());
 
         HashMap<String, Object> identityServer = new HashMap<String, Object>();
@@ -277,6 +272,9 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
          * manifestWatcher = new BundleWatcher<ManifestEntry>(context, new
          * ScriptEngineManifestScanner(), null); manifestWatcher.start();
          */
+        
+        // Initialize the registry in ScriptUtil
+        Scripts.init(this);
 
         logger.info("OpenIDM Script Service component is activated.");
     }
@@ -285,6 +283,10 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
     protected void modified(ComponentContext context) {
         JsonValue configuration = enhancedConfig.getConfigurationAsJson(context);
         setConfiguration(configuration.required().asMap());
+        
+        // Clear the registry in ScriptUtil
+        Scripts.init(null);
+        
         propertiesCache.clear();
         Set<String> keys =
                 null != getBindings() ? new HashSet<String>(getBindings().keySet()) : Collections
@@ -309,11 +311,18 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
                 getBindings().remove(name);
             }
         }
+        
+        // Initialize the registry in ScriptUtil
+        Scripts.init(this);
+        
         logger.info("OpenIDM Script Service component is modified.");
     }
 
     @Deactivate
     protected void deactivate(ComponentContext context) {
+        // Clear the registry in ScriptUtil
+        Scripts.init(null);
+        
         if (null != manifestWatcher) {
             manifestWatcher.stop();
         }
@@ -583,7 +592,7 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         // Add the globals (if any) to the script bindings
         if (!globals.isNull() && globals.isMap()) {
             for (String key : globals.keys()) {
-                scriptEntry.put(key, globals.get(key));
+                scriptEntry.put(key, globals.get(key).getObject());
             }
         }
         return scriptEntry;
@@ -713,6 +722,8 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             return e.asPromise();
         } catch (ScriptCompilationException e) {
             return new BadRequestException(e.getMessage(), e).asPromise();
+        } catch (ScriptThrownException e) {
+            return e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage()).asPromise();
         } catch (IllegalArgumentException e) { // from getActionAsEnum
             return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
@@ -767,8 +778,10 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
             
             if (!scriptValue.isNull()) {
                 ScriptEntry entry = takeScript(scriptValue);
-                JsonValue input = params.get("input");
-                execScript(context, entry, input);
+                // a map of bindings
+                Map<String, Object> bindings = new HashMap<>();
+                bindings.put("object", params.get("input").getObject());
+                execScript(context, entry, bindings);
             } else {
                 throw new ExecutionException("No valid script '" + scriptName + "' configured in schedule.");
             }
@@ -795,18 +808,38 @@ public class ScriptRegistryService extends ScriptRegistryImpl implements Request
         }
     }
 
-    private void execScript(Context context, ScriptEntry script, JsonValue value)
-            throws ForbiddenException, InternalServerErrorException {
+    /**
+     * Executes the given script with the provided bindings.
+     *
+     * @param context The request context
+     * @param script The script
+     * @param bindings The bindings
+     * @return JsonValue to be used for a given patch operation
+     * @throws ForbiddenException on script execution error
+     * @throws InternalServerErrorException on script execution error
+     * @throws BadRequestException on script null or inactive
+     */
+    public JsonValue execScript(Context context, ScriptEntry script, Map<String, Object> bindings)
+            throws ForbiddenException, InternalServerErrorException, BadRequestException {
         if (null != script && script.isActive()) {
             Script executable = script.getScript(context);
-            executable.put("object", value.getObject());
+            for (Map.Entry<String, Object> entry : bindings.entrySet()) {
+                executable.put(entry.getKey(), entry.getValue());
+            }
             try {
-                executable.eval(); // allows direct modification to the object
+                Object result = executable.eval(); // allows direct modification to the object
+                if (result instanceof JsonValue) {
+                    return (JsonValue) result;
+                } else {
+                    return new JsonValue(result);
+                }
             } catch (ScriptThrownException ste) {
                 throw new ForbiddenException(ste.getValue().toString());
             } catch (ScriptException se) {
-                throw new InternalServerErrorException("script encountered exception", se);
+                throw new InternalServerErrorException("Script encountered exception.", se);
             }
+        } else {
+            throw new BadRequestException("Script is null or inactive.");
         }
     }
 }
