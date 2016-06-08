@@ -110,7 +110,7 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
      *     <li>maintenance filter - toggled based on maintenance mode</li>
      *     <li>logging filter - always enabled, logs trace-level messages</li>
      *     <li>audit filter - enabled once AuditFilter is bound</li>
-     * </ul></ol>
+     * </ul>
      * These are via Java implementation and not sourced from router.json {@see RouterFilterChain}.
      */
     private static final int NUMBER_OF_STATIC_FILTERS = 4;
