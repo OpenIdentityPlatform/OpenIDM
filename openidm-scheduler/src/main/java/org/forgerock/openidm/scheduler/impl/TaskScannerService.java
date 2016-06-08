@@ -75,7 +75,8 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM TaskScanner Service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/taskscanner*")
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/taskscanner*"),
+    @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "taskscanner")
 })
 @Service
 public class TaskScannerService implements RequestHandler, ScheduledService {

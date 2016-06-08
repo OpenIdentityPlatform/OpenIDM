@@ -128,9 +128,6 @@ public class SchedulerService implements RequestHandler {
     // Valid configuration values
     public final static String SCHEDULE_TYPE_CRON = "cron";
 
-    // Default service PID prefix to use if the invokeService name is a fragment
-    public final static String SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
-
     // Misfire Policies
     public final static String MISFIRE_POLICY_DO_NOTHING = "doNothing";
     public final static String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";

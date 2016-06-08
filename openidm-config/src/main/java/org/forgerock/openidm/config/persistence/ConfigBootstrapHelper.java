@@ -37,6 +37,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -82,9 +83,6 @@ public class ConfigBootstrapHelper {
     public static final String DATASOURCE_FILE_PREFIX = "datasource.";
     public static final String JSON_CONFIG_FILE_EXT = ".json";
     
-    // Default prefix for OpenIDM OSGi services
-    public static final String DEFAULT_SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
-    
     final static Logger logger = LoggerFactory.getLogger(ConfigBootstrapHelper.class);
 
     static boolean warnMissingConfig = true;
@@ -124,7 +122,7 @@ public class ConfigBootstrapHelper {
         // If bootstrap info not found in system properties, check for configuration files
         String confDir = getConfigFileInstallDir();
         File unqualified = new File(confDir, filePrefix + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
-        File qualified = new File(confDir, ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX
+        File qualified = new File(confDir, ServerConstants.SERVICE_RDN_PREFIX
                 + filePrefix + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
 
         File loadedFile = null;
@@ -271,7 +269,7 @@ public class ConfigBootstrapHelper {
         String qualifiedPid = fileNamePid;
         // Prefix unqualified pid names with the default.
         if (fileNamePid != null && !(fileNamePid.startsWith("org.") || fileNamePid.startsWith("com."))) {
-            qualifiedPid = DEFAULT_SERVICE_RDN_PREFIX + fileNamePid;
+            qualifiedPid = ServerConstants.SERVICE_RDN_PREFIX + fileNamePid;
         }
         return qualifiedPid;
     }
@@ -286,8 +284,8 @@ public class ConfigBootstrapHelper {
      * @return
      */
     public static String unqualifyPid(String qualifiedPid) {
-        if (qualifiedPid != null && qualifiedPid.startsWith(DEFAULT_SERVICE_RDN_PREFIX)) {
-            return qualifiedPid.substring(DEFAULT_SERVICE_RDN_PREFIX.length());
+        if (qualifiedPid != null && qualifiedPid.startsWith(ServerConstants.SERVICE_RDN_PREFIX)) {
+            return qualifiedPid.substring(ServerConstants.SERVICE_RDN_PREFIX.length());
         } else {
             return qualifiedPid;
         }

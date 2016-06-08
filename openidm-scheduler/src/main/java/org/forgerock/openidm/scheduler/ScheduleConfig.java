@@ -30,6 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
@@ -85,7 +86,7 @@ public class ScheduleConfig {
             // service PIDs fragments are prefixed with openidm qualifier
             if (!invokeService.contains(".")) {
                 String fragment = invokeService;
-                invokeService = SchedulerService.SERVICE_RDN_PREFIX + fragment;
+                invokeService = ServerConstants.SERVICE_RDN_PREFIX + fragment;
             }
         }
         invokeContext = config.get(SchedulerService.SCHEDULE_INVOKE_CONTEXT).getObject();
