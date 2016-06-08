@@ -23,7 +23,7 @@
     <properties>
         <jetty-version>9.2.9.v20150224</jetty-version>
         <salesforce.api.version>29</salesforce.api.version>
-        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.3-SNAPSHOT</provisioner.salesforcemodule.version>
+        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.4-SNAPSHOT</provisioner.salesforcemodule.version>
     </properties>
 
     <repositories>
