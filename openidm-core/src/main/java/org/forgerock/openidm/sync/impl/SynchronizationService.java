@@ -48,6 +48,7 @@ import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
@@ -72,6 +73,7 @@ import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.forgerock.util.query.QueryFilter;
+import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,9 +85,10 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = SynchronizationService.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
 @Properties({
-    @Property(name = "service.description", value = "OpenIDM object synchronization service"),
-    @Property(name = "service.vendor", value = "ForgeRock AS"),
-    @Property(name = "openidm.router.prefix", value = "/sync/*")
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM object synchronization service"),
+    @Property(name = Constants.SERVICE_VENDOR, value = "ForgeRock AS"),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/sync/*"),
+    @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "sync")
 })
 @Service
 public class SynchronizationService implements SingletonResourceProvider, ScheduledService {

@@ -114,7 +114,9 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Script Registry Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/script*") })
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/script*"),
+    @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "script")
+})
 @References({
     @Reference(name = "CryptoServiceReference", referenceInterface = CryptoService.class,
             bind = "bindCryptoService", unbind = "unbindCryptoService",

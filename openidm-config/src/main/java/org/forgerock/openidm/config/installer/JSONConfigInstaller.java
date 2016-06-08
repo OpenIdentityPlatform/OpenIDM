@@ -45,6 +45,7 @@ import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.BundleContext;
@@ -162,12 +163,12 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
                 String confDir = ConfigBootstrapHelper.getConfigFileInstallDir();
 
                 // Externalize OpenIDM configurations into the file "view"
-                if (fileName == null && pid.startsWith(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX)) {
-                    String unqualified = pid.substring(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX.length());
+                if (fileName == null && pid.startsWith(ServerConstants.SERVICE_RDN_PREFIX)) {
+                    String unqualified = pid.substring(ServerConstants.SERVICE_RDN_PREFIX.length());
                     if (factoryPid != null) {
                         String unqualifiedFactoryPid = factoryPid;
-                        if (factoryPid.startsWith(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX)) {
-                            unqualifiedFactoryPid = factoryPid.substring(ConfigBootstrapHelper.DEFAULT_SERVICE_RDN_PREFIX.length());
+                        if (factoryPid.startsWith(ServerConstants.SERVICE_RDN_PREFIX)) {
+                            unqualifiedFactoryPid = factoryPid.substring(ServerConstants.SERVICE_RDN_PREFIX.length());
                         }
                         String alias = (String) dict.get(SERVICE_FACTORY_PID_ALIAS);
                         if (alias == null) {

@@ -95,7 +95,8 @@ import java.util.Set;
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM System Object Set Service"),
-        @Property(name = ServerConstants.ROUTER_PREFIX, value = ProvisionerService.ROUTER_PREFIX)
+        @Property(name = ServerConstants.ROUTER_PREFIX, value = ProvisionerService.ROUTER_PREFIX),
+        @Property(name = ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE, value = "provisioner")
 })
 public class SystemObjectSetService implements ScheduledService, SingletonResourceProvider {
 

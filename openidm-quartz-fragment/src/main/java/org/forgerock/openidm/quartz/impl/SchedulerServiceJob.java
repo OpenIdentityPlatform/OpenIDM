@@ -41,6 +41,7 @@ import org.forgerock.audit.events.AccessAuditEventBuilder;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.util.ResourceExceptionsUtil;
 import org.forgerock.openidm.config.enhanced.InvalidException;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.util.LogUtil;
 import org.forgerock.openidm.util.LogUtil.LogLevel;
 import org.forgerock.services.TransactionId;
@@ -150,13 +151,15 @@ public class SchedulerServiceJob implements Job {
         scheduledServiceTracker.close();
     }
 
-    ServiceTracker getServiceTracker(String servicePID) throws InvalidException {
+    ServiceTracker getServiceTracker(String invokeService) throws InvalidException {
         Filter filter = null;
         BundleContext context = null;
         try {
+            // invokeService comes in with the RDN prepended, so strip it off
+            invokeService = invokeService.replace(ServerConstants.SERVICE_RDN_PREFIX, "");
             context = FrameworkUtil.getBundle(SchedulerServiceJob.class).getBundleContext();
             filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + ScheduledService.class.getName() + ")"
-                    + "(service.pid=" + servicePID + "))");
+                    + "(" + ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE + "=" + invokeService + "))");
         } catch (InvalidSyntaxException ex) {
             throw new InvalidException("Failure in setting up scheduler to find service to invoke. One possible cause is an invalid "
                     + "invokeService property. :  " + ex.getMessage(), ex);
