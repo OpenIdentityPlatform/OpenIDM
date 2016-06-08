@@ -20,16 +20,9 @@ import static org.forgerock.json.resource.Requests.copyOfCreateRequest;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.List;
-import java.util.Map;
-import java.util.regex.Pattern;
-
-import javax.script.ScriptException;
-import javax.servlet.ServletException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.tuple.Pair;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -37,11 +30,9 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.AbstractConnectionWrapper;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -51,7 +42,6 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.FilterChain;
-import org.forgerock.json.resource.FilterCondition;
 import org.forgerock.json.resource.Filters;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -66,92 +56,154 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Resources;
 import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.audit.filter.AuditFilter;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.filter.ScriptedFilter;
+import org.forgerock.openidm.filter.PassthroughFilter;
+import org.forgerock.openidm.filter.MutableFilterDecorator;
+import org.forgerock.openidm.filter.ServiceUnavailableFilter;
+import org.forgerock.openidm.router.RouterFilterRegistration;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-import org.forgerock.script.Script;
-import org.forgerock.script.ScriptEntry;
-import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The ConnectionFactory responsible for providing Connections to routing requests initiated
+ * The ServletConnectionFactory responsible for providing Connections to routing requests initiated
  * from an external request on the api servlet.
  */
-@Component(name = ServletConnectionFactory.PID, policy = ConfigurationPolicy.OPTIONAL,
-        configurationFactory = false, immediate = true)
-@Service
+@Component(name = ServerConstants.EXTERNAL_ROUTER_SERVICE_PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
+@Service({ ConnectionFactory.class, RouterFilterRegistration.class })
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Common REST Servlet Connection Factory")
 })
-public class ServletConnectionFactory implements ConnectionFactory {
+public class ServletConnectionFactory implements ConnectionFactory, RouterFilterRegistration {
 
-    public static final String PID = "org.forgerock.openidm.router";
-    
     /** Event name prefix for monitoring the router */
-    public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
+    private static final String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
 
-    /**
-     * Setup logging for the {@link org.forgerock.openidm.servlet.internal.ServletConnectionFactory}.
-     */
-    private final static Logger logger = LoggerFactory.getLogger(ServletConnectionFactory.class);
+    /** Setup logging for the {@link org.forgerock.openidm.servlet.internal.ServletConnectionFactory}. */
+    private static final Logger logger = LoggerFactory.getLogger(ServletConnectionFactory.class);
 
-    // the created connection factory
-    protected ConnectionFactory connectionFactory;
+    /** Router Filter at head of chain while services are still being initialized. */
+    private static final Filter SERVICE_UNAVAILABLE_FILTER = new ServiceUnavailableFilter("Service is starting");
 
     /** the Request Handler (Router) */
     @Reference(target = "(org.forgerock.openidm.router=*)")
-    protected RequestHandler requestHandler = null;
-
-    /** Script Registry service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private ScriptRegistry scriptRegistry = null;
+    private RequestHandler requestHandler = null;
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private EnhancedConfig enhancedConfig = null;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC, target = "(service.pid=org.forgerock.openidm.maintenance.filter)")
-    private Filter maintenanceFilter = null;
+    /**
+     * We define 4 filters that are "statically" defined:
+     * <ul>
+     *     <li>startup filter - throws ServiceUnavailableException until configured router filters are loaded</li>
+     *     <li>maintenance filter - toggled based on maintenance mode</li>
+     *     <li>logging filter - always enabled, logs trace-level messages</li>
+     *     <li>audit filter - enabled once AuditFilter is bound</li>
+     * </ul></ol>
+     * These are via Java implementation and not sourced from router.json {@see RouterFilterChain}.
+     */
+    private static final int NUMBER_OF_STATIC_FILTERS = 4;
+
+    /** A wrapper for the startup filter - begin with a service-unavailable filter */
+    private final MutableFilterDecorator startupFilter = new MutableFilterDecorator(SERVICE_UNAVAILABLE_FILTER);
+
+    /** A wrapper for the maintenance filter - populated when the MaintenanceFilter is bound */
+    @Reference(name = "MaintenanceFilter", referenceInterface = Filter.class,
+            target = "(service.pid=org.forgerock.openidm.maintenance.filter)",
+            bind = "bindMaintenanceFilter", unbind = "unbindMaintenanceFilter",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
+    private final MutableFilterDecorator maintenanceFilter = new MutableFilterDecorator();
+
+    /** A filter to emit trace messages on the request and response */
+    private final Filter loggingFilter = newTraceLoggingFilter();
+
+    /** A wrapper for the audit filter - populated when the AuditFilter is bound */
+    @Reference(name = "AuditFilter", referenceInterface = Filter.class,
+            target = "(service.pid=org.forgerock.openidm.audit.filter)",
+            bind = "bindAuditFilter", unbind = "unbindAuditFilter",
+            cardinality = ReferenceCardinality.OPTIONAL_UNARY, policy = ReferencePolicy.DYNAMIC)
+    private final MutableFilterDecorator auditFilter = new MutableFilterDecorator();
+
+    /** the constructed filter chain */
+    private FilterChain filterChain;
+
+    /** the created connection factory */
+    protected ConnectionFactory connectionFactory;
+
+    /**
+     * Assign the maintenance filter delegate to the provided filter.
+     *
+     * @param filter the active maintenance filter
+     */
+    void bindMaintenanceFilter(Filter filter) {
+        maintenanceFilter.setDelegate(filter);
+    }
+
+    /**
+     * Remove the maintenance filter by settings its delegate to a passthrough filter.
+     *
+     * @param filter the maintenance filter
+     */
+    void unbindMaintenanceFilter(Filter filter) {
+        maintenanceFilter.setDelegate(PassthroughFilter.PASSTHROUGH_FILTER);
+    }
+
+    /**
+     * Assign the audit filter delegate to the provided filter.
+     *
+     * @param filter the active audit filter
+     */
+    void bindAuditFilter(Filter filter) {
+        auditFilter.setDelegate(filter);
+    }
+
+    /**
+     * Remove the audit filter by settings its delegate to a passthrough filter.
+     *
+     * @param filter the audit filter
+     */
+    void unbindAuditFilter(Filter filter) {
+        auditFilter.setDelegate(PassthroughFilter.PASSTHROUGH_FILTER);
+    }
 
     @Activate
-    protected void activate(ComponentContext context) throws ServletException, NamespaceException {
+    protected void activate(ComponentContext context) {
         logger.debug("Creating servlet router/connection factory");
         String factoryPid = enhancedConfig.getConfigurationFactoryPid(context);
         if (StringUtils.isNotBlank(factoryPid)) {
-            throw new IllegalArgumentException(
-                    "Factory configuration not allowed, must not have property: "
-                            + ServerConstants.CONFIG_FACTORY_PID);
+            throw new IllegalArgumentException("Factory configuration not allowed, must not have property: "
+                    + ServerConstants.CONFIG_FACTORY_PID);
         }
-        try {
-            final AuditFilter auditFilter = new AuditFilter(connectionFactory);
-            connectionFactory = newWrappedInternalConnectionFactory(Resources.newInternalConnectionFactory(
-                    init(enhancedConfig.getConfigurationAsJson(context), requestHandler, auditFilter)));
-            auditFilter.setConnectionFactory(connectionFactory);
-        } catch (Exception e) {
-            logger.error("Failed to configure the Filtered Router service", e);
-        }
+
+        List<Filter> filters = new ArrayList<>(NUMBER_OF_STATIC_FILTERS);
+
+        // static filters - order is important here
+        filters.add(startupFilter);
+        filters.add(maintenanceFilter);
+        filters.add(loggingFilter);
+        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("^(?!.*(^audit/)).*$"), auditFilter));
+
+        filterChain = new FilterChain(requestHandler, filters);
+        connectionFactory = newWrappedInternalConnectionFactory(Resources.newInternalConnectionFactory(filterChain));
 
         logger.info("Servlet ConnectionFactory created.");
     }
 
     @Deactivate
-    protected synchronized void deactivate(ComponentContext context) {
+    protected void deactivate(ComponentContext context) {
     }
-    
+
     private ConnectionFactory newWrappedInternalConnectionFactory(final ConnectionFactory connectionFactory) {
         return new ConnectionFactory() {
             @Override
@@ -339,121 +391,16 @@ public class ServletConnectionFactory implements ConnectionFactory {
                     idContext = request.getResourcePath();
                 } else {
                     // For RUD, patch group statistics without the local resource identifier
-                    idContext = request.getResourcePathObject().head(request.getResourcePathObject().size() - 1).toString();
+                    idContext = request.getResourcePathObject()
+                            .head(request.getResourcePathObject().size() - 1)
+                            .toString();
                 }
 
-                String eventName = new StringBuilder(EVENT_ROUTER_PREFIX)
-                        .append(idContext)
-                        .append("/")
-                        .append(requestType.toString().toLowerCase())
-                        .toString();
+                String eventName = EVENT_ROUTER_PREFIX + idContext + "/" + requestType.toString().toLowerCase();
                 
                 return Name.get(eventName);
             }
         };
-    }
-
-    /**
-     * Initialize the router with configuration. Supports modifying router configuration.
-     *
-     * @param configuration the router configuration listing filters that are installed
-     * @param handler the request handler (router)
-     * @param auditFilter the audit filter to attach to the request handler
-     * @return the RequestHandler decorated with a FilterChain consisting of any filters that are configured
-     */
-    RequestHandler init(JsonValue configuration, final RequestHandler handler, final Filter auditFilter)
-            throws ScriptException, ResourceException {
-        final JsonValue filterConfig = configuration.get("filters").expect(List.class);
-        // # filters = config filters + maintenance + logging + audit
-        final List<Filter> filters = new ArrayList<>(filterConfig.size() + 3);
-
-        filters.add(maintenanceFilter);
-        filters.add(newLoggingFilter());
-        filters.add(Filters.conditionalFilter(Filters.matchResourcePath("^(?!.*(^audit/)).*$"), auditFilter));
-
-        for (JsonValue jv : filterConfig) {
-            Filter filter = newFilter(jv);
-            if (null != filter) {
-                filters.add(filter);
-            }
-        }
-
-        // filters will always have at least the logging filter
-        return new FilterChain(handler, filters);
-    }
-
-    /**
-     * Create a Filter from the filter configuration.
-     *
-     * @param config
-     *            the configuration describing a single filter.
-     * @return a Filter
-     * @throws org.forgerock.json.JsonValueException
-     *             TODO.
-     */
-    private Filter newFilter(JsonValue config) throws JsonValueException, ScriptException {
-        FilterCondition filterCondition = null;
-
-        final Pair<JsonPointer, ScriptEntry> condition = getScript(config.get("condition"));
-        final Pair<JsonPointer, ScriptEntry> onRequest = getScript(config.get("onRequest"));
-        final Pair<JsonPointer, ScriptEntry> onResponse = getScript(config.get("onResponse"));
-        final Pair<JsonPointer, ScriptEntry> onFailure = getScript(config.get("onFailure"));
-
-        // Require at least one of the following
-        if (null == onRequest && null == onResponse && null == onFailure) {
-            return null;
-        }
-        
-        // Check for condition on pattern
-        Pattern pattern = config.get("pattern").asPattern();
-        if (null != pattern) {
-            filterCondition = Filters.matchResourcePath(pattern);
-        }
-
-        // Check for condition on type
-        final EnumSet<RequestType> requestTypes = EnumSet.noneOf(RequestType.class);
-        for (JsonValue method : config.get("methods").expect(List.class)) {
-            requestTypes.add(method.asEnum(RequestType.class));
-        }
-        if (!requestTypes.isEmpty()) {
-            filterCondition = (null == filterCondition) 
-                    ? Filters.matchRequestType(requestTypes)
-                    : Filters.and(filterCondition, Filters.matchRequestType(requestTypes));
-        }
-
-        // Create the filter
-        Filter filter = (null == filterCondition)
-                ? new ScriptedFilter(onRequest, onResponse, onFailure)
-                : Filters.conditionalFilter(filterCondition, new ScriptedFilter(onRequest, onResponse, onFailure));
-
-        // Check for a condition script
-        if (null != condition) {
-            FilterCondition conditionFilterCondition = new FilterCondition() {
-                @Override
-                public boolean matches(final Context context, final Request request) {
-                    try {
-                        final Script script = condition.getValue().getScript(context);
-                        script.put("request", request);
-                        script.put("context", context);
-                        return (Boolean) script.eval();
-                    } catch (ScriptException e) {
-                        logger.warn("Failed to evaluate filter condition: ", e.getMessage(), e);
-                    }
-                    return false;
-                }
-            };
-            filter = Filters.conditionalFilter(conditionFilterCondition, filter);
-        }
-        return filter;
-    }
-
-    private Pair<JsonPointer, ScriptEntry> getScript(JsonValue scriptJson) throws ScriptException {
-        if (scriptJson.expect(Map.class).isNull()) {
-            return null;
-        }
-
-        ScriptEntry entry = scriptRegistry.takeScript(scriptJson);
-        return Pair.of(scriptJson.getPointer(), entry);
     }
 
     private static final ResultHandler<Response> LOGGING_RESULT_HANDLER =
@@ -470,59 +417,68 @@ public class ServletConnectionFactory implements ConnectionFactory {
                 public void handleException(ResourceException exception) {
                     int code = exception.getCode();
                     if (logger.isTraceEnabled()) {
-                        logger.trace("Resource exception: {} {}: \"{}\"", exception.getCode(), exception.getReason(), exception.getMessage(), exception);
+                        logger.trace("Resource exception: {} {}: \"{}\"",
+                                exception.getCode(), exception.getReason(), exception.getMessage(), exception);
                     } else if (code >= 500 && code <= 599) { // log server-side errors
-                        logger.warn("Resource exception: {} {}: \"{}\"", exception.getCode(), exception.getReason(), exception.getMessage(), exception);
+                        logger.warn("Resource exception: {} {}: \"{}\"",
+                                exception.getCode(), exception.getReason(), exception.getMessage(), exception);
                     }
                 }
             };
 
-    private Filter newLoggingFilter() {
+    private Filter newTraceLoggingFilter() {
         return new Filter() {
             @Override
-            public Promise<ActionResponse, ResourceException> filterAction(Context context, ActionRequest request, RequestHandler next) {
+            public Promise<ActionResponse, ResourceException> filterAction(
+                    Context context, ActionRequest request, RequestHandler next) {
                 logger.trace("Request: {}", request);
                 return next.handleAction(context, request)
                         .thenOnResultOrException(LOGGING_RESULT_HANDLER, LOGGING_EXCEPTION_HANDLER);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> filterCreate(Context context, CreateRequest request, RequestHandler next) {
+            public Promise<ResourceResponse, ResourceException> filterCreate(
+                    Context context, CreateRequest request, RequestHandler next) {
                 logger.trace("Request: {}", request);
                 return next.handleCreate(context, request)
                         .thenOnResultOrException(LOGGING_RESULT_HANDLER, LOGGING_EXCEPTION_HANDLER);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> filterDelete(Context context, DeleteRequest request, RequestHandler next) {
+            public Promise<ResourceResponse, ResourceException> filterDelete(
+                    Context context, DeleteRequest request, RequestHandler next) {
                 logger.trace("Request: {}", request);
                 return next.handleDelete(context, request)
                         .thenOnResultOrException(LOGGING_RESULT_HANDLER, LOGGING_EXCEPTION_HANDLER);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> filterPatch(Context context, PatchRequest request, RequestHandler next) {
+            public Promise<ResourceResponse, ResourceException> filterPatch(
+                    Context context, PatchRequest request, RequestHandler next) {
                 logger.trace("Request: {}", request);
                 return next.handlePatch(context, request)
                         .thenOnResultOrException(LOGGING_RESULT_HANDLER, LOGGING_EXCEPTION_HANDLER);
             }
 
             @Override
-            public Promise<QueryResponse, ResourceException> filterQuery(Context context, QueryRequest request, QueryResourceHandler handler, RequestHandler next) {
+            public Promise<QueryResponse, ResourceException> filterQuery(
+                    Context context, QueryRequest request, QueryResourceHandler handler, RequestHandler next) {
                 logger.trace("Request: {}", request);
                 return next.handleQuery(context, request, handler)
                         .thenOnResultOrException(LOGGING_RESULT_HANDLER, LOGGING_EXCEPTION_HANDLER);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> filterRead(Context context, ReadRequest request, RequestHandler next) {
+            public Promise<ResourceResponse, ResourceException> filterRead(
+                    Context context, ReadRequest request, RequestHandler next) {
                 logger.trace("Request: {}", request);
                 return next.handleRead(context, request)
                         .thenOnResultOrException(LOGGING_RESULT_HANDLER, LOGGING_EXCEPTION_HANDLER);
             }
 
             @Override
-            public Promise<ResourceResponse, ResourceException> filterUpdate(Context context, UpdateRequest request, RequestHandler next) {
+            public Promise<ResourceResponse, ResourceException> filterUpdate(
+                    Context context, UpdateRequest request, RequestHandler next) {
                 logger.trace("Request: {}", request);
                 return next.handleUpdate(context, request)
                         .thenOnResultOrException(LOGGING_RESULT_HANDLER, LOGGING_EXCEPTION_HANDLER);
@@ -547,4 +503,27 @@ public class ServletConnectionFactory implements ConnectionFactory {
         connectionFactory.close();
     }
 
+    // ----- Implementation of RouterFilterRegistration
+
+    @Override
+    public void addFilter(Filter filter) {
+        // add the new filter directly to the filter chain at the end
+        filterChain.getFilters().add(filter);
+    }
+
+    @Override
+    public void removeFilter(Filter filter) {
+        // remove the filter directly from the filter chain
+        filterChain.getFilters().remove(filter);
+    }
+
+    @Override
+    public void setRouterFilterReady() {
+        startupFilter.setDelegate(PassthroughFilter.PASSTHROUGH_FILTER);
+    }
+
+    @Override
+    public void setRouterFilterNotReady() {
+        startupFilter.setDelegate(SERVICE_UNAVAILABLE_FILTER);
+    }
 }

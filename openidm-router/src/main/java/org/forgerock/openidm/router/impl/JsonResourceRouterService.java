@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.router.impl;
@@ -76,7 +68,7 @@ import org.slf4j.LoggerFactory;
  * endpoints to authenticated users that relay (or proxy) requests to other parts of the system where
  * we want to apply the same business logic as if these requests had been directly over HTTP.
  */
-@Component(name = JsonResourceRouterService.PID, policy = ConfigurationPolicy.OPTIONAL,
+@Component(name = JsonResourceRouterService.PID, policy = ConfigurationPolicy.IGNORE,
         metatype = true, configurationFactory = false, immediate = true)
 @Service(value = { ConnectionFactory.class, IDMConnectionFactory.class })
 @Properties({
@@ -86,35 +78,33 @@ import org.slf4j.LoggerFactory;
 public class JsonResourceRouterService implements IDMConnectionFactory {
 
     // Public Constants
-    public static final String PID = "org.forgerock.openidm.internal";
+    public static final String PID = "org.forgerock.openidm.router.internal";
 
     /** Setup logging for the {@link JsonResourceRouterService}. */
     private final static Logger logger = LoggerFactory.getLogger(JsonResourceRouterService.class);
 
-    /** Event name prefix for monitoring the router */
-    public final static String EVENT_ROUTER_PREFIX = "openidm/internal/router/";
-
-    @Reference(target = "(service.pid=org.forgerock.openidm.router)")
-    private ConnectionFactory connectionFactory = null;
+    /** the "external" router connection factory */
+    @Reference(target = ServerConstants.EXTERNAL_ROUTER_SERVICE_PID_FILTER)
+    private ConnectionFactory external = null;
 
     /** internal connection factory for internal routing */
     private ConnectionFactory internal = null;
 
     @Activate
     void activate(ComponentContext context) {
-        internal = newInternalConnectionFactory(connectionFactory);
-        logger.info("Reconciliation service activated.");
+        internal = newInternalConnectionFactory(external);
+        logger.info("IDMConnectionFactory service activated.");
     }
 
     @Modified
     void modified(ComponentContext context) {
-        activate(context);
-        logger.info("Reconciliation service modified.");
+        internal = newInternalConnectionFactory(external);
+        logger.info("IDMConnectionFactory service modified.");
     }
 
     @Deactivate
     void deactivate(ComponentContext context) {
-        logger.info("Reconciliation service deactivated.");
+        logger.info("IDMConnectionFactory service deactivated.");
     }
 
     // ----- Implementation of ConnectionFactory -----
@@ -133,6 +123,19 @@ public class JsonResourceRouterService implements IDMConnectionFactory {
     @Override
     public void close() {
         internal.close();
+    }
+
+    // ----- IDMConnectionFactory implementation -----
+    // delegate to the object's *external* ConnectionFactory that comes from the router
+
+    @Override
+    public Connection getExternalConnection() throws ResourceException {
+        return external.getConnection();
+    }
+
+    @Override
+    public Promise<Connection, ResourceException> getExternalConnectionAsync() {
+        return external.getConnectionAsync();
     }
 
     private ConnectionFactory newInternalConnectionFactory(final ConnectionFactory connectionFactory) {
@@ -161,19 +164,6 @@ public class JsonResourceRouterService implements IDMConnectionFactory {
                 }
             }
         };
-    }
-
-    // ----- IDMConnectionFactory implementation -----
-    // delegate to the object's *external* ConnectionFactory that comes from the router
-
-    @Override
-    public Connection getExternalConnection() throws ResourceException {
-        return connectionFactory.getConnection();
-    }
-
-    @Override
-    public Promise<Connection, ResourceException> getExternalConnectionAsync() {
-        return connectionFactory.getConnectionAsync();
     }
 
     private Context newTransactionIdContext(final Context context) {
