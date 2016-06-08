@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2014-2015 ForgeRock AS. All rights reserved.
+ * Copyright (c) 2014-2016 ForgeRock AS. All rights reserved.
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -29,6 +29,7 @@ import static org.forgerock.json.resource.QueryRequest.FIELD_QUERY_ID;
 import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_EXPRESSION;
 import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_FILTER;
 import static org.forgerock.json.resource.http.HttpUtils.PARAM_QUERY_ID;
+import static org.forgerock.json.resource.http.HttpUtils.PARAM_FIELDS;
 
 import java.util.Map;
 
@@ -65,6 +66,8 @@ public class RequestUtil {
                 request.setQueryExpression(String.valueOf(e.getValue()));
             } else if (PARAM_QUERY_FILTER.equals(e.getKey()) || FIELD_QUERY_FILTER.equals(e.getKey())) {
                 request.setQueryFilter(QueryFilters.parse(String.valueOf(e.getValue())));
+            } else if (PARAM_FIELDS.equals(e.getKey())) {
+                request.addField(String.valueOf(e.getValue()).split(","));
             } else {
                 request.setAdditionalParameter(e.getKey(), String.valueOf(e.getValue()));
             }
