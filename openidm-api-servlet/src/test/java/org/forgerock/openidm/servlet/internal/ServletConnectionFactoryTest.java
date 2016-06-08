@@ -1,31 +1,24 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.servlet.internal;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,11 +54,15 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * A test of the ServletConnectionFactory and underlying request handler.
- * 
  */
 public class ServletConnectionFactoryTest {
 
-    private Connection testable = null;
+    private final Router requestHandler = new Router();
+
+    private final ScriptRegistryImpl sr = new ScriptRegistryImpl(new HashMap<String, Object>(),
+            Collections.<ScriptEngineFactory>singleton(new GroovyScriptEngineFactory()), new SimpleBindings());
+
+    private final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
 
     @BeforeClass
     public void BeforeClass() throws Exception {
@@ -76,49 +73,188 @@ public class ServletConnectionFactoryTest {
         JsonValue configuration =
                 new JsonValue((new ObjectMapper()).readValue(new File(config.toURI()), Map.class));
 
-        final Router requestHandler = new Router();
         requestHandler.addRoute(uriTemplate("/audit/recon"), new MemoryBackend());
         requestHandler.addRoute(uriTemplate("/managed/user"), new MemoryBackend());
         requestHandler.addRoute(uriTemplate("/system/OpenDJ/account"), new MemoryBackend());
         requestHandler.addRoute(uriTemplate("/system/AD/account"), new MemoryBackend());
 
-        ScriptRegistryImpl sr = new ScriptRegistryImpl(new HashMap<String, Object>(),
-                Collections.<ScriptEngineFactory>singleton(new GroovyScriptEngineFactory()), new SimpleBindings());
-
         URL script = ServletConnectionFactoryTest.class.getResource("/script/");
         assertThat(script).isNotNull().overridingErrorMessage("Failed to find /recon/script folder in test");
         sr.addSourceUnit(new DirectoryContainer("script", script));
 
-        final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
         when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(configuration);
-        when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class)))
-                .thenReturn("");
+        when(enhancedConfig.getConfigurationFactoryPid(any(ComponentContext.class))).thenReturn("");
+    }
 
-        Filter maintenanceFilter =  mock(Filter.class);
-        when(maintenanceFilter.filterCreate(any(Context.class), any(CreateRequest.class), any(RequestHandler.class)))
+    @Test
+    public void testNoFiltersActive() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
+
+        final ResourceResponse response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).doesNotContain("filterMarker");
+    }
+
+    @Test
+    public void testMaintenanceFilterActive() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.bindMaintenanceFilter(createMockFilter("maintenance"));
+        filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
+
+        final ResourceResponse response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).hasArray("filterMarker").contains("maintenance");
+    }
+
+    @Test
+    public void testAuditFilterActive() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.bindAuditFilter(createMockFilter("audit"));
+        filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
+
+        final ResourceResponse response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).hasArray("filterMarker").contains("audit");
+    }
+
+    @Test
+    public void testMaintenanceAndAuditFilterActive() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.bindMaintenanceFilter(createMockFilter("maintenance"));
+        filterService.bindAuditFilter(createMockFilter("audit"));
+        filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
+
+        final ResourceResponse response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).hasArray("filterMarker").containsSequence("maintenance", "audit");
+    }
+
+    @Test
+    public void testMaintenanceFilterActiveThenInactive() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.bindMaintenanceFilter(createMockFilter("maintenance"));
+        filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
+
+        ResourceResponse response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).hasArray("filterMarker").contains("maintenance");
+
+        filterService.unbindMaintenanceFilter(mock(Filter.class));
+        response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).doesNotContain("filterMarker");
+    }
+
+    @Test
+    public void testAuditFilterActiveThenInactive() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.bindAuditFilter(createMockFilter("audit"));
+        filterService.activate(mock(ComponentContext.class));
+        filterService.setRouterFilterReady();
+
+        ResourceResponse response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).hasArray("filterMarker").contains("audit");
+
+        filterService.unbindAuditFilter(mock(Filter.class));
+        response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).doesNotContain("filterMarker");
+    }
+
+    @Test(expectedExceptions = ServiceUnavailableException.class)
+    public void testRouterFiltersNotReady() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.activate(mock(ComponentContext.class));
+
+        sendRequest(filterService);
+    }
+
+    @Test
+    public void testAddRemoveRouterFilter() throws Exception {
+        ServletConnectionFactory filterService = new ServletConnectionFactory();
+        filterService.bindRequestHandler(requestHandler);
+        filterService.bindEnhancedConfig(enhancedConfig);
+        filterService.activate(mock(ComponentContext.class));
+        Filter filter = createMockFilter("crestFilter");
+        filterService.addFilter(filter);
+        filterService.setRouterFilterReady();
+
+        ResourceResponse response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).hasArray("filterMarker").contains("crestFilter");
+
+        filterService.removeFilter(filter);
+        response = sendRequest(filterService);
+
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_ID).isNotNull();
+        assertThat(response.getContent()).stringAt(ResourceResponse.FIELD_CONTENT_REVISION).isNotNull();
+        assertThat(response.getContent()).doesNotContain("filterMarker");
+    }
+
+    private ResourceResponse sendRequest(ServletConnectionFactory filterService) throws ResourceException {
+        Connection connection = filterService.getConnection();
+        JsonValue content = new JsonValue(new HashMap<String, Object>());
+        return connection.create(createContext("admin"),
+                Requests.newCreateRequest("/managed/user", content));
+    }
+
+    private Filter createMockFilter(final String markerString) {
+        Filter filter = mock(Filter.class);
+        when(filter.filterCreate(any(Context.class), any(CreateRequest.class), any(RequestHandler.class)))
                 .thenAnswer(new Answer<Promise<ResourceResponse, ResourceException>>() {
                     public Promise<ResourceResponse, ResourceException> answer(InvocationOnMock invocation) {
                         Object[] args = invocation.getArguments();
                         Context context = (Context) args[0];
                         CreateRequest request = (CreateRequest) args[1];
+                        List<String> markerList = request.getContent().get("filterMarker")
+                                .defaultTo(new ArrayList<String>())
+                                .asList(String.class);
+                        markerList.add(markerString);
+                        request.getContent().put("filterMarker", markerList);
                         RequestHandler handler = (RequestHandler) args[2];
                         return handler.handleCreate(context, request);
                     }
                 });
-
-        ServletConnectionFactory filterService = new ServletConnectionFactory();
-        filterService.bindRequestHandler(requestHandler);
-        filterService.bindScriptRegistry(sr);
-        filterService.bindEnhancedConfig(enhancedConfig);
-        filterService.bindMaintenanceFilter(maintenanceFilter);
-        filterService.activate(mock(ComponentContext.class));
-        testable = filterService.getConnection();
-    }
-
-    @Test
-    public void testActivate() throws Exception {
-        JsonValue content = new JsonValue(new HashMap<String, Object>());
-        testable.create(createContext("admin"), Requests.newCreateRequest("/managed/user", content));
+        return filter;
     }
 
     private Context createContext(String id) {

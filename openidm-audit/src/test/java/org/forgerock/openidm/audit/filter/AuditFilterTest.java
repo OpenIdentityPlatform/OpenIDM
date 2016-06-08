@@ -94,7 +94,8 @@ public class AuditFilterTest {
         when(request.getRequestType()).thenReturn(RequestType.READ);
 
         try {
-            AuditFilter filter = new AuditFilter(connectionFactory);
+            AuditFilter filter = new AuditFilter();
+            filter.bindConnectionFactory(connectionFactory);
             filter.logAuditAccessEntry(context, request,
                     new AsyncFunction<Void, Response, ResourceException>() {
                         @Override
@@ -117,7 +118,8 @@ public class AuditFilterTest {
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         when(connectionFactory.getConnection()).thenThrow(new BadRequestException());
 
-        AuditFilter filter = new AuditFilter(connectionFactory);
+        AuditFilter filter = new AuditFilter();
+        filter.bindConnectionFactory(connectionFactory);
         filter.logAuditAccessEntry(context, request,
                 new AsyncFunction<Void, Response, ResourceException>() {
                     @Override
@@ -147,7 +149,8 @@ public class AuditFilterTest {
         Request request = mock(Request.class);
         when(request.getRequestType()).thenReturn(RequestType.READ);
 
-        AuditFilter filter = new AuditFilter(connectionFactory);
+        AuditFilter filter = new AuditFilter();
+        filter.bindConnectionFactory(connectionFactory);
         filter.logAuditAccessEntry(context, request,
                 new AsyncFunction<Void, Response, ResourceException>() {
                     @Override
