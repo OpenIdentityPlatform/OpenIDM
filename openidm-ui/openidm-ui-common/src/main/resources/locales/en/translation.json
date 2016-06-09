@@ -1112,6 +1112,10 @@
                     "reportName": "Replaced",
                     "desc": "File updated/replaced for proper operation."
                   },
+                  "REMOVED": {
+                      "reportName": "Removed",
+                      "desc": "File removed for proper operation."
+                  },
                   "PRESERVED": {
                     "reportName": "Preserved",
                     "desc": "Modified file saved; updated file available in same directory."
