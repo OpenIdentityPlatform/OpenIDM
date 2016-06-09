@@ -24,7 +24,7 @@ import org.forgerock.services.context.Context;
  * and logic specific to recon entries.
  * @see ReconAuditEventBuilder
  */
-class ReconAuditEventLogger extends AbstractSyncAuditEventLogger {
+class ReconAuditEventLogger extends AbstractSyncAuditEventLogger<ReconAuditEventBuilder> {
 
     public static final String RECON_AUDIT_PATH = "audit/recon";
     public static final String RECON_AUDIT_EVENT_NAME = "recon";
@@ -138,10 +138,8 @@ class ReconAuditEventLogger extends AbstractSyncAuditEventLogger {
      * @return The updated builder.
      */
     @Override
-    protected AbstractSyncAuditEventBuilder applyCustomFields(AbstractSyncAuditEventBuilder builder) {
-        // Due to the recursive generic typing of the builders, casting is required until an alternative is found.
-        ReconAuditEventBuilder reconBuilder = (ReconAuditEventBuilder) builder;
-        return reconBuilder.reconciling(reconciling)
+    protected ReconAuditEventBuilder applyCustomFields(ReconAuditEventBuilder builder) {
+        return builder.reconciling(reconciling)
                 .ambiguousTargetIds(ambiguousTargetIds)
                 .reconAction(reconciliationServiceReconAction)
                 .entryType(entryType)
@@ -155,7 +153,7 @@ class ReconAuditEventLogger extends AbstractSyncAuditEventLogger {
      * @see ReconAuditEventBuilder
      */
     @Override
-    protected AbstractSyncAuditEventBuilder getEventBuilder() {
+    protected ReconAuditEventBuilder getEventBuilder() {
         return ReconAuditEventBuilder.auditEventBuilder();
     }
 

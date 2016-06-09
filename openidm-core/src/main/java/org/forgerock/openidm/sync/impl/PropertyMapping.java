@@ -18,10 +18,12 @@ package org.forgerock.openidm.sync.impl;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.pointer;
 
 
 // Java SE
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
 
@@ -74,8 +76,8 @@ class PropertyMapping {
      */
     public PropertyMapping(JsonValue config) throws JsonValueException {
         condition = Conditions.newCondition(config.get("condition"));
-        targetPointer = config.get("target").required().asPointer();
-        sourcePointer = config.get("source").asPointer(); // optional
+        targetPointer = config.get("target").required().as(pointer());
+        sourcePointer = config.get("source").as(pointer()); // optional
         transform = Scripts.newScript(config.get("transform"));
         defaultValue = config.get("default").getObject();
     }
@@ -98,7 +100,7 @@ class PropertyMapping {
             JsonValue child = jv.get(tokens[n]);
             if (child.isNull() && !jv.isDefined(tokens[n])) {
                 try {
-                    jv.put(tokens[n], new HashMap());
+                    jv.put(tokens[n], new LinkedHashMap<String, Object>());
                 } catch (JsonValueException jve) {
                     throw new SynchronizationException(jve);
                 }

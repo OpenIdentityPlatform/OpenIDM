@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.json.resource.Resources.newCollection;
+import static org.forgerock.json.resource.Resources.newHandler;
 import static org.forgerock.json.resource.Router.uriTemplate;
 
 import java.util.HashSet;
@@ -149,7 +149,7 @@ public class ManagedObjectService implements RequestHandler {
 
         ManagedObjectSetRequestHandler(final ManagedObjectSet objectSet) {
             this.objectSet = objectSet;
-            this.objectSetRequestHandler = newCollection(objectSet);
+            this.objectSetRequestHandler = newHandler(objectSet);
         }
 
         private RequestHandler requestHandler(final Request request) {

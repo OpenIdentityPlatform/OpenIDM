@@ -151,7 +151,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
         JsonValue queryCfg = calcEffectiveConfig(queryConfigPropertyName);
 
         if (queryCfg.isNull()) {
-            queryCfg = new JsonValue(new LinkedHashMap());
+            queryCfg = new JsonValue(new LinkedHashMap<String, Object>());
         }
         // If not defined in the query config itself, default the query resource to the mapping source
         if (!queryCfg.isDefined("resourceName")) {
@@ -211,7 +211,7 @@ public abstract class ReconTypeBase implements ReconTypeHandler {
             final Collection<String> collectionToPopulate, final boolean caseSensitive, final QuerySide querySide,
             int pageSize, String pagingCookie) throws SynchronizationException {
         final Collection<String> ids = collectionToPopulate;
-        final JsonValue objList = new JsonValue(new LinkedList());
+        final JsonValue objList = new JsonValue(new LinkedList<>());
         final ReconQueryResult reconQueryResult = new ReconQueryResult();
         try {
             QueryRequest request = RequestUtil.buildQueryRequestFromParameterMap(objectSet, query.asMap());

@@ -23,7 +23,6 @@ import static org.forgerock.util.query.QueryFilter.equalTo;
 
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -162,7 +161,7 @@ public class ReconciliationService
     public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
         try {
             if (request.getResourcePathObject().isEmpty()) {
-                List<Map> runList = new ArrayList<>();
+                List<Map<String, Object>> runList = new ArrayList<>();
                 for (ReconciliationContext entry : reconRuns.values()) {
                     runList.add(entry.getSummary());
                 }

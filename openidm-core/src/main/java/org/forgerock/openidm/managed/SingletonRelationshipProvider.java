@@ -19,12 +19,10 @@ import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.util.promise.Promises.newResultPromise;
-import static org.forgerock.util.query.QueryFilter.*;
 
 import java.util.ArrayList;
 import java.util.List;
 
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -53,7 +51,6 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -83,7 +80,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
         final Router router = new Router();
         router.addRoute(STARTS_WITH,
                 uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, schemaField.getName())),
-                Resources.newSingleton(this));
+                Resources.newHandler(this));
         this.requestHandler = router;
     }
 

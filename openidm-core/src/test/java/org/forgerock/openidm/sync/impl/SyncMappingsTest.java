@@ -18,7 +18,6 @@ package org.forgerock.openidm.sync.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;
-import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -17,6 +17,8 @@ package org.forgerock.openidm.sync.impl;
 
 
 // Java Standard Edition
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
+
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.sync.ReconAction;
@@ -73,11 +75,11 @@ class Policy {
      * @param config a {@link JsonValue} object representing the policy configuration.
      */
     public Policy(JsonValue config) {
-        situation = config.get("situation").required().asEnum(Situation.class);
+        situation = config.get("situation").required().as(enumConstant(Situation.class));
         JsonValue action = config.get("action").required();
         condition =  Conditions.newCondition(config.get("condition"));
         if (action.isString()) {
-            this.action = action.asEnum(ReconAction.class);
+            this.action = action.as(enumConstant(ReconAction.class));
             this.script = null;
         } else {
             this.action = null;

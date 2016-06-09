@@ -58,7 +58,7 @@ public class ResultIterable implements Iterable<ResultEntry> {
         JsonValue newObjList = null;
 
         if (this.values != null) {
-            newObjList = new JsonValue(new LinkedList());
+            newObjList = new JsonValue(new LinkedList<>());
         }
 
         while (entryIter.hasNext()) {

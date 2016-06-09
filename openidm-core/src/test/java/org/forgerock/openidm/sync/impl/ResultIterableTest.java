@@ -25,10 +25,6 @@ import java.util.LinkedHashSet;
 
 import org.forgerock.json.JsonValue;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import org.testng.annotations.Test;
 
@@ -143,7 +139,7 @@ public class ResultIterableTest {
         JsonValue newObjList = null;
 
         if (fullObject) {
-            newObjList = new JsonValue(new LinkedList());
+            newObjList = new JsonValue(new LinkedList<>());
         }
         
         for (int i = 0; i < numItems; i++) {

@@ -61,7 +61,7 @@ public class ReconciliationStatistic {
     private PhaseStatistic sourceStat;
     private PhaseStatistic targetStat;
     
-    private Map<ReconStage, Map> stageStat = new ConcurrentHashMap<ReconStage, Map>();
+    private Map<ReconStage, Map<String, Object>> stageStat = new ConcurrentHashMap<>();
 
     public ReconciliationStatistic(ReconciliationContext reconContext) {
         this.reconContext = reconContext;
@@ -89,13 +89,13 @@ public class ReconciliationStatistic {
     }
     
     public void startStage(ReconStage stage) {
-        Map stageEntry = new ConcurrentHashMap();
+        Map<String, Object> stageEntry = new ConcurrentHashMap<>();
         stageEntry.put("startTime", System.currentTimeMillis());
         stageStat.put(stage, stageEntry);
     }
     
     public void endStage(ReconStage stage) {
-        Map stageEntry = stageStat.get(stage);
+        Map<String, Object> stageEntry = stageStat.get(stage);
         if (stageEntry != null) {
             stageEntry.put("endTime", System.currentTimeMillis());
         }

@@ -19,8 +19,7 @@ package org.forgerock.openidm.sync.impl;
 /**
  * This is the audit event builder for RECON event.
  */
-public class ReconAuditEventBuilder<T extends ReconAuditEventBuilder<T>>
-        extends AbstractSyncAuditEventBuilder<T> {
+public class ReconAuditEventBuilder extends AbstractSyncAuditEventBuilder<ReconAuditEventBuilder> {
 
     public static final String ENTRY_TYPE = "entryType";
     public static final String RECON_ACTION = "reconAction";
@@ -28,8 +27,7 @@ public class ReconAuditEventBuilder<T extends ReconAuditEventBuilder<T>>
     public static final String RECONCILING = "reconciling";
     public static final String RECON_ID = "reconId";
 
-    @SuppressWarnings("rawtypes")
-    public static ReconAuditEventBuilder<?> auditEventBuilder() {
+    public static ReconAuditEventBuilder auditEventBuilder() {
         return new ReconAuditEventBuilder();
     }
 
@@ -43,7 +41,7 @@ public class ReconAuditEventBuilder<T extends ReconAuditEventBuilder<T>>
      * @return Self.
      * @see #ENTRY_TYPE
      */
-    public T entryType(String entryType) {
+    public ReconAuditEventBuilder entryType(String entryType) {
         jsonValue.put(ENTRY_TYPE, entryType);
         return self();
     }
@@ -55,7 +53,7 @@ public class ReconAuditEventBuilder<T extends ReconAuditEventBuilder<T>>
      * @return Self.
      * @see #RECON_ACTION
      */
-    public T reconAction(ReconciliationService.ReconAction action) {
+    public ReconAuditEventBuilder reconAction(ReconciliationService.ReconAction action) {
         if (null != action) {
             jsonValue.put(RECON_ACTION, action.name());
         }
@@ -69,7 +67,7 @@ public class ReconAuditEventBuilder<T extends ReconAuditEventBuilder<T>>
      * @return Self.
      * @see #AMBIGUOUS_TARGET_IDS
      */
-    public T ambiguousTargetIds(String ambiguousTargetIds) {
+    public ReconAuditEventBuilder ambiguousTargetIds(String ambiguousTargetIds) {
         jsonValue.put(AMBIGUOUS_TARGET_IDS, ambiguousTargetIds);
         return self();
     }
@@ -81,7 +79,7 @@ public class ReconAuditEventBuilder<T extends ReconAuditEventBuilder<T>>
      * @return Self.
      * @see #RECONCILING
      */
-    public T reconciling(String reconciling) {
+    public ReconAuditEventBuilder reconciling(String reconciling) {
         jsonValue.put(RECONCILING, reconciling);
         return self();
     }
@@ -93,7 +91,7 @@ public class ReconAuditEventBuilder<T extends ReconAuditEventBuilder<T>>
      * @return
      * @see #RECON_ID
      */
-    public T reconId(String reconId) {
+    public ReconAuditEventBuilder reconId(String reconId) {
         jsonValue.put(RECON_ID, reconId);
         return self();
     }

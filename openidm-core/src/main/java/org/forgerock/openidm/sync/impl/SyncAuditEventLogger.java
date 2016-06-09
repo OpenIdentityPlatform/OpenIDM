@@ -21,7 +21,7 @@ import org.forgerock.services.context.Context;
  * A sync audit log entry representation.
  * @see SyncAuditEventBuilder
  */
-class SyncAuditEventLogger extends AbstractSyncAuditEventLogger {
+class SyncAuditEventLogger extends AbstractSyncAuditEventLogger<SyncAuditEventBuilder> {
 
     public static final String SYNC_AUDIT_PATH = "audit/sync";
     public static final String SYNC_AUDIT_EVENT_NAME = "sync";
@@ -52,7 +52,7 @@ class SyncAuditEventLogger extends AbstractSyncAuditEventLogger {
      * @see SyncAuditEventBuilder
      */
     @Override
-    protected AbstractSyncAuditEventBuilder getEventBuilder() {
+    protected SyncAuditEventBuilder getEventBuilder() {
         return SyncAuditEventBuilder.auditEventBuilder();
     }
 
@@ -63,7 +63,7 @@ class SyncAuditEventLogger extends AbstractSyncAuditEventLogger {
      * @return
      */
     @Override
-    protected AbstractSyncAuditEventBuilder applyCustomFields(AbstractSyncAuditEventBuilder builder) {
+    protected SyncAuditEventBuilder applyCustomFields(SyncAuditEventBuilder builder) {
         // Sync has no additional custom fields at this time.
         return builder;
     }
