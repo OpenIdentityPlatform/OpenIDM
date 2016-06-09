@@ -173,7 +173,7 @@ public class SchedulerService implements RequestHandler {
     @Reference
     ClusterManagementService clusterManager;
 
-    @Reference(name = "ref_SchedulerService_PolicyService", 
+    @Reference(name = "ref_SchedulerService_PolicyService",
             target = "(" + ServerConstants.ROUTER_PREFIX + "=/policy*)")
     protected RouteService policy;
 
@@ -265,17 +265,23 @@ public class SchedulerService implements RequestHandler {
     }
 
     /**
-     * Unregisters a {@link ScheduleConfigService} and deletes the schedule if the scheduler has been started.
+     * Unregisters a {@link ScheduleConfigService} and deletes the schedule if the scheduler has been started, and
+     * if the service deactivation has not occurred as part of the shutdown of an idm node.
      * 
-     * @param service the {@link ScheduleConfigService} to register.
-     * @throws SchedulerException
-     * @throws ParseException
+     * @param service the {@link ScheduleConfigService} to remove.
+     * @param frameworkStopping indicates whether the osgi container is stopping
      */
-    public void unregisterConfigService(ScheduleConfigService service) {
+    public void unregisterConfigService(ScheduleConfigService service, boolean frameworkStopping) {
         synchronized (CONFIG_SERVICE_LOCK) {
             logger.debug("Unregistering ScheduleConfigService");
             configMap.remove(service.getJobName());
-            if (started) {
+            /*
+            The deleteSchedule call below will remove the schedule from any configured persistent store only if
+            the config deactivation is not taking place due to IDM shutdown. This check is present to insure that
+            the shutdown of a node cluster does not remove a scheduled task, which would prevent that schedule from
+            firing again on any remaining node clusters.
+             */
+            if (started && !frameworkStopping) {
                 try {
                     logger.debug("Deleting schedule {}", service.getJobName());
                     deleteSchedule(service.getJobName());

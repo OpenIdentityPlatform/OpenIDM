@@ -29,6 +29,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.InvalidException;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.quartz.SchedulerException;
@@ -90,7 +91,15 @@ public class ScheduleConfigService {
     @Deactivate
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
-        schedulerService.unregisterConfigService(this);
+        schedulerService.unregisterConfigService(this, isFrameworkStopping(compContext));
+    }
+
+    /*
+    A bit of a hack, but bundle 0 is the Framework bundle, whose state will be STOPPING if the osgi framework is
+    shutting-down.
+     */
+    private boolean isFrameworkStopping(ComponentContext componentContext) {
+        return componentContext.getBundleContext().getBundle(0).getState() == Bundle.STOPPING;
     }
 
     /**
