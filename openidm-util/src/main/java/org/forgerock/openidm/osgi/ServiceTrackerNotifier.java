@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright © 2011-2016 ForgeRock AS. All rights reserved.
  */
 package org.forgerock.openidm.osgi;
 
@@ -30,27 +30,32 @@ import org.slf4j.LoggerFactory;
  * Avoids having to extend service tracker each time this is desired,
  * or abusing ServiceTrackerCustomizer for this purpose.
  *
+ * @param <S> The type of the service being tracked.
+ * @param <T> The type of the tracked object.
  */
 public class ServiceTrackerNotifier<S, T> extends ServiceTracker<S, T> {
 
     private final static Logger logger = LoggerFactory.getLogger(ServiceTrackerNotifier.class);
 
-    ServiceTrackerListener listener;
+    ServiceTrackerListener<S,T> listener;
     BundleContext context;
 
-    public ServiceTrackerNotifier(BundleContext context, Filter filter, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
+    public ServiceTrackerNotifier(BundleContext context, Filter filter,
+            ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener<S,T> listener) {
         super(context, filter, customizer);
         this.listener = listener;
         this.context = context;
     }
 
-    public ServiceTrackerNotifier(BundleContext context, ServiceReference<S> reference, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
+    public ServiceTrackerNotifier(BundleContext context, ServiceReference<S> reference,
+            ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener<S,T> listener) {
         super(context, reference, customizer);
         this.listener = listener;
         this.context = context;
     }
 
-    public ServiceTrackerNotifier(BundleContext context, java.lang.String clazz, ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener listener) {
+    public ServiceTrackerNotifier(BundleContext context, java.lang.String clazz,
+            ServiceTrackerCustomizer<S,T> customizer, ServiceTrackerListener<S,T> listener) {
         super(context, clazz, customizer);
         this.listener = listener;
         this.context = context;

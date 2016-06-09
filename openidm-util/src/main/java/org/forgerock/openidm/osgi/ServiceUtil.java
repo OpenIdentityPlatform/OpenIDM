@@ -51,7 +51,7 @@ public final class ServiceUtil {
             }
         }
 
-        Pair<ServiceReference, Object> pair = null;
+        Pair<ServiceReference<?>, Object> pair = null;
 
         if (!lookupName.isServiceNameBased()) {
             pair = findService(ctx, interfaceName, filter);
@@ -79,26 +79,26 @@ public final class ServiceUtil {
         return result;
     }
 
-    private static Pair<ServiceReference, Object> findService(BundleContext ctx,
+    private static Pair<ServiceReference<?>, Object> findService(BundleContext ctx,
             String interfaceName, String filter) {
-        Pair<ServiceReference, Object> p = null;
+        Pair<ServiceReference<?>, Object> p = null;
 
         try {
-            ServiceReference[] refs = ctx.getServiceReferences(interfaceName, filter);
+            ServiceReference<?>[] refs = ctx.getServiceReferences(interfaceName, filter);
 
             if (refs != null) {
                 // change the service order
-                Arrays.sort(refs, new Comparator<ServiceReference>() {
-                    public int compare(ServiceReference o1, ServiceReference o2) {
+                Arrays.sort(refs, new Comparator<ServiceReference<?>>() {
+                    public int compare(ServiceReference<?> o1, ServiceReference<?> o2) {
                         return o2.compareTo(o1);
                     }
                 });
 
-                for (ServiceReference ref : refs) {
+                for (ServiceReference<?> ref : refs) {
                     Object service = ctx.getService(ref);
 
                     if (service != null) {
-                        p = new ImmutablePair<ServiceReference, Object>(ref, service);
+                        p = new ImmutablePair<ServiceReference<?>, Object>(ref, service);
                         break;
                     }
                 }

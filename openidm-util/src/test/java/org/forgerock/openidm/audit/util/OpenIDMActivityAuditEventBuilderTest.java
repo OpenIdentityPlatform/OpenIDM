@@ -19,6 +19,7 @@ package org.forgerock.openidm.audit.util;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.services.TransactionId;
@@ -70,7 +71,7 @@ public class OpenIDMActivityAuditEventBuilderTest {
         assertThat(eventValue.get(OpenIDMActivityAuditEventBuilder.MESSAGE).asString()).isEqualTo(TEST_MESSAGE);
         assertThat(eventValue.get(OpenIDMActivityAuditEventBuilder.OBJECT_ID).asString()).isEqualTo(TEST_OBJECT_ID);
         assertThat(eventValue.get(OpenIDMActivityAuditEventBuilder.PASSWORD_CHANGED).asBoolean()).isEqualTo(false);
-        assertThat(eventValue.get(OpenIDMActivityAuditEventBuilder.STATUS).asEnum(Status.class))
+        assertThat(eventValue.get(OpenIDMActivityAuditEventBuilder.STATUS).as(enumConstant(Status.class)))
                 .isEqualTo(Status.SUCCESS);
     }
 }

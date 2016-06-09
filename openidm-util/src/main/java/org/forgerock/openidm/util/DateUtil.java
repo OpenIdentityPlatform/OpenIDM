@@ -17,7 +17,6 @@ package org.forgerock.openidm.util;
 
 import java.util.Date;
 
-import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.joda.time.Chronology;
 import org.joda.time.DateTime;

@@ -106,7 +106,7 @@ public class HealthService
         STARTING, ACTIVE_READY, ACTIVE_NOT_READY, STOPPING
     }
 
-    static ServiceTracker tracker;
+    static ServiceTracker<?, ?> tracker;
 
     private ComponentContext context;
     private FrameworkListener frameworkListener;
@@ -470,9 +470,9 @@ public class HealthService
      *            the BundleContext
      * @return the ServiceTracker
      */
-    private ServiceTracker initServiceTracker(BundleContext context) {
-        ServiceTracker tracker =
-                new ServiceTrackerNotifier(context, ClusterManagementService.class.getName(), null, this);
+    private ServiceTracker<?, ?> initServiceTracker(BundleContext context) {
+        ServiceTracker<?, ?> tracker =
+                new ServiceTrackerNotifier<>(context, ClusterManagementService.class.getName(), null, this);
         tracker.open();
         return tracker;
     }
