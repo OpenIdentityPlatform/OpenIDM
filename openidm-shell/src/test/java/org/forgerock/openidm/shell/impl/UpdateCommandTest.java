@@ -19,8 +19,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.*;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.*;
 
 import org.apache.felix.service.command.CommandSession;

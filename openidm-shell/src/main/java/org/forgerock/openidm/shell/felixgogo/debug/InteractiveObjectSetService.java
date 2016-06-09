@@ -187,7 +187,7 @@ class InteractiveObjectSetService implements /* RequestHandler, */ServiceListene
     private void printExceptionHelp(Scanner scanner) throws ResourceException {
         session.getConsole().println("Throw a JsonResourceException");
         session.getConsole().print("Type in the numeric code of the exception: ");
-        throw ResourceException.getException(scanner.nextInt(), "Test exception");
+        throw ResourceException.newResourceException(scanner.nextInt(), "Test exception");
     }
 
     @Override
