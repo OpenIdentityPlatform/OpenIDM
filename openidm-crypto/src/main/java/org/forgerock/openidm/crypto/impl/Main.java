@@ -94,16 +94,8 @@ public class Main {
             int i0 = i1 * 256 + i2;
             String x = Integer.toString(i0, 36);
 
-            switch (x.length()) {
-                case 1:
-                    buf.append('0');
-                case 2:
-                    buf.append('0');
-                case 3:
-                    buf.append('0');
-                default:
-                    buf.append(x);
-            }
+            buf.append(new String(new char[4 - x.length()]).replace("\0", "0"));
+            buf.append(x);
         }
         return buf.toString();
 
