@@ -28,7 +28,6 @@ import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.script.registry.ScriptRegistryImpl;
 import org.forgerock.script.scope.Function;
-import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.source.DirectoryContainer;
 import org.forgerock.script.source.EmbeddedScriptSource;
 import org.forgerock.util.promise.Promise;
@@ -45,11 +44,11 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.openidm.script.ResourceFunctions.resourceFunctions;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -96,16 +95,7 @@ public abstract class ResourceFunctionsTest {
             }
         }).when(resource).handleRead(any(Context.class), any(ReadRequest.class));
 
-        scriptRegistry.put("router", new ConcurrentHashMap<String, Object>() {{
-            put("create", ResourceFunctions.newCreateFunction(connectionFactory));
-            put("read", ResourceFunctions.newReadFunction(connectionFactory));
-            put("update", ResourceFunctions.newUpdateFunction(connectionFactory));
-            put("patch", ResourceFunctions.newPatchFunction(connectionFactory));
-            put("query", ResourceFunctions.newQueryFunction(connectionFactory));
-            put("delete", ResourceFunctions.newDeleteFunction(connectionFactory));
-            put("action", ResourceFunctions.newActionFunction(connectionFactory));
-        }});
-
+        scriptRegistry.put("router", resourceFunctions(connectionFactory));
 
         URL container = getScriptContainer("/container/");
         Assert.assertNotNull(container);

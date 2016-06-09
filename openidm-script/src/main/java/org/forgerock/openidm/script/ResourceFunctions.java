@@ -93,6 +93,7 @@ public final class ResourceFunctions {
         }
 
         @Override
+        @SuppressWarnings({ "unchecked", "fallthrough"})
         public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                 throws ResourceException, NoSuchMethodException {
             String resourceContainer = null;
@@ -209,6 +210,7 @@ public final class ResourceFunctions {
         }
 
         @Override
+        @SuppressWarnings({ "unchecked", "fallthrough"})
         public JsonValue call(final Parameter scope, final Function<?> callback,
                 Object... arguments) throws ResourceException, NoSuchMethodException {
             String resourceName = null;
@@ -308,6 +310,7 @@ public final class ResourceFunctions {
         }
 
         @Override
+        @SuppressWarnings({ "unchecked", "fallthrough"})
         public JsonValue call(final Parameter scope, final Function<?> callback,
                 final Object... arguments) throws ResourceException, NoSuchMethodException {
 
@@ -426,6 +429,7 @@ public final class ResourceFunctions {
         }
 
         @Override
+        @SuppressWarnings({ "unchecked", "fallthrough"})
         public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                 throws ResourceException, NoSuchMethodException {
             String resourceName = null;
@@ -545,6 +549,7 @@ public final class ResourceFunctions {
         }
 
         @Override
+        @SuppressWarnings({ "unchecked", "fallthrough"})
         public JsonValue call(Parameter scope, final Function<?> callback, Object... arguments)
                 throws ResourceException, NoSuchMethodException {
 
@@ -736,6 +741,7 @@ public final class ResourceFunctions {
         }
 
         @Override
+        @SuppressWarnings({ "unchecked", "fallthrough"})
         public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                 throws ResourceException, NoSuchMethodException {
             String resourceName = null;
@@ -841,6 +847,7 @@ public final class ResourceFunctions {
         }
 
         @Override
+        @SuppressWarnings({ "unchecked", "fallthrough"})
         public JsonValue call(Parameter scope, Function<?> callback, Object... arguments)
                 throws ResourceException, NoSuchMethodException {
 
