@@ -45,19 +45,19 @@ public class Config {
      * @param propsToUpdate the properties to update
      * @throws Exception
      */
-    public static void updateConfig(Dictionary propsToUpdate) throws Exception {
+    public static void updateConfig(Dictionary<String, Object> propsToUpdate) throws Exception {
         BundleContext context = FrameworkUtil.getBundle(Param.class).getBundleContext();
         if (context != null) {
-            ServiceReference configAdminRef = context.getServiceReference(ConfigurationAdmin.class.getName());
+            ServiceReference<?> configAdminRef = context.getServiceReference(ConfigurationAdmin.class.getName());
             if (configAdminRef != null) {
                 ConfigurationAdmin confAdmin = (ConfigurationAdmin) context.getService(configAdminRef);
                 Configuration configuration = confAdmin.getConfiguration("org.ops4j.pax.web");
 
                 if (propsToUpdate != null) {
-                    Dictionary props = configuration.getProperties();
-                    Enumeration keys = propsToUpdate.keys();
+                    Dictionary<String, Object> props = configuration.getProperties();
+                    Enumeration<String> keys = propsToUpdate.keys();
                     while (keys.hasMoreElements()) {
-                        String key = (String)keys.nextElement();
+                        String key = keys.nextElement();
                         props.put(key, propsToUpdate.get(key));
                     }
                     configuration.update(props);
