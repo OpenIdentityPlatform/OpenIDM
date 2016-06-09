@@ -188,7 +188,7 @@ public class LocalCommandScope extends CustomCommandScope {
                 // TODO pretty print
                 try {
                     String json = FileUtil.readFile(subFile);
-                    JsonParser parser = mapper.getJsonFactory().createJsonParser(json);
+                    JsonParser parser = mapper.getFactory().createParser(json);
                     while (parser.nextToken() != null) {
                         /* be happy */
                     }
