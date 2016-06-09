@@ -33,8 +33,6 @@ import java.util.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.object;
 
 /**
  * Test ScriptedPatchValueTransformerFactory class.

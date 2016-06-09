@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.script;
 
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -261,9 +262,10 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
             customizer.handleQuery(context, request, script.getBindings());
 
             final Function<Void> queryCallback = new Function<Void>() {
-                                             @Override
-                                             public Void call(Parameter scope, Function<?> callback, Object... arguments)
-                                             throws ResourceException, NoSuchMethodException {
+                static final long serialVersionUID = 1L;
+                @Override
+                public Void call(Parameter scope, Function<?> callback, Object... arguments)
+                        throws ResourceException, NoSuchMethodException {
                     if (arguments.length == 3 && null != arguments[2]) {
                         if (arguments[2] instanceof Map) {
 
@@ -329,7 +331,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
                         handleQueryResultList(result.get(QueryResponse.FIELD_RESULT), handler);
                         queryResponse = newQueryResponse(
                                 result.get(QueryResponse.FIELD_PAGED_RESULTS_COOKIE).asString(),
-                                result.get(QueryResponse.FIELD_TOTAL_PAGED_RESULTS_POLICY).asEnum(CountPolicy.class),
+                                result.get(QueryResponse.FIELD_TOTAL_PAGED_RESULTS_POLICY).as(enumConstant(CountPolicy.class)),
                                 result.get(QueryResponse.FIELD_TOTAL_PAGED_RESULTS).asInteger());
                     } else {
                         logger.debug("Script returned unexpected query result structure: ",
