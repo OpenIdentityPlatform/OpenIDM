@@ -53,17 +53,15 @@ define([
                 {
                     "displayName" : "DJ LDAP Configuration",
                     "fileName" : "provisioner.openicf-ldap"
-                },
-                {
-                    "displayName" : "IBM LDAP Configuration",
-                    "fileName" : "provisioner.openicf-racfldap"
                 }
-            ]
+            ],
+            generic : true
         },
         model : {
 
         },
         render: function(args, callback) {
+
             var base = "templates/admin/connector/";
 
             this.data.publicKey = "";
@@ -169,6 +167,7 @@ define([
             uiUtils.jqConfirm($.t("templates.connector.ldapConnector.ldapTypeChange"),
                 _.bind(function(){
                     if(value === "baseConfig") {
+                        this.data.generic = true;
                         this.render({
                             "animate": false,
                             "connectorDefaults": this.model.defaultLdap,
@@ -179,6 +178,7 @@ define([
                         });
                     } else {
                         ConnectorDelegate.connectorDefault(value, "ldap").then(_.bind(function (result) {
+                            this.data.generic = false;
                             this.render({
                                 "animate": false,
                                 "connectorDefaults": result,

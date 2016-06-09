@@ -100,11 +100,6 @@ define([
                     "displayName" : "Full LDAP Configuration",
                     "fileName" : "fullConfig",
                     "type": "ldap"
-                },
-                {
-                    "displayName" : "IBM LDAP Configuration",
-                    "fileName" : "provisioner.openicf-racfldap",
-                    "type": "ldap"
                 }
             ]
         },

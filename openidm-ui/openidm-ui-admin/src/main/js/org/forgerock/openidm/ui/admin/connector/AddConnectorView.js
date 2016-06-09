@@ -108,6 +108,7 @@ define([
         },
 
         getProvisioner: function() {
+
             var connectorData,
                 connDetails = this.connectorTypeRef.data.connectorDefaults,
                 mergedResult = {},
@@ -156,6 +157,7 @@ define([
 
             ConnectorDelegate.testConnector(mergedResult).then(
                 _.bind(function(testResult) {
+                    
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
                     if (!mergedResult.objectTypes) {
