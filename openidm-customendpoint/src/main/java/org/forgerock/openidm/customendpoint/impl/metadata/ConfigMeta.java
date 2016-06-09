@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.customendpoint.impl.metadata;
 
+import static org.forgerock.json.JsonValueFunctions.pointer;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -60,14 +62,14 @@ public class ConfigMeta implements MetaDataProvider {
                 List<JsonPointer> result = new ArrayList<JsonPointer>(instructions.size());
                 for (JsonValue pointer : instructions) {
                     try {
-                        result.add(pointer.asPointer());
+                        result.add(pointer.as(pointer()));
                     } catch (JsonValueException e) {
                         logger.error("Failed build JsonPointer from : {}", pointer, e);
                     }
                 }
                 return result;
             }
-            return Collections.EMPTY_LIST;
+            return Collections.emptyList();
         }
         return null;
     }
