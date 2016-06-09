@@ -99,7 +99,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
         final Router router = new Router();
         router.addRoute(RoutingMode.STARTS_WITH, 
                 uriTemplate(String.format("{%s}/%s", PARAM_MANAGED_OBJECT_ID, schemaField.getName())),
-                Resources.newCollection(this));
+                Resources.newHandler(this));
         this.requestHandler = router;
     }
 

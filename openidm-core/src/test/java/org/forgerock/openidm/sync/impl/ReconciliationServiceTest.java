@@ -49,6 +49,7 @@ import org.testng.annotations.Test;
 public class ReconciliationServiceTest {
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testReadReconById() throws Exception {
         //given
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
@@ -83,6 +84,7 @@ public class ReconciliationServiceTest {
     }
 
     @Test
+    @SuppressWarnings("unchecked")
     public void testReadWithEmptyReconAuditLog() throws Exception {
         //given
         final ConnectionFactory connectionFactory = mock(ConnectionFactory.class);

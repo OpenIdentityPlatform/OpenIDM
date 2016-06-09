@@ -19,7 +19,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyMap;
+import static org.mockito.Matchers.anyMapOf;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -74,14 +74,14 @@ public class PolicyTest {
 
         Bindings bindingsMock = mock(Bindings.class);
         when(scriptMock.createBindings()).thenReturn(bindingsMock);
-        doNothing().when(bindingsMock).putAll(anyMap());
+        doNothing().when(bindingsMock).putAll(anyMapOf(String.class, Object.class));
         when(scriptMock.eval(bindingsMock)).thenReturn(ReconAction.IGNORE);
         
     }
 
     @AfterMethod
     public void tearDown() throws Exception {
-        policies = new HashMap<String, List<Policy>>();
+        policies = new HashMap<>();
     }
 
     @Test

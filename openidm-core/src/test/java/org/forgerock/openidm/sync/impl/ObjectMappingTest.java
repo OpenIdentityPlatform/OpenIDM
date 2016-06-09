@@ -41,7 +41,6 @@ import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
-import org.testng.Assert;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;

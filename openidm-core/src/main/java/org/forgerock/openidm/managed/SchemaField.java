@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.managed;
 
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
+
 import javax.script.ScriptException;
 
 import org.forgerock.json.JsonException;
@@ -122,7 +124,7 @@ public class SchemaField {
             final CryptoService cryptoService) throws JsonValueException, ScriptException {
         this.name = name;
         this.cryptoService = cryptoService;
-        this.scope = schema.get("scope").defaultTo(Scope.PUBLIC.name()).asEnum(Scope.class);
+        this.scope = schema.get("scope").defaultTo(Scope.PUBLIC.name()).as(enumConstant(Scope.class));
         
         // Initialize the type
         initializeType(schema);

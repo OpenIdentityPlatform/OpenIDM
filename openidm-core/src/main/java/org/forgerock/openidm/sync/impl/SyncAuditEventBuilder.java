@@ -19,11 +19,9 @@ package org.forgerock.openidm.sync.impl;
 /**
  * This is the audit event builder for SYNC event.
  */
-public class SyncAuditEventBuilder<T extends SyncAuditEventBuilder<T>>
-        extends AbstractSyncAuditEventBuilder<T> {
+public class SyncAuditEventBuilder extends AbstractSyncAuditEventBuilder<SyncAuditEventBuilder> {
 
-    @SuppressWarnings("rawtypes")
-    public static SyncAuditEventBuilder<?> auditEventBuilder() {
+    public static SyncAuditEventBuilder auditEventBuilder() {
         return new SyncAuditEventBuilder();
     }
 

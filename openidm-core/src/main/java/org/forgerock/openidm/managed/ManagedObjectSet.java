@@ -558,8 +558,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         final Set<JsonPointer> systemRelationships = relationshipProviders.keySet();
         if (!relationshipFields.containsAll(systemRelationships)) {
             final JsonValue diff = JsonPatch.diff(oldObject, newObject);
-            for (Map<String, Object> diffOp : diff.asList(Map.class)) {
-                //not descriminating on type of diff - replace/add/remove will all result in relationshipField additions
+            for (JsonValue diffElement : diff) {
+                Map<String, Object> diffOp = diffElement.asMap();
+                //not discriminating on type of diff - replace/add/remove will all result in relationshipField additions
                 JsonPointer pathPointer = new JsonPointer((String) diffOp.get(JsonPatch.PATH_PTR.leaf()));
                 if (systemRelationships.contains(pathPointer) && !relationshipFields.contains(pathPointer)) {
                     relationshipFields.add(pathPointer);

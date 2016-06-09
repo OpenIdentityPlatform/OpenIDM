@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;
@@ -84,8 +85,8 @@ public class AbstractSyncAuditEventLoggerTest {
         String entryType = content.get(ReconAuditEventBuilder.ENTRY_TYPE).asString();
         assertThat(entryType).isEqualTo("entryType");
 
-        ReconciliationService.ReconAction reconAction = content.get(ReconAuditEventBuilder.RECON_ACTION).asEnum(
-                ReconciliationService.ReconAction.class);
+        ReconciliationService.ReconAction reconAction = content.get(ReconAuditEventBuilder.RECON_ACTION).as(
+                enumConstant(ReconciliationService.ReconAction.class));
         assertThat(reconAction).isEqualTo(ReconciliationService.ReconAction.reconById);
 
         String reconciling = content.get(ReconAuditEventBuilder.RECONCILING).asString();
@@ -105,7 +106,7 @@ public class AbstractSyncAuditEventLoggerTest {
         doCommonSetupAndValidation(syncAuditEvent);
     }
 
-    private void setCommonFields(AbstractSyncAuditEventLogger auditEvent) {
+    private <T extends AbstractSyncAuditEventBuilder<T>> void setCommonFields(AbstractSyncAuditEventLogger<T> auditEvent) {
         auditEvent.setStatus(Status.SUCCESS);
 
         auditEvent.setException(new InternalServerErrorException("test"));
@@ -116,7 +117,8 @@ public class AbstractSyncAuditEventLoggerTest {
         auditEvent.setTargetObjectId(UUID.randomUUID().toString());
     }
 
-    private JsonValue doCommonSetupAndValidation(AbstractSyncAuditEventLogger auditEvent) throws Exception {
+    private <T extends AbstractSyncAuditEventBuilder<T>> JsonValue doCommonSetupAndValidation(
+            AbstractSyncAuditEventLogger<T> auditEvent) throws Exception {
         ConnectionFactory connectionFactory = mock(ConnectionFactory.class);
         Connection connection = mock(Connection.class);
         when(connectionFactory.getConnection()).thenReturn(connection);
@@ -132,14 +134,13 @@ public class AbstractSyncAuditEventLoggerTest {
         String mapping = content.get(AbstractSyncAuditEventBuilder.MAPPING).asString();
         assertThat(mapping).isEqualTo(TEST_MAPPING);
 
-        Status status = content.get(AbstractSyncAuditEventBuilder.STATUS).asEnum(Status.class);
+        Status status = content.get(AbstractSyncAuditEventBuilder.STATUS).as(enumConstant(Status.class));
         assertThat(status).isEqualTo(Status.SUCCESS);
 
-        ReconAction reconAction = content.get(AbstractSyncAuditEventBuilder.ACTION).asEnum(
-                ReconAction.class);
+        ReconAction reconAction = content.get(AbstractSyncAuditEventBuilder.ACTION).as(enumConstant(ReconAction.class));
         assertThat(reconAction).isEqualTo(ReconAction.CREATE);
 
-        Situation situation = content.get(AbstractSyncAuditEventBuilder.SITUATION).asEnum(Situation.class);
+        Situation situation = content.get(AbstractSyncAuditEventBuilder.SITUATION).as(enumConstant(Situation.class));
         assertThat(situation).isEqualTo(Situation.FOUND);
 
         Object exception = content.get(SyncAuditEventBuilder.EXCEPTION).getObject();

@@ -19,6 +19,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Requests.*;
 
 import java.util.ArrayList;
@@ -826,7 +827,7 @@ class ObjectMapping {
         }
 
         try {
-            ReconAction action = params.get("action").required().asEnum(ReconAction.class);
+            ReconAction action = params.get("action").required().as(enumConstant(ReconAction.class));
             SyncOperation op = null;
             ReconAuditEventLogger event = null;
             Status status = Status.SUCCESS;
@@ -871,7 +872,7 @@ class ObjectMapping {
                 }
                 // IF an expected situation is supplied, compare and reject if current situation changed
                 if (params.isDefined("situation")) {
-                    Situation situation = params.get("situation").required().asEnum(Situation.class);
+                    Situation situation = params.get("situation").required().as(enumConstant(Situation.class));
                     if (!situation.equals(op.situation)) {
                         throw new SynchronizationException("Expected situation does not match. Expected: " 
                                 + situation.name()
@@ -1119,7 +1120,7 @@ class ObjectMapping {
      * @param entry the LogEntry
      * @param syncException the Exception
      */
-    public void setLogEntryMessage(AbstractSyncAuditEventLogger entry, Exception syncException) {
+    public <T extends AbstractSyncAuditEventBuilder<T>> void setLogEntryMessage(AbstractSyncAuditEventLogger<T> entry, Exception syncException) {
         JsonValue messageDetail = null;  // top level ResourceException
         Throwable cause = syncException; // Root cause
         entry.setException(syncException);
@@ -1348,7 +1349,7 @@ class ObjectMapping {
             this.reconById = reconById;
         }
         @Override
-        Callable createTask(ResultEntry objectEntry) throws SynchronizationException {
+        Callable<Void> createTask(ResultEntry objectEntry) throws SynchronizationException {
             return new ReconTask(objectEntry, reconContext, parentContext,
                     allLinks, remainingIds, reconById);
         }
@@ -1368,7 +1369,8 @@ class ObjectMapping {
      * @param entry the entry to create
      * @throws SynchronizationException
      */
-    private void logEntry(AbstractSyncAuditEventLogger entry) throws SynchronizationException {
+    private <T extends AbstractSyncAuditEventBuilder<T>> void logEntry(AbstractSyncAuditEventLogger<T> entry)
+            throws SynchronizationException {
         try {
             entry.log(connectionFactory);
         } catch (ResourceException e) {
@@ -2172,6 +2174,7 @@ class ObjectMapping {
                 } catch (SynchronizationException e) {
                     LOGGER.debug("Unable to find link for explicit sync operation UNLINK");
                 }
+                break;
             default:
                 break;
             }
@@ -2268,7 +2271,7 @@ class ObjectMapping {
         /**
          * @return the ambiguous target identifier(s), or an empty list if no ambiguous entries are present
          */
-        public List getAmbiguousTargetIds() {
+        public List<String> getAmbiguousTargetIds() {
             return ambiguousTargetIds;
         }
 

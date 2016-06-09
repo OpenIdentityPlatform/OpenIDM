@@ -24,9 +24,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.script.ScriptRegistry;
 import org.testng.annotations.BeforeTest;

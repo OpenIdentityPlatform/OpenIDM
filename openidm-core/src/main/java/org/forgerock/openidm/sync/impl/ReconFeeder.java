@@ -128,6 +128,6 @@ public abstract class ReconFeeder {
      * @throws SynchronizationException if processing fails
      */
     
-    abstract Callable createTask(ResultEntry entry) throws SynchronizationException;
+    abstract Callable<Void> createTask(ResultEntry entry) throws SynchronizationException;
 
 }
