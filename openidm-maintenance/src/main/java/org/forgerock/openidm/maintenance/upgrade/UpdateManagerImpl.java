@@ -102,11 +102,12 @@ import org.slf4j.LoggerFactory;
  * Basic manager to initiate the product maintenance and upgrade mechanisms.
  */
 @Component(name = UpdateManagerImpl.PID, policy = ConfigurationPolicy.IGNORE, immediate = true,
-    description = "OpenIDM Update Manager", metatype = false)
+    description = "OpenIDM Update Manager", metatype = true)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Manager")
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "Product Update Manager"),
+        @Property(name = "suppressMetatypeWarning", value = "true")
 })
 public class UpdateManagerImpl implements UpdateManager {
 
@@ -1232,7 +1233,7 @@ public class UpdateManagerImpl implements UpdateManager {
      * @throws UpdateException If the repo bundle cannot be found
      */
     private String getDbDirName() throws UpdateException {
-        final ServiceReference repoReference = repoServiceTracker.getServiceReference();
+        final ServiceReference<RepoBootService> repoReference = repoServiceTracker.getServiceReference();
 
         if (repoReference == null) {
             throw new UpdateException("Could not find repo service");

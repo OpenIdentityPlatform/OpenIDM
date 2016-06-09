@@ -16,7 +16,6 @@
 package org.forgerock.openidm.maintenance.upgrade;
 
 import static org.forgerock.json.JsonValue.*;
-import static org.forgerock.json.JsonValue.field;
 
 import org.forgerock.json.JsonValue;
 
