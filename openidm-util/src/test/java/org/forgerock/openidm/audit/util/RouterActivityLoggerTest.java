@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -116,7 +117,7 @@ public class RouterActivityLoggerTest {
         String capturedMessage = content.get(OpenIDMActivityAuditEventBuilder.MESSAGE).asString();
         assertThat(capturedMessage).isEqualTo(TEST_MESSAGE);
 
-        Status status = content.get(OpenIDMActivityAuditEventBuilder.STATUS).asEnum(Status.class);
+        Status status = content.get(OpenIDMActivityAuditEventBuilder.STATUS).as(enumConstant(Status.class));
         assertThat(status).isEqualTo(Status.SUCCESS);
 
         String runAs = content.get(OpenIDMActivityAuditEventBuilder.RUN_AS).asString();
@@ -211,6 +212,7 @@ public class RouterActivityLoggerTest {
         // given
         IdentityServer.initInstance(new PropertyAccessor() {
             @Override
+            @SuppressWarnings("unchecked")
             public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
                 if (key.equals(RouterActivityLogger.OPENIDM_AUDIT_LOG_FULL_OBJECTS)) {
                     return (T) "true";
