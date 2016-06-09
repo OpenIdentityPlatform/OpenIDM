@@ -141,7 +141,7 @@ public final class ContextRegistrator {
      */
     SecurityConfigurator instantiateSecurityConfigurator(String clazzName) {
         SecurityConfigurator configurator = null;
-        Class configuratorClazz = null;
+        Class<?> configuratorClazz = null;
         try {
             configuratorClazz = context.getBundleContext().getBundle().loadClass(clazzName);
             logger.debug("Loaded configurator class {}", clazzName);
