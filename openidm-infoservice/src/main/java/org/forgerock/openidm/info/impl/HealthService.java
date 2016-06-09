@@ -88,7 +88,8 @@ import org.slf4j.LoggerFactory;
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/health/*")})
 @Service(value = { HealthInfo.class, RequestHandler.class })
 public class HealthService
-        implements HealthInfo, ClusterEventListener, ServiceTrackerListener, RequestHandler {
+        implements HealthInfo, ClusterEventListener,
+                ServiceTrackerListener<ClusterManagementService, ClusterManagementService>, RequestHandler {
 
     public static final String PID = "org.forgerock.openidm.health";
 
@@ -478,12 +479,11 @@ public class HealthService
     }
 
     @Override
-    public void addedService(ServiceReference reference, Object service) {
-        ClusterManagementService clusterService = (ClusterManagementService) service;
-        if (clusterService != null) {
-            clusterService.register(LISTENER_ID, this);
-            clusterEnabled = clusterService.isEnabled();
-            cluster = clusterService;
+    public void addedService(ServiceReference<ClusterManagementService> reference, ClusterManagementService service) {
+        if (service != null) {
+            service.register(LISTENER_ID, this);
+            clusterEnabled = service.isEnabled();
+            cluster = service;
             if (clusterEnabled && !cluster.isStarted()) {
                 cluster.startClusterManagement();
             }
@@ -491,7 +491,7 @@ public class HealthService
     }
 
     @Override
-    public void removedService(ServiceReference reference, Object service) {
+    public void removedService(ServiceReference<ClusterManagementService> reference, ClusterManagementService service) {
         if (cluster != null) {
             cluster.unregister(LISTENER_ID);
             cluster = null;
@@ -500,15 +500,14 @@ public class HealthService
     }
 
     @Override
-    public void modifiedService(ServiceReference reference, Object service) {
-        ClusterManagementService clusterService = (ClusterManagementService) service;
+    public void modifiedService(ServiceReference<ClusterManagementService> reference, ClusterManagementService service) {
         if (cluster != null) {
             cluster.unregister(LISTENER_ID);
             cluster = null;
         }
-        if (clusterService != null) {
-            clusterService.register(LISTENER_ID, this);
-            cluster = clusterService;
+        if (service != null) {
+            service.register(LISTENER_ID, this);
+            cluster = service;
         }
     }
 
@@ -541,7 +540,7 @@ public class HealthService
         }
 
         // Get currently registered services
-        ServiceReference[] refs = null;
+        ServiceReference<?>[] refs = null;
         try {
             refs = context.getBundleContext().getAllServiceReferences(null, null);
         } catch (Exception e) {
@@ -555,7 +554,7 @@ public class HealthService
         List<String> missingServices = new ArrayList<String>(requiredServices);
         if (refs != null && refs.length > 0) {
             for (String req : requiredServices) {
-                for (ServiceReference ref : refs) {
+                for (ServiceReference<?> ref : refs) {
                     String pid = (String) ref.getProperty(Constants.SERVICE_PID);
                     if (pid != null && pid.matches(req)) {
                         missingServices.remove(req);
