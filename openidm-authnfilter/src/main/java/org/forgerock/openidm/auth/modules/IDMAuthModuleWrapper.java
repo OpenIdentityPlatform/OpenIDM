@@ -389,7 +389,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
         }
 
         // attempt to read the user object; will return null if any of the pieces are null
-        return queryExecutor.apply(queryBuilder.forPrincipal(principalName).build());
+        return queryExecutor.apply(queryBuilder.build(principalName));
     }
 
     private void setClientIPAddress(MessageInfoContext messageInfo) {
@@ -458,7 +458,6 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
         private final String queryOnResource;
         private String queryId = null;
         private String authenticationId = null;
-        private String principal = null;
 
         private UserDetailQueryBuilder(final String queryOnResource) {
             this.queryOnResource = queryOnResource;
@@ -474,12 +473,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
             return this;
         }
 
-        UserDetailQueryBuilder forPrincipal(final String principal) {
-            this.principal = principal;
-            return this;
-        }
-
-        QueryRequest build() throws BadRequestException {
+        QueryRequest build(final String principal) throws BadRequestException {
             if (queryOnResource == null || authenticationId == null || principal == null) {
                 return null;
             }
