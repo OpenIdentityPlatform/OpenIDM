@@ -61,7 +61,6 @@ import org.slf4j.LoggerFactory;
  * }
  *
  * @version $Revision$ $Date$
- * @deprecated
  * @see <a
  *      href="https://svn.forgerock.org/openidm/branches/2.1.x-CREST/openidm-util/src/main/java/org/forgerock/openidm/util/ResourceUtil.java">ResourceUtil.URLParser</a>
  */

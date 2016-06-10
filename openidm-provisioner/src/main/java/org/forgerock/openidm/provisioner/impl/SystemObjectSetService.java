@@ -27,6 +27,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_NAME;
 import static org.forgerock.openidm.provisioner.ConnectorConfigurationHelper.CONNECTOR_REF;
@@ -181,10 +182,12 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             strategy = ReferenceStrategy.EVENT)
     private Map<SystemIdentifier, ProvisionerService> provisionerServices = new HashMap<SystemIdentifier, ProvisionerService>();
 
+    @SuppressWarnings("rawtypes")
     protected void bindProvisionerService(ProvisionerService service, Map properties) {
         provisionerServices.put(service.getSystemIdentifier(), service);
     }
 
+    @SuppressWarnings("rawtypes")
     protected void unbindProvisionerService(ProvisionerService service, Map properties) {
         for (Map.Entry<SystemIdentifier, ProvisionerService> entry : provisionerServices.entrySet()) {
             if (service.equals(entry.getValue())) {
@@ -209,10 +212,12 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
             policy = ReferencePolicy.DYNAMIC)
     private Map<String, ConnectorConfigurationHelper> connectorConfigurationHelpers = new HashMap<String, ConnectorConfigurationHelper>();
 
+    @SuppressWarnings("rawtypes")
     protected void bindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) throws ResourceException {
         connectorConfigurationHelpers.put(helper.getProvisionerType(), helper);
     }
 
+    @SuppressWarnings("rawtypes")
     protected void unbindConnectorConfigurationHelper(ConnectorConfigurationHelper helper, Map properties) {
         connectorConfigurationHelpers.remove(helper.getProvisionerType());
     }
@@ -402,7 +407,7 @@ public class SystemObjectSetService implements ScheduledService, SingletonResour
     public void execute(Context context, Map<String, Object> schedulerContext) throws ExecutionException {
         try {
             JsonValue params = new JsonValue(schedulerContext).get(CONFIGURED_INVOKE_CONTEXT);
-            if (params.get("action").asEnum(SystemAction.class).isLiveSync()) {
+            if (params.get("action").as(enumConstant(SystemAction.class)).isLiveSync()) {
                 String source = params.get("source").required().asString();
                 liveSync(context, source, true);
             }
