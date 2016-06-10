@@ -1,0 +1,73 @@
+{
+  "type": "object",
+  "required": [
+    "to",
+    "from"
+  ],
+  "properties": {
+    "host": {
+      "type": "string",
+      "format": "hostname",
+      "default": "localhost"
+    },
+    "port": {
+      "type": "integer",
+      "default": "25"
+    },
+    "debug": {
+      "type": "boolean"
+    },
+    "auth": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean"
+        },
+        "username": {
+          "type": "string"
+        },
+        "password": {
+          "type": "string"
+        }
+      }
+    },
+    "starttls": {
+      "type": "object",
+      "properties": {
+        "enable": {
+          "type": "boolean"
+        }
+      }
+    },
+    "to": {
+      "type": "string",
+      "format": "email"
+    },
+    "from": {
+      "type": "string",
+      "format": "email"
+    },
+    "cc": {
+      "type": "string",
+      "format": "email"
+    },
+    "bcc": {
+      "type": "string",
+      "format": "email"
+    },
+    "subject": {
+      "type": "string",
+      "default": "<empty subject>"
+    },
+    "body": {
+      "type": "string",
+      "default": "<empty message>"
+    },
+    "type": {
+      "label": "MIME Type",
+      "type": "string",
+      "default": "text/plain"
+    }
+  }
+}
+

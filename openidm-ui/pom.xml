@@ -43,6 +43,7 @@
         <module>openidm-ui-common</module>
         <module>openidm-ui-admin</module>
         <module>openidm-ui-enduser</module>
+        <module>openidm-ui-api</module>
     </modules>
 
     <build>

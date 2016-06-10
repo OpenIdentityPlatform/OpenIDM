@@ -1189,6 +1189,15 @@
             </includes>
         </dependencySet>
         <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/ui/api</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:openidm-ui-api</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
