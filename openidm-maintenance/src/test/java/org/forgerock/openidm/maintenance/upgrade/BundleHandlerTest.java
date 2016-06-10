@@ -99,11 +99,10 @@ public class BundleHandlerTest {
         setInstalledBundles();
         bundleHandler = new BundleHandler(service.getSystemBundle().getBundleContext(), ARCHIVE_EXTENSION,
                 new LogHandler() {
-            @Override
-            public void log(Path filePath, Path backupPath) {
-
-            }
-        });
+                    @Override
+                    public void log(Path filePath, Path backupPath) {
+                    }
+                });
         bundlePath = Paths.get(service.getProjectURI().resolve("bundle/HelloWorld-1.0-SNAPSHOT.jar"));
     }
 
@@ -114,8 +113,12 @@ public class BundleHandlerTest {
 
     private void stopBundle(Bundle bundle) throws Exception{
         bundleHandler.stopBundle(bundle);
-        // wait 2 seconds for the framework to finish
-        Thread.sleep(2000);
+        // wait up to 5 seconds for the framework to finish
+        int waited = 0;
+        while (bundle.getState() != Bundle.RESOLVED && waited < 5000) {
+            Thread.sleep(100);
+            waited += 100;
+        }
     }
 
     private void uninstallBundle(Bundle bundle) throws Exception {
@@ -131,8 +134,12 @@ public class BundleHandlerTest {
 
     private void startBundle(Bundle bundle) throws Exception {
         bundleHandler.startBundle(bundle);
-        // Wait for bundle to start
-        Thread.sleep(2000);
+        // Wait for bundle to start for up to 5 seconds
+        int waited = 0;
+        while (bundle.getState() != Bundle.ACTIVE && waited < 5000) {
+            Thread.sleep(100);
+            waited += 100;
+        }
     }
 
     @Test
