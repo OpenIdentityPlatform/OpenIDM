@@ -1,0 +1,6 @@
+{
+    "enabled" : true,
+    "urlContextRoot" : "/api",
+    "defaultDir" : "&{launcher.install.location}/ui/api/default",
+    "extensionDir" : "&{launcher.install.location}/ui/api/extension"
+}

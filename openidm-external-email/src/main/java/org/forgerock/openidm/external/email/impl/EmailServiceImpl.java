@@ -36,6 +36,12 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -59,8 +65,12 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Email service implementation
- * 
  */
+@SingletonProvider(@Handler(
+        id = "emailService:0",
+        title = "Email Service",
+        description = "Service that sends email via an external SMTP server.",
+        mvccSupported = false))
 @Component(name = EmailServiceImpl.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
@@ -77,6 +87,19 @@ public class EmailServiceImpl implements SingletonResourceProvider {
 
     EmailClient emailClient;
 
+    @Action(operationDescription =
+    @Operation(
+            description = "Send email",
+            errors = {
+                    @ApiError(
+                            id = "badRequest",
+                            code = 400,
+                            description = "Indicates that the request could not be understood by "
+                                    + "the resource due to malformed syntax.")
+            }),
+            name = "send",
+            request = @Schema(schemaResource = "sendActionRequest.json"),
+            response = @Schema(schemaResource = "sendActionResponse.json"))
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         Map<String, Object> result = new HashMap<>();
