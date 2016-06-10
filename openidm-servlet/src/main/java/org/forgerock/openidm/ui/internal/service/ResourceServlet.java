@@ -120,6 +120,12 @@ public final class ResourceServlet extends HttpServlet {
             if ("/".equals(target)) {
                 target = "/index.html";
             }
+
+            // Never cache index.html to ensure we always have the current product version for asset requests
+            if (target.equals("/index.html")) {
+                res.setHeader("Cache-Control", "no-cache");
+            }
+
             target = prependSlash(target);
             if (target.startsWith(FELIX_WEB_CONSOLE)) {
                 // this request is not for us
