@@ -24,6 +24,9 @@
 
 package org.forgerock.openidm.servletregistration.impl;
 
+import static org.forgerock.json.JsonValueFunctions.listOf;
+import static org.forgerock.json.JsonValueFunctions.url;
+
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -118,6 +121,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
     /**
      * {@inheritDoc}
      */
+    @SuppressWarnings("rawtypes")
     public void registerServlet(String alias, Servlet servlet, Dictionary initparams) throws ServletException, NamespaceException {
         webContainer.registerServlet(alias, servlet, initparams, webContainer.getDefaultSharedHttpContext());
     }
@@ -177,13 +181,13 @@ public class ServletRegistrationSingleton implements ServletRegistration {
         // Get required info from config
         String filterClass = config.get(SERVLET_FILTER_CLASS).required().asString();
         logger.info("Using filter class: {}", filterClass);
-        List<URL> urls = config.get(SERVLET_FILTER_CLASS_PATH_URLS).asList(
+        List<URL> urls = config.get(SERVLET_FILTER_CLASS_PATH_URLS).as(listOf(
                 new Function<JsonValue, URL, JsonValueException>() {
                     @Override
                     public URL apply(JsonValue jsonValue) throws JsonValueException {
-                        return jsonValue.asURL();
+                        return jsonValue.as(url());
                     }
-                });
+                }));
         logger.info("Added URLs { {} })) to filter classpath", StringUtils.join(urls, ", "));
 
         Map<String, Object> preInvokeReqAttributes = config.get(SERVLET_FILTER_PRE_INVOKE_ATTRIBUTES).asMap();
@@ -214,7 +218,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
             Thread.currentThread().setContextClassLoader(filterCL);
             filter = (Filter)(Class.forName(filterClass, true, filterCL).newInstance());
         } catch (Exception ex) {
-            logger.warn("Configured class {} failed to load from configured class path URLs {}", new Object[] {filterClass, urls, ex});
+            logger.warn("Configured class {} failed to load from configured class path URLs {}", filterClass, urls, ex);
             throw ex;
         } finally {
             Thread.currentThread().setContextClassLoader(origCL);
@@ -223,7 +227,7 @@ public class ServletRegistrationSingleton implements ServletRegistration {
         // Create filter
         Filter proxiedFilter = (Filter) Proxy.newProxyInstance(
                 filter.getClass().getClassLoader(),
-                new Class[] { Filter.class },
+                new Class<?>[] { Filter.class },
                 new FilterProxy(filter, filterCL, preInvokeReqAttributes));
 
         // Register filter

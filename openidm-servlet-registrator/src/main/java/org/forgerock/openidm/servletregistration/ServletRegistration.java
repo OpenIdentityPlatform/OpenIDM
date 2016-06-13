@@ -83,6 +83,7 @@ public interface ServletRegistration {
      *        servlet's <code>ServletConfig</code> object.
      * @throws Exception if a problem occurs registering a servlet filter
      */
+    @SuppressWarnings("rawtypes")
     void registerServlet(String alias, Servlet servlet, Dictionary initparams) throws ServletException, NamespaceException;
 
     /**
