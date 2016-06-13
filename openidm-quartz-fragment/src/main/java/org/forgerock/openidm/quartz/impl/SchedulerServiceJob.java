@@ -97,6 +97,7 @@ public class SchedulerServiceJob implements Job {
         return new SecurityContext(new TransactionIdContext(new RootContext(), new TransactionId()) , id, authzid);
     }
 
+    @SuppressWarnings("unchecked")
     public void execute(JobExecutionContext context) throws JobExecutionException {
         JobDataMap data = context.getMergedJobDataMap();
 
@@ -105,10 +106,10 @@ public class SchedulerServiceJob implements Job {
 
         String invokeService = (String) data.get(ScheduledService.CONFIGURED_INVOKE_SERVICE);
         Object invokeContext = data.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
-        ServiceTracker scheduledServiceTracker = (ServiceTracker) getServiceTracker(invokeService);
+        ServiceTracker<ScheduledService, ScheduledService> scheduledServiceTracker = getServiceTracker(invokeService);
 
         logger.debug("Job to invoke service with PID {} and invoke context {} with scheduler context {}",
-                new Object[] {invokeService, invokeContext, context});
+                invokeService, invokeContext, context);
         logger.debug("Job to invoke service with PID {} with scheduler context {}", invokeService, context);
 
         Map<String,Object> scheduledServiceContext = new HashMap<>();
@@ -120,7 +121,7 @@ public class SchedulerServiceJob implements Job {
         scheduledServiceContext.put(ScheduledService.ACTUAL_FIRE_TIME, context.getFireTime());
         scheduledServiceContext.put(ScheduledService.NEXT_FIRE_TIME, context.getNextFireTime());
 
-        ScheduledService scheduledService = (ScheduledService) scheduledServiceTracker.getService();
+        ScheduledService scheduledService = scheduledServiceTracker.getService();
         if (scheduledService == null) {
             logger.info("Scheduled service {} to invoke currently not found, not (yet) registered. ", invokeService);
         } else {
@@ -138,7 +139,7 @@ public class SchedulerServiceJob implements Job {
                         context.getJobDetail().getFullName());
             } catch (Exception ex) {
                 logger.warn("Scheduled service \"{}\" invocation reported failure: {}",
-                        new Object[]{context.getJobDetail().getFullName(), ex.getMessage(), ex});
+                        context.getJobDetail().getFullName(), ex.getMessage(), ex);
                 try {
                     scheduledService.auditScheduledService(
                             scheduledContext,
@@ -151,9 +152,10 @@ public class SchedulerServiceJob implements Job {
         scheduledServiceTracker.close();
     }
 
-    ServiceTracker getServiceTracker(String invokeService) throws InvalidException {
-        Filter filter = null;
-        BundleContext context = null;
+    private ServiceTracker<ScheduledService, ScheduledService> getServiceTracker(String invokeService)
+            throws InvalidException {
+        final Filter filter;
+        final BundleContext context;
         try {
             // invokeService comes in with the RDN prepended, so strip it off
             invokeService = invokeService.replace(ServerConstants.SERVICE_RDN_PREFIX, "");
@@ -161,10 +163,11 @@ public class SchedulerServiceJob implements Job {
             filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "=" + ScheduledService.class.getName() + ")"
                     + "(" + ServerConstants.SCHEDULED_SERVICE_INVOKE_SERVICE + "=" + invokeService + "))");
         } catch (InvalidSyntaxException ex) {
-            throw new InvalidException("Failure in setting up scheduler to find service to invoke. One possible cause is an invalid "
+            throw new InvalidException(
+                    "Failure in setting up scheduler to find service to invoke. One possible cause is an invalid "
                     + "invokeService property. :  " + ex.getMessage(), ex);
         }
-        ServiceTracker serviceTracker = new ServiceTracker(context, filter, null);
+        ServiceTracker<ScheduledService, ScheduledService> serviceTracker = new ServiceTracker<>(context, filter, null);
         serviceTracker.open();
 
         return serviceTracker;
@@ -189,6 +192,7 @@ public class SchedulerServiceJob implements Job {
                         ResourceExceptionsUtil.adapt(e).toJsonValue()).toEvent();
     }
 
+    @SuppressWarnings("rawtypes")
     private AccessAuditEventBuilder newBaseAccessAuditEventBuilder(final Context context,
             final JobExecutionContext jobContext) {
         final AccessAuditEventBuilder auditEventBuilder = new AccessAuditEventBuilder();
