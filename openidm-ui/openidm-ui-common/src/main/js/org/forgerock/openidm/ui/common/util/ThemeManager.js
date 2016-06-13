@@ -31,20 +31,20 @@ define([
         $("<link/>", {
             rel: "icon",
             type: "image/x-icon",
-            href: theme.path + theme.icon
+            href: require.toUrl(theme.path + theme.icon)
         }).appendTo("head");
 
         $("<link/>", {
             rel: "shortcut icon",
             type: "image/x-icon",
-            href: theme.path + theme.icon
+            href: require.toUrl(theme.path + theme.icon)
         }).appendTo("head");
 
         _.forEach(theme.stylesheets, function(stylesheet) {
             $("<link/>", {
                 rel: "stylesheet",
                 type: "text/css",
-                href: stylesheet
+                href: require.toUrl(stylesheet)
             }).appendTo("head");
         });
     };

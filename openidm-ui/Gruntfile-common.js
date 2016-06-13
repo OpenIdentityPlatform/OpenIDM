@@ -30,6 +30,7 @@ module.exports = function(grunt, options) {
             "../openidm-ui-common/src/test/qunit": "/",
             "src/test/qunit": "/tests"
         },
+        targetVersion = grunt.option("target-version") || "dev",
         mavenSrcPath = "src/main/js",
         compositionDirectory = "target/compose",
         compiledDirectory = "target/www",
@@ -145,6 +146,21 @@ module.exports = function(grunt, options) {
                 })
             }
         },
+        replace: {
+            /**
+             * Include the version of IDM in the index file.
+             *
+             * This is needed to force the browser to refetch JavaScript files when a new version of IDM is deployed.
+             */
+            buildNumber: {
+                src: compositionDirectory + "/index.html",
+                dest: compiledDirectory + "/index.html",
+                replacements: [{
+                    from: "${version}",
+                    to: targetVersion
+                }]
+            }
+        },
         eslint: {
             /**
              * Check the JavaScript source code for common mistakes and style issues.
@@ -194,8 +210,8 @@ module.exports = function(grunt, options) {
              */
             compile: {
                 options: {
-                    baseUrl: transpiledDirectory,
-                    mainConfigFile: transpiledDirectory + "/main.js",
+                    baseUrl: compiledDirectory,
+                    mainConfigFile: compiledDirectory + "/main.js",
                     out: compiledDirectory + "/main.js",
                     include: ["main"],
                     preserveLicenseComments: false,
@@ -311,6 +327,7 @@ module.exports = function(grunt, options) {
     grunt.loadNpmTasks("grunt-newer");
     grunt.loadNpmTasks('grunt-notify');
     grunt.loadNpmTasks("grunt-sync");
+    grunt.loadNpmTasks("grunt-text-replace");
 
     grunt.registerTask('build:dev', [
         'copy:compose',
@@ -320,6 +337,7 @@ module.exports = function(grunt, options) {
         'copy:compiled',
         'copy:compiledMain',
         'copy:transpiled',
+        "replace",
         'babel:test',
         'copy:test',
         'qunit'
@@ -329,10 +347,11 @@ module.exports = function(grunt, options) {
         'copy:compose',
         'eslint',
         'babel:source',
-        'requirejs',
         'less:prod',
         'copy:compiled',
         'copy:transpiled',
+        'requirejs',
+        "replace",
         'babel:test',
         'copy:test',
         'qunit'
