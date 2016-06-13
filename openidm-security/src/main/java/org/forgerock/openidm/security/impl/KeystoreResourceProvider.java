@@ -57,7 +57,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

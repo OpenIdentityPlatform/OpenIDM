@@ -167,11 +167,12 @@ public class SecurityResourceProvider {
      * @return the object
      * @throws Exception
      */
+    @SuppressWarnings("unchecked")
     protected <T> T fromPem(String pem) throws Exception {
         StringReader sr = new StringReader(pem);
         PEMReader pw = new PEMReader(sr);
         Object object = pw.readObject();
-        return (T)object;
+        return (T) object;
     }
     
     /**
@@ -189,7 +190,8 @@ public class SecurityResourceProvider {
         if (object instanceof X509Certificate) {
             return (X509Certificate)object;
         } else {
-            throw ResourceException.getException(ResourceException.BAD_REQUEST, "Unsupported certificate format");
+            throw ResourceException.newResourceException(
+                    ResourceException.BAD_REQUEST, "Unsupported certificate format");
         }
     }
     
