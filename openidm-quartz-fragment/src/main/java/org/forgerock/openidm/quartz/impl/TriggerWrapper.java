@@ -123,14 +123,14 @@ public class TriggerWrapper {
      * 
      * @param map repo Map object
      */
-    public TriggerWrapper(Map<String, Object> map) {
-        serialized = (String)map.get("serialized");
-        name = (String)map.get("name");
-        group = (String)map.get("group");
-        state = (Integer)map.get("state");
-        previous_state = (Integer)map.get("previous_state");
-        acquired = (Boolean)map.get("acquired");
-        revision = (String)map.get("_rev");
+    public TriggerWrapper(JsonValue map) {
+        serialized = map.get("serialized").asString();
+        name = map.get("name").asString();
+        group = map.get("group").asString();
+        state = map.get("state").asInteger();
+        previous_state = map.get("previous_state").asInteger();
+        acquired = map.get("acquired").asBoolean();
+        revision = map.get("_rev").asString();
     }
 
     /**
@@ -220,7 +220,7 @@ public class TriggerWrapper {
      * @throws JobPersistenceException
      */
     public Trigger getTrigger() throws JobPersistenceException {
-        return (Trigger)RepoJobStoreUtils.deserialize(serialized);
+        return (Trigger) RepoJobStoreUtils.deserialize(serialized);
     }
     
     /**

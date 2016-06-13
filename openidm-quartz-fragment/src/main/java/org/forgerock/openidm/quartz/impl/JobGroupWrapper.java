@@ -24,10 +24,12 @@
 */
 package org.forgerock.openidm.quartz.impl;
 
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.forgerock.json.JsonValue;
 
@@ -57,28 +59,19 @@ public class JobGroupWrapper {
    /**
     * Creates a JobGroupWrapper from a JsonValue object
     * 
-    * @param value a JsonValue object
-    */
-   public JobGroupWrapper(JsonValue value) {
-       this(value.asMap());
-   }
-   
-   /**
-    * Creates a JobGroupWrapper from an object map
-    * 
     * @param map    an object map
     */
-   public JobGroupWrapper(Map<String, Object> map) {
-       name = (String)map.get("name");
-       if (map.get("paused") != null) {
-           paused = (Boolean)map.get("paused");
+   public JobGroupWrapper(JsonValue map) {
+       name = map.get("name").asString();
+       if (map.get("paused").isNotNull()) {
+           paused = map.get("paused").asBoolean();
        }
-       if (map.get("jobs") != null) {
-           jobs = (List<String>)map.get("jobs");
+       if (map.get("jobs").isNotNull()) {
+           jobs = map.get("jobs").asList(String.class);
        } else {
-           jobs = new ArrayList<String>();
+           jobs = new ArrayList<>();
        }
-       revision = (String)map.get("_rev");
+       revision = map.get("_rev").asString();
    }
    
    /**
@@ -159,11 +152,11 @@ public class JobGroupWrapper {
     * @return a JsonValue object
     */
    public JsonValue getValue() {
-       Map<String, Object> valueMap = new HashMap<String, Object>();
-       valueMap.put("jobs", jobs);
-       valueMap.put("name", name);
-       valueMap.put("paused", paused);
-       return new JsonValue(valueMap);
+       return json(object(
+               field("jobs", jobs),
+               field("name", name),
+               field("paused", paused)
+       ));
    }
 
    /**

@@ -25,10 +25,10 @@
 
 package org.forgerock.openidm.quartz.impl;
 
+import static org.forgerock.json.JsonValue.*;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.forgerock.json.JsonValue;
 
@@ -48,37 +48,27 @@ public class TriggerGroupWrapper {
      * @param triggerName the group name
      */
     public TriggerGroupWrapper(String triggerName) {
-        triggers = new ArrayList<String>();
+        triggers = new ArrayList<>();
         name = triggerName;
         paused = false;
-        
     }
     
     /**
      * Creates a new TriggerGroupWrapper from a JsonValue object
      * 
-     * @param value the JsonValue object
-     */
-    public TriggerGroupWrapper(JsonValue value) {
-        this(value.asMap());
-    }
-    
-    /**
-     * Creates a new TriggerGroupWrapper from a object map.
-     * 
      * @param map   the object map
      */
-    public TriggerGroupWrapper(Map<String, Object> map) {
-        name = (String)map.get("name");
-        if (map.get("paused") != null) {
-            paused = (Boolean)map.get("paused");
+    public TriggerGroupWrapper(JsonValue map) {
+        name = map.get("name").asString();
+        if (map.get("paused").isNotNull()) {
+            paused = map.get("paused").asBoolean();
         }
-        if (map.get("triggers") != null) {
-            triggers = (List<String>)map.get("triggers");
+        if (map.get("triggers").isNotNull()) {
+            triggers = map.get("triggers").asList(String.class);
         } else {
-            triggers = new ArrayList<String>();
+            triggers = new ArrayList<>();
         }
-        revision = (String)map.get("_rev");
+        revision = map.get("_rev").asString();
     }
     
     /**
@@ -159,11 +149,11 @@ public class TriggerGroupWrapper {
      * @return a JsonValue object
      */
     public JsonValue getValue() {
-        Map<String, Object> valueMap = new HashMap<String, Object>();
-        valueMap.put("triggers", triggers);
-        valueMap.put("name", name);
-        valueMap.put("paused", paused);
-        return new JsonValue(valueMap);
+        return json(object(
+                field("triggers", triggers),
+                field("name", name),
+                field("paused", paused)
+        ));
     }
 
     /**
