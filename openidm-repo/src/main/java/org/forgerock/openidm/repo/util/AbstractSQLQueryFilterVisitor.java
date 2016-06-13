@@ -61,8 +61,11 @@ import org.forgerock.util.query.QueryFilterVisitor;
  *     function AND behaves</li>
  *     <li>@{link #visitOrFilter(Object, List&lt;QueryFilter&gt;, Object)} to dictate how the composite
  *     function OR behaves</li>
+ *
+ * @param <R> the subclass of SQLRenderer the visitor returns
+ * @param <P> the parameter type passed in the visit methods
  */
-public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer, P> implements QueryFilterVisitor<R, P, JsonPointer> {
+public abstract class AbstractSQLQueryFilterVisitor<R extends SQLRenderer<?>, P> implements QueryFilterVisitor<R, P, JsonPointer> {
 
     /**
      * A templating method that will generate the actual value assertion.
