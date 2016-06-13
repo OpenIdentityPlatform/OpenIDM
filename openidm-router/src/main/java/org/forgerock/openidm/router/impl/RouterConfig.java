@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.router.impl;
 
+import static org.forgerock.json.JsonValueFunctions.*;
+
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
@@ -206,7 +208,7 @@ public class RouterConfig {
         }
 
         // Check for condition on pattern
-        Pattern pattern = config.get("pattern").asPattern();
+        Pattern pattern = config.get("pattern").as(pattern());
         if (null != pattern) {
             filterCondition = Filters.matchResourcePath(pattern);
         }
@@ -214,7 +216,7 @@ public class RouterConfig {
         // Check for condition on type
         final EnumSet<RequestType> requestTypes = EnumSet.noneOf(RequestType.class);
         for (JsonValue method : config.get("methods").expect(List.class)) {
-            requestTypes.add(method.asEnum(RequestType.class));
+            requestTypes.add(method.as(enumConstant(RequestType.class)));
         }
         if (!requestTypes.isEmpty()) {
             filterCondition = (null == filterCondition)

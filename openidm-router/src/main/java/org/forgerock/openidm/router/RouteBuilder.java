@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.router;
 
+import org.forgerock.json.resource.Request;
 import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.resource.CollectionResourceProvider;
@@ -202,13 +203,14 @@ public final class RouteBuilder {
         return this;
     }
 
-    public RouteMatcher[] register(Router router) {
+    @SuppressWarnings({ "unchecked", "rawtypes" })
+    public RouteMatcher<Request>[] register(Router router) {
         if (routes.isEmpty()) {
             return new RouteMatcher[0];
         }
-        Set<RouteMatcher> registered = new HashSet<>();
+        Set<RouteMatcher<Request>> registered = new HashSet<>();
         for (RouteItem r : routes) {
-            RouteMatcher o = r.register(router);
+            final RouteMatcher<Request> o = r.register(router);
             if (null != o) {
                 registered.add(o);
             }
@@ -233,7 +235,7 @@ public final class RouteBuilder {
             this.uriTemplate = uriTemplate;
         }
 
-        private RouteMatcher register(Router router) {
+        private RouteMatcher<Request> register(Router router) {
             if (null != router) {
                 if (null != collection) {
                     return router.addRoute(uriTemplate, collection);
