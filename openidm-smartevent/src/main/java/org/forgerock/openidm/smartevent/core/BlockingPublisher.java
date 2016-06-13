@@ -39,7 +39,7 @@ public class BlockingPublisher implements PluggablePublisher {
      */
     private final static int QUEUE_CAPACITY = (1024 * 2);
 
-    private static BlockingQueue queue = new LinkedBlockingQueue(QUEUE_CAPACITY);
+    private static BlockingQueue<EventEntry> queue = new LinkedBlockingQueue<>(QUEUE_CAPACITY);
     
     private static Runnable consumer = new Runnable() {
 
@@ -47,7 +47,7 @@ public class BlockingPublisher implements PluggablePublisher {
         public void run() {
             try {
                 while (true) {
-                    EventEntry entry = (EventEntry) queue.take();
+                    EventEntry entry = queue.take();
                     statisticsHandler.onEvent(entry, -1, true);
                 }
             } catch (InterruptedException ex) {

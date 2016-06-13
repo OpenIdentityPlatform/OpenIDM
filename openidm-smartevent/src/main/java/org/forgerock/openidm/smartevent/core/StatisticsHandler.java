@@ -58,7 +58,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     /**
      * Keep track of monitoring data per event Name
      */
-    public Map<String, MonitoringInfo> map = new HashMap<String, MonitoringInfo>();
+    public Map<String, MonitoringInfo> map = new HashMap<>();
 
     // Regular statistics logging option
     private ScheduledExecutorService logScheduler;
@@ -129,9 +129,9 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     /**
      * @inheritDoc
      */
-    public Map getTotals() {
-        Map stats = new TreeMap();
-        for (java.util.Map.Entry<String, MonitoringInfo> entry : map.entrySet()) {
+    public Map<String, String> getTotals() {
+        Map<String, String> stats = new TreeMap<>();
+        for (Map.Entry<String, MonitoringInfo> entry : map.entrySet()) {
             stats.put(entry.getKey(), entry.getValue().toString());
         }
         return stats;
@@ -140,10 +140,10 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
     /**
      * @inheritDoc
      */
-    public Map getRecent() {
+    public Map<Long, String> getRecent() {
         // TODO: consider adding history for not yet end()-ed events
         // Present history ordered by start time, with latest start time first
-        Map recent = new TreeMap(Collections.reverseOrder());
+        Map<Long, String> recent = new TreeMap<>(Collections.reverseOrder());
         try {
             if (disruptor != null) {
                 RingBuffer<DisruptorReferringEventEntry> buf =
@@ -152,7 +152,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
                     for (int count = 0; count < buf.getBufferSize(); count++) {
                         DisruptorReferringEventEntry entry = buf.claimAndGetPreallocated(count);
                         if (entry != null && entry.startTime > 0) {
-                            recent.put(Long.valueOf(entry.startTime), entry.toString());
+                            recent.put(entry.startTime, entry.toString());
                         }
                     }
                 }
@@ -243,6 +243,7 @@ public class StatisticsHandler implements EventHandler<DisruptorReferringEventEn
      * 
      * Consumes the events off the ring buffer
      */
+    @SuppressWarnings("deprecation")
     public void onEvent(final DisruptorShortEventEntry eventEntry, final long sequence,
             final boolean endOfBatch) throws Exception {
         long diff = eventEntry.endTime - eventEntry.startTime;
