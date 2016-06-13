@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.router;
 
+import org.forgerock.json.resource.Request;
 import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.json.resource.CollectionResourceProvider;
 import org.forgerock.json.resource.RequestHandler;
@@ -56,18 +57,17 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
      */
     final static Logger logger = LoggerFactory.getLogger(RouterRegistryImpl.class);
 
-    protected final BundleContext context;
+    protected final BundleContext bundleContext;
 
     protected final ServiceTracker<Router, Router> routerTracker;
 
-    protected ServiceTracker<Object, RouteEntry> resourceTracker;
+    protected ServiceTracker<Object, RouteEntryImpl> resourceTracker;
 
-    protected final AtomicReference<Router> internalRouter = new AtomicReference<Router>();
+    protected final AtomicReference<Router> internalRouter = new AtomicReference<>();
 
     protected final AtomicBoolean isActive = new AtomicBoolean(Boolean.FALSE);
 
-    protected final CopyOnWriteArraySet<RouteEntry> routeCache =
-            new CopyOnWriteArraySet<RouteEntry>();
+    protected final CopyOnWriteArraySet<RouteEntry> routeCache = new CopyOnWriteArraySet<>();
 
     // the routerTracker.getTrackingCount when the router were last got
     protected int routerCount;
@@ -80,7 +80,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         if (null == context) {
             throw new NullPointerException("Failure the BundleContext value is null.");
         }
-        this.context = context;
+        this.bundleContext = context;
         this.routerTracker = routerTracker;
 
         String flt =
@@ -89,7 +89,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
                      + "(" + Constants.OBJECTCLASS + "=" + RequestHandler.class.getName() + ")"
                 + ")";
         try {
-            resourceTracker = new ServiceTracker(context, FrameworkUtil.createFilter(flt), this);
+            resourceTracker = new ServiceTracker<>(context, FrameworkUtil.createFilter(flt), this);
         } catch (InvalidSyntaxException e) {
             // not expected (filter is tested valid)
         }
@@ -113,12 +113,12 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
     }
 
     public RouteEntryImpl addRoute(final Bundle source, RouteBuilder routeBuilder) {
-        return new RouteEntryImpl(context, source, internalRouter, routeBuilder);
+        return new RouteEntryImpl(bundleContext, source, internalRouter, routeBuilder);
     }
 
     public RouteEntryImpl addRouteCustom(final Bundle source, RouteBuilder routeBuilder) {
         final RouteEntryImpl self =
-                new RouteEntryImpl(context, source, internalRouter, routeBuilder) {
+                new RouteEntryImpl(bundleContext, source, internalRouter, routeBuilder) {
                     @Override
                     public boolean removeRoute() {
                         routeCache.remove(this);
@@ -131,9 +131,10 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
 
     public RouteEntryImpl addRoute(ServiceReference<Object> reference, Object service) {
         try {
-            RouteBuilder newRoutes =
-                    RouteBuilder.newBuilder().bind(service,
-                            reference.getProperty(ServerConstants.ROUTER_PREFIX)).seal();
+            RouteBuilder newRoutes = RouteBuilder
+                    .newBuilder()
+                    .bind(service, reference.getProperty(ServerConstants.ROUTER_PREFIX))
+                    .seal();
             if (newRoutes.isNotEmpty()) {
                 return addRoute(reference.getBundle(), newRoutes);
             }
@@ -162,7 +163,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
     // ----- Implementation of ServiceTrackerCustomizer interface
 
     public RouteEntryImpl addingService(ServiceReference<Object> reference) {
-        Object service = context.getService(reference);
+        Object service = bundleContext.getService(reference);
         RouteEntryImpl result = null;
         if (service instanceof CollectionResourceProvider) {
             result = addRoute(reference, service);
@@ -172,14 +173,14 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
             result = addRoute(reference, service);
         }
         if (null == result) {
-            context.ungetService(reference);
+            bundleContext.ungetService(reference);
         }
         return result;
     }
 
     public void modifiedService(ServiceReference<Object> reference, RouteEntryImpl service) {
         service.removeRoute();
-        Object newService = context.getService(reference);
+        Object newService = bundleContext.getService(reference);
         RouteEntry result = null;
         if (newService instanceof CollectionResourceProvider) {
             result = addRoute(reference, newService);
@@ -189,12 +190,12 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
             result = addRoute(reference, newService);
         }
         if (null == result) {
-            context.ungetService(reference);
+            bundleContext.ungetService(reference);
         }
     }
 
     public void removedService(ServiceReference<Object> reference, RouteEntryImpl service) {
-        context.ungetService(reference);
+        bundleContext.ungetService(reference);
         service.removeRoute();
     }
 
@@ -207,8 +208,7 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
             if (routerTracker == null) {
                 internalRouter.set(new Router());
             } else {
-
-                ServiceReference[] refs = routerTracker.getServiceReferences();
+                ServiceReference<Router>[] refs = routerTracker.getServiceReferences();
                 if (refs == null || refs.length == 0) {
                     internalRouter.set(new Router());
                 } else {
@@ -272,8 +272,8 @@ class RouteServiceImpl implements RouteService {
 
 class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
 
-    protected RouteMatcher[] registeredRoutes;
-    protected ServiceRegistration factoryServiceRegistration;
+    protected RouteMatcher<Request>[] registeredRoutes;
+    protected ServiceRegistration<RouteService> factoryServiceRegistration;
 
     RouteEntryImpl(BundleContext parent, Bundle bundle, final AtomicReference<Router> router, RouteBuilder builder) {
         super(bundle, router);
@@ -288,7 +288,7 @@ class RouteEntryImpl extends RouteServiceImpl implements RouteEntry {
             Dictionary<String, Object> props = builder.buildServiceProperties();
             props.put(Constants.SERVICE_PID, RouteService.class.getName());
             factoryServiceRegistration =
-                    parent.registerService(RouteService.class.getName(), new RouteServiceFactory(router), props);
+                    parent.registerService(RouteService.class, new RouteServiceFactory(router), props);
         }
     }
 

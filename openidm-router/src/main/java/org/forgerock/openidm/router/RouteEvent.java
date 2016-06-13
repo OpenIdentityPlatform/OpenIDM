@@ -24,6 +24,7 @@
 
 package org.forgerock.openidm.router;
 
+import org.forgerock.json.resource.Request;
 import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.json.resource.Router;
 
@@ -39,7 +40,7 @@ public class RouteEvent extends EventObject {
     /**
      * Reference to the service that had a change occur in its lifecycle.
      */
-    private final transient RouteMatcher routeMatcher;
+    private final transient RouteMatcher<Request> routeMatcher;
 
     private final transient Router router;
 
@@ -76,7 +77,7 @@ public class RouteEvent extends EventObject {
      * @param routeMatcher
      *            A {@code RouteMatcher} object that had a lifecycle change.
      */
-    public RouteEvent(int type, final Router router, final RouteMatcher routeMatcher) {
+    public RouteEvent(int type, final Router router, final RouteMatcher<Request> routeMatcher) {
         super(routeMatcher);
         this.routeMatcher = routeMatcher;
         this.router = router;
@@ -90,7 +91,7 @@ public class RouteEvent extends EventObject {
      *
      * @return {@code Route} that had a lifecycle change.
      */
-    public RouteMatcher getRouteMatcher() {
+    public RouteMatcher<Request> getRouteMatcher() {
         return routeMatcher;
     }
 
