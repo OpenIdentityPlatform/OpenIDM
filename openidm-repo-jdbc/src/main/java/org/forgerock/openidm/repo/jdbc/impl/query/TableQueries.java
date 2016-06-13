@@ -297,7 +297,7 @@ public class TableQueries {
 
         params.put(PAGED_RESULTS_OFFSET, offsetParam);
         params.put(PAGE_SIZE, pageSizeParam);
-        QueryFilter<JsonPointer> queryFilter = (QueryFilter) params.get(QUERY_FILTER);
+        QueryFilter<JsonPointer> queryFilter = getQueryFilterFromParamMap(params);
         String queryExpression = (String) params.get(QUERY_EXPRESSION);
         String queryId = (String) params.get(QUERY_ID);
         if (queryId == null && queryExpression == null && queryFilter == null) {
@@ -650,6 +650,11 @@ public class TableQueries {
         commands.setConfiguredQueries(replacements, commandsConfig);
     }
 
+
+    @SuppressWarnings("unchecked")
+    private QueryFilter<JsonPointer> getQueryFilterFromParamMap(Map<String, Object> params) {
+        return (QueryFilter<JsonPointer>) params.get(QUERY_FILTER);
+    }
     /**
      * @return the smartevent Name for a given query
      */

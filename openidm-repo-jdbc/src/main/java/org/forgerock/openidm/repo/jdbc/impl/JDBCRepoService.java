@@ -19,6 +19,7 @@ import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.QueryResponse.NO_COUNT;
 import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
@@ -151,11 +152,11 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             strategy = ReferenceStrategy.EVENT)
     private Map<String, DataSourceService> dataSourceServices = new HashMap<>();
 
-    protected void bindDataSourceService(DataSourceService service, Map properties) {
+    protected void bindDataSourceService(DataSourceService service, Map<String, Object> properties) {
         dataSourceServices.put(properties.get(ServerConstants.CONFIG_FACTORY_PID).toString(), service);
     }
 
-    protected void unbindDataSourceService(DataSourceService service, Map properties) {
+    protected void unbindDataSourceService(DataSourceService service, Map<String, Object> properties) {
         for (Map.Entry<String, DataSourceService> entry : dataSourceServices.entrySet()) {
             if (service.equals(entry.getValue())) {
                 dataSourceServices.remove(entry.getKey());
@@ -889,7 +890,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
 
             databaseType = config.get(CONFIG_DB_TYPE)
                     .defaultTo(DatabaseType.ANSI_SQL99.name())
-                    .asEnum(DatabaseType.class);
+                    .as(enumConstant(DatabaseType.class));
             maxTxRetry = config.get(CONFIG_MAX_TX_RETRY).defaultTo(5).asInteger();
             int maxBatchSize = config.get(CONFIG_MAX_BATCH_SIZE).defaultTo(100).asInteger();
 

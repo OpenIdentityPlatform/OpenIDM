@@ -77,7 +77,6 @@ public class GenericTableConfigTest {
     private JsonValue parseJson(String json) throws IOException {
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(JsonParser.Feature.ALLOW_SINGLE_QUOTES, true);
-        Map cfgMap = mapper.readValue(json, Map.class);
-        return new JsonValue(cfgMap);
+        return new JsonValue(mapper.readValue(json, Map.class));
     }
 }

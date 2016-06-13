@@ -52,7 +52,6 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SortKey;
-import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
@@ -696,49 +695,3 @@ class Mapping {
     }
 }
 
-/**
- * Parsed Config handling
- */
-class ColumnMapping {
-    public static final String DB_COLUMN_NAME = "column";
-    public static final String DB_COLUMN_TYPE = "type";
-
-    public static final String TYPE_STRING = "STRING";
-    public static final String TYPE_JSON_MAP = "JSON_MAP";
-    public static final String TYPE_JSON_LIST = "JSON_LIST";
-
-
-    public JsonPointer objectColPointer;
-    public String objectColName; // String representation of the column
-                                 // name/path
-    public String dbColName;
-    public String dbColType;
-
-    public ColumnMapping(String objectColName, JsonValue dbColMappingConfig) {
-        this.objectColName = objectColName;
-        this.objectColPointer = new JsonPointer(objectColName);
-        if (dbColMappingConfig.required().isList()) {
-            if (dbColMappingConfig.asList().size() != 2) {
-                throw new InvalidException("Explicit table mapping has invalid entry for "
-                        + objectColName + ", expecting column name and type but contains "
-                        + dbColMappingConfig.asList());
-            }
-            dbColName = dbColMappingConfig.get(0).required().asString();
-            dbColType = dbColMappingConfig.get(1).required().asString();
-        } else if (dbColMappingConfig.isMap()) {
-            dbColName = dbColMappingConfig.asMap().get(DB_COLUMN_NAME).toString();
-            dbColType = dbColMappingConfig.asMap().get(DB_COLUMN_TYPE).toString();
-        } else {
-            dbColName = dbColMappingConfig.asString();
-            dbColType = TYPE_STRING;
-        }
-    }
-
-    public boolean isJsonPointer(JsonPointer fieldPointer) {
-        return objectColPointer.equals(fieldPointer);
-    }
-
-    public String toString() {
-        return "object column : " + objectColName + " -> " + dbColName + ":" + dbColType + "\n";
-    }
-}

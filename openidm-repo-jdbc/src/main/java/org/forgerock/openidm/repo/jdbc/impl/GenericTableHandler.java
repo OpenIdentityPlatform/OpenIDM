@@ -235,7 +235,7 @@ public class GenericTableHandler implements TableHandler {
                 logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, resultMap);
                 return newResourceResponse(localId, rev, new JsonValue(resultMap));
             } else {
-                throw ResourceException.getException(ResourceException.NOT_FOUND,
+                throw ResourceException.newResourceException(ResourceException.NOT_FOUND,
                         "Object " + fullId + " not found in " + type);
             }
         } finally {
@@ -800,72 +800,3 @@ class GenericQueryResultMapper implements QueryResultMapper {
     }
 }
 
-class GenericTableConfig {
-    public String mainTableName;
-    public String propertiesTableName;
-    public boolean searchableDefault;
-    public GenericPropertiesConfig properties;
-
-    public boolean isSearchable(JsonPointer propPointer) {
-
-        // More specific configuration takes precedence
-        Boolean explicit = null;
-        while (!propPointer.isEmpty() && explicit == null) {
-            explicit = properties.explicitlySearchable.get(propPointer);
-            propPointer = propPointer.parent();
-        }
-        
-        if (explicit != null) {
-            return explicit.booleanValue();
-        } else {
-            return searchableDefault;
-        }
-    }
-    
-    /**  
-     * @return Approximation on whether this may have searchable properties
-     * It is only an approximation as we do not have an exhaustive list of possible properties
-     * to consider against a default setting of searchable.
-     */
-    public boolean hasPossibleSearchableProperties() {
-        return ((searchableDefault) ? true : properties.explicitSearchableProperties);
-    }
-
-    public static GenericTableConfig parse(JsonValue tableConfig) {
-        GenericTableConfig cfg = new GenericTableConfig();
-        tableConfig.required();
-        cfg.mainTableName = tableConfig.get("mainTable").required().asString();
-        cfg.propertiesTableName = tableConfig.get("propertiesTable").required().asString();
-        cfg.searchableDefault = tableConfig.get("searchableDefault").defaultTo(Boolean.TRUE).asBoolean();
-        cfg.properties = GenericPropertiesConfig.parse(tableConfig.get("properties"));
-
-        return cfg;
-    }
-}
-
-class GenericPropertiesConfig {
-    public Map<JsonPointer, Boolean> explicitlySearchable = new HashMap<JsonPointer, Boolean>();
-    public String mainTableName;
-    public String propertiesTableName;
-    public boolean searchableDefault;
-    public GenericPropertiesConfig properties;
-    // Whether there are any properties explicitly set to searchable true
-    public boolean explicitSearchableProperties;
-
-    public static GenericPropertiesConfig parse(JsonValue propsConfig) {
-        
-        GenericPropertiesConfig cfg = new GenericPropertiesConfig();
-        if (!propsConfig.isNull()) {
-            for (String propName : propsConfig.keys()) {
-                JsonValue detail = propsConfig.get(propName);
-                boolean propSearchable = detail.get("searchable").asBoolean();
-                cfg.explicitlySearchable.put(new JsonPointer(propName), propSearchable);
-                if (propSearchable) {
-                    cfg.explicitSearchableProperties = true;
-                }
-            }
-        }
-
-        return cfg;
-    }
-}

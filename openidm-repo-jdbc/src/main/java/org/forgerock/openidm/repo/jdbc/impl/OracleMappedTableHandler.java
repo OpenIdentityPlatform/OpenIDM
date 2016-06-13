@@ -27,7 +27,6 @@ import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 

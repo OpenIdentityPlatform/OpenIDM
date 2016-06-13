@@ -102,8 +102,7 @@ public class DBUnitUtils {
     }
 
     public IDataSet createFlatXml(Class<?> resourceLocalClass, String fileName) throws DataSetException, IOException {
-        ClassLoader loader = resourceLocalClass.getClassLoader();
-        InputStream in = loader.getSystemResourceAsStream(fileName);
+        InputStream in = ClassLoader.getSystemResourceAsStream(fileName);
         return createFlatXml(in);
     }
 
