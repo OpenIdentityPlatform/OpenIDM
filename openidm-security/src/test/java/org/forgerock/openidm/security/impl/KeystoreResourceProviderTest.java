@@ -34,13 +34,12 @@ import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.util.encode.Base64;
 import org.testng.annotations.AfterClass;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import sun.misc.BASE64Encoder;
-import sun.security.provider.X509Factory;
 
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.TrustManagerFactory;
@@ -61,6 +60,9 @@ import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.mockito.Mockito.mock;
 
 public class KeystoreResourceProviderTest {
+
+    public static final String BEGIN_CERT = "-----BEGIN CERTIFICATE-----";
+    public static final String END_CERT = "-----END CERTIFICATE-----";
 
     private final Router router = new Router();
     private final Connection connection = Resources.newInternalConnection(router);
@@ -142,7 +144,7 @@ public class KeystoreResourceProviderTest {
             UnrecoverableEntryException, NoSuchAlgorithmException {
         //given
         ActionRequest actionRequest =
-                Requests.newActionRequest(KEYSTORE_ROUTE, keystoreResourceProvider.ACTION_GENERATE_CERT);
+                Requests.newActionRequest(KEYSTORE_ROUTE, KeystoreResourceProvider.ACTION_GENERATE_CERT);
         actionRequest.setContent(createGenerateCertActionContent(true));
 
         //when
@@ -160,7 +162,7 @@ public class KeystoreResourceProviderTest {
             UnrecoverableEntryException, KeyStoreException {
         //given
         ActionRequest actionRequest =
-                Requests.newActionRequest(KEYSTORE_ROUTE, keystoreResourceProvider.ACTION_GENERATE_CERT);
+                Requests.newActionRequest(KEYSTORE_ROUTE, KeystoreResourceProvider.ACTION_GENERATE_CERT);
         actionRequest.setContent(createGenerateCertActionContent(true));
 
         //when
@@ -178,7 +180,7 @@ public class KeystoreResourceProviderTest {
             UnrecoverableEntryException, NoSuchAlgorithmException {
         //given
         ActionRequest actionRequest =
-                Requests.newActionRequest(KEYSTORE_ROUTE, keystoreResourceProvider.ACTION_GENERATE_CERT);
+                Requests.newActionRequest(KEYSTORE_ROUTE, KeystoreResourceProvider.ACTION_GENERATE_CERT);
         final JsonValue content = createGenerateCertActionContent(true);
         content.remove("alias");
         actionRequest.setContent(content);
@@ -193,7 +195,7 @@ public class KeystoreResourceProviderTest {
             UnrecoverableEntryException, NoSuchAlgorithmException {
         //given
         ActionRequest actionRequest =
-                Requests.newActionRequest(KEYSTORE_ROUTE, keystoreResourceProvider.ACTION_GENERATE_CERT);
+                Requests.newActionRequest(KEYSTORE_ROUTE, KeystoreResourceProvider.ACTION_GENERATE_CERT);
         actionRequest.setContent(createGenerateCertActionContent(true));
 
         //when
@@ -205,9 +207,9 @@ public class KeystoreResourceProviderTest {
         final DateUtil dateUtil = DateUtil.getDateUtil();
         final Map<String,Object> content = new HashMap<>();
         content.put("alias", TEST_CERT_ALIAS);
-        content.put("algorithm", keystoreResourceProvider.DEFAULT_ALGORITHM);
-        content.put("signatureAlgorithm", keystoreResourceProvider.DEFAULT_SIGNATURE_ALGORITHM);
-        content.put("keySize", keystoreResourceProvider.DEFAULT_KEY_SIZE);
+        content.put("algorithm", KeystoreResourceProvider.DEFAULT_ALGORITHM);
+        content.put("signatureAlgorithm", KeystoreResourceProvider.DEFAULT_SIGNATURE_ALGORITHM);
+        content.put("keySize", KeystoreResourceProvider.DEFAULT_KEY_SIZE);
         content.put("domainName","domainName");
         content.put("validFrom", dateUtil.now());
         content.put("validTo", dateUtil.parseIfDate(dateUtil.currentDateTime().plusDays(1).toDate().toString()));
@@ -245,10 +247,9 @@ public class KeystoreResourceProviderTest {
 
     private String convertCertToPEM(final byte[] encodedCert) {
         final StringBuilder certAsPEM = new StringBuilder();
-        final BASE64Encoder encoder = new BASE64Encoder();
-        certAsPEM.append(X509Factory.BEGIN_CERT)
-                .append(new String (encoder.encodeBuffer(encodedCert)))
-                .append(X509Factory.END_CERT);
+        certAsPEM.append(BEGIN_CERT)
+                .append(Base64.encode(encodedCert))
+                .append(END_CERT);
         return  certAsPEM.toString();
     }
 }
