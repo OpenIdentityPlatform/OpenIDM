@@ -23,6 +23,8 @@
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
+
 import java.util.Hashtable;
 
 import org.forgerock.json.JsonValue;
@@ -96,7 +98,7 @@ public class Activator implements BundleActivator {
     private String getDbDirname(JsonValue repoConfig) {
         final DatabaseType databaseType = repoConfig.get(JDBCRepoService.CONFIG_DB_TYPE)
                 .defaultTo(DatabaseType.ANSI_SQL99.name())
-                .asEnum(DatabaseType.class);
+                .as(enumConstant(DatabaseType.class));
 
         switch (databaseType) {
             case SQLSERVER:
