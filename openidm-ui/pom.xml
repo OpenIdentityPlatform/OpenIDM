@@ -86,7 +86,7 @@
                             </goals>
                             <phase>compile</phase>
                             <configuration>
-                                <arguments>${grunt.task}</arguments>
+                                <arguments>${grunt.task} --target-version=${project.version}</arguments>
                             </configuration>
                         </execution>
                     </executions>
