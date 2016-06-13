@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;

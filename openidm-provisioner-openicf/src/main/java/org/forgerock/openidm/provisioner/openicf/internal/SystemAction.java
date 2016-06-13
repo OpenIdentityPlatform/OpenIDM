@@ -24,6 +24,8 @@
 
 package org.forgerock.openidm.provisioner.openicf.internal;
 
+import static org.forgerock.json.JsonValueFunctions.pattern;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -83,7 +85,7 @@ public class SystemAction {
         private String actionSource;
 
         public SystemTypeAction(JsonValue systemTypeAction) {
-            this.systemType = systemTypeAction.get("systemType").required().asPattern();
+            this.systemType = systemTypeAction.get("systemType").required().as(pattern());
             this.actionType = systemTypeAction.get("actionType").required().asString();
             if (systemTypeAction.isDefined("actionFile")) {
                 File scriptFile =

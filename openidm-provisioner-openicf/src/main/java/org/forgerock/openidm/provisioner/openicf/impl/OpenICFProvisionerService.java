@@ -98,7 +98,6 @@ import org.forgerock.openidm.provisioner.SystemIdentifier;
 import org.forgerock.openidm.provisioner.openicf.ConnectorInfoProvider;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.forgerock.openidm.provisioner.openicf.OperationHelper;
-import org.forgerock.openidm.provisioner.openicf.commons.AttributeMissingException;
 import org.forgerock.openidm.provisioner.openicf.commons.ConnectorUtil;
 import org.forgerock.openidm.provisioner.openicf.commons.ObjectClassInfoHelper;
 import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper;
@@ -183,13 +182,14 @@ import org.slf4j.LoggerFactory;
  */
 @Component(name = OpenICFProvisionerService.PID,
         policy = ConfigurationPolicy.REQUIRE,
-        metatype = false,
+        metatype = true,
         description = "OpenIDM OpenICF Provisioner Service",
         immediate = true)
 @Service(value = {ProvisionerService.class})
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
-    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM OpenICF Provisioner Service")
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM OpenICF Provisioner Service"),
+    @Property(name = "suppressMetatypeWarning", value = "true")
 })
 public class OpenICFProvisionerService implements ProvisionerService, SingletonResourceProvider {
 
@@ -496,7 +496,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         } catch (InvalidPasswordException e) {
             message = MessageFormat.format("Invalid password has been provided to operation {0} for system object: {1}",
                     request.getRequestType().toString(), resourceId);
-            return ResourceException.getException(UNAUTHORIZED_ERROR_CODE, message, exception);
+            return ResourceException.newResourceException(UNAUTHORIZED_ERROR_CODE, message, exception);
         } catch (UnknownUidException e) {
             message = MessageFormat.format("Operation {0} could not find resource {1} on system object: {2}",
                     request.getRequestType().toString(), resourceId, resourceContainer);
@@ -504,7 +504,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         } catch (InvalidCredentialException e) {
             message = MessageFormat.format("Invalid credential has been provided to operation {0} for system object: {1}",
                     request.getRequestType().toString(), resourceId);
-            return ResourceException.getException(UNAUTHORIZED_ERROR_CODE, message, exception);
+            return ResourceException.newResourceException(UNAUTHORIZED_ERROR_CODE, message, exception);
         } catch (PermissionDeniedException e) {
             message = MessageFormat.format("Permission was denied on {0} operation for system object: {1}",
                     request.getRequestType().toString(), resourceId);

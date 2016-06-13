@@ -17,7 +17,6 @@
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.*;
-import static org.identityconnectors.framework.common.objects.filter.FilterBuilder.startsWith;
 
 import java.util.Iterator;
 import java.util.List;
