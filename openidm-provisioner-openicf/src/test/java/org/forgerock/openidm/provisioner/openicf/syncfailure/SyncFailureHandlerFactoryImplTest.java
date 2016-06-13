@@ -54,7 +54,7 @@ public class SyncFailureHandlerFactoryImplTest {
     }
 
     private JsonValue parseJsonString(String json) throws Exception {
-        return new JsonValue((Map) mapper.readValue(json, Map.class));
+        return new JsonValue(mapper.readValue(json, Map.class));
     }
 
     private int getRetries(SyncFailureHandler handler) throws Exception {

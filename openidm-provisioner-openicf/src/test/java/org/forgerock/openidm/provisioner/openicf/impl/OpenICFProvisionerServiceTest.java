@@ -44,6 +44,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.forgerock.json.resource.Request;
 import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
@@ -53,7 +54,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
@@ -102,14 +102,9 @@ import org.forgerock.util.query.QueryFilter;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.logging.impl.NoOpLogger;
 import org.identityconnectors.framework.common.objects.Name;
-import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.server.ConnectorServer;
 import org.identityconnectors.framework.server.impl.ConnectorServerImpl;
-import org.identityconnectors.framework.spi.operations.UpdateAttributeValuesOp;
-import org.identityconnectors.framework.spi.operations.UpdateOp;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -174,19 +169,19 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         try {
             IdentityServer.initInstance(new PropertyAccessor() {
                 @Override
+                @SuppressWarnings("unchecked")
                 public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
                     if (String.class.isAssignableFrom(expected)) {
                         try {
                             if (LAUNCHER_INSTALL_LOCATION.equals(key)
                                     || LAUNCHER_PROJECT_LOCATION.equals(key)
                                     || LAUNCHER_WORKING_LOCATION.equals(key)) {
-                                return (T) URLDecoder.decode(OpenICFProvisionerServiceTest.class
-                                        .getResource("/").getPath(), "utf-8");
+                                return (T) URLDecoder.decode(
+                                        OpenICFProvisionerServiceTest.class.getResource("/").getPath(), "utf-8");
                             } else if (LAUNCHER_INSTALL_URL.equals(key)
                                     || LAUNCHER_PROJECT_URL.equals(key)
                                     || LAUNCHER_WORKING_URL.equals(key)) {
-                                return (T) OpenICFProvisionerServiceTest.class.getResource("/")
-                                        .toString();
+                                return (T) OpenICFProvisionerServiceTest.class.getResource("/").toString();
                             }
                         } catch (UnsupportedEncodingException e) {
                             /* ignore */
@@ -207,7 +202,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
     @Override
     public RouteEntry addRoute(RouteBuilder routeBuilder) {
 
-        final RouteMatcher[] routes = routeBuilder.register(router);
+        final RouteMatcher<Request>[] routes = routeBuilder.register(router);
         return new RouteEntry() {
             @Override
             public boolean removeRoute() {
@@ -643,7 +638,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         connection.create(new RootContext(), createRequest);
 
         SyncStub sync = new SyncStub();
-        RouteMatcher r = router.addRoute(uriTemplate("sync"), sync);
+        RouteMatcher<Request> r = router.addRoute(uriTemplate("sync"), sync);
 
 
         ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName + "/account",
@@ -993,7 +988,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         connection.create(new RootContext(), createRequest);
 
         SyncStub sync = new SyncStub();
-        RouteMatcher r = router.addRoute(uriTemplate("sync"), sync);
+        RouteMatcher<Request> r = router.addRoute(uriTemplate("sync"), sync);
 
         ActionRequest actionRequest = Requests.newActionRequest("system/" + systemName,
                 SystemObjectSetService.SystemAction.liveSync.toString());

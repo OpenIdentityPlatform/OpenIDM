@@ -20,6 +20,7 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
  *
  */
 public class SyncHandlerException extends RuntimeException {
+    static final long serialVersionUID = 1L;
     /**
      * {@inheritDoc}
      */

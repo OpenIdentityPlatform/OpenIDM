@@ -140,7 +140,7 @@ public class ConnectorUtil {
     public static final String JAVA_TYPE_PRIMITIVE_BYTE = "JAVA_TYPE_PRIMITIVE_BYTE";
 
 
-    private static final Map<String, Class> typeMap = new HashMap<String, Class>(43);
+    private static final Map<String, Class<?>> typeMap = new HashMap<>(43);
     public static final String OPENICF_CONNECTOR_REF = "connectorRef";
     public static final String OPENICF_OBJECT_TYPES = "objectTypes";
     public static final String OPENICF_OPERATION_OPTIONS = "operationOptions";
@@ -149,7 +149,7 @@ public class ConnectorUtil {
 
     static {
 
-        typeMap.put(Constants.TYPE_ANY, Object.class);
+        typeMap.put("any" /* Constants.TYPE_ANY */, Object.class); // avoid the deprecation warning
         //typeMap.put(Constants.TYPE_NULL, null);
         typeMap.put(Constants.TYPE_ARRAY, List.class);
         typeMap.put(Constants.TYPE_BOOLEAN, Boolean.class);
@@ -230,7 +230,7 @@ public class ConnectorUtil {
      * @param name
      * @return class if it has mapped to a type or null if not.
      */
-    public static Class findClassForName(String name) {
+    public static Class<?> findClassForName(String name) {
         return typeMap.get(name);
     }
 
@@ -243,8 +243,8 @@ public class ConnectorUtil {
      * @return
      * @see #findClassForName(String)
      */
-    public static String findNameForClass(Class clazz) {
-        for (Map.Entry<String, Class> entry : typeMap.entrySet()) {
+    public static String findNameForClass(Class<?> clazz) {
+        for (Map.Entry<String, Class<?>> entry : typeMap.entrySet()) {
             if (entry.getValue().equals(clazz)) {
                 return entry.getKey();
             }
@@ -260,7 +260,7 @@ public class ConnectorUtil {
      * @param clazz
      * @return
      */
-    public static String findJSONTypeForClass(Class clazz) {
+    public static String findJSONTypeForClass(Class<?> clazz) {
         if ((Integer.class.isAssignableFrom(clazz)) || (int.class == clazz)) {
             return Constants.TYPE_INTEGER;
         } else if ((Number.class.isAssignableFrom(clazz)) || (double.class == clazz) || (float.class == clazz) || (long.class == clazz)) {
@@ -389,13 +389,14 @@ public class ConnectorUtil {
         }
     }
 
+    @SuppressWarnings({"rawtypes", "unchecked" })
     private static Object convertFromConfigurationProperty(ConfigurationProperty configurationProperty, CryptoService cryptoService) throws JsonCryptoException{
         Object sourceValue = configurationProperty.getValue();
         if (sourceValue == null) {
             return null;
         }
         boolean isArray = sourceValue.getClass().isArray();
-        Class sourceType = isArray ? sourceValue.getClass().getComponentType() : sourceValue.getClass();
+        Class<?> sourceType = isArray ? sourceValue.getClass().getComponentType() : sourceValue.getClass();
         Object result = null;
         if (isArray) {
             if (sourceType == byte.class) {
@@ -438,7 +439,7 @@ public class ConnectorUtil {
         return result;
     }
 
-
+    @SuppressWarnings({"rawtypes", "unchecked" })
     public static void  configureConfigurationProperties(JsonValue source, ConfigurationProperties target,
             CryptoService cryptoService) throws JsonValueException {
         source.required();
@@ -452,10 +453,10 @@ public class ConnectorUtil {
                     continue;
                 }
                 ConfigurationProperty property = target.getProperty(e.getKey());
-                Class targetType = property.getType();
+                Class<?> targetType = property.getType();
                 Object propertyValue = null;
                 if (targetType.isArray()) {
-                    Class targetBaseType = targetType.getComponentType();
+                    Class<?> targetBaseType = targetType.getComponentType();
                     if (targetBaseType == byte.class || targetBaseType == char.class) {
                         propertyValue = coercedTypeCasting(e.getValue(), targetType);
                     } else if (e.getValue() instanceof List) {
@@ -616,10 +617,13 @@ public class ConnectorUtil {
             throw new IllegalArgumentException("Bad algorithm name: " + algorithm);
         }
 
-        for (Map<String, Object> server: info.get(OPENICF_GROUP_SERVERS_LIST).required().asList(Map.class)) {
-            AsyncConnectorInfoManager aim = serverInfo.get(server.get("name"));
-            if (null != aim && aim instanceof AsyncRemoteConnectorInfoManager) {
-                lbf.addAsyncRemoteConnectorInfoManager((AsyncRemoteConnectorInfoManager) aim);
+        for (JsonValue element : new JsonValue(info.get(OPENICF_GROUP_SERVERS_LIST).required().asList())) {
+            final String serverName = element.get("name").asString();
+            if (serverName != null) {
+                AsyncConnectorInfoManager aim = serverInfo.get(serverName);
+                if (null != aim && aim instanceof AsyncRemoteConnectorInfoManager) {
+                    lbf.addAsyncRemoteConnectorInfoManager((AsyncRemoteConnectorInfoManager) aim);
+                }
             }
         }
         return lbf;
@@ -804,7 +808,7 @@ public class ConnectorUtil {
 
     public static Map<String, Object> getOperationOptionInfoMap(OperationOptionInfo info) {
         Map<String, Object> schema = new LinkedHashMap<String, Object>();
-        Class clazz = info.getType().isArray() ? info.getType().getComponentType() : info.getType();
+        Class<?> clazz = info.getType().isArray() ? info.getType().getComponentType() : info.getType();
         if (info.getType().isArray()) {
             schema.put(Constants.TYPE, Constants.TYPE_ARRAY);
             Map<String, Object> itemSchema = new LinkedHashMap<String, Object>(2);
@@ -904,7 +908,7 @@ public class ConnectorUtil {
         }
 
         Class<T> targetClazz = clazz;
-        Class sourceClass = source.getClass();
+        Class<?> sourceClass = source.getClass();
         boolean coerced = false;
         T result = null;
         try {

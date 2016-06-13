@@ -353,7 +353,7 @@ public class AttributeInfoHelper {
         }
     }
 
-    private Object getNewValue(Object source, boolean isMultiValued, Class type) {
+    private Object getNewValue(Object source, boolean isMultiValued, Class<?> type) {
         if (isMultiValued) {
             return getMultiValue(source, type);
         } else {
@@ -365,12 +365,13 @@ public class AttributeInfoHelper {
         if (null == source) {
             return null;
         } 
-        
+
         if (source instanceof JsonValue) {
             source = ((JsonValue) source).getObject();
         }
-        
+
         if (source instanceof List) {
+            @SuppressWarnings({ "rawtypes", "unchecked" })
             List c = (List) source;
             if (c.size() < 2) {
                 if (c.isEmpty()) {

@@ -83,8 +83,7 @@ public class ConnectorUtilTest {
         try {
             inputStream = ConnectorUtilTest.class.getResourceAsStream("/config/TestSystemConnectorConfiguration.json");
             ObjectMapper mapper = new ObjectMapper();
-            Map map = mapper.readValue(inputStream, Map.class);
-            jsonConfiguration = new JsonValue(map);
+            jsonConfiguration = new JsonValue(mapper.readValue(inputStream, Map.class));
         } finally {
             if (null != inputStream) {
                 inputStream.close();

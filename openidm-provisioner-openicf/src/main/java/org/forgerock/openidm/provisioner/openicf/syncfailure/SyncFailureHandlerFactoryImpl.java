@@ -17,12 +17,16 @@ package org.forgerock.openidm.provisioner.openicf.syncfailure;
 
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.json.JsonValue;
 import org.forgerock.script.ScriptRegistry;
+import org.osgi.framework.Constants;
 
 /**
  * A factory service to create the SyncFailureHandler strategy from config.
@@ -30,11 +34,15 @@ import org.forgerock.script.ScriptRegistry;
  */
 @Component(name = SyncFailureHandlerFactoryImpl.PID,
         policy = ConfigurationPolicy.IGNORE,
-        metatype = false,
+        metatype = true,
         description = "OpenIDM Sync Failure Handler Factory Service",
-        immediate = true
-)
+        immediate = true)
 @Service()
+@Properties({
+    @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Sync Failure Handler Factory"),
+    @Property(name = "suppressMetatypeWarning", value = "true")
+})
 public class SyncFailureHandlerFactoryImpl implements SyncFailureHandlerFactory {
     public static final String PID = "org.forgerock.openidm.openicf.syncfailure";
 

@@ -139,13 +139,6 @@ public class OperationOptionInfoHelper {
     public OperationOptionsBuilder build(JsonValue source, ObjectClassInfoHelper objectClassInfoHelper) throws IOException {
         OperationOptionsBuilder builder = new OperationOptionsBuilder();
         if (null != source && !source.isNull()) {
-            //Get the explicit options object if defied.
-            Object o = source.get("_options");
-            Map<String, Object> options = null;
-            if (o instanceof Map) {
-                options = (Map<String, Object>) o;
-            }
-
             for (AttributeInfoHelper helper : attributes) {
                 helper.build(builder, source.get(helper.getName()));
             }

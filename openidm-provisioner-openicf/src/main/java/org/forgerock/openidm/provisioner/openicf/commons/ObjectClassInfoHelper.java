@@ -44,7 +44,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.PatchOperation;
-import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.ResourceResponse;
@@ -126,7 +125,7 @@ public class ObjectClassInfoHelper {
             final List<JsonPointer> fieldFilters) {
         boolean returnResource = false;
         if (null != fieldFilters) {
-            Set<String> attrsToGet = new HashSet();
+            Set<String> attrsToGet = new HashSet<>();
             for (JsonPointer field : fieldFilters) {
                 if (field.isEmpty()
                         || returnResource

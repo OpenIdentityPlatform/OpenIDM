@@ -55,7 +55,9 @@ import org.testng.annotations.Test;
  */
 public class ConnectorInfoProviderServiceTest {
 
-    private Dictionary properties = null;
+    private static final ObjectMapper mapper = new ObjectMapper();
+
+    private Dictionary<String, Object> properties = null;
     private JsonValue connectorInfoProviderServiceConfiguration = null;
 
     protected ConnectorInfoProviderService testableConnectorInfoProvider = null;
@@ -74,10 +76,9 @@ public class ConnectorInfoProviderServiceTest {
             buffer.write(temp, 0, read);
         }
         String config = new String(buffer.toByteArray());
-        connectorInfoProviderServiceConfiguration =
-                new JsonValue((new ObjectMapper()).readValue(config, Map.class));
+        connectorInfoProviderServiceConfiguration = new JsonValue(mapper.readValue(config, Map.class));
 
-        properties = new Hashtable<String, Object>();
+        properties = new Hashtable<>();
         properties.put(ComponentConstants.COMPONENT_NAME, getClass().getName());
         properties.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, config);
 
@@ -165,7 +166,6 @@ public class ConnectorInfoProviderServiceTest {
         configuration.getConfigurationProperties().setPropertyValue("createFileIfNotExists", true);
 
         try {
-            ObjectMapper mapper = new ObjectMapper();
             URL root = ConnectorInfoProviderServiceTest.class.getResource("/");
             mapper.writeValue(new File((new URL(root, "XMLConnector_configuration.json")).toURI()),
                     testableConnectorInfoProvider.createSystemConfiguration(connectorReference, configuration, true));
@@ -188,11 +188,10 @@ public class ConnectorInfoProviderServiceTest {
                 ConnectorInfoProviderServiceTest.class
                         .getResourceAsStream("/config/org.forgerock.openidm.provisioner.openicf.impl.OpenICFProvisionerServiceSolarisConnectorTest.json");
         assertThat(inputStream).isNotNull();
-        Map config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
         List<JsonPointer> result =
                 testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID,
-                        null, new JsonValue(config));
+                        null, new JsonValue(mapper.readValue(inputStream, Map.class)));
         String[] expected =
                 new String[] { "/configurationProperties/password",
                     "/configurationProperties/credentials", "/configurationProperties/privateKey",
@@ -205,11 +204,10 @@ public class ConnectorInfoProviderServiceTest {
                 ConnectorInfoProviderServiceTest.class
                         .getResourceAsStream("/config/provisioner.openicf-xml.json");
         assertThat(inputStream).isNotNull();
-        config = (new ObjectMapper()).readValue(inputStream, Map.class);
 
         result =
                 testableConnectorInfoProvider.getPropertiesToEncrypt(OpenICFProvisionerService.PID,
-                        null, new JsonValue(config));
+                        null, new JsonValue(mapper.readValue(inputStream, Map.class)));
         assertThat(result).hasSize(0);
 
         result =
