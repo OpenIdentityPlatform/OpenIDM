@@ -59,7 +59,7 @@ public class PublisherTest {
         EventEntry measure = Publisher.start(EVENT_BASIC_TEST, dummyPayload, dummyContext1);
         Math.sqrt(342972);
         measure.end();
-        Thread.currentThread().sleep(100); // Statistics is not necessarily updated in a synchronous fashion
+        Thread.sleep(100); // Statistics is not necessarily updated in a synchronous fashion
         Object totals = mbs.getAttribute(getStatisticsMBean(), "Totals");
         assertThat(totals).isInstanceOf(Map.class);
         Object statisticsEntry = ((Map)totals).get(EVENT_BASIC_TEST.asString());
@@ -89,7 +89,7 @@ public class PublisherTest {
             EventEntry measure = Publisher.start(EVENT_PERF_SMOKE_TEST, dummyPayload, dummyContext1);
             measure.end();
         }
-        Thread.currentThread().sleep(200); 
+        Thread.sleep(200);
         
         long start = System.currentTimeMillis();
         for (int i = 0; i < iterations; i++) {

@@ -18,10 +18,6 @@ package org.forgerock.openidm.smartevent.core;
 
 import java.util.Map;
 
-//import com.lmax.disruptor.SingleThreadedClaimStrategy;
-//import com.lmax.disruptor.SleepingWaitStrategy;
-//import com.lmax.disruptor.dsl.Disruptor;
-
 /**
  * This MBean interface is expected to change!!!
  * 
@@ -34,13 +30,13 @@ public interface StatisticsHandlerMBean {
     /**
      * @return The statistics totals
      */
-    Map getTotals();
+    Map<String, String> getTotals();
 
     /**
      * @return the recent history of events, mapping from start time to the
      *         event detail
      */
-    Map getRecent();
+    Map<Long, String> getRecent();
 
     /**
      * Reset all statistics data for events

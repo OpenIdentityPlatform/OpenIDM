@@ -59,8 +59,13 @@ public class DisruptorReferringPublisher implements PluggablePublisher {
     static RingBuffer<DisruptorReferringEventEntry> ringBuffer;
 
     static {
-        disruptor.handleEventsWith(new StatisticsHandler(disruptor));
+        handleEvents();
         ringBuffer = disruptor.start();
+    }
+
+    @SuppressWarnings("unchecked")
+    static void handleEvents() {
+        disruptor.handleEventsWith(new StatisticsHandler(disruptor));
     }
 
     static long sequence = -1;

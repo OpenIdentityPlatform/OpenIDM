@@ -35,6 +35,7 @@ import com.lmax.disruptor.EventFactory;
  *             end() to be called on the EventEntry
  * 
  */
+@Deprecated
 public class DisruptorShortEventEntry implements EventEntry {
 
     Name eventName;

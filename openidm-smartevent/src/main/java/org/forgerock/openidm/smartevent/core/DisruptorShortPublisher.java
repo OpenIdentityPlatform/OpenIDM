@@ -35,6 +35,7 @@ import com.lmax.disruptor.dsl.Disruptor;
  *             to the ring buffer size Plus it is highly sensitive to requiring
  *             end() to be called on the EventEntry
  */
+@Deprecated
 public class DisruptorShortPublisher implements PluggablePublisher {
 
     static PluggablePublisher INSTANCE = new DisruptorShortPublisher();
