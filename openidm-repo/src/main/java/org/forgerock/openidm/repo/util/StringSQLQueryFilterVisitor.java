@@ -61,6 +61,8 @@ import org.forgerock.util.query.QueryFilterVisitor;
  * which handles the value assertions - x operand y for the standard operands.  The implementer is also responsible for
  * implementing {@link #visitPresentFilter(Object, org.forgerock.json.JsonPointer)} as "field present" can vary
  * by database implementation (though typically "field IS NOT NULL" is chosen).
+ *
+ * @param <P> the parameter type passed in the visit methods
  */
 public abstract class StringSQLQueryFilterVisitor<P> extends AbstractSQLQueryFilterVisitor<StringSQLRenderer, P> {
 
