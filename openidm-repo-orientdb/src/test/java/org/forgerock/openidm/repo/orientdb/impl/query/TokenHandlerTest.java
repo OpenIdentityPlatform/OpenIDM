@@ -23,9 +23,7 @@
  */
 package org.forgerock.openidm.repo.orientdb.impl.query;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.resource.BadRequestException;
@@ -56,7 +54,9 @@ public class TokenHandlerTest {
     }
     
     // Disabled as CREST 2.x supports param values only
-    //@Test(dependsOnMethods = {"initTokenHandler"})
+    // see also OPENIDM-522
+    /*
+    @Test(dependsOnMethods = {"initTokenHandler"})
     public void replaceTokensWithListValues() throws BadRequestException {
         String queryString = "select ${unquoted:_fields} from ${unquoted:_resource} where firstname = ${firstname} and lastname like '${unquoted:lastname}%'";
 
@@ -70,6 +70,7 @@ public class TokenHandlerTest {
         String result = tokenHandler.replaceTokensWithValues(queryString, params);
         assertThat(result).isEqualTo("select firstname,lastname,email from managed/user where firstname = 'John' and lastname like 'D%'");
     }
+    */
 
     @Test(dependsOnMethods = {"initTokenHandler"})
     public void replaceTokenWithDotNotationAbsolute() throws BadRequestException {

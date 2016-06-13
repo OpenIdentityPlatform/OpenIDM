@@ -25,6 +25,7 @@ package org.forgerock.openidm.repo.orientdb.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.MapEntry.entry;
+import static org.forgerock.json.JsonValue.json;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.orientechnologies.orient.core.db.ODatabaseRecordThreadLocal;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -129,32 +131,33 @@ public class DocumentUtilTest {
         doc.field("lastname", "Doe");
         doc.field("city", new ODocument().field("name","Paris").field("country", "France"));
         doc.field("phonenumbers", new ODocument().field("home","555-666-7777").field("mobile", "555-111-2222"), OType.EMBEDDED);
+
+        // wrap result in JsonValue to help with typing
+        JsonValue result = json(DocumentUtil.toMap(doc));
         
-        Map result = DocumentUtil.toMap(doc);
-        
-        assertThat(result).contains(
+        assertThat(result.asMap()).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
                 entry(DocumentUtil.TAG_REV, "0"), // Doc version starts at 0
                 entry("firstname", "John"), 
                 entry("lastname", "Doe"));
 
-        Object city = result.get("city");
-        assertThat(city).isNotNull().overridingErrorMessage("city map entry null");
-        assertThat(city).isInstanceOf(Map.class);
-        assertThat((Map)city)
+        JsonValue city = result.get("city");
+        assertThat(city.isNotNull()).overridingErrorMessage("city map entry null");
+        assertThat(city.isMap());
+        assertThat(city.asMap())
                 .hasSize(2)
                 .contains(entry("name", "Paris"), entry("country", "France"));
-        
-        Object phonenumbers = result.get("phonenumbers");
+
+        JsonValue phonenumbers = result.get("phonenumbers");
         assertThat(phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
-        assertThat(phonenumbers).isInstanceOf(Map.class);
-        assertThat((Map)phonenumbers)
+        assertThat(phonenumbers.isMap());
+        assertThat(phonenumbers.asMap())
                 .hasSize(2)
                 .contains(entry("home", "555-666-7777"), entry("mobile", "555-111-2222"));
     }
-    
+
     @Test
     public void embeddedListToMap() {
 
@@ -166,31 +169,32 @@ public class DocumentUtilTest {
         List<ODocument> addresses = new ArrayList<ODocument>();
         addresses.add(new ODocument().field("type", "home").field("street", "Main st.").field("city", "San Francisco") );
         addresses.add(new ODocument().field("type", "business").field("street", "Wall st.").field("city", "New York") );
-        doc.field("addresses",  addresses, OType.EMBEDDED); 
+        doc.field("addresses",  addresses, OType.EMBEDDED);
+
+        // wrap result in JsonValue to help with typing
+        JsonValue result = json(DocumentUtil.toMap(doc));
         
-        Map<String, Object> result = DocumentUtil.toMap(doc);
-        
-        assertThat(result).contains(
+        assertThat(result.asMap()).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"), //"-1:-1"), // ID when doc not yet stored
                 entry(DocumentUtil.TAG_REV, "0"), // Doc version starts at 0
                 entry("firstname", "John"), 
                 entry("lastname", "Doe"));
 
-        Object addrResult = result.get("addresses");
+        JsonValue addrResult = result.get("addresses");
         assertThat(addrResult).isNotNull().overridingErrorMessage("addresses map entry null");
-        assertThat(addrResult).isInstanceOf(List.class);
-        List addr = (List)addrResult;
-        assertThat(addr)
+        assertThat(addrResult.isList());
+        assertThat(addrResult.asList())
                 .hasSize(2);
 
-        assertThat(addr.get(0)).isInstanceOf(Map.class);
-        Map firstEntry = (Map) addr.get(0);
-        assertThat(firstEntry).contains(
+        JsonValue firstEntry = addrResult.get(0);
+        assertThat(firstEntry.isMap());
+        assertThat(firstEntry.asMap()).contains(
                 entry("type", "home"),
                 entry("street", "Main st."),
                 entry("city", "San Francisco"));
-        Map secondEntry = (Map) addr.get(1); 
-        assertThat(secondEntry).contains(
+        JsonValue secondEntry = addrResult.get(1);
+        assertThat(secondEntry.isMap());
+        assertThat(secondEntry.asMap()).contains(
                 entry("type", "business"),
                 entry("street", "Wall st."),
                 entry("city", "New York")); 
@@ -210,25 +214,26 @@ public class DocumentUtilTest {
         detail.add(new ODocument().field("locations", addresses, OType.EMBEDDED));
         
         doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
-        
-        Map result = DocumentUtil.toMap(doc);
-        
-        assertThat(result).contains(
+
+        // wrap result in JsonValue to help with typing
+        JsonValue resultWidgets = json(DocumentUtil.toMap(doc));
+
+        assertThat(resultWidgets.isMap());
+        assertThat(resultWidgets.asMap()).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"),
                 entry(DocumentUtil.TAG_REV, "0"));
 
-        Map resultWidgets = (Map) result;
-        
-        Map resultWidget = (Map) resultWidgets.get("widget");
-        List resultDetails = (List) resultWidget.get("detail");
-        Map resultDetail1 = (Map) resultDetails.get(0);
-        List resultLocations = (List) resultDetail1.get("locations");
-        Map resultAddress2 = (Map) resultLocations.get(1);
+        JsonValue resultWidget = resultWidgets.get("widget");
+        JsonValue resultDetails = resultWidget.get("detail");
+        JsonValue resultDetail1 = resultDetails.get(0);
+        JsonValue resultLocations = resultDetail1.get("locations");
+        JsonValue resultAddress2 = resultLocations.get(1);
         System.out.println(resultAddress2);
-        Map resultStatus = (Map) resultAddress2.get("status");
-        Integer resultInventory = (Integer) resultStatus.get("inventory");
-        assertThat(resultInventory.intValue()).isEqualTo(20);
-    }    
+        JsonValue resultStatus = resultAddress2.get("status");
+        JsonValue resultInventory = resultStatus.get("inventory");
+        assertThat(resultInventory.isNumber()).isTrue();
+        assertThat(resultInventory.asInteger()).isEqualTo(20);
+    }
     
     @Test
     public void deepNestingWithSetToMap() {
@@ -243,24 +248,25 @@ public class DocumentUtilTest {
         detail.add(new ODocument().field("locations", addresses, OType.EMBEDDED));
         
         doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
-        
-        Map<String, Object> result = DocumentUtil.toMap(doc);
-        
-        assertThat(result).contains(
+
+        // wrap result in JsonValue to help with typing
+        JsonValue resultWidgets = json(DocumentUtil.toMap(doc));
+
+        assertThat(resultWidgets.isMap()).isTrue();
+        assertThat(resultWidgets.asMap()).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"),
                 entry(DocumentUtil.TAG_REV, "0"));
 
-        Map resultWidgets = (Map) result;
-        
-        Map resultWidget = (Map) resultWidgets.get("widget");
-        List resultDetails = (List) resultWidget.get("detail");
-        Map resultDetail1 = (Map) resultDetails.get(0);
-        List resultLocations = (List) resultDetail1.get("locations");
-        Map resultAddress1 = (Map) resultLocations.get(0);
+        JsonValue resultWidget = resultWidgets.get("widget");
+        JsonValue resultDetails = resultWidget.get("detail");
+        JsonValue resultDetail1 = resultDetails.get(0);
+        JsonValue resultLocations = resultDetail1.get("locations");
+        JsonValue resultAddress1 = resultLocations.get(0);
         System.out.println(resultAddress1);
-        Map resultStatus = (Map) resultAddress1.get("status");
-        Integer resultInventory = (Integer) resultStatus.get("inventory");
-        assertThat(resultInventory.intValue()).isEqualTo(10);
+        JsonValue resultStatus = resultAddress1.get("status");
+        JsonValue resultInventory = resultStatus.get("inventory");
+        assertThat(resultInventory.isNumber()).isTrue();
+        assertThat(resultInventory.asInteger()).isEqualTo(10);
     }
 
     @Test
@@ -279,25 +285,26 @@ public class DocumentUtilTest {
         detail.add(locationsMap);
         
         doc.field("widget", new ODocument().field("name","widget-a").field("detail", detail), OType.EMBEDDED);
-        
-        Map result = DocumentUtil.toMap(doc);
-        
-        assertThat(result).contains(
+
+        // wrap result in JsonValue to help with typing
+        JsonValue resultWidgets = json(DocumentUtil.toMap(doc));
+
+        assertThat(resultWidgets.isMap()).isTrue();
+        assertThat(resultWidgets.asMap()).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"),
                 entry(DocumentUtil.TAG_REV, "0"));
 
-        Map resultWidgets = (Map) result;
-        
-        Map resultWidget = (Map) resultWidgets.get("widget");
-        List resultDetails = (List) resultWidget.get("detail");
-        Map resultDetail1 = (Map) resultDetails.get(0);
-        List resultLocations = (List) resultDetail1.get("locations");
-        Map resultAddress2 = (Map) resultLocations.get(1);
+        JsonValue resultWidget = resultWidgets.get("widget");
+        JsonValue resultDetails = resultWidget.get("detail");
+        JsonValue resultDetail1 = resultDetails.get(0);
+        JsonValue resultLocations = resultDetail1.get("locations");
+        JsonValue resultAddress2 = resultLocations.get(1);
         System.out.println(resultAddress2);
-        Map resultStatus = (Map) resultAddress2.get("status");
-        Integer resultInventory = (Integer) resultStatus.get("inventory");
-        assertThat(resultInventory.intValue()).isEqualTo(20);
-    }    
+        JsonValue resultStatus = resultAddress2.get("status");
+        JsonValue resultInventory = resultStatus.get("inventory");
+        assertThat(resultInventory.isNumber()).isTrue();
+        assertThat(resultInventory.asInteger()).isEqualTo(20);
+    }
     
     @Test
     public void mapToDocNullTest() throws ConflictException {
@@ -315,7 +322,7 @@ public class DocumentUtilTest {
         map.put("telephone", "(555) 123-4567");
         map.put("age", 20);
         map.put("longnumber", Long.MAX_VALUE);
-        map.put("amount", Float.valueOf(12345678.89f));
+        map.put("amount", 12345678.89f);
         map.put("present", Boolean.FALSE);
         map.put("somedate", new Date());
         
@@ -354,7 +361,7 @@ public class DocumentUtilTest {
         map.put("telephone", "(555) 123-4567");
         map.put("age", 20);
         map.put("longnumber", Long.MAX_VALUE);
-        map.put("amount", Float.valueOf(12345678.89f));
+        map.put("amount", 12345678.89f);
         map.put("present", Boolean.FALSE);
         map.put("somedate", new Date());
         
@@ -366,7 +373,7 @@ public class DocumentUtilTest {
         existingDoc.field("telephone", "(999) 999-9999");
         existingDoc.field("age", 20);
         existingDoc.field("longnumber", 0);
-        existingDoc.field("amount", Float.valueOf(12345678.89f));
+        existingDoc.field("amount", 12345678.89f);
         existingDoc.field("present", Boolean.FALSE);
         existingDoc.field("somedate", new Date());
         existingDoc.field("AnotherFieldToBeRemoved", new Date());
@@ -452,7 +459,7 @@ public class DocumentUtilTest {
                 .isEqualTo(0)
                 .overridingErrorMessage("Version not as expected");
 
-        ODocument phonenumbers = (ODocument) result.field("phonenumbers");
+        final ODocument phonenumbers = result.field("phonenumbers");
         assertThat((Object) phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
@@ -462,7 +469,13 @@ public class DocumentUtilTest {
         assertThat(phonenumbers.field("mobile"))
                 .isEqualTo("555-111-2222")
                 .overridingErrorMessage("unexpected mobile phone");
-        assertThat((Iterable) phonenumbers).hasSize(2);
+        // disambiguate assertThat(ODocument) from assertThat(Iterable) and avoid casting
+        assertThat(new Iterable<Map.Entry<String, Object>>() {
+            @Override
+            public Iterator<Map.Entry<String, Object>> iterator() {
+                return phonenumbers.iterator();
+            }
+        }).hasSize(2);
     }
     
     @Test
@@ -504,7 +517,7 @@ public class DocumentUtilTest {
                 .isFalse()
                 .overridingErrorMessage("City map should have been removed but is present.");
         
-        ODocument phonenumbers = (ODocument)result.field("phonenumbers");
+        final ODocument phonenumbers = result.field("phonenumbers");
         assertThat((Object) phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
@@ -517,9 +530,14 @@ public class DocumentUtilTest {
         assertThat(phonenumbers.containsField("home"))
                 .isFalse()
                 .overridingErrorMessage("Home phone should have been removed but is present.");
-        assertThat((Iterable) phonenumbers)
-                .hasSize(2);
-    }    
+        // disambiguate assertThat(ODocument) from assertThat(Iterable) and avoid casting
+        assertThat(new Iterable<Map.Entry<String, Object>>() {
+            @Override
+            public Iterator<Map.Entry<String, Object>> iterator() {
+                return phonenumbers.iterator();
+            }
+        }).hasSize(2);
+    }
     
     @Test
     public void listToEmbeddedList() throws ConflictException {
@@ -553,12 +571,8 @@ public class DocumentUtilTest {
         assertThat(result.getVersion())
                 .isEqualTo(0)
                 .overridingErrorMessage("Version not as expected");
-        
-        Object resultCities = result.field("cities");
-        assertThat(resultCities).isInstanceOf(List.class);
-        assertThat((List) resultCities).containsOnly("Paris", "St. Louis");
 
-        ODocument phonenumbers = (ODocument)result.field("phonenumbers");
+        final ODocument phonenumbers = result.field("phonenumbers");
         assertThat((Object) phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
@@ -568,8 +582,13 @@ public class DocumentUtilTest {
         assertThat(phonenumbers.field("mobile"))
                 .isEqualTo("555-111-2222")
                 .overridingErrorMessage("unexpected mobile phone");
-        assertThat((Iterable) phonenumbers)
-                .hasSize(2);
+        // disambiguate assertThat(ODocument) from assertThat(Iterable) and avoid casting
+        assertThat(new Iterable<Map.Entry<String, Object>>() {
+            @Override
+            public Iterator<Map.Entry<String, Object>> iterator() {
+                return phonenumbers.iterator();
+            }
+        }).hasSize(2);
     }
     
     @Test(expectedExceptions = ConflictException.class)
@@ -602,30 +621,32 @@ public class DocumentUtilTest {
         map.put("phonenumbers", phone);
         
         ODocument intermediateResult = DocumentUtil.toDocument(map, null, getDatabase(), orientDocClass);
-        
-        Map result = DocumentUtil.toMap(intermediateResult);
-        
-        assertThat(result).contains(
+
+        // wrap in JsonValue to help in typing
+        JsonValue result = json(DocumentUtil.toMap(intermediateResult));
+
+        assertThat(result.isMap()).isTrue();
+        assertThat(result.asMap()).contains(
                 entry(DocumentUtil.TAG_ID, "client-assigned-id"), 
                 entry(DocumentUtil.TAG_REV, "2"), 
                 entry("firstname", "John"), 
                 entry("lastname", "Doe"));
 
-        Object checkCity = result.get("city");
+        JsonValue checkCity = result.get("city");
         assertThat(checkCity)
                 .isNotNull()
                 .overridingErrorMessage("city map entry null");
-        assertThat(checkCity).isInstanceOf(Map.class);
-        assertThat((Map)checkCity)
+        assertThat(checkCity.isMap()).isTrue();
+        assertThat(checkCity.asMap())
                 .hasSize(2)
                 .contains(entry("name", "Paris"), entry("country", "France"));
         
-        Object phonenumbers = result.get("phonenumbers");
+        JsonValue phonenumbers = result.get("phonenumbers");
         assertThat(phonenumbers)
                 .isNotNull()
                 .overridingErrorMessage("phonenumbers map entry null");
-        assertThat(phonenumbers).isInstanceOf(Map.class);
-        assertThat((Map)phonenumbers)
+        assertThat(phonenumbers.isMap()).isTrue();
+        assertThat(phonenumbers.asMap())
                 .hasSize(2)
                 .contains(entry("home", "555-666-7777"), entry("mobile", "555-111-2222"));
     }
