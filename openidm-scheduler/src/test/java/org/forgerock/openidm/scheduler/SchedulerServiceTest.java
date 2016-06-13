@@ -108,7 +108,7 @@ public class SchedulerServiceTest {
     private ComponentContext getMockedContext() {
         ComponentContext mockedContext = mock(ComponentContext.class);
         BundleContext mockedBundleContext = mock(BundleContext.class);
-        Dictionary<String, Object> compContextProperties = new Hashtable();
+        Dictionary<String, Object> compContextProperties = new Hashtable<>();
         //compContextProperties.put("config.factory-pid", null);
         when(mockedContext.getProperties()).thenReturn(compContextProperties);
         when(mockedContext.getBundleContext()).thenReturn(mockedBundleContext);
