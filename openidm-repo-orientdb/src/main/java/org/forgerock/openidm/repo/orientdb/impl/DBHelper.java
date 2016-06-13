@@ -419,30 +419,29 @@ public class DBHelper {
         String defaultAdminUser = "openidm-admin";
         // Default password needs to be replaced after installation
         String defaultAdminPwd = "openidm-admin";
-        List<Map> defaultAdminRoles = json(array(
+        JsonValue defaultAdminRoles = json(array(
                 object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-admin")),
-                object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-authorized"))))
-                .asList(Map.class);
+                object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-authorized"))));
         populateDefaultUser(defaultTableName, db, defaultAdminUser, defaultAdminPwd, defaultAdminRoles);
         logger.trace("Created default user {}. Please change the assigned default password.",
                 defaultAdminUser);
 
         String anonymousUser = "anonymous";
         String anonymousPwd = "anonymous";
-        List<Map> anonymousRoles = json(array(
-                object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-reg")))).asList(Map.class);
+        JsonValue anonymousRoles = json(array(
+                object(field(RelationshipUtil.REFERENCE_ID, "repo/internal/role/openidm-reg"))));
         populateDefaultUser(defaultTableName, db, anonymousUser, anonymousPwd, anonymousRoles);
         logger.trace("Created default user {} for registration purposes.", anonymousUser);
     }
 
     private static void populateDefaultUser(String defaultTableName, ODatabaseDocumentTx db,
-            String user, String pwd, List roles) throws InvalidException {
+            String user, String pwd, JsonValue roles) throws InvalidException {
 
         JsonValue defaultAdmin = new JsonValue(new HashMap<String, Object>());
         defaultAdmin.put("_openidm_id", user);
         defaultAdmin.put("userName", user);
         defaultAdmin.put("password", pwd);
-        defaultAdmin.put("roles", roles);
+        defaultAdmin.put("roles", roles.getObject());
 
         try {
             ODocument newDoc = DocumentUtil.toDocument(defaultAdmin.asMap(), null, db, defaultTableName);

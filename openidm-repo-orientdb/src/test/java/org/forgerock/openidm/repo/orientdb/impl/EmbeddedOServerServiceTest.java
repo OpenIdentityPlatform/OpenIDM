@@ -63,7 +63,7 @@ public class EmbeddedOServerServiceTest {
                 + "}}";
 
         ObjectMapper mapper = new ObjectMapper();
-        JsonValue config = new JsonValue((Map)mapper.readValue(automaticBackupConfig, Map.class));
+        JsonValue config = new JsonValue(mapper.readValue(automaticBackupConfig, Map.class));
         EmbeddedOServerService embeddedOServerService = new EmbeddedOServerService();
         embeddedOServerService.activate(config);
         assertNotNull(embeddedOServerService.orientDBServer);

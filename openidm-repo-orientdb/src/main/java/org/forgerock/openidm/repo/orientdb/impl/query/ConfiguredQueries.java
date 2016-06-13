@@ -139,14 +139,14 @@ public abstract class ConfiguredQueries<Q extends OCommandRequest, R extends Req
         try {
             String replacedQueryString = tokenHandler.replaceTokensWithOrientToken(queryString);
             Q query = createQueryObject(replacedQueryString);
-            return new QueryInfo<Q>(true, query, queryString);
+            return new QueryInfo<>(true, query, queryString);
         } catch (PrepareNotSupported ex) {
             // Statement not in a format that it can be converted into prepared statement
-            return new QueryInfo<Q>(false, null, queryString);
+            return new QueryInfo<>(false, null, queryString);
         } catch (com.orientechnologies.orient.core.exception.OQueryParsingException ex) {
             // With current OrientDB impl parsing will actually only fail on first use,
             // hence unless the implementation changes this is unlikely to trigger
-            return new QueryInfo<Q>(false, null, queryString);
+            return new QueryInfo<>(false, null, queryString);
         }
     }
 

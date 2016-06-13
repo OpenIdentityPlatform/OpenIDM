@@ -24,9 +24,8 @@
 package org.forgerock.openidm.repo.orientdb.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.HashMap;
-import java.util.Map;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentTx;
 import com.orientechnologies.orient.core.db.document.ODatabaseDocumentPool;
@@ -44,7 +43,7 @@ public class DBHelperTest {
 
     @Test
     public void initPoolTest() throws Exception {
-        ODatabaseDocumentPool pool = DBHelper.getPool(dbURL, user, password, minSize, maxSize, new JsonValue(new HashMap()), true);
+        ODatabaseDocumentPool pool = DBHelper.getPool(dbURL, user, password, minSize, maxSize, json(object()), true);
         assertThat(pool).isNotNull();
         ODatabaseDocumentTx db = pool.acquire(dbURL, user, password);
         assertThat(db).isNotNull();
@@ -57,8 +56,7 @@ public class DBHelperTest {
     public void updateDbCredentialsTest() throws Exception {
         String newUser = "user1";
         String newPassword = "pass1";
-        Map map = new HashMap();
-        JsonValue completeConfig = new JsonValue(map);
+        JsonValue completeConfig = json(object());
         int minSize = 5;
         int maxSize = 20;
         ODatabaseDocumentPool pool = DBHelper.getPool(dbURL, user, password, minSize, maxSize, completeConfig, true);
