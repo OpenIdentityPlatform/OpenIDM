@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.scheduler.impl;
 
+import static org.forgerock.json.JsonValueFunctions.pointer;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -220,6 +222,6 @@ public class TaskScannerContext {
      * @return the JsonPointer contained within the "taskState/${field}" object
      */
     private JsonPointer getTaskStatePointer(JsonValue value, String field) {
-        return value.get("taskState").required().get(field).required().asPointer();
+        return value.get("taskState").required().get(field).required().as(pointer());
     }
 }

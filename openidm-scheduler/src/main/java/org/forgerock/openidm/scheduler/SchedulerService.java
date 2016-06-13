@@ -80,7 +80,6 @@ import org.forgerock.openidm.router.RouteService;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
-import org.osgi.util.tracker.ServiceTracker;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -166,9 +165,6 @@ public class SchedulerService implements RequestHandler {
 
     // Optional user defined name for this instance, derived from the file install name
     String configFactoryPID;
-
-    // Tracks OSGi services that match the configured service PID
-    ServiceTracker scheduledServiceTracker;
 
     @Reference
     ClusterManagementService clusterManager;
@@ -330,7 +326,7 @@ public class SchedulerService implements RequestHandler {
             // Lock access to the scheduler so that a schedule is not added during a config update
             synchronized (LOCK) {
                 // Determine the schedule class based on whether the job has concurrent execution enabled/disabled
-                Class scheduleClass = null;
+                Class<?> scheduleClass = null;
                 if (scheduleConfig.getConcurrentExecution()) {
                     scheduleClass = SchedulerServiceJob.class;
                 } else {
@@ -358,16 +354,16 @@ public class SchedulerService implements RequestHandler {
                         // Schedule the Job (with trigger)
                         scheduler.scheduleJob(job, trigger);
                         logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.",
-                                new Object[] { jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
-                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime() });
+                                jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
+                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime());
                     } else {
                         // Set the job to durable so that it can exist without a trigger (since the job is "disabled")
                         job.setDurability(true);
                         // Add the job (no trigger)
                         scheduler.addJob(job, false);
                         logger.info("Job {} added with schedule {}, timezone {}, start time {}, end time {}.",
-                                new Object[] { jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
-                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime() });
+                                jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
+                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime());
                     }
 
                 }
@@ -783,8 +779,7 @@ public class SchedulerService implements RequestHandler {
     private JsonValue parseStringified(String stringified) {
         JsonValue jsonValue = null;
         try {
-            Map parsedValue = (Map) mapper.readValue(stringified, Map.class);
-            jsonValue = new JsonValue(parsedValue);
+            jsonValue = new JsonValue(mapper.readValue(stringified, Map.class));
         } catch (IOException ex) {
             throw new JsonException("String passed into parsing is not valid JSON", ex);
         }
