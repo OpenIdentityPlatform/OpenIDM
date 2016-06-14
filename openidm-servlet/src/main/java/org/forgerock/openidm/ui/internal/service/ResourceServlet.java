@@ -60,6 +60,8 @@ import org.slf4j.LoggerFactory;
         immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
 public final class ResourceServlet extends HttpServlet {
+    private static final long serialVersionUID = 1;
+
     final static Logger logger = LoggerFactory.getLogger(ResourceServlet.class);
 
     /** config parameter keys */
