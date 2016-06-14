@@ -174,7 +174,7 @@ function createJobsForGrantConstraints(grant) {
  */
 function deleteJobsForGrantConstraints(grant) {
     if (hasConstraints(grant._refProperties)) {
-        for (index in grant.temporalConstraints) {
+        for (index in grant._refProperties.temporalConstraints) {
             deleteJobsForConstraint(
                     grant._refProperties._id + "-temporalConstraint-" + index + "-start",
                     grant._refProperties._id + "-temporalConstraint-" + index + "-end",
@@ -277,11 +277,8 @@ function createJobsForConstraint(constraint, startJobId, endJobId, script) {
         try {
             openidm.create("scheduler", startJobId, startJob);
         } catch (e) {
-            // If 412 (precondition failed) code is encountered, ignore, otherwise log error
-            if (e.javaException.getCode() !== 412) {
-                logger.error("Error while attempting to create start schedule for temporal constraint on grant of: " 
-                        + resourceName);
-            }
+            logger.error("Error while attempting to create start schedule for temporal constraint on resource "
+                + resourceName + " with id of: " + startJobId);
         }
     } else {
         logger.debug("Not creating start job, is in the past");
@@ -291,11 +288,8 @@ function createJobsForConstraint(constraint, startJobId, endJobId, script) {
         try {
             openidm.create("scheduler", endJobId, endJob);
         } catch (e) {
-            // If 412 (precondition failed) code is encountered, ignore, otherwise log error
-            if (e.javaException.getCode() !== 412) {
-                logger.error("Error while attempting to create end schedule for temporal constraint on grant of: " 
-                        + resourceName);
-            }
+            logger.error("Error while attempting to create end schedule for temporal constraint on resource "
+                + resourceName + " with id of: " + endJobId);
         }
     } else {
         logger.debug("Not creating end job, is in the past");
@@ -309,24 +303,30 @@ function createJobsForConstraint(constraint, startJobId, endJobId, script) {
  * @param constraint an object representing a temporal constraint
  */
 function deleteJobsForConstraint(startJobId, endJobId, index) {
-    var startJobId = resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-start",
-        endJobId = resourceName.toString().replace('/', '-') + "-temporalConstraint-" + index + "-end";
     try {
         logger.debug("delete startJob: " + resourceName);
         openidm.delete("scheduler/" + startJobId, null);
     } catch (e) {
-        // If 404 (not found) code is encountered, ignore, otherwise log error
         if (e.javaException.getCode() !== 404) {
-            logger.error("Error while attempting to delete start schedule for temporal constraint of: " + resourceName);
+            logger.error("Error while attempting to delete start schedule for temporal constraint on resource "
+                + resourceName + " with id of: " + startJobId);
+        } else {
+            //only at debug as removing a temporal constraint which has passed should fail, as trigger has already fired.
+            logger.debug("Error while attempting to delete start schedule for temporal constraint on resource "
+                + resourceName + " with id of: " + startJobId);
         }
     }
     try {
         logger.debug("delete endJob:   " + resourceName);
         openidm.delete("scheduler/" + endJobId, null);
     } catch (e) {
-        // If 404 (not found) code is encountered, ignore, otherwise log error
         if (e.javaException.getCode() !== 404) {
-            logger.error("Error while attempting to delete end schedule for temporal constraint of: " + resourceName);
+            logger.error("Error while attempting to delete end schedule for temporal constraint on resource "
+                + resourceName + " with id of: " + endJobId);
+        } else {
+            //only at debug as removing a temporal constraint which has passed should fail, as trigger has already fired.
+            logger.debug("Error while attempting to delete end schedule for temporal constraint on resource "
+                + resourceName + " with id of: " + endJobId);
         }
     }
 };
