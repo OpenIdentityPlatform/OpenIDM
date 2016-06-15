@@ -1,0 +1,12 @@
+[
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items').add(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items', '{\"type\":\"object\"}');"
+         }
+      }
+   }
+]
