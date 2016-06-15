@@ -134,6 +134,13 @@ define([
             url: /^schedule\/(.+)\/$/,
             pattern: "schedule/?/"
         },
+        "advancedView" : {
+            childView: "org/forgerock/openidm/ui/admin/mapping/AdvancedView",
+            view: "org/forgerock/openidm/ui/admin/mapping/MappingBaseView",
+            role: "ui-admin",
+            url: /^advanced\/(.+)\/$/,
+            pattern: "advanced/?/"
+        },
         "adminListSystemObjectView" : {
             view: "org/forgerock/openidm/ui/common/resource/ListResourceView",
             role: "ui-admin",
