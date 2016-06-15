@@ -476,7 +476,9 @@
                         "properties" : {
                             "effectiveAssignments" : {
                                 "type" : "array",
-                                "items" : "object"
+                                "items" : {
+                                    "type" : "object"
+                                }
                             },
                             "timestamp" : {
                                 "type" : "string"
