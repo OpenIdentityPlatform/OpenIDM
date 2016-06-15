@@ -1073,6 +1073,7 @@
         </includes>
         <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
     </fileSet>
+  </fileSets>
     <!-- sample6 -->
     <files>
         <file>
