@@ -35,7 +35,9 @@
             <div class="form-group has-feedback">
                 <label class="col-sm-3 control-label" for="ldapHost">{{t "templates.connector.ldapConnector.host"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="ldapHost" name="configurationProperties.host" value="{{connectorDefaults.configurationProperties.host}}" data-validator-event="keyup blur" data-validator="required" />
+                    <input class="form-control" type="text" id="ldapHost" name="configurationProperties.host" data-validator-event="keyup blur" data-validator="required"
+                        {{#if connectorDefaults.configurationProperties.host}} value="{{connectorDefaults.configurationProperties.host}}"
+                        {{else}} value="{{ t "templates.connector.ldapConnector.defaultHost"}}" {{/if}}/>
                     <div class="validation-message"></div>
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
@@ -62,7 +64,10 @@
             <div class="form-group has-feedback">
                 <label class="col-sm-3 control-label" for="ldapPrincipal">{{t "templates.connector.ldapConnector.username"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" type="text" id="ldapPrincipal" name="configurationProperties.principal" placeholder="{{t "templates.connector.ldapConnector.usernamePlaceholder"}}" value="{{connectorDefaults.configurationProperties.principal}}" data-validator-event="keyup blur" data-validator="required" />
+                    <input class="form-control" type="text" id="ldapPrincipal" name="configurationProperties.principal"
+                        {{#if connectorDefaults.configurationProperties.principal}} value="{{connectorDefaults.configurationProperties.principal}}"
+                        {{else}} value="{{t "templates.connector.ldapConnector.usernamePlaceholder"}}" {{/if}}
+                    data-validator-event="keyup blur" data-validator="required" />
                     <div class="validation-message"></div>
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <span class="help-block">{{t "templates.connector.ldapConnector.loginAccountDN"}}</span>
@@ -73,7 +78,10 @@
                 <label class="col-sm-3 control-label" for="credentials">{{t "templates.connector.ldapConnector.password"}}</label>
                 <div class="col-sm-8">
                     <!-- autocomplete="new-password" is required to prevent chrome from auto-completing these form fields -->
-                    <input class="form-control" type="password" id="credentials" autocomplete="new-password" name="configurationProperties.credentials" data-validator-event="keyup blur" value="" {{#if connectorDefaults.configurationProperties.credentials}} placeholder="********" {{/if}} />
+                    <input class="form-control" type="password" id="credentials" autocomplete="new-password" name="configurationProperties.credentials" data-validator-event="keyup blur" value=""
+                        {{#if connectorDefaults.configurationProperties.credentials}} placeholder="********"
+                        {{else}} data-validator="required" {{/if}} />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                 </div>
             </div>
         </div>
@@ -108,8 +116,9 @@
             {{else}}
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
-                <div class="input-group col-sm-8">
-                    <input class="form-control" id="baseDN" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" placeholder={{t "templates.connector.ldapConnector.baseDN"}} />
+                <div class="col-sm-8">
+                    <input class="form-control" id="baseDN" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" value={{t "templates.connector.ldapConnector.baseDN"}} />
+                    <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <div class="input-group-addon">
                         <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
