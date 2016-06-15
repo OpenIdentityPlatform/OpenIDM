@@ -14,8 +14,9 @@
 
   Copyright (c) 2011-2016 ForgeRock AS. All rights reserved.
 -->
-<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
- xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
     <id>bin</id>
     <baseDirectory>/</baseDirectory>
     <formats>
@@ -100,9 +101,9 @@
         </fileSet>
         <!-- Create empty logs directory  -->
         <fileSet>
-        <directory>${project.build.directory}</directory>
+            <directory>${project.build.directory}</directory>
             <excludes>
-             <exclude>**/*</exclude>
+                <exclude>**/*</exclude>
             </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
@@ -360,7 +361,7 @@
             <outputDirectory>/openidm/samples/sample5b</outputDirectory>
         </fileSet>
         <fileSet>
-          <directory>${basedir}/src/main/resources/samples/sample5</directory>
+            <directory>${basedir}/src/main/resources/samples/sample5</directory>
             <includes>
                 <include>conf/**</include>
                 <include>data/**</include>
@@ -957,123 +958,123 @@
             </includes>
             <outputDirectory>/openidm/samples/roles/temporalConstraints/</outputDirectory>
         </fileSet>
-    <!-- Setup link qualifier samples  -->
-    <fileSet>
-        <directory>${basedir}/src/main/resources/samples/multiaccountlinking</directory>
-        <includes>
-            <include>README.md</include>
-            <include>conf/sync.json</include>
-        </includes>
-        <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
-    </fileSet>
-    <fileSet>
-        <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-        <includes>
-            <include>**</include>
-        </includes>
-        <excludes>
-            <exclude>data/*.xsd</exclude>
-            <exclude>data/*.xml</exclude>
-        </excludes>
-        <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
-    </fileSet>
-    <fileSet>
-        <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-        <includes>
-            <include>provisioner.openicf-ldap.json</include>
-        </includes>
-        <outputDirectory>/openidm/samples/multiaccountlinking/conf</outputDirectory>
-    </fileSet>
-    <fileSet>
-        <directory>${basedir}/src/main/resources</directory>
-        <includes>
-            <include>conf/**</include>
-            <include>script/**</include>
-        </includes>
-        <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
-    </fileSet>
-	<!-- Setup Historical Account Linking Sample -->
-	<fileSet>
-		<directory>${basedir}/src/main/resources/samples/internal-common</directory>
-		<includes>
-			<include>**</include>
-		</includes>
-		<excludes>
-			<exclude>data/*.xsd</exclude>
-			<exclude>data/*.xml</exclude>
-		</excludes>
-		<outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
-	</fileSet>
-	<fileSet>
-		<directory>${basedir}/src/main/resources/samples/provisioners</directory>
-		<includes>
-			<include>provisioner.openicf-ldap.json</include>
-		</includes>
-		<outputDirectory>/openidm/samples/historicalaccountlinking/conf</outputDirectory>
-	</fileSet>
-	<fileSet>
-		<directory>${basedir}/src/main/resources</directory>
-		<includes>
-			<include>conf/**</include>
-			<include>script/**</include>
-		</includes>
-		<outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
-	</fileSet>
-    <!-- Setup Multiple Passwords Sample  -->
-    <fileSet>
-        <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-        <includes>
-            <include>**</include>
-        </includes>
-        <excludes>
-            <exclude>data/*.xsd</exclude>
-            <exclude>data/*.xml</exclude>
-        </excludes>
-        <outputDirectory>/openidm/samples/multiplepasswords</outputDirectory>
-    </fileSet>
-	<fileSet>
-		<directory>${basedir}/src/main/resources/samples/multiplepasswords</directory>
-		<includes>
-			<include>README.md</include>
-            <include>conf/**</include>
-            <include>script/**</include>
-            <include>data/**</include>
-		</includes>
-		<outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
-	</fileSet>
-	<fileSet>
-		<directory>${basedir}/src/main/resources/samples/provisioners</directory>
-		<includes>
-            <include>provisioner.openicf-ldap.json</include>
-            <include>provisioner.openicf-ldap2.json</include>
-		</includes>
-		<outputDirectory>/openidm/samples/multiplepasswords/conf</outputDirectory>
-	</fileSet>
-	<fileSet>
-		<directory>${basedir}/src/main/resources</directory>
-		<includes>
-			<include>conf/**</include>
-			<include>script/**</include>
-		</includes>
-		<outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
-	</fileSet>
-    <!-- Setup kerberos sample -->
-    <fileSet>
-        <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-        <includes>
-            <include>provisioner.openicf-kerberos.json</include>
-        </includes>
-        <outputDirectory>/openidm/samples/kerberos/conf</outputDirectory>
-    </fileSet>
-    <fileSet>
-        <directory>${basedir}/src/main/resources</directory>
-        <includes>
-            <include>conf/**</include>
-            <include>script/**</include>
-        </includes>
-        <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
-    </fileSet>
-  </fileSets>
+        <!-- Setup link qualifier samples  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/multiaccountlinking</directory>
+            <includes>
+                <include>README.md</include>
+                <include>conf/sync.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/multiaccountlinking/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/multiaccountlinking/</outputDirectory>
+        </fileSet>
+        <!-- Setup Historical Account Linking Sample -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/historicalaccountlinking/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/historicalaccountlinking</outputDirectory>
+        </fileSet>
+        <!-- Setup Multiple Passwords Sample  -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
+            <includes>
+                <include>**</include>
+            </includes>
+            <excludes>
+                <exclude>data/*.xsd</exclude>
+                <exclude>data/*.xml</exclude>
+            </excludes>
+            <outputDirectory>/openidm/samples/multiplepasswords</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/multiplepasswords</directory>
+            <includes>
+                <include>README.md</include>
+                <include>conf/**</include>
+                <include>script/**</include>
+                <include>data/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-ldap.json</include>
+                <include>provisioner.openicf-ldap2.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/multiplepasswords/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/multiplepasswords/</outputDirectory>
+        </fileSet>
+        <!-- Setup kerberos sample -->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf-kerberos.json</include>
+            </includes>
+            <outputDirectory>/openidm/samples/kerberos/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
+        </fileSet>
+    </fileSets>
     <!-- sample6 -->
     <files>
         <file>
