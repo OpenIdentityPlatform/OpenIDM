@@ -7,12 +7,12 @@
     "origin": {
         "product": "OpenIDM",
         "version": [
-            "4.0.1-SNAPSHOT"
+            "4.0.0-1-SNAPSHOT"
         ]
     },
     "destination": {
         "product": "OpenIDM",
-        "version": "4.0.2-SNAPSHOT"
+        "version": "4.0.0-2-SNAPSHOT"
     },
     "removeFile" : [
 
