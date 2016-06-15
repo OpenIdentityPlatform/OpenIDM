@@ -1551,6 +1551,7 @@
                 "filterLdapAttr" : "Filter by LDAP attribute",
                 "groupFilter" : "Group Filter",
                 "defaultPort" : "1389",
+                "defaultHost" : "localhost",
                 "baseDN" : "cn=Users,dc=company,dc=com",
                 "account" : "Account",
                 "group" : "Group",
