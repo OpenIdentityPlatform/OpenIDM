@@ -1453,7 +1453,6 @@
                 "passwordAttribute" : "Password Attribute",
                 "csvFile" : "CSV File",
                 "headerUid" : "Header UID",
-                "headerName" : "Header Username",
                 "headerPassword" : "Header Password",
                 "quoteCharacter" : "Quote Character",
                 "fieldDelimiter" : "Field Delimiter",
