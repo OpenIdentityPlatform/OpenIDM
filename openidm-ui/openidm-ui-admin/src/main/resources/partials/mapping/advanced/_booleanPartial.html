@@ -1,0 +1,27 @@
+<div class="form-group">
+    <label class="col-sm-3 control-label" for="{{this.name}}">{{this.title}}</label>
+    <div class="col-sm-8">
+        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+            <label>
+                <input class="toggleBoolean advancedMappingParam"
+                    id="{{this.name}}"
+                    type="checkbox"
+                    name="{{this.name}}"
+                    value="true"
+                    data-panel-id="{{this.panelId}}"
+                    {{#if this.configuredValue}}
+                        checked
+                    {{/if}} >
+                <span></span>
+            </label>
+
+        </div>
+        <span class="help-block">
+            {{this.helpText}}
+            {{#if this.helpLink}}
+                <a href="{{this.helpLink}}" target="_blank">{{t "common.help.help"}}</a>
+            {{/if}}
+        </span>
+
+    </div>
+</div>

@@ -1852,6 +1852,34 @@
                 "absent" : "Absent:",
                 "absentMessage" : "Source object has no matching target.",
                 "noSync" : "No Sync Details Available"
+            },
+            "tabs": {
+                "advanced": "Advanced",
+                "association": "Association",
+                "behavior": "Behaviors",
+                "properties": "Properties",
+                "scheduling": "Scheduling"
+            },
+            "advanced": {
+                "additionalOptions": "Additional Mapping Options",
+                "allowEmptySourceSet": "Allow Reconciliations From an Empty Source",
+                "allowEmptySourceSetHelp": "Disabled by default; reconciliations from an empty source can delete all data in a target resource.",
+                "correlateEmptyTargetSet": "Correlate Emtpy Target Objects",
+                "correlateEmptyTargetSetHelp": "",
+                "enableSync": "Disable Automatic Synchronization",
+                "enableSyncHelp": "",
+                "prefetchLinks": "Pre-fetch Links",
+                "prefetchLinksHelp": "If disabled, reconciliations examine each link when processing source and target objects",
+                "reconSourceQueryPaging": "Enable Reconciliation Paging",
+                "reconSourceQueryPagingHelp": "Configure reconciliation pages that fit in memory limits",
+                "reconSourceQueryPagingSize": "Paging Size",
+                "reconSourceQueryPagingSizeHelp": "Number of entries processed in each reconciliation page (default=1000)",
+                "sourceQueryFullEntry": "Return Complete Source Object",
+                "sourceQueryFullEntryHelp": "Override auto detection to return complete object from sourceQuery.",
+                "taskThreads": "Threads Per Reconciliation",
+                "taskThreadsHelp": "",
+                "targetQueryFullEntry": "Return Complete Target Object",
+                "targetQueryFullEntryHelp": "Override auto detection to return complete object from targetQuery."
             }
         }
     },
@@ -1941,6 +1969,10 @@
                 "spaceNotAllowed" : "Cannot contain a space",
                 "unique" : "Unique value required"
             }
+        },
+        "help" : {
+            "help": "Help",
+            "moreInfo": "More info."
         },
         "user" : {
             "userQuery" : {
