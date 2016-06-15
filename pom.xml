@@ -293,6 +293,7 @@
         <module>openidm-external-email</module>
         <module>openidm-external-rest</module>
         <module>openidm-httpcontext</module>
+        <module>openidm-identity-provider</module>
         <module>openidm-infoservice</module>
         <module>openidm-customendpoint</module>
         <module>openidm-jetty-fragment</module>
