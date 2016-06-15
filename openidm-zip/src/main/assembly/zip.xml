@@ -1073,23 +1073,6 @@
         </includes>
         <outputDirectory>/openidm/samples/kerberos/</outputDirectory>
     </fileSet>
-    <!-- scriptedssh connector-->
-    <fileSet>
-        <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-        <includes>
-            <include>provisioner.openicf-ssh.json</include>
-        </includes>
-        <outputDirectory>/openidm/samples/scriptedssh/conf</outputDirectory>
-    </fileSet>
-    <fileSet>
-        <directory>${basedir}/src/main/resources</directory>
-        <includes>
-            <include>conf/**</include>
-            <include>script/**</include>
-        </includes>
-        <outputDirectory>/openidm/samples/scriptedssh</outputDirectory>
-    </fileSet>
-  </fileSets>
     <!-- sample6 -->
     <files>
         <file>
