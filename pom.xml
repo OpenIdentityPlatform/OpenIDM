@@ -208,12 +208,12 @@
 
     <properties>
         <!-- Version management -->
-        <commons.commons-bom.version>20.0.0-alpha-5</commons.commons-bom.version>
+        <commons.commons-bom.version>21.0.0-alpha-1</commons.commons-bom.version>
 
         <!-- Commons versions -->
-        <commons.forgerock-script.version>3.4.0</commons.forgerock-script.version>
+        <commons.forgerock-script.version>4.0.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
-        <commons.forgerock-launcher.version>2.0.1</commons.forgerock-launcher.version>
+        <commons.forgerock-launcher.version>2.0.2-SNAPSHOT</commons.forgerock-launcher.version>
 
         <!-- Third party dependency versions -->
         <orientdb.version>1.7.10</orientdb.version>
@@ -253,7 +253,7 @@
         <felix.webconsole.packageadmin.version>1.0.0</felix.webconsole.packageadmin.version>
 
         <!-- OpenICF Framework and Connector versions -->
-        <openicf.framework.version>1.5.0.1-SNAPSHOT</openicf.framework.version>
+        <openicf.framework.version>1.5.2.0-SNAPSHOT</openicf.framework.version>
         <openicf.xmlconnector.version>1.1.0.2</openicf.xmlconnector.version>
         <openicf.csvconnector.version>1.5.1.4</openicf.csvconnector.version>
         <openicf.dbtableconnector.version>1.1.0.1</openicf.dbtableconnector.version>
