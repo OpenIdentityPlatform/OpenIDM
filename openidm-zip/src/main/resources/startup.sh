@@ -119,7 +119,7 @@ START_IDM() {
         -classpath "$CLASSPATH" \
         -Dopenidm.system.server.root="$OPENIDM_HOME" \
         -Djava.awt.headless=true \
-        org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS)
+        org.forgerock.openidm.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS)
 }
 
 while
@@ -129,4 +129,4 @@ do
    continue;
 done
 
-# org.forgerock.commons.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
+# org.forgerock.openidm.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
