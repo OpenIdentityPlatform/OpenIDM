@@ -62,7 +62,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.commons.launcher.OSGiFrameworkService;
+import org.forgerock.openidm.launcher.OSGiFrameworkService;
 import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -164,8 +164,8 @@ public class UpdateManagerImpl implements UpdateManager {
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating UpdateManagerImpl {}", compContext.getProperties());
         BundleContext bundleContext = compContext.getBundleContext();
-        Filter osgiFrameworkFilter = bundleContext
-                .createFilter("(" + Constants.OBJECTCLASS + "=org.forgerock.commons.launcher.OSGiFramework)");
+        Filter osgiFrameworkFilter = bundleContext.createFilter(
+                "(" + Constants.OBJECTCLASS + "=org.forgerock.openidm.launcher.OSGiFramework)");
         ServiceTracker<OSGiFrameworkService, OSGiFrameworkService> serviceTracker =
                 new ServiceTracker<>(bundleContext, osgiFrameworkFilter, null);
         serviceTracker.open(true);
