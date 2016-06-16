@@ -84,7 +84,7 @@ define([
                 });
             }, this);
             e.preventDefault();
-            
+
             if(AuthenticationModuleView.model.amSettings) {
                 this.handleOpenAMUISettings(AuthenticationModuleView.model.amSettings).then(function () {
                     doSave(true);
@@ -104,7 +104,7 @@ define([
                         });
                     });
                 };
-            
+
             if (amSettings.openamAuthEnabled) {
                 // Validate openamDeploymentUrl
                 OpenAMProxyDelegate.serverinfo(amSettings.openamDeploymentUrl).then(_.bind(function(info){
@@ -121,10 +121,14 @@ define([
             } else {
                 confirmed();
             }
-            
+
             //remove this property so it doesn't get saved in ui-configuration.json
             delete amSettings.openamDeploymentUrl;
-            
+            //remove ui-config properties that do not need to be in authentication.json
+            delete AuthenticationModuleView.model.changes[amAuthIndex].properties.openamUseExclusively;
+            delete AuthenticationModuleView.model.changes[amAuthIndex].properties.openamLoginLinkText;
+            delete AuthenticationModuleView.model.changes[amAuthIndex].properties.openamLoginUrl;
+
             return prom;
         }
 
