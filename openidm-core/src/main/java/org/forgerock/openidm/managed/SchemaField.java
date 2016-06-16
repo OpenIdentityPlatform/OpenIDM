@@ -55,6 +55,11 @@ public class SchemaField {
     public static JsonPointer FIELD_ALL = new JsonPointer("*");
     public static JsonPointer FIELD_EMPTY = new JsonPointer("");
 
+    /**
+     * Custom {@code relationship} JSON Schema type, which is essentially a sub-type of {@code object}.
+     */
+    public static final String TYPE_RELATIONSHIP = "relationship";
+
     /** Schema field types */
     enum SchemaFieldType {
         CORE, 
@@ -220,7 +225,7 @@ public class SchemaField {
      * @param type the type of this schema field
      */
     private void setType(String type) {
-        if (type.equals("relationship")) {
+        if (type.equals(TYPE_RELATIONSHIP)) {
             this.type = SchemaFieldType.RELATIONSHIP;
         } else if (type.equals("null")) {
             this.nullable = true;
