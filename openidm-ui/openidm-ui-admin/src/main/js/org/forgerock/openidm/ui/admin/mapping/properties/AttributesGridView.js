@@ -93,7 +93,7 @@ define([
             this.currentLinkQualifier = this.data.linkQualifiers[0];
             this.data.hasLinkQualifiers = this.mapping.linkQualifiers;
 
-            if (conf.globalData.sampleSource && this.mapping.properties.length) {
+            if (conf.globalData.sampleSource && conf.globalData.sampleSource.IDMSampleMappingName === this.mapping.name && this.mapping.properties.length) {
                 this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
             }
 
@@ -444,6 +444,10 @@ define([
                 tempDetails = {},
                 sampleSource = conf.globalData.sampleSource || {};
 
+            if (sampleSource.IDMSampleMappingName !== this.mapping.name) {
+                sampleSource = {};
+            }
+
             this.sampleDisplay = [];
 
             if (!_.isEmpty(sampleSource)) {
@@ -507,6 +511,10 @@ define([
             var samplePromise = $.Deferred(),
                 filterCheck,
                 sampleSource = conf.globalData.sampleSource || {};
+
+            if (sampleSource.IDMSampleMappingName !== this.mapping.name) {
+                return samplePromise.resolve(null);
+            }
 
             if (sampleDetails.hasCondition) {
                 if (_.isString(sampleDetails.condition)) {
