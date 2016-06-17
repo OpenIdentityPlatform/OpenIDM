@@ -13,7 +13,7 @@
     ~ Header, with the fields enclosed by brackets [] replaced by your own identifying
     ~ information: "Portions copyright [year] [name of copyright owner]".
     ~
-    ~ Copyright 2015 ForgeRock AS.
+    ~ Copyright 2015-2016 ForgeRock AS.
 -->
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
 
@@ -40,6 +40,8 @@
     </Arg>-->
 
     <New id="httpConfig" class="org.eclipse.jetty.server.HttpConfiguration">
+        <!-- remove Server header from HTTP responses, to prevent leaking server-type/version -->
+        <Set name="sendServerVersion">false</Set>
         <Set name="outputBufferSize">32768</Set>
         <Set name="requestHeaderSize">8192</Set>
         <Set name="responseHeaderSize">8192</Set>
@@ -274,6 +276,13 @@
                     </Arg>
                 </Call-->
             </New>
+        </Arg>
+    </Call>
+
+    <!-- Fallback error handler, that returns minimal information, for errors that cannot be handled by OpenIDM -->
+    <Call name="addBean">
+        <Arg>
+            <New class="org.forgerock.openidm.jetty.JettyErrorHandler"/>
         </Arg>
     </Call>
 
