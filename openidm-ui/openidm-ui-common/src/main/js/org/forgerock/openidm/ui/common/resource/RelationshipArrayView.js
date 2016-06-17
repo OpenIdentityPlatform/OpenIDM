@@ -25,6 +25,7 @@ define([
     "org/forgerock/openidm/ui/common/delegates/ResourceDelegate",
     "org/forgerock/commons/ui/common/components/Messages",
     "org/forgerock/commons/ui/common/main/AbstractCollection",
+    "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/openidm/ui/common/util/ResourceCollectionUtils",
     "org/forgerock/openidm/ui/common/resource/ResourceCollectionSearchDialog",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -42,6 +43,7 @@ define([
         resourceDelegate,
         messagesManager,
         AbstractCollection,
+        AbstractModel,
         resourceCollectionUtils,
         ResourceCollectionSearchDialog,
         uiUtils,
@@ -260,6 +262,18 @@ define([
                     queryParams: BackgridUtils.getQueryParams({
                         _queryFilter: 'true',
                         _fields: ''
+                    }),
+                    model: AbstractModel.extend({
+                        /*
+                            By default AbstractModel sets the idAttribute to "_id".
+                            In this grid the "_id" property is not actually the _id
+                            of the relationship it is the _id of the resource being
+                            displayed. There could be duplicates of this _id if a
+                            relationship is created multiple times on the same resource.
+                            Overriding the "idAttribute" by setting it to use "_refProperties._id"
+                            allows the "duplicates" to be displayed/edited/removed.
+                        */
+                        idAttribute: "_refProperties._id"
                     })
                 }),
                 relationshipGrid,
