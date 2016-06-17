@@ -49,7 +49,7 @@
                 "name" : {
                     "type" : "string",
                     "required" : true,
-                    "nativeName" : "__NAME__",
+                    "nativeName" : "name",
                     "nativeType" : "string"
                 }
             }
