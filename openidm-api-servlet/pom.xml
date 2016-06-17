@@ -48,6 +48,11 @@
             <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-jetty-fragment</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Forgerock commons dependencies -->
         <dependency>
