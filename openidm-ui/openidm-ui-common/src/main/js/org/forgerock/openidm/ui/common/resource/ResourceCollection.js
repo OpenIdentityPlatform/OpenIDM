@@ -25,7 +25,7 @@ define([
             this.url = options.url;
             this.model = AbstractModel.extend({ "url": options.url });
             this.state = options.state;
-            _.extend(this.queryParams, BackgridUtils.getQueryParams({
+            this.queryParams = _.extend({}, this.queryParams, BackgridUtils.getQueryParams({
                 _queryFilter: options._queryFilter
             }, options.isSystemResource));
         }
