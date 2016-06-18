@@ -33,7 +33,10 @@ define([
             data: "{}",
             url: "/json/sessions?_action=logout",
             headers : headers,
-            errorsHandlers: {"Bad Request": {status: 400}}
+            errorsHandlers: {
+                "Bad Request": {status: 400},
+                "Unauthorized": {status: 401}
+            }
         });
 
     };
