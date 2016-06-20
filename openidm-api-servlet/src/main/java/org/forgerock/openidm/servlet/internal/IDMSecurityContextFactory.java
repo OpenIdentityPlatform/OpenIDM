@@ -32,7 +32,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.http.HttpContextFactory;
-import org.forgerock.json.resource.http.SecurityContextFactory;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 
@@ -70,7 +69,9 @@ public class IDMSecurityContextFactory implements HttpContextFactory {
     @Override
     public Context createContext(Context parent, org.forgerock.http.protocol.Request request) throws ResourceException {
 
-        final SecurityContextFactory securityContextFactory = SecurityContextFactory.getHttpServletContextFactory();
+        @SuppressWarnings("deprecation")
+        final org.forgerock.json.resource.http.SecurityContextFactory securityContextFactory =
+                org.forgerock.json.resource.http.SecurityContextFactory.getHttpServletContextFactory();
         final SecurityContext securityContext = securityContextFactory.createContext(parent);
 
         // execute global security context augmentation scripts

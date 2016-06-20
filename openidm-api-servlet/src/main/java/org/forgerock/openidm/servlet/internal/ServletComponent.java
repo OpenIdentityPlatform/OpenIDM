@@ -18,6 +18,7 @@ package org.forgerock.openidm.servlet.internal;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_SCRIPT_EXTENSIONS;
 
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.List;
@@ -198,7 +199,9 @@ public class ServletComponent implements EventHandler {
                     }
                 });
 
-        servletRegistration.registerServlet(SERVLET_ALIAS, servlet, new Hashtable());
+        @SuppressWarnings("rawtypes")
+        final Dictionary params = new Hashtable();
+        servletRegistration.registerServlet(SERVLET_ALIAS, servlet, params);
         logger.info("Registered servlet at {}", SERVLET_ALIAS);
     }
 
