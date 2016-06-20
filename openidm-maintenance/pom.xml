@@ -40,11 +40,6 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-launcher</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-util</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -86,6 +81,11 @@
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr</artifactId>
+            <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>launcher</artifactId>
             <scope>provided</scope>
         </dependency>
 
