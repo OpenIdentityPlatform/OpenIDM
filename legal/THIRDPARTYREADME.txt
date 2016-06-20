@@ -897,9 +897,9 @@ Version: groovy-connector-1.4.2.0.jar
 Copyright: Copyright (c) 2015 ForgeRock AS.
            Copyright 2003-2013 the original author or authors. (Groovy)
 
-Version: ldap-connector-1.4.1.0.jar
+Version: ldap-connector-1.4.1.1.jar
 Copyright: Copyright 2010 Sun Microsystems, Inc.,
-           Portions copyright 2010-2015 ForgeRock AS
+           Portions copyright 2010-2016 ForgeRock AS
 
 Version: xml-connector-1.1.0.2.jar
 Copyright: Copyright (c) 2010-2012 ForgeRock Inc.

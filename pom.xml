@@ -257,7 +257,7 @@
         <openicf.csvconnector.version>1.5.1.4</openicf.csvconnector.version>
         <openicf.dbtableconnector.version>1.1.0.1</openicf.dbtableconnector.version>
         <openicf.remoteconnectorserver.version />
-        <openicf.ldapconnector.version>1.4.1.0</openicf.ldapconnector.version>
+        <openicf.ldapconnector.version>1.4.1.1</openicf.ldapconnector.version>
         <openicf.googleconnector.version>1.4.1.0</openicf.googleconnector.version>
         <openicf.groovyconnector.version>1.4.2.0</openicf.groovyconnector.version>
         <openicf.sshconnector.version>1.4.0.0</openicf.sshconnector.version>
