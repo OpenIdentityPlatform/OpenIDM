@@ -22,15 +22,8 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.launcher;
-
 /**
- * A PropertyAccessor is an interface used to resolve value in property
- * substitution.
- * 
- * @author Laszlo Hordos
+ * Package contains the ForgeRock Launcher to initiate and start
+ * OSGi {@link org.osgi.framework.launch.Framework} in many different ways.
  */
-public interface PropertyAccessor {
-
-    <T> T get(String name);
-}
+package org.forgerock.commons.launcher;

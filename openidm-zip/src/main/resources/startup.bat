@@ -91,7 +91,7 @@ goto gotTitle
 set _EXECJAVA=start %_RUNJAVA%
 :gotTitle
 
-set MAINCLASS=org.forgerock.openidm.launcher.Main
+set MAINCLASS=org.forgerock.commons.launcher.Main
 
 rem Execute Java with the applicable properties
 pushd %OPENIDM_HOME%

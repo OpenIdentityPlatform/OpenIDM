@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.launcher;
+package org.forgerock.commons.launcher;
 
 import java.net.URL;
 import java.util.EnumSet;

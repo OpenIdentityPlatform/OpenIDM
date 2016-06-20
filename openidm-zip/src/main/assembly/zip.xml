@@ -39,7 +39,6 @@
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
             <excludes>
-                <exclude>**/config.properties</exclude>
                 <exclude>**/*.sh</exclude>
                 <exclude>**/*.command</exclude>
                 <exclude>**/*.bat</exclude>
@@ -67,14 +66,6 @@
                 <exclude>**/scriptedazure/**</exclude>
                 <exclude>**/provisioners/provisioner.openicf-scriptedazure.json</exclude>
             </excludes>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <outputDirectory>/openidm</outputDirectory>
-            <includes>
-                <include>**/config.properties</include>
-            </includes>
-            <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources</directory>
@@ -1108,7 +1099,6 @@
                 <exclude>org.apache.felix:org.osgi.foundation</exclude>
                 <exclude>org.apache.felix:javax.servlet</exclude>
                 <exclude>org.forgerock.openicf.connectors:*</exclude>
-                <exclude>org.forgerock.openidm:openidm-launcher</exclude>
                 <exclude>org.forgerock.openidm:openidm-shell</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui-ria*</exclude>
                 <exclude>org.forgerock.openidm:openidm-ui</exclude>

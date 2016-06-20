@@ -95,7 +95,7 @@
                             <transformers>
                                 <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                                     <manifestEntries>
-                                        <Main-Class>org.forgerock.openidm.launcher.Main</Main-Class>
+                                        <Main-Class>org.forgerock.commons.launcher.Main</Main-Class>
                                         <SCM-Revision>${ci.scm.revision}</SCM-Revision>
                                     </manifestEntries>
                                 </transformer>
