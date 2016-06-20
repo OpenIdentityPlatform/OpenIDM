@@ -198,89 +198,33 @@ public class ConfigurationUtil {
         return files;
     }
 
-    public enum Delimiter {
-        DOLLAR {
-            @Override
-            char getStartChar() {
-                return '$';
-            }
-
-            @Override
-            String getStartString() {
-                return DELIM_START_DOLLAR;
-            }
-        },
-        AMPERSAND {
-            @Override
-            char getStartChar() {
-                return '&';
-            }
-
-            @Override
-            String getStartString() {
-                return DELIM_START_AMPERSAND;
-            }
-        };
-
-        abstract char getStartChar();
-
-        abstract String getStartString();
-    }
-
-    public static final String DELIM_START_DOLLAR = "${";
-    public static final String DELIM_START_AMPERSAND = "&{";
-    public static final char DELIM_STOP = '}';
+    private static final String DELIM_START = "&{";
+    private static final char DELIM_STOP = '}';
 
     /**
      * <p>
      * This method performs property variable substitution on the specified
      * value. If the specified value contains the syntax
-     * <tt>&{&lt;prop-name&gt;}</tt> or <tt>${&lt;prop-name&gt;}</tt>, where <tt>&lt;prop-name&gt;</tt> refers to
+     * <tt>&{&lt;prop-name&gt;}</tt>, where <tt>&lt;prop-name&gt;</tt> refers to
      * either a configuration property or a system property, then the
      * corresponding property value is substituted for the variable placeholder.
      * Multiple variable placeholders may exist in the specified value as well
      * as nested variable placeholders, which are substituted from inner most to
      * outer most. Configuration properties override system properties.
      * </p>
-     *
+     * 
      * @param val
      *            The string on which to perform property substitution.
      * @param configuration
      *            Set of configuration properties.
      * @return The value of the specified string after property substitution.
-     **/
+     */
     public static Object substVars(String val, final PropertyAccessor configuration) {
         return substVars(val, configuration, false);
     }
 
-    /**
-     * <p>
-     * This method performs property variable substitution on the specified
-     * value. If the specified value contains the syntax
-     * <tt>&{&lt;prop-name&gt;}</tt> or <tt>${&lt;prop-name&gt;}</tt>, where <tt>&lt;prop-name&gt;</tt> refers to
-     * either a configuration property or a system property, then the
-     * corresponding property value is substituted for the variable placeholder.
-     * Multiple variable placeholders may exist in the specified value as well
-     * as nested variable placeholders, which are substituted from inner most to
-     * outer most. Configuration properties override system properties.
-     * </p>
-     *
-     * @param val The string on which to perform property substitution.
-     * @param configuration Set of configuration properties.
-     * @param doEscape if handling escaped characters is desired
-     * @return The value of the specified string after property substitution.
-     **/
     public static Object substVars(String val, final PropertyAccessor configuration,
             boolean doEscape) {
-        Object substVars = substVars(val, configuration, Delimiter.AMPERSAND, doEscape);
-        if (substVars instanceof String) {
-            substVars = substVars((String) substVars, configuration, Delimiter.DOLLAR, doEscape);
-        }
-        return substVars;
-    }
-
-    private static Object substVars(String val, final PropertyAccessor propertyAccessor,
-            Delimiter delimiter, boolean doEscape) {
 
         // Assume we have a value that is something like:
         // "leading &{foo.&{bar}} middle ${baz} trailing"
@@ -295,7 +239,7 @@ public class ConfigurationUtil {
             if (stopDelim < 0) {
                 return val;
             }
-            startDelim = val.indexOf(delimiter.getStartString());
+            startDelim = val.indexOf(DELIM_START);
             // If there is no starting delimiter, then just return
             // the value since there is no variable declared.
             if (startDelim < 0) {
@@ -309,79 +253,69 @@ public class ConfigurationUtil {
 
         for (int index = 0; index < val.length(); index++) {
             switch (val.charAt(index)) {
-                case '\\': {
-                    if (doEscape) {
-                        index++;
-                        if (index < val.length()) {
-                            propertyStack.peek().append(val.charAt(index));
-                        }
-                    } else {
+            case '\\': {
+                if (doEscape) {
+                    index++;
+                    if (index < val.length()) {
                         propertyStack.peek().append(val.charAt(index));
                     }
-                    break;
-                }
-                case '&': {
-                    if ('{' == val.charAt(index + 1) && val.charAt(index) == delimiter.getStartChar()) {
-                        // This is a start of a new property
-                        propertyStack.push(new StringBuilder(val.length()));
-                        index++;
-                    } else {
-                        propertyStack.peek().append(val.charAt(index));
-                    }
-                    break;
-                }
-                case '$': {
-                    if ('{' == val.charAt(index + 1) && val.charAt(index) == delimiter.getStartChar()) {
-                        // This is a start of a new property
-                        propertyStack.push(new StringBuilder(val.length()));
-                        index++;
-                    } else {
-                        propertyStack.peek().append(val.charAt(index));
-                    }
-                    break;
-                }
-                case DELIM_STOP: {
-                    // End of the actual property
-                    if (propertyStack.size() == 1) {
-                        // There is no start delimiter
-                        propertyStack.peek().append(val.charAt(index));
-                    } else {
-                        String variable = propertyStack.pop().toString();
-                        if ((index == val.length() - 1) && propertyStack.size() == 1
-                                && parentBuilder.length() == 0) {
-                            // Replace entire value with an Object
-                            Object substValue =
-                                    getSubstituteValue(Object.class, variable, propertyAccessor);
-                            if (null != substValue) {
-                                return substValue;
-                            } else {
-                                propertyStack.peek().append(delimiter.getStartString())
-                                        .append(variable).append(DELIM_STOP);
-                                return propertyStack.peek().toString();
-                            }
-                        } else {
-                            String substValue =
-                                    getSubstituteValue(String.class, variable, propertyAccessor);
-                            if (null != substValue) {
-                                propertyStack.peek().append(substValue);
-                            } else {
-                                propertyStack.peek().append(delimiter.getStartString())
-                                        .append(variable).append(DELIM_STOP);
-                            }
-                        }
-                    }
-                    break;
-                }
-                default: {
+                } else {
                     propertyStack.peek().append(val.charAt(index));
                 }
+                break;
+            }
+            case '&': {
+                if ('{' == val.charAt(index + 1)) {
+                    // This is a start of a new property
+                    propertyStack.push(new StringBuilder(val.length()));
+                    index++;
+                } else {
+                    propertyStack.peek().append(val.charAt(index));
+                }
+                break;
+            }
+            case DELIM_STOP: {
+                // End of the actual property
+                if (propertyStack.size() == 1) {
+                    // There is no start delimiter
+                    propertyStack.peek().append(val.charAt(index));
+                } else {
+                    String variable = propertyStack.pop().toString();
+                    if ((index == val.length() - 1) && propertyStack.size() == 1
+                            && parentBuilder.length() == 0) {
+                        // Replace entire value with an Object
+                        Object substValue =
+                                getSubstituteValue(Object.class, variable, configuration);
+                        if (null != substValue) {
+                            return substValue;
+                        } else {
+                            propertyStack.peek().append(DELIM_START).append(variable).append(
+                                    DELIM_STOP);
+                            return propertyStack.peek().toString();
+                        }
+                    } else {
+                        String substValue =
+                                getSubstituteValue(String.class, variable, configuration);
+                        if (null != substValue) {
+                            propertyStack.peek().append(substValue);
+                        } else {
+                            propertyStack.peek().append(DELIM_START).append(variable).append(
+                                    DELIM_STOP);
+                        }
+                    }
+                }
+                break;
+            }
+            default: {
+                propertyStack.peek().append(val.charAt(index));
+            }
             }
         }
 
         // Close the open &{ tags.
         for (int index = propertyStack.size(); index > 1; index--) {
             StringBuilder top = propertyStack.pop();
-            propertyStack.peek().append(delimiter.getStartString()).append(top.toString());
+            propertyStack.peek().append(DELIM_START).append(top.toString());
         }
         return parentBuilder.toString();
     }
