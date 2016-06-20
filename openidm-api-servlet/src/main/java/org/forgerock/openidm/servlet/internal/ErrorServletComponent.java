@@ -22,6 +22,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
+import java.util.Dictionary;
 import java.util.Hashtable;
 
 import org.apache.felix.scr.annotations.Activate;
@@ -61,13 +62,17 @@ public class ErrorServletComponent {
     @Activate
     protected void activate(ComponentContext context) throws ServletException, NamespaceException {
         errorServlet = new HttpServlet() {
+            private static final long serialVersionUID = 1L;
+
             @Override
             protected void doGet(final HttpServletRequest request, final HttpServletResponse response)
                     throws ServletException, IOException {
                 JettyErrorHandler.outputErrorPageResponse(request, response);
             }
         };
-        servletRegistration.registerServlet(ERROR_SERVLET_ALIAS, errorServlet, new Hashtable());
+        @SuppressWarnings("rawtypes")
+        final Dictionary params = new Hashtable();
+        servletRegistration.registerServlet(ERROR_SERVLET_ALIAS, errorServlet, params);
         logger.info("Registered servlet at {}", ERROR_SERVLET_ALIAS);
 
         httpService.registerErrorPage(ErrorPageErrorHandler.GLOBAL_ERROR_PAGE, ERROR_SERVLET_ALIAS,
