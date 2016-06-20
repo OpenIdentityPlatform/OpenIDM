@@ -15,7 +15,7 @@
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
-import org.forgerock.openidm.launcher.OSGiFrameworkService;
+import org.forgerock.commons.launcher.OSGiFrameworkService;
 import org.forgerock.openidm.util.FileUtil;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.wiring.FrameworkWiring;

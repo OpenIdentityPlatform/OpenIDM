@@ -22,7 +22,7 @@
  * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
-package org.forgerock.openidm.launcher;
+package org.forgerock.commons.launcher;
 
 import static org.junit.Assert.*;
 
@@ -31,6 +31,7 @@ import java.net.URL;
 import java.util.Arrays;
 import java.util.Vector;
 
+import org.junit.Assert;
 import org.testng.annotations.Test;
 
 /**

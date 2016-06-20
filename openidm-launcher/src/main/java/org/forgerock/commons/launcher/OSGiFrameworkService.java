@@ -14,7 +14,7 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.launcher;
+package org.forgerock.commons.launcher;
 
 import static org.kohsuke.args4j.ExampleMode.ALL;
 import static org.kohsuke.args4j.ExampleMode.REQUIRED;

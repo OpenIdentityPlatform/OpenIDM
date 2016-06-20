@@ -14,7 +14,7 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.launcher;
+package org.forgerock.commons.launcher;
 
 import org.forgerock.json.JsonValue;
 import java.net.MalformedURLException;

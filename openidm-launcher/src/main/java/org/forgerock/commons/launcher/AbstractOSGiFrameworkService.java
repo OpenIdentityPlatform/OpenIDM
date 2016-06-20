@@ -14,7 +14,7 @@
  * Copyright 2012-2015 ForgeRock AS.
  */
 
-package org.forgerock.openidm.launcher;
+package org.forgerock.commons.launcher;
 
 import java.net.MalformedURLException;
 import java.util.HashMap;

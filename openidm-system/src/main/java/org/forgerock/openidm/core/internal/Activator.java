@@ -48,7 +48,7 @@ public class Activator implements BundleActivator {
             filter =
                     context.createFilter("(&(" + Constants.OBJECTCLASS + "=java.util.Map)("
                             + Constants.SERVICE_PID
-                            + "=org.forgerock.openidm.launcher.BootConfiguration))");
+                            + "=org.forgerock.commons.launcher.BootConfiguration))");
         }
         serviceTracker =
                 new ServiceTracker<Map<String, Object>, Map<String, Object>>(context, filter, null);
