@@ -54,6 +54,12 @@ if ""%ARCH%"" == """" (
 )
 
 
+rem -------------------------------------------------------------
+rem Service java options, needs to be separated by ;
+if not "%JAVA_OPTS_SERVICE%" == "" goto optsOK
+set JAVA_OPTS_SERVICE=-Xmx128m;-Xms128m; 
+:optsOK
+
 rem Set Launcher start params, needs to be separated by ;
 if not "%LAUNCHER_START_PARAMS%" == "" goto launcerStartOK
 set LAUNCHER_START_PARAMS=-c;bin/launcher.json
