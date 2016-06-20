@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -33,22 +33,6 @@
     <groupId>org.forgerock.commons</groupId>
     <artifactId>launcher</artifactId>
     <name>ForgeRock OSGi Launcher Main</name>
-    <packaging>bundle</packaging>
-    <properties>
-        <!-- Version management -->
-        <commons.forgerock-bom.version>1.0.0-SNAPSHOT</commons.forgerock-bom.version>
-    </properties>
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>org.forgerock.commons</groupId>
-                <artifactId>forgerock-bom</artifactId>
-                <version>${commons.forgerock-bom.version}</version>
-                <scope>import</scope>
-                <type>pom</type>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
     <dependencies>
         <!-- Embedded Dependencies -->
         <dependency>
@@ -58,7 +42,8 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
-            <artifactId>forgerock-util</artifactId>
+            <artifactId>json-fluent</artifactId>
+            <version>1.2.0</version>
         </dependency>
         <dependency>
             <groupId>org.codehaus.plexus</groupId>
@@ -148,7 +133,7 @@
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
                                     <artifactId>org.apache.felix.configadmin</artifactId>
-                                    <version>1.8.0</version>
+                                    <version>1.6.0</version>
                                 </artifactItem>
                                 <artifactItem>
                                     <groupId>org.apache.felix</groupId>
@@ -177,16 +162,6 @@
                         <auto.deploy.dir>${project.build.directory}/osgi/bundle/</auto.deploy.dir>
                         <org.osgi.framework.storage>${project.build.directory}/osgi/cache/</org.osgi.framework.storage>
                     </systemPropertyVariables>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Embed-Dependency>json-simple,plexus-utils,args4j</Embed-Dependency>
-                    </instructions>
                 </configuration>
             </plugin>
         </plugins>

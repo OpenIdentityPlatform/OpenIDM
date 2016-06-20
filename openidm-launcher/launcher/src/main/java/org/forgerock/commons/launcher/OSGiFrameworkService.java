@@ -1,17 +1,25 @@
 /*
- * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions copyright [year] [name of copyright owner]".
+ * The contents of this file are subject to the terms
+ * of the Common Development and Distribution License
+ * (the License). You may not use this file except in
+ * compliance with the License.
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * You can obtain a copy of the License at
+ * http://forgerock.org/license/CDDLv1.0.html
+ * See the License for the specific language governing
+ * permission and limitations under the License.
+ *
+ * When distributing Covered Code, include this CDDL
+ * Header Notice in each file and include the License file
+ * at http://forgerock.org/license/CDDLv1.0.html
+ * If applicable, add the following below the CDDL Header,
+ * with the fields enclosed by brackets [] replaced by
+ * your own identifying information:
+ * "Portions Copyrighted [year] [name of copyright owner]"
  */
 
 package org.forgerock.commons.launcher;
@@ -44,9 +52,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.codehaus.plexus.util.DirectoryScanner;
-import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonTransformer;
-import org.forgerock.json.JsonValue;
+import org.forgerock.json.fluent.JsonException;
+import org.forgerock.json.fluent.JsonTransformer;
+import org.forgerock.json.fluent.JsonValue;
 import org.json.simple.parser.JSONParser;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -414,17 +422,13 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
     }
 
     protected void registerServices(BundleContext bundleContext) throws Exception {
-        Dictionary<String, String> properties2 = new Hashtable<String, String>(4);
-        properties2.put(Constants.SERVICE_VENDOR, "ForgeRock AS.");
-        properties2.put(Constants.SERVICE_DESCRIPTION, "OSGi Framework Service");
-        properties2.put(Constants.SERVICE_PID, OSGiFramework.class.getName());
-        bundleContext.registerService(OSGiFramework.class, this, properties2);
-
         Dictionary<String, String> properties = new Hashtable<String, String>(4);
         properties.put(Constants.SERVICE_VENDOR, "ForgeRock AS.");
-        properties.put(Constants.SERVICE_DESCRIPTION, "Boot Configuration");
-        properties.put(Constants.SERVICE_PID, BootConfiguration.class.getName());
-        bundleContext.registerService(Map.class, Collections.unmodifiableMap(bootParameters), properties);
+        properties.put(Constants.SERVICE_DESCRIPTION, "Delegated Launcher Boot Configuration");
+        properties.put(Constants.SERVICE_PID, OSGiFramework.class.getName());
+        properties.put(Constants.SERVICE_RANKING, "16");
+        bundleContext.registerService(Map.class, Collections.unmodifiableMap(bootParameters),
+                properties);
     }
 
     protected Map<String, String> getConfigurationProperties() {
