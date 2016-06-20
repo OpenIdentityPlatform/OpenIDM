@@ -74,11 +74,10 @@
             <includes>
                 <include>**/*.sh</include>
                 <include>**/*.command</include>
-                <include>bin/**</include>
             </includes>
             <filtered>true</filtered>
         </fileSet>
-       <fileSet>
+        <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <outputDirectory>/openidm</outputDirectory>
             <fileMode>754</fileMode>
@@ -1258,12 +1257,16 @@
             </includes>
         </dependencySet>
         <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/bin</outputDirectory>
-            <outputFileNameMapping>${artifact.artifactId}.${artifact.extension}</outputFileNameMapping>
+            <unpack>true</unpack>
+            <outputDirectory>/openidm/</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-launcher</include>
+                <include>org.forgerock.commons:launcher-zip:zip:*</include>
             </includes>
+            <unpackOptions>
+                <includes>
+                    <include>bin/**</include>
+                </includes>
+            </unpackOptions>
         </dependencySet>
         <dependencySet>
             <unpack>false</unpack>

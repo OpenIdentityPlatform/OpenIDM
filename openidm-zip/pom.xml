@@ -98,11 +98,6 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-launcher</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-policy</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -408,6 +403,11 @@
         </dependency>
 
         <!-- ForgeRock commons -->
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>launcher-zip</artifactId>
+            <type>zip</type>
+        </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
             <artifactId>script-javascript</artifactId>

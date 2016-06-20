@@ -24,9 +24,6 @@
 
 package org.forgerock.commons.launcher;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.data.MapEntry.entry;
-
 import java.io.File;
 import java.net.URLDecoder;
 import java.util.concurrent.Semaphore;
@@ -44,6 +41,7 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Factory;
 import org.testng.annotations.Test;
+import static org.fest.assertions.api.Assertions.*;
 
 /**
  * A NAME does ...
@@ -154,9 +152,7 @@ public class OSGiFrameworkServiceTest {
         Assert.assertEquals(testable.getStorageDir(), "storage-location");
         Assert.assertEquals(testable.isVerbose(), true);
         Assert.assertEquals(testable.isNewThread(), true);
-        assertThat(testable.getBootParameters())
-                .hasSize(2)
-                .contains(entry("key1", "value1"))
+        assertThat(testable.getBootParameters()).hasSize(2).contains(entry("key1", "value1"))
                 .contains(entry("key2", "value2"));
     }
 
