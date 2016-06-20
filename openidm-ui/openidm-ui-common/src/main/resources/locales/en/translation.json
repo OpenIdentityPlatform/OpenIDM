@@ -1664,7 +1664,7 @@
             	"privateKeyDisplay": "The private key",
             	"privateKeyHelp": "The base 64 encoded value (PEM) of the private key used for Public Key authentication",
             	"authenticationTypeDisplay": "Authentication type",
-            	"authenticationTypeHelp": "Defines which authentication type should be use: PASSWORD or PUBKEY",
+            	"authenticationTypeHelp": "Defines which authentication type should be used: PASSWORD or PUBKEY",
             	"promptDisplay": "Default prompt",
             	"promptHelp": "A string representing the exact remote SSH session prompt (defaults to 'root@localhost:# ')",
             	"sudoCommandDisplay": "Sudo command",

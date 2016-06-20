@@ -533,13 +533,15 @@ define([
             _.each(models, _.bind(function(model){
                 var propertyValuePath = resourceCollectionUtils.getPropertyValuePath(model.attributes),
                     resourceCollectionIndex = resourceCollectionUtils.getResourceCollectionIndex(this.schema, propertyValuePath, this.data.prop.propName),
-                    displayText = resourceCollectionUtils.getDisplayText(this.data.prop, model.attributes, resourceCollectionIndex);
+                    displayText = resourceCollectionUtils.getDisplayText(this.data.prop, model.attributes, resourceCollectionIndex),
+                    child = { "name" : displayText, "parent" : "null" };
 
-                treeData.children.push({
-                    "name" : displayText,
-                    "parent" : "null",
-                    "url" : "#resource/" + propertyValuePath + "/edit/" + model.attributes._id
-                });
+                // Can't link to internal roles, so filter them here
+                if (!propertyValuePath.match(/^repo\//)) {
+                    child.url = "#resource/" + propertyValuePath + "/edit/" + model.attributes._id;
+                }
+
+                treeData.children.push(child);
             }, this));
 
             root = treeData;
