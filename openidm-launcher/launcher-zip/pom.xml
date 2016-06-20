@@ -39,9 +39,9 @@
         <profile>
             <id>generate-assembly-zip</id>
             <activation>
-                <file>
-                    <exists>src/assembly/zip.xml</exists>
-                </file>
+                <property>
+                    <name>env.SVN_REVISION</name>
+                </property>
             </activation>
 
             <dependencies>
