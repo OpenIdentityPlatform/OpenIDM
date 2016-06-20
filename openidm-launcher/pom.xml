@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>2.0.4</version>
+        <version>1.2.9</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-launcher</artifactId>
@@ -103,6 +103,10 @@
     </ciManagement>
 
     <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <maven.compiler.target>1.6</maven.compiler.target>
+        <maven.compiler.source>1.6</maven.compiler.source>
+
         <!-- Documentation and site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/commons.forgerock.org/httpdocs/forgerock-launcher</siteDistributionURL>
         <docTargetVersion>1.0.0</docTargetVersion>
@@ -152,7 +156,7 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
                 <version>4.2.1</version>
-                <scope>test</scope>
+				<scope>test</scope>
             </dependency>
         </dependencies>
     </dependencyManagement>
