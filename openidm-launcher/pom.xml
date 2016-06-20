@@ -2,7 +2,7 @@
 <!--
   ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
   ~
-  ~ Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
+  ~ Copyright (c) 2012 ForgeRock AS. All Rights Reserved
   ~
   ~ The contents of this file are subject to the terms
   ~ of the Common Development and Distribution License
@@ -28,11 +28,11 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.1.0</version>
+        <version>1.1.0-SNAPSHOT</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-launcher</artifactId>
-    <version>1.1.0-SNAPSHOT</version>
+    <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
     <name>ForgeRock OSGi Launcher Parent</name>
     <description>ForgeRock OSGi Container Launcher Parent</description>
@@ -71,6 +71,9 @@
             <url>${siteDistributionURL}</url>
         </site>
     </distributionManagement>
+    <prerequisites>
+        <maven>2.2.1</maven>
+    </prerequisites>
 
     <!-- NOT ALLOWED: (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
     <repositories>
@@ -142,20 +145,20 @@
             <!-- Test Dependencies -->
             <dependency>
                 <groupId>org.easytesting</groupId>
-                <artifactId>fest-assert-core</artifactId>
-                <version>2.0M8</version>
+                <artifactId>fest-assert</artifactId>
+                <version>1.4</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.testng</groupId>
                 <artifactId>testng</artifactId>
-                <version>6.8</version>
+                <version>6.7</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>org.apache.felix.framework</artifactId>
-                <version>4.0.3</version>
+                <version>4.0.2</version>
 				<scope>test</scope>
             </dependency>
         </dependencies>
