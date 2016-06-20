@@ -155,14 +155,14 @@ define([
                 this.data.connectorId = this.name = splitDetails[1];
 
                 //Get current connector details
-                ConfigDelegate.readEntity(this.data.systemType +"/" + this.data.connectorId).then(_.bind(function(data){
+                ConfigDelegate.readEntity(this.data.systemType + "/" + this.data.connectorId).then(_.bind(function(data){
                     var tempVersion;
 
                     this.data.connectorIcon = connectorUtils.getIcon(data.connectorRef.connectorName);
                     this.currentObjectTypeLoaded = "savedConfig";
                     this.data.objectTypeDefaultConfigs = this.objectTypeConfigs[data.connectorRef.bundleName];
 
-                    this.data.connectorName = data.name;
+                    this.data.connectorName = this.name;
                     this.data.connectorTypeName = data.connectorRef.connectorName;
 
                     this.data.enabled = data.enabled;
@@ -537,8 +537,9 @@ define([
                 }, this);
 
                 $.when.apply($, schedulerPromises).then(_.bind(function () {
-                    _.each(schedulerPromises, function (schedule) {
-                        schedule = schedule.responseJSON;
+                    _.each(arguments, function (schedule) {
+                        schedule = schedule[0];
+
                         //////////////////////////////////////////////////////////////////////////////////////////////////
                         //                                                                                              //
                         // TODO: Use queryFilters to avoid having to pull back all schedules and sifting through them.  //
@@ -547,8 +548,8 @@ define([
                         if (schedule && schedule.invokeContext.action === "liveSync") {
 
                             sourcePieces = schedule.invokeContext.source.split("/");
-
-                            if(sourcePieces[1] === this.name) {
+                            
+                            if(sourcePieces[1] === this.connectorDetails.name) {
                                 this.$el.find(".sources option[value='" + schedule.invokeContext.source + "']").remove();
 
                                 this.$el.find("#schedules").append("<div class='liveSyncScheduleContainer'></div>");
@@ -595,16 +596,16 @@ define([
         updateLiveSyncObjects: function() {
             var objectTypes = [];
 
-            if (this.name) {
+            if (this.connectorDetails.name) {
                 this.$el.find(".nameFieldMessage").hide();
 
                 if (this.userDefinedObjectTypes && _.size(this.userDefinedObjectTypes) > 0) {
                     objectTypes = _.map(this.userDefinedObjectTypes, function (object, key) {
-                        return "system/" + this.name + "/" + key;
+                        return "system/" + this.connectorDetails.name + "/" + key;
                     }, this);
                 } else {
                     objectTypes = _.map(this.data.objectTypes, function (object, key) {
-                        return "system/" + this.name + "/" + key;
+                        return "system/" + this.connectorDetails.name + "/" + key;
                     }, this);
                 }
 
