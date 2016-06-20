@@ -25,7 +25,6 @@
 package org.forgerock.commons.launcher;
 
 import java.net.MalformedURLException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,15 +95,12 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
 
             Callable<Void> container = new Callable<Void>() {
                 public Void call() throws Exception {
-                    FrameworkEvent event = null;
+                    FrameworkEvent event;
                     do {
                         // Start the framework.
-                        Framework fw = framework.get();
-                        fw.start();
-                        
+                        framework.get().start();
                         // Wait for framework to stop to exit the VM.
-                        event = fw.waitForStop(0);
-                        
+                        event = framework.get().waitForStop(0);
                     }
                     // If the framework was updated, then restart it.
                     while (event.getType() == FrameworkEvent.STOPPED_UPDATE);
@@ -126,7 +122,7 @@ public abstract class AbstractOSGiFrameworkService implements OSGiFramework {
             throw e;
         }
     }
-    
+
     public void stop() throws Exception {
         Framework fw = framework.getAndSet(null);
         if (null != fw) {
