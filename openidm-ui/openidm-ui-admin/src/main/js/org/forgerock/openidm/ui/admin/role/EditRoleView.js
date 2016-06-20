@@ -113,7 +113,9 @@ function ($, _, Handlebars,
          */
         delete this.queryEditor;
 
-        this.queryEditor = this.renderEditor();
+        if(this.oldObject.condition !== undefined) {
+            this.queryEditor = this.renderEditor();
+        }
     };
 
     EditRoleView.prototype.renderEditor = function (clearFilter) {
@@ -148,10 +150,10 @@ function ($, _, Handlebars,
 
         if (this.$el.find("#enableDynamicRoleGrantCheckbox").prop("checked")) {
             this.$el.find("#roleConditionQueryField").show();
-            this.renderEditor();
+            this.queryEditor = this.renderEditor();
         } else {
             this.$el.find("#roleConditionQueryField").hide();
-            this.renderEditor(true);
+            this.queryEditor = this.renderEditor(true);
         }
     };
 
