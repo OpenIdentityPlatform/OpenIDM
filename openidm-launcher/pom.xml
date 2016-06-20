@@ -28,7 +28,7 @@
     <parent>
         <groupId>org.forgerock</groupId>
         <artifactId>forgerock-parent</artifactId>
-        <version>1.2.9</version>
+        <version>1.1.0</version>
     </parent>
     <groupId>org.forgerock.commons</groupId>
     <artifactId>forgerock-launcher</artifactId>
@@ -60,9 +60,9 @@
         </license>
     </licenses>
     <scm>
-        <connection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-launcher.git</connection>
-        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/commons/forgerock-launcher.git</developerConnection>
-        <url>http://stash.forgerock.org/projects/COMMONS/repos/forgerock-launcher/browse</url>
+        <connection>scm:svn:https://svn.forgerock.org/commons/forgerock-launcher/trunk</connection>
+        <developerConnection>scm:svn:https://svn.forgerock.org/commons/forgerock-launcher/trunk</developerConnection>
+        <url>http://sources.forgerock.org/browse/commons/forgerock-launcher/trunk</url>
     </scm>
     <distributionManagement>
         <site>
