@@ -172,40 +172,6 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
         };
     }
 
-    /**
-     *  Extends the passed in PropertyAccessor to check for the property in the extendedMap prior to deferring to
-     *  the passed in PropertyAccessor.
-     */
-    private static class ExtendedPropertyAccessor implements PropertyAccessor {
-        private final Map<String, Object> extendedMap;
-        private PropertyAccessor propertyAccessor;
-
-        /**
-         * Creates the extended accessor.
-         * @param extendedMap the map to look for the property first.
-         * @param propertyAccessor the original accessor to refer to if not found in the extendedMap.
-         */
-        public ExtendedPropertyAccessor(Map<String, Object> extendedMap, PropertyAccessor propertyAccessor) {
-            this.extendedMap = extendedMap;
-            this.propertyAccessor = propertyAccessor;
-        }
-
-        @Override
-        public <T> T get(String name) {
-            Object value = extendedMap.get(name);
-            if (null == value) {
-                value = propertyAccessor.get(name);
-            }
-            T result = null;
-            try {
-                result = (T) value;
-            } catch (ClassCastException e) {
-                /* ignore */
-            }
-            return result;
-        }
-    }
-
     public String getInstallDir() {
         return installDir;
     }
@@ -617,20 +583,16 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             if (props == null) {
                 configurationProperties.clear();
             }
-            // Perform variable substitution on properties loaded from other sources.
+            // Perform variable substitution on specified properties.
             systemProperties = (new JsonValue(props, null, Arrays.asList(transformer))).copy();
         }
 
-        // Perform variable substitution on all properties that have been loaded thus far, including those just loaded,
-        // by extending the existing propertyAccessor to include properties that have just been read.
-        Map<String, Object> propertiesMap = systemProperties.asMap();
-        PropertyAccessor extendedPropertyAccessor = new ExtendedPropertyAccessor(propertiesMap, propertyAccessor);
-        for (Map.Entry<String, Object> entry : propertiesMap.entrySet()) {
+        for (Map.Entry<String, Object> entry : systemProperties.asMap().entrySet()) {
             Object value = entry.getValue();
             if (value instanceof String) {
                 // Exclude the null and non String values
                 Object newValue =
-                        ConfigurationUtil.substVars((String) value, extendedPropertyAccessor);
+                        ConfigurationUtil.substVars((String) value, propertyAccessor);
                 configurationProperties.put(entry.getKey(), newValue);
             }
         }
