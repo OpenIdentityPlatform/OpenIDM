@@ -1,4 +1,4 @@
-@echo off
+rem @echo off
 SETLOCAL ENABLEDELAYEDEXPANSION
 
 rem Set Launcher Home
