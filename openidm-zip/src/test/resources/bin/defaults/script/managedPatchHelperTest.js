@@ -26,7 +26,8 @@ exports.test = function() {
     function testRemove() {
         // test cases for remove
         [
-            [
+            [ // test remove on nested object
+                // content
                 [
                     {
                         "name" : "user",
@@ -36,8 +37,11 @@ exports.test = function() {
                         }
                     }
                 ],
+                // name
                 "user",
+                // path
                 "b.b2",
+                // expectedResult
                 [
                     {
                         "name" : "user",
@@ -47,7 +51,8 @@ exports.test = function() {
                     }
                 ]
             ],
-            [
+            [ // test remove on non-existent object
+                // content
                 [
                     {
                         "name" : "user",
@@ -57,8 +62,11 @@ exports.test = function() {
                         }
                     }
                 ],
+                // name
                 "role",
+                // path
                 "b.b2",
+                // expectedResult
                 [
                     {
                         "name" : "user",
@@ -88,7 +96,8 @@ exports.test = function() {
     function testAdd() {
         // test cases for add
         [
-            [
+            [ // add property to existing object
+                // content
                 [
                     {
                         "name" : "user",
@@ -98,9 +107,13 @@ exports.test = function() {
                         }
                     }
                 ],
+                // name
                 "user",
+                // path
                 "b.bb2",
+                // value
                 "added",
+                // expectedResult
                 [
                     {
                         "name" : "user",
@@ -108,6 +121,32 @@ exports.test = function() {
                             "b1" : "text/javascript",
                             "b2" : "roles",
                             "bb2" : "added"
+                        }
+                    }
+                ]
+            ],
+            [ // add replaces existing object
+                // content
+                [
+                    {
+                        "name": "foo",
+                        "replaceme" : {
+                            "deleteme": true
+                        }
+                    }
+                ],
+                // name
+                "foo",
+                // path
+                "replaceme",
+                // value
+                { "newvalue": true },
+                // expectedResult
+                [
+                    {
+                        "name": "foo",
+                        "replaceme": {
+                            "newvalue": true
                         }
                     }
                 ]

@@ -35,7 +35,7 @@
       "value" : {
          "script" : {
             "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').remove(content, 'user', 'onCreate.file');"
+            "source" : "require('managedPatchHelper').add(content, 'user', 'onCreate',  { \"type\": \"text/javascript\", \"source\": \"require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\" } );"
          }
       }
    },
@@ -45,7 +45,7 @@
       "value" : {
          "script" : {
             "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'user', 'onCreate.source',  \"require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\");"
+            "source" : "require('managedPatchHelper').add(content, 'user', 'onUpdate', { \"type\" : \"text/javascript\",  \"source\" : \"require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles'); require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);\" } );"
          }
       }
    },
@@ -55,7 +55,7 @@
       "value" : {
          "script" : {
             "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'user', 'onUpdate.type', 'text/javascript');"
+            "source" : "require('managedPatchHelper').add(content, 'role', 'onCreate', { 'type': 'text/javascript', 'source' : \"require('roles/conditionalRoles').roleCreate(object);\" });"
          }
       }
    },
@@ -65,57 +65,7 @@
       "value" : {
          "script" : {
             "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'user', 'onUpdate.source', \"require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\");"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'role', 'onCreate.type', 'text/javascript');"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'role', 'onCreate.source', \"require('roles/conditionalRoles').roleCreate(object);\");"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'role', 'onUpdate.type', 'text/javascript');"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'role', 'onUpdate.source',   \"require('roles/conditionalRoles').roleUpdate(oldObject, object);\");"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'user', 'onUpdate.source', \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);\");"
+            "source" : "require('managedPatchHelper').add(content, 'role', 'onUpdate', { 'type': 'text/javascript', 'source': \"require('roles/conditionalRoles').roleUpdate(oldObject, object);\" });"
          }
       }
    }
