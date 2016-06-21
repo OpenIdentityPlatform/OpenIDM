@@ -757,10 +757,17 @@ public abstract class RelationshipProvider {
         // Do activity logging.
         activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue, null, 
                 Status.SUCCESS);
-        
-        // Perform an update on the managed object
-        managedObjectSetService.update(context, newUpdateRequest(managedId, afterValue), managedId, null, beforeValue, 
-                afterValue, new HashSet<JsonPointer>(Arrays.asList(propertyPtr)));
+
+        // execute the onUpdate script of the managed object
+        managedObjectSetService.executeOnUpdateScript(context, request, managedId, beforeValue, afterValue);
+
+        // Execute the postUpdate script of the managed object
+        managedObjectSetService.executePostUpdate(context, newUpdateRequest(managedId, afterValue), managedId,
+                beforeValue, afterValue);
+
+        // Changes to the relationship will trigger sync on the managed object
+        managedObjectSetService.performSyncAction(context, request, managedId, notifyUpdate,
+                beforeValue, afterValue);
     }
 
     /**
