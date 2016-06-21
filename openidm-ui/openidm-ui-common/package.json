@@ -10,6 +10,7 @@
     "babel-plugin-transform-es2015-block-scoping": "^6.9.0",
     "babel-plugin-transform-es2015-computed-properties": "^6.8.0",
     "babel-plugin-transform-es2015-shorthand-properties": "^6.8.0",
+    "babel-plugin-transform-es2015-template-literals": "^6.8.0",
     "eslint": "1.10.3",
     "eslint-config-forgerock": "1.1.1",
     "eslint-formatter-warning-summary": "1.0.1",
