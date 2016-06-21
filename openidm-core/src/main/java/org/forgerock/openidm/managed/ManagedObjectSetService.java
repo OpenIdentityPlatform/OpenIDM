@@ -16,35 +16,60 @@
 
 package org.forgerock.openidm.managed;
 
-import java.util.Set;
-
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.sync.impl.SynchronizationService;
 import org.forgerock.services.context.Context;
 
 /**
- * An interface for performing actions on a set of managed objects.
+ * An interface for performing actions on a set of managed objects. This interface is consumed by the RelationshipProvider
+ * when functioning as the relationship endpoint in order to trigger functionality on the Managed Object 'owning' the
+ * relationship.
  */
 public interface ManagedObjectSetService {
-    
-    /** 
-     * Performs and update on a managed object.  The update will include executing onUpdate and postUpdate scripts as
-     * well as performing a sync operation on the managed object.
+
+    /**
+     * Sends a sync action request to the synchronization service
      *
-     * @param context the current Context
-     * @param request the source Request
-     * @param resourceId the resource id of the object being modified
-     * @param rev the revision of the object being modified
-     * @param oldValue the old value of the object
-     * @param newValue the new value of the object
-     * @param relationshipFields a set of relationship fields.
-     * @return a {@link ResourceResponse} object representing the updated resource
-     * @throws ResourceException
+     * @param context the Context of the request
+     * @param request the Request being processed
+     * @param resourceId the additional resourceId parameter telling the synchronization service which object
+     *                   is being synchronized
+     * @param action the {@link org.forgerock.openidm.sync.impl.SynchronizationService.SyncServiceAction}
+     * @param oldValue the previous object value before the change (if applicable, or null if not)
+     * @param newValue the object value to sync
+     * @throws ResourceException in case of a failure that was not handled by the ResultHandler
      */
-    public ResourceResponse update(final Context context, Request request, String resourceId, String rev,
-            JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
-            throws ResourceException;
-}
+    void performSyncAction(final Context context, final Request request, final String resourceId,
+                           final SynchronizationService.SyncServiceAction action, final JsonValue oldValue,
+                           final JsonValue newValue) throws ResourceException;
+
+    /**
+     * Executes a postUpdate script, if configured, for a managed object.
+     *
+     * @param context the Context of the request
+     * @param request the Request being processed
+     * @param resourceId the resource ID of the managed object
+     * @param oldValue the previous object value
+     * @param newValue the object value
+     * @throws ResourceException in case of a failure that was not handled by the ResultHandler
+     */
+    void executePostUpdate(final Context context, final Request request, final String resourceId,
+                                  final JsonValue oldValue, final JsonValue newValue) throws ResourceException;
+
+    /**
+     *
+     * @param context the Context of the request
+     * @param request the Request being processed
+     * @param resourceId the resource ID of the managed object
+     * @param oldValue the previous object value
+     * @param newValue the updated object value
+     * @throws ResourceException in case the onUpdate script throws an exception
+     */
+    void executeOnUpdateScript(Context context, Request request, String resourceId, JsonValue oldValue,
+                                      JsonValue newValue) throws ResourceException;
+
+
+    }
+

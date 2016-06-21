@@ -299,7 +299,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             measure.end();
         }
     }
-    
+
+    @Override
     public void executePostUpdate(Context context, Request request, String resourceId, JsonValue oldValue, 
             JsonValue newValue) throws ResourceException {
         // Execute the postUpdate script if configured
@@ -476,7 +477,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @return a {@link ResourceResponse} object representing the updated resource
      * @throws ResourceException
      */
-    public ResourceResponse update(final Context context, Request request, String resourceId, String rev,
+    private ResourceResponse update(final Context context, Request request, String resourceId, String rev,
     		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
             throws ResourceException {
         Context managedContext = new ManagedObjectContext(context);
@@ -1518,6 +1519,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         return stripped;
     }
 
+    @Override
     public void performSyncAction(final Context context, final Request request, final String resourceId,
             final SynchronizationService.SyncServiceAction action, final JsonValue oldValue, final JsonValue newValue)
         throws ResourceException {
@@ -1583,6 +1585,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             logger.error("Failed to sync {} {}:{}", action.name(), name, resourceId, e);
             throw e;
         }
+    }
+
+    @Override
+    public void executeOnUpdateScript(Context context, Request request, String resourceId, JsonValue decryptedOld,
+                                      JsonValue decryptedNew) throws ResourceException {
+        execScript(context, ScriptHook.onUpdate, decryptedNew,
+                prepareScriptBindings(context, request, resourceId, decryptedOld, decryptedNew));
+
     }
 
     /**
