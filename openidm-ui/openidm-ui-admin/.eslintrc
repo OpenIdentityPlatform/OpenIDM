@@ -4,7 +4,8 @@
     "parser": "babel-eslint",
     "env": {
         "amd": true,
-        "browser": true
+        "browser": true,
+        "qunit": true
     },
     "ecmaFeatures": {
         "arrowFunctions": true
