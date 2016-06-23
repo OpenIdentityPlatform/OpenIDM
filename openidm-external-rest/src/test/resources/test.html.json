@@ -1,0 +1,4 @@
+{
+  "headers" : {"Content-Length" : [ "224" ], "Content-Type" : [ "text/html" ]},
+  "body" : "<!DOCTYPE html>\n<!-- Copyright 2016 ForgeRock AS.\n\tLicense terms: https://forgerock.org/cddlv1-0/ -->\n<html lang=\"en\">\n<head>\n    <meta charset=\"UTF-8\">\n    <title>Title</title>\n</head>\n<body>\n<div>Body</div>\n</body>\n</html>"
+}

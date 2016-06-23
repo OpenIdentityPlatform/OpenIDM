@@ -38,7 +38,7 @@
 
         request.content["contentType"] = "application/x-www-form-urlencoded";
 
-        return openidm.action("external/rest", "noop", request.content);
+        return openidm.action("external/rest", "call", request.content);
     } else {
         throw {
             "code" : 400,
