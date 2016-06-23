@@ -434,6 +434,13 @@ define([
             this.initSort();
         },
 
+        /**
+            Produces grid data from mapping transform properties. After every property is processed
+            (conditional and transform logic applied) the full set of details is provided to this.loadGrid.
+
+            @param {array} props - array of maps, each of which represent the mapping logic necessary for a single target property
+            @return {array} promises that will be resolved for each property in need of transformation
+        */
         gridFromMapProps : function (props) {
             var propertyDetails = _.clone(props),
                 evalPromises = [],
@@ -459,14 +466,12 @@ define([
 
                     tempDetails = {};
 
-                    if (item.condition || item.transform) {
-                        globals.linkQualifier = this.currentLinkQualifier;
+                    globals.linkQualifier = this.currentLinkQualifier;
 
-                        if (sampleSource[item.source]) {
-                            globals.source = sampleSource[item.source];
-                        } else {
-                            globals.source = sampleSource;
-                        }
+                    if (item.source !== "") {
+                        globals.source = sampleSource[item.source];
+                    } else {
+                        globals.source = sampleSource;
                     }
 
                     if (item.condition) {
