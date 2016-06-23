@@ -757,17 +757,16 @@ public abstract class RelationshipProvider {
         // Do activity logging.
         activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue, null, 
                 Status.SUCCESS);
-
-        // execute the onUpdate script of the managed object
-        managedObjectSetService.executeOnUpdateScript(context, request, managedId, beforeValue, afterValue);
-
-        // Execute the postUpdate script of the managed object
-        managedObjectSetService.executePostUpdate(context, newUpdateRequest(managedId, afterValue), managedId,
-                beforeValue, afterValue);
-
-        // Changes to the relationship will trigger sync on the managed object
-        managedObjectSetService.performSyncAction(context, request, managedId, notifyUpdate,
-                beforeValue, afterValue);
+        
+        // Perform an update on the managed object
+        // Note that the second-to-last parameter corresponds to the to-be-created relationships according to the
+        // javadocs in ManagedObjectSet#update, but that this relationship has already been added. If this value is
+        // empty however, the diff between the new and old objects in ManagedObjectSet#updateRelationshipFields will add
+        // this relationship back to the set of to-be-persisted relationships. Thus this field is retained here, as
+        // a slight performance enhancement. Note that this semantic impurity will be addressed when the RelationshipProvider
+        // class is refactored. TODO
+        managedObjectSetService.update(context, newUpdateRequest(managedId, afterValue), managedId, null, beforeValue, 
+                afterValue, new HashSet<>(Arrays.asList(propertyPtr)), new HashSet<>(Arrays.asList(propertyPtr)));
     }
 
     /**
