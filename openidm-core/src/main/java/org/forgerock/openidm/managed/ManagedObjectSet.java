@@ -299,8 +299,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             measure.end();
         }
     }
-
-    @Override
+    
     public void executePostUpdate(Context context, Request request, String resourceId, JsonValue oldValue, 
             JsonValue newValue) throws ResourceException {
         // Execute the postUpdate script if configured
@@ -472,13 +471,16 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param oldValue the old value of the object, as read from the repo
      * @param newValue the new value of the object, as specified by the user, or as constituted via a router read 
      *                 request in the triggerSyncCheck action.
-     * @param relationshipFields a set of relationship fields to persist. These fields must match the relationship
-     *                           fields present in the oldValue JsonValue.
+     * @param relationshipFields a set of relationship fields to persist.
+     * @param alreadyPersistedRelationshipFields the set of relationship fields already persisted by the caller. Non-empty
+     *                                           set specified only when method invoked by RelationshipProvider when
+     *                                           consumed as a relationship endpoint, as it persists the relationship
+     *                                           prior to calling this method.
      * @return a {@link ResourceResponse} object representing the updated resource
      * @throws ResourceException
      */
-    private ResourceResponse update(final Context context, Request request, String resourceId, String rev,
-    		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields)
+    public ResourceResponse update(final Context context, Request request, String resourceId, String rev,
+    		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields, Set<JsonPointer> alreadyPersistedRelationshipFields)
             throws ResourceException {
         Context managedContext = new ManagedObjectContext(context);
 
@@ -498,8 +500,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         // appropriately.
         updateRelationshipFields(context, resourceId, relationshipFields, decryptedOld, decryptedNew);
 
+        //remove already-persisted relationship fields, as they should not be validated/persisted
+        relationshipFields.removeAll(alreadyPersistedRelationshipFields);
+
         // Validate relationships before persisting
-        validateRelationshipFields(managedContext, decryptedOld, decryptedNew);
+        validateRelationshipFields(managedContext, decryptedOld, decryptedNew, relationshipFields);
 
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, request, decryptedNew);
@@ -710,7 +715,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Validate relationships before persisting
-            validateRelationshipFields(managedContext, json(object()), value);
+            validateRelationshipFields(managedContext, json(object()), value, relationshipProviders.keySet());
 
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(managedContext, request, value);
@@ -839,20 +844,23 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     }
 
     /**
-     * This will traverse the jsonValue and validate that all relationship references are valid.
+     * This will traverse the jsonValue and validate that all relationship references are valid and available for
+     * assignment.
      *
+     * @param context context of the request that is in progress.
      * @param oldValue previous state of the json.
      * @param newValue json object that will get its relationship fields validated.
-     * @param context context of the request that is in progress.
+     * @param toBeValidatedRelationshipFields the set of relationship fields which should be validated
      * @throws ResourceException BadRequestException when the first invalid relationship reference is discovered,
      * otherwise for other issues.
      */
-    private void validateRelationshipFields(Context context, JsonValue oldValue, JsonValue newValue)
-            throws ResourceException {
+    private void validateRelationshipFields(Context context, JsonValue oldValue, JsonValue newValue,
+                Set<JsonPointer> toBeValidatedRelationshipFields) throws ResourceException {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/managedObjectSet/validateRelationshipFields"), null, null);
         try {
-            for (JsonPointer field : schema.getRelationshipFields()) {
-                if (schema.getField(field).isValidationRequired()) {
+            for (JsonPointer field : toBeValidatedRelationshipFields) {
+                final SchemaField schemaField = schema.getField(field);
+                if ((schemaField != null) && schemaField.isValidationRequired()) {
                     relationshipProviders.get(field).validateRelationshipField(context,
                             oldValue.get(field) == null ? json(null) : oldValue.get(field),
                             newValue.get(field) == null ? json(null) : newValue.get(field));
@@ -909,7 +917,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             actions.
              */
             ResourceResponse updatedResponse = update(managedContext, request, resourceId, request.getRevision(),
-            		repoReadResponse.getContent(), request.getContent(), relationshipProviders.keySet());
+            		repoReadResponse.getContent(), request.getContent(), relationshipProviders.keySet(),
+                    Collections.<JsonPointer>emptySet());
             
             activityLogger.log(managedContext, request, "update", managedId(repoReadResponse.getId()).toString(),
                     repoReadResponse.getContent(), updatedResponse.getContent(), Status.SUCCESS);
@@ -1110,7 +1119,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     newValue.put("_rev", rev);
                 }
                 ResourceResponse patchedResource =
-                        update(context, request, resource.getId(), rev, oldValue, newValue, patchedRelationshipFields);
+                        update(context, request, resource.getId(), rev, oldValue, newValue, patchedRelationshipFields,
+                                Collections.<JsonPointer>emptySet());
 
                 activityLogger.log(context, request, "", managedId(patchedResource.getId()).toString(),
                         oldValue, patchedResource.getContent(), Status.SUCCESS);
@@ -1519,7 +1529,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         return stripped;
     }
 
-    @Override
     public void performSyncAction(final Context context, final Request request, final String resourceId,
             final SynchronizationService.SyncServiceAction action, final JsonValue oldValue, final JsonValue newValue)
         throws ResourceException {
@@ -1585,14 +1594,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             logger.error("Failed to sync {} {}:{}", action.name(), name, resourceId, e);
             throw e;
         }
-    }
-
-    @Override
-    public void executeOnUpdateScript(Context context, Request request, String resourceId, JsonValue decryptedOld,
-                                      JsonValue decryptedNew) throws ResourceException {
-        execScript(context, ScriptHook.onUpdate, decryptedNew,
-                prepareScriptBindings(context, request, resourceId, decryptedOld, decryptedNew));
-
     }
 
     /**
