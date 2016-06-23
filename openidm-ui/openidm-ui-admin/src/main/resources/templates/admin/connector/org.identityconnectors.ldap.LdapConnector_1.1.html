@@ -49,7 +49,7 @@
             <div class="form-group has-feedback">
                 <label for="port" class="control-label col-sm-3">{{t "templates.connector.ldapConnector.port"}}</label>
                 <div class="input-group col-sm-7 ldap-port-group">
-                    <input id="port" aria-describedby="ssl-addon" data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="configurationProperties.port" value={{t "templates.connector.ldapConnector.defaultPort"}} />
+                    <input id="port" aria-describedby="ssl-addon" data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
                     <div class="input-group-addon" id="ssl-addon">
                         <input id="ssl" autocomplete="off" type="checkbox" name="configurationProperties.ssl" {{#if connectorDefaults.configurationProperties.ssl}} checked{{/if}} value="true">
                         <label for="ssl">{{t "templates.connector.ldapConnector.ssl"}}</label>

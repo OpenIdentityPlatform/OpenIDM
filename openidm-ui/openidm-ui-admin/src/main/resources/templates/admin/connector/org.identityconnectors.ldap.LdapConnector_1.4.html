@@ -51,7 +51,7 @@
             <div class="form-group has-feedback">
                 <label for="port" class="control-label col-sm-3">{{t "templates.connector.ldapConnector.port"}}</label>
                 <div class="input-group col-sm-7 ldap-port-group">
-                    <input id="port" aria-describedby="ssl-addon" data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="configurationProperties.port" value={{t "templates.connector.ldapConnector.defaultPort"}} />
+                    <input id="port" aria-describedby="ssl-addon" data-validator-event="keyup blur" data-validator="required" class="form-control" autocomplete="off" type="text" name="configurationProperties.port" value="{{connectorDefaults.configurationProperties.port}}" />
                     <div class="input-group-addon" id="ssl-addon">
                         <input id="ssl" autocomplete="off" type="checkbox" name="configurationProperties.ssl" {{#if connectorDefaults.configurationProperties.ssl}} checked{{/if}} value="true">
                         <label for="ssl">{{t "templates.connector.ldapConnector.ssl"}}</label>
@@ -106,7 +106,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]"  placeholder={{t "templates.connector.ldapConnector.baseDN"}} value={{value}} />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]"  placeholder={{t "templates.connector.ldapConnector.baseDN"}} value="{{value}}" />
                     <div class="input-group-addon">
                         <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -117,7 +117,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                 <div class="col-sm-8">
-                    <input class="form-control" id="baseDN" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" value={{t "templates.connector.ldapConnector.baseDN"}} />
+                    <input class="form-control" id="baseDN" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]" value="{{t "templates.connector.ldapConnector.baseDN"}}" />
                     <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
                     <div class="input-group-addon">
                         <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
