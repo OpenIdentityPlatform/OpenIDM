@@ -43,10 +43,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
-import org.ops4j.pax.web.service.WebContainer;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleEvent;
-import org.osgi.framework.BundleListener;
+import org.forgerock.openidm.servletregistration.ServletRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -78,9 +75,9 @@ public final class ResourceServlet extends HttpServlet {
     private String defaultDir;
     private String extensionDir;
     private String contextRoot;
-    
+
     @Reference
-    private WebContainer webContainer;
+    private ServletRegistration servletRegistration;
 
     /**vn comEnhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -157,7 +154,7 @@ public final class ResourceServlet extends HttpServlet {
     }
 
     /**
-     * Initializes the servlet and registers it with the WebContainer.
+     * Initializes the servlet and registers it with {@link ServletRegistration}.
      * 
      * @param context the ComponentContext containing the configuration
      * @throws ServletException
@@ -187,15 +184,15 @@ public final class ResourceServlet extends HttpServlet {
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
         Dictionary<String, Object> props = new Hashtable<>();
-        webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
+        servletRegistration.registerServlet(contextRoot, this,  props);
         logger.debug("Registered UI servlet at {}", contextRoot);
     }
     
     /**
-     * Clears the servlet, unregistering it with the WebContainer and removing the bundle listener.
+     * Clears the servlet, unregistering it with {@link ServletRegistration} and removing the bundle listener.
      */
     private void clear() {
-        webContainer.unregister(contextRoot);
+        servletRegistration.unregisterServlet(this);
         logger.debug("Unregistered UI servlet at {}", contextRoot);
     }
     
