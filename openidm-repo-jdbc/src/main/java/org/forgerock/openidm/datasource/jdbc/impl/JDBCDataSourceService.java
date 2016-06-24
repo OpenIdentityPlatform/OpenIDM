@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
@@ -70,8 +70,10 @@ public class JDBCDataSourceService implements DataSourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(JDBCDataSourceService.class);
 
+    /** holds the configuration we activate with so we can detect differences on @modified */
     private JsonValue config;
 
+    /** the configured DataSourceService reference so we can swap gracefully when configuration changes */
     private AtomicReference<DataSourceService> configuredDataSourceService = new AtomicReference<>(null);
 
     /**
@@ -145,10 +147,11 @@ public class JDBCDataSourceService implements DataSourceService {
     }
 
     /**
-     * Initializes the JDBC Connection Service with the supplied configuration
+     * Initializes and returns the JDBC Connection Service with the supplied configuration
      *
      * @param config the configuration object
      * @param bundleContext the bundle context
+     * @return a DataSourceService constructed from the configuration
      */
     private DataSourceService initDataSourceService(final JsonValue config, final BundleContext bundleContext) {
         return new DataSourceService() {
