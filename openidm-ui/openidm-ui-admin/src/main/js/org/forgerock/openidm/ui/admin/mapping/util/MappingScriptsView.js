@@ -89,6 +89,8 @@ define([
         saveScripts: function(e) {
             e.preventDefault();
 
+            this.model.mapping = this.getCurrentMapping();
+
             var scriptHook = null,
                 tmpEditor,
                 eventName,

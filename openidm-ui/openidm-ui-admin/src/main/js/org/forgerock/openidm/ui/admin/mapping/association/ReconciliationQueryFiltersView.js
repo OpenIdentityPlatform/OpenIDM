@@ -83,6 +83,8 @@ define([
 
             e.preventDefault();
 
+            this.model.mapping = this.getCurrentMapping();
+
             queries =  _.chain(this.model.queryEditors)
                 .filter(function (qe) {
                     return _.has(qe, "editor");
