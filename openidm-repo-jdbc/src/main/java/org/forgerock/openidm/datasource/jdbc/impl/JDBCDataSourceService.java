@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
@@ -21,6 +21,7 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -69,11 +70,11 @@ public class JDBCDataSourceService implements DataSourceService {
 
     private static final Logger logger = LoggerFactory.getLogger(JDBCDataSourceService.class);
 
+    /** holds the configuration we activate with so we can detect differences on @modified */
     private JsonValue config;
 
-    private DataSourceConfig dataSourceConfig;
-    private DataSourceFactory dataSourceFactory;
-    private DataSource dataSource;
+    /** the configured DataSourceService reference so we can swap gracefully when configuration changes */
+    private AtomicReference<DataSourceService> configuredDataSourceService = new AtomicReference<>(null);
 
     /**
      * Enhanced configuration service.
@@ -91,7 +92,7 @@ public class JDBCDataSourceService implements DataSourceService {
      */
     public static DataSourceService getBootService(JsonValue config, BundleContext context) {
         JDBCDataSourceService bootService = new JDBCDataSourceService();
-        bootService.init(config, context);
+        bootService.configuredDataSourceService.getAndSet(bootService.initDataSourceService(config, context));
         return bootService;
     }
 
@@ -146,15 +147,34 @@ public class JDBCDataSourceService implements DataSourceService {
     }
 
     /**
-     * Initializes the JDBC Connection Service with the supplied configuration
+     * Initializes and returns the JDBC Connection Service with the supplied configuration
      *
      * @param config the configuration object
      * @param bundleContext the bundle context
+     * @return a DataSourceService constructed from the configuration
      */
-    private void init(JsonValue config, final BundleContext bundleContext) {
-        dataSourceConfig = parseJson(config);
-        dataSourceFactory = dataSourceConfig.accept(new DataSourceFactoryConfigVisitor(bundleContext), null);
-        dataSource = dataSourceFactory.newInstance();
+    private DataSourceService initDataSourceService(final JsonValue config, final BundleContext bundleContext) {
+        return new DataSourceService() {
+            final DataSourceConfig dataSourceConfig = parseJson(config);
+            final DataSourceFactory dataSourceFactory = dataSourceConfig.accept(
+                    new DataSourceFactoryConfigVisitor(bundleContext), null);
+            final DataSource dataSource = dataSourceFactory.newInstance();
+
+            @Override
+            public String getDatabaseName() {
+                return dataSourceConfig.getDatabaseName();
+            }
+
+            @Override
+            public DataSource getDataSource() {
+                return dataSource;
+            }
+
+            @Override
+            public void shutdown() {
+                dataSourceFactory.shutdown(dataSource);
+            }
+        };
     }
 
     /**
@@ -167,7 +187,7 @@ public class JDBCDataSourceService implements DataSourceService {
         logger.debug("Activating ConnectionManager Service with configuration {}", compContext.getProperties());
         try {
             config = enhancedConfig.getConfigurationAsJson(compContext);
-            init(config, compContext.getBundleContext());
+            configuredDataSourceService.getAndSet(initDataSourceService(config, compContext.getBundleContext()));
             logger.info("JDBCConnectionManager started.");
         } catch (RuntimeException e) {
             logger.warn("Configuration invalid and could not be parsed, can not start JDBC repository: ", e);
@@ -184,6 +204,7 @@ public class JDBCDataSourceService implements DataSourceService {
     void deactivate(ComponentContext compContext) {
         logger.debug("Deactivating Service {}", compContext);
         shutdown();
+        configuredDataSourceService.set(null);
         logger.info("Repository stopped.");
     }
 
@@ -198,8 +219,12 @@ public class JDBCDataSourceService implements DataSourceService {
         try {
             JsonValue newConfig = enhancedConfig.getConfigurationAsJson(compContext);
             if (hasConfigChanged(config, newConfig)) {
-                deactivate(compContext);
-                activate(compContext);
+                // configure a new DataSourceService and swap
+                DataSourceService oldDataSourceService = configuredDataSourceService.getAndSet(
+                        initDataSourceService(newConfig, compContext.getBundleContext()));
+                // and shutdown the old one
+                oldDataSourceService.shutdown();
+
                 logger.info("Reconfigured the JDBC Repository Service {}", compContext.getProperties());
             }
         } catch (Exception ex) {
@@ -222,16 +247,16 @@ public class JDBCDataSourceService implements DataSourceService {
 
     @Override
     public String getDatabaseName() {
-        return dataSourceConfig.getDatabaseName();
+        return configuredDataSourceService.get().getDatabaseName();
     }
 
     @Override
     public DataSource getDataSource() {
-        return dataSource;
+        return configuredDataSourceService.get().getDataSource();
     }
 
     @Override
     public void shutdown() {
-        dataSourceFactory.shutdown(dataSource);
+        configuredDataSourceService.get().shutdown();
     }
 }
