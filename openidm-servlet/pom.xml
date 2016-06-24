@@ -46,6 +46,11 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.forgerock.openidm</groupId>
+      <artifactId>openidm-servlet-registrator</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
       <groupId>org.forgerock.commons</groupId>
       <artifactId>forgerock-util</artifactId>
     </dependency>
