@@ -34,6 +34,10 @@ define([
 
         MappingAdminAbstractView = AdminAbstractView.extend({
             getCurrentMapping: function() {
+                if(currentMapping.recon) {
+                    delete currentMapping.recon;
+                }
+
                 return _.clone(currentMapping, true);
             },
 
@@ -71,6 +75,10 @@ define([
             },
 
             setCurrentMapping: function(mapping) {
+                if(mapping.recon) {
+                    delete mapping.recon;
+                }
+
                 currentMapping = mapping;
                 return mapping;
             },
