@@ -193,14 +193,14 @@ public class IdentityProviderService implements SingletonResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest readRequest) {
-        List<Map<String, String>> identityProviders = new ArrayList<>();
+        JsonValue identityProviders = json(array());
         for (ProviderConfig config : getIdentityProviders()) {
-            Map<String, String> provider = mapper.convertValue(config, Map.class);
+            JsonValue provider = json(mapper.convertValue(config, Map.class));
             provider.remove(ProviderConfig.CLIENT_SECRET);
-            identityProviders.add(provider);
+            identityProviders.add(provider.asMap());
         }
         return newResourceResponse(null, null,
-                json(object(field(PROVIDERS, identityProviders))))
+                json(object(field(PROVIDERS, identityProviders.asList()))))
                 .asPromise();
     }
 
