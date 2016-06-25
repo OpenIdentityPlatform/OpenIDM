@@ -259,7 +259,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                     //we need a TransactionManager to use this
                     JtaProcessEngineConfiguration configuration = new JtaProcessEngineConfiguration();
 
-                    if (useDataSource == null) {
+                    if (!dataSourceServices.containsKey(useDataSource)) {
                         //no data source specified - use embedded h2
                         //initialise the default h2 DataSource
                         //Implement it here. There are examples in the JDBCRepoService
