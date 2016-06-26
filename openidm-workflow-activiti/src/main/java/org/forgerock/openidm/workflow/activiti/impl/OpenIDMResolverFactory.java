@@ -93,7 +93,7 @@ public class OpenIDMResolverFactory implements ResolverFactory {
                 //Called from ScriptTask
                 if (activityBehavior instanceof ScriptTaskActivityBehavior) {
                     behaviour = (ScriptTaskActivityBehavior) activityBehavior;
-                    Class cls = Class.forName("org.activiti.engine.impl.bpmn.behavior.ScriptTaskActivityBehavior");
+                    Class<?> cls = Class.forName("org.activiti.engine.impl.bpmn.behavior.ScriptTaskActivityBehavior");
                     Field languageField = cls.getDeclaredField("language");
                     languageField.setAccessible(true);
                     language = (String) languageField.get(behaviour);
@@ -156,9 +156,10 @@ public class OpenIDMResolverFactory implements ResolverFactory {
     private String processClassDelegate(VariableScope scope, ClassDelegate delegate) {
         String language = "groovy";
         try {
-            Class cls = Class.forName("org.activiti.engine.impl.bpmn.helper.ClassDelegate");
+            Class<?> cls = Class.forName("org.activiti.engine.impl.bpmn.helper.ClassDelegate");
             Field languageFields = cls.getDeclaredField("fieldDeclarations");
             languageFields.setAccessible(true);
+            @SuppressWarnings("unchecked")
             List<FieldDeclaration> fieldDeclarations = (List<FieldDeclaration>) languageFields.get(delegate);
             for (FieldDeclaration field : fieldDeclarations) {
                 if ("language".equals(field.getName())) {

@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import java.io.File;
@@ -159,11 +160,11 @@ public class ActivitiServiceImpl implements RequestHandler {
             strategy = ReferenceStrategy.EVENT)
     private final Map<String, DataSourceService> dataSourceServices = new ConcurrentHashMap<>();
 
-    protected void bindDataSourceService(DataSourceService service, Map properties) {
+    protected void bindDataSourceService(DataSourceService service, Map<String, Object> properties) {
         dataSourceServices.put(properties.get(ServerConstants.CONFIG_FACTORY_PID).toString(), service);
     }
 
-    protected void unbindDataSourceService(DataSourceService service, Map properties) {
+    protected void unbindDataSourceService(DataSourceService service, Map<String, Object> properties) {
         for (Map.Entry<String, DataSourceService> entry : dataSourceServices.entrySet()) {
             if (service.equals(entry.getValue())) {
                 dataSourceServices.remove(entry.getKey());
@@ -418,7 +419,9 @@ public class ActivitiServiceImpl implements RequestHandler {
     private void readConfiguration(ComponentContext compContext) {
         JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
         if (!config.isNull()) {
-            location = config.get(CONFIG_LOCATION).defaultTo(EngineLocation.embedded.name()).asEnum(EngineLocation.class);
+            location = config.get(CONFIG_LOCATION)
+                    .defaultTo(EngineLocation.embedded.name())
+                    .as(enumConstant(EngineLocation.class));
             useDataSource = config.get(CONFIG_USE_DATASOURCE).defaultTo("default").asString();
             JsonValue mailconfig = config.get(CONFIG_MAIL);
             if (mailconfig.isNotNull()) {
@@ -466,11 +469,11 @@ public class ActivitiServiceImpl implements RequestHandler {
         this.idmSessionFactory.setScriptRegistry(null);
     }
 
-    public void bindService(JavaDelegate delegate, Map props) {
+    public void bindService(JavaDelegate delegate, Map<String, Object> props) {
         expressionManager.bindService(delegate, props);
     }
 
-    public void unbindService(JavaDelegate delegate, Map props) {
+    public void unbindService(JavaDelegate delegate, Map<String, Object> props) {
         expressionManager.unbindService(delegate, props);
     }
 

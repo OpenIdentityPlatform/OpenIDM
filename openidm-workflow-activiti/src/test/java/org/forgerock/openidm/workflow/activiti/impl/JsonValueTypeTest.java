@@ -76,6 +76,7 @@ public class JsonValueTypeTest {
         public void setDoubleValue(Double doubleValue) {
         }
 
+        @Deprecated
         public String getByteArrayValueId() {
             return null;
         }
@@ -83,6 +84,7 @@ public class JsonValueTypeTest {
         public void setByteArrayValue(ByteArrayEntity byteArrayValue) {
         }
 
+        @Deprecated
         public ByteArrayEntity getByteArrayValue() {
             return null;
         }
@@ -95,6 +97,7 @@ public class JsonValueTypeTest {
         }
 
         @Override
+        @Deprecated
         public void setByteArrayValue(byte[] bytes) {
             throw new UnsupportedOperationException("Not supported yet.");
         }

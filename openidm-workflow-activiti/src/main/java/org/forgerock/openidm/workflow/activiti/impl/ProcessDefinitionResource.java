@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
@@ -155,8 +156,8 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
                         processEngine.getRepositoryService().createProcessDefinitionQuery().list();
                 if (definitionList != null && definitionList.size() > 0) {
                     for (ProcessDefinition processDefinition : definitionList) {
-                        Map value = mapper.convertValue(processDefinition, HashMap.class);
-                        ResourceResponse r = newResourceResponse(processDefinition.getId(), null, new JsonValue(value));
+                        JsonValue value = json(mapper.convertValue(processDefinition, Map.class));
+                        ResourceResponse r = newResourceResponse(processDefinition.getId(), null, value);
                         handler.handleResource(r);
                     }
                 }
@@ -166,8 +167,8 @@ public class ProcessDefinitionResource implements CollectionResourceProvider {
                 setProcessDefinitionParams(query, request);
                 List<ProcessDefinition> list = query.list();
                 for (ProcessDefinition processDefinition : list) {
-                    Map value = mapper.convertValue(processDefinition, HashMap.class);
-                    ResourceResponse r = newResourceResponse(processDefinition.getId(), null, new JsonValue(value));
+                    JsonValue value = json(mapper.convertValue(processDefinition, Map.class));
+                    ResourceResponse r = newResourceResponse(processDefinition.getId(), null, value);
                     handler.handleResource(r);
                 }
                 return newQueryResponse().asPromise();

@@ -15,16 +15,16 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.fasterxml.jackson.databind.MapperFeature;
@@ -83,16 +83,16 @@ import org.forgerock.util.promise.Promise;
  */
 public class ProcessInstanceResource implements CollectionResourceProvider {
 
-    private final static ObjectMapper MAPPER;
+    private final static ObjectMapper mapper;
     private final ProcessEngine processEngine;
     private final Function<ProcessEngine, HistoricProcessInstanceQuery, NeverThrowsException> queryFunction;
 
     static {
-        MAPPER = new ObjectMapper();
-        MAPPER.addMixIn(HistoricProcessInstanceEntity.class, HistoricProcessInstanceMixIn.class);
-        MAPPER.addMixIn(HistoricTaskInstanceEntity.class, HistoricTaskInstanceEntityMixIn.class);
-        MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        mapper = new ObjectMapper();
+        mapper.addMixIn(HistoricProcessInstanceEntity.class, HistoricProcessInstanceMixIn.class);
+        mapper.addMixIn(HistoricTaskInstanceEntity.class, HistoricTaskInstanceEntityMixIn.class);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
     /**
@@ -144,7 +144,7 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 resultMap.put(ActivitiConstants.ACTIVITI_BUSINESSKEY, instance.getBusinessKey());
                 resultMap.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONID, instance.getProcessDefinitionId());
                 resultMap.put(ActivitiConstants.ID, instance.getId());
-                JsonValue content = new JsonValue(resultMap);
+                JsonValue content = json(resultMap);
                 return newResourceResponse(instance.getId(), null, content).asPromise();
             } else {
                 return new InternalServerErrorException("The process instance could not be created").asPromise();
@@ -177,8 +177,8 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             Authentication.setAuthenticatedUserId(context.asContext(SecurityContext.class).getAuthenticationId());
             HistoricProcessInstance process = processEngine.getHistoryService().createHistoricProcessInstanceQuery().processInstanceId(resourceId).singleResult();
             if (process != null) {
-                Map value = MAPPER.convertValue(process, HashMap.class);
-                ResourceResponse r = newResourceResponse(process.getId(), null, new JsonValue(value));
+                JsonValue value = json(mapper.convertValue(process, Map.class));
+                ResourceResponse r = newResourceResponse(process.getId(), null, value);
                 processEngine.getRuntimeService().deleteProcessInstance(resourceId, "Deleted by Openidm");
                 return r.asPromise();
             } else {
@@ -204,10 +204,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             final HistoricProcessInstanceQuery query = queryFunction.apply(processEngine);
             if (ActivitiConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
                 for (HistoricProcessInstance i : query.list()) {
-                    Map<String, Object> value = MAPPER.convertValue(i, Map.class);
+                    JsonValue value = json(mapper.convertValue(i, Map.class));
                     // TODO OPENIDM-3603 add relationship support
                     value.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(i));
-                    ResourceResponse r = newResourceResponse(i.getId(), null, new JsonValue(value));
+                    ResourceResponse r = newResourceResponse(i.getId(), null, value);
                     handler.handleResource(r);
                 }
                 return newQueryResponse().asPromise();
@@ -215,10 +215,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
                 setProcessInstanceParams(query, request);
                 setSortKeys(query, request);
                 for (HistoricProcessInstance processinstance : query.list()) {
-                    Map<String, Object> value = MAPPER.convertValue(processinstance, Map.class);
+                    JsonValue value = json(mapper.convertValue(processinstance, Map.class));
                     // TODO OPENIDM-3603 add relationship support
                     value.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(processinstance));
-                    handler.handleResource(newResourceResponse(processinstance.getId(), null, new JsonValue(value)));
+                    handler.handleResource(newResourceResponse(processinstance.getId(), null, value));
                 }
                 return newQueryResponse().asPromise();
             } else {
@@ -239,10 +239,10 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
             if (instance == null) {
                 return new NotFoundException().asPromise();
             } else {
-                JsonValue content = new JsonValue(MAPPER.convertValue(instance, Map.class));
+                JsonValue content = json(mapper.convertValue(instance, Map.class));
                 // TODO OPENIDM-3603 add relationship support
                 content.put(ActivitiConstants.ACTIVITI_PROCESSDEFINITIONRESOURCENAME, getProcessDefName(instance));
-                content.put("tasks", getTasksForProcess(instance.getId()));
+                content.put("tasks", getTasksForProcess(instance.getId()).getObject());
 
                 // diagram support
                 if (request.getFields().contains(ActivitiConstants.ACTIVITI_DIAGRAM)) {
@@ -284,11 +284,11 @@ public class ProcessInstanceResource implements CollectionResourceProvider {
      * @param processId process instance id
      * @return Map containing all tasks associated with the processId
      */
-    private List<Map<String, Object>> getTasksForProcess(String processId) {
+    private JsonValue getTasksForProcess(String processId) {
         HistoricTaskInstanceQuery query = processEngine.getHistoryService().createHistoricTaskInstanceQuery();
-        List<Map<String, Object>> tasks = new ArrayList<>();
+        JsonValue tasks = json(array());
         for (HistoricTaskInstance taskInstance : query.processInstanceId(processId).list()) {
-            tasks.add(MAPPER.convertValue(taskInstance, Map.class));
+            tasks.add(mapper.convertValue(taskInstance, Map.class));
         }
         return tasks;
     }
