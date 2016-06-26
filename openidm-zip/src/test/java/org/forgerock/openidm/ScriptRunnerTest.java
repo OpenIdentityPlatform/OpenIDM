@@ -57,6 +57,8 @@ public class ScriptRunnerTest  {
      * script modules using the classpath.
      */
     private class ClasspathModuleSourceProvider extends UrlModuleSourceProvider {
+        static final long serialVersionUID = 1L;
+
         public ClasspathModuleSourceProvider() {
             super(null, null, new DefaultUrlConnectionExpiryCalculator(0), null);
         }
