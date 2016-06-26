@@ -64,13 +64,15 @@ public class CustomObjectTypeProperty extends CustomBaseObject {
     /**
      * Supported types for configuration properties.
      */
-    private static final Map<String,String> PROPERTY_TYPES = new HashMap<String,String>() {{
-        put("string", "String.class");
-        put("array", "Object.class");
-        put("boolean", "Boolean.class");
-        put("integer", "Integer.class");
-        put("object", "Object.class");
-    }};
+    private static final Map<String,String> PROPERTY_TYPES = new HashMap<String,String>();
+
+    static {
+        PROPERTY_TYPES.put("string", "String.class");
+        PROPERTY_TYPES.put("array", "Object.class");
+        PROPERTY_TYPES.put("boolean", "Boolean.class");
+        PROPERTY_TYPES.put("integer", "Integer.class");
+        PROPERTY_TYPES.put("object", "Object.class");
+    }
 
     private String name;
     private String type;
