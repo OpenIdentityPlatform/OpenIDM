@@ -137,10 +137,10 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 return new NotFoundException("Task " + resourceId + " not found.").asPromise();
             }
 
-            Map<String, Object> deletedTask = mapper.convertValue(task, Map.class);
+            JsonValue deletedTask = json(mapper.convertValue(task, Map.class));
             processEngine.getTaskService()
                     .deleteTask(resourceId, request.getAdditionalParameter(ActivitiConstants.ACTIVITI_DELETEREASON));
-            return newResourceResponse(task.getId(), null, new JsonValue(deletedTask)).asPromise();
+            return newResourceResponse(task.getId(), null, deletedTask).asPromise();
         } catch (ActivitiObjectNotFoundException ex) {
             return new NotFoundException(ex.getMessage()).asPromise();
         } catch (Exception ex) {
@@ -166,8 +166,8 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 setSortKeys(query, request);
                 List<Task> list = query.list();
                 for (Task taskInstance : list) {
-                    Map value = mapper.convertValue(taskInstance, HashMap.class);
-                    ResourceResponse r = newResourceResponse(taskInstance.getId(), null, new JsonValue(value));
+                    JsonValue value = json(mapper.convertValue(taskInstance, Map.class));
+                    ResourceResponse r = newResourceResponse(taskInstance.getId(), null, value);
                     if (taskInstance.getDelegationState() == DelegationState.PENDING) {
                         r.getContent().add(ActivitiConstants.ACTIVITI_DELEGATE, taskInstance.getAssignee());
                     } else {
@@ -196,11 +196,11 @@ public class TaskInstanceResource implements CollectionResourceProvider {
             if (task == null) {
                 return new NotFoundException().asPromise();
             } else {
-                Map value = mapper.convertValue(task, HashMap.class);
+                JsonValue value = json(mapper.convertValue(task, Map.class));
                 TaskFormData data = processEngine.getFormService().getTaskFormData(task.getId());
-                List<Map> propertyValues = new ArrayList<Map>();
+                List<Map<String, String>> propertyValues = new ArrayList<>();
                 for (FormProperty p : data.getFormProperties()) {
-                    Map<String, String> entry = new HashMap<String, String>();
+                    Map<String, String> entry = new HashMap<>();
                     entry.put(p.getId(), p.getValue());
                     propertyValues.add(entry);
                 }
@@ -219,7 +219,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                 value.put(ActivitiConstants.ACTIVITI_VARIABLES, variables);
                 value.put("candidates", getCandidateIdentities(task).getObject());
 
-                return newResourceResponse(task.getId(), null, new JsonValue(value)).asPromise();
+                return newResourceResponse(task.getId(), null, value).asPromise();
             }
         } catch (Exception ex) {
             return new InternalServerErrorException(ex.getMessage(), ex).asPromise();
@@ -256,10 +256,11 @@ public class TaskInstanceResource implements CollectionResourceProvider {
             if (task == null) {
                 return new NotFoundException().asPromise();
             } else {
-                Map value = request.getContent().expect(Map.class).asMap();
+                Map<String, Object> value = request.getContent().expect(Map.class).asMap();
                 if (value.containsKey(ActivitiConstants.ACTIVITI_ASSIGNEE)) {
                     task.setAssignee(value.get(ActivitiConstants.ACTIVITI_ASSIGNEE) == null
-                            ? null : value.get(ActivitiConstants.ACTIVITI_ASSIGNEE).toString());
+                            ? null
+                            : value.get(ActivitiConstants.ACTIVITI_ASSIGNEE).toString());
                 }
                 if (value.get(ActivitiConstants.ACTIVITI_DESCRIPTION) != null) {
                     task.setDescription(value.get(ActivitiConstants.ACTIVITI_DESCRIPTION).toString());
@@ -271,7 +272,7 @@ public class TaskInstanceResource implements CollectionResourceProvider {
                     task.setOwner(value.get(ActivitiConstants.ACTIVITI_OWNER).toString());
                 }
                 processEngine.getTaskService().saveTask(task);
-                Map<String, String> result = new HashMap<String, String>(1);
+                Map<String, String> result = new HashMap<>(1);
                 result.put("Task updated", resourceId);
                 return newResourceResponse(resourceId, null, new JsonValue(result)).asPromise();
             }

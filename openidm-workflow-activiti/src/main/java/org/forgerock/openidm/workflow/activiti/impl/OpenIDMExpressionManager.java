@@ -31,9 +31,9 @@ import org.osgi.service.component.ComponentConstants;
  *
  */
 public class OpenIDMExpressionManager extends ExpressionManager {
-    private Map<String, JavaDelegate> delegateMap = new HashMap<String, JavaDelegate>();
+    private Map<String, JavaDelegate> delegateMap = new HashMap<>();
     
-    public void bindService(JavaDelegate delegate, Map props) {
+    public void bindService(JavaDelegate delegate, Map<String, Object> props) {
         String name = (String) props.get(ComponentConstants.COMPONENT_NAME);
         if (name == null) { //handle blueprint services as well
             name = (String) props.get("osgi.service.blueprint.compname");
@@ -43,7 +43,7 @@ public class OpenIDMExpressionManager extends ExpressionManager {
         }
     }
 
-    public void unbindService(JavaDelegate delegate, Map props) {
+    public void unbindService(JavaDelegate delegate, Map<String, Object> props) {
         String name = (String) props.get(ComponentConstants.COMPONENT_NAME);
         if (delegateMap.containsKey(name)) {
             delegateMap.remove(name);

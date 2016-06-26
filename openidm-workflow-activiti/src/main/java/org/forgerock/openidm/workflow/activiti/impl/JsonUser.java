@@ -17,7 +17,8 @@ package org.forgerock.openidm.workflow.activiti.impl;
 
 import org.activiti.engine.identity.User;
 import org.forgerock.json.JsonValue;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
+
 import org.forgerock.openidm.crypto.CryptoService;
 
 import static org.forgerock.openidm.workflow.activiti.impl.SharedIdentityService.*;
@@ -36,7 +37,7 @@ public class JsonUser extends JsonValue implements User {
      * @param userId the Java object representing JSON value.
      */
     public JsonUser(CryptoService service, String userId) {
-        super(new HashMap());
+        super(new LinkedHashMap<String, Object>());
         this.cryptoService = service;
         put(SCIM_USERNAME, userId);
     }
@@ -63,7 +64,7 @@ public class JsonUser extends JsonValue implements User {
 
     public void setFirstName(String firstName) {
         if (get(SCIM_NAME).isNull()) {
-            put(SCIM_NAME, new HashMap(6));
+            put(SCIM_NAME, new LinkedHashMap<String, Object>(6));
         }
         if (get(SCIM_NAME).isMap()) {
             get(SCIM_NAME).put(SCIM_NAME_GIVENNAME, firstName);
@@ -72,7 +73,7 @@ public class JsonUser extends JsonValue implements User {
 
     public void setLastName(String lastName) {
         if (get(SCIM_NAME).isNull()) {
-            put(SCIM_NAME, new HashMap(6));
+            put(SCIM_NAME, new LinkedHashMap<String, Object>(6));
         }
         if (get(SCIM_NAME).isMap()) {
             get(SCIM_NAME).put(SCIM_NAME_FAMILYNAME, lastName);

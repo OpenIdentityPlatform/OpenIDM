@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnCollection;
@@ -47,7 +48,6 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
 import org.activiti.engine.ActivitiObjectNotFoundException;
@@ -130,8 +130,8 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
                 Map<String, TaskDefinition> taskdefinitions = procdef.getTaskDefinitions();
                 for (TaskDefinition taskDefinition : taskdefinitions.values()) {
                     DefaultTaskFormHandler taskFormHandler = (DefaultTaskFormHandler) taskDefinition.getTaskFormHandler();
-                    Map value = mapper.convertValue(taskDefinition, HashMap.class);
-                    ResourceResponse r = newResourceResponse(taskDefinition.getKey(), null, new JsonValue(value));
+                    JsonValue value = json(mapper.convertValue(taskDefinition, Map.class));
+                    ResourceResponse r = newResourceResponse(taskDefinition.getKey(), null, value);
                     r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormHandler.getFormKey());
                     handler.handleResource(r);
                 }
@@ -152,13 +152,13 @@ public class TaskDefinitionResource implements CollectionResourceProvider {
             ProcessDefinitionEntity procdef = (ProcessDefinitionEntity) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getDeployedProcessDefinition(processDefinitionId);
             TaskDefinition taskDefinition = procdef.getTaskDefinitions().get(resourceId);
             if (taskDefinition != null) {
-                Map value = mapper.convertValue(taskDefinition, HashMap.class);
-                ResourceResponse r = newResourceResponse(taskDefinition.getKey(), null, new JsonValue(value));
+                JsonValue value = json(mapper.convertValue(taskDefinition, Map.class));
+                ResourceResponse r = newResourceResponse(taskDefinition.getKey(), null, value);
                 FormService formService = processEngine.getFormService();
                 String taskFormKey = formService.getTaskFormKey(processDefinitionId, resourceId);
                 if (taskFormKey != null) {
                     r.getContent().add(ActivitiConstants.ACTIVITI_FORMRESOURCEKEY, taskFormKey);
-                    ByteArrayInputStream startForm = (ByteArrayInputStream) ((RepositoryServiceImpl) processEngine.getRepositoryService()).getResourceAsStream(procdef.getDeploymentId(), taskFormKey);
+                    ByteArrayInputStream startForm = (ByteArrayInputStream) (processEngine.getRepositoryService()).getResourceAsStream(procdef.getDeploymentId(), taskFormKey);
                     Reader reader = new InputStreamReader(startForm);
                     try {
                         Scanner s = new Scanner(reader).useDelimiter("\\A");

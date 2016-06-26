@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupportedOnInstance;
@@ -59,15 +60,15 @@ import java.util.Map;
  */
 public class TaskInstanceHistoryResource implements CollectionResourceProvider {
 
-    private static final ObjectMapper MAPPER;
+    private static final ObjectMapper mapper;
     private ProcessEngine processEngine;
 
     static {
-        MAPPER = new ObjectMapper();
-        MAPPER.addMixIn(HistoricTaskInstanceEntity.class,
+        mapper = new ObjectMapper();
+        mapper.addMixIn(HistoricTaskInstanceEntity.class,
                 HistoricTaskInstanceEntityMixIn.class);
-        MAPPER.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-        MAPPER.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
+        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
+        mapper.configure(MapperFeature.SORT_PROPERTIES_ALPHABETICALLY, true);
     }
 
     /**
@@ -136,8 +137,8 @@ public class TaskInstanceHistoryResource implements CollectionResourceProvider {
                     setSortKeys(query, request);
                 }
                 for (HistoricTaskInstance i : query.list()) {
-                    Map<String, Object> value = MAPPER.convertValue(i, Map.class);
-                    handler.handleResource(newResourceResponse(i.getId(), null, new JsonValue(value)));
+                    JsonValue value = json(mapper.convertValue(i, Map.class));
+                    handler.handleResource(newResourceResponse(i.getId(), null, value));
                 }
                 return newQueryResponse().asPromise();
             } else {
