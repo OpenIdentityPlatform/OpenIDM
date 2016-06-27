@@ -19,7 +19,8 @@ define([
     "underscore",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function($, _, constants, AbstractDelegate) {
+], function($, _, constants,
+            AbstractDelegate) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/identityProviders");
 

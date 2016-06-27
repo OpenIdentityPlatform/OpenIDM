@@ -84,6 +84,12 @@ var httpAccessConfig =
             "methods"    : "read",
             "actions"    : "*"
         },
+        {
+            "pattern"    : "identityProviders",
+            "roles"      : "openidm-authorized",
+            "methods"    : "read",
+            "actions"    : "*"
+        },
 
         // externally-visisble Self-Service endpoints
         {

@@ -286,6 +286,13 @@
         }
     },
     "templates" : {
+        "socialIdentities" : {
+            "linkedUsing" : "Linked using",
+            "primary" : "Primary",
+            "linkedAccounts" : "Linked Accounts",
+            "socialIdentities" : "Social Identities",
+            "noSocialProviders" : "No Social Providers Available"
+        },
         "util" : {
             "scriptList" : {
                 "event": "EVENT",

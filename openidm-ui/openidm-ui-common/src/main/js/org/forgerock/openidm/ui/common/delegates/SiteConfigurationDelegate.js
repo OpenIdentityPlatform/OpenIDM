@@ -38,11 +38,11 @@ define([
 
             if (data.configuration.kbaEnabled === true) {
                 require.config({"map": { "*": {
-                    "UserProfileView" : "org/forgerock/commons/ui/user/profile/UserProfileKBAView"
+                    "UserProfileView" : "org/forgerock/openidm/ui/user/profile/UserProfileKBAView"
                 } } } );
             } else {
                 require.config({"map": { "*": {
-                    "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView"
+                    "UserProfileView": "org/forgerock/openidm/ui/user/profile/UserProfileView"
                 } } } );
             }
 
