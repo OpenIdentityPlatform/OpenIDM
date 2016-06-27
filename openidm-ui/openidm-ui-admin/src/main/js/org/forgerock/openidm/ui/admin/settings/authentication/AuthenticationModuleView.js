@@ -283,18 +283,22 @@ define([
 
         handleOpenAMUISettings: function (config) {
             var prom = $.Deferred(),
-                amAuthIndex = _.findIndex(this.model.changes, { name: "OPENAM_SESSION" }),
+                amAuthIndex,
+                amSettings;
+
+            //make sure this is the OPENAM_SESSION module that is being edited
+            if (config.name === "OPENAM_SESSION") {
+                amAuthIndex = _.findIndex(this.model.changes, { name: "OPENAM_SESSION" });
                 amSettings = _.pick(config.properties, this.data.amUIProperties, "openamDeploymentUrl");
 
-            amSettings.openamAuthEnabled = config.enabled;
-            delete amSettings.enabled;
-
-            this.model.amSettings = amSettings;
-
-            //before saving these properties need to be changed back to the untranslated versions
-            this.model.changes[amAuthIndex].properties.truststoreType = this.data.amTruststoreType;
-            this.model.changes[amAuthIndex].properties.truststorePath = this.data.amTruststorePath;
-            this.model.changes[amAuthIndex].properties.truststorePassword = this.data.amTruststorePassword;
+                amSettings.openamAuthEnabled = config.enabled;
+                delete amSettings.enabled;
+                this.model.amSettings = amSettings;
+                //before saving these properties need to be changed back to the untranslated versions
+                this.model.changes[amAuthIndex].properties.truststoreType = this.data.amTruststoreType;
+                this.model.changes[amAuthIndex].properties.truststorePath = this.data.amTruststorePath;
+                this.model.changes[amAuthIndex].properties.truststorePassword = this.data.amTruststorePassword;
+            }
         },
 
         addOpenAMUISettings: function () {
