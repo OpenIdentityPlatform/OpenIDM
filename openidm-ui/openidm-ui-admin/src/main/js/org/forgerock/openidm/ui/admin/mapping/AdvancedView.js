@@ -75,12 +75,37 @@ define([
                         }
                     });
 
-                    // Overwrite `isChanged` to provide proper functionality to ChangesPending Widget
+                    // Overwrite `ChangesPending#isChanged` to provide functionality to ChangesPending Widget
                     panel.changeWatcher.isChanged = function() {
                         var isChanged =  _.some(this.data.watchedProperties, function (prop) {
+                        // need to add `!` to the output of `compare` to return from properly from `_.some`
                             return !this.compareObjects(prop, this.data.watchedObj, this.data.changes);
                         }, this);
                         return isChanged;
+                    };
+
+                    // Overwrite `ChangesPending#compareObjects` to provide proper functionality to ChangesPending Widget
+                    panel.changeWatcher.compareObjects = function(property, obj1, obj2) {
+                        var val1 = _.clone(obj1[property], true),
+                            val2 = _.clone(obj2[property], true),
+                            deleteEmptyProperties = function (obj) {
+                                _.each(obj, function(prop, key) {
+                                    if (_.isEmpty(prop) && !_.isNumber(prop) && !_.isBoolean(prop)) {
+                                        delete obj[key];
+                                    }
+                                });
+                            };
+
+                        if (_.isObject(val1) && _.isObject(val2)) {
+                            deleteEmptyProperties(val1);
+                            deleteEmptyProperties(val2);
+
+                        // Need to add an explicit comparison (val1 === val2)
+                        // reason: `!val1/!val2` performs type coercion
+                        } else if (!val1 && !val2 && val1 === val2) {
+                            return true;
+                        }
+                        return _.isEqual(val1, val2);
                     };
                 });
 
@@ -93,9 +118,10 @@ define([
                 buttons = this.$el.find(panelId + " .advanced-mapping-button"),
                 formData = this.getFormData(),
                 mapping = this.getCurrentMapping(),
-                panel = _.find(this.data.panels, {domId: panelId});
+                panel = _.find(this.data.panels, {domId: panelId}),
+                mutatedMapping = this.mutateMapping(mapping, formData);
 
-            panel.changeWatcher.makeChanges(this.mutateMapping(mapping, formData));
+            panel.changeWatcher.makeChanges(mutatedMapping);
 
             if (panel.changeWatcher.isChanged()) {
                 buttons.prop('disabled', false);
@@ -111,33 +137,58 @@ define([
         saveMapping: function(event) {
             event.preventDefault();
             var mapping = this.getCurrentMapping(),
-                formData = form2js("advancedMappingConfigForm", ".", true),
+                formData = this.getFormData(),
                 mutatedMapping = this.mutateMapping(mapping, formData);
 
-            // Send mutatedMapping to the server
-            this.AbstractMappingSave(mutatedMapping, () => {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+            if (!_.isEqual(mutatedMapping, mapping)) {
+                this.AbstractMappingSave(mutatedMapping, () => {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
+                    this.render();
+                });
+            } else {
                 this.render();
-            });
+            }
 
         },
 
         mutateMapping: function(mapping, formData) {
             var mutatedMapping = {};
 
+            if (formData.taskThreads) {
+                formData.taskThreads = Number(formData.taskThreads);
+            }
+
             _.assign(mutatedMapping, mapping, formData);
 
             // Loop over mutatedMapping and handle cases
             _.forIn(mutatedMapping, (value, key) => {
 
-                // Properly add/remove the properties to the mapping obj
                 if (key === "taskThreads") {
                     // Task threads need to handle a zero case
                     if (value === 0) {
                         mutatedMapping[key] = 0;
+
+                    // default is 10 threads so if this is selected remove from the mapping
                     } else if (value === 10) {
-                        // default is 10 threads so if this is selected remove from the mapping
                         delete mutatedMapping[key];
+
+                    // handle other falsy values
+                    } else if (!value) {
+                        if (mapping.taskThreads) {
+                            mutatedMapping.taskThreads = mapping.taskThreads;
+                        } else {
+                            delete mutatedMapping.taskThreads;
+                        }
+                    }
+                } else if (key === "prefetchLinks") {
+                    // have to reverse the expression of this because it is implicitly enabled
+                    // if undefined on or false on mapping delete true and send false
+                    if (_.isUndefined(mapping.prefetchLinks) || mapping.prefetchLinks === false) {
+                        if (mutatedMapping.prefetchLinks === true) {
+                            delete mutatedMapping.prefetchLinks;
+                        } else {
+                            mutatedMapping.prefetchLinks = false;
+                        }
                     }
                 } else {
                     // If value falsy for anything else,
@@ -147,6 +198,7 @@ define([
                     }
                 }
             });
+
             return mutatedMapping;
         },
 
@@ -178,14 +230,16 @@ define([
                 obj.params = options.params.map((param) => {
 
                     // Set initial values
-                    if (!_.isUndefined(options.mapping[param.name])) {
 
-                        // Special case for enableSync
-                        if (param.name.match("enableSync")) {
-                            param.configuredValue = !options.mapping[param.name];
-                        } else {
-                            param.configuredValue = options.mapping[param.name];
-                        }
+                    // Special case for prefetchLinks
+                    // prefetchLinks is implicitly enabled by default
+                    if (param.name === "prefetchLinks") {
+                        param.configuredValue = !options.mapping.prefetchLinks;
+                    }
+
+                    // All others should be whatever the mapping is
+                    if (!_.isUndefined(options.mapping[param.name])) {
+                        param.configuredValue = options.mapping[param.name];
                     }
 
                     // Add panel ids to configParameters
