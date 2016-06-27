@@ -2,7 +2,7 @@
     "name" : "business",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.csvfile-connector",
-        "bundleVersion" : "1.1.0.2",
+        "bundleVersion" : "1.5.1.4",
         "connectorName" : "org.forgerock.openicf.csvfile.CSVFileConnector",
         "connectorHostRef" : "testServer"
     },
@@ -28,9 +28,7 @@
         "SEARCH" : -1
     },
     "configurationProperties" : {
-        "filePath" : "&{launcher.working.location}data/business.csv",
-        "uniqueAttribute" : "uid",
-        "nameAttribute" : "uid"
+        "csvFile" : "&{launcher.working.location}data/business.csv"
     },
     "objectTypes" : {
         "account" : {

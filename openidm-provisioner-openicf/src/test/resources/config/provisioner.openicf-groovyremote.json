@@ -2,7 +2,7 @@
     "name": "groovyremote",
     "connectorRef": {
         "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
-        "bundleVersion": "[1.4.0.0,2.0.0.0)",
+        "bundleVersion": "1.4.2.1",
         "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector",
         "connectorHostRef": "testServer"
     },
@@ -29,7 +29,7 @@
         "enableAttributesToGetSearchResultsHandler": true
     },
     "configurationProperties": {
-        "scriptRoots": ["&{launcher.working.location}samples/groovy-connector-1.4.2.0/groovy/"],
+        "scriptRoots": ["&{launcher.working.location}samples/groovy-connector-1.4.2.1/groovy/"],
         "authenticateScriptFileName": "AuthenticateScript.groovy",
         "createScriptFileName": "CreateScript.groovy",
         "deleteScriptFileName": "DeleteScript.groovy",

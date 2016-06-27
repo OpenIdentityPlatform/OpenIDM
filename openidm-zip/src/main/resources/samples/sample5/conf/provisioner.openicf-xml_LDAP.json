@@ -2,7 +2,7 @@
     "name" : "ldap",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.xml-connector",
-        "bundleVersion" : "1.1.0.2",
+        "bundleVersion" : "1.1.0.3",
         "connectorName" : "org.forgerock.openicf.connectors.xml.XMLConnector"
     },
     "producerBufferSize" : 100,
