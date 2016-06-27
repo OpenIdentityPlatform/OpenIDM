@@ -261,8 +261,8 @@ define([
                 valueArray = [],
                 relationshipValuePath;
 
-            //if the propVal is not an empty object this is an update and there is only one value
-            if (!_.isEmpty(propVal)) {
+            //if relationshipValue is not an array there is only one value
+            if (!_.isArray(relationshipValue)) {
                 relationshipValuePath = typeValue + "/" + relationshipValue;
                 valueArray.push({
                     val: _.extend(propVal, { "_ref": relationshipValuePath , "_refProperties" : refPropsOverride || getRefProps() }),

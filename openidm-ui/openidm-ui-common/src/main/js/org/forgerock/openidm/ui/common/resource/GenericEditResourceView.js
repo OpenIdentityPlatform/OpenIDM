@@ -527,7 +527,7 @@ define([
                         property: prop,
                         propertyValue: el.val(),
                         schema: _this.data.schema,
-                        onChange: function (value, newText) {
+                        onChange: function (value, originalPropertyValue, newText) {
                             _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue(JSON.stringify(value));
                             button.remove();
                             convertField(prop);
