@@ -652,11 +652,6 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore-nio</artifactId>
-            <version>4.3.2</version>
-        </dependency>
         <!-- ldap connector dependencies -->
         <dependency>
             <groupId>org.forgerock.opendj</groupId>
@@ -669,6 +664,12 @@
             <groupId>org.apache.olingo</groupId>
             <artifactId>odata-client-core</artifactId>
             <version>4.0.0-beta-01</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>com.fasterxml</groupId>

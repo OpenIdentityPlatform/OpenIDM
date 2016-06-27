@@ -15,9 +15,12 @@
  */
 package org.forgerock.openidm.shell.impl;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.math.NumberUtils.isDigits;
+
 import java.io.File;
 import java.io.FileFilter;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -27,8 +30,6 @@ import java.util.Map;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.apache.commons.lang3.StringUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
@@ -75,16 +76,13 @@ public class RemoteCommandScope extends CustomCommandScope {
             "Delay in milliseconds between config update retries if OpenIDM is not ready";
     private static final String RETRY_DELAY_METAVAR = "DELAY";
 
-
-    private final HttpRemoteJsonResource resource = new HttpRemoteJsonResource();
-
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
      * {@inheritDoc}
      */
     public Map<String, String> getFunctionMap() {
-        Map<String, String> help = new HashMap<String, String>();
+        Map<String, String> help = new HashMap<>();
         help.put("configimport", getLongHeader("configimport"));
         help.put("configexport", getLongHeader("configexport"));
         help.put("configureconnector", getLongHeader("configureconnector"));
@@ -99,40 +97,75 @@ public class RemoteCommandScope extends CustomCommandScope {
         return "remote";
     }
 
-    private void processOptions(final String userPass, final String idmUrl, final String idmPort) {
-        String username = "";
-        String password = "";
-
-        if (StringUtils.isNotBlank(userPass)) {
-            int passwordIdx = userPass.indexOf(":") + 1;
-
+    /**
+     * Gets OpenIDM username configuration parameter.
+     *
+     * @param userPass Colon separated {@code username:password} for basic-authentication or {@code null}
+     * @return Username or {@code null}
+     */
+    private static String getUsername(final String userPass) {
+        if (isNotBlank(userPass)) {
+            final int passwordIdx = userPass.indexOf(":") + 1;
             if (passwordIdx > 0) {
-                username = userPass.substring(0, passwordIdx - 1);
-                password = userPass.substring(passwordIdx);
+                return userPass.substring(0, passwordIdx - 1);
             } else {
-                username = userPass;
-                password = new String(System.console().readPassword("Password:"));
+                return userPass;
             }
-
-            resource.setUsername(username);
-            resource.setPassword(password);
         }
+        return null;
+    }
 
-        if (StringUtils.isNotBlank(idmUrl)) {
-            resource.setBaseUri(idmUrl.endsWith("/") ? idmUrl : idmUrl + "/");
+    /**
+     * Gets OpenIDM password configuration parameter.
+     *
+     * @param userPass Colon separated {@code username:password} for basic-authentication or {@code null}
+     * @return Password or {@code null}
+     */
+    private static String getPassword(final String userPass) {
+        if (isNotBlank(userPass)) {
+            final int passwordIdx = userPass.indexOf(":") + 1;
+            if (passwordIdx > 0) {
+                return userPass.substring(passwordIdx);
+            } else {
+                return new String(System.console().readPassword("Password:"));
+            }
         }
+        return null;
+    }
 
-        if (StringUtils.isNotBlank(idmPort)) {
-            if (NumberUtils.isDigits(idmPort)) {
-                resource.setPort(Integer.decode(idmPort));
+    /**
+     * Gets OpenIDM URL configuration parameter.
+     *
+     * @param url OpenIDM URL
+     * @return URL
+     */
+    private static String getUrl(final String url) {
+        if (isNotBlank(url)) {
+            return url.endsWith("/") ? url : url + "/";
+        }
+        throw new IllegalArgumentException("URL required");
+    }
+
+    /**
+     * Gets OpenIDM port-override configuration parameter.
+     *
+     * @param port OpenIDM port-override or {@code null}
+     * @return Port or {@code null}
+     */
+    private static Integer getPort(final String port) {
+        if (isNotBlank(port)) {
+            if (isDigits(port)) {
+                return Integer.decode(port);
             } else {
                 throw new IllegalArgumentException("Port must be a number");
             }
         }
+        return null;
     }
 
     /**
      * Handles the Update (upgrade/patch) process.
+     *
      * @param session session that invoked the command.
      * @param userPass user:passwd to be used on rest calls.
      * @param idmUrl url to the idm instance.
@@ -188,27 +221,31 @@ public class RemoteCommandScope extends CustomCommandScope {
             final boolean quietMode,
 
             @Descriptor("Filename of the Update archive within bin/update.")
-            String archive) throws ResourceException {
+            final String archive) throws ResourceException {
 
-        processOptions(userPass, idmUrl, idmPort);
+        try (final HttpRemoteJsonResource resource = new HttpRemoteJsonResource(
+                getUrl(idmUrl), getPort(idmPort), getUsername(userPass), getPassword(userPass))) {
 
-        UpdateCommandConfig config = new UpdateCommandConfig()
-                .setUpdateArchive(archive)
-                .setLogFilePath(logFilePath)
-                .setQuietMode(quietMode)
-                .setAcceptedLicense(acceptLicense)
-                .setSkipRepoUpdatePreview(skipRepoUpdatePreview)
-                .setMaxJobsFinishWaitTimeMs(maxJobsFinishWaitTimeMs)
-                .setMaxUpdateWaitTimeMs(maxUpdateWaitTimeMs);
+            UpdateCommandConfig config = new UpdateCommandConfig()
+                    .setUpdateArchive(archive)
+                    .setLogFilePath(logFilePath)
+                    .setQuietMode(quietMode)
+                    .setAcceptedLicense(acceptLicense)
+                    .setSkipRepoUpdatePreview(skipRepoUpdatePreview)
+                    .setMaxJobsFinishWaitTimeMs(maxJobsFinishWaitTimeMs)
+                    .setMaxUpdateWaitTimeMs(maxUpdateWaitTimeMs);
 
-        UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
-        // If in quiet mode, check for repo updates, if there is update, exit and throw error
-        if (config.isQuietMode() && !updateCommand.fetchRepoUpdates(new RootContext()).asList().isEmpty()) {
-            System.err.println("Quiet mode not supported. " +
-                    "Quiet mode may only be used when archives do not contain repository updates. ");
-            return;
+            UpdateCommand updateCommand = new UpdateCommand(session, resource, config);
+            // If in quiet mode, check for repo updates, if there is update, exit and throw error
+            if (config.isQuietMode() && !updateCommand.fetchRepoUpdates(new RootContext()).asList().isEmpty()) {
+                System.err.println("Quiet mode not supported. " +
+                        "Quiet mode may only be used when archives do not contain repository updates. ");
+                return;
+            }
+            updateCommand.execute(new RootContext());
+        } catch (Exception e) {
+            session.getConsole().append("Operation failed: ").println(e.getMessage());
         }
-        updateCommand.execute(new RootContext());
     }
 
     /**
@@ -298,43 +335,42 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             @Descriptor("source directory")
             final String source) {
-        processOptions(userPass, idmUrl, idmPort);
-        resource.setRetries(retries);
-        resource.setRetryDelay(retryDelay);
 
-        PrintStream console = session.getConsole();
-        File file = IdentityServer.getFileForPath(source);
-        console.println("...................................................................");
-        if (file.isDirectory()) {
-            console.println("[ConfigImport] Load JSON configuration files from:");
-            console.append("[ConfigImport] \t").println(file.getAbsolutePath());
+        try (final HttpRemoteJsonResource resource = new HttpRemoteJsonResource(
+                getUrl(idmUrl), getPort(idmPort), getUsername(userPass), getPassword(userPass))) {
 
-            FileFilter filter = new FileFilter() {
-                public boolean accept(File f) {
-                    return f.getName().endsWith(".json");
+            PrintStream console = session.getConsole();
+            File file = IdentityServer.getFileForPath(source);
+            console.println("...................................................................");
+            if (file.isDirectory()) {
+                console.println("[ConfigImport] Load JSON configuration files from:");
+                console.append("[ConfigImport] \t").println(file.getAbsolutePath());
+
+                FileFilter filter = new FileFilter() {
+                    public boolean accept(File f) {
+                        return f.getName().endsWith(".json");
+                    }
+                };
+
+                // Read the files from the provided source directory.
+                File[] files = file.listFiles(filter);
+                Map<String, File> localConfigSet = new HashMap<>(files.length);
+                for (File subFile : files) {
+                    if (subFile.isDirectory()) {
+                        continue;
+                    }
+                    String configName = subFile.getName().replaceFirst("-", "/");
+                    configName = ConfigBootstrapHelper.unqualifyPid(configName.substring(0, configName.length() - 5));
+                    if (configName.indexOf("-") > -1) {
+                        console.append(
+                                "[WARN] Invalid file name found with multiple '-' character. The normalized config id: ");
+                        console.println(configName);
+                    }
+                    localConfigSet.put(configName, subFile);
                 }
-            };
 
-            // Read the files from the provided source directory.
-            File[] files = file.listFiles(filter);
-            Map<String, File> localConfigSet = new HashMap<String, File>(files.length);
-            for (File subFile : files) {
-                if (subFile.isDirectory()) {
-                    continue;
-                }
-                String configName = subFile.getName().replaceFirst("-", "/");
-                configName = ConfigBootstrapHelper.unqualifyPid(configName.substring(0, configName.length() - 5));
-                if (configName.indexOf("-") > -1) {
-                    console.append(
-                            "[WARN] Invalid file name found with multiple '-' character. The normalized config id: ");
-                    console.println(configName);
-                }
-                localConfigSet.put(configName, subFile);
-            }
-
-            // Read the remote configs that are currently active.
-            Map<String, JsonValue> remoteConfigSet = new HashMap<String, JsonValue>();
-            try {
+                // Read the remote configs that are currently active.
+                Map<String, JsonValue> remoteConfigSet = new HashMap<>();
                 ResourceResponse responseValue = resource.read(null, Requests.newReadRequest("config"));
                 Iterator<JsonValue> iterator = responseValue.getContent().get("configurations").iterator();
                 while (iterator.hasNext()) {
@@ -346,64 +382,80 @@ public class RemoteCommandScope extends CustomCommandScope {
                         remoteConfigSet.put(id, configValue);
                     }
                 }
-            } catch (ResourceException e) {
-                console.append("Remote operation failed: ").println(e.getMessage());
-                return;
-            } catch (Exception e) {
-                console.append("Operation failed: ").println(e.getMessage());
-                return;
-            }
 
-            final ResourcePath configResource = ResourcePath.valueOf("config");
-            for (Map.Entry<String, File> entry : localConfigSet.entrySet()) {
-                String sourceConfigId = entry.getKey();
-                try {
-                    if (remoteConfigSet.containsKey(sourceConfigId)) {
-                        // Update
-                        UpdateRequest updateRequest = Requests.newUpdateRequest(configResource.concat(sourceConfigId),
-                                new JsonValue(mapper.readValue(entry.getValue(), Map.class)));
-
-                        resource.update(null, updateRequest);
-                        // If the update succeeded, remove the entry from 'remoteConfigSet' - this prevents it
-                        // from being deleted below.  If this update fails, the entry will remain in remoteConfigSet
-                        // and will be deleted from the remote IDM instance.
-                        remoteConfigSet.remove(sourceConfigId);
-                    } else {
-                        // Create
-                        CreateRequest createRequest = Requests.newCreateRequest(configResource.concat(sourceConfigId),
-                                new JsonValue(mapper.readValue(entry.getValue(), Map.class)));
-                        resource.create(null, createRequest);
-                    }
-                    prettyPrint(console, "ConfigImport", sourceConfigId, null);
-                } catch (Exception e) {
-                    prettyPrint(console, "ConfigImport", sourceConfigId, e.getMessage());
-                }
-            }
-
-            // Delete all additional config objects
-            if (replaceall) {
-                for (String configId : remoteConfigSet.keySet()) {
-                    if (isProtectedConfigId(configId)) {
-                        prettyPrint(console, "ConfigDelete", configId, "Protected configuration can not be deleted");
-                        continue;
-                    }
-
-                    try {
-                        // configId is concatenated to avoid file paths from getting url encoded -> '/'-> '%2f'
-                        resource.delete(null, Requests.newDeleteRequest(configResource.concat(configId)));
-                        prettyPrint(console, "ConfigDelete", configId, null);
-                    } catch (Exception e) {
-                        prettyPrint(console, "ConfigDelete", configId, e.getMessage());
+                final ResourcePath configResource = ResourcePath.valueOf("config");
+                for (Map.Entry<String, File> entry : localConfigSet.entrySet()) {
+                    String sourceConfigId = entry.getKey();
+                    int retryCount = 0;
+                    while (retryCount < retries) {
+                        try {
+                            configImportUpdateOrCreate(sourceConfigId, entry.getValue(), remoteConfigSet,
+                                    configResource, resource);
+                            prettyPrint(console, "ConfigImport", sourceConfigId, null);
+                        } catch (Exception e) {
+                            if (++retryCount >= retries) {
+                                prettyPrint(console, "ConfigImport", sourceConfigId, e.getMessage());
+                            } else {
+                                // sleep and retry
+                                Thread.sleep(retryDelay);
+                                continue;
+                            }
+                        }
+                        // success or failed
+                        break;
                     }
                 }
-            }
 
-        } else if (file.exists()) {
-            // TODO import archive file
-            console.println("Input path must be a directory not a file.");
+                // Delete all additional config objects
+                if (replaceall) {
+                    for (String configId : remoteConfigSet.keySet()) {
+                        if (isProtectedConfigId(configId)) {
+                            prettyPrint(console, "ConfigDelete", configId, "Protected configuration can not be deleted");
+                            continue;
+                        }
+
+                        try {
+                            // configId is concatenated to avoid file paths from getting url encoded -> '/'-> '%2f'
+                            resource.delete(null, Requests.newDeleteRequest(configResource.concat(configId)));
+                            prettyPrint(console, "ConfigDelete", configId, null);
+                        } catch (Exception e) {
+                            prettyPrint(console, "ConfigDelete", configId, e.getMessage());
+                        }
+                    }
+                }
+
+            } else if (file.exists()) {
+                // TODO import archive file
+                console.println("Input path must be a directory not a file.");
+            } else {
+                console.append("[ConfigImport] Configuration directory not found at: ");
+                console.println(file.getAbsolutePath());
+            }
+        } catch (ResourceException e) {
+            session.getConsole().append("Remote operation failed: ").println(e.getMessage());
+        } catch (Exception e) {
+            session.getConsole().append("Operation failed: ").println(e.getMessage());
+        }
+    }
+
+    private void configImportUpdateOrCreate(final String sourceConfigId, final File file,
+            final Map<String, JsonValue> remoteConfigSet, final ResourcePath configResource,
+            final HttpRemoteJsonResource resource) throws Exception {
+        if (remoteConfigSet.containsKey(sourceConfigId)) {
+            // Update
+            UpdateRequest updateRequest = Requests.newUpdateRequest(configResource.concat(sourceConfigId),
+                    new JsonValue(mapper.readValue(file, Map.class)));
+
+            resource.update(null, updateRequest);
+            // If the update succeeded, remove the entry from 'remoteConfigSet' - this prevents it
+            // from being deleted below.  If this update fails, the entry will remain in remoteConfigSet
+            // and will be deleted from the remote IDM instance.
+            remoteConfigSet.remove(sourceConfigId);
         } else {
-            console.append("[ConfigImport] Configuration directory not found at: ");
-            console.println(file.getAbsolutePath());
+            // Create
+            CreateRequest createRequest = Requests.newCreateRequest(configResource, sourceConfigId,
+                    new JsonValue(mapper.readValue(file, Map.class)));
+            resource.create(null, createRequest);
         }
     }
 
@@ -473,18 +525,19 @@ public class RemoteCommandScope extends CustomCommandScope {
             final String idmPort,
 
             @Descriptor("target directory")
-            String target) {
-        processOptions(userPass, idmUrl, idmPort);
+                    String target) {
 
-        File targetDir = IdentityServer.getFileForPath(target);
-        if (!targetDir.exists()) {
-            targetDir.mkdirs();
-        }
+        try (final HttpRemoteJsonResource resource = new HttpRemoteJsonResource(
+                getUrl(idmUrl), getPort(idmPort), getUsername(userPass), getPassword(userPass))) {
 
-        session.getConsole().println("[ConfigExport] Export JSON configurations to:");
-        session.getConsole().append("[ConfigExport] \t").println(targetDir.getAbsolutePath());
+            File targetDir = IdentityServer.getFileForPath(target);
+            if (!targetDir.exists()) {
+                targetDir.mkdirs();
+            }
 
-        try {
+            session.getConsole().println("[ConfigExport] Export JSON configurations to:");
+            session.getConsole().append("[ConfigExport] \t").println(targetDir.getAbsolutePath());
+
             ResourceResponse responseValue = resource.read(null, Requests.newReadRequest("config"));
             Iterator<JsonValue> iterator = responseValue.getContent().get("configurations").iterator();
             String bkpPostfix = "." + (new SimpleDateFormat("yyyy-MM-dd'T'HH-mm-ss")).format(new Date()) + ".bkp";
@@ -514,10 +567,6 @@ public class RemoteCommandScope extends CustomCommandScope {
         } catch (Exception e) {
             session.getConsole().append("Operation failed: ").println(e.getMessage());
         }
-    }
-
-    private void export(InputStream console, PrintStream out, String[] args) {
-        out.println("Exported");
     }
 
     /**
@@ -551,10 +600,11 @@ public class RemoteCommandScope extends CustomCommandScope {
             @Descriptor("Name of the new connector configuration.")
             @MetaVar("CONNECTOR")
             @Parameter(names = { "-n", "--name" }, absentValue = "test")
-            String name) {
-        processOptions(userPass, idmUrl, idmPort);
+            final String name) {
 
-        try {
+        try (final HttpRemoteJsonResource resource = new HttpRemoteJsonResource(
+                getUrl(idmUrl), getPort(idmPort), getUsername(userPass), getPassword(userPass))) {
+
             // Prepare temp folder and file
             File temp = IdentityServer.getFileForPath("temp");
             if (!temp.exists()) {
@@ -562,7 +612,7 @@ public class RemoteCommandScope extends CustomCommandScope {
             }
             // TODO Make safe file name
 
-            if (StringUtils.isBlank(name) || !name.matches("\\w++")) {
+            if (isBlank(name) || !name.matches("\\w++")) {
                 session.getConsole().append("The given name \"").append(name).println(
                         "\" must match [a-zA-Z_0-9] pattern");
                 return;
@@ -641,6 +691,7 @@ public class RemoteCommandScope extends CustomCommandScope {
 
             session.getConsole()
                     .append("Edit the configuration file and run the command again. The configuration was saved to ")
+
                     .println(finalConfig.getAbsolutePath());
 
         } catch (ResourceException e) {

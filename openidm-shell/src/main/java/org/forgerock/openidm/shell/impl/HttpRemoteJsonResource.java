@@ -1,188 +1,127 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.shell.impl;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.resource.ResourceException.newResourceException;
-import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.json.resource.Responses.newResourceResponse;
-
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.logging.Level;
+import java.net.URISyntaxException;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.http.util.Json;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
+import org.apache.http.client.utils.URIBuilder;
+import org.forgerock.http.Filter;
+import org.forgerock.http.Handler;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.apache.async.AsyncHttpClientProvider;
+import org.forgerock.http.handler.Handlers;
+import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.header.GenericHeader;
+import org.forgerock.http.protocol.Header;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.http.spi.Loader;
+import org.forgerock.json.resource.AbstractAsynchronousConnection;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.http.CrestHttp;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.Options;
+import org.forgerock.util.Reject;
+import org.forgerock.util.encode.Base64;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
-import org.restlet.data.ChallengeResponse;
-import org.restlet.data.ChallengeScheme;
-import org.restlet.data.Conditions;
-import org.restlet.data.MediaType;
-import org.restlet.data.Method;
-import org.restlet.data.Preference;
-import org.restlet.data.Reference;
-import org.restlet.data.Tag;
-import org.restlet.ext.jackson.JacksonRepresentation;
-import org.restlet.representation.EmptyRepresentation;
-import org.restlet.representation.Representation;
-import org.restlet.resource.ClientResource;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A {@link Connection} to the remote OpenIDM instance.
  */
-public class HttpRemoteJsonResource implements Connection {
+public class HttpRemoteJsonResource extends AbstractAsynchronousConnection {
+
+    private static final Logger logger = LoggerFactory.getLogger(HttpRemoteJsonResource.class);
+
+    private final HttpClientHandler httpClientHandler;
+
+    private final RequestHandler client;
+
+    private volatile boolean closed;
 
     /**
-     * Requests that the origin server accepts the entity enclosed in the
-     * request as a new subordinate of the resource identified by the request
-     * URI.
+     * Initializes {@code HttpRemoteJsonResource}'s HTTP client.
      *
-     * @see <a
-     *      href="http://www.w3.org/Protocols/rfc2616/rfc2616-sec9.html#sec9.5">HTTP
-     *      RFC - 9.5 POST</a>
+     * @param uri Base URI of this resource.
+     * @param port Override port in {@code baseUri} or {@code null} if not required.
+     * @param username Username for HTTP basic authentication or {@code null} if not required.
+     * @param password Password for HTTP basic authentication or {@code null} if not required.
+     * @throws URISyntaxException Malformed {@code uri}
      */
-    public static final Method PATCH = new Method("PATCH");
+    public HttpRemoteJsonResource(final String uri, final Integer port, final String username, final String password)
+            throws URISyntaxException {
 
-    /** Base reference used for requesting this resource. */
-    private Reference baseReference;
+        final URIBuilder uriBuilder = new URIBuilder(Reject.checkNotNull(uri, "uri required"));
+        if (port != null) {
+            uriBuilder.setPort(port);
+        }
 
-    /** Username used for authentication when accessing the resource. */
-    private String username = "";
+        httpClientHandler = newHttpClientHandler();
+        final Handler requestHandler;
+        if (username != null && password != null) {
+            // apply basic-auth header to all client requests
+            final String credentials = username + ':' + password;
+            final Header authHeader = new GenericHeader(
+                    "Authorization", "Basic " + Base64.encode(credentials.getBytes()));
+            requestHandler = Handlers.chainOf(httpClientHandler, new Filter() {
+                @Override
+                public Promise<Response, NeverThrowsException> filter(final Context context,
+                        final org.forgerock.http.protocol.Request request, final Handler next) {
+                    request.getHeaders().add(authHeader);
+                    return next.handle(context, request);
+                }
+            });
+        } else {
+            requestHandler = httpClientHandler;
+        }
 
-    /** Password used for authentication when accessing the resource. */
-    private String password = "";
-
-    /** Number of retries if the config update does not "take" */
-    private int retries = 10;
-
-    /** Delay between retries */
-    private int retryDelay = 500;
-    /**
-     * Construct the HttpRemoteJsonResource.
-     */
-    public HttpRemoteJsonResource() {
+        client = CrestHttp.newRequestHandler(requestHandler, uriBuilder.build());
     }
 
     /**
-     * Create a HttpRemoteJsonResource with credentials.
-     *
-     * @param uri URI of this resource.
-     * @param username Username for HTTP basic authentication
-     * @param password Password for HTTP basic authentication.
-     */
-    public HttpRemoteJsonResource(final String uri, final String username, final String password) {
-        this.username = username;
-        this.password = password;
-
-        baseReference = new Reference(uri);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ActionResponse action(Context context, ActionRequest request) throws ResourceException {
-        JsonValue params = new JsonValue(request.getAdditionalParameters());
-        JsonValue result = handle(request, request.getResourcePath(), params);
-        return newActionResponse(result);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ActionResponse, ResourceException> actionAsync(Context context, ActionRequest request) {
-        return new NotSupportedException().asPromise();
-    }
-
-    /**
-     * {@inheritDoc}
+     * Closes the underlying {@link HttpClientHandler}, closing the connection pool, and as such should only be called
+     * on shutdown.
      */
     @Override
     public void close() {
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ResourceResponse create(Context context, CreateRequest request) throws ResourceException {
-        JsonValue response = handle(request, request.getResourcePathObject().toString(), null);
-        return newResourceResponse(response.get("_id").asString(), response.get("_rev").asString(), response);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> createAsync(Context context, CreateRequest request) {
-        return new NotSupportedException().asPromise();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public ResourceResponse delete(Context context, DeleteRequest request) throws ResourceException {
-        final JsonValue response = handle(request, request.getResourcePath(), null);
-        return newResourceResponse(response.get("_id").asString(), response.get("_rev").asString(), response);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> deleteAsync(Context context, DeleteRequest request) {
-        return new NotSupportedException().asPromise();
+        if (!closed && httpClientHandler != null) {
+            try {
+                httpClientHandler.close();
+            } catch (IOException e) {
+                logger.warn("Error while closing HTTP Client Handler", e);
+            } finally {
+                closed = true;
+            }
+        }
     }
 
     /**
@@ -190,7 +129,7 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public boolean isClosed() {
-        return false;
+        return closed;
     }
 
     /**
@@ -198,306 +137,92 @@ public class HttpRemoteJsonResource implements Connection {
      */
     @Override
     public boolean isValid() {
-        return true;
+        return !closed;
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ResourceResponse patch(Context context, PatchRequest request) throws ResourceException {
-        throw new NotSupportedException();
+    public Promise<ActionResponse, ResourceException> actionAsync(final Context context, final ActionRequest request) {
+        return client.handleAction(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> patchAsync(Context context, PatchRequest request) {
-        return new NotSupportedException().asPromise();
+    public Promise<ResourceResponse, ResourceException> createAsync(final Context context,
+            final CreateRequest request) {
+        return client.handleCreate(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public QueryResponse query(Context context, QueryRequest request, QueryResourceHandler handler) throws ResourceException {
-        throw new NotSupportedException();
+    public Promise<ResourceResponse, ResourceException> deleteAsync(final Context context,
+            final DeleteRequest request) {
+        return client.handleDelete(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public QueryResponse query(Context context, QueryRequest request, Collection<? super ResourceResponse> results) throws ResourceException {
-        throw new NotSupportedException();
+    public Promise<ResourceResponse, ResourceException> patchAsync(final Context context, final PatchRequest request) {
+        return client.handlePatch(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<QueryResponse, ResourceException> queryAsync(Context context, QueryRequest request, QueryResourceHandler handler) {
-        return new NotSupportedException().asPromise();
+    public Promise<QueryResponse, ResourceException> queryAsync(final Context context, final QueryRequest request,
+            QueryResourceHandler handler) {
+        return client.handleQuery(context, request, handler);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public ResourceResponse read(Context context, ReadRequest request) throws ResourceException {
-        JsonValue result = handle(request, request.getResourcePath(), null);
-        return newResourceResponse(result.get("_id").asString(), result.get("_rev").asString(), result);
+    public Promise<ResourceResponse, ResourceException> readAsync(final Context context, final ReadRequest request) {
+        return client.handleRead(context, request);
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Promise<ResourceResponse, ResourceException> readAsync(Context context, ReadRequest request) {
-        return new NotSupportedException().asPromise();
+    public Promise<ResourceResponse, ResourceException> updateAsync(final Context context,
+            final UpdateRequest request) {
+        return client.handleUpdate(context, request);
     }
 
     /**
-     * {@inheritDoc}
+     * Builds an {@link AsyncHttpClientProvider} instance, which must be closed on shutdown.
+     *
+     * @return {@link AsyncHttpClientProvider} instance
      */
-    @Override
-    public ResourceResponse update(Context context, UpdateRequest request) throws ResourceException {
-        JsonValue result = handle(request, request.getResourcePath(), null);
-        return newResourceResponse(result.get("_id").asString(), result.get("_rev").asString(), result);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Promise<ResourceResponse, ResourceException> updateAsync(Context context, UpdateRequest request) {
-        return new NotSupportedException().asPromise();
-    }
-
-    private ClientResource getClientResource(Reference ref) {
-        ClientResource clientResource = new ClientResource(new org.restlet.Context(), new Reference(baseReference, ref));
-
-        List<Preference<MediaType>> acceptedMediaTypes = new ArrayList<Preference<MediaType>>(1);
-        acceptedMediaTypes.add(new Preference<MediaType>(MediaType.APPLICATION_JSON));
-        clientResource.getClientInfo().setAcceptedMediaTypes(acceptedMediaTypes);
-        clientResource.getLogger().setLevel(Level.WARNING);
-
-        ChallengeResponse rc = new ChallengeResponse(ChallengeScheme.HTTP_BASIC, username, password);
-        clientResource.setChallengeResponse(rc);
-
-        return clientResource;
-    }
-
-    private JsonValue handle(Request request, String id, JsonValue params)
-        throws org.forgerock.json.resource.ResourceException {
-        Representation response = null;
-        ClientResource clientResource = null;
+    private static HttpClientHandler newHttpClientHandler() {
         try {
-            Reference remoteRef = new Reference(id);
-
-            // Get the client resource corresponding to this request's resource name
-            clientResource = getClientResource(remoteRef);
-
-            // Prepare query params
-            if (params != null && !params.isNull()) {
-                for (Map.Entry<String, Object> entry : params.asMap().entrySet()) {
-                    if (entry.getValue() instanceof String) {
-                        clientResource.addQueryParameter(entry.getKey(), (String) entry.getValue());
-                    }
-                }
-            }
-
-            // Payload
-            Representation representation = null;
-            JsonValue value = getRequestValue(request);
-            if (!value.isNull()) {
-                representation = new JacksonRepresentation<Map<String, Object>>(value.asMap());
-            }
-
-            // ETag
-            Conditions conditions = new Conditions();
-
-            for (int retry = 0; retry < retries; retry++ ) {
-                try {
-                    switch (request.getRequestType()) {
-                        case CREATE:
-                            conditions.setNoneMatch(Collections.singletonList(Tag.ALL));
-                            clientResource.getRequest().setConditions(conditions);
-                            response = clientResource.put(representation);
-                            break;
-                        case READ:
-                            response = clientResource.get();
-                            break;
-                        case UPDATE:
-                            conditions.setMatch(getTag(((UpdateRequest) request).getRevision()));
-                            clientResource.getRequest().setConditions(conditions);
-                            response = clientResource.put(representation);
-                            break;
-                        case DELETE:
-                            conditions.setMatch(Collections.singletonList(Tag.ALL));
-                            clientResource.getRequest().setConditions(conditions);
-                            response = clientResource.delete();
-                            break;
-                        case PATCH:
-                            conditions.setMatch(getTag(((PatchRequest) request).getRevision()));
-                            clientResource.getRequest().setConditions(conditions);
-                            clientResource.setMethod(PATCH);
-                            clientResource.getRequest().setEntity(representation);
-                            response = clientResource.handle();
-                            break;
-                        case QUERY:
-                            response = clientResource.get();
-                            break;
-                        case ACTION:
-                            clientResource.setQueryValue("_action", ((ActionRequest) request).getAction());
-                            response = clientResource.post(representation);
-                            break;
-                        default:
-                            throw new BadRequestException();
-                    }
-                    break;
-                } catch (org.restlet.resource.ResourceException e) {
-                    // wait and try again
-                    if (retry >= retries) {
-                        throw e;
-                    }
-                    Thread.sleep(retryDelay);
-                }
-            }
-
-            if (!clientResource.getStatus().isSuccess()) {
-                throw newResourceException(clientResource.getStatus().getCode(),
-                        clientResource.getStatus().getDescription(),
-                        clientResource.getStatus().getThrowable());
-            }
-            return (null != response && !(response instanceof EmptyRepresentation)
-                    ? json(Json.readJson(response.getText()))
-                    : json(null));
-        } catch (JsonValueException jve) {
-            throw new BadRequestException(jve);
-        } catch (org.restlet.resource.ResourceException e) {
-            StringBuilder sb = new StringBuilder(e.getStatus().getDescription());
-            if (null != clientResource) {
-                try {
-                    sb.append(" ").append(clientResource.getResponse().getEntity().getText());
-                } catch (IOException e1) {
-                    // unable to add response text to exception message, proceed without
-                }
-            }
-            throw newResourceException(e.getStatus().getCode(), sb.toString(), e.getCause());
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e);
-        } finally {
-            if (null != response) {
-                response.release();
-            }
+            return new HttpClientHandler(
+                    // this client is currently used in a "synchronous" manner, so configure with minimal resources
+                    Options.defaultOptions()
+                            .set(HttpClientHandler.OPTION_RETRY_REQUESTS, true)
+                            .set(HttpClientHandler.OPTION_REUSE_CONNECTIONS, false)
+                            .set(HttpClientHandler.OPTION_MAX_CONNECTIONS, 1)
+                            .set(AsyncHttpClientProvider.OPTION_WORKER_THREADS, 1)
+                            .set(HttpClientHandler.OPTION_LOADER, new Loader() {
+                                @Override
+                                public <S> S load(Class<S> service, Options options) {
+                                    return service.cast(new AsyncHttpClientProvider());
+                                }
+                            }));
+        } catch (HttpApplicationException e) {
+            throw new RuntimeException("Error while building HTTP Client Handler", e);
         }
-    }
-
-    private JsonValue getRequestValue(Request request) throws Exception {
-        switch (request.getRequestType()) {
-        case CREATE:
-            return ((CreateRequest) request).getContent();
-        case UPDATE:
-            return new JsonValue(((UpdateRequest) request).getContent());
-        case PATCH:
-            ObjectMapper mapper = new ObjectMapper();
-            List<PatchOperation> ops = ((PatchRequest) request).getPatchOperations();
-            JsonValue value = new JsonValue(new ArrayList<Object>());
-            for (PatchOperation op : ops) {
-                value.add(new JsonValue(mapper.readValue(op.toString(), Object.class)));
-            }
-            return value;
-        case ACTION:
-            JsonValue content = ((ActionRequest) request).getContent();
-            if (content != null && !content.isNull()) {
-                return content;
-            } else {
-                return new JsonValue(new HashMap<String, Object>());
-            }
-        }
-        return new JsonValue(null);
-    }
-
-    private List<Tag> getTag(String tag) {
-        List<Tag> result = new ArrayList<Tag>(1);
-        if (null != tag && tag.trim().length() > 0) {
-            result.add(Tag.parse(tag));
-        }
-        return result;
-    }
-
-    /**
-     * Gets the username.
-     *
-     * @return the username
-     */
-    public String getUsername() {
-        return username;
-    }
-
-    /**
-     * Sets the username.
-     *
-     * @param username the username
-     */
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    /**
-     * Gets the password.
-     *
-     * @return the password
-     */
-    public String getPassword() {
-        return password;
-    }
-
-    /**
-     * Sets the password.
-     *
-     * @param password the password
-     */
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    /**
-     * Sets the port.
-     *
-     * @param port the port
-     */
-    public void setPort(int port) {
-        baseReference.setHostPort(port);
-    }
-
-    /**
-     * Sets the base URI.
-     *
-     * @param baseUri the base URI
-     */
-    public void setBaseUri(final String baseUri) {
-        baseReference = new Reference(baseUri);
-    }
-
-    /**
-     * Sets the number of retries.
-     *
-     * @param retries the number of retries
-     */
-    public void setRetries(int retries) {
-        this.retries = retries;
-    }
-
-    /**
-     * Sets the delay between retries.
-     *
-     * @param retryDelay the delay between retries (in milliseconds)
-     */
-    public void setRetryDelay(int retryDelay) {
-        this.retryDelay = retryDelay;
     }
 
 }

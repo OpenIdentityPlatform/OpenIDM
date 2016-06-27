@@ -49,17 +49,8 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-external-rest</artifactId>
-            <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.jackson</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet</artifactId>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-client-apache-async</artifactId>
         </dependency>
         <dependency>
             <groupId>org.apache.felix</groupId>
