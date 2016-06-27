@@ -282,7 +282,9 @@
     <!-- Fallback error handler, that returns minimal information, for errors that cannot be handled by OpenIDM -->
     <Call name="addBean">
         <Arg>
-            <New class="org.forgerock.openidm.jetty.JettyErrorHandler"/>
+            <New class="org.forgerock.openidm.jetty.JettyErrorHandler">
+                <Set name="server"><Ref refid="Server" /></Set>
+            </New>
         </Arg>
     </Call>
 
