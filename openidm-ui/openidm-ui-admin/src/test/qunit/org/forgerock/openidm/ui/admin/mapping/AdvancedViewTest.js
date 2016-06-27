@@ -9,7 +9,7 @@ define([
         },
         formData = {
             "correlateEmptyTargetSet": false,
-            "prefetchLinks": false
+            "prefetchLinks": true
         };
 
     QUnit.module('AdvancedView #mutateMapping');
@@ -62,7 +62,51 @@ define([
             "#mutatedMapping: properly adds user enabled fields"
         );
 
+        /*
+         * Task Threads
+         */
+         /*
+          * PrefetchLinks
+          */
 
+        ////////////////////////////////////////
+        // strings from form
+        ///////////////////////////////////////
+
+        // Number strings should be sent as numbers
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        mergeFormData.taskThreads = "20";
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.ok(
+            mutatedMapping.taskThreads &&
+            mutatedMapping.taskThreads === 20,
+            "#mutatedMapping: Task threads Number strings should be sent as numbers"
+        );
+
+        assert.ok(
+            typeof mutatedMapping.taskThreads === "number",
+            "#mutatedMapping: Task threads should be sent as numbers -- is number"
+        );
+
+        // other strings should be ignored
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        mergeFormData.taskThreads = "froggy";
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.equal(
+            mutatedMapping.taskThreads, mergeMapping.taskThreads,
+            "#mutatedMapping: Task threads should ignore non-number strings "
+        );
+
+        ////////////////////////
+        // Numbers
+        ///////////////////////
+        
         // Task threads should be properly added for non-zero values
         mergeFormData = _.clone(formData);
         mergeMapping = _.clone(mapping);
@@ -118,6 +162,98 @@ define([
             "#mutatedMapping: Task threads set to 10 will be deleted from mapping (default mapping obj)"
         );
 
+        /*
+         * PrefetchLinks
+         */
+
+        ////////////////////////
+        // Undefined on mapping
+        ///////////////////////
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        // undefined on mapping true on form comes out undefined
+        mergeFormData.prefetchLinks = true;
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.ok(
+            _.isUndefined(mutatedMapping.prefetchLinks),
+            "#mutatedMapping: Prefetch links undefined on mapping true on form comes out undefined"
+        );
+
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        // undefined on mapping false on form comes out false
+        mergeFormData.prefetchLinks = false;
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.ok(
+            mutatedMapping.prefetchLinks === false,
+            "#mutatedMapping: Prefetch Links undefined on mapping false on form comes out false"
+        );
+
+        //////////////////////
+        // False on mapping
+        /////////////////////
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        // False on mapping true on form comes out undefined
+        mergeMapping.prefetchLinks = false;
+        mergeFormData.prefetchLinks = true;
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.ok(
+            _.isUndefined(mutatedMapping.prefetchLinks),
+            "#mutatedMapping: Prefetch links false on mapping true on form comes out undefined"
+        );
+
+
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        // false on mapping false on form should come out false
+        mergeMapping.prefetchLinks = false;
+        mergeFormData.prefetchLinks = false;
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.ok(
+            mutatedMapping.prefetchLinks === false,
+            "#mutatedMapping: Prefetch links false on mapping false on form should come out false"
+        );
+
+        //////////////////////
+        // True on mapping
+        /////////////////////
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        // True on mapping true on form should come out true
+        mergeMapping.prefetchLinks = true;
+        mergeFormData.prefetchLinks = true;
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.ok(
+            mutatedMapping.prefetchLinks === true,
+            "#mutatedMapping: Prefetch links true on mapping true on form should come out true"
+        );
+
+
+        mergeFormData = _.clone(formData);
+        mergeMapping = _.clone(mapping);
+
+        // True on mapping false on form comes out false
+        mergeMapping.prefetchLinks = true;
+        mergeFormData.prefetchLinks = false;
+        mutatedMapping = mutateMapping(mergeMapping, mergeFormData);
+
+        assert.ok(
+            mutatedMapping.prefetchLinks === false,
+            "#mutatedMapping: True on mapping false on form comes out false"
+        );
+
+
     });
 
     // // Add tests for my object creator
@@ -133,7 +269,7 @@ define([
             {name: "helpText",  val: ""},
             {name:"name", val:"correlateEmptyTargetSet"},
             {name:"panelId", val:"#additionalOptionsPanel"},
-            {name:"title", val:"Correlate Emtpy Target Objects"}
+            {name:"title", val:"Correlate Empty Target Objects"}
         ].map(function(prop) {
             assert.ok(param.hasOwnProperty(prop.name), "param properties: names");
             assert.equal(param[prop.name], prop.val, "param properties: values");

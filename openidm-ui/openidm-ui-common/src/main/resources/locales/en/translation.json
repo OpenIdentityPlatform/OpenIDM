@@ -1917,7 +1917,7 @@
                 "additionalOptions": "Additional Mapping Options",
                 "allowEmptySourceSet": "Allow Reconciliations From an Empty Source",
                 "allowEmptySourceSetHelp": "Disabled by default; reconciliations from an empty source can delete all data in a target resource.",
-                "correlateEmptyTargetSet": "Correlate Emtpy Target Objects",
+                "correlateEmptyTargetSet": "Correlate Empty Target Objects",
                 "correlateEmptyTargetSetHelp": "",
                 "enableSync": "Disable Automatic Synchronization",
                 "enableSyncHelp": "",
