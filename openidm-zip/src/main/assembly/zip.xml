@@ -1017,6 +1017,7 @@
                 <exclude>org.forgerock.openidm:openidm-ui</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-activiti:**:jar-with-dependencies</exclude>
                 <exclude>org.forgerock.openidm:openidm-workflow-remote</exclude>
+                <exclude>org.forgerock.openidm.tools:custom-scripted-connector-bundler</exclude>
                 <exclude>org.apache.felix:*gogo*</exclude>
                 <exclude>org.springframework*:*</exclude> <!--exclude optional Activiti dependency-->
                 <exclude>stax:*</exclude>
@@ -1164,13 +1165,6 @@
                     <include>bin/**</include>
                 </includes>
             </unpackOptions>
-        </dependencySet>
-        <dependencySet>
-            <unpack>false</unpack>
-            <includes>
-                <include>org.forgerock.openidm.tools:custom-scripted-connector-bundler:*</include>
-            </includes>
-            <outputDirectory>/openidm/tools</outputDirectory>
         </dependencySet>
 
         <dependencySet>
