@@ -1,7 +1,8 @@
 define([
     "org/forgerock/openidm/ui/common/resource/RelationshipArrayView",
+    "org/forgerock/commons/ui/common/components/Messages",
     "lodash"
-], function (RelationshipArrayView, _) {
+], function (RelationshipArrayView, messagesManager, _) {
     QUnit.module('RelationshipArrayView Tests');
 
     var relationshipArrayView = new RelationshipArrayView(),
@@ -25,6 +26,7 @@ define([
                         if (isFinalPromise) {
                             _this2.args.showChart = _this2.data.showChart;
                             _this2.render(_this2.args);
+                            messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.addSuccess",{ objectTitle: _this2.data.prop.title })});
                         }
                     });
                 },
@@ -44,6 +46,7 @@ define([
         expectedOpts.onChange = (value, oldValue, newText) => {
             return _this2.updateRelationship(value, oldValue).then( () => {
                 _this2.render(_this2.args);
+                messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.editSuccess",{ objectTitle: _this2.data.prop.title })});
             });
         };
         expectedOpts.multiSelect = false;
