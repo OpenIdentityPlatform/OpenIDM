@@ -444,6 +444,7 @@ define([
                         if (isFinalPromise) {
                             this.args.showChart = this.data.showChart;
                             this.render(this.args);
+                            messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.addSuccess",{ objectTitle: this.data.prop.title })});
                         }
                     });
                 };
@@ -451,6 +452,7 @@ define([
                 opts.onChange = (value, oldValue, newText) => {
                     return this.updateRelationship(value, oldValue).then( () => {
                         this.render(this.args);
+                        messagesManager.messages.addMessage({"message": $.t("templates.admin.ResourceEdit.editSuccess",{ objectTitle: this.data.prop.title })});
                     });
                 };
             }
