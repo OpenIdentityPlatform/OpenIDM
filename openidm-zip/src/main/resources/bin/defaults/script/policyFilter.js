@@ -23,7 +23,9 @@
  * @see policy
  */
 
-(function () {
+(function (isFromRequire) {
+
+    var namespace = isFromRequire ? exports : this;
 
     /**
      * Translates different request details into a single path which can have
@@ -33,7 +35,7 @@
      * @param {string} unencodedId The identifier for the new resource, for creates
      * @returns {string} The full path to use for policy evaluation
      */
-    exports.getFullResourcePath = function (method, basePath, unencodedId) {
+    namespace.getFullResourcePath = function (method, basePath, unencodedId) {
         var fullResourcePath;
         var id = org.forgerock.http.util.Uris.urlEncodePathElement(unencodedId);
 
@@ -54,7 +56,7 @@
      * @param {Object} content Content of the resource to be evaluated
      * @returns {Array} List of all failing policies, with details
      */
-    exports.evaluatePolicy = function(path, content) {
+    namespace.evaluatePolicy = function(path, content) {
         return openidm.action("policy/" + path, "validateObject", content, { "external" : "true" });
     };
 
@@ -62,7 +64,7 @@
      * Method intended to be called from router filter context, for implicit evaluation of a resource.
      * Throws an error when policy fails, with the failure details included.
      */
-    exports.runFilter = function () {
+    namespace.runFilter = function () {
         var enforce = identityServer.getProperty("openidm.policy.enforcement.enabled", "true", true),
             fullResourcePath = this.getFullResourcePath(request.method, request.resourcePath, request.newResourceId);
 
@@ -81,4 +83,8 @@
 
     };
 
-}());
+    if (!isFromRequire) {
+        namespace.runFilter();
+    }
+
+}(typeof module !== "undefined"));
