@@ -1224,7 +1224,7 @@
                   "msg": "Uses a trusted request attribute to determine username. Designed to pair with an external auth filter."
                 }
             },
-
+            "missingTemplateError": "Missing Template for ",
             "disabled": "Disabled",
             "edit": "Edit",
             "new": "New",
@@ -1257,9 +1257,9 @@
             },
             "authId": "Authentication ID",
             "userCred": "User Credential",
-            "userOrGroup": "User Roles or Group Membership",
+            "userOrGroup": "Method for Determining Roles",
             "selectOption": "Select an option",
-            "userRoles": "User Roles",
+            "userRoles": "User Roles Property",
             "groupMembership": "Group Membership",
             "customProp": "Custom Properties",
             "property": "Property",

@@ -3,7 +3,6 @@
 <div class="form-group">
     <label class="col-sm-3 control-label" for="select-{{property}}">{{t label}}</label>
     <div class="col-sm-6">
-
         <select id="select-{{property}}"
                 class="form-control array-selection"
                 name="{{property}}"
@@ -12,7 +11,15 @@
                 {{#contains ../value this}}
                     <option selected value="{{this}}">{{this}}</option>
                 {{else}}
-                    <option value="{{this}}">{{this}}</option>
+                    {{#unless ../value}}
+                        {{#equals ../default this}}
+                            <option selected value="{{this}}">{{this}}</option>
+                        {{else}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/equals}}
+                    {{else}}
+                        <option value="{{this}}">{{this}}</option>
+                    {{/unless}}
                 {{/contains}}
             {{/eachTwoLists}}
 

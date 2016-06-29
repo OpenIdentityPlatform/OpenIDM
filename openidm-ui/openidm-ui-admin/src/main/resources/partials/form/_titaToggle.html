@@ -1,0 +1,17 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+
+<div class="form-group">
+    <label for="toggle-{{property}}" class="col-sm-3 control-label">{{t label}}</label>
+    <div class="col-sm-6">
+        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+            <label>
+                <input id="toggle-{{property}}" {{#unless noForm2js}}name="{{property}}"{{/unless}} type="checkbox" {{#if enabled}}checked{{/if}} value="true"><span></span>
+            </label>
+        </div>
+
+        {{#if helpKey}}
+        <div class="help-block">{{t helpKey}}</div>
+        {{/if}}
+    </div>
+</div>
