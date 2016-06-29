@@ -47,7 +47,6 @@ define([
                     previousNode = null,
                     node = this.data.filter;
 
-
                 _.each(objectPath, function (index) {
                     if (index.length) {
                         previousNode = node;
@@ -59,52 +58,88 @@ define([
                 return {current: node, parent: previousNode, path: objectPath};
             },
 
+            createNode: function(options) {
+                var node = { name: "", value: "", tag: "equalityMatch", children: [], op: "expr" };
+                return _.merge(node, options);
+            },
+
+            deleteNode: function(tree, contextPath) {
+                var path = _.chain(contextPath).takeRight(contextPath.length - 1).map((val) => Number(val)).value();
+
+                if (path.length >= 1) {
+                    // if parent and should remove the calling node from parent children collection
+                    // get the parent
+                    let parent = this.getNode(tree, path, -1);
+                    if (parent.children.length > 1) {
+                        parent.children = parent.children.filter((child, index) => index !== _.last(path));
+                    }
+                    // prune tree
+                    tree = this.pruneStrandedNodes(tree);
+
+                } else {
+                    // if no parent then modify root node
+                    tree = { "op": "none", "children": [] };
+                }
+                return tree;
+            },
+
+            getNode(tree, path, level) {
+                if (_.some(path, (p) => typeof p !== "number")) {
+                    throw "expected array of numbers but got " + path;
+                }
+                level = level || 0;
+                return _.take(path, path.length + level).reduce((branch, p) => {
+                    return branch.children[Number(p)];
+                }, tree);
+            },
+
+            insertChildNode: function(parentNode, options) {
+                var node = this.createNode(options);
+
+                if (!parentNode.children) {
+                    parentNode.children = [];
+                }
+                parentNode.children.push(node);
+                return parentNode;
+            },
+
+            pruneStrandedNodes(node, parent, debug) {
+                if (node.children.length > 1) {
+                    node.children.forEach( (child) => {
+                        this.pruneStrandedNodes(child, node);
+                    });
+                } else if (node.children.length === 1) {
+                    if (parent) {
+                        parent.children[parent.children.indexOf(node)] = node.children[0];
+                    } else {
+                        node = node.children[0];
+                    }
+                }
+                return node;
+            },
+
             removeNode: function(e, callback) {
-                this.deleteNode(e);
+                var context = this.getExpressionContext(e);
+                this.data.filter = this.deleteNode(this.data.filter, context.path);
+                this.setFilterString();
                 this.renderExpressionTree(callback);
             },
 
-            deleteNode: function(e, callback) {
-                var context = this.getExpressionContext(e),
-                    parent,
-                    children;
-
-                if (!_.isNull(context.parent)) {
-                    children = context.children;
-
-                    children = _.reject(children, function(c) { return c === context.current; });
-                    if (children.length !== 0) {
-                        this.setFilterString();
-                    } else {
-                        e.target = $(":input:first", $(e.target).parents(".node[index]")[1])[0];
-                        return this.removeNode(e);
-                    }
-                } else {
-                    context.current.children.pop();
-                }
-            },
-
-            createNode: function(e) {
+            addNodeAndReRender: function(e, callback) {
                 var context = this.getExpressionContext(e),
                     node = context.current;
-                if (!node.children) {
-                    node.children = [];
-                }
-                node.children.push({name: "", value: "", tag: "equalityMatch", children: [], op: "expr"});
-                this.setFilterString();
-            },
 
-            addNodeAndReRender: function(e, callback) {
-                this.createNode(e);
+                this.insertChildNode(node);
+                this.setFilterString();
                 this.renderExpressionTree(callback);
             },
 
             updateNodeValue: function(e, callback) {
+
                 var context = this.getExpressionContext(e),
                     node = context.current,
                     field = $(e.target),
-                    createNode = this.createNode.bind(this, e),
-                    deleteNode = this.deleteNode.bind(this, e),
+                    insertChildNode = this.insertChildNode.bind(this, node),
                     redrawContainer = false;
 
                 // handle field types
@@ -113,7 +148,7 @@ define([
                     node.op = field.val();
 
                     if (node.op === "none") {
-                        _.times(node.children.length, deleteNode);
+                        this.data.filter = { "op": "none", "children": [] };
                     } else if (node.op === "expr") {
                         node.name = "";
                         node.value = "";
@@ -121,19 +156,19 @@ define([
                         node.children = [];
                     } else if (node.op === "not") {
                         if (!node.children || !node.children.length) {
-                            this.createNode(e);
+                            insertChildNode();
                         } else {
-                            _.times(node.children.length, deleteNode);
-                            this.createNode(e);
+                            node.children = [];
+                            insertChildNode();
                         }
                     } else if (node.op === "and" || node.op === "or") {
                         if (node.children) {
                             if (node.children.length < 2) {
                                 // add as many as it takes to get to 2 nodes
-                                _.times(2 - node.children.length, createNode);
+                                _.times(2 - node.children.length, insertChildNode);
                             }
                         } else {
-                            _.times(2, createNode);
+                            _.times(2, insertChildNode);
                         }
                     }
                 // end of op handlers

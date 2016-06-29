@@ -44,7 +44,8 @@ define([
                         "name" : queryFilterTree.field,
                         "op" : "expr",
                         "tag" : invertedTagMap[queryFilterTree.operator] || queryFilterTree.operator,
-                        "value" : queryFilterTree.value
+                        "value" : queryFilterTree.value,
+                        "children" : []
                     };
                 }
             },
