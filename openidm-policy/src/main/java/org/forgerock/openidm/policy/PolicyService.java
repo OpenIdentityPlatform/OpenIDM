@@ -57,7 +57,9 @@ import org.slf4j.LoggerFactory;
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Policy Service"),
-    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/policy*") })
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/policy*"),
+    @Property(name = "suppressMetatypeWarning", value = "true")
+})
 public class PolicyService extends AbstractScriptedService {
 
     public static final String PID = "org.forgerock.openidm.policy";
