@@ -19,6 +19,7 @@ import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceException.newResourceException;
+import static org.forgerock.util.Utils.closeSilently;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -304,39 +305,43 @@ public class RestService implements SingletonResourceProvider {
                 new Function<Response, ActionResponse, ResourceException>() {
                     @Override
                     public ActionResponse apply(final Response response) throws ResourceException {
-                        if (!response.getStatus().isSuccessful()) {
-                            throw newResourceException(response.getStatus().getCode(), "HTTP request failed");
-                        }
-
-                        final Header contentTypeHeader = response.getHeaders().get(ContentTypeHeader.NAME);
-                        final MediaType mediaType = contentTypeHeader != null
-                                ? MediaType.parse(contentTypeHeader.getFirstValue())
-                                : MediaType.JSON_UTF_8;
-
-                        final Entity entity = response.getEntity();
                         try {
-                            final JsonValue content;
-                            if (!forceWrap && MediaType.JSON_UTF_8.is(mediaType)) {
-                                // pass-through JSON response unchanged
-                                content = json(entity.getJson());
-                            } else {
-                                // wrap response body/headers in JSON
-                                final Map<String, List<String>> responseHeaders = response.getHeaders()
-                                        .copyAsMultiMapOfStrings();
-                                content = json(object());
-                                content.put(ARG_HEADERS, responseHeaders);
-                                if (mediaType.is(MediaType.ANY_TEXT_TYPE) || MediaType.JSON_UTF_8.is(mediaType)) {
-                                    // text
-                                    content.put(ARG_BODY, entity.getString());
-                                } else {
-                                    // base64 encoded binary
-                                    content.put(ARG_BODY, Base64.encode(entity.getBytes()));
-                                    content.put(ARG_BASE_64, true);
-                                }
+                            if (!response.getStatus().isSuccessful()) {
+                                throw newResourceException(response.getStatus().getCode(), "HTTP request failed");
                             }
-                            return Responses.newActionResponse(content);
-                        } catch (IOException e) {
-                            throw new InternalServerErrorException(e.getMessage(), e);
+
+                            final Header contentTypeHeader = response.getHeaders().get(ContentTypeHeader.NAME);
+                            final MediaType mediaType = contentTypeHeader != null
+                                    ? MediaType.parse(contentTypeHeader.getFirstValue())
+                                    : MediaType.JSON_UTF_8;
+
+                            final Entity entity = response.getEntity();
+                            try {
+                                final JsonValue content;
+                                if (!forceWrap && MediaType.JSON_UTF_8.is(mediaType)) {
+                                    // pass-through JSON response unchanged
+                                    content = json(entity.getJson());
+                                } else {
+                                    // wrap response body/headers in JSON
+                                    final Map<String, List<String>> responseHeaders = response.getHeaders()
+                                            .copyAsMultiMapOfStrings();
+                                    content = json(object());
+                                    content.put(ARG_HEADERS, responseHeaders);
+                                    if (mediaType.is(MediaType.ANY_TEXT_TYPE) || MediaType.JSON_UTF_8.is(mediaType)) {
+                                        // text
+                                        content.put(ARG_BODY, entity.getString());
+                                    } else {
+                                        // base64 encoded binary
+                                        content.put(ARG_BODY, Base64.encode(entity.getBytes()));
+                                        content.put(ARG_BASE_64, true);
+                                    }
+                                }
+                                return Responses.newActionResponse(content);
+                            } catch (IOException e) {
+                                throw new InternalServerErrorException(e.getMessage(), e);
+                            }
+                        } finally {
+                            closeSilently(response);
                         }
                     }
                 },
