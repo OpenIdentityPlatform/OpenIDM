@@ -41,6 +41,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -884,7 +885,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             JsonValue genericQueries = config.get("queries").get("genericTables");
             JsonValue genericCommands = config.get("commands").get("genericTables");
 
-            tableHandlers = new HashMap<>();
+            tableHandlers = new ConcurrentHashMap<>();
 
             databaseType = config.get(CONFIG_DB_TYPE)
                     .defaultTo(DatabaseType.ANSI_SQL99.name())
