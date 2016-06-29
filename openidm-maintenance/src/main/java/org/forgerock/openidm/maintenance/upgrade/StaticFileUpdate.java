@@ -146,6 +146,10 @@ class StaticFileUpdate {
             }
         });
 
+        if (!changed) {
+            fileStateChecker.updateState(path);
+        }
+
         return changed ? destination : null;
     }
 
