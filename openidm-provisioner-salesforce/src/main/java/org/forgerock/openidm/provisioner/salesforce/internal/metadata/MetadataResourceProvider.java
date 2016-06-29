@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.provisioner.salesforce.internal.metadata;
 
@@ -24,6 +24,8 @@ import java.io.ByteArrayInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -54,6 +56,7 @@ import org.forgerock.openidm.provisioner.salesforce.internal.SalesforceConnectio
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentException;
 import org.slf4j.Logger;
@@ -84,9 +87,7 @@ import com.sforce.ws.parser.PullParserException;
 import com.sforce.ws.parser.XmlInputStream;
 
 /**
- * A NAME does ...
- *
- * @author Laszlo Hordos
+ * Provides metadata relating to the salesforce connection. Available at metadata/{metadata_type}
  */
 public class MetadataResourceProvider implements CollectionResourceProvider {
 
@@ -104,13 +105,14 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
 
     // one second in milliseconds
     private static final long ONE_SECOND = 1000;
+    private static final int SESSION_RENEWAL_HEADER_TIMEOUT_SECONDS = 20;
     // maximum number of attempts to retrieve the results
     private static final int MAX_NUM_POLL_REQUESTS = 50;
     private static final TypeMapper TYPE_MAPPER = new TypeMapper();
 
     private final SalesforceConnection sfconnection;
 
-    private MetadataConnection connection;
+    private volatile MetadataConnection connection;
 
     public MetadataResourceProvider(final SalesforceConnection connection) {
         this.sfconnection = connection;
@@ -131,29 +133,36 @@ public class MetadataResourceProvider implements CollectionResourceProvider {
             }
             this.connection.getConfig().setSessionRenewer(new SessionRenewer() {
                 @Override
-                public SessionRenewalHeader renewSession(final ConnectorConfig config)
-                        throws ConnectionException {
+                public SessionRenewalHeader renewSession(final ConnectorConfig config) throws ConnectionException {
                     try {
-                        if (!sfconnection.refreshAccessToken(config)) {
-                            final ServiceUnavailableException cause =
-                                    new ServiceUnavailableException(
-                                            "Session is expired and can not be renewed");
-                            throw new ConnectionException(cause.getMessage(), cause);
-                        }
-                    } catch (final ResourceException e) {
+                        return sfconnection.refreshAccessToken(config).then(
+                                new Function<Void, SessionRenewalHeader, ConnectionException>() {
+                                    @Override
+                                    public SessionRenewalHeader apply(Void value) throws ConnectionException {
+                                        SessionRenewalHeader header = new SessionRenewalHeader();
+                                        header.name =
+                                                new javax.xml.namespace.QName(
+                                                        "http://soap.sforce.com/2006/04/metadata", "SessionHeader");
+                                        header.headerElement = new SessionHeader_element();
+                                        ((SessionHeader_element) header.headerElement).setSessionId(config
+                                                .getSessionId());
+                                        MetadataResourceProvider.this.connection.getSessionHeader().setSessionId(
+                                                config.getSessionId());
+                                        return header;
+                                    }
+                                },
+                                new Function<ResourceException, SessionRenewalHeader, ConnectionException>() {
+                                    @Override
+                                    public SessionRenewalHeader apply(ResourceException value) throws ConnectionException {
+                                        final ServiceUnavailableException cause =
+                                                new ServiceUnavailableException(
+                                                        "Session is expired and can not be renewed");
+                                        throw new ConnectionException(cause.getMessage(), cause);
+                                    }
+                                }).getOrThrow(SESSION_RENEWAL_HEADER_TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    } catch (InterruptedException | TimeoutException e) {
                         throw new ConnectionException(e.getMessage(), e);
                     }
-
-                    SessionRenewalHeader header = new SessionRenewalHeader();
-                    header.name =
-                            new javax.xml.namespace.QName(
-                                    "http://soap.sforce.com/2006/04/metadata", "SessionHeader");
-                    header.headerElement = new SessionHeader_element();
-                    ((SessionHeader_element) header.headerElement).setSessionId(config
-                            .getSessionId());
-                    MetadataResourceProvider.this.connection.getSessionHeader().setSessionId(
-                            config.getSessionId());
-                    return header;
                 }
             });
         } catch (ConnectionException e) {

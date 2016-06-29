@@ -1,7 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2013-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.provisioner.salesforce.internal;
 
@@ -14,6 +24,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.JsonPointer;
@@ -31,7 +42,10 @@ import org.forgerock.openidm.provisioner.ConnectorConfigurationHelper;
 import org.forgerock.openidm.provisioner.salesforce.internal.schema.SchemaHelper;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -46,14 +60,13 @@ import static org.forgerock.json.JsonValue.object;
  */
 @Component(name = SalesforceConfigurationHelper.PID,
         policy = ConfigurationPolicy.OPTIONAL,
-        metatype = true,
-        description = "Salesforce Connector Configuration Helper",
         immediate = true)
 @Service
 @Properties({
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "Salesforce Connector Configuration Helper") })
 public class SalesforceConfigurationHelper implements MetaDataProvider, ConnectorConfigurationHelper {
+    final static Logger logger = LoggerFactory.getLogger(SalesforceConfigurationHelper.class);
 
     public static final String PID = "org.forgerock.openidm.provisioner.salesforce.confighelper";
 
@@ -67,7 +80,7 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
      * Cryptographic service.
      */
     @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected CryptoService cryptoService = null;
+    protected volatile CryptoService cryptoService = null;
 
     @Activate
     void activate(ComponentContext context) throws Exception {
@@ -109,15 +122,20 @@ public class SalesforceConfigurationHelper implements MetaDataProvider, Connecto
         params.get(CONNECTOR_REF).required();
         params.get(CONFIGURATION_PROPERTIES).required();
 
+        SalesforceConnection connection = null;
         try {
             // validate and test the configuration properties we were given
-            new SalesforceConnection(
-                    SalesforceConnectorUtil.parseConfiguration(params, cryptoService)
-                    .validate())
-                .test();
+            final SalesforceConfiguration salesforceConfiguration = SalesforceConnectorUtil.parseConfiguration(params, cryptoService).validate();
+            connection =
+                    new SalesforceConnection(salesforceConfiguration, SalesforceConnectorUtil.newHttpClientHandler(salesforceConfiguration));
+            connection.test();
             jv.put("ok", true);
         } catch (Exception e) {
             jv.put("error", e.getMessage());
+        } finally {
+            if (connection != null) {
+                connection.dispose();
+            }
         }
         return jv.asMap();
     }

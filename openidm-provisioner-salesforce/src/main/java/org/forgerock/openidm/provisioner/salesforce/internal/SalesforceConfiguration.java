@@ -1,16 +1,26 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2014 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2013-2016 ForgeRock AS.
  */
+
 package org.forgerock.openidm.provisioner.salesforce.internal;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.json.JsonValue;
-import org.restlet.data.Form;
+import org.forgerock.http.protocol.Form;
 
 /**
  *
@@ -363,30 +373,19 @@ public class SalesforceConfiguration {
         return this;
     }
 
-    public Form getAuthenticationForm() {
+    public String getFormRepresentationOfAuthenticationState() {
         validate();
         Form form = new Form();
         form.add(SalesforceConnection.CLIENT_ID, getClientId());
         form.add(SalesforceConnection.CLIENT_SECRET, getClientSecret());
-
-        if (null == getRefreshToken()) {
+        if (getRefreshToken() == null) {
             form.add(SalesforceConnection.GRANT_TYPE, SalesforceConnection.PASSWORD);
-
             form.add(SalesforceConnection.USERNAME, getUsername());
             form.add(SalesforceConnection.PASSWORD, getPassword() + getSecurityToken());
         } else {
             form.add(SalesforceConnection.GRANT_TYPE, SalesforceConnection.REFRESH_TOKEN);
-
             form.add(SalesforceConnection.REFRESH_TOKEN, refresh_token);
         }
-
-        return form;
+        return form.toFormString();
     }
-
-    static SalesforceConfiguration parseConfiguration(JsonValue config) {
-        return SalesforceConnection.mapper.convertValue(
-                config.required().expect(Map.class).asMap(),
-                SalesforceConfiguration.class);
-    }
-
 }

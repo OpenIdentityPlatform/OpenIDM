@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-  ~
-  ~ Copyright (c) 2013 ForgeRock AS. All Rights Reserved
+   The contents of this file are subject to the terms of the Common Development and
+   Distribution License (the License). You may not use this file except in compliance with the
+   License.
+
+   You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+   specific language governing permission and limitations under the License.
+
+   When distributing Covered Software, include this CDDL Header Notice in each file and include
+   the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+   Header, with the fields enclosed by brackets [] replaced by your own identifying
+   information: "Portions copyright [year] [name of copyright owner]".
+
+   Copyright 2013-2016 ForgeRock AS.
   -->
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
@@ -12,7 +22,7 @@
     <parent>
         <artifactId>openidm-project</artifactId>
         <groupId>org.forgerock.openidm</groupId>
-        <version>4.5.0</version>
+        <version>5.0.0-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-salesforce</artifactId>
     <version>${provisioner.salesforcemodule.version}</version>
@@ -59,12 +69,6 @@
                 <enabled>false</enabled>
             </releases>
         </repository>
-        <!-- Restlet -->
-        <repository>
-            <id>maven-restlet</id>
-            <name>Public online Restlet repository</name>
-            <url>http://maven.restlet.org</url>
-        </repository>
     </repositories>
     <pluginRepositories>
         <pluginRepository>
@@ -90,9 +94,12 @@
             <version>${project.parent.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.restlet.osgi</groupId>
-            <artifactId>org.restlet.ext.jackson</artifactId>
-            <version>${restlet.version}</version>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-client-apache-async</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource-http</artifactId>
         </dependency>
         <dependency>
             <groupId>commons-io</groupId>
@@ -124,27 +131,26 @@
         <dependency>
             <groupId>org.osgi</groupId>
             <artifactId>org.osgi.core</artifactId>
-            <version>4.3.1</version>
+            <version>6.0.0</version>
             <scope>provided</scope>
         </dependency>
-        <!-- TODO Remove org.apache.felix.framework when Compendium 4.3 is used -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.framework</artifactId>
-            <version>4.2.1</version>
+            <version>5.4.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
             <groupId>org.osgi</groupId>
-            <artifactId>org.osgi.compendium</artifactId>
-            <version>4.2.0</version>
+            <artifactId>osgi.cmpn</artifactId>
+            <version>6.0.0</version>
         </dependency>
 
         <!-- Provided Dependencies -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.scr.annotations</artifactId>
-            <version>1.9.6</version>
+            <version>1.10.0</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -204,12 +210,6 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient-osgi</artifactId>
-            <version>4.3.2</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.0.13</version>
@@ -221,7 +221,7 @@
             <plugin>
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-scr-plugin</artifactId>
-                <version>1.15.0</version>
+                <version>1.22.0</version>
                 <executions>
                     <execution>
                         <id>generate-scr-scrdescriptor</id>
