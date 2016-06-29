@@ -165,9 +165,9 @@ define([
      */
     Handlebars.registerHelper("contains", function(list, item, options) {
         if (_.indexOf(list, item) >= 0) {
-            return options.fn(this);
+            return options.fn(item);
         } else {
-            return options.inverse(this);
+            return options.inverse(item);
         }
     });
 

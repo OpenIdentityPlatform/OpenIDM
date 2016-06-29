@@ -1,0 +1,50 @@
+<div>
+    <label for="propertyMapping" class="text-primary">{{t "templates.auth.propertyMapping"}}</label>
+
+    <div id="propertyMapping" class="well">
+        <div class="form-horizontal">
+            <div id="basicPropertyMappingFields">
+                {{> form/_basicInput
+                    value=config.properties.propertyMapping.authenticationId
+                    label="templates.auth.authId"
+                    property="properties.propertyMapping.authenticationId"
+                    noValidation="true"}}
+
+                {{> form/_basicInput
+                    value=config.properties.propertyMapping.userCredential
+                    label="templates.auth.userCred"
+                    property="properties.propertyMapping.userCredential"
+                    noValidation="true"}}
+            </div>
+            {{> form/_basicSelect
+                property="userOrGroup"
+                label="templates.auth.userOrGroup"
+                diffDisplayVal="true"
+                noForm2js="true"
+                options=userOrGroupOptions
+                value=userOrGroupValue}}
+
+            <div id="userRolesOptions">
+                {{> form/_basicInput
+                value=config.properties.propertyMapping.userRoles
+                label="templates.auth.userRoles"
+                property="properties.propertyMapping.userRoles"
+                noForm2js="true"
+                noValidation="true"}}
+            </div>
+        </div>
+
+        <div id="groupMembershipOptions" style="display:none;">
+            <div class="form-horizontal">
+                {{> form/_basicInput
+                    value=config.properties.propertyMapping.groupMembership
+                    label="templates.auth.groupMembership"
+                    property="properties.propertyMapping.groupMembership"
+                    noForm2js="true"
+                    noValidation="true"}}
+            </div>
+            <div id="groupMembershipOptionsEditor"></div>
+        </div>
+
+    </div>
+</div>

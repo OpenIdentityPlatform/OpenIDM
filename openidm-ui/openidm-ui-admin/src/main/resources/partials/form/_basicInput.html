@@ -1,14 +1,22 @@
 <!-- Copyright 2015 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
-<div class="form-group">
+<div class="form-group{{#if hidden}} hide{{/if}}">
     <label class="col-sm-3 control-label" for="input-{{property}}">{{t label}}</label>
     <div class="col-sm-6">
         <input
                 id="input-{{property}}"
                 class="form-control"
                 type="{{#if type}}{{type}}{{else}}text{{/if}}"
-                name="{{property}}"
-                value="{{value}}"
+                {{#unless noForm2js}}name="{{property}}"{{/unless}}
+                {{#if value}}
+                    value="{{value}}"
+                {{else}}
+                    {{#if default}}
+                        value="{{default}}"
+                    {{/if}}
+                {{/if}}
+
+
         {{#if readonly}}readonly{{/if}}
         {{#if required}}required data-validator="required"{{/if}}
         />

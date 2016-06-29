@@ -196,8 +196,8 @@
   }
 }
 
-#AuthenticationModuleDialog .basicForm,
-#AuthenticationModuleDialog .advancedForm,
+#AuthenticationModuleDialogContainer #basicForm,
+#AuthenticationModuleDialogContainer #advancedForm,
 #auditEventHandlerConfig {
   h3 {
     font-size: 14px;
@@ -225,23 +225,25 @@
   }
 }
 
-#AuthenticationModuleDialog {
+#AuthenticationModuleDialogContainer {
   margin-top: -15px;
+  &>h3{
+    font-size: 14px;
+  }
 
-  .advancedForm {
-    margin-bottom: 15px;
+  .form-horizontal.well {
 
-    & > div > .well {
-      display: none;
+  }
 
-      .container-augmentSecurityContext>.well {
-        background-color: white;
-        padding: 9px !important;
-      }
-    }
+  #basicForm, #advancedForm {
+    padding-bottom: 5px;
 
-    .container-augmentSecurityContext > .well {
-      background-color: white;
+    #allowedAuthenticationIdPatterns>div>.well,
+    #propertyMapping.well,
+    #customProperties>div>.well,
+    #augmentSecurityContext.well {
+      background-color: white !important;
+      padding: 9px !important;
 
       button {
         i {
@@ -249,6 +251,27 @@
         }
       }
     }
+  }
+
+  .advanced-toggle {
+    cursor: pointer;
+  }
+  #advancedForm {
+    display: none;
+
+    #customProperties {
+      margin-top: -35px;
+    }
+
+    &.form-horizontal .form-group {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #customProperties>div>.well {
+      margin-bottom: 0;
+    }
+
   }
 }
 

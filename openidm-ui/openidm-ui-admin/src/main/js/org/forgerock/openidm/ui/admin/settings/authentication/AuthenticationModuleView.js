@@ -57,15 +57,7 @@ define([
                 "OPENID_CONNECT": null,
                 "PASSTHROUGH": null,
                 "TRUSTED_ATTRIBUTE": null
-            },
-            amUIProperties: [
-                "openamLoginUrl",
-                "openamLoginLinkText",
-                "openamUseExclusively"
-            ],
-            amTruststoreType : "&{openidm.truststore.type}",
-            amTruststorePath : "&{openidm.truststore.location}",
-            amTruststorePassword : "&{openidm.truststore.password}"
+            }
         },
 
         /**
@@ -81,8 +73,6 @@ define([
                 configs,
                 this.getAuthenticationData()
             );
-
-            this.addOpenAMUISettings();
 
             // this.model.authModules should not be altered until a save is done.  Use this.model.changes for the local copy.
             if (!_.has(this.model, "changes")) {
@@ -212,20 +202,8 @@ define([
         },
 
         checkChanges: function() {
-            this.checkHasAM();
             this.setProperties(["authModules"], {"authModules": this.model.changes});
             this.model.changesModule.makeChanges({"authModules": this.model.changes}, true);
-        },
-
-        /**
-         * If an AM session module is present the session configurations may need to be altered
-         */
-        checkHasAM: function() {
-            var amExists = _.findWhere(this.model.changes, {"name": "OPENAM_SESSION", "enabled": true});
-
-            if (amExists) {
-                this.model.addedOpenAM();
-            }
         },
 
         editAuthModule: function(e) {
@@ -235,7 +213,6 @@ define([
                     this.model.changes[this.getClickedRowIndex(e)] = config;
                     this.render(this.model);
                     this.checkChanges();
-                    this.handleOpenAMUISettings(config);
                 }, this)
             }, _.noop);
         },
@@ -255,7 +232,6 @@ define([
                         this.model.changes.push(config);
                         this.render(this.model);
                         this.checkChanges();
-                        this.handleOpenAMUISettings(config);
                     }, this)
                 }, _.noop);
             }
@@ -279,40 +255,7 @@ define([
             });
 
             return index;
-        },
-
-        handleOpenAMUISettings: function (config) {
-            var prom = $.Deferred(),
-                amAuthIndex,
-                amSettings;
-
-            //make sure this is the OPENAM_SESSION module that is being edited
-            if (config.name === "OPENAM_SESSION") {
-                amAuthIndex = _.findIndex(this.model.changes, { name: "OPENAM_SESSION" });
-                amSettings = _.pick(config.properties, this.data.amUIProperties, "openamDeploymentUrl");
-
-                amSettings.openamAuthEnabled = config.enabled;
-                delete amSettings.enabled;
-                this.model.amSettings = amSettings;
-                //before saving these properties need to be changed back to the untranslated versions
-                this.model.changes[amAuthIndex].properties.truststoreType = this.data.amTruststoreType;
-                this.model.changes[amAuthIndex].properties.truststorePath = this.data.amTruststorePath;
-                this.model.changes[amAuthIndex].properties.truststorePassword = this.data.amTruststorePassword;
-            }
-        },
-
-        addOpenAMUISettings: function () {
-            var amAuthIndex = _.findIndex(this.model.authModules, { name: "OPENAM_SESSION" });
-
-            if (!this.model.changes && amAuthIndex >= 0) {
-                //add amUIProperties
-                this.model.authModules[amAuthIndex].properties = _.extend(
-                    this.model.authModules[amAuthIndex].properties,
-                    _.pick(Configuration.globalData, this.data.amUIProperties)
-                );
-            }
         }
-
     });
 
     return new AuthenticationModuleView();

@@ -1,0 +1,105 @@
+<h3>{{t "templates.auth.basicProperties"}}</h3>
+<div class="well" id="basicForm">
+    <div id="basicFields" class="form-horizontal">
+        {{> form/_titaToggle
+        property="enabled"
+        label="templates.auth.moduleEnabled"
+        enabled=config.enabled}}
+
+        {{> form/_basicSelect
+        property="properties.queryOnResource"
+        label="templates.auth.routeToOpenAMUserDataStore"
+        options=resources
+        value=config.properties.queryOnResource}}
+
+        {{> form/_basicInput
+        value=config.properties.openamDeploymentUrl
+        label="templates.auth.openamDeploymentUrl"
+        property="properties.openamDeploymentUrl"
+        noValidation="true"}}
+
+        {{> form/_titaToggle
+        label="templates.auth.openamUseExclusively"
+        property="properties.openamUseExclusively"
+        enabled=config.properties.openamUseExclusively}}
+    </div>
+</div>
+
+<h3 class="advanced-toggle">
+    <i class="advancedShowHide fa fa-caret-right"></i>
+    {{t "templates.auth.advancedProperties"}}
+</h3>
+
+<div class="form-horizontal well" id="advancedForm">
+
+    {{> form/_basicInput
+    value=config.properties.openamLoginUrl
+    label="templates.auth.openamLoginUrl"
+    property="properties.openamLoginUrl"
+    default= "/XUI/#login/"
+    noValidation="true"}}
+
+    {{> form/_basicInput
+    value=config.properties.openamLoginLinkText
+    label="templates.auth.openamLoginLinkText"
+    property="properties.openamLoginLinkText"
+    noValidation="true"}}
+
+    {{> form/_tagSelectize
+    value=config.properties.defaultUserRoles
+    label="templates.auth.defaultUserRole"
+    property="properties.defaultUserRoles"
+    options=defaultUserRoles
+    default="openidm-authorized"}}
+
+    {{> form/_basicInput
+    value=config.properties.openamSSOTokenCookieName
+    label="templates.auth.openamSSOTokenCookieName"
+    property="properties.openamSSOTokenCookieName"
+    noValidation="true"}}
+
+    {{> form/_basicInput
+    value=config.properties.openamUserAttribute
+    label="templates.auth.openamUserAttribute"
+    property="properties.openamUserAttribute"
+    default="uid"
+    hidden="true"
+    noValidation="true"}}
+
+    {{> form/_basicInput
+    value=config.properties.groupComparisonMethod
+    label="templates.auth.groupComparisonMethod"
+    property="properties.groupComparisonMethod"
+    default="ldap"
+    hidden="true"
+    noValidation="true"}}
+
+    {{> form/_basicInput
+    value=config.properties.truststoreType
+    label="templates.auth.truststoreType"
+    property="properties.truststoreType"
+    hidden="true"
+    noValidation="true"}}
+
+    {{> form/_basicInput
+    value=config.properties.truststorePath
+    label="templates.auth.truststorePath"
+    property="properties.truststorePath"
+    hidden="true"
+    noValidation="true"}}
+
+    {{> form/_basicInput
+    value=config.properties.truststorePassword
+    label="templates.auth.truststorePassword"
+    property="properties.truststorePassword"
+    hidden="true"
+    noValidation="true"}}
+
+    {{> settings/authentication/_propertyMapping}}
+    {{> settings/authentication/_customProperties}}
+    {{> settings/authentication/_augmentSecurityContext}}
+</div>
+
+
+
+
