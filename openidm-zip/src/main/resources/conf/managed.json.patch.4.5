@@ -5,36 +5,6 @@
       "value" : {
          "script" : {
             "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.effectiveRoles.file');"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.effectiveRoles.rolesPropName');"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
-            "source" : "require('managedPatchHelper').add(content, 'user', 'schema.properties.effectiveRoles.source', \"require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');\");"
-         }
-      }
-   },
-   {
-      "operation" : "transform",
-      "field" : "/objects",
-      "value" : {
-         "script" : {
-            "type" : "text/javascript",
             "source" : "require('managedPatchHelper').add(content, 'user', 'onCreate',  { \"type\": \"text/javascript\", \"source\": \"require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\" } );"
          }
       }
@@ -55,6 +25,106 @@
       "value" : {
          "script" : {
             "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'postCreate', { \"type\" : \"text/javascript\",  \"file\" : \"roles/postOperation-roles.js\" } );"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'postUpdate', { \"type\" : \"text/javascript\",  \"file\" : \"roles/postOperation-roles.js\" } );"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'postDelete', { \"type\" : \"text/javascript\",  \"file\" : \"roles/postOperation-roles.js\" } );"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.order');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'schema.order', [ \"_id\", \"userName\", \"password\", \"givenName\", \"sn\", \"mail\", \"accountStatus\", \"telephoneNumber\", \"postalAddress\", \"address2\", \"city\", \"postalCode\", \"country\", \"stateProvince\", \"roles\", \"manager\", \"authzRoles\", \"reports\", \"effectiveRoles\", \"effectiveAssignments\", \"lastSync\", \"kbaInfo\" ]);"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'schema.properties.roles.items.properties._refProperties.properties._grantType', { \"type\" : \"string\", \"label\" : \"Grant Type\" });"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.effectiveRoles.onRetrieve');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'schema.properties.effectiveRoles.onRetrieve', { \"type\" : \"text/javascript\", \"source\" : \"require('roles/effectiveRoles').calculateEffectiveRoles(object, 'roles');\" });"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.effectiveRoles.source');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'user', 'schema.properties.lastSync', { \"type\" : \"object\", \"scope\" : \"private\", \"viewable\" : false, \"searchable\" : false, \"properties\" : { \"effectiveAssignments\" : { \"type\" : \"array\", \"items\" : \"object\" }, \"timestamp\" : { \"type\" : \"string\" } } });"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
             "source" : "require('managedPatchHelper').add(content, 'role', 'onCreate', { 'type': 'text/javascript', 'source' : \"require('roles/conditionalRoles').roleCreate(object);\" });"
          }
       }
@@ -66,6 +136,86 @@
          "script" : {
             "type" : "text/javascript",
             "source" : "require('managedPatchHelper').add(content, 'role', 'onUpdate', { 'type': 'text/javascript', 'source': \"require('roles/conditionalRoles').roleUpdate(oldObject, object);\" });"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'postCreate', { \"type\" : \"text/javascript\",  \"file\" : \"roles/postOperation-roles.js\" } );"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'postUpdate', { \"type\" : \"text/javascript\",  \"file\" : \"roles/postOperation-roles.js\" } );"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'postDelete', { \"type\" : \"text/javascript\",  \"file\" : \"roles/postOperation-roles.js\" } );"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'schema.properties.members.items.properties._refProperties.properties._grantType', { \"type\" : \"string\", \"label\" : \"Grant Type\" });"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'schema.properties.condition', { \"description\" : \"A conditional filter for this role\", \"title\" : \"Condition\", \"viewable\" : false, \"searchable\" : false, \"type\" : \"string\" });"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'schema.properties.temporalConstraints', { \"description\" : \"An array of temporal constraints for a role\", \"title\" : \"Temporal Constraints\", \"viewable\" : false, \"returnByDefault\" : true, \"type\" : \"array\", \"items\" : { \"type\" : \"object\", \"properties\" : { \"duration\" : { \"type\" : \"string\" } }, \"required\" : [ \"duration\" ] } });"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').remove(content, 'role', 'schema.order');"
+         }
+      }
+   },
+   {
+      "operation" : "transform",
+      "field" : "/objects",
+      "value" : {
+         "script" : {
+            "type" : "text/javascript",
+            "source" : "require('managedPatchHelper').add(content, 'role', 'schema.order', [ '_id', 'name', 'description', 'assignments', 'members', 'condition', 'temporalConstraints' ]);"
          }
       }
    }
