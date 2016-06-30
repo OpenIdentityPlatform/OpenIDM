@@ -1,18 +1,18 @@
 {
     "update" : {
         "description" : "Full product installation",
-        "resource" : "https://forgerock.org/openidm/doc/bootstrap/release-notes/",
+        "resource" : "https://backstage.forgerock.com/#!/docs/openidm/4/release-notes",
         "restartRequired" : true
     },
     "origin": {
         "product": "OpenIDM",
         "version": [
-            "4.0.0-1-SNAPSHOT"
+            "4.0.0-1"
         ]
     },
     "destination": {
         "product": "OpenIDM",
-        "version": "4.0.0-2-SNAPSHOT"
+        "version": "4.0.0-2"
     },
     "removeFile" : [
 
