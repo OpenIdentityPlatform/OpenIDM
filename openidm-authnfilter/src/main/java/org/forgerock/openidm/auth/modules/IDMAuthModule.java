@@ -19,7 +19,7 @@ package org.forgerock.openidm.auth.modules;
 import static org.forgerock.http.handler.HttpClientHandler.*;
 
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
-import org.forgerock.http.apache.sync.SyncHttpClientProvider;
+import org.forgerock.http.apache.async.AsyncHttpClientProvider;
 import org.forgerock.http.spi.Loader;
 import org.forgerock.jaspi.modules.iwa.IWAModule;
 import org.forgerock.jaspi.modules.openid.OpenIdConnectModule;
@@ -50,7 +50,7 @@ public enum IDMAuthModule {
                             .set(OPTION_LOADER, new Loader() {
                                 @Override
                                 public <S> S load(Class<S> service, Options options) {
-                                    return service.cast(new SyncHttpClientProvider());
+                                    return service.cast(new AsyncHttpClientProvider());
                                 }
                             }));
         }
