@@ -850,6 +850,7 @@ public class UpdateManagerImpl implements UpdateManager {
         private final Path tempDirectory;
         private final long timestamp = new Date().getTime();
         private final Path archivePath;
+        private final Path installDir;
         private boolean completeable = false;
 
         private final Lock lock = new ReentrantLock();
@@ -866,6 +867,7 @@ public class UpdateManagerImpl implements UpdateManager {
             this.fileStateChecker = fileStateChecker;
             this.updateConfig = updateConfig;
             this.tempDirectory = tempDirectory;
+            this.installDir = installDir;
 
             this.staticFileUpdate = new StaticFileUpdate(fileStateChecker, installDir,
                     archive, new ProductVersion(ServerConstants.getVersion(),
@@ -968,9 +970,8 @@ public class UpdateManagerImpl implements UpdateManager {
                         UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                                 .setFilePath(path.toString())
                                 .setFileState(fileStateChecker.getCurrentFileState(configFile).name());
-                        String pid = parsePid(configFile.getFileName().toString());
                         patchConfig(ContextUtil.createInternalContext(),
-                                "config/" + pid, JsonUtil.parseStringified(FileUtil.readFile(patchFile)));
+                                configFile, JsonUtil.parseStringified(FileUtil.readFile(patchFile)));
                         fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
                         logUpdate(updateEntry.addFile(fileEntry.toJson()));
                     } else {
@@ -1109,19 +1110,26 @@ public class UpdateManagerImpl implements UpdateManager {
          * Apply a JsonPatch to a config object on the router.
          *
          * @param context the context for the patch request.
-         * @param resourceName the name of the resource to be patched.
+         * @param configFile the config file to be patched.
          * @param patch a JsonPatch to be applied to the named config resource.
          * @throws UpdateException
          */
-        private void patchConfig(Context context, String resourceName, JsonValue patch) throws UpdateException {
+        private void patchConfig(final Context context, final Path configFile, final JsonValue patch) throws UpdateException {
+            final String pid = parsePid(configFile.getFileName().toString());
+            final Path backupFile = installDir.resolve("conf/").resolve(configFile.getFileName().toString()
+                    + StaticFileUpdate.OLD_SUFFIX + timestamp);
+
             try {
-                PatchRequest request = Requests.newPatchRequest(resourceName);
+                Files.copy(installDir.resolve("conf/").resolve(configFile.getFileName()), backupFile);
+                PatchRequest request = Requests.newPatchRequest("config/" + pid);
                 for (PatchOperation op : PatchOperation.valueOfList(patch)) {
                     request.addPatchOperation(op);
                 }
                 UpdateManagerImpl.this.connectionFactory.getConnection().patch(new UpdateContext(context), request);
             } catch (ResourceException e) {
                 throw new UpdateException("Patch request failed", e);
+            } catch (IOException e) {
+                throw new UpdateException("Config backup failed for " + configFile, e);
             }
         }
 
