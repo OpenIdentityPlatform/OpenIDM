@@ -229,7 +229,7 @@ define([
                 if(!this.data.newObject) {
                     _.each(newValue, _.bind(function(val,key) {
                         var relationshipType = this.data.schema.properties[key] && this.data.schema.properties[key].typeRelationship,
-                            hasVal = val && val.length;
+                            hasVal = !!(val && val.toString().length);
                         if(
                                 (!this.oldObject[key] && hasVal) ||
                                 (!relationshipType && (this.oldObject[key] && !_.isEqual(this.oldObject[key], val))) ||
