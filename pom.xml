@@ -274,8 +274,6 @@
         <openidm.osgi.import.defaults />
         <openidm.osgi.import.additional />
         <openidm.osgi.import>
-            org.forgerock.openidm.*;provide:=true,
-            org.forgerock.json.*,
             ${openidm.osgi.import.before.defaults},
             ${openidm.osgi.import.defaults},
             ${openidm.osgi.import.additional},
