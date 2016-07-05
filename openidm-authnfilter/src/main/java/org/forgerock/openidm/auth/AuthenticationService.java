@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS
+ * Copyright 2013-2016 ForgeRock AS
  */
 
 package org.forgerock.openidm.auth;
@@ -20,6 +20,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import javax.inject.Provider;
+
+import static org.forgerock.json.JsonValueFunctions.enumConstant;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -56,6 +65,10 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
+import org.forgerock.openidm.idp.config.ProviderConfig;
+import org.forgerock.openidm.idp.impl.IdentityProviderListener;
+import org.forgerock.openidm.idp.impl.IdentityProviderService;
+import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.SecurityContext;
@@ -72,14 +85,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static org.forgerock.json.JsonValueFunctions.enumConstant;
-import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
-import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 
 /**
  * Configures the authentication chains based on authentication.json.
@@ -122,7 +127,7 @@ import static org.forgerock.caf.authentication.framework.AuthenticationFilter.Au
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM Authentication Service"),
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/authentication")
 })
-public class AuthenticationService implements SingletonResourceProvider {
+public class AuthenticationService implements SingletonResourceProvider, IdentityProviderListener {
 
     /** The PID for this Component. */
     public static final String PID = "org.forgerock.openidm.authentication";
@@ -139,6 +144,8 @@ public class AuthenticationService implements SingletonResourceProvider {
     private static final String AUTH_MODULE_NAME_KEY = "name";
     private static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
     private static final String MODULE_CONFIG_ENABLED = "enabled";
+    private static final String RESOLVERS = "resolvers";
+    private static final String RESOLVER_NAME_KEY = "name";
 
     private JsonValue config;
 
@@ -223,31 +230,98 @@ public class AuthenticationService implements SingletonResourceProvider {
             };
 
     /**
+     * Amends the config so that the OPENID_CONNECT
+     * module has the appropriate resolvers.
+     *
+     * @param authModuleConfig configuration of the authentication modules.
+     */
+    void amendAuthConfig(JsonValue authModuleConfig) {
+        // get OpenIDConnect Properties
+        JsonValue openidConnectModuleProperties = FluentIterable.from(authModuleConfig)
+                .firstMatch(new Predicate<JsonValue>() {
+                    @Override
+                    public boolean apply(JsonValue authModuleConfig) {
+                        return authModuleConfig.get(AUTH_MODULE_NAME_KEY).asString()
+                                .equals(IDMAuthModule.OPENID_CONNECT.name());
+                    }
+                })
+                .get()
+                .get(AUTH_MODULE_PROPERTIES_KEY);
+
+        if (openidConnectModuleProperties.isNotNull()) {
+            // replace resolvers with resolvers populated from IdentityProviderConfigs
+            openidConnectModuleProperties.put(RESOLVERS,
+                    FluentIterable.from(openidConnectModuleProperties.get(RESOLVERS))
+                            .transform(new Function<JsonValue, JsonValue>() {
+                                @Override
+                                public JsonValue apply(final JsonValue resolver) {
+                                    return ProviderConfigMapper.toJsonValue(
+                                            FluentIterable.from(identityProviderService.getIdentityProviders())
+                                                    .firstMatch(new Predicate<ProviderConfig>() {
+                                                        @Override
+                                                        public boolean apply(ProviderConfig config) {
+                                                            return config.getName().equals(
+                                                                    resolver.get(RESOLVER_NAME_KEY).asString());
+                                                        }
+                                                    })
+                                                    .get());
+                                }
+                            })
+                            .toList());
+        }
+    }
+
+
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile IdentityProviderService identityProviderService;
+
+    protected void bindIdentityProviderService(IdentityProviderService identityProviderService) {
+        this.identityProviderService = identityProviderService;
+        identityProviderService.registerIdentityProviderListener(this);
+    }
+
+    protected void unbindIdentityProviderService() {
+        identityProviderService.unregisterIdentityProviderListener(this);
+        identityProviderService = null;
+    }
+
+    @Override
+    public void identityProviderConfigChanged() {
+        if (config == null) {
+            logger.debug("No configuration for Authentication Service");
+            return;
+        }
+        // the auth module list config lives under at /serverAuthConfig/authModule
+        JsonValue authModuleConfig = config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
+        amendAuthConfig(authModuleConfig);
+
+        try {
+            authFilterWrapper.setFilter(configureAuthenticationFilter(config));
+        } catch (AuthenticationException e) {
+            logger.error("Error configuring authentication filter.", e);
+        }
+
+        // filter enabled module configs and get their properties;
+        // then filter those with valid auth properties, and build an authenticator
+        authenticators.clear();
+        authenticators.addAll(FluentIterable.from(authModuleConfig)
+                .filter(enabledAuthModules)
+                .transform(toModuleProperties)
+                .filter(authModulesThatHaveValidAuthenticatorProperties)
+                .transform(toAuthenticatorFromProperties)
+                .toList());
+    }
+
+    /**
      * Activates this component.
      *
      * @param context The ComponentContext
      */
     @Activate
-    public synchronized void activate(ComponentContext context) throws AuthenticationException {
+    public void activate(final ComponentContext context) throws AuthenticationException {
         logger.info("Activating Authentication Service with configuration {}", context.getProperties());
         config = enhancedConfig.getConfigurationAsJson(context);
-
-        authFilterWrapper.setFilter(configureAuthenticationFilter(config));
-
-        // the auth module list config lives under at /serverAuthConfig/authModule
-        final JsonValue authModuleConfig = config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
-
-        // filter enabled module configs and get their properties;
-        // then filter those with valid auth properties, and build an authenticator
-        for (final Authenticator authenticator :
-                FluentIterable.from(authModuleConfig)
-                .filter(enabledAuthModules)
-                .transform(toModuleProperties)
-                .filter(authModulesThatHaveValidAuthenticatorProperties)
-                .transform(toAuthenticatorFromProperties)) {
-            authenticators.add(authenticator);
-        }
-
+        identityProviderConfigChanged();
         logger.debug("OpenIDM Config for Authentication {} is activated.", config.get(Constants.SERVICE_PID));
     }
 

@@ -48,8 +48,8 @@ public class ProviderConfig {
     @JsonProperty("userinfo_endpoint")
     private String userInfoEndpoint;
 
-    @JsonProperty("discovery_url")
-    private String discoveryUrl;
+    @JsonProperty("well-known")
+    private String wellKnown;
 
     /** Default true, can disable
      * identity provider by setting to false
@@ -93,8 +93,8 @@ public class ProviderConfig {
         return userInfoEndpoint;
     }
 
-    public String getDiscoveryUrl() {
-        return discoveryUrl;
+    public String getWellKnown() {
+        return wellKnown;
     }
 
     public boolean isEnabled() {
