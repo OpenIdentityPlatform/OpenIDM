@@ -43,7 +43,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
-import org.forgerock.openidm.servletregistration.ServletRegistration;
+import org.ops4j.pax.web.service.WebContainer;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.http.NamespaceException;
 import org.slf4j.Logger;
@@ -79,7 +79,7 @@ public final class ResourceServlet extends HttpServlet {
     private String contextRoot;
 
     @Reference
-    private ServletRegistration servletRegistration;
+    private WebContainer webContainer;
 
     /**vn comEnhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -156,7 +156,7 @@ public final class ResourceServlet extends HttpServlet {
     }
 
     /**
-     * Initializes the servlet and registers it with {@link ServletRegistration}.
+     * Initializes the servlet and registers it with the WebContainer.
      * 
      * @param context the ComponentContext containing the configuration
      * @throws ServletException
@@ -186,15 +186,15 @@ public final class ResourceServlet extends HttpServlet {
         contextRoot = prependSlash(config.get(CONFIG_CONTEXT_ROOT).asString());
 
         Dictionary<String, Object> props = new Hashtable<>();
-        servletRegistration.registerServlet(contextRoot, this,  props);
+        webContainer.registerServlet(contextRoot, this,  props, webContainer.getDefaultSharedHttpContext());
         logger.debug("Registered UI servlet at {}", contextRoot);
     }
     
     /**
-     * Clears the servlet, unregistering it with {@link ServletRegistration} and removing the bundle listener.
+     * Clears the servlet, unregistering it with the WebContainer and removing the bundle listener.
      */
     private void clear() {
-        servletRegistration.unregisterServlet(this);
+        webContainer.unregister(contextRoot);
         logger.debug("Unregistered UI servlet at {}", contextRoot);
     }
     
