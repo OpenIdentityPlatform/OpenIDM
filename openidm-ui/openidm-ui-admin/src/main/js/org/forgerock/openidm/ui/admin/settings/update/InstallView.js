@@ -65,6 +65,7 @@ define([
                     } else if (this.data.repoUpdates) {
                         this.showRepoUpdates(this.data.lastID);
                     } else if (this.model.runningID) {
+                        this.model.failedOnce = 0;
                         this.pollInstall(this.model.runningID);
                     }
 
@@ -150,15 +151,7 @@ define([
                     }, this), 1000);
 
                 } else {
-                    if (!this.model.restarted) {
-                        this.$el.find(".restart").text($.t("templates.update.install.restarting"));
-
-                        MaintenanceDelegate.restartIDM().then(_.bind(function() {
-                            this.waitForLastUpdateID(_.bind(this.installationReport, this));
-                        }, this));
-
-
-                    }
+                    _.delay(_.bind(this.restartNow, this), 1000);
                 }
             };
 
@@ -207,7 +200,7 @@ define([
                     }, this), _.bind(function () {
                         this.waitForLastUpdateID(callback);
                     }, this));
-                }, this), 1000);
+                }, this), 2000);
             } else {
                 this.model.error("Restart timed out.");
             }
@@ -229,8 +222,7 @@ define([
                             "msg": response.statusMessage,
                             "version": this.model.version
                         }));
-                    }, this), 500);
-
+                    }, this), 1000);
                 } else if (response && response.status === "COMPLETE") {
                     this.$el.find("#updateInstallerContainer .progress-bar").css("width", "100%");
 
@@ -253,10 +245,12 @@ define([
                 } else if (response && response.status === "REVERTED") {
                     this.showUI();
                     this.model.error($.t("templates.update.install.reverted"));
-
+                } else if ((!response || !response.status) && this.model.failedOnce === 0) {
+                    this.model.failedOnce = 1;
+                    _.delay(_.bind(this.pollInstall, this, id), 1000);
                 } else {
                     this.showUI();
-                    this.model.error($.t("templates.update.install.failedStatus"));
+                    this.model.error($.t("templates.update.install.failedStatus") + " " + id);
                 }
 
             }, this), _.bind(function() {
