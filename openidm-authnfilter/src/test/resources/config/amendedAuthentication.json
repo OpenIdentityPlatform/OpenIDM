@@ -1,0 +1,29 @@
+{
+  "name": "OPENID_CONNECT",
+  "properties": {
+    "openIdConnectHeader": "oidc_id_token",
+    "queryOnResource": "managed/user",
+    "propertyMapping": {
+      "authenticationId": "subject",
+      "userRoles": "authzRoles"
+    },
+    "resolvers": [
+      {
+        "name": "google",
+        "type": "openid_connect",
+        "icon": "google",
+        "client_id": "",
+        "client_secret": "",
+        "authorization_endpoint": "https://accounts.google.com/o/oauth2/v2/auth",
+        "token_endpoint": "https://www.googleapis.com/oauth2/v4/token",
+        "userinfo_endpoint": "https://www.googleapis.com/oauth2/v3/userinfo",
+        "well-known": "https://accounts.google.com/.well-known/openid-configuration",
+        "enabled": true
+      }
+    ],
+    "defaultUserRoles": [
+      "openidm-authorized"
+    ]
+  },
+  "enabled": true
+}

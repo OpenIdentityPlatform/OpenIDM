@@ -97,7 +97,8 @@
                 <configuration>
                     <instructions>
                         <Export-Package>
-                            org.forgerock.openidm.idp.impl
+                            org.forgerock.openidm.idp.impl;
+                            org.forgerock.openidm.idp.config;
                         </Export-Package>
                     </instructions>
                 </configuration>

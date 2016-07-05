@@ -949,7 +949,7 @@
             "tokenEndpoint" : "Token Endpoint",
             "userInfoEndpoint" : "User Info Endpoint",
             "title" : "Social ID Provider",
-            "discoveryUrl" : "Discovery URL",
+            "wellKnown" : "Discovery URL",
             "scope" : "Scope"
         },
         "audit": {

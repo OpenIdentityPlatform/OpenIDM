@@ -60,6 +60,11 @@
             <artifactId>openidm-enhanced-config</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-identity-provider</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Third party dependencies -->
         <dependency>

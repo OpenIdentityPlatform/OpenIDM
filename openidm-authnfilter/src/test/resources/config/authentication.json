@@ -1,0 +1,24 @@
+{
+  "authModules": [
+    {
+      "name": "OPENID_CONNECT",
+      "properties": {
+        "openIdConnectHeader": "oidc_id_token",
+        "queryOnResource": "managed/user",
+        "propertyMapping": {
+          "authenticationId": "subject",
+          "userRoles": "authzRoles"
+        },
+        "resolvers": [
+          {
+            "name": "google"
+          }
+        ],
+        "defaultUserRoles": [
+          "openidm-authorized"
+        ]
+      },
+      "enabled": true
+    }
+  ]
+}
