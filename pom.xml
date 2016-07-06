@@ -221,7 +221,7 @@
         <restlet.version>2.3.1</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
         <joda-time.version>2.6</joda-time.version>
-        <h2.version>1.4.191</h2.version>
+        <h2.version>1.4.192</h2.version>
         <paxweb.version>4.2.4</paxweb.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.5</xbean.version>
@@ -235,22 +235,22 @@
 
         <felix.framework.version>5.4.0</felix.framework.version>
         <felix.configadmin.version>1.8.8</felix.configadmin.version>
-        <felix.eventadmin.version>1.4.2</felix.eventadmin.version>
+        <felix.eventadmin.version>1.4.6</felix.eventadmin.version>
         <felix.gogo.shell.version>0.12.0</felix.gogo.shell.version>
         <felix.inventory.version>1.0.4</felix.inventory.version>
-        <felix.metatype.version>1.0.10</felix.metatype.version>
-        <felix.fileinstall.version>3.4.2</felix.fileinstall.version>
+        <felix.metatype.version>1.1.2</felix.metatype.version>
+        <felix.fileinstall.version>3.5.4</felix.fileinstall.version>
         <felix.log.version>1.0.1</felix.log.version>
         <felix.scr.version>2.0.2</felix.scr.version>
-        <felix.scr.annotations.version>1.9.12</felix.scr.annotations.version>
+        <felix.scr.annotations.version>1.10.0</felix.scr.annotations.version>
         <felix.shell.version>1.4.3</felix.shell.version>
         <felix.shell.tui.version>1.4.1</felix.shell.tui.version>
-        <felix.webconsole.version>4.2.14</felix.webconsole.version>
+        <felix.webconsole.version>4.2.16</felix.webconsole.version>
         <felix.webconsole.ds.version>2.0.2</felix.webconsole.ds.version>
-        <felix.webconsole.event.version>1.0.2</felix.webconsole.event.version>
+        <felix.webconsole.event.version>1.1.4</felix.webconsole.event.version>
         <felix.webconsole.memoryusage.version>1.0.6</felix.webconsole.memoryusage.version>
-        <felix.webconsole.obr.version>1.0.0</felix.webconsole.obr.version>
-        <felix.webconsole.packageadmin.version>1.0.0</felix.webconsole.packageadmin.version>
+        <felix.webconsole.obr.version>1.0.2</felix.webconsole.obr.version>
+        <felix.webconsole.packageadmin.version>1.0.2</felix.webconsole.packageadmin.version>
 
         <!-- OpenICF Framework and Connector versions -->
         <openicf.framework.version>1.5.2.0-SNAPSHOT</openicf.framework.version>
