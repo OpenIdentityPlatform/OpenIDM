@@ -519,6 +519,35 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     /**
+     * Return the full product version string.
+     *
+     * @return full product version
+     */
+    String getProductVersion() {
+        return ServerConstants.getVersion();
+    }
+
+    /**
+     * Remove non-numeric version extensions such as -SNAPSHOT and -RCn. Numeric extensions such as -1 are
+     * still significant.
+     *
+     * @return base product version
+     */
+    String getBaseProductVersion() {
+        String ver = getProductVersion();
+        int idx = ver.lastIndexOf("-");
+        while (idx > -1) {
+            String part = ver.substring(idx + 1);
+            if (part.matches("\\d*")) {
+                return ver;
+            }
+            ver = ver.substring(0, idx);
+            idx = ver.lastIndexOf("-");
+        }
+        return ver;
+    }
+
+    /**
      * Check if the file is for the correct version.
      *
      * @param updateConfig Configuration for the archive.
@@ -526,11 +555,12 @@ public class UpdateManagerImpl implements UpdateManager {
      * @throws InvalidArchiveUpdateException
      * @see ServerConstants#getVersion()
      */
-    private void validateCorrectVersion(JsonValue updateConfig, File updateFile) throws InvalidArchiveUpdateException {
-        if (!updateConfig.get(ORIGIN_VERSION).asList().contains(ServerConstants.getVersion())) {
+    void validateCorrectVersion(JsonValue updateConfig, File updateFile) throws UpdateException {
+        if (!updateConfig.get(ORIGIN_VERSION).asList().contains(getProductVersion()) &&
+                !updateConfig.get(ORIGIN_VERSION).asList().contains(getBaseProductVersion())) {
             throw new InvalidArchiveUpdateException(updateFile.getName(), "The archive " + updateFile.getName()
                     + " can be used only to update version '" + updateConfig.get(ORIGIN_VERSION).asList()
-                    + "' and you are running version " + ServerConstants.getVersion());
+                    + "' and you are running version " + getProductVersion());
         }
     }
 

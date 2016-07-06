@@ -22,11 +22,15 @@ import static org.mockito.Mockito.*;
 import java.io.File;
 import java.nio.file.Path;
 
+import org.assertj.core.api.Assertions;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 /**
@@ -36,7 +40,7 @@ import org.testng.annotations.Test;
  */
 public class UpdateManagerImplTest {
     private final static Logger logger = LoggerFactory.getLogger(UpdateManagerImplTest.class);
-    private UpdateManagerImpl updateManager;
+
     private JsonValue testConfig = json(object());
     private File archiveFile;
 
@@ -44,19 +48,34 @@ public class UpdateManagerImplTest {
     public void setupListAvailableUpdates() throws Exception {
         archiveFile = mock(File.class);
         when(archiveFile.getName()).thenReturn("test.zip");
-        updateManager = mock(UpdateManagerImpl.class);
-        when(updateManager.resolveChecksumFile(any(Path.class))).thenReturn(mock(ChecksumFile.class));
-        when(updateManager.getUpdateFiles()).thenReturn(new File[]{archiveFile});
-        when(updateManager.listAvailableUpdates()).thenCallRealMethod();
 
         // Setup update properties for further tests.
         testConfig.clear();
-        when(updateManager.readUpdateConfig(any(File.class))).thenReturn(testConfig);
+    }
+
+    // Create a "concrete", mock UpdateManagerImpl - good for many tests
+    private UpdateManagerImpl newUpdateManager() {
+        return new UpdateManagerImpl() {
+            File[] getUpdateFiles() {
+                return new File[]{ archiveFile };
+            }
+            JsonValue readUpdateConfig(File file) throws InvalidArchiveUpdateException {
+                return testConfig;
+            }
+            ChecksumFile resolveChecksumFile(Path path) throws UpdateException {
+                return mock(ChecksumFile.class);
+            }
+            Path extractFileToDirectory(File zipFile, Path fileToExtract) throws UpdateException {
+                return mock(Path.class);
+            }
+        };
     }
 
     @Test
     public void testListAvailableUpdatesBadFilename() throws Exception {
         when(archiveFile.getName()).thenReturn("test.xyz");
+
+        UpdateManagerImpl updateManager = newUpdateManager();
 
         // Test when properties file isn't found in the archive.
         JsonValue responseJson = updateManager.listAvailableUpdates();
@@ -69,8 +88,19 @@ public class UpdateManagerImplTest {
 
     @Test
     public void testListAvailableUpdatesBadProperties() throws Exception {
-        when(updateManager.readUpdateConfig(any(File.class))).thenThrow(
-                new InvalidArchiveUpdateException("test.zip", "bad properties"));
+        // this UpdateManagerImpl throws an exception on reading the update config to test
+        // listAvailableUpdates' ability to return the proper error
+        UpdateManagerImpl updateManager = new UpdateManagerImpl() {
+            File[] getUpdateFiles() {
+                return new File[]{ archiveFile };
+            }
+            JsonValue readUpdateConfig(File file) throws InvalidArchiveUpdateException {
+                throw new InvalidArchiveUpdateException("test.zip", "bad properties");
+            }
+            ChecksumFile resolveChecksumFile(Path path) throws UpdateException {
+                return mock(ChecksumFile.class);
+            }
+        };
 
         // Test when properties file isn't found in the archive.
         JsonValue responseJson = updateManager.listAvailableUpdates();
@@ -88,6 +118,8 @@ public class UpdateManagerImplTest {
                 field("product", "OTHER_PRODUCT")
                 ));
 
+        UpdateManagerImpl updateManager = newUpdateManager();
+
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
         // Rejects should be populated as the update is for a different product.
@@ -103,6 +135,8 @@ public class UpdateManagerImplTest {
                 field("product", UpdateManagerImpl.PRODUCT_NAME),
                 field("version", array("X.X.X"))
                 ));
+
+        UpdateManagerImpl updateManager = newUpdateManager();
 
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
@@ -128,7 +162,8 @@ public class UpdateManagerImplTest {
                 field("resource", "url"),
                 field("restartRequired", false)
                 ));
-        when(updateManager.extractFileToDirectory(any(File.class), any(Path.class))).thenReturn(mock(Path.class));
+        UpdateManagerImpl updateManager = newUpdateManager();
+
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
         // Archive should not be rejected.
@@ -144,8 +179,24 @@ public class UpdateManagerImplTest {
                 field("product", UpdateManagerImpl.PRODUCT_NAME),
                 field("version", array(ServerConstants.getVersion()))
         ));
-        when(updateManager.extractFileToDirectory(any(File.class), any(Path.class))).thenThrow(
-                new UpdateException("missing checksum file"));
+        // this UpdateManagerImpl throws an exception when extracting the file
+        // to simulate a bad checksum in order to test listAvailableUpdates'
+        // ability to return the proper error
+        UpdateManagerImpl updateManager = new UpdateManagerImpl() {
+            File[] getUpdateFiles() {
+                return new File[]{ archiveFile };
+            }
+            JsonValue readUpdateConfig(File file) throws InvalidArchiveUpdateException {
+                return testConfig;
+            }
+            ChecksumFile resolveChecksumFile(Path path) throws UpdateException {
+                return mock(ChecksumFile.class);
+            }
+            Path extractFileToDirectory(File zipFile, Path fileToExtract) throws UpdateException {
+                throw new UpdateException("missing checksum file");
+            }
+        };
+
         JsonValue responseJson = updateManager.listAvailableUpdates();
         logger.info("response json is {}", responseJson.toString());
         // Rejects should be populated as checksum file is missing.
@@ -154,5 +205,62 @@ public class UpdateManagerImplTest {
         assertThat(responseJson.get("rejects").get(0)).stringAt("archive").isEqualTo("test.zip");
         assertThat(responseJson.get("rejects").get(0)).stringAt("reason").isEqualTo("The archive test.zip does not appear to contain a checksums file.");
         assertThat(responseJson.get("rejects").get(0)).stringAt("errorMessage").isEqualTo("missing checksum file");
+    }
+
+    @DataProvider
+    public Object[][] versions() {
+        return new Object[][] {
+                // @formatter:off
+                { "5.0.0", "5.0.0", true },
+                { "5.0.0-1", "5.0.0-1", false },
+                { "5.0.1", "5.0.1", false },
+                { "5.0.0-RC1", "5.0.0", true },
+                { "5.0.0-SNAPSHOT", "5.0.0", true },
+                { "5.0.0-RC3-SNAPSHOT", "5.0.0", true },
+                { "5.0.0-1-SNAPSHOT", "5.0.0-1", false }
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "versions")
+    public void testGetBaseProductVersion(final String fullVersion, final String baseVersion, boolean unused) {
+        UpdateManagerImpl updateManager = new UpdateManagerImpl() {
+            String getProductVersion() {
+                return fullVersion;
+            }
+        };
+        Assertions.assertThat(baseVersion).isEqualTo(updateManager.getBaseProductVersion());
+    }
+
+    @Test(dataProvider = "versions")
+    public void testArchiveVersionMatch(final String version, final String baseVersion, final boolean shouldMatch)
+            throws Exception {
+        testConfig.add("origin", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", array("5.0.0"))
+        ));
+        testConfig.add("destination", object(
+                field("product", UpdateManagerImpl.PRODUCT_NAME),
+                field("version", ServerConstants.getVersion())
+        ));
+        testConfig.add("update", object(
+                field("description", "description"),
+                field("resource", "url"),
+                field("restartRequired", false)
+        ));
+        UpdateManagerImpl updateManager = new UpdateManagerImpl() {
+            String getProductVersion() {
+                return version;
+            }
+            String getBaseProductVersion() {
+                return baseVersion;
+            }
+        };
+        try {
+            updateManager.validateCorrectVersion(testConfig, new File("foo"));
+            org.assertj.core.api.Assertions.assertThat(shouldMatch).isTrue();
+        } catch (InvalidArchiveUpdateException e) {
+            org.assertj.core.api.Assertions.assertThat(shouldMatch).isFalse();
+        }
     }
 }
