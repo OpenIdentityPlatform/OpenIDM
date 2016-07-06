@@ -224,9 +224,17 @@ define([
         });
 
     widgetInstance.generateWidget = function(loadingObject, callback) {
-        var widget = {};
+        var widget = {},
+            loadingWidget = loadingObject.widget;
 
         $.extend(true, widget, new Widget());
+
+        // The boolean value of `false` will cause an error for settings so convert to string
+        if (loadingObject.widget.barchart) {
+            loadingObject.widget.barchart = loadingObject.widget.barchart.toString();
+        } else {
+            loadingObject.widget.barchart = "false";
+        }
 
         widget.render(loadingObject, callback);
 

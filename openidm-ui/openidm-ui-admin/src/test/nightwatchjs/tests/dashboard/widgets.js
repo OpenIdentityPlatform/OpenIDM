@@ -12,15 +12,16 @@ module.exports = {
         //must create a session before tests can begin
         client.globals.login.helpers.setSession(client, function () {
             //read all configs that need to have the originals cached
-            client.globals.config.read("ui/configuration", function (data) {
+            client.globals.config.read("ui/dashboard", function (data) {
                 done();
             });
         });
     },
 
-    after: function(client) {
+    after: function(client, done) {
         client.globals.config.resetAll(function(data) {
             client.end();
+            done();
         });
     },
 
@@ -29,7 +30,8 @@ module.exports = {
             navigation = dashboard.section.navigation,
             dashboardBody = dashboard.section.dashboardBody,
             newDashboard = dashboard.section.newDashboard,
-            addWidgetsWindow = dashboard.section.addWidgetsWindow;
+            addWidgetsWindow = dashboard.section.addWidgetsWindow,
+            nameInput = newDashboard.elements.nameInput.selector;
 
         navigation
             .waitForElementPresent("@dashboardDropdown", 2000)
@@ -38,7 +40,12 @@ module.exports = {
 
         newDashboard
             .waitForElementPresent("@nameInput", 2000)
-            .setValue("@nameInput", "Widget Dashboard")
+            .click("@nameInput")
+            .setValue("@nameInput", "Widget Dashboard");
+        client.pause(500);
+        client.keys(client.Keys.TAB);
+        console.log(client.Keys.TAB);
+        newDashboard
             .click("@createDashboardButton");
 
         client.pause(1000);
@@ -100,45 +107,53 @@ module.exports = {
     },
 
     // This test should work with OPENIDM-5306
-    //"Recon widget is configurable": function (client) {
-    //    var dashboard = client.page.dashboard(),
-    //        dashboardBody = dashboard.section.dashboardBody,
-    //        widgetSettingsWindow = dashboard.section.widgetSettingsWindow;
-    //
-    //    dashboardBody.click("@secondWidgetOptionsToggle")
-    //        .waitForElementPresent("@secondWidgetMenu", 2000)
-    //        .assert.elementPresent("@secondWidgetSettings")
-    //        .click("@secondWidgetSettings");
-    //
-    //    widgetSettingsWindow
-    //        .waitForElementPresent("@widgetSettingsBody", 3000)
-    //        .assert.elementPresent("@reconWidgetType")
-    //        .assert.value("@reconWidgetType", false)
-    //        .setValue("@reconWidgetType", true)
-    //        .assert.value("@widgetSizeSelect", "large")
-    //        .setValue("@widgetSizeSelect", "small")
-    //        .click("@widgetSaveButton")
-    //        .waitForElementNotPresent("@widgetSettingsBody", 2000)
-    //        .assert.elementNotPresent("@widgetSettingsBody");
-    //
-    //    client.refresh(function() {
-    //        dashboardBody.click("@secondWidgetOptionsToggle")
-    //            .waitForElementPresent("@secondWidgetMenu", 2000)
-    //            .assert.elementPresent("@secondWidgetSettings")
-    //            .click("@secondWidgetSettings");
-    //
-    //        widgetSettingsWindow
-    //            .assert.value("@reconWidgetType", true)
-    //            .assert.value("@widgetSizeSelect", "small");
-    //    });
-    //}
-
-    "Quick Start widget is configurable": function (client) {
+    "Recon widget is configurable": function (client) {
         var dashboard = client.page.dashboard(),
             dashboardBody = dashboard.section.dashboardBody,
             widgetSettingsWindow = dashboard.section.widgetSettingsWindow;
 
-        dashboardBody.click("@thirdWidgetOptionsToggle")
+        dashboardBody
+            .click("@secondWidgetOptionsToggle")
+            .waitForElementPresent("@secondWidgetMenu", 2000)
+            .assert.elementPresent("@secondWidgetSettings")
+            .click("@secondWidgetSettings");
+
+        widgetSettingsWindow
+            .waitForElementPresent("@widgetSettingsBody", 3000)
+            .assert.elementPresent("@reconWidgetType")
+            .assert.value("@reconWidgetType", "false")
+            .setValue("@reconWidgetType", "true")
+            .assert.value("@widgetSizeSelect", "large")
+            .setValue("@widgetSizeSelect", "small")
+            .assert.value("@widgetSizeSelect", "small")
+            .click("@widgetSaveButton")
+            .waitForElementNotPresent("@widgetSettingsBody", 2000)
+            .assert.elementNotPresent("@widgetSettingsBody");
+
+        client.refresh(function() {
+            dashboardBody
+                .waitForElementPresent("@secondWidgetOptionsToggle", 2000)
+                .click("@secondWidgetOptionsToggle")
+                .waitForElementPresent("@secondWidgetMenu", 2000)
+                .assert.elementPresent("@secondWidgetSettings")
+                .click("@secondWidgetSettings");
+            client.pause(500);
+            widgetSettingsWindow
+                .assert.value("@reconWidgetType", "true")
+                .assert.value("@widgetSizeSelect", "small");
+        });
+    },
+
+    "Quick Start widget is configurable": function (client) {
+        client.refresh();
+
+        var dashboard = client.page.dashboard(),
+            dashboardBody = dashboard.section.dashboardBody,
+            widgetSettingsWindow = dashboard.section.widgetSettingsWindow;
+
+        dashboardBody
+            .waitForElementPresent("@thirdWidgetOptionsToggle", 2000)
+            .click("@thirdWidgetOptionsToggle")
             .waitForElementPresent("@thirdWidgetMenu", 2000)
             .assert.elementPresent("@thirdWidgetSettings")
             .click("@thirdWidgetSettings");
@@ -157,6 +172,6 @@ module.exports = {
         dashboardBody
             .waitForElementPresent("@quickLinksWidgetCardContainer", 2000)
             .assert.elementPresent("@quickLinksWidgetCardContainer")
-            .assert.cssClassPresent("@quickLinksCard", "fa-link")
+            .assert.cssClassPresent("@quickLinksCard", "fa-link");
     }
 };
