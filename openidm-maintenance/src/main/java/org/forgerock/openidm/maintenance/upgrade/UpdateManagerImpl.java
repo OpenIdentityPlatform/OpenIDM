@@ -66,6 +66,7 @@ import org.forgerock.commons.launcher.OSGiFrameworkService;
 import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
@@ -927,76 +928,38 @@ public class UpdateManagerImpl implements UpdateManager {
                 for (final Path path : archive.getFiles()) {
                     logger.trace("processing archive file: {}", path);
                     if (path.startsWith(BUNDLE_PATH)) {
-                        Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
-                        String symbolicName = null;
-                        try {
-                            Attributes manifest = readManifest(newPath);
-                            symbolicName = manifest.getValue(Constants.BUNDLE_SYMBOLICNAME);
-                        } catch (Exception e) {
-                            // jar does not contain a manifest
-                        }
-                        if (symbolicName == null) {
-                            // treat it as a static file
-                            Path backupFile = staticFileUpdate.replace(path);
-                            if (backupFile != null) {
-                                UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                        .setFilePath(path.toString())
-                                        .setFileState(fileStateChecker.getCurrentFileState(path).name())
-                                        .setActionTaken(UpdateAction.REPLACED.toString());
-                                fileEntry.setBackupFile(backupFile.toString());
-                                logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                        // This is a bundle
+                        replaceBundle(bundleHandler, path);
+                    } else if (path.getFileName().toString().endsWith(JSON_EXT) &&
+                            path.toString().contains(".*conf[^a-z]+.*")) {
+                        // This is a conf file
+
+                        // TODO: Support config deletion
+
+                        if (!projectDir.equals(installDir) &&
+                                path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
+                            // Running in a project directory and this conf file targets that conf directory.
+                            // Ignore it if it already exists else create it.
+                            if (fileStateChecker.getCurrentFileState(path) == FileState.NONEXISTENT) {
+                                createNewConfig(path);
+                            }
+                        } else if (projectDir.equals(installDir) && path.startsWith(CONF_PATH)) {
+                            // Not running in a project directory and this conf file targets the root conf directory.
+                            // Ignore it if it already exists else create it.
+                            if (fileStateChecker.getCurrentFileState(path) == FileState.NONEXISTENT) {
+                                createNewConfig(path);
                             }
                         } else {
-                            bundleHandler.upgradeBundle(newPath, symbolicName);
-                            fileStateChecker.updateState(path);
+                            // Conf is in some non-project conf directory, treat it as a static file.
+                            updateStaticFile(path);
                         }
-                    } else if (path.getFileName().toString().endsWith(JSON_EXT) &&
-                            !projectDir.equals(installDir) &&
-                            path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
-                        // a json config in the current project - ignore it
-                    } else if (path.startsWith(CONF_PATH) &&
-                            path.getFileName().toString().endsWith(JSON_EXT) &&
-                            fileStateChecker.getCurrentFileState(path) != FileState.NONEXISTENT) {
-                        // a json config in the default project - ignore it
                     } else if ((path.startsWith(CONF_PATH) || (repoConfPath != null && path.startsWith(repoConfPath))) &&
                             path.getFileName().toString().endsWith(PATCH_EXT)) {
-                        // a patch file for a config in the repo
-                        File patchFile = new File(new File(tempDirectory.toString(), "openidm").toString(),
-                                path.toString());
-                        Path configFile = Paths.get(path.toString()
-                                .substring(0, path.toString().length() - PATCH_EXT.length()));
-                        UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                .setFilePath(path.toString())
-                                .setFileState(fileStateChecker.getCurrentFileState(configFile).name());
-                        String pid = parsePid(configFile.getFileName().toString());
-                        patchConfig(ContextUtil.createInternalContext(),
-                                "config/" + pid, JsonUtil.parseStringified(FileUtil.readFile(patchFile)));
-                        fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
-                        logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                        // This is a patch file for a config in the repo
+                        applyConfigPatch(path);
                     } else {
-                        // normal static file; update it
-                        UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
-                                .setFilePath(path.toString())
-                                .setFileState(fileStateChecker.getCurrentFileState(path).name());
-
-                        if (!isReadOnly(path)) {
-                            Path stockFile = staticFileUpdate.keep(path);
-                            fileEntry.setActionTaken(UpdateAction.PRESERVED.toString());
-                            if (stockFile != null) {
-                                fileEntry.setStockFile(stockFile.toString());
-                            }
-                        } else {
-                            Path backupFile = staticFileUpdate.replace(path);
-                            fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
-                            if (backupFile != null) {
-                                fileEntry.setBackupFile(backupFile.toString());
-                            }
-                        }
-
-                        if (fileEntry.getStockFile() == null && fileEntry.getBackupFile() == null) {
-                            fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
-                        }
-                        logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                        // This is a normal static file
+                        updateStaticFile(path);
                     }
                     logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
                             .setStatusMessage("Processed " + path.getFileName().toString()));
@@ -1046,6 +1009,86 @@ public class UpdateManagerImpl implements UpdateManager {
             if (updateConfig.get(UPDATE_RESTARTREQUIRED).asBoolean()) {
                 restart();
             }
+        }
+
+        void replaceBundle(BundleHandler bundleHandler, Path path) throws IOException, UpdateException {
+            Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
+            String symbolicName = null;
+            try {
+                Attributes manifest = readManifest(newPath);
+                symbolicName = manifest.getValue(Constants.BUNDLE_SYMBOLICNAME);
+            } catch (Exception e) {
+                // jar does not contain a manifest
+            }
+            if (symbolicName == null) {
+                // treat it as a static file
+                Path backupFile = staticFileUpdate.replace(path);
+                if (backupFile != null) {
+                    UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                            .setFilePath(path.toString())
+                            .setFileState(fileStateChecker.getCurrentFileState(path).name())
+                            .setActionTaken(UpdateAction.REPLACED.toString());
+                    fileEntry.setBackupFile(backupFile.toString());
+                    logUpdate(updateEntry.addFile(fileEntry.toJson()));
+                }
+            } else {
+                bundleHandler.upgradeBundle(newPath, symbolicName);
+                fileStateChecker.updateState(path);
+            }
+        }
+
+        void createNewConfig(Path path) throws IOException, UpdateException {
+            File jsonfile = new File(new File(tempDirectory.toString(), "openidm").toString(),
+                    path.toString());
+            Path configFile = Paths.get(path.toString()
+                    .substring(0, path.toString().length() - PATCH_EXT.length()));
+            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                    .setFilePath(path.toString())
+                    .setFileState(fileStateChecker.getCurrentFileState(configFile).name());
+            createConfig(ContextUtil.createInternalContext(),
+                    configFile, JsonUtil.parseStringified(FileUtil.readFile(jsonfile)));
+            fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
+            logUpdate(updateEntry.addFile(fileEntry.toJson()));
+        }
+
+        void applyConfigPatch(Path path) throws IOException, UpdateException {
+            File patchFile = new File(new File(tempDirectory.toString(), "openidm").toString(),
+                    path.toString());
+            Path configFile = Paths.get(path.toString()
+                    .substring(0, path.toString().length() - PATCH_EXT.length()));
+            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                    .setFilePath(path.toString())
+                    .setFileState(fileStateChecker.getCurrentFileState(configFile).name());
+            String pid = parsePid(configFile.getFileName().toString());
+            patchConfig(ContextUtil.createInternalContext(),
+                    "config/" + pid, JsonUtil.parseStringified(FileUtil.readFile(patchFile)));
+            fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
+            logUpdate(updateEntry.addFile(fileEntry.toJson()));
+        }
+
+        void updateStaticFile(Path path) throws IOException, UpdateException {
+            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                    .setFilePath(path.toString())
+                    .setFileState(fileStateChecker.getCurrentFileState(path).name());
+
+            if (!isReadOnly(path)) {
+                Path stockFile = staticFileUpdate.keep(path);
+                fileEntry.setActionTaken(UpdateAction.PRESERVED.toString());
+                if (stockFile != null) {
+                    fileEntry.setStockFile(stockFile.toString());
+                }
+            } else {
+                Path backupFile = staticFileUpdate.replace(path);
+                fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
+                if (backupFile != null) {
+                    fileEntry.setBackupFile(backupFile.toString());
+                }
+            }
+
+            if (fileEntry.getStockFile() == null && fileEntry.getBackupFile() == null) {
+                fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
+            }
+            logUpdate(updateEntry.addFile(fileEntry.toJson()));
         }
 
         /**
@@ -1103,6 +1146,26 @@ public class UpdateManagerImpl implements UpdateManager {
             }
 
             restartOsgiFramework();
+        }
+
+        /**
+         * Create a config object on the router.
+         *
+         * @param context the context for the patch request.
+         * @param configFile the config file to be patched.
+         * @param content a JsonValue containing the new config to be created.
+         * @throws UpdateException
+         */
+        private void createConfig(final Context context, final Path configFile, final JsonValue content)
+                throws UpdateException {
+            final String pid = parsePid(configFile.getFileName().toString());
+
+            try {
+                CreateRequest request = Requests.newCreateRequest("config/" + pid, content);
+                UpdateManagerImpl.this.connectionFactory.getConnection().create(new UpdateContext(context), request);
+            } catch (ResourceException e) {
+                throw new UpdateException("Create request failed", e);
+            }
         }
 
         /**
