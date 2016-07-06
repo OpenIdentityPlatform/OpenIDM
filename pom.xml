@@ -220,12 +220,16 @@
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
         <restlet.version>2.3.1</restlet.version>
         <javascript.maven.plugin.version>2.0.0-alpha-1</javascript.maven.plugin.version>
-        <joda-time.version>2.6</joda-time.version>
+        <joda-time.version>2.9.4</joda-time.version>
         <h2.version>1.4.192</h2.version>
-        <paxweb.version>4.2.4</paxweb.version>
+        <paxweb.version>4.2.7</paxweb.version>
         <javax.inject.version>1_2</javax.inject.version>
         <xbean.version>4.5</xbean.version>
         <asm.version>5.0.4</asm.version>
+        <!-- quartz 2.x is not compatible yet -->
+        <quartz.version>1.8.6_1</quartz.version>
+        <rhino.version>1.7R4_1</rhino.version>
+        <groovy.version>2.2.2</groovy.version>
 
         <!-- OSGi/Felix versions -->
         <!-- Felix 5.4 Framework implements OSGi R6 specification -->
@@ -723,23 +727,17 @@
             </dependency>
 
             <!-- Quartz based scheduler OSGi bundle.
-             This version wraps the original jar which is not a bundle
-             2.0.* is not compatible yet -->
+                 This version wraps the original jar which is not a bundle
+            -->
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.quartz</artifactId>
-                <version>1.8.6_1</version>
-                <!--<version>2.1.7_1</version>-->
+                <version>${quartz.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
                 <artifactId>org.apache.servicemix.bundles.rhino</artifactId>
-                <version>1.7R4_1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.servicemix.bundles</groupId>
-                <artifactId>org.apache.servicemix.bundles.commons-configuration</artifactId>
-                <version>1.9_1</version>
+                <version>${rhino.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.servicemix.bundles</groupId>
@@ -750,7 +748,7 @@
             <dependency>
                 <groupId>org.codehaus.groovy</groupId>
                 <artifactId>groovy-all</artifactId>
-                <version>2.2.2</version>
+                <version>${groovy.version}</version>
             </dependency>
 
             <!-- Pax Web Dependencies -->
@@ -793,7 +791,6 @@
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.11</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
