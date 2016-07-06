@@ -59,7 +59,7 @@ define([
 
                 this.parentRender(_.bind(function() {
                     if (this.data.successful && this.model.archiveModel.get("restartRequired")) {
-                        this.restarting();
+                        this.restartNow();
                     } else if (this.data.successful && !this.model.archiveModel.get("restartRequired")) {
                         this.installationReport();
                     } else if (this.data.repoUpdates) {
@@ -118,44 +118,19 @@ define([
         },
 
         /**
-         * Restarts IDM if it wasn't triggered naturally through the countdown. Then waits for the last update id.
-         * @param e
+         * Restarts IDM then waits for the last update id.
          */
-        restartNow: function(e) {
-            if (e) {
-                e.preventDefault();
-            }
+        restartNow: function() {
 
             if (!this.model.restarted) {
                 this.$el.find(".restart").text($.t("templates.update.install.restarting"));
 
                 MaintenanceDelegate.restartIDM().then(_.bind(function() {
-                    this.waitForLastUpdateID(_.bind(this.installationReport, this));
+                    this.waitForLastUpdateID(
+                        _.bind(this.installationReport, this));
                 }, this));
 
             }
-        },
-
-        /**
-         * Counts down from 30, once the countdown completes we begin to wait for the last update ID
-         */
-        restarting: function () {
-            var countDown;
-
-            countDown = function(seconds) {
-                this.$el.find(".restart span").text(seconds);
-
-                if (seconds > 0 && !this.model.restarted) {
-                    _.delay(_.bind(function () {
-                        _.bind(countDown, this)(seconds - 1);
-                    }, this), 1000);
-
-                } else {
-                    _.delay(_.bind(this.restartNow, this), 1000);
-                }
-            };
-
-            _.bind(countDown, this)(30);
         },
 
         installationReport: function() {
