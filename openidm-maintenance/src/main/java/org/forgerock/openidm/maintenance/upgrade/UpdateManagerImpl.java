@@ -1038,6 +1038,10 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         void createNewConfig(Path path) throws IOException, UpdateException {
+            // Never create this file if it is missing -- the installed IDM uses another database
+            if (path.getFileName().toString().equals("repo.orientdb.json")) {
+                return;
+            }
             File jsonfile = new File(new File(tempDirectory.toString(), "openidm").toString(),
                     path.toString());
             Path configFile = Paths.get(path.toString()
