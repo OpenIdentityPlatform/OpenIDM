@@ -299,6 +299,7 @@
         <module>openidm-infoservice</module>
         <module>openidm-customendpoint</module>
         <module>openidm-jetty-fragment</module>
+        <module>openidm-messaging</module>
         <module>openidm-policy</module>
         <module>openidm-provisioner-openicf</module>
         <module>openidm-provisioner</module>

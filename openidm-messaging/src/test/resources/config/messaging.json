@@ -1,0 +1,29 @@
+{
+    "subscribers" : [
+        {
+            "name": "Test case subscriber",
+            "instanceCount": 2,
+            "enabled": true,
+            "type"  : "JMS",
+            "handler" : {
+                "type" : "SCRIPTED",
+                "properties": {
+                    "script" : {
+                        "type" : "text/javascript",
+                        "file" : "testMessaging.js"
+                    }
+                }
+            },
+            "properties" : {
+                "sessionMode" : "CLIENT",
+                "jndi" : {
+                    "contextProperties" : {
+                        "java.naming.factory.initial" : "org.forgerock.openidm.messaging.MessagingServiceTest$TestContextFactory"
+                    },
+                    "destinationName" : "testQ",
+                    "connectionFactoryName" : "TestFactory"
+                }
+            }
+        }
+    ]
+}

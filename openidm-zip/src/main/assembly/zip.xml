@@ -312,6 +312,15 @@
             </includes>
             <outputDirectory>/openidm/samples/scriptedcrest2dj</outputDirectory>
         </fileSet>
+        <!-- Setup scriptedJMSSubscriber-->
+        <fileSet>
+            <directory>${basedir}/src/main/resources</directory>
+            <includes>
+                <include>conf/**</include>
+                <include>script/**</include>
+            </includes>
+            <outputDirectory>/openidm/samples/scriptedJMSSubscriber</outputDirectory>
+        </fileSet>
         <!-- Setup scriptedazure  -->
         <!-- fileSet>
             <directory>${basedir}/src/main/resources/samples/provisioners</directory>
