@@ -27,12 +27,12 @@
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>4.0.0-1</version>
+        <version>4.1.0-1-SNAPSHOT</version>
     </parent>
 
     <groupId>org.forgerock.openidm.tools</groupId>
     <artifactId>custom-scripted-connector-bundler</artifactId>
-    <version>4.0.0-1</version>
+    <version>4.1.0-1-SNAPSHOT</version>
     <name>Custom Scripted Groovy Connector Bundler</name>
     <description>This is a tool to bundle the Groovy connector using configured bundle name and configuration
         parameters without the user needing to write connector code manually (aside from the Groovy scripts).
@@ -42,7 +42,7 @@
         <connection>scm:svn:https://svn.forgerock.org/openidm/trunk/tools/custom-scripted-connector-bundler</connection>
         <developerConnection>scm:svn:https://svn.forgerock.org/openidm/trunk/tools/custom-scripted-connector-bundler</developerConnection>
         <url>http://sources.forgerock.org/browse/openidm/trunk/tools/custom-scripted-connector-bundler</url>
-      <tag>4.0.0-1</tag>
+      <tag>4.0.0</tag>
   </scm>
     <issueManagement>
         <system>jira</system>

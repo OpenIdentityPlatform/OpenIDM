@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>4.0.0-1</version>
+        <version>4.1.0-1-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-quartz-fragment</artifactId>
     <name>OpenIDM Quartz Fragment</name>
