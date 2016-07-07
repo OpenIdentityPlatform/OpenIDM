@@ -18,8 +18,7 @@ package org.forgerock.openidm.idp.impl;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toJsonValue;
-import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toProviderConfig;
+import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.*;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -31,6 +30,7 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -77,9 +77,31 @@ public class IdentityProviderService implements SingletonResourceProvider {
     public static final String PID = "org.forgerock.openidm.identityProviders";
     public static final String PROVIDERS = "providers";
 
+    /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(IdentityProviderService.class);
 
+    /** Constant unsupported exception for 501 response to unimplemented methods */
     private static final ResourceException NOT_SUPPORTED = new NotSupportedException("Operation is not implemented");
+
+    /** Transformation function to remove client secret */
+    private static final Function<JsonValue, JsonValue> withoutClientSecret =
+            new Function<JsonValue, JsonValue>() {
+                @Override
+                public JsonValue apply(JsonValue value) {
+                    JsonValue copy = value.copy();
+                    copy.remove(ProviderConfig.CLIENT_SECRET);
+                    return copy;
+                }
+            };
+
+    /** Transformation function to remove client secret */
+    private static final Function<JsonValue, Object> toUnwrappedJsonValue =
+            new Function<JsonValue, Object>() {
+                @Override
+                public Object apply(JsonValue value) {
+                    return value.getObject();
+                }
+            };
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -172,14 +194,14 @@ public class IdentityProviderService implements SingletonResourceProvider {
 
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest readRequest) {
-        JsonValue identityProviders = json(array());
-        for (ProviderConfig config : getIdentityProviders()) {
-            JsonValue provider = toJsonValue(config);
-            provider.remove(ProviderConfig.CLIENT_SECRET);
-            identityProviders.add(provider.asMap());
-        }
         return newResourceResponse(null, null,
-                json(object(field(PROVIDERS, identityProviders.asList()))))
+                json(object(field(PROVIDERS,
+                        FluentIterable.from(getIdentityProviders())
+                        .transform(toJsonValue)
+                        .transform(withoutClientSecret)
+                        .transform(toUnwrappedJsonValue)
+                        .toList()
+                ))))
                 .asPromise();
     }
 

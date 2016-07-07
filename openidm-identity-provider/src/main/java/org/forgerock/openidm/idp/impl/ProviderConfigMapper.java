@@ -40,7 +40,7 @@ public class ProviderConfigMapper {
     }
 
     /**
-     * A {@link Function} that returns all available supported providers as a ProviderSchemaConfig bean
+     * A {@link Function} that returns a JSON provider configuration as a ProviderConfig bean
      */
     static final Function<JsonValue, ProviderConfig> toProviderConfig =
             new Function<JsonValue, ProviderConfig>() {
@@ -51,13 +51,23 @@ public class ProviderConfigMapper {
             };
 
     /**
+     * A {@link Function} that returns a ProviderConfig bean as JSON
+     */
+    static final Function<ProviderConfig, JsonValue> toJsonValue =
+            new Function<ProviderConfig, JsonValue>() {
+                @Override
+                public JsonValue apply(ProviderConfig providerConfig) {
+                    return json(mapper.convertValue(providerConfig, Map.class));
+                }
+            };
+    /**
      * Converts a {@link ProviderConfig} to {@link JsonValue}.
      *
      * @param config of {@link ProviderConfig} to convert to {@link JsonValue}
      * @return {@link ProviderConfig as {@link JsonValue}}
      */
     public static JsonValue toJsonValue(ProviderConfig config) {
-        return json(mapper.convertValue(config, Map.class));
+        return toJsonValue.apply(config);
     }
 
     /**
