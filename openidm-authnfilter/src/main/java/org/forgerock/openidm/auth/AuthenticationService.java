@@ -236,6 +236,10 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      * @param authModuleConfig configuration of the authentication modules.
      */
     void amendAuthConfig(JsonValue authModuleConfig) {
+        if (identityProviderService.getIdentityProviders().isEmpty()) {
+            // no configured identityProviders found to inject
+            return;
+        }
         // get OpenIDConnect Properties
         JsonValue openidConnectModuleProperties = FluentIterable.from(authModuleConfig)
                 .firstMatch(new Predicate<JsonValue>() {
