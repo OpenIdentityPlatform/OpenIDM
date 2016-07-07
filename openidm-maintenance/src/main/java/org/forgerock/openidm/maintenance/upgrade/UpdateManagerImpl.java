@@ -932,8 +932,7 @@ public class UpdateManagerImpl implements UpdateManager {
                     if (path.startsWith(BUNDLE_PATH)) {
                         // This is a bundle
                         replaceBundle(bundleHandler, path);
-                    } else if (path.getFileName().toString().endsWith(JSON_EXT) &&
-                            path.toString().contains(".*conf[^a-z]+.*")) {
+                    } else if (path.getFileName().toString().endsWith(JSON_EXT)) {
                         // This is a conf file
 
                         // TODO: Support config deletion
@@ -1044,16 +1043,11 @@ public class UpdateManagerImpl implements UpdateManager {
             if (path.getFileName().toString().equals("repo.orientdb.json")) {
                 return;
             }
-            File jsonfile = new File(new File(tempDirectory.toString(), "openidm").toString(),
-                    path.toString());
-            Path configFile = Paths.get(path.toString()
-                    .substring(0, path.toString().length() - PATCH_EXT.length()));
             UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                     .setFilePath(path.toString())
-                    .setFileState(fileStateChecker.getCurrentFileState(configFile).name());
-            createConfig(ContextUtil.createInternalContext(),
-                    configFile, JsonUtil.parseStringified(FileUtil.readFile(jsonfile)));
-            fileEntry.setActionTaken(UpdateAction.APPLIED.toString());
+                    .setFileState(fileStateChecker.getCurrentFileState(path).name());
+            staticFileUpdate.keep(path);
+            fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
             logUpdate(updateEntry.addFile(fileEntry.toJson()));
         }
 
