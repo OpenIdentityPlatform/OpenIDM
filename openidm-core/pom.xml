@@ -27,7 +27,7 @@
     <parent>
         <groupId>org.forgerock.openidm</groupId>
         <artifactId>openidm-project</artifactId>
-        <version>4.0.0-2</version>
+        <version>4.1.0-2-SNAPSHOT</version>
     </parent>
     <artifactId>openidm-core</artifactId>
     <packaging>bundle</packaging>
