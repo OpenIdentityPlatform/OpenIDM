@@ -356,7 +356,7 @@ define([
                 el = $(event.target).closest(".self-service-card");
             }
 
-            if (el.hasClass("disabled") && !this.$el.find(".all-check").val()) {
+            if (el.hasClass("disabled")) {
                 return false;
             }
 
