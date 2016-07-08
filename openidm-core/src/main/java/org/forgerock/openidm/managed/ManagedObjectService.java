@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -37,11 +37,14 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.services.routing.RouteMatcher;
 import org.forgerock.http.routing.RoutingMode;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -74,7 +77,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Provides access to managed objects.
- * 
+ *
  */
 @Component(name = ManagedObjectService.PID, immediate = true,
         policy = ConfigurationPolicy.REQUIRE)
@@ -83,7 +86,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM managed objects service"),
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/managed*") })
-public class ManagedObjectService implements RequestHandler {
+public class ManagedObjectService implements RequestHandler, Describable<ApiDescription, Request> {
 
     public static final String PID = "org.forgerock.openidm.managed";
 
@@ -143,13 +146,15 @@ public class ManagedObjectService implements RequestHandler {
      * Requests to {@code /} and {@code /{id}} will be directed to the object set.
      * Requests starting with {@code /{id}/{relationshipField}} will be directed to their relationship provider.
      */
-    private class ManagedObjectSetRequestHandler implements RequestHandler {
+    private class ManagedObjectSetRequestHandler implements RequestHandler, Describable<ApiDescription, Request> {
         final ManagedObjectSet objectSet;
         final RequestHandler objectSetRequestHandler;
+        final ApiDescription apiDescription;
 
         ManagedObjectSetRequestHandler(final ManagedObjectSet objectSet) {
             this.objectSet = objectSet;
             this.objectSetRequestHandler = newHandler(objectSet);
+            apiDescription = ManagedObjectApiDescription.build(objectSet);
         }
 
         private RequestHandler requestHandler(final Request request) {
@@ -204,12 +209,32 @@ public class ManagedObjectService implements RequestHandler {
         public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
             return requestHandler(request).handleUpdate(context, request);
         }
+
+        @Override
+        public ApiDescription api(ApiProducer<ApiDescription> apiProducer) {
+            return apiDescription;
+        }
+
+        @Override
+        public ApiDescription handleApiRequest(Context context, Request request) {
+            return apiDescription;
+        }
+
+        @Override
+        public void addDescriptorListener(Listener listener) {
+            // empty
+        }
+
+        @Override
+        public void removeDescriptorListener(Listener listener) {
+            // empty
+        }
     }
 
 
     /**
      * Activates the component
-     * 
+     *
      * @param context the {@link ComponentContext} object for this component.
      */
     @Activate
@@ -229,7 +254,7 @@ public class ManagedObjectService implements RequestHandler {
 
     /**
      * Modifies the component
-     * 
+     *
      * @param context the {@link ComponentContext} object for this component.
      */
     @Modified
@@ -263,7 +288,7 @@ public class ManagedObjectService implements RequestHandler {
 
     /**
      * Deactivates the component
-     * 
+     *
      * @param context the {@link ComponentContext} object for this component.
      */
     @Deactivate
@@ -271,7 +296,7 @@ public class ManagedObjectService implements RequestHandler {
         managedRouter.removeAllRoutes();
         managedRoutes.clear();
     }
-    
+
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
         return managedRouter.handleAction(context, request);
@@ -309,5 +334,25 @@ public class ManagedObjectService implements RequestHandler {
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
             final UpdateRequest request) {
         return managedRouter.handleUpdate(context, request);
+    }
+
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> apiProducer) {
+        return managedRouter.api(apiProducer);
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return managedRouter.handleApiRequest(context, request);
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        managedRouter.addDescriptorListener(listener);
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        managedRouter.removeDescriptorListener(listener);
     }
 }
