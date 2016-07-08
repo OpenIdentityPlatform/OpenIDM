@@ -35,6 +35,7 @@ import java.nio.file.Paths;
 import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.LinkedList;
@@ -843,6 +844,13 @@ public class UpdateManagerImpl implements UpdateManager {
     }
 
     private class UpdateThread extends Thread {
+        // OPENIDM-6182
+        private final List<Path> nonJsonConf = Arrays.asList(
+                Paths.get("conf/boot/boot.properties"),
+                Paths.get("conf/config.properties"),
+                Paths.get("conf/jetty.xml"),
+                Paths.get("script/access.js"));
+
         private final UpdateLogEntry updateEntry;
         private final Archive archive;
         private final FileStateChecker fileStateChecker;
@@ -969,8 +977,21 @@ public class UpdateManagerImpl implements UpdateManager {
                         applyConfigPatch(path);
                     } else {
                         // This is a normal static file
+                        // 1. copy it into its normal place
                         updateStaticFile(path);
+                        // 2. (OPENIDM-6182) copy non-conf project files to the project directory if the
+                        // project direct is external
+                        try {
+                            if (!projectDir.startsWith(installDir)
+                                    && (nonJsonConf.contains(path))) {
+                                staticFileUpdate.addToProjectDirectory(path, Paths.get(projectDir));
+                            }
+                        } catch (IOException e) {
+                            logger.warn("Unable to copy \"" + path.toString() + "\" to project directory "
+                                    + "\"" + projectDir + "\"", e);
+                        }
                     }
+
                     logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
                             .setStatusMessage("Processed " + path.getFileName().toString()));
                 }
