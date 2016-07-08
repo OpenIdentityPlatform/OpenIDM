@@ -76,10 +76,6 @@
             <groupId>org.forgerock.http</groupId>
             <artifactId>chf-http-core</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.commons</groupId>
-            <artifactId>json-schema-core</artifactId>
-        </dependency>
 
 <!--        <dependency>
             <groupId>org.apache.felix</groupId>

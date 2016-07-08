@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -180,8 +180,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     /** Flag for indicating if policy enforcement is enabled */
     private final boolean enforcePolicies;
 
-    private final JsonValue config;
-
     /**
      * Constructs a new managed object set.
      *
@@ -214,7 +212,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
         this.managedObjectPath = new ResourcePath("managed").child(name);
 
-        this.config = config;
         this.schema = new ManagedObjectSchema(config.get("schema").expect(Map.class), scriptRegistry, cryptoService);
 
         for (JsonPointer relationship : schema.getRelationshipFields()) {
@@ -1621,14 +1618,5 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      */
     Map<JsonPointer, RelationshipProvider> getRelationshipProviders() {
         return relationshipProviders;
-    }
-
-    /**
-     * Original JSON configuration.
-     *
-     * @return JSON configuration
-     */
-    JsonValue getConfig() {
-        return config;
     }
 }
