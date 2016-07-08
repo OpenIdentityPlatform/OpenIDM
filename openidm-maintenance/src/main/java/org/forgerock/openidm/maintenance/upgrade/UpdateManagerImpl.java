@@ -1187,6 +1187,10 @@ public class UpdateManagerImpl implements UpdateManager {
 
             try {
                 Files.copy(installDir.resolve("conf/").resolve(configFile.getFileName()), backupFile);
+            } catch (IOException e) {
+                logger.warn("Config backup failed for " + configFile, e);
+            }
+            try {
                 PatchRequest request = Requests.newPatchRequest("config/" + pid);
                 for (PatchOperation op : PatchOperation.valueOfList(patch)) {
                     request.addPatchOperation(op);
@@ -1194,8 +1198,6 @@ public class UpdateManagerImpl implements UpdateManager {
                 UpdateManagerImpl.this.connectionFactory.getConnection().patch(new UpdateContext(context), request);
             } catch (ResourceException e) {
                 throw new UpdateException("Patch request failed", e);
-            } catch (IOException e) {
-                throw new UpdateException("Config backup failed for " + configFile, e);
             }
         }
 
