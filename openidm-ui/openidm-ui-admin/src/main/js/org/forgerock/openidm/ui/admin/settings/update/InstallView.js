@@ -164,7 +164,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
             }
 
             if (!this.model.timeout) {
-                // Poll endpoint once a second so don't bog down the ui with AJAX calls.
+                // Poll endpoint once every five seconds so don't bog down the ui with AJAX calls.
                 _.delay(_.bind(function() {
                     MaintenanceDelegate.getLastUpdateId().then(_.bind(function (response) {
 
@@ -177,7 +177,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                     }, this), _.bind(function () {
                         this.waitForLastUpdateID(callback);
                     }, this));
-                }, this), 2000);
+                }, this), 5000);
             } else {
                 this.model.error("Restart timed out.");
             }
@@ -199,7 +199,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                             "msg": response.statusMessage,
                             "version": this.model.version
                         }));
-                    }, this), 1000);
+                    }, this), 5000);
                 } else if (response && response.status === "COMPLETE") {
                     this.$el.find("#updateInstallerContainer .progress-bar").css("width", "100%");
 
@@ -212,7 +212,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                             "response": response,
                             "version": this.model.version
                         }));
-                    }, this), 1000);
+                    }, this), 5000);
                 } else if (response && response.status === "PENDING_REPO_UPDATES") {
                     this.data.repoUpdates = true;
                     this.data.repoUpdatesList = this.model.repoUpdatesList;
@@ -224,7 +224,7 @@ define("org/forgerock/openidm/ui/admin/settings/update/InstallView", [
                     this.model.error($.t("templates.update.install.reverted"));
                 } else if ((!response || !response.status) && this.model.failedOnce === 0) {
                     this.model.failedOnce = 1;
-                    _.delay(_.bind(this.pollInstall, this, id), 1000);
+                    _.delay(_.bind(this.pollInstall, this, id), 5000);
                 } else {
                     this.showUI();
                     this.model.error($.t("templates.update.install.failedStatus") + " " + id);
