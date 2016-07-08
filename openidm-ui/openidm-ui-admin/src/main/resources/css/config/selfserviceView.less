@@ -53,6 +53,23 @@
   background-color: #eee;
 }
 
+.selfservice-holder {
+  .simple-section {
+    .wide-card {
+      overflow:auto;
+
+      .details {
+        padding-bottom:0px;
+      }
+
+      .logo-details {
+        float: none;
+        margin-left: 80px;
+      }
+    }
+  }
+}
+
 .selfservice-holder .wide-card,
 .gu-mirror.self-service-card, {
   height:125px;
@@ -132,37 +149,6 @@
     float:left;
     margin-left:20px;
   }
-  
-.selfservice-holder {
-  position: relative;
-
-  .details h3 {
-      text-transform: none;
-  }
-
-  .logo-holder {
-    float: left;
-    margin-right: 15px;
-  }
-
-  .logo-details {
-    overflow: hidden;
-  }
-
-  .control-label {
-    text-align: right;
-  }
-
-  .simple-section {
-    margin-bottom: 15px;
-  }
-
-  &.disabled {
-    .control-label {
-      color: #C7C9CA;
-    }
-  }
-}
 
   &.disabled {
     cursor:default;
