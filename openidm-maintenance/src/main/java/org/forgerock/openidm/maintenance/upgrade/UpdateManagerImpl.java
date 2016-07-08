@@ -937,8 +937,18 @@ public class UpdateManagerImpl implements UpdateManager {
                         // TODO: Support config deletion
 
                         if (!projectDir.equals(installDir) &&
+                                projectDir.startsWith(installDir) &&
                                 path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
                             // Running in a project directory and this conf file targets that conf directory.
+                            // Ignore it if it already exists else create it.
+                            if (fileStateChecker.getCurrentFileState(path) == FileState.NONEXISTENT) {
+                                createNewConfig(path);
+                            }
+                        } else if (!projectDir.equals(installDir) &&
+                                !projectDir.startsWith(installDir) &&
+                                path.startsWith(CONF_PATH)) {
+                            // Running in a project directory outside of the installation directory
+                            // and this conf file targets a config in the root conf
                             // Ignore it if it already exists else create it.
                             if (fileStateChecker.getCurrentFileState(path) == FileState.NONEXISTENT) {
                                 createNewConfig(path);
