@@ -120,18 +120,41 @@ class StaticFileUpdate {
      */
     Path keep(final Path path) throws IOException {
         boolean changed = CHANGED_STATES.contains(fileStateChecker.getCurrentFileState(path));
-        final Set<PosixFilePermission> permissions = getPosixPermissions(path);
 
         final Path destination = root.resolve(changed
                 ? path.toString() + NEW_SUFFIX + timestamp
                 : path.toString());
+
+        copyNewFile(path, destination);
+
+        if (!changed) {
+            fileStateChecker.updateState(path);
+        }
+
+        return changed ? destination : null;
+    }
+
+    /**
+     * Adds a new file with .new suffix to the project directory.  We assume this file does
+     * not already exist.
+     *
+     * @param path the [relative] path within the archive we want to copy
+     * @param projectDir the [absolute] path of the project directory
+     * @throws IOException on failure to copy file
+     */
+    void addToProjectDirectory(final Path path, final Path projectDir) throws IOException {
+        copyNewFile(path, projectDir.resolve(path.toString() + NEW_SUFFIX + timestamp));
+    }
+
+    void copyNewFile(final Path pathInArchive, final Path destination) throws IOException {
+        final Set<PosixFilePermission> permissions = getPosixPermissions(pathInArchive);
 
         // Create parent directories if missing
         if (!destination.getParent().toFile().exists()) {
             Files.createDirectories(destination.getParent());
         }
 
-        archive.withInputStreamForPath(path, new Function<InputStream, Void, IOException>() {
+        archive.withInputStreamForPath(pathInArchive, new Function<InputStream, Void, IOException>() {
             @Override
             public Void apply(InputStream inputStream) throws IOException {
                 Files.copy(inputStream,
@@ -145,12 +168,6 @@ class StaticFileUpdate {
                 return null;
             }
         });
-
-        if (!changed) {
-            fileStateChecker.updateState(path);
-        }
-
-        return changed ? destination : null;
     }
 
     /**
