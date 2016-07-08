@@ -1213,7 +1213,12 @@ public class UpdateManagerImpl implements UpdateManager {
         try {
             updateLogService.updateUpdate(entry);
         } catch (ResourceException e) {
-            throw new UpdateException("Failed to modify update log entry.", e);
+            try {
+                Thread.sleep(2000L);
+                updateLogService.updateUpdate(entry);
+            } catch (Exception e2) {
+                logger.warn("Failed to modify update log entry for " + entry.toJson().toString(), e2);
+            }
         }
     }
 
