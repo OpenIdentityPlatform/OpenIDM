@@ -1181,7 +1181,8 @@ public class UpdateManagerImpl implements UpdateManager {
                     + StaticFileUpdate.OLD_SUFFIX + timestamp);
 
             try {
-                Files.copy(installDir.resolve("conf/").resolve(configFile.getFileName()), backupFile);
+                final Path projectDir = Paths.get(IdentityServer.getInstance().getProjectLocation().toString());
+                Files.copy(projectDir.resolve("conf/").resolve(configFile.getFileName()), backupFile);
             } catch (IOException e) {
                 logger.warn("Config backup failed for " + configFile, e);
             }
