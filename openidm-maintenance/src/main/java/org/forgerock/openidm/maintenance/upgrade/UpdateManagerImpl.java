@@ -73,6 +73,7 @@ import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -956,7 +957,7 @@ public class UpdateManagerImpl implements UpdateManager {
                                 path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
                             // Running in a project directory and this conf file targets that conf directory.
                             // Ignore it if it already exists else create it.
-                            if (fileStateChecker.getCurrentFileState(path) == FileState.NONEXISTENT) {
+                            if (!configExists(path.getFileName())) {
                                 createNewConfig(path);
                             }
                         } else if (!projectDir.equals(installDir) &&
@@ -964,14 +965,15 @@ public class UpdateManagerImpl implements UpdateManager {
                                 path.startsWith(CONF_PATH)) {
                             // Running in a project directory outside of the installation directory
                             // and this conf file targets a config in the root conf
-                            // Ignore it if it already exists else create it.
-                            if (fileStateChecker.getCurrentFileState(path) == FileState.NONEXISTENT) {
+                            // Create this config if it does not exist (might be required for proper functionality);
+                            // skip it otherwise (we'd expect a .patch file to patch existing config)
+                            if (!configExists(path.getFileName())) {
                                 createNewConfig(path);
                             }
                         } else if (projectDir.equals(installDir) && path.startsWith(CONF_PATH)) {
                             // Not running in a project directory and this conf file targets the root conf directory.
                             // Ignore it if it already exists else create it.
-                            if (fileStateChecker.getCurrentFileState(path) == FileState.NONEXISTENT) {
+                            if (!configExists(path.getFileName())) {
                                 createNewConfig(path);
                             }
                         } else {
@@ -1080,10 +1082,13 @@ public class UpdateManagerImpl implements UpdateManager {
             if (path.getFileName().toString().equals("repo.orientdb.json")) {
                 return;
             }
+            File configFile = new File(new File(tempDirectory.toString(), "openidm").toString(),
+                    path.toString());
             UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                     .setFilePath(path.toString())
                     .setFileState(fileStateChecker.getCurrentFileState(path).name());
-            staticFileUpdate.keep(path);
+            createConfig(ContextUtil.createInternalContext(),
+                    path, JsonUtil.parseStringified(FileUtil.readFile(configFile)));
             fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
             logUpdate(updateEntry.addFile(fileEntry.toJson()));
         }
@@ -1185,6 +1190,30 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         /**
+         * Determine if the config referenced by path (just the bare filename) exists by reading it from the config
+         * store.
+         *
+         * @param path A config filename
+         * @return whether the config object for that name exists in the config store
+         */
+        boolean configExists(Path path) {
+            final String pid = parsePid(path.toString());
+
+            try {
+                ReadRequest request = Requests.newReadRequest("config/" + pid);
+                UpdateManagerImpl.this.connectionFactory.getConnection().read(
+                        new UpdateContext(ContextUtil.createInternalContext()), request);
+                return true;
+            } catch (ResourceException e) {
+                // We're mostly concerned about NotFoundException which means the configuration does not exist.
+                // But in the case of a general fault reading the config, assume it does not exist - the worst
+                // that will happen is we will fail in trying to create the config if it already exists and
+                // we couldn't read it.
+                return false;
+            }
+        }
+
+        /**
          * Create a config object on the router.
          *
          * @param context the context for the patch request.
@@ -1197,7 +1226,15 @@ public class UpdateManagerImpl implements UpdateManager {
             final String pid = parsePid(configFile.getFileName().toString());
 
             try {
-                CreateRequest request = Requests.newCreateRequest("config/" + pid, content);
+                // XXX undo the work by parsePid to make sure we call create on config properly
+                final String[] paths = pid.split("/");
+                final CreateRequest request;
+                if (paths.length == 2)
+                    request = Requests.newCreateRequest("config/" + paths[0], paths[1], content);
+                else {
+                    request = Requests.newCreateRequest("config", paths[0], content);
+                }
+
                 UpdateManagerImpl.this.connectionFactory.getConnection().create(new UpdateContext(context), request);
             } catch (ResourceException e) {
                 throw new UpdateException("Create request failed", e);
