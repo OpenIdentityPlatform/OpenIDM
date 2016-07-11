@@ -723,7 +723,7 @@
                 "twoWayRelationship" : "Two-way Relationship",
                 "twoWayRelationshipHelp" : "Indicates whether a relationship is bi-directional",
                 "targetRelationshipProperty" : "Target Relationship Property",
-                "targetRelationshipPropertyHelp" : "From the remote Managed Object",
+                "targetRelationshipPropertyHelp" : "From the remote object",
                 "validateRelationship" : "Validate Relationship",
                 "validateRelationshipHelp" : "Indicates whether a relationship between two objects must be validated when created or updated",
                 "relationshipProperties" : "Relationship Properties",
