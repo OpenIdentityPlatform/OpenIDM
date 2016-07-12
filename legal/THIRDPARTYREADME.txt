@@ -1329,6 +1329,9 @@ Copyright: Copyright 2012 Stefan Petre
 Version: contentflow.js (version 1.0.2)
 Copyright: (c) 2007 - 2010 Sebastian Kutsch
 
+Version: dragula-3.6.7-min.js
+Copyright: 2015-2016 Nicolas Bevacqua <https://bevacqua.github.io/dragula/>
+
 Version: dimple-2.1.2-min.js
 Copyright: Copyright: 2014 PMSI-AlignAlytics
 
