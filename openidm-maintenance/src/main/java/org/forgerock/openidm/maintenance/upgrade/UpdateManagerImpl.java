@@ -850,6 +850,7 @@ public class UpdateManagerImpl implements UpdateManager {
         private final List<Path> nonJsonConf = Arrays.asList(
                 Paths.get("conf/boot/boot.properties"),
                 Paths.get("conf/config.properties"),
+                Paths.get("conf/logging.properties"),
                 Paths.get("conf/system.properties"),
                 Paths.get("conf/jetty.xml"),
                 Paths.get("script/access.js"));
