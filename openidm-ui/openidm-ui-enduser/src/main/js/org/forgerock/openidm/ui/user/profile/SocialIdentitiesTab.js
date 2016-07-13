@@ -18,18 +18,27 @@ define([
     "jquery",
     "underscore",
     "bootstrap",
-    "org/forgerock/commons/ui/common/main/AbstractView",
+    "org/forgerock/commons/ui/user/profile/AbstractUserProfileTab",
     "org/forgerock/openidm/ui/common/delegates/SocialDelegate"
 ], function($, _, bootstrap,
-            AbstractView,
+            AbstractUserProfileTab,
             SocialDelegate) {
-    var UserPreferencesView = AbstractView.extend({
-        template: "templates/profile/SocialIdentitiesTemplate.html",
-        element: "#socialIdentities",
-        noBaseTemplate: true,
-        events: {
+    var SocialIdentitiesView = AbstractUserProfileTab.extend({
+        template: "templates/profile/SocialIdentitiesTab.html",
+        events: _.extend({
             "change .social-toggle" : "toggleSocialProvider"
+        }, AbstractUserProfileTab.prototype.events),
+
+        /**
+         Expected by all dynamic user profile tabs - returns a map of details necessary to render the nav tab
+         */
+        getTabDetail : function () {
+            return {
+                "panelId": "socialIdentities",
+                "label": $.t("templates.socialIdentities.socialIdentities")
+            };
         },
+
         model: {
 
         },
@@ -49,10 +58,7 @@ define([
                     ];
                 }
 
-                this.parentRender(() => {
-
-
-                });
+                this.parentRender(callback);
             });
         },
 
@@ -72,5 +78,5 @@ define([
         }
     });
 
-    return new UserPreferencesView();
+    return new SocialIdentitiesView();
 });

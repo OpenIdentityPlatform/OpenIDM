@@ -35,17 +35,6 @@ define([
             url: "",
             headers: headers
         }).then(function(data) {
-
-            if (data.configuration.kbaEnabled === true) {
-                require.config({"map": { "*": {
-                    "UserProfileView" : "org/forgerock/openidm/ui/user/profile/UserProfileKBAView"
-                } } } );
-            } else {
-                require.config({"map": { "*": {
-                    "UserProfileView": "org/forgerock/openidm/ui/user/profile/UserProfileView"
-                } } } );
-            }
-
             if(successCallback) {
                 successCallback(data.configuration);
             }

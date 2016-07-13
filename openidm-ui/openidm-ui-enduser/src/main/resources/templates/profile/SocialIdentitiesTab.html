@@ -1,5 +1,6 @@
 <div class="panel-body">
     <label class="control-label col-sm-3">{{t "templates.socialIdentities.linkedAccounts"}}</label>
+    <form id="socialIdentities">
     <div class="col-sm-7 social-holder">
         {{#if providers}}
         {{#each providers}}
@@ -38,5 +39,6 @@
         {{else}}
             <div class="no-providers text-muted">{{t "templates.socialIdentities.noSocialProviders"}}</div>
         {{/if}}
+    </form>
     </div>
 </div>

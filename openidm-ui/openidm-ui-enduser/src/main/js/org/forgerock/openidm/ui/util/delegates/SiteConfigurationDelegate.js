@@ -19,12 +19,31 @@ define([
     "underscore",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
-    "org/forgerock/commons/ui/common/components/Navigation"
-], function($, _, conf, commonSiteConfigurationDelegate, nav) {
+    "org/forgerock/commons/ui/common/components/Navigation",
+    "UserProfileView"
+], function($, _, conf, commonSiteConfigurationDelegate, nav, UserProfileView) {
 
-    var obj = commonSiteConfigurationDelegate;
+    var obj = Object.create(commonSiteConfigurationDelegate);
 
     obj.adminCheck = false;
+
+    obj.getConfiguration = function (successCallback, errorCallback) {
+        return $.when(
+            commonSiteConfigurationDelegate.getConfiguration()
+        ).then(function (configuration) {
+            var tabList = ["org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab"];
+            if (configuration.kbaEnabled === true) {
+                tabList.push("org/forgerock/commons/ui/user/profile/UserProfileKBATab");
+            }
+            require(tabList, function () {
+                _.each(_.toArray(arguments), UserProfileView.registerTab, UserProfileView);
+            });
+            if (successCallback) {
+                successCallback(configuration);
+            }
+            return configuration;
+        }, errorCallback);
+    };
 
     obj.checkForDifferences = function(){
         if(conf.loggedUser && _.contains(conf.loggedUser.uiroles,"ui-admin") && !obj.adminCheck){
