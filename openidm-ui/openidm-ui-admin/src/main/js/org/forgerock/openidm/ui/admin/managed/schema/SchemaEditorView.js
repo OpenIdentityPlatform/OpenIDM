@@ -189,13 +189,10 @@ define([
 
         saveManagedSchema: function(event) {
             event.preventDefault();
+            //set showSchema so that when editManagedView is re-rendered after saving it will know to open up the schema tab
+            this.parent.args.push("showSchema");
 
-            this.parent.data.currentManagedObject.schema = this.getManagedSchema();
-
-            this.parent.saveManagedObject(this.parent.data.currentManagedObject, this.parent.data.managedObjects, _.bind(function () {
-                this.parent.args.push("showSchema");
-                this.parent.render(this.parent.args);
-            }, this));
+            this.parent.saveManagedObject(this.parent.data.currentManagedObject, this.parent.data.managedObjects);
         },
 
         loadSchema: function() {

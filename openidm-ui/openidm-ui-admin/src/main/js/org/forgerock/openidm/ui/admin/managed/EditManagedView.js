@@ -210,15 +210,7 @@ define([
                 this.data.currentManagedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
                 this.$el.find("#managedErrorMessage").hide();
 
-                this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.bind(function() {
-                    this.$el.find("#managedObjectDisplayName").html(this.data.currentManagedObject.name);
-
-                    if(this.data.currentManagedObject.schema.icon) {
-                        this.$el.find(".header-icon i").prop("class", "fa " + this.data.currentManagedObject.schema.icon);
-                    } else {
-                        this.$el.find(".header-icon i").prop("class", "fa fa-cube");
-                    }
-                }, this));
+                this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
             } else {
                 this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
                 this.$el.find("#managedErrorMessage").show();
@@ -274,7 +266,7 @@ define([
 
             this.data.currentManagedObject.properties = properties;
 
-            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
         },
 
         saveManagedScripts: function(event) {
@@ -290,7 +282,7 @@ define([
                 }
             }, this);
 
-            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects, _.noop);
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
         },
 
         deleteManaged: function(event) {

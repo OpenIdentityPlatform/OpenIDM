@@ -80,9 +80,7 @@ define([
             if(!nameCheck) {
                 this.model.managedObjects.objects.push(managedObject);
 
-                this.saveManagedObject(managedObject, this.model.managedObjects, function () {
-                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.editManagedView, args: [managedObject.name]});
-                });
+                this.saveManagedObject(managedObject, this.model.managedObjects, true);
             } else {
                 this.$el.find("#managedErrorMessage .message").html($.t("templates.managed.duplicateNameError"));
                 this.$el.find("#managedErrorMessage").show();
