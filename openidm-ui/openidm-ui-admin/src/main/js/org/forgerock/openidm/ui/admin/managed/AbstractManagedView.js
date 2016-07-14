@@ -21,13 +21,15 @@ define([
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/Router"
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/openidm/ui/admin/managed/schema/SchemaEditorView"
 ], function($, _,
             AdminAbstractView,
             ConfigDelegate,
             EventManager,
             Constants,
-            Router) {
+            Router,
+            SchemaEditorView) {
 
     var AbstractManagedView = AdminAbstractView.extend({
         data: {},
@@ -63,13 +65,15 @@ define([
             }
         },
 
-        saveManagedObject: function(managedObject, saveObject, routeTo) {
+        saveManagedObject: function(managedObject, saveObject, isNewManagedObject) {
             var promises = [];
 
-            if (this.getManagedSchema) {
-                managedObject.schema = this.getManagedSchema();
+            if (!isNewManagedObject) {
+                managedObject.schema = SchemaEditorView.getManagedSchema();
             }
-            
+
+            managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
+
             this.combineSchemaAndProperties();
 
             promises.push(ConfigDelegate.updateEntity("managed", {"objects" : saveObject.objects}));
@@ -83,9 +87,11 @@ define([
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "managedObjectSaveSuccess");
                 EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
 
-                this.splitSchemaAndProperties();
-                
-                routeTo();
+                if (isNewManagedObject) {
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.editManagedView, args: [managedObject.name]});
+                } else {
+                    this.render(this.args);
+                }
             }, this));
         },
 
@@ -100,39 +106,39 @@ define([
 
             return found;
         },
-        
+
         splitSchemaAndProperties: function () {
             var propertiesFields = ["encryption","scope", "onRetrieve", "onValidate", "onStore", "isVirtual", "secureHash"],
                 properties = [],
                 schemaProperties = {};
-            
+
             if (this.data.currentManagedObject) {
                 _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
                     var property = _.pick(val,propertiesFields);
-                    
+
                     if (!_.isEmpty(property)) {
                         property.name = key;
-                        
+
                         if (property.isVirtual) {
                             property.type = "virtual";
                             delete property.isVirtual;
                         }
-                        
+
                         properties.push(property);
                     }
                 });
-                
+
                 this.data.currentManagedObject.properties = properties;
-                
+
                 _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
                     val = _.omit(val,propertiesFields);
                     schemaProperties[key] = val;
                 });
-                
+
                 this.data.currentManagedObject.schema.properties = schemaProperties;
             }
         },
-        
+
         combineSchemaAndProperties: function () {
             if (this.data.currentManagedObject) {
                 _.each(this.data.currentManagedObject.properties, _.bind(function (property) {
@@ -141,7 +147,7 @@ define([
                     }
                     _.extend(this.data.currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectEvents"));
                 }, this));
-                
+
                 delete this.data.currentManagedObject.properties;
             }
         }
