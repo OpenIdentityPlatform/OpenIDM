@@ -38,6 +38,7 @@ import javax.script.ScriptException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.SyncContext;
 import org.forgerock.openidm.condition.Conditions;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -765,7 +766,7 @@ class ObjectMapping {
                 newValue = LazyObjectAccessor.rawReadObject(connectionFactory, context, resourceContainer, resourceId);
             }
 
-            if (oldValue == null || oldValue.getObject() == null || JsonPatch.diff(oldValue, newValue).size() > 0) {
+            if (oldValue == null || oldValue.getObject() == null || JsonUtil.isNotEqual(oldValue, newValue)) {
                 return doSourceSync(context, resourceId, newValue, false, oldValue); // synchronous for now
             } else {
                 LOGGER.trace("There is nothing to update on {}", resourceContainer + "/" + resourceId);
@@ -1871,7 +1872,7 @@ class ObjectMapping {
                                             linkObject.linkQualifier);
                                     execScript("onUpdate", onUpdateScript, oldTarget);
                                     // only update if target changes
-                                    if (JsonPatch.diff(oldTarget, getTargetObject()).size() > 0) {
+                                    if (JsonUtil.isNotEqual(oldTarget, getTargetObject())) {
                                         updateTargetObject(context, getTargetObject(), targetId);
                                     }
                                 }

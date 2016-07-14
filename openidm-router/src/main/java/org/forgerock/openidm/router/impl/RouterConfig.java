@@ -52,6 +52,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.RouterFilterRegistration;
 import org.forgerock.openidm.filter.ScriptedFilter;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
@@ -119,7 +120,7 @@ public class RouterConfig {
             JsonValue modifiedConfig = enhancedConfig.getConfigurationAsJson(context);
             if (config != null
                     && modifiedConfig != null
-                    && JsonPatch.diff(config, modifiedConfig).size() == 0) {
+                    && JsonUtil.isEqual(config, modifiedConfig)) {
                 return;
             }
             deactivate(context);

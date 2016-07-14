@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * Copyright (c) 2011-2016 ForgeRock AS. All Rights Reserved
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -45,6 +45,7 @@ import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCrypto;
+import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.openidm.core.PropertyAccessor;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.slf4j.Logger;
@@ -80,6 +81,30 @@ public final class JsonUtil {
 
     private JsonUtil() {
     }
+
+    /**
+     * Returns true if the {@link JsonPatch#diff(JsonValue, JsonValue)} returns an empty result, thus
+     * suggesting the two json values are equal.
+     *
+     * @param left value to be compared with right
+     * @param right value to be compared with left
+     * @return true if there is no difference between the two json values.
+     */
+    public static boolean isEqual(JsonValue left, JsonValue right) {
+        return JsonPatch.diff(left, right).size() == 0;
+    }
+
+    /**
+     * returns true of the two json values are different.
+     *
+     * @param left value to be compared with right
+     * @param right value to be compared with left
+     * @return true of the two json values are different
+     */
+    public static boolean isNotEqual(JsonValue left, JsonValue right) {
+        return !isEqual(left, right);
+    }
+
 
     public static boolean jsonIsNull(JsonValue value) {
         return (value == null || value.isNull());
