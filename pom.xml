@@ -789,11 +789,6 @@
 
             <!-- Test Dependencies -->
             <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
                 <groupId>org.codehaus.jstestrunner</groupId>
                 <artifactId>jstestrunner-junit</artifactId>
                 <version>1.0.2</version>
