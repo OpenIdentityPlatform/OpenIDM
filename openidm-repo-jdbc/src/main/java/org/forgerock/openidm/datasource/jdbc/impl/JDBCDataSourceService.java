@@ -46,6 +46,7 @@ import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.util.JsonUtil;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -242,7 +243,7 @@ public class JDBCDataSourceService implements DataSourceService {
      * @return true if the configurations differ, false otherwise
      */
     private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
-        return JsonPatch.diff(existingConfig, newConfig).size() > 0;
+        return JsonUtil.isNotEqual(existingConfig, newConfig);
     }
 
     @Override

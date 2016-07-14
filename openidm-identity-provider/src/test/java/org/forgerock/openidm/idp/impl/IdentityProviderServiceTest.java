@@ -30,6 +30,7 @@ import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.idp.config.ProviderConfig;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.BeforeSuite;
@@ -85,6 +86,6 @@ public class IdentityProviderServiceTest {
         assertThat(response).hasArray("providers").hasSize(1);
         JsonValue google = response.get("providers").get(0);
         assertThat(google).doesNotContain("client_secret"); // it should be removed by readInstance
-        assertThat(JsonPatch.diff(google, expected).size()).isEqualTo(0);
+        assertThat(JsonUtil.isEqual(google, expected)).isTrue();
     }
 }

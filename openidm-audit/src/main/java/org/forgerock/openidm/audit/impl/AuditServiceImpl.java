@@ -60,7 +60,6 @@ import org.forgerock.audit.secure.JcaKeyStoreHandler;
 import org.forgerock.audit.secure.KeyStoreHandler;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -85,12 +84,12 @@ import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.script.Script;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
-import org.forgerock.util.Options;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
@@ -379,7 +378,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
-        return JsonPatch.diff(existingConfig, newConfig).size() > 0;
+        return JsonUtil.isNotEqual(existingConfig, newConfig);
     }
 
     @Deactivate

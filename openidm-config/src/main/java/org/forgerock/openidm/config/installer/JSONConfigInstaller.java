@@ -427,7 +427,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             oldJsonConfig.remove(ResourceResponse.FIELD_CONTENT_REVISION);
         }
         
-        return JsonPatch.diff(oldJsonConfig, newJsonConfig).size() == 0;
+        return JsonUtil.isEqual(oldJsonConfig, newJsonConfig);
     }
 
     Configuration getConfiguration(String fileName, String pid, String factoryPid, boolean addIfNew) throws Exception {
