@@ -21,63 +21,77 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/main/SpinnerManager"
-], function($, _, constants, AbstractDelegate, configuration, eventManager, spinner) {
+    "org/forgerock/commons/ui/common/main/SpinnerManager",
+    "org/forgerock/commons/ui/common/main/Router"
+], function($, _, constants, AbstractDelegate, configuration, eventManager, spinner, router) {
 
     var obj = new AbstractDelegate(constants.host + "/openidm/recon");
 
-    obj.waitForAll = function (reconIds, suppressSpinner, progressCallback) {
+    obj.waitForAll = function (reconIds, suppressSpinner, progressCallback, delayTime) {
         var resultPromise = $.Deferred(),
             completedRecons = [],
-            checkCompleted;
+            checkCompleted,
+            startUrl = router.currentRoute.url;
+
+        if (!delayTime) {
+            delayTime = 1000;
+        }
 
         checkCompleted = function () {
-
-            obj.serviceCall({
-                "type": "GET",
-                "url": "/" + reconIds[completedRecons.length],
-                "suppressSpinner": suppressSpinner,
-                "errorsHandlers": {
-                    "Not found": {
-                        status: 404
+            /**
+            * Check to make sure we are still on the same page we were when this process
+            * started. If not then cancel the process so ajax requests
+            * will not continue to fire in the background.
+            */
+            if (router.currentRoute.url === startUrl) {
+                obj.serviceCall({
+                    "type": "GET",
+                    "url": "/" + reconIds[completedRecons.length],
+                    "suppressSpinner": suppressSpinner,
+                    "errorsHandlers": {
+                        "Not found": {
+                            status: 404
+                        }
                     }
-                }
-            }).then(function (reconStatus) {
+                }).then(function (reconStatus) {
 
-                if (progressCallback) {
-                    progressCallback(reconStatus);
-                }
+                    if (progressCallback) {
+                        progressCallback(reconStatus);
+                    }
 
-                if (reconStatus.ended.length !== 0) {
-                    completedRecons.push(reconStatus);
+                    if (reconStatus.ended.length !== 0) {
+                        completedRecons.push(reconStatus);
+                        if (completedRecons.length === reconIds.length) {
+                            resultPromise.resolve(completedRecons);
+                        } else {
+                            _.delay(checkCompleted, delayTime);
+                        }
+                    } else {
+                        if (!suppressSpinner) {
+                            spinner.showSpinner();
+                        }
+                        _.delay(checkCompleted, delayTime);
+                    }
+
+
+                }, function () {
+                    // something went wrong with the read on /recon/_id, perhaps this recon was interrupted during a restart of the server?
+
+                    completedRecons.push({
+                        "reconId": reconIds[completedRecons.length],
+                        "status": "failed"
+                    });
+
                     if (completedRecons.length === reconIds.length) {
                         resultPromise.resolve(completedRecons);
                     } else {
-                        _.delay(checkCompleted, 1000);
+                        _.delay(checkCompleted, delayTime);
                     }
-                } else {
-                    if (!suppressSpinner) {
-                        spinner.showSpinner();
-                    }
-                    _.delay(checkCompleted, 1000);
-                }
-
-
-            }, function () {
-                // something went wrong with the read on /recon/_id, perhaps this recon was interrupted during a restart of the server?
-
-                completedRecons.push({
-                    "reconId": reconIds[completedRecons.length],
-                    "status": "failed"
                 });
-
-                if (completedRecons.length === reconIds.length) {
-                    resultPromise.resolve(completedRecons);
-                } else {
-                    _.delay(checkCompleted, 1000);
-                }
-            });
-
+            } else {
+                console.log("route has changed - recon status check cancelled");
+                resultPromise.resolve([]);
+            }
         };
 
         if (!suppressSpinner) {
@@ -87,7 +101,7 @@ define([
 
         return resultPromise;
     };
-    
+
     obj.triggerRecons = function (mappings, suppressSpinner) {
         var reconIds = [],
             reconPromises = [];
@@ -106,15 +120,14 @@ define([
 
     };
 
-    obj.triggerRecon = function (mapping, suppressSpinner, progressCallback) {
-
+    obj.triggerRecon = function (mapping, suppressSpinner, progressCallback, delayTime) {
         return obj.serviceCall({
             "suppressSpinner": suppressSpinner,
             "url": "?_action=recon&mapping=" + mapping,
             "type": "POST"
         }).then(function (reconId) {
 
-            return obj.waitForAll([reconId._id], suppressSpinner, progressCallback)
+            return obj.waitForAll([reconId._id], suppressSpinner, progressCallback, delayTime)
                       .then(function (reconArray) {
                           return reconArray[0];
                       }) ;
