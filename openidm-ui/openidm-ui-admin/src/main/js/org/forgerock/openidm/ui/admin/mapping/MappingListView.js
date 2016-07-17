@@ -56,7 +56,9 @@ define([
             "click .mapping-config-body": "mappingDetail",
             "click .toggle-view-btn": "toggleButtonChange",
             "keyup .filter-input" : "filterMappings",
-            "paste .filter-input" : "filterMappings"
+            "paste .filter-input" : "filterMappings",
+            "click .sync-now": "syncNow",
+            "click .stop-sync": "stopSync"
         },
         model: {},
         partials: [
@@ -67,7 +69,8 @@ define([
             "partials/mapping/list/_linkName.html"
         ],
         mappingDetail: function(e){
-            if(!$(e.target).closest("button").hasClass("delete-button")){
+            var button = $(e.target).closest("button");
+            if(!button.hasClass("card-button")){
                 e.preventDefault();
 
                 eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: "propertiesView", args: [$(e.target).closest(".mapping-config-body").attr("mapping")]});
@@ -280,7 +283,7 @@ define([
 
                         this.$el.find("#mappingGrid").append(mappingGrid.render().el);
 
-                        this.showSyncStatus();
+                        this.showSyncStatus(true);
 
                         if (callback) {
                             callback();
@@ -372,19 +375,46 @@ define([
                 }, this));
             }, this));
         },
-        showSyncStatus: function(){
+        showSyncStatus: function(isOnPageLoad){
             _.each(this.data.mappingConfig, function (mapping){
                 var el = this.$el.find("." + mapping.name + "_syncStatus"),
                     icon = this.$el.find("." + mapping.name + "_syncStatus_icon"),
-                    text, type, parent = el.parent();
+                    recon = mapping.recon,
+                    parent = el.parent(),
+                    text,
+                    type,
+                    total,
+                    processed;
 
-                if(mapping.recon){
-                    if(mapping.recon.state === "CANCELED") {
+                if(recon){
+                    if(recon.state === "CANCELED") {
                         text = $.t("templates.mapping.lastSyncCanceled");
                         type = "DANGER";
-                    } else if(mapping.recon.state === "ACTIVE") {
-                        text = $.t("templates.mapping.inProgress");
+                    } else if(recon.state === "ACTIVE") {
+                        text = $.t("templates.mapping.inProgress") + ": ";
+
+                        if (recon.progress.source.existing.total !== "?"  && recon.stage === "ACTIVE_RECONCILING_SOURCE") {
+                            processed = parseInt(recon.progress.source.existing.processed, 10);
+                            total = parseInt(recon.progress.source.existing.total, 10);
+                        } else if(recon.progress.target.existing.total !== "?" && recon.stage === "ACTIVE_RECONCILING_TARGET") {
+                            total = parseInt(recon.progress.target.existing.total, 10);
+                            processed = parseInt(recon.progress.target.existing.processed, 10);
+                        } else {
+                            total = 0;
+                            processed = 0;
+                        }
+
+                        if(total !== 0 && processed !== 0) {
+                            text +=  recon.stageDescription + " - <span class='bold-message'>" + processed + "/" + total + "</span>";
+                        } else {
+                            text += recon.stageDescription;
+                        }
+
                         type = "SUCCESS";
+
+                        if (isOnPageLoad) {
+                            this.updateReconStatus(mapping.name, recon._id);
+                        }
                     } else {
                         text = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(mapping.recon.ended,"MMMM dd, yyyy HH:mm");
                         type = "SUCCESS";
@@ -417,7 +447,7 @@ define([
                     icon.addClass("fa-check-circle");
                 }
 
-                el.text(text);
+                el.html(text);
             }, this);
         },
 
@@ -444,6 +474,104 @@ define([
                 this.$el.find(".mapping-config-body").fadeIn();
                 this.$el.find(".backgrid tbody tr").fadeIn();
             }
+        },
+        /**
+         * This function sets the recon for the associated mapping in this.data.mappingConfig
+         * (based on mappingName) to the newly updated recon. It then fires off showSyncStatus()
+         * to reload recon status information
+         *
+         * @param mappingName {string} - name of the mapping to find in this.data.mappingConfig
+         * @param recon {object} - recon object
+         */
+        updateMappingRecon: function (mappingName, recon) {
+            var mapping = _.findWhere(this.data.mappingConfig, { name : mappingName });
+            mapping.recon = recon;
+            this.showSyncStatus();
+        },
+        /**
+         * This function disables/enables hides/shows the "Reconcile Now"
+         * and "Stop Reconciliation" buttons for an individual mapping
+         *
+         * @param mappingName {string}
+         * @param reconInProgress {boolean}
+         */
+        toggleReconButtons: function (mappingName, reconInProgress) {
+            var syncNowButton = this.$el.find(".sync-now[mappingName=" + mappingName + "]"),
+                stopSyncButton = this.$el.find(".stop-sync[mappingName=" + mappingName + "]");
+
+            if (reconInProgress) {
+                //disable/hide the syncNowButton
+                syncNowButton.hide();
+                syncNowButton.prop("disabled", true);
+                //enable/show the stopSyncButton
+                stopSyncButton.show();
+                stopSyncButton.prop("disabled", false);
+            } else {
+                //recon is complete enable/show the syncNowButton
+                syncNowButton.show();
+                syncNowButton.prop("disabled",false);
+                //and disable/hide the stopSyncButton
+                stopSyncButton.hide();
+                stopSyncButton.prop("disabled", true);
+            }
+        },
+        /**
+         * This function finds the appropriate mapping name based on the click event,
+         * toggles the correct buttons, and triggers a recon base on mappingName
+         * which updates the recon status on the mapping card every 2 seconds until it is complete
+         *
+         * @param e {object} - event object
+         */
+        syncNow: function (e) {
+            var mappingName = $(e.target).closest(".sync-now").attr("mappingName");
+
+            e.preventDefault();
+
+            this.toggleReconButtons(mappingName, true);
+
+            //trigger the recon
+            reconDelegate.triggerRecon(mappingName, true, (runningRecon) => {
+                this.updateMappingRecon(mappingName, runningRecon);
+            }, 2000).then((completedRecon) => {
+                this.toggleReconButtons(mappingName);
+                this.updateMappingRecon(mappingName, completedRecon);
+            });
+        },
+        /**
+         * This function is called on page load when a recon is already active.
+         * It calls waitForAll on and individual recon and updates the recon status
+         * on the mapping card every 2 seconds until it is complete
+         *
+         * @param mappingName {string} - name of the mapping to find in this.data.mappingConfig
+         * @param runningReconId {string} - uuid for the active recon
+         */
+        updateReconStatus: function (mappingName, runningReconId) {
+            this.toggleReconButtons(mappingName, true);
+
+            reconDelegate.waitForAll([runningReconId], true, (runningRecon) => {
+                this.updateMappingRecon(mappingName, runningRecon);
+            }, 2000).then((completedRecon) => {
+                this.toggleReconButtons(mappingName);
+                this.updateMappingRecon(mappingName, completedRecon);
+            });
+        },
+        /**
+         * This function finds the appropriate mapping name based on the click event,
+         * stops a recon based on mappingName, toggles the correct buttons,
+         * and updates the recon status on the mapping card
+         *
+         * @param e {object} - event object
+         */
+        stopSync: function(e){
+            var mappingName = $(e.target).closest(".stop-sync").attr("mappingName"),
+                mapping = _.findWhere(this.data.mappingConfig, { name : mappingName });
+
+            e.preventDefault();
+
+            reconDelegate.stopRecon(mapping.recon._id, true).then((canceledRecon) => {
+                this.toggleReconButtons(mappingName);
+                this.updateMappingRecon(mappingName, canceledRecon);
+            });
         }
     });
 
