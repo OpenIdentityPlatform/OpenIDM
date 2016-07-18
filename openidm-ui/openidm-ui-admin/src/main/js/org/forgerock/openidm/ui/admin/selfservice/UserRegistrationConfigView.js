@@ -70,6 +70,13 @@ define([
             "configDefault": {
                 "stageConfigs" : [
                     {
+                        "name" : "termsAndConditions",
+                        "termsTranslations" : {
+                            "en" : "Some fake terms",
+                            "fr" : "More fake terms"
+                        }
+                    },
+                    {
                         "name" : "captcha",
                         "recaptchaSiteKey": "",
                         "recaptchaSecretKey": "",
@@ -169,8 +176,22 @@ define([
                 }
             }];
 
+            this.data.licensingAndConsent = [{
+                type: "termsAndConditions",
+                name: $.t("templates.selfservice.termsAndConditions.title"),
+                details: $.t("templates.selfservice.termsAndConditions.details"),
+                editable: true,
+                togglable: true,
+                image: {
+                    icon: "file-text-o"
+                }
+            }];
+
             //Master config list for controlling various states such as what is editable and what is enabled by default when turned on
             this.model.configList = [{
+                type : "termsAndConditions",
+                toggledOn: true
+            }, {
                 type: "captcha",
                 enabledByDefault: false,
                 toggledOn: false

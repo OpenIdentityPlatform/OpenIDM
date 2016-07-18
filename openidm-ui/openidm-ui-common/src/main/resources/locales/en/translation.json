@@ -580,6 +580,7 @@
             "storageLookup" : "User Storage & Lookup",
             "userVerification" : "User Verification",
             "securityQuestions" : "Security Questions",
+            "licensingAndConsent" : "Licensing / Privacy Agreement",
             "password" : {
                 "resetStageTitle" : "Configure Password Reset Form",
                 "emailValidationTitle" : "Configure Validation Email",
@@ -591,7 +592,8 @@
                 "emailValidationTitle" : "Configure Validation Email",
                 "kbaStageTitle" : "Configure KBA Stage",
                 "userDetailsTitle" : "Configure User Details",
-                "captchaTitle" : "reCAPTCHA for Registration"
+                "captchaTitle" : "reCAPTCHA for Registration",
+                "termsAndConditionsTitle" : "Terms & Conditions"
             },
             "username" : {
                 "captchaTitle" : "reCAPTCHA for Username Retrieval",
@@ -606,6 +608,10 @@
                 "identityUsernameFieldHelp" : "Account Property",
                 "identityEmailField" : "Identity Email Field",
                 "identityEmailFieldHelp" : "Email property"
+            },
+            "termsAndConditions" : {
+                "title" : "Terms & Conditions",
+                "details" : "Add a end-user license agreement."
             },
             "captcha" : {
                 "description" : "Use Google reCAPTCHA to stop bots.",

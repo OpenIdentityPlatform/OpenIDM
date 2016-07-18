@@ -48,6 +48,7 @@ define([
             "partials/selfservice/_captcha.html",
             "partials/selfservice/_translationMap.html",
             "partials/selfservice/_translationItem.html",
+            "partials/selfservice/_termsAndConditions.html",
             "partials/form/_basicInput.html",
             "partials/form/_basicSelectize.html",
             "partials/form/_tagSelectize.html"
