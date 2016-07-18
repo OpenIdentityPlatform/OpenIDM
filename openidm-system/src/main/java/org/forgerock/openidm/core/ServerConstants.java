@@ -243,7 +243,13 @@ public final class ServerConstants {
     /**
      * Default prefix for OpenIDM OSGi services.  Also used as prefix for scheduled service job "invokeService" attributes.
      */
-    public final static String SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
+    public static final String SERVICE_RDN_PREFIX = "org.forgerock.openidm.";
+
+    /** the boot.properties property for the jwtsession hmac signing key alias */
+    public static final String JWTSESSION_SIGNING_KEY_ALIAS_PROPERTY = "openidm.config.crypto.jwtsession.hmackey.alias";
+
+    /** the default jwtsession hmac signing key alias */
+    public static final String DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS = "openidm-jwtsessionhmac-key";
 
     /**
      * Query input value for the QUERY_ID input key.

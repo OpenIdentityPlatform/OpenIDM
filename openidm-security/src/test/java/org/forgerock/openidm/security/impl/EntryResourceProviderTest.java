@@ -32,6 +32,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Key;
+import java.security.KeyRep;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -63,6 +64,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
@@ -424,7 +426,7 @@ public class EntryResourceProviderTest {
             if (key == null) {
                 throw new NotFoundException("Alias does not correspond to a key entry in " + resourceName);
             } else {
-                return returnKey(alias, key);
+                return KeyRepresentation.toJsonValue(alias, key);
             }
         }
     }

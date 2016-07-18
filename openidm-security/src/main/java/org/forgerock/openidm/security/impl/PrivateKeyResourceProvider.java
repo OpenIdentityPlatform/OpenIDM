@@ -36,6 +36,7 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.KeyStoreHandler;
 import org.forgerock.openidm.security.KeyStoreManager;
@@ -80,7 +81,7 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
         if (key == null) {
             throw new NotFoundException("Alias does not correspond to a key entry in " + resourceName);
         } else {
-            return returnKey(alias, key);
+            return KeyRepresentation.toJsonValue(alias, key);
         }
     }
 

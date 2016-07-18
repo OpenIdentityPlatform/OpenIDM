@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS
  */
 
 // TODO: Expose as a set of resource actions.
@@ -35,17 +27,22 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStore.SecretKeyEntry;
+import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
+import org.bouncycastle.openssl.PEMWriter;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
@@ -56,6 +53,10 @@ import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.KeyRepresentation;
+import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoConstants;
@@ -68,6 +69,7 @@ import org.forgerock.openidm.crypto.SaltedSHA384FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA512FieldStorageScheme;
 import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.forgerock.openidm.util.JsonUtil;
+import org.forgerock.util.encode.Base64;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -76,7 +78,7 @@ import org.slf4j.LoggerFactory;
  * Cryptography Service
  *
  */
-public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
+public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, SharedKeyService {
 
     /**
      * Setup logging for the {@link CryptoServiceImpl}.
@@ -119,6 +121,24 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
         return result;
     }
 
+    /** Map of crypto secret key aliases and the algorithm they should use */
+    private static final Map<String, String> configAliases = new LinkedHashMap<>(3);
+    static {
+        // each alias is stored under a specific property in boot.properties
+        configAliases.put(
+                IdentityServer.getInstance().getProperty("openidm.config.crypto.alias"),
+                "AES");
+        configAliases.put(
+                IdentityServer.getInstance().getProperty("openidm.config.crypto.selfservice.sharedkey.alias"),
+                "AES");
+        configAliases.put(
+                // OPENIDM-6190 jwt-session signing key must be 256bit
+                IdentityServer.getInstance().getProperty(
+                        ServerConstants.JWTSESSION_SIGNING_KEY_ALIAS_PROPERTY,
+                        ServerConstants.DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS),
+                "HmacSHA256");
+    }
+
     public void activate(BundleContext context) {
         logger.debug("Activating cryptography service");
         try {
@@ -129,10 +149,6 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
                 String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
                 String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
                 String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
-                String[] configAliases = new String[] {
-                        IdentityServer.getInstance().getProperty("openidm.config.crypto.alias"),
-                        IdentityServer.getInstance().getProperty("openidm.config.crypto.selfservice.sharedkey.alias")
-                };
 
                 try {
                     logger.info(
@@ -147,12 +163,12 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
                         ks.load(in, password == null ? null : clearPassword);
                         if (instanceType.equals(ClusterUtil.TYPE_STANDALONE)
                                 || instanceType.equals(ClusterUtil.TYPE_CLUSTERED_FIRST)) {
-                            for (String alias : configAliases) {
-                                Key key = ks.getKey(alias, clearPassword);
+                            for (Map.Entry<String, String> alias : configAliases.entrySet()) {
+                                Key key = ks.getKey(alias.getKey(), clearPassword);
                                 if (key == null) {
                                     // Initialize the keys
                                     logger.debug("Initializing secret key entry {} in the keystore", alias);
-                                    generateDefaultKey(ks, alias, location, clearPassword);
+                                    generateDefaultKey(ks, alias.getKey(), location, clearPassword, alias.getValue());
                                 }
                             }
                         }
@@ -193,12 +209,13 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
      * @param alias the alias of the secret key
      * @param location the keystore location
      * @param password the keystore password
+     * @param algorithm the key generator algorithm
      * @throws IOException
      * @throws GeneralSecurityException
      */
-    private void generateDefaultKey(KeyStore ks, String alias, String location, char[] password)
+    private void generateDefaultKey(KeyStore ks, String alias, String location, char[] password, String algorithm)
             throws IOException, GeneralSecurityException {
-        SecretKey newKey = KeyGenerator.getInstance("AES").generateKey();
+        SecretKey newKey = KeyGenerator.getInstance(algorithm).generateKey();
         ks.setEntry(alias, new SecretKeyEntry(newKey), new KeyStore.PasswordProtection(password));
         OutputStream out = new FileOutputStream(location);
         try {
@@ -353,6 +370,12 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService {
             return fieldStorageScheme.fieldMatches(plainTextValue, cryptoValue.get("data").asString());
         }
         return false;
+    }
+
+    @Override
+    public JsonValue getSharedKey(String alias) throws Exception {
+        Key key = keySelector.select(alias);
+        return KeyRepresentation.toJsonValue(alias, key);
     }
 
 }

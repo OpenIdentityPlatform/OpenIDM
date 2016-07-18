@@ -30,7 +30,6 @@ import java.io.FileInputStream;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.math.BigInteger;
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -45,8 +44,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.crypto.SecretKey;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
@@ -72,6 +69,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
@@ -145,21 +143,7 @@ public class SecurityResourceProvider {
         this.instanceType = IdentityServer.getInstance().getProperty(
                 "openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
     }
-    /**
-     * Returns a PEM String representation of a object.
-     * 
-     * @param object the object
-     * @return the PEM String representation
-     * @throws Exception
-     */
-    protected String toPem(Object object) throws Exception {
-        StringWriter sw = new StringWriter(); 
-        PEMWriter pw = new PEMWriter(sw); 
-        pw.writeObject(object); 
-        pw.flush(); 
-        return sw.toString();
-    }
-    
+
     /**
      * Returns an object from a PEM String representation
      * 
@@ -224,7 +208,7 @@ public class SecurityResourceProvider {
         content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
         content.put("type", cert.getType());
         content.put("cert", getCertString(cert));
-        content.put("publicKey", getKeyMap(cert.getPublicKey()));
+        content.put("publicKey", KeyRepresentation.getKeyMap(cert.getPublicKey()).getObject());
         if (cert instanceof X509Certificate) {
             Map<String, Object> issuer = new HashMap<>();
             X500Name name = X500Name.getInstance(PrincipalUtil.getIssuerX509Principal((X509Certificate)cert));
@@ -253,57 +237,8 @@ public class SecurityResourceProvider {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
         content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
         content.put("csr", getCertString(csr));
-        content.put("publicKey", getKeyMap(csr.getPublicKey()));
+        content.put("publicKey", KeyRepresentation.getKeyMap(csr.getPublicKey()).getObject());
         return content;
-    }
-
-    /**
-     * Returns a JsonValue map representing a CSR
-     * 
-     * @param alias  the certificate alias
-     * @param key The key
-     * @return a JsonValue map representing the CSR
-     * @throws Exception
-     */
-    protected JsonValue returnKey(String alias, Key key) throws Exception {
-        JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
-        content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
-        if (key instanceof PrivateKey) {
-            content.put("privateKey", getKeyMap(key));
-        } else if (key instanceof SecretKey) {
-            content.put("secret", getSecretKeyMap(key));
-        }
-        return content;
-    }
-
-    /**
-     * Returns a JsonValue map representing key
-     * 
-     * @param key  The key
-     * @return a JsonValue map representing the key
-     * @throws Exception
-     */
-    protected Map<String, Object> getKeyMap(Key key) throws Exception {
-        Map<String, Object> keyMap = new HashMap<>();
-        keyMap.put("algorithm", key.getAlgorithm());
-        keyMap.put("format", key.getFormat());
-        keyMap.put("encoded", toPem(key));
-        return keyMap;
-    }
-
-    /**
-     * Returns a JsonValue map representing key
-     *
-     * @param key  The key
-     * @return a JsonValue map representing the key
-     * @throws Exception
-     */
-    protected Map<String, Object> getSecretKeyMap(Key key) throws Exception {
-        Map<String, Object> keyMap = new HashMap<>();
-        keyMap.put("algorithm", key.getAlgorithm());
-        keyMap.put("format", key.getFormat());
-        keyMap.put("encoded", Base64.encode(key.getEncoded()));
-        return keyMap;
     }
 
     /**
@@ -474,7 +409,7 @@ public class SecurityResourceProvider {
     protected void storeKeyPair(String alias, KeyPair keyPair) throws ResourceException {
         try {
             JsonValue keyPairValue = new JsonValue(new HashMap<String, Object>());
-            keyPairValue.put("value" , toPem(keyPair));
+            keyPairValue.put("value" , KeyRepresentation.toPem(keyPair));
             JsonValue encrypted = getCryptoService().encrypt(keyPairValue, cryptoCipher, cryptoAlias);
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
             keyMap.put("keyPair", encrypted.getObject());
