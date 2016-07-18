@@ -65,11 +65,11 @@ define([
                 SocialDelegate.providerList(),
                 SocialDelegate.availableProviders(),
                 ConfigDelegate.readEntityAlways("selfservice/registration")
-            ).then((providerList, currentProviders, userRegistration) => {
-                this.data.providers = _.cloneDeep(providerList.providers);
-                this.model.providers = _.cloneDeep(providerList.providers);
+            ).then((currentProviders, availableProviders, userRegistration) => {
+                this.data.providers = _.cloneDeep(availableProviders.providers);
+                this.model.providers = _.cloneDeep(availableProviders.providers);
 
-                if(userRegistration) {
+                if (userRegistration) {
                     this.model.userRegistration = userRegistration;
                 }
 
@@ -79,7 +79,7 @@ define([
                     provider.details = $.t("templates.socialProviders.configureProvider");
                     provider.enabled = false;
 
-                    switch(provider.name) {
+                    switch (provider.name) {
                         case "google":
                             provider.displayIcon = "google";
                             break;
@@ -87,7 +87,7 @@ define([
 
 
                     _.each(currentProviders.providers, (currentProvider) => {
-                        if(provider.name === currentProvider.name) {
+                        if (provider.name === currentProvider.name) {
                             _.extend(this.model.providers[index], currentProvider);
 
                             provider.enabled = true;

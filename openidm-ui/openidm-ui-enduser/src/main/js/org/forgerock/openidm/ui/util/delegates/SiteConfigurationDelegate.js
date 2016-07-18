@@ -20,8 +20,13 @@ define([
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/components/Navigation",
+    "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
     "UserProfileView"
-], function($, _, conf, commonSiteConfigurationDelegate, nav, UserProfileView) {
+], function($, _, conf,
+            commonSiteConfigurationDelegate,
+            nav,
+            SocialDelegate,
+            UserProfileView) {
 
     var obj = Object.create(commonSiteConfigurationDelegate);
 
@@ -29,15 +34,23 @@ define([
 
     obj.getConfiguration = function (successCallback, errorCallback) {
         return $.when(
-            commonSiteConfigurationDelegate.getConfiguration()
-        ).then(function (configuration) {
-            var tabList = ["org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab"];
+            commonSiteConfigurationDelegate.getConfiguration(),
+            SocialDelegate.providerList()
+        ).then(function (configuration, socialProviders) {
+            var tabList = [];
+
+            if(socialProviders.providers.length > 0) {
+                tabList.push("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab");
+            }
+
             if (configuration.kbaEnabled === true) {
                 tabList.push("org/forgerock/commons/ui/user/profile/UserProfileKBATab");
             }
+
             require(tabList, function () {
                 _.each(_.toArray(arguments), UserProfileView.registerTab, UserProfileView);
             });
+
             if (successCallback) {
                 successCallback(configuration);
             }

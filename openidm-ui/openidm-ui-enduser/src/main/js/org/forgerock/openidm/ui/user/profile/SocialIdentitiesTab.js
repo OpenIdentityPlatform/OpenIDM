@@ -43,8 +43,8 @@ define([
 
         },
         render: function(args, callback) {
-            SocialDelegate.availableProviders().then((availableProviders) => {
-                this.data.providers = availableProviders.providers;
+            SocialDelegate.providerList().then((response) => {
+                this.data.providers = response.providers;
 
                 //TODO hardcoded for this demo
                 if(this.data.providers.length > 0) {

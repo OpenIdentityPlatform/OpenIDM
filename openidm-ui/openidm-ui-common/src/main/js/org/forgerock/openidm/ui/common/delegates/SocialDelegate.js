@@ -17,28 +17,50 @@
 define([
     "jquery",
     "underscore",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/AbstractDelegate"
-], function($, _, constants,
-            AbstractDelegate) {
+    "org/forgerock/commons/ui/common/main/AbstractDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
+    "org/forgerock/commons/ui/common/util/Constants"
+], function($, _,
+    AbstractDelegate,
+    Configuration,
+    Constants) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/identityProviders");
+    var obj = new AbstractDelegate(Constants.host + "/openidm/identityProviders");
 
-    obj.availableProviders = function() {
+    obj.providerList = function() {
+        var headers = {},
+            promise = $.Deferred();
+        headers[Constants.HEADER_PARAM_USERNAME] = "anonymous";
+        headers[Constants.HEADER_PARAM_PASSWORD] = "anonymous";
+        headers[Constants.HEADER_PARAM_NO_SESSION] = "true";
+
         return obj.serviceCall({
             url: "",
-            type: "get"
+            type: "get",
+            headers: headers
         }).then((results) => {
             return results;
         });
     };
 
-    obj.providerList = function() {
+    obj.availableProviders = function() {
         return obj.serviceCall({
             url: "?_action=availableProviders",
             type: "post"
         }).then((results) => {
             return results;
+        });
+    };
+
+    obj.getAuthToken = function (provider, code, redirect_uri) {
+        return this.serviceCall({
+            "type": "POST",
+            "url": "?_action=getauthtoken",
+            "data": JSON.stringify({
+                provider: provider,
+                code: code,
+                redirect_uri: redirect_uri
+            })
         });
     };
 
