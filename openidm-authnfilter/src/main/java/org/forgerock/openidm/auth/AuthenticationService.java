@@ -47,9 +47,12 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder;
 import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.base.Optional;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.http.Filter;
+import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -62,6 +65,8 @@ import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
@@ -147,6 +152,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     private static final String RESOLVERS = "resolvers";
     private static final String RESOLVER_NAME_KEY = "name";
 
+    /** the encoded key location in the return value from {@link SharedKeyService#getSharedKey(String)} */
+    private static final JsonPointer ENCODED_SECRET_PTR = new JsonPointer("/secret/encoded");
+
     private JsonValue config;
 
     /** The authenticators to delegate to.*/
@@ -156,6 +164,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     volatile CryptoService cryptoService;
+
+    @Reference
+    SharedKeyService sharedKeyService;
 
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC)
@@ -368,6 +379,22 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         final JsonValue serverAuthContext = moduleConfig.get(SERVER_AUTH_CONTEXT_KEY).required();
         final JsonValue sessionConfig = serverAuthContext.get(AuthenticationService.SESSION_MODULE_KEY);
         final JsonValue authModulesConfig = serverAuthContext.get(AuthenticationService.AUTH_MODULES_KEY);
+
+        if (sessionConfig.get(AUTH_MODULE_PROPERTIES_KEY).get(JwtSessionModule.HMAC_SIGNING_KEY).isNull()) {
+            try {
+                // amend session config to include the hmac key stored in the keystore
+                String signingKey = sharedKeyService.getSharedKey(
+                        IdentityServer.getInstance().getProperty(
+                                ServerConstants.JWTSESSION_SIGNING_KEY_ALIAS_PROPERTY,
+                                ServerConstants.DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS))
+                        .get(ENCODED_SECRET_PTR)
+                        .required()
+                        .asString();
+                sessionConfig.get(AUTH_MODULE_PROPERTIES_KEY).put(JwtSessionModule.HMAC_SIGNING_KEY, signingKey);
+            } catch (Exception e) {
+                throw new AuthenticationException("Cannot read hmac signing key", e);
+            }
+        }
 
         final List<AuthenticationModuleBuilder> authModuleBuilders = new ArrayList<>();
         for (final JsonValue authModuleConfig : authModulesConfig) {
