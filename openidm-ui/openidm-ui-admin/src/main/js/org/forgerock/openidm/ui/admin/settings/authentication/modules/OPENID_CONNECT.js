@@ -47,7 +47,7 @@ define([
             }
 
             if ($(e.currentTarget).is(":checked")) {
-                SocialDelegate.availableProviders().then(_.bind(function (data) {
+                SocialDelegate.providerList().then(_.bind(function (data) {
                     if (data.providers.length === 0) {
                         setDisableState.call(this, true);
                     } else {
