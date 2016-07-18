@@ -52,6 +52,14 @@
                                 {{/each}}
                             </div>
                         </div>
+                        <div class="simple-section clearfix">
+                            <label class="col-sm-3 control-label">{{t "templates.selfservice.licensingAndConsent"}}</label>
+                            <div class="col-sm-7">
+                                {{#each licensingAndConsent}}
+                                {{> _toggleIconBlock this}}
+                                {{/each}}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
