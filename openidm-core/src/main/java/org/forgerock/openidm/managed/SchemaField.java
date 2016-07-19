@@ -100,10 +100,7 @@ public class SchemaField {
     
     /** The CryptoService implementation */
     private CryptoService cryptoService;
-    
-    /** The encryption configuration */
-    private JsonValue encryptionValue;
-    
+
     /** The hashing configuration */
     private JsonValue hashingValue;
 
@@ -117,7 +114,7 @@ public class SchemaField {
     private final ScriptEntry onStore;
 
     /** The encryptor to use for encrypting JSON values */
-    private JsonEncryptor encryptor;
+    private final JsonEncryptor encryptor;
 
     /** String that indicates the privacy level of the property. */
     private final Scope scope;
@@ -157,11 +154,17 @@ public class SchemaField {
         }
 
         // Initialize the encryptor if encryption is defined.
-        encryptionValue = schema.get("encryption");
-        if (encryptionValue.isNotNull()) {
-            setEncryptor();
+        JsonValue encrypttionValue = schema.get("encryption");
+        try {
+            encryptor = encrypttionValue.isNotNull()
+                    ? cryptoService.getEncryptor(
+                        encrypttionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
+                        encrypttionValue.get("key").required().asString())
+                    : null;
+        } catch (JsonCryptoException e) {
+            throw new JsonValueException(encrypttionValue, "Failed to create encryptor from cryptoService", e);
         }
-        
+
         // Set the hashing value, if a secure hash is defined, and make sure the hashing algorithm is defined.
         hashingValue = schema.get("secureHash");
         if (hashingValue.isNotNull()) {
@@ -200,22 +203,6 @@ public class SchemaField {
             }
             // Set validation flag
             this.validationRequired = schema.get("validate").defaultTo(false).asBoolean();
-        }
-    }
-    
-    /**
-     * A synchronized method for setting the encryptor is if hasn't already been set and there exists an encryption 
-     * configuration.
-     */
-    private synchronized void setEncryptor() {
-        if (encryptor == null && encryptionValue.isNotNull()) {
-            try {
-                encryptor = cryptoService.getEncryptor(
-                        encryptionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
-                        encryptionValue.get("key").required().asString());
-            } catch (JsonCryptoException jce) {
-                logger.warn("Unable to set encryptor");
-            }
         }
     }
     
@@ -409,7 +396,6 @@ public class SchemaField {
      */
     void onStore(Context context, JsonValue value) throws InternalServerErrorException {
         execScript(context, "onStore", onStore, value);
-        setEncryptor();
         try {
             if (value.isDefined(name)) {
                 JsonValue propValue = value.get(name);
