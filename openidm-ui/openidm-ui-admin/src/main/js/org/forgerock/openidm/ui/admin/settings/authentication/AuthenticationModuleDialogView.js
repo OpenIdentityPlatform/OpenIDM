@@ -111,6 +111,10 @@ define([
                                     id: "submitAuditEventHandlers",
                                     cssClass: "btn-primary",
                                     action: function(dialogRef) {
+                                        if (this.hasClass("disabled")) {
+                                            return false;
+                                        }
+
                                         self.model.saveCallback(view.getConfig());
                                         dialogRef.close();
                                     }

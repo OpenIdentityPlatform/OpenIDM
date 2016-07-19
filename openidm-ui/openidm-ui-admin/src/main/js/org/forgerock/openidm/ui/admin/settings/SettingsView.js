@@ -106,7 +106,7 @@ define([
                 EventManager.sendEvent(Constants.ROUTE_REQUEST, {
                     routeName: "settingsView",
                     args: [route],
-                    trigger: false
+                    trigger: true
                 });
             }
         }

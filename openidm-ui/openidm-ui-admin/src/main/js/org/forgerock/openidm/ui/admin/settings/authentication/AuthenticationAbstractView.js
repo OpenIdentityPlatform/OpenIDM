@@ -39,6 +39,15 @@ define([
             noBaseTemplate: true,
             element: "#AuthenticationModuleDialogContainer",
             model: {},
+            knownProperties: [
+                "enabled",
+                "queryOnResource",
+                "queryId",
+                "defaultUserRoles",
+                "propertyMapping",
+                "augmentSecurityContext",
+                "groupRoleMapping"
+            ],
             partials: [
                 "partials/form/_titaToggle.html",
                 "partials/form/_basicSelect.html",
@@ -118,6 +127,11 @@ define([
                             text: input
                         };
                     }
+                });
+
+                this.$el.find(".array-selection-no-custom").selectize({
+                    delimiter: ",",
+                    persist: false
                 });
 
                 if (!_.isUndefined(args.augmentSecurityContext)) {
