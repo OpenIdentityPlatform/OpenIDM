@@ -50,6 +50,9 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.idp.impl.IdentityProviderListener;
+import org.forgerock.openidm.idp.impl.IdentityProviderService;
+import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStage;
@@ -80,7 +83,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = "service.description", value = "OpenIDM SelfService Service"),
     @Property(name = "service.vendor", value = "ForgeRock AS"),
 })
-public class SelfService {
+public class SelfService implements IdentityProviderListener {
     static final String PID = "org.forgerock.openidm.selfservice";
 
     private static final Logger LOGGER = LoggerFactory.getLogger(SelfService.class);
@@ -128,27 +131,22 @@ public class SelfService {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile CryptoService cryptoService;
 
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile IdentityProviderService identityProviderService;
+
     private Dictionary<String, Object> properties = null;
     private JsonValue config;
     private RequestHandler processService;
     private ServiceRegistration<RequestHandler> serviceRegistration = null;
+    private ComponentContext context;
 
     @Activate
     void activate(ComponentContext context) throws Exception {
+        this.context = context;
         LOGGER.debug("Activating Service with configuration {}", context.getProperties());
         try {
             config = enhancedConfig.getConfigurationAsJson(context);
-            amendConfig();
-
-            // create self-service request handler
-            processService = JsonAnonymousProcessServiceBuilder.newBuilder()
-                    .withClassLoader(this.getClass().getClassLoader())
-                    .withJsonConfig(config)
-                    .withProgressStageProvider(newProgressStageProvider(newHttpClient()))
-                    .withTokenHandlerFactory(newTokenHandlerFactory())
-                    .withProcessStore(newProcessStore())
-                    .build();
-
+            identityProviderConfigChanged();
             // begin service registration prep
 
             String factoryPid = enhancedConfig.getConfigurationFactoryPid(context);
@@ -162,9 +160,6 @@ public class SelfService {
             properties.put(ServerConstants.ROUTER_PREFIX,
                     resourcePath(ROUTER_PREFIX).concat(resourcePath(factoryPid)).toString());
 
-            // service registration - register the AnonymousProcessService directly as a RequestHandler
-            serviceRegistration = context.getBundleContext().registerService(
-                    RequestHandler.class, processService, properties);
         } catch (Exception ex) {
             LOGGER.warn("Configuration invalid, can not start self-service.", ex);
             throw ex;
@@ -172,11 +167,17 @@ public class SelfService {
         LOGGER.info("Self-service started.");
     }
 
-    private void amendConfig() throws ResourceException {
+    void amendConfig(final JsonValue config) throws ResourceException {
         for (JsonValue stageConfig : config.get(STAGE_CONFIGS)) {
             if (stageConfig.isDefined(KBA_CONFIG)) {
                 // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
+            } else if (stageConfig.get("name").asString().equals("userDetails")) {
+                // add oauth provider config
+                identityProviderService.registerIdentityProviderListener(this);
+                stageConfig.put("providers", ProviderConfigMapper.toJsonValue(
+                        identityProviderService.getIdentityProviders())
+                        .asList());
             }
         }
 
@@ -333,10 +334,8 @@ public class SelfService {
     void deactivate(ComponentContext compContext) {
         LOGGER.debug("Deactivating Service {}", compContext.getProperties());
         try {
-            if (null != serviceRegistration) {
-                serviceRegistration.unregister();
-                serviceRegistration = null;
-            }
+            unregisterServiceRegistration();
+            identityProviderService.unregisterIdentityProviderListener(this);
         } catch (IllegalStateException e) {
             /* Catch if the service was already removed */
             serviceRegistration = null;
@@ -346,5 +345,44 @@ public class SelfService {
             LOGGER.info("Self-service stopped.");
         }
     }
+
+    private void unregisterServiceRegistration() {
+        if (null != serviceRegistration) {
+            serviceRegistration.unregister();
+            serviceRegistration = null;
+        }
+    }
+
+    /** Implementation of IdentityProviderListener */
+
+    @Override
+    public String getListenerName() {
+        return ComponentContextUtil.getFullPid(context);
+    }
+
+    @Override
+    public void identityProviderConfigChanged() {
+        LOGGER.debug("Configuring {} with changes from IdentityProviderConfig {}",
+                PID, identityProviderService.getIdentityProviders());
+        try {
+            unregisterServiceRegistration();
+            amendConfig(config);
+            // create self-service request handler
+            processService = JsonAnonymousProcessServiceBuilder.newBuilder()
+                    .withClassLoader(this.getClass().getClassLoader())
+                    .withJsonConfig(config)
+                    .withProgressStageProvider(newProgressStageProvider(newHttpClient()))
+                    .withTokenHandlerFactory(newTokenHandlerFactory())
+                    .withProcessStore(newProcessStore())
+                    .build();
+
+            // service registration - register the AnonymousProcessService directly as a RequestHandler
+            serviceRegistration = context.getBundleContext().registerService(
+                    RequestHandler.class, processService, properties);
+        } catch (Exception ex) {
+            LOGGER.warn("Configuration invalid, self-service not configured. ", ex);
+        }
+    }
+
 
 }

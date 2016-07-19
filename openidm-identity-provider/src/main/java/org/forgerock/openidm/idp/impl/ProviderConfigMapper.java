@@ -15,8 +15,10 @@
  */
 package org.forgerock.openidm.idp.impl;
 
+import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 
+import java.util.List;
 import java.util.Map;
 
 import org.forgerock.guava.common.base.Function;
@@ -53,7 +55,7 @@ public class ProviderConfigMapper {
     /**
      * A {@link Function} that returns a ProviderConfig bean as JSON
      */
-    static final Function<ProviderConfig, JsonValue> toJsonValue =
+    public static final Function<ProviderConfig, JsonValue> toJsonValue =
             new Function<ProviderConfig, JsonValue>() {
                 @Override
                 public JsonValue apply(ProviderConfig providerConfig) {
@@ -68,6 +70,20 @@ public class ProviderConfigMapper {
      */
     public static JsonValue toJsonValue(ProviderConfig config) {
         return toJsonValue.apply(config);
+    }
+
+    /**
+     * Converts a List of {@Link ProviderConfig} to {@link JsonValue}.
+     *
+     * @param configList of {@link ProviderConfig}
+     * @return {@link ProviderConfig} list as a {@link JsonValue}
+     */
+    public static final JsonValue toJsonValue(List<ProviderConfig> configList) {
+        JsonValue json = json(array());
+        for (ProviderConfig config : configList) {
+            json.add(toJsonValue.apply(config).asMap());
+        }
+        return json;
     }
 
     /**

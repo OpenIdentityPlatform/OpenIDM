@@ -22,6 +22,13 @@ package org.forgerock.openidm.idp.impl;
 public interface IdentityProviderListener {
 
     /**
+     * Returns the name of the IdentityProviderListener.
+     * 
+     * @return name of the listener as a String
+     */
+    String getListenerName();
+
+    /**
      * When there is a configuration change on any ProviderConfig,
      * services that have a references to the IdentityProviderService need
      * to be notified that there have been changes.

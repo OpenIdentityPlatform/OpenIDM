@@ -142,7 +142,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
     /** String refers to the name of the provider **/
     private final List<ProviderConfig> providerConfigs = new ArrayList<>();
 
-    private final List<IdentityProviderListener> identityProviderListeners = new ArrayList<>();
+    /** Key is typically the PID of the service implementing the listener  */
+    private final Map<String, IdentityProviderListener> identityProviderListeners = new ConcurrentHashMap<>();
 
     @Activate
     public void activate(ComponentContext context) throws Exception {
@@ -213,19 +214,19 @@ public class IdentityProviderService implements SingletonResourceProvider {
     /**
      * Registers a IdentityProviderListener.
      *
-     * @param listener IdentityProviderLister to be added
+     * @param listener {@link IdentityProviderListener} to be added
      */
     public void registerIdentityProviderListener(IdentityProviderListener listener) {
-        identityProviderListeners.add(listener);
+        identityProviderListeners.put(listener.getListenerName(), listener);
     }
 
     /**
      * Unregisters a IdentityProviderListener.
      *
-     * @param listener IdentityProviderLister to be removed
+     * @param listener {@link IdentityProviderListener} to be removed
      */
     public void unregisterIdentityProviderListener(IdentityProviderListener listener) {
-        identityProviderListeners.remove(listener);
+        identityProviderListeners.remove(listener.getListenerName());
     }
 
     /**
@@ -233,7 +234,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * on any identity provider configuration.
      */
     public void notifyListeners() {
-        for (IdentityProviderListener listener : identityProviderListeners) {
+        for (IdentityProviderListener listener : identityProviderListeners.values()) {
             listener.identityProviderConfigChanged();
         }
     }

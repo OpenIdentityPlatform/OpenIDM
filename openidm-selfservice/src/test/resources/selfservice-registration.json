@@ -1,0 +1,9 @@
+{
+  "stageConfigs" : [
+    {
+      "name" : "userDetails",
+      "identityEmailField" : "mail"
+    }
+  ],
+  "storage" : "stateless"
+}

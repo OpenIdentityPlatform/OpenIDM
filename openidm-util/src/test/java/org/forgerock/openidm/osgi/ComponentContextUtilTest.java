@@ -91,4 +91,33 @@ public class ComponentContextUtilTest {
         Dictionary<String, Object> modifiable = ComponentContextUtil.getModifiableProperties(context);
         assertThat(modifiable.remove("property")).isEqualTo("value");
     }
+
+    @Test
+    public void testGetFullPidWithFactoryId() {
+        final String fullPid = "org.forgerock.openidm.osgi.factoryPid";
+        ComponentContext contextMock = mock(ComponentContext.class);
+
+        Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put(ComponentContextUtil.COMPONENT_NAME, "org.forgerock.openidm.osgi");
+        properties.put(ComponentContextUtil.COMPONENT_CONFIG_FACTORY_PID, "factoryPid");
+        Dictionary<String, Object> dictionary = new UnmodifiableDictionary(properties);
+
+        when(contextMock.getProperties()).thenReturn(dictionary);
+
+        assertThat(ComponentContextUtil.getFullPid(contextMock)).isEqualTo(fullPid);
+    }
+
+    @Test
+    public void testGetFullPidWithOutFactoryId() {
+        final String fullPid = "org.forgerock.openidm.osgi";
+        ComponentContext contextMock = mock(ComponentContext.class);
+
+        Hashtable<String, Object> properties = new Hashtable<>();
+        properties.put(ComponentContextUtil.COMPONENT_NAME, "org.forgerock.openidm.osgi");
+        Dictionary<String, Object> dictionary = new UnmodifiableDictionary(properties);
+
+        when(contextMock.getProperties()).thenReturn(dictionary);
+
+        assertThat(ComponentContextUtil.getFullPid(contextMock)).isEqualTo(fullPid);
+    }
 }
