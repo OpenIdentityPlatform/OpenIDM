@@ -22,9 +22,12 @@ import java.util.Enumeration;
 import java.util.Hashtable;
 
 /**
- * Utilties for augmenting ComponentContext behavior.
+ * Utilities for augmenting ComponentContext behavior.
  */
 public class ComponentContextUtil {
+
+    public static final String COMPONENT_NAME = "component.name";
+    public static final String COMPONENT_CONFIG_FACTORY_PID = "config.factory-pid";
 
     public static Dictionary<String, Object> getModifiableProperties(ComponentContext context) {
         final Dictionary<String, Object> properties = context.getProperties();
@@ -35,6 +38,20 @@ public class ComponentContextUtil {
             copy.put(key, properties.get(key));
         }
         return copy;
+    }
+
+    /**
+     * Returns the full PID from a ComponentContext.
+     *
+     * @param context {@link ComponentContext} to get PID from
+     * @return full PID of the component as a String
+     */
+    public static String getFullPid(ComponentContext  context) {
+        return context.getProperties().get(COMPONENT_CONFIG_FACTORY_PID) != null
+                ? context.getProperties().get(COMPONENT_NAME).toString()
+                    + "."
+                    + context.getProperties().get(COMPONENT_CONFIG_FACTORY_PID)
+                : context.getProperties().get(COMPONENT_NAME).toString();
     }
 
     private ComponentContextUtil() {

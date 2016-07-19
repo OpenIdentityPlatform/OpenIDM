@@ -19,6 +19,7 @@ package org.forgerock.openidm.auth;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import javax.inject.Provider;
 
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
@@ -252,37 +253,42 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             return;
         }
         // get OpenIDConnect Properties
-        JsonValue openidConnectModuleProperties = FluentIterable.from(authModuleConfig)
+        Optional<JsonValue> openidConnectModulePropertiesOption = FluentIterable.from(authModuleConfig)
                 .firstMatch(new Predicate<JsonValue>() {
                     @Override
                     public boolean apply(JsonValue authModuleConfig) {
                         return authModuleConfig.get(AUTH_MODULE_NAME_KEY).asString()
                                 .equals(IDMAuthModule.OPENID_CONNECT.name());
                     }
-                })
-                .get()
-                .get(AUTH_MODULE_PROPERTIES_KEY);
+                });
 
-        if (openidConnectModuleProperties.isNotNull()) {
-            // replace resolvers with resolvers populated from IdentityProviderConfigs
-            openidConnectModuleProperties.put(RESOLVERS,
-                    FluentIterable.from(openidConnectModuleProperties.get(RESOLVERS))
-                            .transform(new Function<JsonValue, JsonValue>() {
-                                @Override
-                                public JsonValue apply(final JsonValue resolver) {
-                                    return ProviderConfigMapper.toJsonValue(
-                                            FluentIterable.from(identityProviderService.getIdentityProviders())
-                                                    .firstMatch(new Predicate<ProviderConfig>() {
-                                                        @Override
-                                                        public boolean apply(ProviderConfig config) {
-                                                            return config.getName().equals(
-                                                                    resolver.get(RESOLVER_NAME_KEY).asString());
-                                                        }
-                                                    })
-                                                    .get());
-                                }
-                            })
-                            .toList());
+        if (openidConnectModulePropertiesOption.isPresent()) {
+            JsonValue openidConnectModuleProperties = openidConnectModulePropertiesOption
+                    .get()
+                    .get(AUTH_MODULE_PROPERTIES_KEY);
+
+            if (openidConnectModuleProperties.isNotNull()) {
+                // replace resolvers with resolvers populated from IdentityProviderConfigs
+                openidConnectModuleProperties.put(RESOLVERS,
+                        FluentIterable.from(openidConnectModuleProperties.get(RESOLVERS))
+                                .transform(new Function<JsonValue, Map<String, Object>>() {
+                                    @Override
+                                    public Map<String, Object> apply(final JsonValue resolver) {
+                                        return ProviderConfigMapper.toJsonValue(
+                                                FluentIterable.from(identityProviderService.getIdentityProviders())
+                                                        .firstMatch(new Predicate<ProviderConfig>() {
+                                                            @Override
+                                                            public boolean apply(ProviderConfig config) {
+                                                                return config.getName().equals(
+                                                                        resolver.get(RESOLVER_NAME_KEY).asString());
+                                                            }
+                                                        })
+                                                        .get())
+                                                .asMap();
+                                    }
+                                })
+                                .toList());
+            }
         }
     }
 
@@ -298,6 +304,13 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     protected void unbindIdentityProviderService() {
         identityProviderService.unregisterIdentityProviderListener(this);
         identityProviderService = null;
+    }
+
+    /** Implementation of IdentityProviderListener */
+
+    @Override
+    public String getListenerName() {
+        return PID;
     }
 
     @Override
