@@ -958,7 +958,8 @@
             "userInfoEndpoint" : "User Info Endpoint",
             "title" : "Social ID Provider",
             "wellKnown" : "Discovery URL",
-            "scope" : "Scope"
+            "scope" : "Scope",
+            "disableOIDCAuthModule": "When you disable all social ID providers, OpenIDM disables the OpenID Connect module."
         },
         "audit": {
             "eventHandlers": {
@@ -1317,7 +1318,10 @@
             "managedUserLink": "Managed User Link",
             "moduleType": "Module Type",
             "select": "Select a Module",
-            "authenticationIdAttribute": "Authentication ID attribute for the User ID"
+            "authenticationIdAttribute": "Authentication ID attribute for the User ID",
+            "noSocialProviderHeader": "Warning",
+            "noSocialProviderMessage": "Configure a social ID provider before adding this module.",
+            "noSocialProviderLink": "Link"
         },
         "selfService": {
             "title": "Self-Service UI",

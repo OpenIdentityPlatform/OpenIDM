@@ -1,0 +1,12 @@
+<!-- Copyright 2016git  ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<div id="{{id}}" class="alert alert-{{type}}" style="{{#if hidden}}display:none;{{/if}}">
+    <i class="fa {{#if icon}}icon{{else}}fa-exclamation-circle{{/if}}"></i>
+    <strong role="heading">{{#if heading}}{{t heading}}{{/if}}</strong>
+    <span class="message">
+        {{#if message}}{{t message}}{{/if}}
+        {{#if link}}
+            <a href="{{link}}" role="button" class="{{linkClass}}">{{t linkMessage}}</a>
+        {{/if}}
+    </span>
+</div>

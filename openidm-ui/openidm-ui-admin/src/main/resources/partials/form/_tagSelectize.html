@@ -4,7 +4,7 @@
     <label class="col-sm-3 control-label" for="select-{{property}}">{{t label}}</label>
     <div class="col-sm-6">
         <select id="select-{{property}}"
-                class="form-control array-selection"
+                class="form-control {{#if disallowCustomTags}}array-selection-no-custom{{else}}array-selection{{/if}}"
                 name="{{property}}"
                 multiple="multiple">
             {{#eachTwoLists options value}}

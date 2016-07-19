@@ -25,6 +25,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
+    "org/forgerock/commons/ui/common/util/UIUtils",
     "bootstrap-dialog",
     "selectize"
 ], function($, _,
@@ -36,6 +37,7 @@ define([
             EventManager,
             Constants,
             AdminUtils,
+            UIUtils,
             BootstrapDialog,
             selectize) {
     var SocialConfigView = AdminAbstractView.extend({
@@ -55,6 +57,7 @@ define([
             "partials/form/_basicInput.html",
             "partials/form/_tagSelectize.html"
         ],
+
         render: function(args, callback) {
             $.when(
                 SocialDelegate.providerList(),
@@ -91,21 +94,91 @@ define([
 
         controlSectionSwitch: function(event) {
             event.preventDefault();
-
-            var toggle = $(event.target),
+            var originalVal = !$(event.currentTarget).is(":checked"),
+                toggle = $(event.target),
                 card = toggle.parents(".wide-card"),
                 index = this.$el.find(".wide-card").index(card),
                 enabled;
 
-            card.toggleClass("disabled");
-            enabled = !card.hasClass("disabled");
+            function configSocialProvider() {
+                card.toggleClass("disabled");
+                enabled = !card.hasClass("disabled");
 
-            this.model.providers[index].enabled = enabled;
+                this.model.providers[index].enabled = enabled;
 
-            if(enabled) {
-                this.createConfig(this.model.providers[index]);
+                if (enabled) {
+                    this.createConfig(this.model.providers[index]);
+                } else {
+                    this.deleteConfig(this.model.providers[index]);
+                }
+            }
+
+            // If you are disabling a social provider
+            if (!card.hasClass("disabled")) {
+                let numOfEnabledProviders = _.filter(this.model.providers, function(provider) {
+                    return provider.enabled;
+                }).length - 1; //removing the current provider from the calculation
+
+                // If the social provider to be disabled is the only enabled provider
+                if (numOfEnabledProviders === 0) {
+
+                    ConfigDelegate.readEntity("authentication").then(_.bind(function (data) {
+
+                        // There is at least one OIDC module and that module is enabled
+                        let self = this,
+                            OIDCModulesEnabled = _.some(data.serverAuthContext.authModules, (module) => {
+                                if (module.name === "OPENID_CONNECT" && module.enabled) {
+                                    return true;
+                                }
+                            });
+
+                        if (OIDCModulesEnabled) {
+
+                            BootstrapDialog.show({
+                                title: $.t('common.form.confirm'),
+                                type: "type-danger",
+                                message: $.t("templates.socialProviders.disableOIDCAuthModule"),
+                                id: "frConfirmationDialog",
+                                buttons: [
+                                    {
+                                        label: $.t('common.form.cancel'),
+                                        id: "frConfirmationDialogBtnClose",
+                                        action: function(dialog) {
+                                            $(event.currentTarget).prop("checked", originalVal);
+                                            dialog.close();
+                                        }
+                                    },
+                                    {
+                                        label: $.t('common.form.ok'),
+                                        cssClass: "btn-danger",
+                                        id: "frConfirmationDialogBtnOk",
+                                        action: function(dialog) {
+                                            _.each(data.serverAuthContext.authModules, (module) => {
+                                                if (module.name === "OPENID_CONNECT") {
+                                                    module.enabled = false;
+                                                }
+                                            });
+
+                                            ConfigDelegate.updateEntity("authentication", data).then(function() {
+                                                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
+                                            });
+
+                                            configSocialProvider.call(self);
+
+                                            dialog.close();
+                                        }
+                                    }
+                                ]
+                            });
+                        } else {
+                            configSocialProvider.call(this);
+                        }
+                    }, this));
+                } else {
+                    configSocialProvider.call(this);
+                }
             } else {
-                this.deleteConfig(this.model.providers[index]);
+                configSocialProvider.call(this);
             }
         },
 
