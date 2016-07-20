@@ -1,0 +1,31 @@
+
+    {{#requirements.properties.user.properties}}
+
+        <div class="form-group">
+            <label class="sr-only separator" for="input-userName">
+                <span>{{t 'common.user.username'}}</span>
+            </label>
+            <input type="text" placeholder="{{t 'common.user.username'}}" value="{{userName.default}}" id="input-userName" name="user.userName" class="form-control input-lg" required />
+        </div>
+
+        {{#name.properties}}
+
+            <div class="form-group">
+                <label class="sr-only separator" for="input-givenName">
+                    <span>{{t 'common.user.givenName'}}</span>
+                </label>
+                <input type="text" placeholder="{{t 'common.user.givenName'}}" id="input-givenName" value="{{givenName.default}}" name="user.name.givenName" class="form-control input-lg" />
+            </div>
+
+            <div class="form-group">
+                <label class="sr-only separator" for="input-familyName">
+                    <span>{{t 'common.user.sn'}}</span>
+                </label>
+                <input type="text" placeholder="{{t 'common.user.sn'}}" id="input-familyName" value="{{familyName.default}}" name="user.name.familyName" class="form-control input-lg" />
+            </div>
+
+        {{/name.properties}}
+
+        {{>profile/_multiValueFormFields field=emails subPartial="profile/_emailEntry" label="common.user.email"}}
+
+    {{/requirements.properties.user.properties}}

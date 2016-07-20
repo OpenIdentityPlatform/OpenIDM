@@ -18,17 +18,45 @@ define([
     "jquery",
     "lodash",
     "form2js",
-    "handlebars",
     "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView",
+    "org/forgerock/commons/ui/common/util/OAuth",
+    "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
     "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function($, _, form2js, Handlebars,
+], function($, _, form2js,
     AnonymousProcessView,
+    OAuth,
+    Router,
     CommonSelfRegistrationView,
     ValidatorsManager) {
 
     var SelfRegistrationView = AnonymousProcessView.extend({
-        baseEntity: "selfservice/registration"
+        baseEntity: "selfservice/registration",
+        partials: [
+            "partials/process/_coreProfileDetails.html",
+            "partials/profile/_multiValueFormFields.html",
+            "partials/profile/_emailEntry.html",
+            "partials/providers/_OAuth.html"
+        ],
+        events: _.extend({
+            "click .oauth": "oauthHandler"
+        }, CommonSelfRegistrationView.events),
+        oauthHandler: function (e) {
+            e.preventDefault();
+            window.location.href = OAuth.getRequestURL(
+                $(e.target).attr("authorization_endpoint"),
+                $(e.target).attr("client_id"),
+                $(e.target).attr("scopes") || "openid profile email",
+                Router.getLink(Router.currentRoute,
+                    [
+                        "/continue" +
+                        (this.delegate.token ? ("&token=" + this.delegate.token) : "") +
+                        "&provider=" + $(e.target).val() +
+                        "&redirect_uri=" + OAuth.getRedirectURI()
+                    ]
+                )
+            );
+        }
     });
 
     SelfRegistrationView.prototype = _.extend(Object.create(CommonSelfRegistrationView), SelfRegistrationView.prototype);
