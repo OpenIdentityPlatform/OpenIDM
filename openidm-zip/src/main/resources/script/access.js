@@ -86,7 +86,7 @@ var httpAccessConfig =
         },
         {
             "pattern"    : "identityProviders",
-            "roles"      : "openidm-authorized",
+            "roles"      : "*",
             "methods"    : "read",
             "actions"    : "*"
         },
