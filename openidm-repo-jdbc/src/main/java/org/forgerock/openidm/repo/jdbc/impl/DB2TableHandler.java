@@ -37,10 +37,13 @@ import org.forgerock.openidm.repo.util.Clause;
 import org.forgerock.util.query.QueryFilter;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import java.util.List;
 import java.util.Map;
+import org.forgerock.json.resource.NotFoundException;
 
 /**
  * @version $Revision$ $Date$
@@ -63,9 +66,7 @@ public class DB2TableHandler extends GenericTableHandler {
                 QueryDefinition.READFORUPDATEQUERYSTR,
                 "SELECT obj.* FROM "
                         + mainTable
-                        + " obj INNER JOIN "
-                        + typeTable
-                        + " objtype ON obj.objecttypes_id = objtype.id AND objtype.objecttype = ? WHERE obj.objectid = ?");
+                        + " obj WHERE obj.objecttypes_id = ? AND obj.objectid = ? FOR UPDATE");
 
         // Main object table DB2 Script
         result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " obj WHERE EXISTS (SELECT 1 FROM " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?");
@@ -149,5 +150,55 @@ public class DB2TableHandler extends GenericTableHandler {
         }
 
         return builder.toSQL();
+    }
+    
+    /**
+     * Reads an object with for update locking applied
+     *
+     * Note: statement associated with the returned resultset
+     * is not closed upon return.
+     * Aside from taking care to close the resultset it also is
+     * the responsibility of the caller to close the associated
+     * statement. Although the specification specifies that drivers/pools
+     * should close the statement automatically, not all do this reliably.
+     *
+     * @param fullId qualified id of component type and id
+     * @param type the component type
+     * @param localId the id of the object within the component type
+     * @param connection the connection to use
+     * @return the row for the requested object, selected FOR UPDATE
+     * @throws NotFoundException if the requested object was not found in the DB
+     * @throws java.sql.SQLException for general DB issues
+     */
+    public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
+            throws NotFoundException, SQLException {
+        
+        PreparedStatement readForUpdateStatement = null;
+        ResultSet rs = null;
+        try {
+            long typeId = readTypeId(type, connection);
+            if (typeId < 0) {
+                throw new NotFoundException("Object " + fullId + " not found. No id could be retrieved for type " + type);
+            }
+            readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
+            logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
+            readForUpdateStatement.setString(1, String.valueOf(typeId));
+            readForUpdateStatement.setString(2, localId);
+
+            logger.debug("Executing: {}", readForUpdateStatement);
+            rs = readForUpdateStatement.executeQuery();
+            if (rs.next()) {
+                logger.debug("Read for update full id: {}", fullId);
+                return rs;
+            } else {
+                CleanupHelper.loggedClose(rs);
+                CleanupHelper.loggedClose(readForUpdateStatement);
+                throw new NotFoundException("Object " + fullId + " not found in " + type);
+            }
+        } catch (SQLException ex) {
+            CleanupHelper.loggedClose(rs);
+            CleanupHelper.loggedClose(readForUpdateStatement);
+            throw ex;
+        }
     }
 }
