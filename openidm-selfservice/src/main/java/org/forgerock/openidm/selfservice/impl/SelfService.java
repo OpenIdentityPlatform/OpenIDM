@@ -146,7 +146,6 @@ public class SelfService implements IdentityProviderListener {
         LOGGER.debug("Activating Service with configuration {}", context.getProperties());
         try {
             config = enhancedConfig.getConfigurationAsJson(context);
-            identityProviderConfigChanged();
             // begin service registration prep
 
             String factoryPid = enhancedConfig.getConfigurationFactoryPid(context);
@@ -159,6 +158,7 @@ public class SelfService implements IdentityProviderListener {
             properties = ComponentContextUtil.getModifiableProperties(context);
             properties.put(ServerConstants.ROUTER_PREFIX,
                     resourcePath(ROUTER_PREFIX).concat(resourcePath(factoryPid)).toString());
+            identityProviderConfigChanged();
 
         } catch (Exception ex) {
             LOGGER.warn("Configuration invalid, can not start self-service.", ex);
@@ -172,10 +172,12 @@ public class SelfService implements IdentityProviderListener {
             if (stageConfig.isDefined(KBA_CONFIG)) {
                 // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
-            } else if (stageConfig.get("name").asString().equals("userDetails")) {
+            } else if (stageConfig.get("class").isNotNull()
+                    && stageConfig.get("class").asString()
+                            .equals("org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig")) {
                 // add oauth provider config
                 identityProviderService.registerIdentityProviderListener(this);
-                stageConfig.put("providers", ProviderConfigMapper.toJsonValue(
+                stageConfig.put(IdentityProviderService.PROVIDERS, ProviderConfigMapper.toJsonValue(
                         identityProviderService.getIdentityProviders())
                         .asList());
             }

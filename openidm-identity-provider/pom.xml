@@ -45,6 +45,18 @@
             <artifactId>forgerock-guava-collect</artifactId>
             <version>18.0.4</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-selfservice-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-selfservice-stages</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.http</groupId>
+            <artifactId>chf-client-apache-async</artifactId>
+        </dependency>
 
         <!-- OpenIDM Dependencies -->
         <dependency>
@@ -121,6 +133,7 @@
                         <Export-Package>
                             org.forgerock.openidm.idp.impl;
                             org.forgerock.openidm.idp.config;
+                            org.forgerock.openidm.idp.relyingparty;
                         </Export-Package>
                     </instructions>
                 </configuration>
