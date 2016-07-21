@@ -947,6 +947,7 @@
         },
         "socialProviders" : {
             "provider" : "Provider",
+            "icon" : "Sign-In Button URL",
             "sectionDetails" : "Enable social identity providers for user authentication and registration.",
             "configureProvider" : "Configure provider for social provisioning",
             "clientId" : "Client ID",

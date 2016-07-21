@@ -140,9 +140,7 @@ define([
                 details: $.t("templates.selfservice.userDetailsHelp"),
                 editable: true,
                 togglable: false,
-                image: {
-                    icon: "database"
-                }
+                displayIcon: "database"
             }];
 
             this.data.userverification = [{
@@ -151,18 +149,14 @@ define([
                 details: $.t("templates.selfservice.captcha.description"),
                 editable: true,
                 togglable: true,
-                image: {
-                    icon: "shield"
-                }
+                displayIcon: "shield"
             }, {
                 type: "emailValidation",
                 name: $.t("templates.selfservice.emailValidation"),
                 details: $.t("templates.selfservice.emailValidationDescription"),
                 editable: true,
                 togglable: true,
-                image: {
-                    icon: "envelope"
-                }
+                displayIcon: "envelope"
             }];
 
             this.data.securityQuestions = [{
@@ -171,9 +165,7 @@ define([
                 details: $.t("templates.selfservice.kbaSecurityAnswerDefinitionStageHelp"),
                 editable: false,
                 togglable: true,
-                image: {
-                    icon: "list-ol"
-                }
+                displayIcon: "list-ol"
             }];
 
             this.data.licensingAndConsent = [{
@@ -182,9 +174,7 @@ define([
                 details: $.t("templates.selfservice.termsAndConditions.details"),
                 editable: true,
                 togglable: true,
-                image: {
-                    icon: "file-text-o"
-                }
+                displayIcon: "file-text-o"
             }];
 
             //Master config list for controlling various states such as what is editable and what is enabled by default when turned on
@@ -208,8 +198,7 @@ define([
                 enabledByDefault: true,
                 toggledOn: false
             }, {
-                "name" : "selfRegistration",
-                "identityServiceUrl" : "managed/user",
+                type : "selfRegistration",
                 toggledOn: true
             }];
 

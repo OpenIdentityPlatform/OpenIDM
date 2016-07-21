@@ -69,6 +69,13 @@ define([
                     provider.details = $.t("templates.socialProviders.configureProvider");
                     provider.enabled = false;
 
+                    switch(provider.name) {
+                        case "google":
+                            provider.displayIcon = "google";
+                            break;
+                    }
+
+
                     _.each(currentProviders.providers, (currentProvider) => {
                         if(provider.name === currentProvider.name) {
                             _.extend(this.model.providers[index], currentProvider);
