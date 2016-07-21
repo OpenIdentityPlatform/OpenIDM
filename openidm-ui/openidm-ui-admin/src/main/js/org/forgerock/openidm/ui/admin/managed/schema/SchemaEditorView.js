@@ -726,6 +726,13 @@ define([
                     return policies;
                 };
 
+                //handle the minLength property
+                if (!property.minLength.length || !parseInt(property.minLength, 10)) {
+                    property.minLength = null;
+                } else {
+                    property.minLength = parseInt(property.minLength, 10);
+                }
+
                 data.properties[property.propertyName] = {
                     "description": property.description,
                     "title": property.title,
