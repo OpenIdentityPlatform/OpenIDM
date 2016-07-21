@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.idp.impl;
 
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -32,6 +33,11 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
+import org.forgerock.http.Client;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.apache.async.AsyncHttpClientProvider;
+import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -48,7 +54,10 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.idp.config.ProviderConfig;
+import org.forgerock.openidm.idp.relyingparty.AuthDetails;
+import org.forgerock.openidm.idp.relyingparty.OpenIDConnectProvider;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.Options;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -102,6 +111,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
                     return value.getObject();
                 }
             };
+
+    private enum Action { getauthtoken, availableProviders }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -173,13 +184,39 @@ public class IdentityProviderService implements SingletonResourceProvider {
         return allProviders;
     }
 
+    /**
+     * Returns a {@link ProviderConfig} for the specified provider name.
+     *
+     * @param providerName name of the provider to retrieve configuration for
+     * @return {@link ProviderConfig} associated with the provider name
+     */
+    public ProviderConfig getIdentityProvider(final String providerName) {
+        for (List<IdentityProviderConfig> authType : identityProviders.values()) {
+            for (IdentityProviderConfig config: authType) {
+                if (config.getIdentityProviderConfig().getName().equals(providerName)) {
+                    return config.getIdentityProviderConfig();
+                }
+            }
+        }
+        return null;
+    }
+
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest actionRequest) {
         try {
-            if (actionRequest.getAction().equals("availableProviders")) {
-                return newActionResponse(json(object(field("providers", providerConfigs)))).asPromise();
-            } else {
-                return new BadRequestException("Not a supported action.").asPromise();
+            switch (actionRequest.getActionAsEnum(Action.class)) {
+            case availableProviders:
+                return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
+            case getauthtoken:
+                final AuthDetails authDetails = new OpenIDConnectProvider(getIdentityProvider(actionRequest.getContent()
+                        .get("provider").required().asString()), newHttpClient())
+                        .getAuthDetails(
+                                actionRequest.getContent().get("code").required().asString(),
+                                actionRequest.getContent().get("redirect_uri").required().asString());
+                // just return id_token as "auth_token"
+                return newActionResponse(json(object(field("auth_token", authDetails.getIdToken())))).asPromise();
+            default:
+                return new BadRequestException("Not a supported Action").asPromise();
             }
         } catch (JsonValueException e) {
             return new BadRequestException(e.getMessage(), e).asPromise();
@@ -237,5 +274,17 @@ public class IdentityProviderService implements SingletonResourceProvider {
         for (IdentityProviderListener listener : identityProviderListeners.values()) {
             listener.identityProviderConfigChanged();
         }
+    }
+
+    private Client newHttpClient() throws HttpApplicationException {
+        return new Client(
+                new HttpClientHandler(
+                        Options.defaultOptions()
+                                .set(OPTION_LOADER, new Loader() {
+                                    @Override
+                                    public <S> S load(Class<S> service, Options options) {
+                                        return service.cast(new AsyncHttpClientProvider());
+                                    }
+                                })));
     }
 }
