@@ -540,6 +540,7 @@
             "passwordSelfServiceHelp" : "Configure the end-user password reset experience.",
             "usernameSelfServiceHelp" : "Configure the end-user forgotten username retrieval experience.",
             "userRegistrationSelfServiceHelp" : "Configure the end-user registration experience.",
+            "captchaNotConfigured" : "Configure or disable reCAPTCHA",
 
             "enableUserRegistration" : "Enable User Registration",
             "enablePassword" : "Enable Password Reset",
