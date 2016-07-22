@@ -580,6 +580,7 @@
             "tokenExpire" : "Token LifeTime (seconds)",
             "storageLookup" : "User Storage & Lookup",
             "userVerification" : "User Verification",
+            "socialSystemMessage" : "Configure social identity providers in <a href='#settings/social/'>system preferences</a>",
             "securityQuestions" : "Security Questions",
             "licensingAndConsent" : "Licensing / Privacy Agreement",
             "password" : {

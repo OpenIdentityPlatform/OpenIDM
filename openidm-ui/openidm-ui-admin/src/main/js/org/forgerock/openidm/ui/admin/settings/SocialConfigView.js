@@ -26,6 +26,7 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView",
     "bootstrap-dialog",
     "selectize"
 ], function($, _,
@@ -38,6 +39,7 @@ define([
             Constants,
             AdminUtils,
             UIUtils,
+            UserRegistrationConfigView,
             BootstrapDialog,
             selectize) {
     var SocialConfigView = AdminAbstractView.extend({
@@ -61,10 +63,15 @@ define([
         render: function(args, callback) {
             $.when(
                 SocialDelegate.providerList(),
-                SocialDelegate.availableProviders()
-            ).then((providerList, currentProviders) => {
+                SocialDelegate.availableProviders(),
+                ConfigDelegate.readEntityAlways("selfservice/registration")
+            ).then((providerList, currentProviders, userRegistration) => {
                 this.data.providers = _.cloneDeep(providerList.providers);
                 this.model.providers = _.cloneDeep(providerList.providers);
+
+                if(userRegistration) {
+                    this.model.userRegistration = userRegistration;
+                }
 
                 _.each(this.data.providers, (provider, index) => {
                     provider.togglable = true;
@@ -101,6 +108,10 @@ define([
                 enabled;
 
             function configSocialProvider() {
+                var providerCount = _.filter(this.model.providers, function(provider) {
+                    return provider.enabled;
+                }).length - 1;
+
                 card.toggleClass("disabled");
                 enabled = !card.hasClass("disabled");
 
@@ -110,6 +121,10 @@ define([
                     this.createConfig(this.model.providers[index]);
                 } else {
                     this.deleteConfig(this.model.providers[index]);
+                }
+
+                if(providerCount === 0 && this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+                    UserRegistrationConfigView.switchToUserDetails(this.model.userRegistration);
                 }
             }
 
