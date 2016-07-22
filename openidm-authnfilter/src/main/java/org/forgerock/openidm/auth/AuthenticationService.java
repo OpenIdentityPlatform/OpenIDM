@@ -268,26 +268,12 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                     .get(AUTH_MODULE_PROPERTIES_KEY);
 
             if (openidConnectModuleProperties.isNotNull()) {
-                // replace resolvers with resolvers populated from IdentityProviderConfigs
+                // populate the resolvers from IdentityProviderConfigs
                 openidConnectModuleProperties.put(RESOLVERS,
-                        FluentIterable.from(openidConnectModuleProperties.get(RESOLVERS))
-                                .transform(new Function<JsonValue, Map<String, Object>>() {
-                                    @Override
-                                    public Map<String, Object> apply(final JsonValue resolver) {
-                                        return ProviderConfigMapper.toJsonValue(
-                                                FluentIterable.from(identityProviderService.getIdentityProviders())
-                                                        .firstMatch(new Predicate<ProviderConfig>() {
-                                                            @Override
-                                                            public boolean apply(ProviderConfig config) {
-                                                                return config.getName().equals(
-                                                                        resolver.get(RESOLVER_NAME_KEY).asString());
-                                                            }
-                                                        })
-                                                        .get())
-                                                .asMap();
-                                    }
-                                })
-                                .toList());
+                        ProviderConfigMapper
+                                .toJsonValue(identityProviderService.getIdentityProviders())
+                                .asList()
+                );
             }
         }
     }
