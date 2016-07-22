@@ -26,7 +26,8 @@ define([
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/selfservice/SelfServiceStageDialogView"
+    "org/forgerock/openidm/ui/admin/selfservice/SelfServiceStageDialogView",
+    "org/forgerock/openidm/ui/common/delegates/SocialDelegate"
 ], function($, _,
             handlebars,
             form2js,
@@ -37,7 +38,8 @@ define([
             AdminUtils,
             EventManager,
             Constants,
-            SelfServiceStageDialogView) {
+            SelfServiceStageDialogView,
+            SocialDelegate) {
     var UserRegistrationConfigView = AdminAbstractView.extend({
         template: "templates/admin/selfservice/UserRegistrationConfigTemplate.html",
         events: {
@@ -201,6 +203,10 @@ define([
             }, {
                 type : "selfRegistration",
                 toggledOn: true
+            }, {
+                type: "socialUserDetails",
+                enabledByDefault: false,
+                toggledOn: true
             }];
 
 
@@ -208,11 +214,27 @@ define([
                 this.getResources(),
                 ConfigDelegate.readEntity("ui/configuration"),
                 ConfigDelegate.readEntityAlways(this.model.configUrl),
-                ConfigDelegate.readEntityAlways("external.email")
-            ).then(_.bind(function(resources, uiConfig, selfServiceConfig, emailConfig) {
+                ConfigDelegate.readEntityAlways("external.email"),
+                SocialDelegate.availableProviders()
+            ).then(_.bind(function(resources, uiConfig, selfServiceConfig, emailConfig, availableProviders) {
                 this.model.emailServiceAvailable = !_.isUndefined(emailConfig) && _.has(emailConfig, "host");
                 this.model.resources = resources;
                 this.model.uiConfig = uiConfig;
+
+                _.each(availableProviders.providers, (provider) => {
+                    switch(provider.name) {
+                        case "google":
+                            provider.displayIcon = "google";
+                            break;
+                    }
+                });
+
+                this.data.socialProviders = {
+                    providerList : availableProviders.providers,
+                    type: "socialUserDetails",
+                    editable: false,
+                    togglable: true
+                };
 
                 if (selfServiceConfig) {
                     $.extend(true, this.model.saveConfig, selfServiceConfig);
@@ -230,9 +252,12 @@ define([
                             this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("disabled", false);
 
                             if(stage.name === "userDetails") {
-                                this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("active", true);
+                                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
+                            } else if (stage.class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+                                this.$el.find(".wide-card[data-type='socialUserDetails'] .section-check").prop("checked", true).trigger("change");
                             } else {
                                 this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
+
                             }
                         }, this);
 
@@ -462,13 +487,21 @@ define([
                 configItem.toggledOn = true;
             }
 
-            if(_.filter(stages, {"name" : type}).length === 0) {
-                saveOrder = this.findPosition(configList, type);
-                defaultLocation = _.findIndex(defaultStages, function (stage) {
-                    return stage.name === type;
-                });
+            if(type !== "socialUserDetails") {
+                if(_.filter(stages, {"name" : type}).length === 0) {
+                    saveOrder = this.findPosition(configList, type);
+                    defaultLocation = _.findIndex(defaultStages, function (stage) {
+                        return stage.name === type;
+                    });
 
-                stages.splice(saveOrder, 0, _.clone(defaultStages[defaultLocation]));
+                    stages.splice(saveOrder, 0, _.clone(defaultStages[defaultLocation]));
+                }
+            } else {
+                stages[0].class = "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig";
+                delete stages[0].name;
+
+                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", false);
+                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("disabled", true);
             }
 
             return stages;
@@ -496,9 +529,19 @@ define([
                 configItem.toggledOn = false;
             }
 
-            return _.reject(stages, function(stage) {
-                return stage.name === type;
-            });
+            if(type !== "socialUserDetails") {
+                return _.reject(stages, function (stage) {
+                    return stage.name === type;
+                });
+            } else {
+                stages[0].name = "userDetails";
+                delete stages[0].class;
+
+                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
+                this.$el.find(".wide-card[data-type='userDetails']").toggleClass("disabled", false);
+
+                return stages;
+            }
         },
 
         /**
@@ -648,6 +691,15 @@ define([
 
             this.$el.find(".all-check").val(true);
             this.$el.find(".all-check").prop("checked", true);
+        },
+
+        switchToUserDetails: function(registrationConfig) {
+            delete registrationConfig.stageConfigs[0].class;
+            registrationConfig.stageConfigs[0].name = "userDetails";
+
+            ConfigDelegate.updateEntity("selfservice/registration", registrationConfig).then(() => {
+                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "selfServiceUserRegistrationSave");
+            });
         },
 
         preventTab: function(event) {

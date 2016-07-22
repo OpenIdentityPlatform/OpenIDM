@@ -48,6 +48,38 @@
                                 {{/each}}
                             </div>
                         </div>
+
+                        <div class="simple-section clearfix">
+                            <label class="col-sm-3 control-label">Social Registration</label>
+                            <div class="col-sm-7">
+                                {{#if socialProviders.providerList}}
+                                <div class="self-service-card card wide-card {{#unless socialProviders.enabled}}disabled{{/unless}}" data-editable="{{socialProviders.editable}}" data-type="{{socialProviders.type}}" {{#if socialProviders.name}}data-name="{{name}}"{{/if}}>
+                                    <div class="card-body">
+                                        <div class="switch-holder panel-heading">
+                                            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                                                <label>
+                                                    <input class="section-check" type="checkbox" {{#if socialProviders.enabled}}checked{{/if}}><span></span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="details panel-body">
+                                            <div class="logo-holder">
+                                                {{#each socialProviders.providerList}}
+                                                <div class="image circle self-service-icon">
+                                                    <i class="fa fa-{{displayIcon}}"></i>
+                                                </div>
+                                                {{/each}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{/if}}
+                                <div class="well text-center">
+                                    {{t "templates.selfservice.socialSystemMessage"}}
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="simple-section clearfix">
                             <label class="col-sm-3 control-label">{{t "templates.selfservice.securityQuestions"}}</label>
                             <div class="col-sm-7">
