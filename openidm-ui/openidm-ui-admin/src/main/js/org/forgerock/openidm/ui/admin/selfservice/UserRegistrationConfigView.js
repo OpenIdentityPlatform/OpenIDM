@@ -45,7 +45,8 @@ define([
             "change .section-check" : "controlSectionSwitch",
             "click .save-config" : "saveConfig",
             "click .wide-card.active" : "showDetailDialog",
-            "click li.disabled a" : "preventTab"
+            "click li.disabled a" : "preventTab",
+            "click #configureCaptcha": "configureCaptcha"
         },
         partials: [
             "partials/_toggleIconBlock.html",
@@ -385,6 +386,8 @@ define([
             this.data.emailRequired = emailCheck.emailRequired;
             this.$el.find("#emailStepWarning").toggle(emailCheck.showWarning);
 
+            this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
+
             if (!this.model.surpressSave && !removeConfig) {
                 this.saveConfig();
             }
@@ -414,6 +417,24 @@ define([
                 "emailRequired": emailRequired,
                 "showWarning": show
             };
+        },
+
+        showCaptchaWarning: function(stageConfigs) {
+            this.$el.find("#captchaNotConfiguredWarning").toggle(this.checkCaptchaConfigs(stageConfigs));
+        },
+
+        checkCaptchaConfigs: function(stageConfigs) {
+            var captchaStage = stageConfigs.filter(function(value) { return value.name === "captcha";})[0];
+            if (captchaStage && (!captchaStage.recaptchaSiteKey || ! captchaStage.recaptchaSecretKey)) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+        
+        configureCaptcha: function(event) {
+            event.preventDefault();
+            this.$el.find("[data-type='captcha']").trigger("click");
         },
 
         /**
@@ -586,6 +607,7 @@ define([
                     EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
                 });
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
+                this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
             }, this));
         },
 
