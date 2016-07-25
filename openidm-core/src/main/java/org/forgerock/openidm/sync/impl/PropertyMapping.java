@@ -183,4 +183,13 @@ class PropertyMapping {
         }
         return condition.evaluate(params, context);
     }
+
+    /**
+     * Determines if {@code PropertyMapping} has a transform-script.
+     *
+     * @return {@code true} if {@code PropertyMapping} has a transform-script and {@code false} otherwise
+     */
+    public boolean hasTransformScript() {
+        return transform != null;
+    }
 }

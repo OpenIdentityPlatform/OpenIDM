@@ -21,6 +21,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Requests.*;
+import static org.forgerock.openidm.sync.impl.ReconciliationStatistic.DurationMetric;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,8 +39,8 @@ import javax.script.ScriptException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.SyncContext;
 import org.forgerock.openidm.condition.Conditions;
+import org.forgerock.openidm.util.DurationStatistics;
 import org.forgerock.services.context.Context;
-import org.forgerock.json.JsonPatch;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.CreateRequest;
@@ -365,27 +366,30 @@ class ObjectMapping {
     /**
      * Returns the complete set of link Qualifiers.
      * 
-     * @param a {@link Context} associated with the current sync.
+     * @param context {@link Context} associated with the current sync.
+     * @param reconContext Recon context or {@code null}
      * @return a {@link Set} object representing the complete set of link qualifiers
      * @throws SynchronizationException
      */
-    private Set<String> getAllLinkQualifiers(Context context) throws SynchronizationException {
-        return getLinkQualifiers(null, null, true, context);
+    private Set<String> getAllLinkQualifiers(Context context, ReconciliationContext reconContext)
+            throws SynchronizationException {
+        return getLinkQualifiers(null, null, true, context, reconContext);
     }
     
     /**
      * Returns a set of link qualifiers for a given source. If the returnAll boolean is used to indicate that all linkQualifiers
      * should be returned regardless of the source object.
-     * 
+     *
      * @param object the object's value
      * @param oldValue the source object's old value
      * @param returnAll true if all link qualifiers should be returned, false otherwise
-     * @param a {@link Context} associated with the current sync.
+     * @param context {@link Context} associated with the current sync.
+     * @param reconContext Recon context or {@code null}
      * @return a {@link Set} object representing the complete set of link qualifiers
      * @throws SynchronizationException
      */
-    private Set<String> getLinkQualifiers(JsonValue object, JsonValue oldValue, boolean returnAll, Context context) 
-            throws SynchronizationException {
+    private Set<String> getLinkQualifiers(JsonValue object, JsonValue oldValue, boolean returnAll, Context context,
+            ReconciliationContext reconContext) throws SynchronizationException {
         if (linkQualifiersScript != null) {
             // Execute script to find the list of link qualifiers
             Map<String, Object> scope = new HashMap<String, Object>();
@@ -393,11 +397,15 @@ class ObjectMapping {
             scope.put("object", object == null || object.isNull() ? null : object.asMap());
             scope.put("oldValue", oldValue == null || oldValue.isNull() ? null : oldValue.asMap());
             scope.put("returnAll", returnAll);
+
+            final long startNanoTime = startNanoTime(reconContext);
             try {
                 return json(linkQualifiersScript.exec(scope, context)).asSet(String.class);
             } catch (ScriptException se) {
                 LOGGER.debug("{} {} script encountered exception", name, "linkQualifiers", se);
                 throw new SynchronizationException(se);
+            } finally {
+                addDuration(reconContext, DurationMetric.linkQualifiersScript, startNanoTime);
             }
         } else {
             return linkQualifiersList;
@@ -499,7 +507,7 @@ class ObjectMapping {
         }
                 
         // Loop over correlation queries, performing a sync for each linkQualifier
-        for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), oldValue, false, context)) {
+        for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), oldValue, false, context, null)) {
             // TODO: one day bifurcate this for synchronous and asynchronous source operation
             SourceSyncOperation op = new SourceSyncOperation(context);
             op.oldValue = oldValue;
@@ -524,7 +532,7 @@ class ObjectMapping {
                 syncAuditEvent.setTargetObjectId(op.getTargetObjectId());
                 syncAuditEvent.setLinkQualifier(op.getLinkQualifier());
                 syncAuditEvent.setStatus(status);
-                logEntry(syncAuditEvent);
+                logEntry(syncAuditEvent, null);
             }
         }
         return results;
@@ -591,10 +599,13 @@ class ObjectMapping {
      *
      * @param context the Context to use for the request
      * @param target the target object to create.
+     * @param reconContext Recon context or {@code null}
      * @throws SynchronizationException
      */
-    private void updateTargetObject(Context context, JsonValue target, String targetId) throws SynchronizationException {
+    private void updateTargetObject(Context context, JsonValue target, String targetId,
+            ReconciliationContext reconContext) throws SynchronizationException {
         EventEntry measure = Publisher.start(EVENT_UPDATE_TARGET, target, null);
+        final long startNanoTime = startNanoTime(reconContext);
         try {
             final String id = target.get("_id").required().asString();
             final String fullId = LazyObjectAccessor.qualifiedId(targetObjectSet, id);
@@ -616,6 +627,7 @@ class ObjectMapping {
             LOGGER.warn("Failed to update target object", ose);
             throw new SynchronizationException(ose);
         } finally {
+            addDuration(reconContext, DurationMetric.updateTargetObject, startNanoTime);
             measure.end();
         }
     }
@@ -625,11 +637,13 @@ class ObjectMapping {
      *
      * @param context the Context to use for the request
      * @param target the target object to create.
+     * @param reconContext Recon context
      * @throws SynchronizationException
      */
-    private void deleteTargetObject(Context context, JsonValue target) throws SynchronizationException {
+    private void deleteTargetObject(Context context, JsonValue target, ReconciliationContext reconContext) throws SynchronizationException {
         if (target != null && target.get("_id").isString()) { // forgiving delete
             EventEntry measure = Publisher.start(EVENT_DELETE_TARGET, target, null);
+            final long startNanoTime = startNanoTime(reconContext);
             try {
                 DeleteRequest request = newDeleteRequest(targetObjectSet, target.get("_id").required().asString())
                         .setRevision(target.get("_rev").asString());
@@ -643,6 +657,7 @@ class ObjectMapping {
                 LOGGER.warn("Failed to delete target object", ose);
                 throw new SynchronizationException(ose);
             } finally {
+                addDuration(reconContext, DurationMetric.deleteTargetObject, startNanoTime);
                 measure.end();
             }
         }
@@ -652,22 +667,25 @@ class ObjectMapping {
      * Apply the configured sync mappings
      *
      * @param context a {@link Context} for the current request.
-     * @param source The current source object 
+     * @param source The current source object
      * @param oldSource an optional old source object before the change(s) that triggered the sync, null if not provided
      * @param target the current target object to modify
      * @param existingTarget the full existing target object
      * @param linkQualifier the linkQualifier associated with the current sync operation
+     * @param reconContext Recon context or {@code null}
      * @throws SynchronizationException if applying the mappings fails.
      */
-    private void applyMappings(Context context, JsonValue source, JsonValue oldSource, JsonValue target, 
-            JsonValue existingTarget, String linkQualifier) throws SynchronizationException {
+    private void applyMappings(Context context, JsonValue source, JsonValue oldSource, JsonValue target,
+            JsonValue existingTarget, String linkQualifier, ReconciliationContext reconContext) throws SynchronizationException {
         EventEntry measure = Publisher.start(getObjectMappingEventName(), source, null);
         try {
             for (PropertyMapping property : properties) {
+                final long startNanoTime = startNanoTime(reconContext, property.hasTransformScript());
                 property.apply(source, oldSource, target, existingTarget, linkQualifier, context);
+                addDuration(reconContext, DurationMetric.propertyMappingScript, startNanoTime);
             }
             // Apply default mapping, if configured
-            applyDefaultMappings(context, source, oldSource, target, existingTarget, linkQualifier);
+            applyDefaultMappings(context, source, oldSource, target, existingTarget, linkQualifier, reconContext);
             
             measure.setResult(target);
         } finally {
@@ -679,16 +697,18 @@ class ObjectMapping {
      * Applies the default mapping by executing the default mapping script.
      *
      * @param context a {@link Context} for the current request.
-     * @param source The current source object 
+     * @param source The current source object
      * @param oldSource an optional old source object before the change(s) that triggered the sync, null if not provided
      * @param target the current target object to modify
      * @param existingTarget the full existing target object
      * @param linkQualifier the linkQualifier associated with the current sync operation
+     * @param reconContext Recon context or {@code null}
      * @return the result of the default mapping execution.
      * @throws SynchronizationException
      */
-    private JsonValue applyDefaultMappings(Context context, JsonValue source, JsonValue oldSource, JsonValue target, 
-            JsonValue existingTarget, String linkQualifier) throws SynchronizationException {
+    private JsonValue applyDefaultMappings(Context context, JsonValue source, JsonValue oldSource, JsonValue target,
+            JsonValue existingTarget, String linkQualifier, ReconciliationContext reconContext)
+            throws SynchronizationException {
         JsonValue result = null;
         if (defaultMapping != null) {
             Map<String, Object> queryScope = new HashMap<String, Object>();
@@ -700,6 +720,8 @@ class ObjectMapping {
             queryScope.put("config", config.asMap());
             queryScope.put("existingTarget", existingTarget.copy().asMap());
             queryScope.put("linkQualifier", linkQualifier);
+
+            final long startNanoTime = startNanoTime(reconContext);
             try {
                 result = json(defaultMapping.exec(queryScope, context));
             } catch (ScriptThrownException ste) {
@@ -707,6 +729,8 @@ class ObjectMapping {
             } catch (ScriptException se) {
                 LOGGER.debug("{} defaultMapping script encountered exception", name, se);
                 throw new SynchronizationException(se);
+            } finally {
+                addDuration(reconContext, DurationMetric.defaultMappingScript, startNanoTime);
             }
         }
         return result;
@@ -910,7 +934,7 @@ class ObjectMapping {
                     }
                 }
                 event.setStatus(status);
-                logEntry(event);
+                logEntry(event, null);
             }
         } finally {
             if (reconId != null) {
@@ -919,12 +943,15 @@ class ObjectMapping {
         }
     }
 
-    private void doResults(ReconciliationContext reconContext, Context context) throws SynchronizationException {
+    private void doResults(ReconciliationContext reconContext, Context context)
+            throws SynchronizationException {
         if (resultScript != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("source", reconContext.getStatistics().getSourceStat().asMap());
             scope.put("target", reconContext.getStatistics().getTargetStat().asMap());
             scope.put("global", reconContext.getStatistics().asMap());
+
+            final long startNanoTime = startNanoTime(reconContext);
             try {
                 resultScript.exec(scope, context);
             } catch (ScriptThrownException ste) {
@@ -932,6 +959,8 @@ class ObjectMapping {
             } catch (ScriptException se) {
                 LOGGER.debug("{} result script encountered exception", name, se);
                 throw new SynchronizationException(se);
+            } finally {
+                addDuration(reconContext, DurationMetric.resultScript, startNanoTime);
             }
         }
     }
@@ -954,30 +983,34 @@ class ObjectMapping {
      * @throws SynchronizationException
      */
     private void doRecon(ReconciliationContext reconContext) throws SynchronizationException {
-        reconContext.getStatistics().reconStart();
+        final ReconciliationStatistic stats = reconContext.getStatistics();
+        stats.reconStart();
         String reconId = reconContext.getReconId();
         EventEntry measureIdQueries = Publisher.start(EVENT_RECON_ID_QUERIES, reconId, null);
         reconContext.setStage(ReconStage.ACTIVE_QUERY_ENTRIES);
         Context context = ObjectSetContext.get();
         try {
             // Execute onRecon script.
-            executeOnRecon(context);
+            executeOnRecon(context, reconContext);
             
             context = new TriggerContext(context, "recon");
             ObjectSetContext.push(context);
             logReconStart(reconContext, context);
 
             // Get the relevant source (and optionally target) identifiers before we assess the situations
-            reconContext.getStatistics().sourceQueryStart();
-            
+            stats.sourceQueryStart();
+            final long firstSourceQueryStart = startNanoTime(reconContext);
+
             ReconQueryResult sourceQueryResult = reconContext.querySourceIter(reconSourceQueryPageSize, null);
             Iterator<ResultEntry> sourceIter = sourceQueryResult.getIterator();
-            reconContext.getStatistics().sourceQueryEnd();
+
+            stats.addDuration(DurationMetric.sourceQuery, firstSourceQueryStart);
+            stats.sourceQueryEnd();
             if (!sourceIter.hasNext()) {
                 if (!reconContext.getReconHandler().allowEmptySourceSet()) {
                     LOGGER.warn("Cannot reconcile from an empty data source, unless allowEmptySourceSet is true.");
                     reconContext.setStage(ReconStage.COMPLETED_FAILED);
-                    reconContext.getStatistics().reconEnd();
+                    stats.reconEnd();
                     logReconEndFailure(reconContext, context);
                     return;
                 }
@@ -988,10 +1021,14 @@ class ObjectMapping {
             ResultIterable targetIterable =
                     new ResultIterable(Collections.<String>emptyList(), Collections.<JsonValue>emptyList());
             if (reconContext.getReconHandler().isRunTargetPhase()) {
-                reconContext.getStatistics().targetQueryStart();
+                stats.targetQueryStart();
+                final long targetQueryStart = startNanoTime(reconContext);
+
                 targetIterable = reconContext.queryTarget();
                 remainingTargetIds.addAll(targetIterable.getAllIds());
-                reconContext.getStatistics().targetQueryEnd();
+
+                stats.addDuration(DurationMetric.targetQuery, targetQueryStart);
+                stats.targetQueryEnd();
             }            
 
             // Optionally get all links up front as well
@@ -999,14 +1036,17 @@ class ObjectMapping {
             if (prefetchLinks) {
                 allLinks = new HashMap<String, Map<String, Link>>();
                 Integer totalLinkEntries = new Integer(0);
-                reconContext.getStatistics().linkQueryStart();
-                for (String linkQualifier : getAllLinkQualifiers(context)) {
+                stats.linkQueryStart();
+                for (String linkQualifier : getAllLinkQualifiers(context, reconContext)) {
+                    final long linkQueryStart = startNanoTime(reconContext);
                     Map<String, Link> linksByQualifier = Link.getLinksForMapping(ObjectMapping.this, linkQualifier);
+                    stats.addDuration(DurationMetric.linkQuery, linkQueryStart);
+
                     allLinks.put(linkQualifier, linksByQualifier);
                     totalLinkEntries += linksByQualifier.size();
                 }
                 reconContext.setTotalLinkEntries(totalLinkEntries);
-                reconContext.getStatistics().linkQueryEnd();
+                stats.linkQueryEnd();
             }
 
             measureIdQueries.end();
@@ -1014,7 +1054,8 @@ class ObjectMapping {
             EventEntry measureSource = Publisher.start(EVENT_RECON_SOURCE, reconId, null);
             reconContext.setStage(ReconStage.ACTIVE_RECONCILING_SOURCE);
 
-            reconContext.getStatistics().sourcePhaseStart();
+            stats.sourcePhaseStart();
+            final long sourcePhaseStart = startNanoTime(reconContext);
             
             boolean queryNextPage = false;
 
@@ -1023,9 +1064,11 @@ class ObjectMapping {
                 // Query next page of results if paging
                 if (queryNextPage) {
                     LOGGER.debug("Querying next page of source ids");
+                    final long pagedSourceQueryStart = startNanoTime(reconContext);
                     sourceQueryResult = reconContext.querySourceIter(reconSourceQueryPageSize, 
                             sourceQueryResult.getPagingCookie());
                     sourceIter = sourceQueryResult.getIterator();
+                    stats.addDuration(DurationMetric.sourceQuery, pagedSourceQueryStart);
                 }
                 // Perform source recon phase on current set of source ids
                 ReconPhase sourcePhase = 
@@ -1034,26 +1077,29 @@ class ObjectMapping {
                 sourcePhase.execute();
                 queryNextPage = true;
             } while (reconSourceQueryPaging && sourceQueryResult.getPagingCookie() != null); // If paging, loop through next pages
-            
-            reconContext.getStatistics().sourcePhaseEnd();
+
+            stats.addDuration(DurationMetric.sourcePhase, sourcePhaseStart);
+            stats.sourcePhaseEnd();
             measureSource.end();
 
             LOGGER.debug("Remaining targets after source phase : {}", remainingTargetIds);
 
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
+                final long targetPhaseStart = startNanoTime(reconContext);
                 reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
                 targetIterable = targetIterable.removeNotMatchingEntries(remainingTargetIds);
-                reconContext.getStatistics().targetPhaseStart();
+                stats.targetPhaseStart();
                 ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context,
                         allLinks, null, targetRecon);
                 targetPhase.setFeedSize(feedSize);
                 targetPhase.execute();
-                reconContext.getStatistics().targetPhaseEnd();
+                stats.addDuration(DurationMetric.targetPhase, targetPhaseStart);
+                stats.targetPhaseEnd();
                 measureTarget.end();
             }
 
-            reconContext.getStatistics().reconEnd();
+            stats.reconEnd();
             reconContext.setStage(ReconStage.ACTIVE_PROCESSING_RESULTS);
             doResults(reconContext, context);
             reconContext.setStage(ReconStage.COMPLETED_SUCCESS);
@@ -1077,30 +1123,31 @@ class ObjectMapping {
                     && reconContext.getStage() != ReconStage.COMPLETED_SUCCESS ) {
                 doResults(reconContext, context);
             }
-            reconContext.getStatistics().reconEnd();
+            stats.reconEnd();
             logReconEndFailure(reconContext, context);
             throw new SynchronizationException("Synchronization failed", e);
         } catch (Exception e) {
             reconContext.setStage(ReconStage.COMPLETED_FAILED);
             doResults(reconContext, context);
-            reconContext.getStatistics().reconEnd();
+            stats.reconEnd();
             logReconEndFailure(reconContext, context);
             throw new SynchronizationException("Synchronization failed", e);
         } finally {
             ObjectSetContext.pop(); // pop the TriggerContext
-            if (!reconContext.getStatistics().hasEnded()) {
-                reconContext.getStatistics().reconEnd();
+            if (!stats.hasEnded()) {
+                stats.reconEnd();
             }
         }
 
 // TODO: cleanup orphan link objects (no matching source or target) here
     }
     
-    private void executeOnRecon(Context context) throws SynchronizationException {
+    private void executeOnRecon(Context context, final ReconciliationContext reconContext) throws SynchronizationException {
         if (onReconScript != null) {
             Map<String, Object> scope = new HashMap<String, Object>();
             scope.put("context", context);
             scope.put("mappingConfig", config);
+            final long startNanoTime = startNanoTime(reconContext);
             try {
                 onReconScript.exec(scope, context);
             } catch (ScriptThrownException se) {
@@ -1109,6 +1156,8 @@ class ObjectMapping {
                 LOGGER.debug("{} script encountered exception", name + " onRecon", se);
                 throw new SynchronizationException(
                         new InternalErrorException(name + " onRecon script encountered exception", se));
+            } finally {
+                addDuration(reconContext, DurationMetric.onReconScript, startNanoTime);
             }
         }
     }
@@ -1180,8 +1229,15 @@ class ObjectMapping {
                     ? new LazyObjectAccessor(connectionFactory, sourceObjectSet, id) // Load source detail on demand
                     : new LazyObjectAccessor(connectionFactory, sourceObjectSet, id, objectEntry); // Pre-queried source detail
             Status status = Status.SUCCESS;
+            final ReconciliationStatistic stats = reconContext.getStatistics();
 
-            for (String linkQualifier : getLinkQualifiers(sourceObjectAccessor.getObject(), null, false, context)) {
+            if (objectEntry == null) {
+                final long sourceObjectQueryStart = startNanoTime(reconContext);
+                objectEntry = sourceObjectAccessor.getObject();
+                stats.addDuration(DurationMetric.sourceObjectQuery, sourceObjectQueryStart);
+            }
+
+            for (String linkQualifier : getLinkQualifiers(objectEntry, null, false, context, reconContext)) {
                 SourceSyncOperation op = new SourceSyncOperation(context);
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
@@ -1231,7 +1287,7 @@ class ObjectMapping {
                     auditEvent.setStatus(status);
                     auditEvent.setAmbiguousTargetIds(op.getAmbiguousTargetIds());
                     auditEvent.setReconId(reconContext.getReconId());
-                    logEntry(auditEvent);
+                    logEntry(auditEvent, reconContext);
                 }
             }
         }
@@ -1248,7 +1304,9 @@ class ObjectMapping {
         public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context context, Map<String,
                 Map<String, Link>> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
             reconContext.checkCanceled();
-            for (String linkQualifier : getAllLinkQualifiers(context)) {
+            final ReconciliationStatistic stats = reconContext.getStatistics();
+
+            for (String linkQualifier : getAllLinkQualifiers(context, reconContext)) {
                 TargetSyncOperation op = new TargetSyncOperation(context);
                 op.reconContext = reconContext;
                 op.setLinkQualifier(linkQualifier);
@@ -1287,7 +1345,7 @@ class ObjectMapping {
                     }
                     event.setStatus(status);
                     event.setReconId(reconContext.getReconId());
-                    logEntry(event);
+                    logEntry(event, reconContext);
                 }
             }
         }
@@ -1367,14 +1425,19 @@ class ObjectMapping {
      * Creates an entry in the audit log.
      *
      * @param entry the entry to create
+     * @param reconContext Recon context or {@code null}
      * @throws SynchronizationException
      */
-    private <T extends AbstractSyncAuditEventBuilder<T>> void logEntry(AbstractSyncAuditEventLogger<T> entry)
+    private <T extends AbstractSyncAuditEventBuilder<T>> void logEntry(AbstractSyncAuditEventLogger<T> entry,
+            ReconciliationContext reconContext)
             throws SynchronizationException {
+        final long startNanoTime = startNanoTime(reconContext);
         try {
             entry.log(connectionFactory);
         } catch (ResourceException e) {
             throw new SynchronizationException(e);
+        } finally {
+            addDuration(reconContext, DurationMetric.auditLog, startNanoTime);
         }
     }
 
@@ -1393,7 +1456,7 @@ class ObjectMapping {
         reconStartEntry.setReconId(reconContext.getReconId());
         reconStartEntry.setMessage("Reconciliation initiated by "
                 + context.asContext(SecurityContext.class).getAuthenticationId());
-        logEntry(reconStartEntry);
+        logEntry(reconStartEntry, reconContext);
 
     }
 
@@ -1441,14 +1504,14 @@ class ObjectMapping {
         String simpleSummary = reconContext.getStatistics().simpleSummary();
         reconAuditEvent.setMessage(simpleSummary);
         reconAuditEvent.setMessageDetail(json(reconContext.getSummary()));
-        logEntry(reconAuditEvent);
+        logEntry(reconAuditEvent, reconContext);
         LOGGER.info(loggerMessage + " " + simpleSummary);
     }
 
     /**
      * Execute a sync engine action explicitly, without going through situation assessment.
      * 
-     * @param a {@link Context} associated with the current sync.
+     * @param context {@link Context} associated with the current sync.
      * @param sourceObject the source object if applicable to the action
      * @param targetObject the target object if applicable to the action
      * @param situation an optional situation that was originally assessed. Null if not the result of an earlier situation assessment.
@@ -1457,7 +1520,7 @@ class ObjectMapping {
      */
     public void explicitOp(Context context, JsonValue sourceObject, JsonValue targetObject, Situation situation, 
             ReconAction action, String reconId) throws SynchronizationException {
-        for (String linkQualifier : getLinkQualifiers(sourceObject, null, false, context)) {
+        for (String linkQualifier : getLinkQualifiers(sourceObject, null, false, context, null)) {
             ExplicitSyncOperation linkOp = new ExplicitSyncOperation(context);
             linkOp.setLinkQualifier(linkQualifier);
             linkOp.init(sourceObject, targetObject, situation, action, reconId);
@@ -1581,7 +1644,10 @@ class ObjectMapping {
             if (sourceObjectAccessor == null || sourceObjectAccessor.getLocalId() == null) {
                 return null;
             } else {
-                return sourceObjectAccessor.getObject();
+                final long startNanoTime = startNanoTime(reconContext, !sourceObjectAccessor.isLoaded());
+                final JsonValue sourceObject = sourceObjectAccessor.getObject();
+                addDuration(reconContext, DurationMetric.sourceObjectQuery, startNanoTime);
+                return sourceObject;
             }
         }
 
@@ -1593,7 +1659,10 @@ class ObjectMapping {
             if (targetObjectAccessor == null || (!targetObjectAccessor.isLoaded() && targetObjectAccessor.getLocalId() == null)) {
                 return null;
             } else {
-                return targetObjectAccessor.getObject();
+                final long startNanoTime = startNanoTime(reconContext, !targetObjectAccessor.isLoaded());
+                final JsonValue targetObject = targetObjectAccessor.getObject();
+                addDuration(reconContext, DurationMetric.targetObjectQuery, startNanoTime);
+                return targetObject;
             }
         }
 
@@ -1650,7 +1719,7 @@ class ObjectMapping {
                     defined = reconContext.getSourceIds().contains(sourceObjectAccessor.getLocalId());
                 } else {
                     // If no lists of existing ids is available, do a load of the object to check
-                    defined = (sourceObjectAccessor.getObject() != null);
+                    defined = (getSourceObject() != null);
                 }
             }
             return defined;
@@ -1680,7 +1749,7 @@ class ObjectMapping {
                     defined = reconContext.getTargets().containsKey(normalizedTargetId);
                 } else {
                     // If no lists of existing ids is available, do a load of the object to check
-                    defined = (targetObjectAccessor.getObject() != null);
+                    defined = (getTargetObject() != null);
                 }
             }
 
@@ -1757,8 +1826,10 @@ class ObjectMapping {
                                     field("object", getSourceObject()),
                                     field("linkQualifier", getLinkQualifier()))), context)) {
                         activePolicy = policy;
+                        final long startNanoTime = startNanoTime(reconContext, activePolicy.hasScript());
                         action = activePolicy.getAction(sourceObjectAccessor, targetObjectAccessor, this, 
                                 getLinkQualifier(), context);
+                        addDuration(reconContext, DurationMetric.activePolicyScript, startNanoTime);
                         break;
                     }
                 }
@@ -1794,7 +1865,7 @@ class ObjectMapping {
                                 JsonValue createTargetObject = json(object());
                                 // apply property mappings to target
                                 applyMappings(context, getSourceObject(), oldValue, createTargetObject, json(null), 
-                                        linkObject.linkQualifier);
+                                        linkObject.linkQualifier, reconContext);
                                 targetObjectAccessor = new LazyObjectAccessor(connectionFactory, targetObjectSet, 
                                         createTargetObject.get("_id").asString(), createTargetObject);
                                 execScript("onCreate", onCreateScript);
@@ -1847,7 +1918,9 @@ class ObjectMapping {
                                         // Allow for link to have been created in the meantime, e.g. programmatically
                                         // create would fail with a failed precondition for link already existing
                                         // Try to read again to see if that is the issue
+                                        final long sourceLinkQueryStart = startNanoTime(reconContext);
                                         linkObject.getLinkForSource(getSourceObjectId());
+                                        addDuration(reconContext, DurationMetric.sourceLinkQuery, sourceLinkQueryStart);
                                         if (linkObject._id == null) {
                                             LOGGER.warn("Failed to create link between {} and {}",
                                                     LazyObjectAccessor.qualifiedId(sourceObjectSet, getSourceObjectId()),
@@ -1868,11 +1941,11 @@ class ObjectMapping {
                                 }
                                 if (getSourceObject() != null && getTargetObject() != null) {
                                     applyMappings(context, getSourceObject(), oldValue, getTargetObject(), oldTarget, 
-                                            linkObject.linkQualifier);
+                                            linkObject.linkQualifier, reconContext);
                                     execScript("onUpdate", onUpdateScript, oldTarget);
                                     // only update if target changes
                                     if (!oldTarget.isEqualTo(getTargetObject())) {
-                                        updateTargetObject(context, getTargetObject(), targetId);
+                                        updateTargetObject(context, getTargetObject(), targetId, reconContext);
                                     }
                                 }
                                 // execute the defaultPostMapping script to add lastSync attribute to managed user
@@ -1887,7 +1960,7 @@ class ObjectMapping {
                                 // forgiving; does nothing if no target
                                 if (getTargetObjectId() != null && getTargetObject() != null) {
                                     execScript("onDelete", onDeleteScript);
-                                    deleteTargetObject(context, getTargetObject());
+                                    deleteTargetObject(context, getTargetObject(), reconContext);
                                     // Represent as not existing anymore so it gets removed from processed targets
                                     targetObjectAccessor = new LazyObjectAccessor(connectionFactory,
                                             targetObjectSet, getTargetObjectId(), null);
@@ -1904,7 +1977,10 @@ class ObjectMapping {
                             case UNLINK:
                                 if (linkObject._id != null) { // forgiving; does nothing if no link exists
                                     execScript("onUnlink", onUnlinkScript);
+
+                                    final long deleteLinkObjectStart = startNanoTime(reconContext);
                                     linkObject.delete(context);
+                                    addDuration(reconContext, DurationMetric.deleteLinkObject, deleteLinkObjectStart);
                                 }
                                 break; // terminate DELETE and UNLINK
                             case EXCEPTION:
@@ -1944,8 +2020,10 @@ class ObjectMapping {
          */
         protected void postAction(boolean sourceAction) throws SynchronizationException {
             if (null != activePolicy) {
+                final long startNanoTime = startNanoTime(reconContext, activePolicy.hasPostActionScript());
                 activePolicy.evaluatePostAction(sourceObjectAccessor, targetObjectAccessor, action, sourceAction, 
                         getLinkQualifier(), reconId, context);
+                addDuration(reconContext, DurationMetric.activePolicyPostActionScript, startNanoTime);
             }
         }
 
@@ -2004,6 +2082,8 @@ class ObjectMapping {
                     Map<String, Object> scope = new HashMap<String, Object>();
                     scope.put("source", sourceObject.asMap());
                     scope.put("linkQualifier", getLinkQualifier());
+
+                    final long startNanoTime = startNanoTime(reconContext);
                     try {
                         Object o = validSource.exec(scope, context);
                         if (o == null || !(o instanceof Boolean)) {
@@ -2015,6 +2095,8 @@ class ObjectMapping {
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validSource script encountered exception", name, se);
                         throw new SynchronizationException(se);
+                    } finally {
+                        addDuration(reconContext, DurationMetric.validSourceScript, startNanoTime);
                     }
                 } else { // no script means true
                     result = true;
@@ -2039,6 +2121,8 @@ class ObjectMapping {
                     Map<String, Object> scope = new HashMap<String, Object>();
                     scope.put("target", getTargetObject().asMap());
                     scope.put("linkQualifier", getLinkQualifier());
+
+                    final long startNanoTime = startNanoTime(reconContext);
                     try {
                         Object o = validTarget.exec(scope, context);
                         if (o == null || !(o instanceof Boolean)) {
@@ -2050,6 +2134,8 @@ class ObjectMapping {
                     } catch (ScriptException se) {
                         LOGGER.debug("{} validTarget script encountered exception", name, se);
                         throw new SynchronizationException(se);
+                    } finally {
+                        addDuration(reconContext, DurationMetric.validTargetScript, startNanoTime);
                     }
                 } else { // no script means true
 //TODO: is this the right result if getTargetObject was null?
@@ -2107,6 +2193,8 @@ class ObjectMapping {
                 if (situation != null) {
                     scope.put("situation", situation.toString());
                 }
+
+                final long startNanoTime = startNanoTime(reconContext);
                 try {
                     script.exec(scope, context);
                 } catch (ScriptThrownException se) {
@@ -2115,6 +2203,8 @@ class ObjectMapping {
                     LOGGER.debug("{} script encountered exception", name + " " + type, se);
                     throw new SynchronizationException(
                             new InternalErrorException(name + " " + type + " script encountered exception", se));
+                } finally {
+                    addDuration(reconContext, DurationMetric.valueOf(type + "Script"), startNanoTime);
                 }
             }
         }
@@ -2197,6 +2287,11 @@ class ObjectMapping {
         // If it can not uniquely identify a target, the list of ambiguous target ids
         public List<String> ambiguousTargetIds;
 
+        /**
+         * Creates source-{@link SyncOperation}.
+         *
+         * @param context Context
+         */
         public SourceSyncOperation(Context context) {
             super(context);
         }
@@ -2305,7 +2400,9 @@ class ObjectMapping {
 
             // In case the link was not pre-read get it here
             if (getSourceObjectId() != null && linkObject.initialized == false) {
+                final long sourceLinkQueryStart = startNanoTime(reconContext);
                 linkObject.getLinkForSource(getSourceObjectId());
+                addDuration(reconContext, DurationMetric.sourceLinkQuery, sourceLinkQueryStart);
             }
             
             // If an existing link was found, set the targetObjectAccessor
@@ -2399,7 +2496,11 @@ class ObjectMapping {
 
                         Link checkExistingLink = new Link(ObjectMapping.this);
                         checkExistingLink.setLinkQualifier(getLinkQualifier());
+
+                        final long targetLinkQueryStart = startNanoTime(reconContext);
                         checkExistingLink.getLinkForTarget(targetObjectAccessor.getLocalId());
+                        addDuration(reconContext, DurationMetric.targetLinkQuery, targetLinkQueryStart);
+
                         if (checkExistingLink._id == null || checkExistingLink.sourceId == null) {
                             situation = Situation.FOUND;
                         } else {
@@ -2475,9 +2576,8 @@ class ObjectMapping {
                 }
                 Map<String, Object> scope = new HashMap<String, Object>();
                 scope.put("source", sourceObject.asMap());
-
                 try {
-                    result = correlation.correlate(scope, getLinkQualifier(), getContext());
+                    result = correlation.correlate(scope, getLinkQualifier(), getContext(), reconContext);
                 } finally {
                     measure.end();
                 }
@@ -2608,13 +2708,16 @@ class ObjectMapping {
          * 
          * @param scope the scope to use for the correlation script
          * @param linkQualifier the link qualifier
+         * @param context Context
+         * @param reconContext Recon context or {@code null}
          * @return a list of results if no correlation is configured
          * @throws SynchronizationException if there was an error during correlation
          */
-        public JsonValue correlate(Map<String, Object> scope, String linkQualifier, Context context) 
-                throws SynchronizationException {
+        public JsonValue correlate(Map<String, Object> scope, String linkQualifier, Context context,
+                ReconciliationContext reconContext) throws SynchronizationException {
             // Set the link qualifier in the script's scope
             scope.put("linkQualifier", linkQualifier);
+            final long startNanoTime = startNanoTime(reconContext, type != CorrelationType.none);
             try {
                 switch (type) {
                 case correlationQuery:
@@ -2632,6 +2735,8 @@ class ObjectMapping {
             } catch (ScriptException se) {
                 LOGGER.debug("{} {} script encountered exception", name, type.toString(), se);
                 throw new SynchronizationException(se);
+            } finally {
+                addDuration(reconContext, DurationMetric.valueOf(type.toString()), startNanoTime);
             }
         }
 
@@ -2657,6 +2762,11 @@ class ObjectMapping {
      */
     class TargetSyncOperation extends SyncOperation {
 
+        /**
+         * Creates target-{@link SyncOperation}.
+         *
+         * @param context Context
+         */
         public TargetSyncOperation(Context context) {
             super(context);
         }
@@ -2732,7 +2842,9 @@ class ObjectMapping {
             // May want to consider an optimization to not query
             // if we don't need the link for the TARGET_IGNORED action
             if (targetId != null) {
+                final long targetLinkQueryStart = startNanoTime(reconContext);
                 linkObject.getLinkForTarget(targetId);
+                addDuration(reconContext, DurationMetric.targetLinkQuery, targetLinkQueryStart);
             }
 
             if (!isTargetValid()) { // target is not valid for this mapping; ignore it
@@ -2760,4 +2872,44 @@ class ObjectMapping {
             }
         }
     }
+
+    /**
+     * Gets a start-time, in nanoseconds, for the current thread. Calling thread must be the same thread used to call
+     * {@link #addDuration(ReconciliationContext, String, long)}.
+     *
+     * @param reconContext Recon context or {@code null}
+     * @return Start-time or {@code -1} if {@code reconContext} was {@code null}
+     */
+    private static long startNanoTime(final ReconciliationContext reconContext) {
+        return reconContext == null ? -1 : DurationStatistics.startNanoTime();
+    }
+
+    /**
+     * Gets a start-time, in nanoseconds, for the current thread. Calling thread must be the same thread used to call
+     * {@link #addDuration(ReconciliationContext, ReconciliationStatistic.DurationMetric, long)}.
+     *
+     * @param reconContext Recon context or {@code null}
+     * @param expression Expression that must be {@code true}, for start-time to be generated
+     * @return Start-time or {@code -1} if {@code reconContext} was {@code null} or {@code expression} was {@code false}
+     */
+    private static long startNanoTime(final ReconciliationContext reconContext, final boolean expression) {
+        return reconContext == null || !expression ? -1 : DurationStatistics.startNanoTime();
+    }
+
+    /**
+     * Delegates a call to {@link ReconciliationStatistic#addDuration(String, long)}, in situations where
+     * {@code reconContext} may be {@code null} and/or {@code startNanoTime} may be {@code -1} to signal that
+     * the duration statistic should <em>not</em> be recorded.
+     *
+     * @param reconContext Recon context or {@code null} to cause this to be a no-op
+     * @param metric Metric for statistic
+     * @param startNanoTime Start-time, in nanoseconds or {@code -1} to cause this to be a no-op
+     */
+    private static void addDuration(final ReconciliationContext reconContext,
+            final ReconciliationStatistic.DurationMetric metric, final long startNanoTime) {
+        if (reconContext != null && startNanoTime != -1) {
+            reconContext.getStatistics().addDuration(metric, startNanoTime);
+        }
+    }
+
 }

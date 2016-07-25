@@ -200,4 +200,22 @@ class Policy {
             }
         }
     }
+
+    /**
+     * Determines if {@code Policy} has a script.
+     *
+     * @return {@code true} if {@code Policy} has a script and {@code false} otherwise
+     */
+    public boolean hasScript() {
+        return script != null;
+    }
+
+    /**
+     * Determines if {@code Policy} has a post-action-script.
+     *
+     * @return {@code true} if {@code Policy} has a post-action-script and {@code false} otherwise
+     */
+    public boolean hasPostActionScript() {
+        return postAction != null;
+    }
 }
