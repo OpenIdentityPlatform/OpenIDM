@@ -28,7 +28,10 @@ define([
             SocialDelegate,
             UserProfileView) {
 
-    var obj = Object.create(commonSiteConfigurationDelegate);
+    var obj = Object.create(commonSiteConfigurationDelegate),
+        hasKba = false,
+        hasSocialProviders = false,
+        cachedUserComponent = null;
 
     obj.adminCheck = false;
 
@@ -37,19 +40,13 @@ define([
             commonSiteConfigurationDelegate.getConfiguration(),
             SocialDelegate.providerList()
         ).then(function (configuration, socialProviders) {
-            var tabList = [];
-
-            if(socialProviders.providers.length > 0) {
-                tabList.push("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab");
+            if (socialProviders.providers.length > 0) {
+                hasSocialProviders = true;
             }
 
             if (configuration.kbaEnabled === true) {
-                tabList.push("org/forgerock/commons/ui/user/profile/UserProfileKBATab");
+                hasKba = true;
             }
-
-            require(tabList, function () {
-                _.each(_.toArray(arguments), UserProfileView.registerTab, UserProfileView);
-            });
 
             if (successCallback) {
                 successCallback(configuration);
@@ -59,7 +56,29 @@ define([
     };
 
     obj.checkForDifferences = function(){
-        if(conf.loggedUser && _.contains(conf.loggedUser.uiroles,"ui-admin") && !obj.adminCheck){
+        var tabList = [];
+
+        // every time the logged-in user component changes, reregister appropriate profile tabs
+        if (conf.loggedUser && conf.loggedUser.component !== cachedUserComponent) {
+            cachedUserComponent = conf.loggedUser.component;
+            UserProfileView.resetTabs();
+            // repo/internal/user records don't support "fancy" tabs like kba and social providers
+            if (conf.loggedUser.component !== "repo/internal/user") {
+                if (hasSocialProviders) {
+                    tabList.push("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab");
+                }
+                if (hasKba) {
+                    tabList.push("org/forgerock/commons/ui/user/profile/UserProfileKBATab");
+                }
+            }
+            if (tabList.length) {
+                require(tabList, function () {
+                    _.each(_.toArray(arguments), UserProfileView.registerTab, UserProfileView);
+                });
+            }
+        }
+
+        if (conf.loggedUser && _.contains(conf.loggedUser.uiroles,"ui-admin") && !obj.adminCheck){
             nav.configuration.userBar.unshift({
                 "id": "admin_link",
                 "href": "/admin",
