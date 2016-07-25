@@ -26,6 +26,7 @@ import java.net.URISyntaxException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -85,6 +86,8 @@ public class RestService implements SingletonResourceProvider {
     static final String PID = "org.forgerock.openidm.external.rest";
 
     private final static Logger logger = LoggerFactory.getLogger(RestService.class);
+
+    private static final Pattern xmlSubtypePattern = Pattern.compile("^(?:xml|[^+]+\\+xml)$", Pattern.CASE_INSENSITIVE);
 
     private static final String CALL_ACTION_NAME = "call";
 
@@ -312,7 +315,7 @@ public class RestService implements SingletonResourceProvider {
 
                             final Header contentTypeHeader = response.getHeaders().get(ContentTypeHeader.NAME);
                             final MediaType mediaType = contentTypeHeader != null
-                                    ? MediaType.parse(contentTypeHeader.getFirstValue())
+                                    ? MediaType.parse(contentTypeHeader.getFirstValue()).withoutParameters()
                                     : MediaType.JSON_UTF_8;
 
                             final Entity entity = response.getEntity();
@@ -327,8 +330,10 @@ public class RestService implements SingletonResourceProvider {
                                             .copyAsMultiMapOfStrings();
                                     content = json(object());
                                     content.put(ARG_HEADERS, responseHeaders);
-                                    if (mediaType.is(MediaType.ANY_TEXT_TYPE) || MediaType.JSON_UTF_8.is(mediaType)) {
-                                        // text
+                                    if (mediaType.is(MediaType.ANY_TEXT_TYPE)
+                                            || MediaType.JSON_UTF_8.is(mediaType)
+                                            || xmlSubtypePattern.matcher(mediaType.subtype()).matches()) {
+                                        // text, xml, or json (with forceWrap)
                                         content.put(ARG_BODY, entity.getString());
                                     } else {
                                         // base64 encoded binary

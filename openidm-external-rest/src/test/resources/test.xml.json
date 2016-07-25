@@ -1,0 +1,4 @@
+{
+  "headers" : {"Content-Length" : [ "142" ], "Content-Type" : [ "application/xml" ]},
+  "body" : "<?xml version=\"1.0\" encoding=\"ISO-8859-1\" ?>\n<!-- Copyright 2016 ForgeRock AS.\n     License terms: https://forgerock.org/cddlv1-0/ -->\n<test/>"
+}
