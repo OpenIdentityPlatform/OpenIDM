@@ -1,28 +1,22 @@
-/**
-* DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-*
-* Copyright (c) 2012-2013 ForgeRock AS. All Rights Reserved
-*
-* The contents of this file are subject to the terms
-* of the Common Development and Distribution License
-* (the License). You may not use this file except in
-* compliance with the License.
-*
-* You can obtain a copy of the License at
-* http://forgerock.org/license/CDDLv1.0.html
-* See the License for the specific language governing
-* permission and limitations under the License.
-*
-* When distributing Covered Code, include this CDDL
-* Header Notice in each file and include the License file
-* at http://forgerock.org/license/CDDLv1.0.html
-* If applicable, add the following below the CDDL Header,
-* with the fields enclosed by brackets [] replaced by
-* your own identifying information:
-* "Portions Copyrighted [year] [name of copyright owner]"
-*
-*/
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2012-2016 ForgeRock AS.
+ */
 package org.forgerock.openidm.sync.impl;
+
+import static org.forgerock.openidm.util.DurationStatistics.nanoToMillis;
+import static org.forgerock.util.Reject.checkNotNull;
 
 import java.util.Date;
 import java.util.EnumMap;
@@ -35,6 +29,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.util.DurationStatistics;
 
 /**
  * Statistic for a reconciliation run
@@ -43,6 +38,39 @@ import org.forgerock.openidm.util.DateUtil;
 public class ReconciliationStatistic {
     
     static DateUtil dateUtil = DateUtil.getDateUtil("UTC");
+
+    public enum DurationMetric {
+        activePolicyPostActionScript,
+        activePolicyScript,
+        auditLog,
+        correlationQuery,
+        correlationScript,
+        defaultMappingScript,
+        deleteLinkObject,
+        deleteTargetObject,
+        linkQualifiersScript,
+        linkQuery,
+        onCreateScript,
+        onDeleteScript,
+        onLinkScript,
+        onReconScript,
+        onUnlinkScript,
+        onUpdateScript,
+        postMappingScript,
+        propertyMappingScript,
+        resultScript,
+        sourceLinkQuery,
+        sourceObjectQuery,
+        sourcePhase,
+        sourceQuery,
+        targetLinkQuery,
+        targetObjectQuery,
+        targetPhase,
+        targetQuery,
+        updateTargetObject,
+        validSourceScript,
+        validTargetScript
+    }
     
     private ReconciliationContext reconContext;    
     private long startTime;
@@ -56,12 +84,13 @@ public class ReconciliationStatistic {
     private AtomicInteger linkCreated = new AtomicInteger();
     private AtomicInteger targetProcessed = new AtomicInteger();
     private AtomicInteger targetCreated = new AtomicInteger();
-    private Map<Status, AtomicInteger> statusProcessed = new EnumMap<Status, AtomicInteger>(Status.class);
+    private Map<Status, AtomicInteger> statusProcessed = new EnumMap<>(Status.class);
 
     private PhaseStatistic sourceStat;
     private PhaseStatistic targetStat;
     
     private Map<ReconStage, Map<String, Object>> stageStat = new ConcurrentHashMap<>();
+    private ConcurrentHashMap<String, DurationStatistics> durationStat = new ConcurrentHashMap<>();
 
     public ReconciliationStatistic(ReconciliationContext reconContext) {
         this.reconContext = reconContext;
@@ -70,6 +99,27 @@ public class ReconciliationStatistic {
         for (Status status : Status.values()) {
             statusProcessed.put(status, new AtomicInteger());
         }
+    }
+
+    /**
+     * For the given {@code key}, calculates and records the time-duration, since
+     * {@link DurationStatistics#startNanoTime() startNanoTime} occurred in the current thread.
+     * <p>
+     * Calling thread must be the same thread used to call {@link DurationStatistics#startNanoTime()}.
+     *
+     * @param metric Metric for statistic
+     * @param startNanoTime Start-time, in nanoseconds
+     */
+    public void addDuration(final DurationMetric metric, final long startNanoTime) {
+        DurationStatistics entry = durationStat.get(checkNotNull(metric).name());
+        if (entry == null) {
+            entry = new DurationStatistics();
+            final DurationStatistics existing = durationStat.putIfAbsent(metric.name(), entry);
+            if (existing != null) {
+                entry = existing;
+            }
+        }
+        entry.stopNanoTime(startNanoTime);
     }
     
     public PhaseStatistic getSourceStat() {
@@ -261,7 +311,7 @@ public class ReconciliationStatistic {
     }
     
     public Map<String, Object> asMap() {
-        Map<String, Object> results = new HashMap<String, Object>();
+        Map<String, Object> results = new HashMap<>();
 
         results.put("startTime", getStarted());
         results.put("endTime", getEnded());
@@ -273,7 +323,7 @@ public class ReconciliationStatistic {
     }
     
     public String simpleSummary() {
-        Map<String, Integer> simpleSummary = new ConcurrentHashMap<String, Integer>();
+        Map<String, Integer> simpleSummary = new HashMap<>();
         getSourceStat().updateSummary(simpleSummary);
         getTargetStat().updateSummary(simpleSummary);
         
@@ -288,17 +338,38 @@ public class ReconciliationStatistic {
     }
     
     public Map<String, Integer> getSituationSummary() {
-        Map<String, Integer> situationSummary = new ConcurrentHashMap<String, Integer>();
+        Map<String, Integer> situationSummary = new HashMap<>();
         getSourceStat().updateSummary(situationSummary);
         getTargetStat().updateSummary(situationSummary);
         return situationSummary;
     }
 
     public Map<String, Integer> getStatusSummary() {
-        Map<String, Integer> statusSummary = new ConcurrentHashMap<String, Integer>();
+        Map<String, Integer> statusSummary = new HashMap<>();
         for (Map.Entry<Status, AtomicInteger> entry : statusProcessed.entrySet()) {
             statusSummary.put(entry.getKey().toString(), entry.getValue().intValue());
         }
         return statusSummary;
+    }
+
+    /**
+     * Exposes current duration statistics, gathered from calls to {@link #addDuration(String, long)}.
+     *
+     * @return Map of duration statistics
+     */
+    public Map<String, Map<String, Long>> getDurationSummary() {
+        final Map<String, Map<String, Long>> resultMap = new HashMap<>(durationStat.size() * 2);
+        for (final Entry<String, DurationStatistics> entry : durationStat.entrySet()) {
+            final Map<String, Long> valueMap = new HashMap<>();
+            final DurationStatistics stats = entry.getValue();
+            valueMap.put("count", stats.count());
+            valueMap.put("sum", nanoToMillis(stats.sum()));
+            valueMap.put("min", nanoToMillis(stats.min()));
+            valueMap.put("max", nanoToMillis(stats.max()));
+            valueMap.put("mean", nanoToMillis(stats.mean()));
+            valueMap.put("stdDev", nanoToMillis(stats.stdDev()));
+            resultMap.put(entry.getKey(), valueMap);
+        }
+        return resultMap;
     }
 }

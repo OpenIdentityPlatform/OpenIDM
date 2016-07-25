@@ -408,6 +408,7 @@ public class ReconciliationContext {
         reconSummary.put("progress", getProgress());
         reconSummary.put("situationSummary", getStatistics().getSituationSummary());
         reconSummary.put("statusSummary", getStatistics().getStatusSummary());
+        reconSummary.put("durationSummary", getStatistics().getDurationSummary());
         reconSummary.put("parameters", reconTypeHandler.getReconParameters().getObject());
         reconSummary.put("started", getStatistics().getStarted());
         reconSummary.put("ended", getStatistics().getEnded());
