@@ -58,7 +58,11 @@ public class RestServiceTest {
     private static final String GET = "GET";
 
     private static final Map<String, Object> JSON_CONTENT_TYPE_HEADER = headers("application/json").build();
+    private static final Map<String, Object> JSON_CONTENT_TYPE_WITH_CHARSET_HEADER =
+            headers("application/json; charset=utf-8").build();
     private static final Map<String, Object> HTML_CONTENT_TYPE_HEADER = headers("text/html").build();
+    private static final Map<String, Object> ATOM_XML_CONTENT_TYPE_HEADER = headers("application/atom+xml").build();
+    private static final Map<String, Object> XML_CONTENT_TYPE_HEADER = headers("application/xml").build();
     private static final Map<String, Object> IMAGE_CONTENT_TYPE_HEADER = headers("image/png").build();
 
     private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
@@ -141,11 +145,20 @@ public class RestServiceTest {
                 // non-JSON, text response (html)
                 {PARAMS_METHOD, OK, HTML_CONTENT_TYPE_HEADER, resourceAsString("/test.html"),
                         resourceAsJsonValue("/test.html.json"), null},
+                // non-JSON, text response (xml)
+                {PARAMS_METHOD, OK, XML_CONTENT_TYPE_HEADER, resourceAsString("/test.xml"),
+                        resourceAsJsonValue("/test.xml.json"), null},
+                // non-JSON, text response (atom-xml)
+                {PARAMS_METHOD, OK, ATOM_XML_CONTENT_TYPE_HEADER, resourceAsString("/test.atom.xml"),
+                        resourceAsJsonValue("/test.atom.xml.json"), null},
                 // non-JSON, non-text response (binary)
                 {PARAMS_METHOD, OK, IMAGE_CONTENT_TYPE_HEADER, resourceAsBytes("/test.png"),
                         resourceAsJsonValue("/test.png.json"), null},
                 // JSON response
                 {PARAMS_METHOD, OK, JSON_CONTENT_TYPE_HEADER, resourceAsJsonValue("/test.json"),
+                        resourceAsJsonValue("/test.json"), null},
+                // JSON response with charset defined in content-type
+                {PARAMS_METHOD, OK, JSON_CONTENT_TYPE_WITH_CHARSET_HEADER, resourceAsJsonValue("/test.json"),
                         resourceAsJsonValue("/test.json"), null},
                 // JSON response, with forceWrap=true flag
                 {PARAMS_FORCE_WRAP, OK, JSON_CONTENT_TYPE_HEADER, resourceAsJsonValue("/test.json"),
