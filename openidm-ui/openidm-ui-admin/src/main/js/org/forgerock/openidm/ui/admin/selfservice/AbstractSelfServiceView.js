@@ -58,7 +58,8 @@ define([
             "change #identityServiceUrl": "updateIdentityServiceURL",
             "click .save-config" : "saveConfig",
             "click .wide-card.active" : "showDetailDialog",
-            "click li.disabled a" : "preventTab"
+            "click li.disabled a" : "preventTab",
+            "click #configureCaptcha": "configureCaptcha"
         },
         partials : [
             "partials/selfservice/_identityServiceUrl.html",
@@ -335,6 +336,8 @@ define([
                 this.$el.find("#emailStepWarning").toggle(tempConfig.showWarning);
             }
 
+            this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
+
             if (!this.model.surpressSave && !removeConfig) {
                 this.saveConfig();
             }
@@ -513,6 +516,29 @@ define([
             };
         },
 
+        showCaptchaWarning: function(stageConfigs) {
+            if (typeof stageConfigs === "boolean") {
+                this.$el.find("#captchaNotConfiguredWarning").toggle(stageConfigs);
+            } else {
+                this.$el.find("#captchaNotConfiguredWarning").toggle(this.checkCaptchaConfigs(stageConfigs));
+            }
+
+        },
+
+        checkCaptchaConfigs: function(stageConfigs) {
+            var captchaStage = stageConfigs.filter(function(value) { return value.name === "captcha";})[0];
+            if (captchaStage && (!captchaStage.recaptchaSiteKey || ! captchaStage.recaptchaSecretKey)) {
+                return true;
+            } else {
+                return false;
+            }
+        },
+
+        configureCaptcha: function(event) {
+            event.preventDefault();
+            this.$el.find("[data-type='captcha'] i.fa.fa-pencil").trigger("click");
+        },
+
         selfServiceRender: function(args, callback) {
             var disabledList,
                 configList = [];
@@ -594,6 +620,8 @@ define([
                                 this.$el.find(".wide-card[data-type='" + stage.name + "']").toggleClass("disabled", false);
                                 this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
                             }, this);
+                            this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
+
 
                             this.model.surpressSave = false;
 
@@ -603,15 +631,18 @@ define([
                         }, this));
 
                     } else {
+
+
                         $.extend(true, this.model.saveConfig, this.model.configDefault);
                         $.extend(true, this.data.config, this.model.configDefault);
 
                         this.data.enableSelfService = false;
 
+
                         this.parentRender(_.bind(function () {
                             this.disableForm();
                             this.setSortable();
-
+                            this.showCaptchaWarning(false);
                             if (callback) {
                                 callback();
                             }
@@ -718,6 +749,7 @@ define([
                     EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
                 });
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Save");
+                this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
             }, this));
         },
         setKBAEnabled: function () {

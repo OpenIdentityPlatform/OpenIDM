@@ -26,6 +26,10 @@
                                 <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
                                 <span class="message">{{t "templates.selfservice.noEmailConfig"}} <a class="alert-link"  href="#settings/email/">{{t "templates.selfservice.emailConfigLink"}}</a></span>
                             </div>
+                            <div role="alert" id="captchaNotConfiguredWarning" class="alert alert-danger">
+                                <i class="fa fa-exclamation-circle"></i><strong>{{t "templates.selfservice.error"}}</strong>
+                                <span class="message">{{t "templates.selfservice.captchaNotConfigured"}} <a id="configureCaptcha" class="alert-link" href="#">{{t "templates.selfservice.emailConfigLink"}}</a></span>
+                            </div>
 
                             <h3 class="block-header">{{t "templates.selfservice.passwordSteps"}}</h3>
                             <div class="selfservice-holder">
