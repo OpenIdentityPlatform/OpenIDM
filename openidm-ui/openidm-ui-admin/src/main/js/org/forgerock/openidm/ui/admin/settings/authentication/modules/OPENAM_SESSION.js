@@ -26,33 +26,27 @@ define([
             JSONEditor,
             AuthenticationAbstractView) {
 
-    const KNOWN_PROPERTIES = [
-        "enabled",
-        "queryOnResource",
-        "openamDeploymentUrl",
-        "openamUseExclusively",
-        "propertyMapping",
-        "augmentSecurityContext",
-        "groupRoleMapping",
-        "openamLoginUrl",
-        "openamLoginLinkText",
-        "defaultUserRoles",
-        "openamSSOTokenCookieName",
-        "openamUserAttribute",
-        "groupComparisonMethod",
-        "truststoreType",
-        "truststorePath",
-        "truststorePassword"
-    ];
-
     var OpenAMSessionView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/modules/OPENAM_SESSION.html",
+
+        knownProperties: AuthenticationAbstractView.prototype.knownProperties.concat([
+            "openamDeploymentUrl",
+            "openamUseExclusively",
+            "openamLoginUrl",
+            "openamLoginLinkText",
+            "openamSSOTokenCookieName",
+            "openamUserAttribute",
+            "groupComparisonMethod",
+            "truststoreType",
+            "truststorePath",
+            "truststorePassword"
+        ]),
 
         render: function (args) {
             this.data = _.clone(args, true);
             this.data.userOrGroupValue = "userRoles";
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);
-            this.data.customProperties = this.getCustomPropertiesList(KNOWN_PROPERTIES, this.data.config.properties || {});
+            this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
 
             this.parentRender(() => {

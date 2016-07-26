@@ -25,14 +25,13 @@ define([
             AuthenticationAbstractView) {
 
     return AuthenticationAbstractView.extend({
-        KNOWN_PROPERTIES: ["enabled", "queryOnResource", "queryId", "defaultUserRoles", "propertyMapping", "augmentSecurityContext", "groupRoleMapping"],
         template: "templates/admin/settings/authentication/modules/DelegatedTemplate.html",
 
         render: function (args) {
             this.data = _.clone(args, true);
             this.data.userOrGroupValue = "userRoles";
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);
-            this.data.customProperties = this.getCustomPropertiesList(this.KNOWN_PROPERTIES, this.data.config.properties || {});
+            this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
 
             if (this.customPreRender) {
