@@ -260,6 +260,7 @@ define([
 
                             }
                         }, this);
+                        this.showCaptchaWarning(this.model.saveConfig.stageConfigs);
 
                         this.model.surpressSave = false;
 
@@ -275,6 +276,7 @@ define([
 
                     this.parentRender(_.bind(function () {
                         this.disableForm();
+                        this.showCaptchaWarning(false);
 
                         if (callback) {
                             callback();
@@ -445,7 +447,11 @@ define([
         },
 
         showCaptchaWarning: function(stageConfigs) {
-            this.$el.find("#captchaNotConfiguredWarning").toggle(this.checkCaptchaConfigs(stageConfigs));
+            if (typeof stageConfigs === "boolean") {
+                this.$el.find("#captchaNotConfiguredWarning").toggle(stageConfigs);
+            } else {
+                this.$el.find("#captchaNotConfiguredWarning").toggle(this.checkCaptchaConfigs(stageConfigs));
+            }
         },
 
         checkCaptchaConfigs: function(stageConfigs) {
@@ -456,7 +462,7 @@ define([
                 return false;
             }
         },
-        
+
         configureCaptcha: function(event) {
             event.preventDefault();
             this.$el.find("[data-type='captcha']").trigger("click");
