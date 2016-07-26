@@ -26,9 +26,12 @@ define([
             JSONEditor,
             AuthenticationAbstractView) {
 
-    const KNOWN_PROPERTIES = ["enabled", "queryOnResource", "queryId", "defaultUserRoles", "propertyMapping", "augmentSecurityContext", "groupRoleMapping", "allowedAuthenticationIdPatterns"];
     var ClientCertView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/modules/CLIENT_CERT.html",
+
+        knownProperties: AuthenticationAbstractView.prototype.knownProperties.concat([
+            "allowedAuthenticationIdPatterns"
+        ]),
 
         render: function (args) {
             this.data = _.clone(args, true);
@@ -36,7 +39,7 @@ define([
             this.data.resources.push("security/truststore");
             this.data.userOrGroupValue = "userRoles";
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);
-            this.data.customProperties = this.getCustomPropertiesList(KNOWN_PROPERTIES, this.data.config.properties || {});
+            this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
 
             this.parentRender(() => {

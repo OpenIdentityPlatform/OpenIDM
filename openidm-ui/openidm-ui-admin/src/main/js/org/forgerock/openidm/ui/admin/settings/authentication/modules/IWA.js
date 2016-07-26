@@ -24,29 +24,22 @@ define([
             Form2js,
             AuthenticationAbstractView) {
 
-    const KNOWN_PROPERTIES = [
-        "enabled",
-        "queryOnResource",
-        "queryId",
-        "defaultUserRoles",
-        "servicePrincipal",
-        "keytabFileName",
-        "kerberosRealm",
-        "kerberosServerName",
-        "groupComparisonMethod",
-        "propertyMapping",
-        "augmentSecurityContext",
-        "groupRoleMapping"
-    ];
-
     var IWAView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/modules/IWA.html",
+
+        knownProperties: AuthenticationAbstractView.prototype.knownProperties.concat([
+            "servicePrincipal",
+            "keytabFileName",
+            "kerberosRealm",
+            "kerberosServerName",
+            "groupComparisonMethod"
+        ]),
 
         render: function (args) {
             this.data = _.clone(args, true);
             this.data.userOrGroupValue = "userRoles";
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);
-            this.data.customProperties = this.getCustomPropertiesList(KNOWN_PROPERTIES, this.data.config.properties || {});
+            this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
 
             this.parentRender(() => {

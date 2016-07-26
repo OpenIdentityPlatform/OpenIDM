@@ -24,25 +24,18 @@ define([
             Form2js,
             AuthenticationAbstractView) {
 
-    const KNOWN_PROPERTIES = [
-        "enabled",
-        "authenticationIdAttribute",
-        "queryOnResource",
-        "queryId",
-        "defaultUserRoles",
-        "propertyMapping",
-        "augmentSecurityContext",
-        "groupRoleMapping"
-    ];
-
     var TrustedAttributeView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/modules/TRUSTED_ATTRIBUTE.html",
+
+        knownProperties: AuthenticationAbstractView.prototype.knownProperties.concat([
+            "authenticationIdAttribute"
+        ]),
 
         render: function (args) {
             this.data = _.clone(args, true);
             this.data.userOrGroupValue = "userRoles";
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);
-            this.data.customProperties = this.getCustomPropertiesList(KNOWN_PROPERTIES, this.data.config.properties || {});
+            this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
 
             this.parentRender(() => {

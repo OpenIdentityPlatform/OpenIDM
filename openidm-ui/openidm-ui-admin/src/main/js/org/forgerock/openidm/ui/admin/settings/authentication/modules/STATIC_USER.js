@@ -22,14 +22,19 @@ define([
 ], function($, _,
             Form2js,
             AuthenticationAbstractView) {
-    const KNOWN_PROPERTIES = ["queryOnResource", "username", "password", "defaultUserRoles", "augmentSecurityContext"];
+
     var StaticUserView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/modules/STATIC_USER.html",
+
+        knownProperties: AuthenticationAbstractView.prototype.knownProperties.concat([
+            "username",
+            "password"
+        ]),
 
         render: function (args) {
             this.data = _.clone(args, true);
             this.data.resources = [ "repo/internal/user" ]; // STATIC and INTERNAL modules only have the single option.
-            this.data.customProperties = this.getCustomPropertiesList(KNOWN_PROPERTIES, this.data.config.properties || {});
+            this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
 
             this.parentRender(() => {
                 this.postRenderComponents({
