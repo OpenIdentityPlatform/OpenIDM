@@ -378,7 +378,7 @@ public class AuditServiceImpl implements AuditService {
     }
 
     private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
-        return JsonUtil.isNotEqual(existingConfig, newConfig);
+        return !existingConfig.isEqualTo(newConfig);
     }
 
     @Deactivate

@@ -38,11 +38,10 @@ import javax.script.ScriptException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.SyncContext;
 import org.forgerock.openidm.condition.Conditions;
-import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.json.JsonPatch;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.NotFoundException;
@@ -766,7 +765,7 @@ class ObjectMapping {
                 newValue = LazyObjectAccessor.rawReadObject(connectionFactory, context, resourceContainer, resourceId);
             }
 
-            if (oldValue == null || oldValue.getObject() == null || JsonUtil.isNotEqual(oldValue, newValue)) {
+            if (oldValue == null || oldValue.getObject() == null || !oldValue.isEqualTo(newValue)) {
                 return doSourceSync(context, resourceId, newValue, false, oldValue); // synchronous for now
             } else {
                 LOGGER.trace("There is nothing to update on {}", resourceContainer + "/" + resourceId);
@@ -1872,7 +1871,7 @@ class ObjectMapping {
                                             linkObject.linkQualifier);
                                     execScript("onUpdate", onUpdateScript, oldTarget);
                                     // only update if target changes
-                                    if (JsonUtil.isNotEqual(oldTarget, getTargetObject())) {
+                                    if (!oldTarget.isEqualTo(getTargetObject())) {
                                         updateTargetObject(context, getTargetObject(), targetId);
                                     }
                                 }

@@ -59,11 +59,11 @@ public class ConfigUpdater {
     protected IDMConnectionFactory connectionFactory;
 
     /**
-     * Apply a JsonPatch to a config object on the router.
+     * Apply a json-patch to a config object on the router.
      *
      * @param context the context for the patch request.
      * @param resourceName the name of the resource to be patched.
-     * @param patch a JsonPatch to be applied to the named config resource.
+     * @param patch a json-patch to be applied to the named config resource.
      * @throws UpdateException
      */
     public void patchConfig(Context context, String resourceName, JsonValue patch) throws UpdateException {

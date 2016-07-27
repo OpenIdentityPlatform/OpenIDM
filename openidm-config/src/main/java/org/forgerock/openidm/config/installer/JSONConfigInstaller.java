@@ -39,7 +39,6 @@ import java.util.Set;
 import org.apache.felix.fileinstall.ArtifactInstaller;
 import org.apache.felix.fileinstall.internal.DirectoryWatcher;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
@@ -427,7 +426,7 @@ public class JSONConfigInstaller implements ArtifactInstaller, ConfigurationList
             oldJsonConfig.remove(ResourceResponse.FIELD_CONTENT_REVISION);
         }
         
-        return JsonUtil.isEqual(oldJsonConfig, newJsonConfig);
+        return oldJsonConfig.isEqualTo(newJsonConfig);
     }
 
     Configuration getConfiguration(String fileName, String pid, String factoryPid, boolean addIfNew) throws Exception {

@@ -60,10 +60,8 @@ import org.forgerock.openidm.datasource.DataSourceService;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -865,7 +863,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
      * @return true if the configurations differ, false otherwise
      */
     private boolean hasConfigChanged(JsonValue existingConfig, JsonValue newConfig) {
-        return JsonUtil.isNotEqual(existingConfig, newConfig);
+        return !existingConfig.isEqualTo(newConfig);
     }
 
     /**

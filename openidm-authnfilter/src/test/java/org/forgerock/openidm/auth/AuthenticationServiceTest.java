@@ -24,11 +24,9 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
-import org.forgerock.openidm.util.JsonUtil;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -86,7 +84,7 @@ public class AuthenticationServiceTest {
 
         // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
         // the amendedAuthentication configuration
-        assertThat(JsonUtil.isEqual(amendedAuthentication, authenticationJson.get("authModules").get(0))).isTrue();
+        assertThat(amendedAuthentication.isEqualTo(authenticationJson.get("authModules").get(0))).isTrue();
     }
 
     @Test
@@ -113,6 +111,6 @@ public class AuthenticationServiceTest {
         authenticationService.amendAuthConfig(authenticationJson.get("authModules"));
 
         // Assert that the authenticationJson has not been modified
-        assertThat(JsonUtil.isEqual(authenticationJson, authenticationJsonNoMod)).isTrue();
+        assertThat(authenticationJson.isEqualTo(authenticationJsonNoMod)).isTrue();
     }
 }

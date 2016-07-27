@@ -1273,11 +1273,11 @@ public class UpdateManagerImpl implements UpdateManager {
         }
 
         /**
-         * Apply a JsonPatch to a config object on the router.
+         * Apply a json-patch to a config object on the router.
          *
          * @param context the context for the patch request.
          * @param configFile the config file to be patched.
-         * @param patch a JsonPatch to be applied to the named config resource.
+         * @param patch a json-patch to be applied to the named config resource.
          * @throws UpdateException
          */
         private void patchConfig(final Context context, final Path configFile, final JsonValue patch) throws UpdateException {

@@ -24,7 +24,7 @@ import java.util.List;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.ConfigAuditEventBuilder;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.patch.JsonPatch;
+import org.forgerock.json.JsonPatch;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.Request;

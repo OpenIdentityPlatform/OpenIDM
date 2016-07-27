@@ -25,7 +25,6 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.testng.annotations.BeforeSuite;
@@ -87,7 +86,6 @@ public class SelfServiceTest {
         // look like the amendedSelfServiceRegistration
         selfService.amendConfig(selfServiceRegistration);
 
-        assertThat(JsonPatch.diff(selfServiceRegistration, amendedSelfServiceRegistration).size())
-                .isEqualTo(0);
+        assertThat(selfServiceRegistration.isEqualTo(amendedSelfServiceRegistration)).isTrue();
     }
 }
