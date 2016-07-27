@@ -554,7 +554,7 @@ define([
                 this.updateMappingRecon(mappingName, runningRecon);
             }, 2000).then((completedRecon) => {
                 this.toggleReconButtons(mappingName);
-                this.updateMappingRecon(mappingName, completedRecon);
+                this.updateMappingRecon(mappingName, completedRecon[0]);
             });
         },
         /**
