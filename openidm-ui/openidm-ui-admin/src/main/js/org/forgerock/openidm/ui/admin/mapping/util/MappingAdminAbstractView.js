@@ -29,7 +29,7 @@ define([
         syncConfig = {},
         numRepresentativeProps = 4,
         recon = null,
-        syncCancelled = null,
+        syncCanceled = null,
         runSync = _.noop(),
 
         MappingAdminAbstractView = AdminAbstractView.extend({
@@ -53,8 +53,8 @@ define([
                 return runSync;
             },
 
-            getSyncCancelled: function() {
-                return _.clone(syncCancelled, true);
+            getSyncCanceled: function() {
+                return _.clone(syncCanceled, true);
             },
 
             getMappingName: function() {
@@ -98,9 +98,9 @@ define([
                 return syncNow;
             },
 
-            setSyncCancelled: function(cancelled) {
-                syncCancelled = cancelled;
-                return cancelled;
+            setSyncCanceled: function(canceled) {
+                syncCanceled = canceled;
+                return canceled;
             },
 
             AbstractMappingSave: function(mapping, callback) {

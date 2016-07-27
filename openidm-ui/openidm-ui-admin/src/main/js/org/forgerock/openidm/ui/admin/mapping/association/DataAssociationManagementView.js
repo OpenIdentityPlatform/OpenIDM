@@ -73,7 +73,7 @@ define([
 
             this.data.reconAvailable = false;
             this.parentRender(_.bind(function() {
-                if(this.data.recon && !this.getSyncCancelled()){
+                if(this.data.recon && !this.getSyncCanceled()){
                     this.renderReconResults(null, callback);
 
                 } else if(callback) {

@@ -31,7 +31,7 @@ define([
         var resultPromise = $.Deferred(),
             completedRecons = [],
             checkCompleted,
-            startUrl = router.currentRoute.url;
+            startView = router.currentRoute.view;
 
         if (!delayTime) {
             delayTime = 1000;
@@ -43,7 +43,7 @@ define([
             * started. If not then cancel the process so ajax requests
             * will not continue to fire in the background.
             */
-            if (router.currentRoute.url === startUrl) {
+            if (router.currentRoute.view === startView) {
                 obj.serviceCall({
                     "type": "GET",
                     "url": "/" + reconIds[completedRecons.length],
@@ -89,8 +89,7 @@ define([
                     }
                 });
             } else {
-                console.log("route has changed - recon status check cancelled");
-                resultPromise.resolve([]);
+                resultPromise.reject();
             }
         };
 

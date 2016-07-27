@@ -98,35 +98,15 @@ define([
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.mappingListView});
             });
         },
-        runningReconProgress: function(onReady){
+        /**
+        *   this function polls for the status of a running recon and updates the display every second
+        */
+        runningReconProgress: function(){
+            this.setSyncInProgress();
             reconDelegate.waitForAll([this.data.recon._id], true, _.bind(function (reconStatus) {
-                if(this.data.recon._id === reconStatus._id && this.data.recon.mapping === this.getCurrentMapping().name){
-                    if(reconStatus.state !== "CANCELED"){
-                        this.setSyncInProgress();
-                        this.$el.find("#stopSyncButton").prop("disabled",false);
-                    } else {
-                        this.data.syncCanceled = true;
-                        this.setSyncCancelled(true);
-                        this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
-                    }
-
-                    this.model.syncDetails = reconStatus;
-
-                    if(this.$el.find("#syncStatusDetails:visible").length) {
-                        this.loadReconDetails(this.model.syncDetails);
-                    }
-                }
+                this.setRunningReconStatus(reconStatus);
             }, this)).then(_.bind(function (completedRecon) {
-                if(this.data.recon._id === completedRecon[0]._id && this.data.recon.mapping === this.currentMapping().name){
-                    this.$el.find("#syncNowButton").show().prop("disabled",false);
-                    this.$el.find("#stopSyncButton").hide();
-
-                    this.data.recon = completedRecon[0];
-                    this.setRecon(this.data.recon);
-                    this.data.syncLabel = $.t("templates.mapping.reconAnalysis.completed");
-                    this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(this.data.recon.ended,"MMMM dd, yyyy HH:mm");
-                    onReady();
-                }
+                this.setReconEnded(completedRecon[0]);
             }, this));
         },
 
@@ -149,9 +129,32 @@ define([
             }
 
             ModuleLoader.load(router.currentRoute.childView).then(_.bind(function (child) {
-                child.render();
-                this.$el.find(".nav-tabs").tabdrop();
+                if (child) {
+                    child.render();
+                    this.$el.find(".nav-tabs").tabdrop();
+                }
             }, this));
+        },
+        /**
+        *   this function does the actual "render" of the view
+        *   called from .render when the page and all it's data are ready
+        *   also called when the page needs to be re-rendered after a running recon ends
+        */
+        loadPage: function(reconIsRunning){
+            this.parentRender(() => {
+                this.updateTab();
+
+                if (this.model.syncOpen) {
+                    this.$el.find("#syncStatus").trigger("click");
+                }
+
+                if (reconIsRunning){
+                    this.runningReconProgress();
+                }
+                if (this.renderCallback){
+                    this.renderCallback();
+                }
+            });
         },
 
         render: function(args, callback) {
@@ -165,6 +168,7 @@ define([
             this.route = { url: router.getURIFragment() };
             this.data.docHelpUrl = constants.DOC_URL;
             this.setSyncNow(_.bind(this.syncNow, this));
+            this.renderCallback = callback;
 
             //because there are relatively slow queries being called which would slow down the interface if they were called each time
             //decide here whether we want to render all of this view or only the child
@@ -176,25 +180,6 @@ define([
                 syncConfig = syncDelegate.mappingDetails(args[0]);
 
                 syncConfig.then(_.bind(function(sync){
-                    var onReady;
-
-                    onReady = _.bind(function(runningRecon){
-                        this.parentRender(_.bind(function () {
-                            this.updateTab();
-
-                            if (this.model.syncOpen) {
-                                $("#syncStatus").trigger("click");
-                            }
-
-                            if (runningRecon){
-                                this.runningReconProgress(onReady);
-                            }
-                            if (callback){
-                                callback();
-                            }
-                        }, this));
-                    }, this);
-
                     this.data.syncConfig = { mappings: _.chain(sync.mappings)
                         .map(function(m){
                             return _.clone(_.omit(m,"recon"));
@@ -207,7 +192,7 @@ define([
                     this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
                     this.data.syncStatus = $.t("templates.mapping.notYetSynced");
                     this.data.syncCanceled = false;
-                    this.setSyncCancelled(false);
+                    this.setSyncCanceled(false);
 
                     this.data.targetType = this.syncType(this.data.mapping.target);
                     this.data.sourceType = this.syncType(this.data.mapping.source);
@@ -253,21 +238,12 @@ define([
                                 this.model.syncDetails = this.data.recon;
 
                                 if (this.data.recon.ended) {
-                                    if(this.data.recon.state === "CANCELED"){
-                                        this.data.syncCanceled = true;
-                                        this.setSyncCancelled(true);
-                                        this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
-                                        this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
-                                    } else {
-                                        this.data.syncLabel = $.t("templates.mapping.reconAnalysis.completed");
-                                        this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(this.data.recon.ended,"MMMM dd, yyyy HH:mm");
-                                    }
-                                    onReady();
+                                    this.setReconEnded(this.data.recon);
                                 } else {
-                                    onReady(true);
+                                    this.loadPage(true);
                                 }
                             } else {
-                                onReady();
+                                this.loadPage();
                             }
                         }, this));
 
@@ -279,15 +255,19 @@ define([
             }
         },
 
+        /**
+        *   this function hides/disables the "Reconcile" button and
+        *   shows/enables the "Cancel Reconciliation" button
+        */
         setSyncInProgress: function(){
             this.$el.find("#syncNowButton").hide().prop("disabled",true);
             this.$el.find("#stopSyncButton").show().prop("disabled", true);
         },
-
+        /**
+        *   this function is called when the "Reconcile" button is clicked
+        *   it polls for the status of a running recon and updates the display every second
+        */
         syncNow: function(event) {
-            var total,
-                processed;
-
             if (event) {
                 event.preventDefault();
             }
@@ -296,48 +276,15 @@ define([
             this.setSyncInProgress();
 
             reconDelegate.triggerRecon(this.getCurrentMapping().name, true, _.bind(function (reconStatus) {
-
-                if (reconStatus.progress.source.existing.total !== "?"  && reconStatus.stage === "ACTIVE_RECONCILING_SOURCE") {
-                    processed = parseInt(reconStatus.progress.source.existing.processed, 10);
-                    total = parseInt(reconStatus.progress.source.existing.total, 10);
-                } else if(reconStatus.progress.target.existing.total !== "?" && reconStatus.stage === "ACTIVE_RECONCILING_TARGET") {
-                    total = parseInt(reconStatus.progress.target.existing.total, 10);
-                    processed = parseInt(reconStatus.progress.target.existing.processed, 10);
-                } else {
-                    total = 0;
-                    processed = 0;
-                }
-
-                this.data.recon = reconStatus;
-                this.setRecon(this.data.recon);
-                this.$el.find("#stopSyncButton").prop("disabled",false);
-
-                this.model.syncDetails = reconStatus;
-
-                this.$el.find("#syncLabel").html($.t("templates.mapping.reconAnalysis.inProgress"));
-
-                if(total !== 0 && processed !== 0) {
-                    this.$el.find("#syncMessage").html(reconStatus.stageDescription + " - <span class='bold-message'>" + processed + "/" + total + "</span>");
-                } else {
-                    this.$el.find("#syncMessage").html(reconStatus.stageDescription);
-                }
-
-                if(this.$el.find("#syncStatusDetails:visible").length) {
-                    this.loadReconDetails(this.model.syncDetails);
-                }
-            }, this)).then(_.bind(function(s){
-                this.data.reconAvailable = false;
-                this.data.recon = s;
-                this.setRecon(this.data.recon);
-
-                delete this.data.mapping;
-                this.updateTab();
-
-                this.$el.find("#syncNowButton").show().prop("disabled",false);
-                this.$el.find("#stopSyncButton").hide().prop("disabled", true);
+                this.setRunningReconStatus(reconStatus);
+            }, this)).then(_.bind(function(completedRecon){
+                this.setReconEnded(completedRecon);
             }, this));
         },
-
+        /**
+        *   this function is called when the "Cancel Reconciliation" button is clicked
+        *   it stops a running recon and updates the recon's status display
+        */
         stopSync: function(e){
             e.preventDefault();
 
@@ -347,10 +294,74 @@ define([
             this.$el.find(".reconProgressContainer").hide();
             this.$el.find("#stoppingSync").show();
 
-            reconDelegate.stopRecon(this.data.recon._id, true).then(_.bind(function(){
-                delete this.data.mapping;
-                this.updateTab();
-            }, this));
+            reconDelegate.stopRecon(this.data.recon._id, true).then(() => {
+                this.setReconEnded(this.data.recon);
+            });
+        },
+        /**
+        *   this function takes a recon object as an argument and updates the view's
+        *   recon status data used to display the current phase and progress of a running recon
+        *
+        *   @param recon {object} - recon object
+        */
+        setRunningReconStatus: function (reconStatus) {
+            var total,
+                processed;
+
+            if (reconStatus.progress.source.existing.total !== "?"  && reconStatus.stage === "ACTIVE_RECONCILING_SOURCE") {
+                processed = parseInt(reconStatus.progress.source.existing.processed, 10);
+                total = parseInt(reconStatus.progress.source.existing.total, 10);
+            } else if(reconStatus.progress.target.existing.total !== "?" && reconStatus.stage === "ACTIVE_RECONCILING_TARGET") {
+                total = parseInt(reconStatus.progress.target.existing.total, 10);
+                processed = parseInt(reconStatus.progress.target.existing.processed, 10);
+            } else {
+                total = 0;
+                processed = 0;
+            }
+
+            this.data.recon = reconStatus;
+            this.setRecon(this.data.recon);
+            this.$el.find("#stopSyncButton").prop("disabled",false);
+
+            this.model.syncDetails = reconStatus;
+
+            this.$el.find("#syncLabel").html($.t("templates.mapping.reconAnalysis.inProgress"));
+
+            if(total !== 0 && processed !== 0) {
+                this.$el.find("#syncMessage").html(reconStatus.stageDescription + " - <span class='bold-message'>" + processed + "/" + total + "</span>");
+            } else {
+                this.$el.find("#syncMessage").html(reconStatus.stageDescription);
+            }
+
+            if(this.$el.find("#syncStatusDetails:visible").length) {
+                this.loadReconDetails(this.model.syncDetails);
+            }
+        },
+        /**
+        *   this function takes a recon object as an argument and updates the view's
+        *   recon status data to display the stats from a completed recon
+        *
+        *   @param recon {object} - recon object
+        */
+        setReconEnded: function (recon) {
+            this.data.reconAvailable = false;
+            this.data.recon = recon;
+            this.setRecon(this.data.recon);
+
+            if(this.data.recon.state === "CANCELED"){
+                this.data.syncCanceled = true;
+                this.setSyncCanceled(true);
+                this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
+                this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
+            } else {
+                this.data.syncLabel = $.t("templates.mapping.reconAnalysis.completed");
+                this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(recon.ended,"MMMM dd, yyyy HH:mm");
+            }
+
+            this.$el.find("#syncNowButton").show().prop("disabled",false);
+            this.$el.find("#stopSyncButton").hide().prop("disabled", true);
+
+            this.loadPage();
         }
     });
 
