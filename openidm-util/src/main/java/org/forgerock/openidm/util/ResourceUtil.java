@@ -36,7 +36,6 @@ import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
 import org.forgerock.json.resource.NotSupportedException;
@@ -193,7 +192,6 @@ public class ResourceUtil {
      * @param oldValue old json to compare.
      * @param newValue new json to compare against oldValue.
      * @return true if the two values are equal ignoring the _id and _rev.
-     * @see JsonUtil#isEqual(JsonValue, JsonValue)
      */
     public static boolean isEqual(JsonValue oldValue, JsonValue newValue) {
         JsonValue tmpOldValue = null == oldValue ? json(object()) : oldValue.copy();
@@ -202,6 +200,6 @@ public class ResourceUtil {
         tmpOldValue.remove(FIELD_CONTENT_REVISION);
         tmpNewValue.remove(FIELD_CONTENT_ID);
         tmpNewValue.remove(FIELD_CONTENT_REVISION);
-        return JsonUtil.isEqual(tmpOldValue, tmpNewValue);
+        return tmpOldValue.isEqualTo(tmpNewValue);
     }
 }

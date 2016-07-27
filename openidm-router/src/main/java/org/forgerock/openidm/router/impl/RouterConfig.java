@@ -41,7 +41,6 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.json.patch.JsonPatch;
 import org.forgerock.json.resource.Filter;
 import org.forgerock.json.resource.FilterChain;
 import org.forgerock.json.resource.FilterCondition;
@@ -120,7 +119,7 @@ public class RouterConfig {
             JsonValue modifiedConfig = enhancedConfig.getConfigurationAsJson(context);
             if (config != null
                     && modifiedConfig != null
-                    && JsonUtil.isEqual(config, modifiedConfig)) {
+                    && config.isEqualTo(modifiedConfig)) {
                 return;
             }
             deactivate(context);
