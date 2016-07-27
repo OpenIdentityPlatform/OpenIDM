@@ -15,28 +15,16 @@
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
-import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.json.resource.Responses.newQueryResponse;
-import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
-import java.io.IOException;
-import java.io.Serializable;
-import java.lang.reflect.Array;
-import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
@@ -54,29 +42,17 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.services.context.Context;
-import org.forgerock.http.routing.UriRouterContext;
-import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CollectionResourceProvider;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
-import org.forgerock.json.resource.QueryFilters;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceResponse;
@@ -84,7 +60,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.http.HttpContext;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.audit.util.RouterActivityLogger;
@@ -109,65 +84,27 @@ import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.openidm.router.RouterRegistry;
-import org.forgerock.openidm.smartevent.EventEntry;
-import org.forgerock.openidm.smartevent.Publisher;
-import org.forgerock.openidm.util.ContextUtil;
-import org.forgerock.openidm.util.ResourceUtil;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.query.QueryFilterVisitor;
 import org.identityconnectors.common.security.GuardedString;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorFacade;
 import org.identityconnectors.framework.api.ConnectorFacadeFactory;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.operations.APIOperation;
-import org.identityconnectors.framework.api.operations.AuthenticationApiOp;
-import org.identityconnectors.framework.api.operations.CreateApiOp;
-import org.identityconnectors.framework.api.operations.DeleteApiOp;
-import org.identityconnectors.framework.api.operations.GetApiOp;
 import org.identityconnectors.framework.api.operations.ScriptOnConnectorApiOp;
 import org.identityconnectors.framework.api.operations.ScriptOnResourceApiOp;
-import org.identityconnectors.framework.api.operations.SearchApiOp;
 import org.identityconnectors.framework.api.operations.SyncApiOp;
 import org.identityconnectors.framework.api.operations.TestApiOp;
-import org.identityconnectors.framework.api.operations.UpdateApiOp;
-import org.identityconnectors.framework.common.FrameworkUtil;
-import org.identityconnectors.framework.common.exceptions.AlreadyExistsException;
-import org.identityconnectors.framework.common.exceptions.ConfigurationException;
-import org.identityconnectors.framework.common.exceptions.ConnectionBrokenException;
-import org.identityconnectors.framework.common.exceptions.ConnectionFailedException;
 import org.identityconnectors.framework.common.exceptions.ConnectorException;
-import org.identityconnectors.framework.common.exceptions.ConnectorIOException;
-import org.identityconnectors.framework.common.exceptions.ConnectorSecurityException;
-import org.identityconnectors.framework.common.exceptions.InvalidAttributeValueException;
 import org.identityconnectors.framework.common.exceptions.InvalidCredentialException;
-import org.identityconnectors.framework.common.exceptions.InvalidPasswordException;
-import org.identityconnectors.framework.common.exceptions.OperationTimeoutException;
-import org.identityconnectors.framework.common.exceptions.PasswordExpiredException;
-import org.identityconnectors.framework.common.exceptions.PermissionDeniedException;
-import org.identityconnectors.framework.common.exceptions.PreconditionFailedException;
-import org.identityconnectors.framework.common.exceptions.PreconditionRequiredException;
-import org.identityconnectors.framework.common.exceptions.RetryableException;
-import org.identityconnectors.framework.common.exceptions.UnknownUidException;
-import org.identityconnectors.framework.common.objects.Attribute;
-import org.identityconnectors.framework.common.objects.AttributeUtil;
-import org.identityconnectors.framework.common.objects.ConnectorObject;
-import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.ObjectClass;
-import org.identityconnectors.framework.common.objects.OperationOptions;
 import org.identityconnectors.framework.common.objects.OperationOptionsBuilder;
-import org.identityconnectors.framework.common.objects.ResultsHandler;
 import org.identityconnectors.framework.common.objects.ScriptContextBuilder;
-import org.identityconnectors.framework.common.objects.SearchResult;
-import org.identityconnectors.framework.common.objects.SortKey;
 import org.identityconnectors.framework.common.objects.SyncDelta;
 import org.identityconnectors.framework.common.objects.SyncResultsHandler;
 import org.identityconnectors.framework.common.objects.SyncToken;
-import org.identityconnectors.framework.common.objects.Uid;
-import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.identityconnectors.framework.common.serializer.SerializerUtil;
 import org.identityconnectors.framework.impl.api.local.LocalConnectorFacadeImpl;
-import org.identityconnectors.framework.impl.api.remote.RemoteWrappedException;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;
@@ -196,20 +133,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     // Public Constants
     public static final String PID = "org.forgerock.openidm.provisioner.openicf";
 
-    //Private Constants
-    private static final String REAUTH_HEADER = "X-OpenIDM-Reauth-Password";
-    private static final String RUN_AS_USER = "runAsUser";
-    private static final String ACCOUNT_USERNAME_ATTRIBUTES = "accountUserNameAttributes";
-
     private static final Logger logger = LoggerFactory.getLogger(OpenICFProvisionerService.class);
-
-    // Monitoring event name prefix
-    private static final String EVENT_PREFIX = "openidm/internal/system/";
-
-    private static final int UNAUTHORIZED_ERROR_CODE = 401;
-
-    private static final QueryFilterVisitor<Filter, ObjectClassInfoHelper, JsonPointer> RESOURCE_FILTER =
-            new OpenICFFilterAdapter();
 
     private SimpleSystemIdentifier systemIdentifier = null;
     private OperationHelperBuilder operationHelperBuilder = null;
@@ -226,30 +150,15 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     /**
      * Cache the SystemActions from local and {@code provisioner.json} jsonConfiguration.
      */
-    private final ConcurrentMap<String, SystemAction> localSystemActionCache =
-            new ConcurrentHashMap<String, SystemAction>();
+    private final ConcurrentMap<String, SystemAction> localSystemActionCache = new ConcurrentHashMap<>();
 
-    private final ConcurrentMap<String, RequestHandler> objectClassHandlers =
-            new ConcurrentHashMap<String, RequestHandler>();
+    private final ConcurrentMap<String, RequestHandler> objectClassHandlers = new ConcurrentHashMap<>();
 
     /* Internal routing objects to register and remove the routes. */
     private RouteEntry routeEntry;
 
     /* Object Types*/
     private Map<String, ObjectClassInfoHelper> objectTypes;
-
-    /**
-     * Holder of non ObjectClass operations:
-     *
-     * <pre>
-     * ValidateApiOp
-     * TestApiOp
-     * ScriptOnConnectorApiOp
-     * ScriptOnResourceApiOp
-     * SchemaApiOp
-     * </pre>
-     */
-    private Map<Class<? extends APIOperation>, OperationOptionInfoHelper> systemOperations = null;
 
     /** The Connection Factory */
     @Reference(policy = ReferencePolicy.STATIC)
@@ -261,6 +170,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         this.activityLogger = new RouterActivityLogger(connectionFactory);
     }
 
+    @SuppressWarnings("unused")
     void unbindConnectionFactory(final IDMConnectionFactory connectionFactory) {
         this.connectionFactory = null;
         // ConnectionFactory has gone away, use null activity logger
@@ -300,8 +210,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     /**
      * Reference to the ThreadSafe {@code ConnectorFacade} instance.
      */
-    private final AtomicReference<ConnectorFacade> connectorFacade =
-            new AtomicReference<ConnectorFacade>();
+    private final AtomicReference<ConnectorFacade> connectorFacade = new AtomicReference<>();
 
     @Activate
     protected void activate(ComponentContext context) {
@@ -321,7 +230,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
 
             syncFailureHandler = syncFailureHandlerFactory.create(jsonConfiguration.get("syncFailureHandler"));
-            
+
+            final OpenICFProvisionerService provisionerService = this;
             connectorInfoProvider.findConnectorInfoAsync(connectorReference).thenOnResult(
                     new org.forgerock.util.promise.ResultHandler<ConnectorInfo>() {
                         public void handleResult(ConnectorInfo connectorInfo) {
@@ -343,16 +253,10 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                                     new ObjectClassResourceProvider(
                                                             entry.getKey(),
                                                             entry.getValue(),
-                                                            objectOperations.get(entry.getKey())));
+                                                            objectOperations.get(entry.getKey()),
+                                                            provisionerService,
+                                                            jsonConfiguration));
                                     }
-
-                                    // TODO Fix this Map
-                                    // ValidateApiOp
-                                    // TestApiOp
-                                    // ScriptOnConnectorApiOp
-                                    // ScriptOnResourceApiOp
-                                    // SchemaApiOp
-                                    systemOperations = Collections.emptyMap();
                                 } catch (Exception e) {
                                     logger.error("OpenICF connector jsonConfiguration of {} has errors.", systemIdentifier.getName(), e);
                                     throw new ComponentException(
@@ -397,8 +301,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     .withSingletonResourceProvider(this)
                     .buildNext()
                     .withModeStartsWith()
-                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName() + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
-                    .withRequestHandler(new ObjectClassRequestHandler())
+                    .withTemplate(ProvisionerService.ROUTER_PREFIX + "/" + systemIdentifier.getName()
+                            + ObjectClassRequestHandler.OBJECTCLASS_TEMPLATE)
+                    .withRequestHandler(new ObjectClassRequestHandler(objectClassHandlers))
                     .seal());
 
             logger.info("OpenICF Provisioner Service component {} route enabled{}", systemIdentifier.getName(),
@@ -411,6 +316,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
     }
 
+    @SuppressWarnings("UnusedParameters")
     @Deactivate
     protected void deactivate(ComponentContext context) {
         if (null != connectorFacadeCallback) {
@@ -444,270 +350,6 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return connectorFacade.get();
     }
 
-    /**
-     * Handle ConnectorExceptions from ConnectorFacade invocations.  Maps each ConnectorException subtype to the
-     * appropriate {@link ResourceException} for passing to {@code handleError}.  Optionally logs to activity log.
-     *
-     * @param context the Context from the original request
-     * @param request the original request
-     * @param exception the ConnectorException that was thrown by the facade
-     * @param resourceId the resourceId being operated on
-     * @param before the object value "before" the request
-     * @param after the object value "after" the request
-     * @param connectorExceptionActivityLogger the ActivityLogger to use to log the exception
-     */
-    private ResourceException adaptConnectorException(Context context, Request request, ConnectorException exception,
-        String resourceContainer, String resourceId, JsonValue before, JsonValue after,
-        ActivityLogger connectorExceptionActivityLogger) {
-
-        // default message
-        String message = MessageFormat.format("Operation {0} failed with {1} on system object: {2}",
-                request.getRequestType(), exception.getClass().getSimpleName(), resourceId);
-
-        try {
-            throw exception;
-        } catch (AlreadyExistsException e) {
-            message = MessageFormat.format("System object {0} already exists", resourceId);
-            return new org.forgerock.json.resource.PreconditionFailedException(message, exception);
-        } catch (ConfigurationException e) {
-            message = MessageFormat.format("Operation {0} failed with ConfigurationException on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new InternalServerErrorException(message, exception);
-        } catch (ConnectionBrokenException e) {
-            message = MessageFormat.format("Operation {0} failed with ConnectionBrokenException on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new ServiceUnavailableException(message, exception);
-        } catch (ConnectionFailedException e) {
-            message = MessageFormat.format("Connection failed during operation {0} on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new ServiceUnavailableException(message, exception);
-        } catch (ConnectorIOException e) {
-            message = MessageFormat.format("Operation {0} failed with ConnectorIOException on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new ServiceUnavailableException(message, exception);
-        } catch (OperationTimeoutException e) {
-            message = MessageFormat.format("Operation {0} Timeout on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new ServiceUnavailableException(message, exception);
-        } catch (PasswordExpiredException e) {
-            message = MessageFormat.format("Operation {0} failed with PasswordExpiredException on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new ForbiddenException(message, exception);
-        } catch (InvalidPasswordException e) {
-            message = MessageFormat.format("Invalid password has been provided to operation {0} for system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return ResourceException.newResourceException(UNAUTHORIZED_ERROR_CODE, message, exception);
-        } catch (UnknownUidException e) {
-            message = MessageFormat.format("Operation {0} could not find resource {1} on system object: {2}",
-                    request.getRequestType().toString(), resourceId, resourceContainer);
-            return new NotFoundException(message, exception).setDetail(new JsonValue(new HashMap<String, Object>()));
-        } catch (InvalidCredentialException e) {
-            message = MessageFormat.format("Invalid credential has been provided to operation {0} for system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return ResourceException.newResourceException(UNAUTHORIZED_ERROR_CODE, message, exception);
-        } catch (PermissionDeniedException e) {
-            message = MessageFormat.format("Permission was denied on {0} operation for system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new ForbiddenException(message, exception);
-        } catch (ConnectorSecurityException e) {
-            message = MessageFormat.format("Operation {0} failed with ConnectorSecurityException on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new InternalServerErrorException(message, exception);
-        } catch (InvalidAttributeValueException e) {
-            message = MessageFormat.format("Attribute value conflicts with the attribute''s schema definition on " +
-                    "operation {0} for system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new BadRequestException(message, exception);
-        } catch (PreconditionFailedException e) {
-            message = MessageFormat.format("The resource version for {0} does not match the version provided on " +
-                    "operation {1} for system object: {2}",
-                    resourceId, request.getRequestType().toString(), resourceContainer);
-            return new org.forgerock.json.resource.PreconditionFailedException(message, exception);
-        } catch (PreconditionRequiredException e) {
-            message = MessageFormat.format("No resource version for resource {0} has been provided on operation {1} for system object: {2}",
-                    resourceId , request.getRequestType().toString(), resourceContainer);
-            return new org.forgerock.json.resource.PreconditionRequiredException(message, exception);
-        } catch (RetryableException e) {
-            message = MessageFormat.format("Request temporarily unavailable on operation {0} for system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new ServiceUnavailableException(message, exception);
-        } catch (UnsupportedOperationException e) {
-            message = MessageFormat.format("Operation {0} is no supported for system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new NotFoundException(message, exception);
-        } catch (IllegalArgumentException e) {
-            message = MessageFormat.format("Operation {0} failed with IllegalArgumentException on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new InternalServerErrorException(message, e);
-        } catch (RemoteWrappedException e) {
-            return adaptRemoteWrappedException(context, request, exception, resourceContainer, resourceId,
-                    before, after, connectorExceptionActivityLogger);
-        } catch (ConnectorException e) {
-            message = MessageFormat.format("Operation {0} failed with ConnectorException on system object: {1}",
-                    request.getRequestType().toString(), resourceId);
-            return new InternalServerErrorException(message, exception);
-        } finally {
-            // log the ConnectorException
-            logger.debug(message, exception);
-            try {
-                connectorExceptionActivityLogger.log(context, request, message, resourceId,
-                        before, after, Status.FAILURE);
-            } catch (ResourceException e) {
-                // this means the ActivityLogger couldn't log request; log to error log
-                logger.warn("Failed to write activity log", e);
-            }
-        }
-    }
-
-    /**
-     * .NET Exceptions that may be wrapped in a RemoteWrappedException
-     */
-    private enum DotNetExceptionHelper {
-
-        ArgumentException("System.ArgumentException") {
-            Exception getMappedException(Exception e) {
-                return new IllegalArgumentException(e.getMessage(), e.getCause());
-            }
-        },
-        InvalidOperationException("System.InvalidOperationException") {
-            Exception getMappedException(Exception e) {
-                return new IllegalStateException(e.getMessage(), e.getCause());
-            }
-        },
-        NullReferenceException("System.NullReferenceException") {
-            Exception getMappedException(Exception e) {
-                return new NullPointerException(e.getMessage());
-            }
-        },
-        NotSupportedException("System.NotSupportedException") {
-            Exception getMappedException(Exception e) {
-                return new UnsupportedOperationException(e.getMessage(), e.getCause());
-            }
-        },
-        UnknownDotNetException("") {
-            Exception getMappedException(Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e.getCause());
-            }
-        };
-
-        private final String exceptionName;
-
-        private DotNetExceptionHelper(final String exceptionName) {
-            this.exceptionName = exceptionName;
-        }
-
-        abstract Exception getMappedException(Exception e);
-
-        ConnectorException getConnectorException(Exception e) {
-            return new ConnectorException(e.getMessage(), getMappedException(e));
-        }
-
-        static DotNetExceptionHelper fromExceptionClass(String name) {
-            for (DotNetExceptionHelper helper : values()) {
-                if (helper.exceptionName.equals(name)) {
-                    return helper;
-                }
-
-            }
-            return UnknownDotNetException;
-        }
-    }
-
-    /**
-     * Checks the RemoteWrappedException to determine which Exception has been wrapped and returns
-     * the appropriated corresponding exception.
-     *
-     * @param context the Context from the original request
-     * @param request the original request
-     * @param exception the ConnectorException that was thrown by the facade
-     * @param resourceId the resourceId being operated on
-     * @param before the object value "before" the request
-     * @param after the object value "after" the request
-     * @param connectorExceptionActivityLogger the ActivityLogger to use to log the exception
-     */
-    private ResourceException adaptRemoteWrappedException(Context context, Request request,
-            ConnectorException exception, String resourceContainer, String resourceId, JsonValue before,
-            JsonValue after, ActivityLogger connectorExceptionActivityLogger) {
-
-        RemoteWrappedException remoteWrappedException = (RemoteWrappedException) exception;
-        final String message = exception.getMessage();
-        final Throwable cause = exception.getCause();
-
-        if (remoteWrappedException.is(AlreadyExistsException.class)) {
-            return adaptConnectorException(context, request, new AlreadyExistsException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(ConfigurationException.class)) {
-            return adaptConnectorException(context, request, new ConfigurationException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(ConnectionBrokenException.class)) {
-            return adaptConnectorException(context, request, new ConnectionBrokenException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(ConnectionFailedException.class)) {
-            return adaptConnectorException(context, request, new ConnectionFailedException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(ConnectorIOException.class)) {
-            return adaptConnectorException(context, request, new ConnectorIOException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(InvalidAttributeValueException.class)) {
-            return adaptConnectorException(context, request, new InvalidAttributeValueException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(InvalidCredentialException.class)) {
-            return adaptConnectorException(context, request, new InvalidCredentialException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(InvalidPasswordException.class)) {
-            return adaptConnectorException(context, request, new InvalidPasswordException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(OperationTimeoutException.class)) {
-            return adaptConnectorException(context, request, new OperationTimeoutException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(PasswordExpiredException.class)) {
-            return adaptConnectorException(context, request, new PasswordExpiredException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(PermissionDeniedException.class)) {
-            return adaptConnectorException(context, request, new PermissionDeniedException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(PreconditionFailedException.class)) {
-            return adaptConnectorException(context, request, new PreconditionFailedException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(PreconditionRequiredException.class)) {
-            return adaptConnectorException(context, request, new PreconditionRequiredException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(RetryableException.class)) {
-            return adaptConnectorException(context, request, RetryableException.wrap(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(UnknownUidException.class)) {
-            return adaptConnectorException(context, request, new UnknownUidException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else if (remoteWrappedException.is(ConnectorException.class)) {
-            return adaptConnectorException(context, request, new ConnectorException(message, cause),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        } else {
-            // handle .NET exceptions
-            return adaptConnectorException(context, request,
-                    DotNetExceptionHelper.fromExceptionClass(remoteWrappedException.getExceptionClass())
-                            .getConnectorException(remoteWrappedException),
-                    resourceContainer, resourceId, before, after, connectorExceptionActivityLogger);
-        }
-    }
-
-    /**
-     * @return the smartevent Name for a given query
-     */
-    org.forgerock.openidm.smartevent.Name getQueryEventName(String objectClass, QueryRequest request) {
-        String prefix = EVENT_PREFIX + getSystemIdentifierName() + "/" + objectClass + "/query/";
-
-        if (request.getQueryId() != null) {
-            return org.forgerock.openidm.smartevent.Name.get(prefix + request.getQueryId());
-        } else if (request.getQueryExpression() != null) {
-            return org.forgerock.openidm.smartevent.Name.get(prefix + "_query_expression");
-        } else if (request.getQueryFilter() != null) {
-            return org.forgerock.openidm.smartevent.Name.get(prefix + "_queryFilter");
-        } else {
-            // This should never happen...
-            return org.forgerock.openidm.smartevent.Name.get(prefix + "_UNKNOWN");
-        }
-    }
-
     private enum ConnectorAction {
         script, test, livesync
     }
@@ -732,9 +374,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     return new BadRequestException("Unsupported action: " + request.getAction()).asPromise();
             }
         } catch (ConnectorException e) {
-             return adaptConnectorException(context, request, e, null, request.getResourcePath(), null, null,
-                     activityLogger)
-                     .asPromise();
+            return ExceptionHelper.adaptConnectorException(context, request, e, null, request.getResourcePath(),
+                    null, null, activityLogger)
+                    .asPromise();
         } catch (JsonValueException e) {
             return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (IllegalArgumentException e) {
@@ -788,8 +430,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
             String variablePrefix = request.getAdditionalParameter(SystemAction.SCRIPT_VARIABLE_PREFIX);
 
-            List<Map<String, Object>> resultList =
-                    new ArrayList<Map<String, Object>>(scriptContextBuilderList.size());
+            List<Map<String, Object>> resultList = new ArrayList<>(scriptContextBuilderList.size());
             result.put("actions", resultList);
 
             for (ScriptContextBuilder contextBuilder : scriptContextBuilderList) {
@@ -799,59 +440,29 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     if (SystemAction.SCRIPT_PARAMS.contains(key)) {
                         continue;
                     }
-                    Object value = entry.getValue();
+                    String value = entry.getValue();
                     Object newValue = value;
                     if (isShell) {
                         if ("password".equalsIgnoreCase(key)) {
-                            if (value instanceof String) {
-                                newValue = new GuardedString(((String) value).toCharArray());
+                            if (value != null) {
+                                newValue = new GuardedString(value.toCharArray());
                             } else {
                                 return new BadRequestException("Invalid type for password.").asPromise();
                             }
                         }
-                        if ("username".equalsIgnoreCase(key)) {
-                            if (value instanceof String == false) {
-                                return new BadRequestException("Invalid type for username.").asPromise();
-                            }
+                        if ("username".equalsIgnoreCase(key) && value == null) {
+                            return new BadRequestException("Invalid type for username.").asPromise();
                         }
-                        if ("workingdir".equalsIgnoreCase(key)) {
-                            if (value instanceof String == false) {
-                                return new BadRequestException("Invalid type for workingdir.").asPromise();
-                            }
+                        if ("workingdir".equalsIgnoreCase(key) && value == null) {
+                            return new BadRequestException("Invalid type for workingdir.").asPromise();
                         }
-                        if ("timeout".equalsIgnoreCase(key)) {
-                            if (!(value instanceof String) && !(value instanceof Number)) {
-                                return new BadRequestException("Invalid type for timeout.").asPromise();
-                            }
+                        if ("timeout".equalsIgnoreCase(key) && value == null) {
+                            return new BadRequestException("Invalid type for timeout.").asPromise();
                         }
                         contextBuilder.addScriptArgument(key, newValue);
                         continue;
                     }
 
-                    if (null != value) {
-                        if (value instanceof Collection) {
-                            newValue =
-                                    Array.newInstance(Object.class,
-                                            ((Collection) value).size());
-                            int i = 0;
-                            for (Object v : (Collection) value) {
-                                if (null == v || FrameworkUtil.isSupportedAttributeType(v.getClass())) {
-                                    Array.set(newValue, i, v);
-                                } else {
-                                    // Serializable may not be
-                                    // acceptable
-                                    Array.set(newValue, i, v instanceof Serializable ? v : v.toString());
-                                }
-                                i++;
-                            }
-
-                        } else if (value.getClass().isArray()) {
-                            // TODO implement the array support later
-                        } else if (!FrameworkUtil.isSupportedAttributeType(value.getClass())) {
-                            // Serializable may not be acceptable
-                            newValue = value instanceof Serializable ? value : value.toString();
-                        }
-                    }
                     contextBuilder.addScriptArgument(key, newValue);
                 }
 
@@ -873,9 +484,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                     operationOptionsBuilder.setOption("variablePrefix", variablePrefix);
                 }
 
-                Map<String, Object> actionResult = new HashMap<String, Object>(2);
+                Map<String, Object> actionResult = new HashMap<>(2);
                 try {
-                    Object scriptResult = null;
+                    final Object scriptResult;
                     if (onConnector) {
                         scriptResult = facade.runScriptOnConnector(
                                 contextBuilder.build(), operationOptionsBuilder.build());
@@ -898,6 +509,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         }
     }
 
+    @SuppressWarnings("UnusedParameters")
     private Promise<ActionResponse, ResourceException> handleTestAction(Context context, ActionRequest request) {
         return newActionResponse(new JsonValue(getStatus(context))).asPromise();
     }
@@ -924,7 +536,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
     /**
      * Checks the {@code operation} permission before execution.
      *
-     * @param operation
+     * @param operation operation for which to retrieve a facade
      * @return if {@code denied} is true and the {@code onDeny} equals
      *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnActionPolicy#ALLOW}
      *         returns false else true
@@ -945,807 +557,12 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         return facade;
     }
 
-    private class ObjectClassRequestHandler implements RequestHandler {
-
-        public static final String OBJECTCLASS = "objectclass";
-        public static final String OBJECTCLASS_TEMPLATE = "/{objectclass}";
-
-        protected String getObjectClass(Context context) throws ResourceException {
-            Map<String, String> variables = ResourceUtil.getUriTemplateVariables(context);
-            if (null != variables && variables.containsKey(OBJECTCLASS)) {
-                return variables.get(OBJECTCLASS);
-            }
-            throw new ForbiddenException(
-                    "Direct access without Router to this service is forbidden.");
-        }
-
-        public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
-            try {
-                String objectClass = getObjectClass(context);
-                RequestHandler delegate = objectClassHandlers.get(objectClass);
-                if (null != delegate) {
-                    return delegate.handleAction(context, request);
-                } else {
-                    throw new NotFoundException("Not found: " + objectClass);
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-            try {
-                String objectClass = getObjectClass(context);
-                RequestHandler delegate = objectClassHandlers.get(objectClass);
-                if (null != delegate) {
-                    return delegate.handleCreate(context, request);
-                } else {
-                    throw new NotFoundException("Not found: " + objectClass);
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        public Promise<ResourceResponse, ResourceException> handleDelete(Context context, DeleteRequest request) {
-            try {
-                String objectClass = getObjectClass(context);
-                RequestHandler delegate = objectClassHandlers.get(objectClass);
-                if (null != delegate) {
-                    return delegate.handleDelete(context, request);
-                } else {
-                    throw new NotFoundException("Not found: " + objectClass);
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        public Promise<ResourceResponse, ResourceException> handlePatch(Context context, PatchRequest request) {
-            try {
-                String objectClass = getObjectClass(context);
-                RequestHandler delegate = objectClassHandlers.get(objectClass);
-                if (null != delegate) {
-                    return delegate.handlePatch(context, request);
-                } else {
-                    throw new NotFoundException("Not found: " + objectClass);
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
-                QueryResourceHandler handler) {
-            try {
-                String objectClass = getObjectClass(context);
-                RequestHandler delegate = objectClassHandlers.get(objectClass);
-                if (null != delegate) {
-                    return delegate.handleQuery(context, request, handler);
-                } else {
-                    throw new NotFoundException("Not found: " + objectClass);
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        public Promise<ResourceResponse, ResourceException> handleRead(Context context, ReadRequest request) {
-            try {
-                String objectClass = getObjectClass(context);
-                RequestHandler delegate = objectClassHandlers.get(objectClass);
-                if (null != delegate) {
-                    return delegate.handleRead(context, request);
-                } else {
-                    throw new NotFoundException("Not found: " + objectClass);
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
-            try {
-                String objectClass = getObjectClass(context);
-                RequestHandler delegate = objectClassHandlers.get(objectClass);
-                if (null != delegate) {
-                    return delegate.handleUpdate(context, request);
-                } else {
-                    throw new NotFoundException("Not found: " + objectClass);
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-    }
-
-    /**
-     * ActionRequest actions we support on /system/[systemName]/[objectClass/{id}
-     */
-    private enum ObjectClassAction {
-        authenticate, resolveUsername, liveSync
-    }
-
-    /**
-     * Handle request on /system/[systemName]/[objectClass]/{id}
-     *
-     * @ThreadSafe
-     */
-    private class ObjectClassResourceProvider implements RequestHandler {
-
-        private final ObjectClassInfoHelper objectClassInfoHelper;
-        private final Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations;
-        private final String objectClass;
-
-        private ObjectClassResourceProvider(String objectClass, ObjectClassInfoHelper objectClassInfoHelper,
-                Map<Class<? extends APIOperation>, OperationOptionInfoHelper> operations) {
-            this.objectClassInfoHelper = objectClassInfoHelper;
-            this.operations = operations;
-            this.objectClass = objectClass;
-        }
-
-        /**
-         * Checks the {@code operation} permission before execution.
-         *
-         * @param operation
-         * @return if {@code denied} is true and the {@code onDeny} equals
-         *         {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnActionPolicy#ALLOW}
-         *         returns false else true
-         * @throws ResourceException
-         *             if {@code denied} is true and the {@code onDeny} equals
-         *             {@link org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelper.OnActionPolicy#THROW_EXCEPTION}
-         */
-        private ConnectorFacade getConnectorFacade0(Class<? extends APIOperation> operation) throws ResourceException {
-            final ConnectorFacade facade = getConnectorFacade();
-            if (null == facade) {
-                throw new ServiceUnavailableException();
-            }
-            OperationOptionInfoHelper operationOptionInfoHelper = operations.get(operation);
-
-            if (null == facade.getOperation(operation)) {
-                throw new NotSupportedException(
-                        "Operation " + operation.getCanonicalName() + " is not supported by the Connector");
-            } else if (null != operationOptionInfoHelper
-                    && (null != operationOptionInfoHelper.getSupportedObjectTypes())) {
-                if (!operationOptionInfoHelper.getSupportedObjectTypes().contains(
-                        objectClassInfoHelper.getObjectClass().getObjectClassValue())) {
-                    throw new NotSupportedException(
-                            "Actions are not supported for resource instances");
-                } else if (OperationOptionInfoHelper.OnActionPolicy.THROW_EXCEPTION.equals(
-                        operationOptionInfoHelper.getOnActionPolicy())) {
-                    throw new ForbiddenException(
-                            "Operation " + operation.getCanonicalName() + " is configured to be denied");
-                }
-            }
-            return facade;
-        }
-
-        private Promise<ActionResponse, ResourceException> handleAuthenticate(Context context, ActionRequest request)
-                throws IOException {
-            try {
-                final ConnectorFacade facade = getConnectorFacade0(AuthenticationApiOp.class);
-                final JsonValue params = new JsonValue(request.getAdditionalParameters());
-                final String username = params.get("username").required().asString();
-                final String password = params.get("password").required().asString();
-
-                OperationOptions operationOptions = operations.get(AuthenticationApiOp.class)
-                        .build(jsonConfiguration, objectClassInfoHelper)
-                        .build();
-
-                // Throw ConnectorException
-                Uid uid = facade.authenticate(objectClassInfoHelper.getObjectClass(), username,
-                        new GuardedString(password.toCharArray()), operationOptions);
-
-                JsonValue result = new JsonValue(new HashMap<String, Object>());
-                result.put(ResourceResponse.FIELD_CONTENT_ID, uid.getUidValue());
-                if (null != uid.getRevision()) {
-                    result.put(ResourceResponse.FIELD_CONTENT_REVISION, uid.getRevision());
-                }
-                return newActionResponse(result).asPromise();
-            } catch (ConnectorException e) {
-                // handle ConnectorException from facade.authenticate:
-                // log to activity log only if this is an external request
-                // (let internal requests do their own logging upon the handleError...)
-                throw adaptConnectorException(context, request, e, null, null, null, null,
-                        ContextUtil.isExternal(context) ? activityLogger : NullActivityLogger.INSTANCE);
-            }
-        }
-
-        private Promise<ActionResponse, ResourceException> handleLiveSync(
-                Context context, ActionRequest request) throws ResourceException {
-            final ActionRequest forwardRequest =
-                    Requests.newActionRequest(ProvisionerService.ROUTER_PREFIX, request.getAction())
-                            .setAdditionalParameter("source", getSource(objectClass));
-
-            // forward request to be handled in SystemObjectSetService#actionInstance
-            return connectionFactory.getConnection().action(context, forwardRequest).asPromise();
-
-        }
-
-        public Promise<ActionResponse, ResourceException> handleAction(
-                Context context, ActionRequest request) {
-            try {
-                switch (request.getActionAsEnum(ObjectClassAction.class)) {
-                    case authenticate:
-                        return handleAuthenticate(context, request);
-                    case liveSync:
-                        return handleLiveSync(context, request);
-                    default:
-                        throw new BadRequestException("Unsupported action: " + request.getAction());
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (IllegalArgumentException e) { // from request.getActionAsEnum
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
-            try {
-                final ConnectorFacade facade = getConnectorFacade0(CreateApiOp.class);
-                final Set<Attribute> createAttributes =
-                        objectClassInfoHelper.getCreateAttributes(request, cryptoService);
-
-                OperationOptions operationOptions = operations.get(CreateApiOp.class)
-                        .build(jsonConfiguration, objectClassInfoHelper)
-                        .build();
-
-                Uid uid = facade.create(objectClassInfoHelper.getObjectClass(),
-                        AttributeUtil.filterUid(createAttributes), operationOptions);
-
-                ResourceResponse resource = getCurrentResource(facade, uid, null);
-                activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
-                        null, resource.getContent(), Status.SUCCESS);
-                return resource.asPromise();
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (ConnectorException e) {
-                return adaptConnectorException(context, request, e, getSource(objectClass),
-                        objectClassInfoHelper.getFullResourceId(request), request.getContent(), null, activityLogger)
-                        .asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> handleDelete(
-                Context context, DeleteRequest request) {
-            String resourceId = objectClassInfoHelper.getFullResourceId(request);
-            try {
-                if (resourceId.isEmpty()) {
-                    throw new BadRequestException(
-                            "The resource collection " + request.getResourcePath() + " cannot be deleted");
-                }
-                final ConnectorFacade facade = getConnectorFacade0(DeleteApiOp.class);
-                final Uid uid = request.getRevision() != null
-                        ? new Uid(resourceId, request.getRevision())
-                        : new Uid(resourceId);
-
-                // do a read first (largely for logging)
-                ResourceResponse before = getCurrentResource(facade, uid, null);
-
-                OperationOptions operationOptions = operations.get(DeleteApiOp.class)
-                        .build(jsonConfiguration, objectClassInfoHelper)
-                        .build();
-
-                facade.delete(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
-
-                JsonValue result = before.getContent().copy();
-                result.put(ResourceResponse.FIELD_CONTENT_ID, uid.getUidValue());
-                if (null != uid.getRevision()) {
-                    result.put(ResourceResponse.FIELD_CONTENT_REVISION, uid.getRevision());
-                }
-                activityLogger.log(context, request, "message", getSource(objectClass,
-                        uid.getUidValue()), before.getContent(), null, Status.SUCCESS);
-                return newResourceResponse(uid.getUidValue(), uid.getRevision(), result).asPromise();
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (ConnectorException e) {
-                return adaptConnectorException(context, request, e,
-                        getSource(objectClass), resourceId, null, null, activityLogger)
-                        .asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> handlePatch(
-                Context context, PatchRequest request) {
-            JsonValue beforeValue = null;
-            String resourceId = objectClassInfoHelper.getFullResourceId(request);
-            try {
-                if (resourceId.isEmpty()) {
-                    throw new BadRequestException(
-                            "The resource collection " + request.getResourcePath() + " cannot be patched");
-                }
-                
-                final ConnectorFacade facade = getConnectorFacade0(UpdateApiOp.class);
-                final Uid _uid = request.getRevision() != null
-                        ? new Uid(resourceId, request.getRevision())
-                        : new Uid(resourceId);
-
-                // read resource before update for logging
-                ResourceResponse before = getCurrentResource(facade, _uid, null);
-                beforeValue = before.getContent();
-                
-                final Set<String> attributeNames = new HashSet<String>();
-                final Set<Attribute> addedAttributes = new HashSet<Attribute>();
-                final Set<Attribute> removedAttributes = new HashSet<Attribute>();
-                final Set<Attribute> updatedAttributes = new HashSet<Attribute>();
-                for (PatchOperation operation : request.getPatchOperations()) {
-                	Attribute attribute = objectClassInfoHelper.getPatchAttribute(operation, beforeValue, cryptoService);	
-                	if (attribute != null) {
-						if (operation.isAdd()) {
-							addedAttributes.add(attribute);
-						} else if (operation.isRemove()) {
-							removedAttributes.add(attribute);
-						} else {
-							updatedAttributes.add(attribute);
-						}
-						attributeNames.add(attribute.getName());
-					}
-                }
-
-                OperationOptions operationOptions;
-                OperationOptionsBuilder operationOptionsBuilder = operations.get(UpdateApiOp.class)
-                        .build(jsonConfiguration, objectClassInfoHelper);
-
-                final String reauthPassword = getReauthPassword(context);
-
-                // if reauth and updating attribute requiring user credentials
-                if (runAsUser(attributeNames, reauthPassword)) {
-                    // get username attribute
-                    final List<String> usernameAttrs =
-                            jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
-                                    .get(ACCOUNT_USERNAME_ATTRIBUTES)
-                                    .asList(String.class);
-                    final String username = beforeValue.get(usernameAttrs.get(0)).asString();
-
-                    if (StringUtils.isNotBlank(username)) {
-                        operationOptionsBuilder.setRunAsUser(username)
-                                .setRunWithPassword(new GuardedString(reauthPassword.toCharArray()));
-                    }
-                }
-
-                operationOptions = operationOptionsBuilder.build();
-
-                Uid uid = _uid;
-                if (addedAttributes.size() > 0) {
-                	// Perform any add operations
-                	uid = facade.addAttributeValues(objectClassInfoHelper.getObjectClass(), uid, 
-                			AttributeUtil.filterUid(addedAttributes), operationOptions);
-                }
-                if (removedAttributes.size() > 0) {
-                	// Perform any remove operations
-                    try {
-                        uid = facade.removeAttributeValues(objectClassInfoHelper.getObjectClass(), uid,
-                                AttributeUtil.filterUid(removedAttributes), operationOptions);
-                    } catch (ConnectorException e) {
-                        logger.debug("Error removing attribute values for object {}", uid, e);
-                    }
-                }
-                if (updatedAttributes.size() > 0) {
-                	// Perform any increment or replace operations
-                	uid = facade.update(objectClassInfoHelper.getObjectClass(), uid, 
-                			AttributeUtil.filterUid(updatedAttributes), operationOptions);
-                }
-                
-                ResourceResponse resource = getCurrentResource(facade, uid, null);
-                activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
-                        beforeValue, resource.getContent(), Status.SUCCESS);
-                return resource.asPromise();
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (ConnectorException e) {
-                return adaptConnectorException(context, request, e, getSource(objectClass),
-                        resourceId, beforeValue, null, activityLogger)
-                        .asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        @Override
-        public Promise<QueryResponse, ResourceException> handleQuery(
-                final Context context, final QueryRequest request, final QueryResourceHandler handler) {
-            EventEntry measure = Publisher.start(getQueryEventName( objectClass, request), request, null);
-            String resourceId = objectClassInfoHelper.getFullResourceId(request);
-            try {
-                if (!resourceId.isEmpty()) {
-                    throw new BadRequestException(
-                            "The resource instance " + request.getResourcePath() + " cannot be queried");
-                }
-                
-                final ConnectorFacade facade = getConnectorFacade0(SearchApiOp.class);
-                OperationOptionsBuilder operationOptionsBuilder = operations.get(SearchApiOp.class)
-                            .build(jsonConfiguration, objectClassInfoHelper);
-
-                Filter filter = null;
-
-                if (request.getQueryId() != null) {
-                    if (ServerConstants.QUERY_ALL_IDS.equals(request.getQueryId())) {
-                        operationOptionsBuilder.setAttributesToGet(Uid.NAME);
-                    } else {
-                        throw new BadRequestException("Unsupported _queryId: " + request.getQueryId());
-                    }
-                } else if (request.getQueryExpression() != null) {
-                    filter = QueryFilters.parse(request.getQueryExpression()).accept(
-                            RESOURCE_FILTER, objectClassInfoHelper);
-                } else if (request.getQueryFilter() != null) {
-                    // No filtering or query by filter.
-                    filter = request.getQueryFilter().accept(RESOURCE_FILTER, objectClassInfoHelper);
-                } else {
-                    throw new BadRequestException("One of _queryId, _queryExpression, or _queryFilter is required.");
-                }
-
-                // If paged results are requested then decode the cookie in
-                // order to determine
-                // the index of the first result to be returned.
-                final int pageSize = request.getPageSize();
-                final String pagedResultsCookie = request.getPagedResultsCookie();
-                if (pageSize > 0) {
-                    operationOptionsBuilder.setPageSize(pageSize);
-                }
-                if (null != pagedResultsCookie) {
-                    operationOptionsBuilder.setPagedResultsCookie(pagedResultsCookie);
-                }
-                operationOptionsBuilder.setPagedResultsOffset(request.getPagedResultsOffset());
-                if (null != request.getSortKeys()) {
-                    List<SortKey> sortKeys = new ArrayList<SortKey>(request.getSortKeys().size());
-                    for (org.forgerock.json.resource.SortKey s: request.getSortKeys()){
-                        sortKeys.add(new SortKey(s.getField().leaf(), s.isAscendingOrder()));
-                    }
-                    operationOptionsBuilder.setSortKeys(sortKeys);
-                }
-
-                // Override ATTRS_TO_GET if fields are specified within the Request
-                if (!request.getFields().isEmpty()) {
-                    objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, request.getFields());
-                }
-
-                final JsonValue logValue = json(array());
-                final Exception[] ex = new Exception[] { null };
-                SearchResult searchResult = facade.search(objectClassInfoHelper.getObjectClass(), filter,
-                        new ResultsHandler() {
-                            @Override
-                            public boolean handle(ConnectorObject obj) {
-                                try {
-                                    ResourceResponse resource = objectClassInfoHelper.build(obj, cryptoService);
-                                    logValue.add(resource.getContent().getObject());
-                                    return handler.handleResource(resource);
-                                } catch (Exception e) {
-                                    ex[0] = e;
-                                    // TODO ICF needs a way to handle exceptions through the facade
-                                    return false;
-                                }
-                            }
-                        }, operationOptionsBuilder.build());
-                if (ex[0] != null) {
-                    throw new InternalServerErrorException(ex[0].getMessage(), ex[0]);
-                }
-                activityLogger.log(context, request,
-                        "query: " + request.getQueryId()
-                                + ", queryExpression: " + request.getQueryExpression()
-                                + ", queryFilter: " + (request.getQueryFilter() != null ? request.getQueryFilter().toString() : null)
-                                + ", parameters: " + request.getAdditionalParameters(),
-                        request.getQueryId(), null, logValue, Status.SUCCESS);
-
-                // TODO Support count policy and totalPagedResults
-                return newResultPromise(
-                        newQueryResponse(searchResult != null ? searchResult.getPagedResultsCookie() : null));
-            } catch (EmptyResultSetException e) {
-                // cause an empty-result to be returned
-                return newResultPromise(newQueryResponse());
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (ConnectorException e) {
-                return adaptConnectorException(context, request, e, null, null, null, null, activityLogger).asPromise();
-            } catch (IllegalArgumentException | JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            } finally {
-                measure.end();
-            }
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> handleRead(
-                Context context, ReadRequest request) {
-            String resourceId = objectClassInfoHelper.getFullResourceId(request);
-            try {
-                if (resourceId.isEmpty()) {
-                    throw new BadRequestException(
-                            "The resource collection " + request.getResourcePath() + " cannot be read");
-                }
-
-                final ConnectorFacade facade = getConnectorFacade0(GetApiOp.class);
-                Uid uid = new Uid(resourceId);
-                ConnectorObject connectorObject = getConnectorObject(facade, uid, request.getFields());
-
-                if (null != connectorObject) {
-                    ResourceResponse resource = objectClassInfoHelper.build(connectorObject, cryptoService);
-                    activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
-                            resource.getContent(), resource.getContent(), Status.SUCCESS);
-                    return resource.asPromise();
-                } else {
-                    final String matchedUri = context.containsContext(UriRouterContext.class)
-                            ? context.asContext(UriRouterContext.class).getMatchedUri()
-                            : "unknown path";
-                    throw new NotFoundException("Object " + resourceId + " not found on " + matchedUri);
-
-                }
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (ConnectorException e) {
-                return adaptConnectorException(context, request, e,
-                        getSource(objectClass), resourceId, null, null, activityLogger)
-                        .asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> handleUpdate(
-                Context context, UpdateRequest request) {
-            JsonValue content = request.getContent();
-            String resourceId = objectClassInfoHelper.getFullResourceId(request);
-            try {
-                if (resourceId.isEmpty()) {
-                    throw new BadRequestException(
-                            "The resource collection " + request.getResourcePath() + " cannot be updated");
-                }
-
-                final ConnectorFacade facade = getConnectorFacade0(UpdateApiOp.class);
-                final Uid _uid = request.getRevision() != null
-                        ? new Uid(resourceId, request.getRevision())
-                        : new Uid(resourceId);
-
-                // read resource before update for logging
-                ResourceResponse before = getCurrentResource(facade, _uid, null);
-
-                // TODO Fix for http://bugster.forgerock.org/jira/browse/CREST-29
-                final Name newName = null;
-                final Set<Attribute> replaceAttributes =
-                        objectClassInfoHelper.getUpdateAttributes(request, newName, cryptoService);
-
-                OperationOptions operationOptions;
-                OperationOptionsBuilder operationOptionsBuilder = operations.get(UpdateApiOp.class)
-                        .build(jsonConfiguration, objectClassInfoHelper);
-
-                final String reauthPassword = getReauthPassword(context);
-
-                // if reauth and updating attributes requiring user credentials
-                if (runAsUser(content.asMap().keySet(), reauthPassword)) {
-                    // get username attribute
-                    final List<String> usernameAttrs =
-                            jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
-                                    .get(ACCOUNT_USERNAME_ATTRIBUTES)
-                                    .asList(String.class);
-                    final String username = content.get(usernameAttrs.get(0)).asString();
-
-                    if (StringUtils.isNotBlank(username)) {
-                        operationOptionsBuilder.setRunAsUser(username)
-                                .setRunWithPassword(new GuardedString(reauthPassword.toCharArray()));
-                    }
-                }
-
-                operationOptions = operationOptionsBuilder.build();
-
-                Uid uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid,
-                        AttributeUtil.filterUid(replaceAttributes), operationOptions);
-
-                ResourceResponse resource = getCurrentResource(facade, uid, null);
-                activityLogger.log(context, request, "message", getSource(objectClass, uid.getUidValue()),
-                        before.getContent(), resource.getContent(), Status.SUCCESS);
-                return resource.asPromise();
-            } catch (ResourceException e) {
-                return e.asPromise();
-            } catch (ConnectorException e) {
-                return adaptConnectorException(context, request, e, getSource(objectClass),
-                        resourceId, content, null, activityLogger)
-                        .asPromise();
-            } catch (JsonValueException e) {
-                return new BadRequestException(e.getMessage(), e).asPromise();
-            } catch (Exception e) {
-                return new InternalServerErrorException(e.getMessage(), e).asPromise();
-            }
-        }
-
-        // see if there is a reauth password provided
-        private String getReauthPassword(Context context) {
-            try {
-                // get reauth password
-                return context.asContext(HttpContext.class).getHeaderAsString(REAUTH_HEADER);
-            } catch (Exception e) {
-                // there will not always be a HttpContext and this is acceptable so catch exception to
-                // prevent the exception from  stopping the remaining update
-                return null;
-            }
-        }
-
-        /**
-         * Checks if any of the supplied attributes require re-authentication to update.
-         * 
-         * @param attributes the attributes being updated
-         * @param reauthPassword the re-authentication password
-         * @return true if a password is re-authentication is required, false otherwise.
-         */
-        private boolean runAsUser(Set<String> attributes, String reauthPassword) {
-            final JsonValue properties = objectClassInfoHelper.getProperties();
-            final Predicate<String> attributesToRunAsUser = new Predicate<String>() {
-                @Override
-                public boolean apply(String attribute) {
-                    return !properties.get(attribute).isNull()
-                            && properties.get(attribute).get(RUN_AS_USER).defaultTo(false).asBoolean();
-                }
-            };
-
-            return StringUtils.isNotEmpty(reauthPassword)
-                    && FluentIterable.from(attributes).filter(attributesToRunAsUser).iterator().hasNext();
-        }
-
-        private ResourceResponse getCurrentResource(final ConnectorFacade facade,
-            final Uid uid, final List<JsonPointer> fields) throws IOException, JsonCryptoException {
-
-            final ConnectorObject co = getConnectorObject(facade, uid, fields);
-            if (null != co) {
-                return objectClassInfoHelper.build(co, cryptoService);
-            } else {
-                JsonValue result = new JsonValue(new HashMap<String, Object>());
-                result.put(ResourceResponse.FIELD_CONTENT_ID, uid.getUidValue());
-                if (null != uid.getRevision()) {
-                    result.put(ResourceResponse.FIELD_CONTENT_REVISION, uid.getRevision());
-                }
-                return newResourceResponse(uid.getUidValue(), uid.getRevision(), result);
-            }
-        }
-
-        private ConnectorObject getConnectorObject(final ConnectorFacade facade,
-            final Uid uid, final List<JsonPointer> fields) throws IOException, JsonCryptoException {
-
-            final OperationOptions operationOptions;
-            if (fields == null || fields.isEmpty()) {
-                operationOptions = operations.get(GetApiOp.class)
-                        .build(jsonConfiguration, objectClassInfoHelper)
-                        .build();
-            } else {
-                OperationOptionsBuilder operationOptionsBuilder = new OperationOptionsBuilder();
-                objectClassInfoHelper.setAttributesToGet(operationOptionsBuilder, fields);
-                operationOptions = operationOptionsBuilder.build();
-            }
-
-            return facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
-        }
-    }
-
-    /**
-     * Handle request on /system/[systemName]/schema
-     *
-     * @ThreadSafe
-     */
-    private static class SchemaResourceProvider implements SingletonResourceProvider {
-
-        private final ResourceResponse schema;
-
-        private SchemaResourceProvider(ResourceResponse schema) {
-            this.schema = schema;
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-            return schema.asPromise();
-        }
-
-        @Override
-        public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
-            return new NotSupportedException("Actions are not supported for resource instances").asPromise();
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest request) {
-            return new NotSupportedException("Patch operations are not supported").asPromise();
-        }
-
-        @Override
-        public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
-            return new NotSupportedException("Update operations are not supported").asPromise();
-        }
-    }
-    
-    /**
-     * A container for information about a sync retry after a failure
-     */
-    private class SyncRetry {
-        
-        /**
-         * The retry value, true if the sync should be retried, false otherwise.
-         */
-        boolean value;
-        
-        /**
-         * The {@link Throwable} associated with the failure
-         */
-        Throwable throwable;
-        
-        public SyncRetry() {
-            value = false;
-            throwable = null;
-        }
-
-        /**
-         * Returns the retry value.
-         * 
-         * @return true if the sync should be retried, false otherwise.
-         */
-        public boolean getValue() {
-            return value;
-        }
-
-        /**
-         * Sets the retry value.
-         * 
-         * @param value true if the sync should be retried, false otherwise.
-         */
-        public void setValue(boolean value) {
-            this.value = value;
-        }
-
-        /**
-         * Returns the {@link Throwable} associated with the failure
-         * 
-         * @return the {@link Throwable} associated with the failure
-         */
-        public Throwable getThrowable() {
-            return throwable;
-        }
-
-        /**
-         * Sets the {@link Throwable} associated with the failure.
-         * 
-         * @param throwable the {@link Throwable} associated with the failure.
-         */
-        public void setThrowable(Throwable throwable) {
-            this.throwable = throwable;
-        }
-    }
-
     /**
      * Gets the unique {@link org.forgerock.openidm.provisioner.SystemIdentifier} of this instance.
      * <p/>
      * The service which refers to this service instance can distinguish between multiple instances by this value.
      *
-     * @return
+     * @return the system identifier
      */
     public SystemIdentifier getSystemIdentifier() {
         return systemIdentifier;
@@ -1759,9 +576,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * Gets the fully qualified path name
      * @param objectClass the object class for the intended resource
      * @param optionalId ids to append to the fully qualified path
-     * @return
+     * @return the fully qualified path name
      */
-    private String getSource(final String objectClass, final String... optionalId) {
+    String getSource(final String objectClass, final String... optionalId) {
         final StringBuilder sb = new StringBuilder("system")
                 .append("/")
                 .append(systemIdentifier.getName())
@@ -1819,7 +636,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
      * @return a Map of the current status of a connector
      */
     public Map<String, Object> getStatus(Context context) {
-        Map<String, Object> result = new LinkedHashMap<String, Object>();
+        Map<String, Object> result = new LinkedHashMap<>();
         JsonValue jv = new JsonValue(result);
         boolean ok = false;
 
@@ -1861,8 +678,8 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         JsonValue jv = json(object());
         jv.put("name", systemIdentifier.getName());
         jv.put("ok", false);
-        SimpleSystemIdentifier testIdentifier = null;
-        ConnectorReference connectorReference = null;
+        SimpleSystemIdentifier testIdentifier;
+        ConnectorReference connectorReference;
         try {
             testIdentifier = new SimpleSystemIdentifier(config);
             connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
@@ -1873,7 +690,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
         ConnectorInfo connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
         if (null != connectorInfo) {
-            ConnectorFacade facade = null;
+            ConnectorFacade facade;
             try {
                 OperationHelperBuilder ohb = new OperationHelperBuilder(testIdentifier.getName(), config,
                         connectorInfo.createDefaultAPIConfiguration(), cryptoService);
@@ -2102,7 +919,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                                             failedRecord[0] = SerializerUtil.serializeXmlObject(syncDelta, true);
                                             logger.debug("Failed to synchronize {} object, handle failure using {}",
                                                     syncDelta.getUid(), syncFailureHandler, e);
-                                            Map<String, Object> syncFailureMap = new HashMap<String, Object>(6);
+                                            Map<String, Object> syncFailureMap = new HashMap<>(6);
                                             syncFailureMap.put("token", syncDelta.getToken().getValue());
                                             syncFailureMap.put("systemIdentifier", systemIdentifier.getName());
                                             syncFailureMap.put("objectType", objectType);
@@ -2133,7 +950,7 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
                         }, operationOptionsBuilder.build());
                         if (syncRetry.getValue()) {
                             Throwable throwable = syncRetry.getThrowable();
-                            Map<String, Object> lastException = new LinkedHashMap<String, Object>(2);
+                            Map<String, Object> lastException = new LinkedHashMap<>(2);
                             lastException.put("throwable", throwable.getMessage());
                             if (null != failedRecord[0]) {
                                 lastException.put("syncDelta", failedRecord[0]);
@@ -2170,9 +987,17 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
 
     /**
      * Package level setter to allow unit tests to set the logger.
-     * @param activityLogger
+     * @param activityLogger the new activity logger
      */
     void setActivityLogger(ActivityLogger activityLogger) {
         this.activityLogger = activityLogger;
+    }
+
+    ActivityLogger getActivityLogger() {
+        return activityLogger;
+    }
+
+    CryptoService getCryptoService() {
+        return cryptoService;
     }
 }
