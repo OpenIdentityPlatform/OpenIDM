@@ -727,7 +727,7 @@ define([
                 };
 
                 //handle the minLength property
-                if (!property.minLength.length || !parseInt(property.minLength, 10)) {
+                if (property.minLength === null || !property.minLength.length || !parseInt(property.minLength, 10)) {
                     property.minLength = null;
                 } else {
                     property.minLength = parseInt(property.minLength, 10);
