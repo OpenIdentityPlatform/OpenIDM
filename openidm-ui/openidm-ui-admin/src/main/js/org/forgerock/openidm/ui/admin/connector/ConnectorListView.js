@@ -222,6 +222,7 @@ define([
                 alternateItem,
                 tempConnector = _.clone(this.data.currentConnectors),
                 connectorPath,
+                connectorName,
                 connectorIndex;
 
             if(selectedItem.length > 0) {
@@ -243,11 +244,12 @@ define([
             _.each(tempConnector, function(connectorObject, index){
                 if(connectorObject.cleanUrlName === selectedItem.attr("data-connector-title")) {
                     connectorPath = this.data.currentConnectors[index].config;
+                    connectorName = this.data.currentConnectors[index].name;
                     connectorIndex = index;
                 }
             }, this);
 
-            connectorUtils.deleteConnector(connectorPath, () => {
+            connectorUtils.deleteConnector(connectorName, connectorPath, () => {
                 this.data.currentConnectors.splice(connectorIndex, 1);
                 selectedItem.remove();
                 alternateItem.remove();

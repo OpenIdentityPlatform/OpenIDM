@@ -118,7 +118,6 @@ define([
             this.connectorTypeRef = null;
             this.connectorList = null;
             this.postActionBlockScript = null;
-            this.name = null;
             this.addedLiveSyncSchedules = [];
             this.connectorTypeRef = null;
             this.userDefinedObjectTypes = null;
@@ -152,7 +151,7 @@ define([
 
                 this.data.editState = true;
                 this.data.systemType = splitDetails[0];
-                this.data.connectorId = this.name = splitDetails[1];
+                this.data.connectorId = splitDetails[1];
 
                 //Get current connector details
                 ConfigDelegate.readEntity(this.data.systemType + "/" + this.data.connectorId).then(_.bind(function(data){
@@ -162,7 +161,7 @@ define([
                     this.currentObjectTypeLoaded = "savedConfig";
                     this.data.objectTypeDefaultConfigs = this.objectTypeConfigs[data.connectorRef.bundleName];
 
-                    this.data.connectorName = this.name;
+                    this.data.connectorName = data.name;
                     this.data.connectorTypeName = data.connectorRef.connectorName;
 
                     this.data.enabled = data.enabled;
@@ -339,7 +338,7 @@ define([
 
             event.preventDefault();
 
-            connectorUtils.deleteConnector(connectorPath, () => {
+            connectorUtils.deleteConnector(this.data.connectorName, connectorPath, () => {
                 eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.connectorListView});
             });
         },
@@ -825,7 +824,7 @@ define([
             _.each(objectTypes, function(object, key){
                 this.$el.find(".dropdown-menu .divider").before(
                         '<li class="data-link">'
-                        +'<a href="#resource/system/' +this.data.connectorName +'/' +key+'/list/"><i class="fa fa-database"> Data ('+key  +')</i></a>'
+                        +'<a href="#resource/system/' + this.data.connectorId +'/' +key+'/list/"><i class="fa fa-database"> Data ('+key  +')</i></a>'
                         +'</li>');
             }, this);
         },
