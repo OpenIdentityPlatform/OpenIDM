@@ -215,7 +215,7 @@ define([
                 ConfigDelegate.readEntity("ui/configuration"),
                 ConfigDelegate.readEntityAlways(this.model.configUrl),
                 ConfigDelegate.readEntityAlways("external.email"),
-                SocialDelegate.availableProviders()
+                SocialDelegate.providerList()
             ).then(_.bind(function(resources, uiConfig, selfServiceConfig, emailConfig, availableProviders) {
                 this.model.emailServiceAvailable = !_.isUndefined(emailConfig) && _.has(emailConfig, "host");
                 this.model.resources = resources;
