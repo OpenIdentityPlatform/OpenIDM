@@ -96,9 +96,8 @@ define([
         };
     };
 
-    obj.deleteConnector = function(connectorPath, successCallback) {
-        var connectorName = connectorPath.split("/")[2],
-            partialPromise = UIUtils.preloadPartial("partials/connector/_connectorMappings.html"),
+    obj.deleteConnector = function(connectorName, connectorPath, successCallback) {
+        var partialPromise = UIUtils.preloadPartial("partials/connector/_connectorMappings.html"),
             connectorMappingsPromise = obj.getConnectorMappings(connectorName);
 
 
