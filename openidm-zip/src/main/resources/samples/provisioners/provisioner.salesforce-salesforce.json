@@ -2737,12 +2737,6 @@
                     "nativeType": "boolean",
                     "required": false
                 },
-                "UserPermissionsAvantgoUser": {
-                    "type": "boolean",
-                    "nativeName": "UserPermissionsAvantgoUser",
-                    "nativeType": "boolean",
-                    "required": false
-                },
                 "UserPermissionsCallCenterAutoLogin": {
                     "type": "boolean",
                     "nativeName": "UserPermissionsCallCenterAutoLogin",
