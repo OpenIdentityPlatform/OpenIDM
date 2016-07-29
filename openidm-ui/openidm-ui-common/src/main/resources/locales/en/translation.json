@@ -1775,6 +1775,7 @@
             "uniqueLinkQualifiers": "The link qualifier must be unique.",
             "linkQualifier" : "Link Qualifier",
             "mappings": "Mappings",
+            "errorEvalTransform" : "Error evaluating transform script from sync config:",
             "source": "Source",
             "target": "Target",
             "more" : "more...",

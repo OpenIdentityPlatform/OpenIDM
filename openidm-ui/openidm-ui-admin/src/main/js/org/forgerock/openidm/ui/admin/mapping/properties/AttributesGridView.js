@@ -574,7 +574,16 @@ define([
                                     transformResults: transformResults
                                 });
                             }, function(e) {
+                                let errorResponse = JSON.parse(e.responseText);
+
                                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+
+                                samplePromise.resolve({
+                                    conditionResults: {
+                                        result: conditionResults
+                                    },
+                                    transformResults:  $.t("templates.mapping.errorEvalTransform") +" " +errorResponse.message
+                                });
                             });
                         } else {
                             samplePromise.resolve({
@@ -593,7 +602,13 @@ define([
                         transformResults: transformResults
                     });
                 }, function(e) {
+                    let errorResponse = JSON.parse(e.responseText);
+
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingEvalError");
+
+                    samplePromise.resolve({
+                        transformResults: $.t("templates.mapping.errorEvalTransform") +" " +errorResponse.message
+                    });
                 });
             } else {
                 samplePromise.resolve(null);
