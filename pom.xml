@@ -229,7 +229,7 @@
         <!-- quartz 2.x is not compatible yet -->
         <quartz.version>1.8.6_1</quartz.version>
         <rhino.version>1.7R4_1</rhino.version>
-        <groovy.version>2.4.7</groovy.version>
+        <groovy.version>2.2.2</groovy.version>
 
         <!-- OSGi/Felix versions -->
         <!-- Felix 5.4 Framework implements OSGi R6 specification -->
