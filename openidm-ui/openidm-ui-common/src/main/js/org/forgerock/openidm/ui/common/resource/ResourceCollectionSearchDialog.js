@@ -52,7 +52,7 @@ define([
             this.data.property = opts.property;
             this.data.propertyValue = {};
 
-            if (opts.propertyValue && opts.propertyValue !== "") {
+            if (opts.propertyValue && opts.propertyValue !== "" && opts.propertyValue !== "null") {
                 this.data.propertyValue = (_.isObject(opts.propertyValue)) ? opts.propertyValue : JSON.parse(opts.propertyValue);
                 this.propertyValuePath = resourceCollectionUtils.getPropertyValuePath(this.data.propertyValue);
                 title = $.t("templates.admin.ResourceEdit.updateResource",{ resource: opts.property.title });
