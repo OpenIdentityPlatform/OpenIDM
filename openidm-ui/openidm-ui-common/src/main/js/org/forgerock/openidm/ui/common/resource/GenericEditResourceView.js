@@ -484,11 +484,12 @@ define([
              */
             convertField = function (prop) {
                 var el = _this.$el.find("#0-root" + prop.selector.replace(/\./g, "-")),//this is the JSONEditor field to be hidden and changed by the button/dialog
-                    buttonId = "relationshipLink-" + prop.propName,
-                    button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({
+                    editButtonId = "relationshipLink-" + prop.propName,
+                    removeButtonId = "removeRelationshipLink-" + prop.propName,
+                    relationshipDisplay = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({
                         "newRelationship": true,
                         "displayText" : $.t("templates.admin.ResourceEdit.addResource",{ resource: prop.title }),
-                        "buttonId" : buttonId
+                        "editButtonId" : editButtonId
                     })),
                     propertyValuePath,
                     iconClass,
@@ -505,7 +506,7 @@ define([
                         return route;
                     };
 
-                if (el.val().length) {
+                if (el.val().length && el.val() !== "null") {
                     propertyValuePath = resourceCollectionUtils.getPropertyValuePath(JSON.parse(el.val()));
                     resourceCollectionSchema = _.findWhere(_this.data.schema.allSchemas, { name : propertyValuePath.split("/")[propertyValuePath.split("/").length - 1] });
 
@@ -513,38 +514,47 @@ define([
                         iconClass = resourceCollectionSchema.schema.icon;
                     }
 
-                    button = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({
+                    relationshipDisplay = $(handlebars.compile("{{> resource/_relationshipDisplay}}")({
                         "iconClass": iconClass || "fa-cube",
                         "displayText": resourceCollectionUtils.getDisplayText(prop, JSON.parse(el.val()), resourceCollectionUtils.getResourceCollectionIndex(_this.data.schema,propertyValuePath, prop.propName)),
                         "editButtonText": $.t("templates.admin.ResourceEdit.updateResource",{ resource: prop.title }),
+                        "removeButtonText": $.t("templates.admin.ResourceEdit.removeResource",{ resource: prop.title }),
                         "propName": prop.propName,
                         "resourceEditPath": resourceEditPath()
                     }));
                 }
 
-                button.click(function (e) {
+                relationshipDisplay.click(function (e) {
                     var opts = {
                         property: prop,
                         propertyValue: el.val(),
                         schema: _this.data.schema,
                         onChange: function (value, originalPropertyValue, newText) {
                             _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue(JSON.stringify(value));
-                            button.remove();
+                            relationshipDisplay.remove();
                             convertField(prop);
                             _this.$el.find("#resourceEditLink-" + prop.propName).text(newText);
                         }
                     };
 
-                    if ($(e.target).attr("id") === buttonId || $(e.target).closest(".updateRelationshipButton").attr("id") === buttonId) {
+                    if ($(e.target).attr("id") === editButtonId || $(e.target).closest(".updateRelationshipButton").attr("id") === editButtonId) {
                         e.preventDefault();
                         new ResourceCollectionSearchDialog().render(opts);
+                    }
+                    if ($(e.target).attr("id") === removeButtonId || $(e.target).closest(".removeRelationshipButton").attr("id") === removeButtonId) {
+                        e.preventDefault();
+                        _this.editor.getEditor("root" + prop.selector.replace("\\","")).setValue("null");
+                        relationshipDisplay.remove();
+                        convertField(prop);
+                        //_this.$el.find("#resourceEditLink-" + prop.propName).text("");
+                        _this.showPendingChanges();
                     }
                 });
 
                 el.attr("style","display: none !important");
                 el.attr("propname",prop.propName);
                 el.addClass("resourceCollectionValue");
-                el.after(button);
+                el.after(relationshipDisplay);
 
                 return $.Deferred().resolve();
             };

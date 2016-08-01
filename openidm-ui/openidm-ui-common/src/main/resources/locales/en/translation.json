@@ -448,6 +448,7 @@
                 "addResource": "Add __resource__",
                 "createNewResource": "Create New __resource__",
                 "updateResource": "Update __resource__",
+                "removeResource": "Remove __resource__",
                 "removeSelectedResource": "Remove Selected __resource__",
                 "type": "Type",
                 "showChart": "Show Chart",
