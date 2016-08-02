@@ -212,6 +212,12 @@ define([
             role: "ui-admin",
             url: /^workflow\/processdefinition\/(.+)$/,
             pattern: "workflow/processdefinition/?"
+        },
+        "apiExplorerView" : {
+            view: "org/forgerock/openidm/ui/admin/api/ApiExplorerView",
+            role: "ui-admin",
+            url: /^apiExplorer$/,
+            pattern: "apiExplorer"
         }
     };
 
