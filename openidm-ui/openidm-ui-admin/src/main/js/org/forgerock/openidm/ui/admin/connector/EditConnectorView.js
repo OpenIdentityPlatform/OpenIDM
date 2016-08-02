@@ -368,18 +368,6 @@ define([
 
             $.extend(true, mergedResults, oldAdvanced, newAdvanced);
 
-            /*
-             Because form2js doesn't handle the titatoggle well we need to manually get the values
-
-             Need to check this later when form2js updates
-             */
-            if(this.$el.find("#advancedForm") && mergedResults.resultsHandlerConfig) {
-                mergedResults.resultsHandlerConfig.enableAttributesToGetSearchResultsHandler = (this.$el.find("#advancedForm #advancedEnableAttributesToGetSearchResultsHandler").val() === "true");
-                mergedResults.resultsHandlerConfig.enableCaseInsensitiveFilter = (this.$el.find("#advancedForm #advancedEnableCaseInsensitiveFilter").val() === "true");
-                mergedResults.resultsHandlerConfig.enableFilteredResultsHandler = (this.$el.find("#advancedForm #advancedEnableFilteredResultsHandler").val() === "true");
-                mergedResults.resultsHandlerConfig.enableNormalizingResultsHandler = (this.$el.find("#advancedForm #advancedEnableNormalizingResultsHandler").val() === "true");
-            }
-
             //Need to convert all strings to numbers also some safety check to prevent bad values
             _.each(mergedResults.operationTimeout, function(value, key) {
                 tempNumber = parseInt(value, 10);

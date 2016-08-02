@@ -39,8 +39,8 @@ function (EditConnectorView, _,
             },
             newConnector = {
                 "resultsHandlerConfig" : {
-                    "enableNormalizingResultsHandler" : "false",
-                    "enableFilteredResultsHandler" : "false"
+                    "enableNormalizingResultsHandler" : false,
+                    "enableFilteredResultsHandler" : false
                 },
                 "poolConfigOption" : {
                     "maxObjects" : 25
