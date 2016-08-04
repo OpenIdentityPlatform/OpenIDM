@@ -14,7 +14,12 @@
           "userinfo_endpoint" : "userinfo_endpoint",
           "well-known" : "",
           "client_id" : "",
-          "client_secret" : ""
+          "client_secret" : "",
+          "scopes" : [
+            "openid",
+            "profile",
+            "email"
+          ]
         }
       ]
     }

@@ -18,7 +18,12 @@
         "token_endpoint": "https://www.googleapis.com/oauth2/v4/token",
         "userinfo_endpoint": "https://www.googleapis.com/oauth2/v3/userinfo",
         "well-known": "https://accounts.google.com/.well-known/openid-configuration",
-        "enabled": true
+        "enabled": true,
+        "scopes" : [
+          "openid",
+          "profile",
+          "email"
+        ]
       }
     ],
     "defaultUserRoles": [

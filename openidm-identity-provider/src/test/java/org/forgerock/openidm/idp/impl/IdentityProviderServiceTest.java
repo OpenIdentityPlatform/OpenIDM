@@ -71,7 +71,8 @@ public class IdentityProviderServiceTest {
                 field("userinfo_endpoint", "userinfo_endpoint"),
                 field("well-known", ""),
                 field("client_id", ""),
-                field("enabled", true)));
+                field("enabled", true),
+                field("scopes", array("openid", "profile", "email"))));
 
         IdentityProviderService service = new IdentityProviderService();
         service.bindIdentityProviderConfig(idpConfig);

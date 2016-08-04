@@ -17,6 +17,8 @@ package org.forgerock.openidm.idp.config;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
 /**
  * Configuration of a Provider using the OIDC identity layer.
  */
@@ -50,6 +52,9 @@ public class ProviderConfig {
 
     @JsonProperty("well-known")
     private String wellKnown;
+
+    @JsonProperty("scopes")
+    private List<String> scopes;
 
     /** Default true, can disable
      * identity provider by setting to false
@@ -99,6 +104,10 @@ public class ProviderConfig {
 
     public boolean isEnabled() {
         return enabled;
+    }
+
+    public List<String> getScopes() {
+        return scopes;
     }
 
 }
