@@ -218,6 +218,11 @@ define([
             role: "ui-admin",
             url: /^apiExplorer$/,
             pattern: "apiExplorer"
+        },
+        "socialView" : {
+            view: "org/forgerock/openidm/ui/admin/social/SocialConfigView",
+            role: "ui-admin",
+            url: "social/"
         }
     };
 
