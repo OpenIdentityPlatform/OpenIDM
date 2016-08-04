@@ -280,7 +280,8 @@
                     "userSelfService" : "User Self-Service",
                     "userRegistration" : "User Registration",
                     "passwordReset" : "Password Reset",
-                    "forgotUsername" : "Forgotten Username"
+                    "forgotUsername" : "Forgotten Username",
+                    "socialProviders" : "Social ID Providers"
                 }
             }
         }
@@ -948,7 +949,9 @@
             "actionAlert": "You must provide a value for the action."
         },
         "socialProviders" : {
+            "socialIdentityTitle" : "Social Identity Providers",
             "provider" : "Provider",
+            "providers" : "Providers",
             "icon" : "Sign-In Button URL",
             "sectionDetails" : "Enable social identity providers for user authentication and registration.",
             "configureProvider" : "Configure provider for social provisioning",
@@ -960,7 +963,11 @@
             "title" : "Social ID Provider",
             "wellKnown" : "Discovery URL",
             "scope" : "Scope",
-            "disableOIDCAuthModule": "When you disable all social ID providers, OpenIDM disables the OpenID Connect module."
+            "scopeHelp" : "OAuth 2.0 scopes needed to access Google APIs",
+            "disableOIDCAuthModule": "When you disable all social ID providers, OpenIDM disables the OpenID Connect module.",
+            "googleGeneralHelp" : "Visit the Google <a href='https://console.developers.google.com' target='_blank'>API Manager</a> to generate a Client ID and Client Secret",
+            "showAdvanced" : "Show Advanced Options",
+            "hideAdvanced" : "Hide Advanced Options"
         },
         "audit": {
             "eventHandlers": {

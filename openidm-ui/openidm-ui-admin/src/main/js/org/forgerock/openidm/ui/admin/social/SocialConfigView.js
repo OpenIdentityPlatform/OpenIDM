@@ -43,9 +43,7 @@ define([
             BootstrapDialog,
             selectize) {
     var SocialConfigView = AdminAbstractView.extend({
-        template: "templates/admin/settings/SocialConfigTemplate.html",
-        element: "#socialContainer",
-        noBaseTemplate: true,
+        template: "templates/admin/social/SocialConfigTemplate.html",
         events: {
             "change .section-check" : "controlSectionSwitch",
             "click .btn-link" : "editConfig"
@@ -55,7 +53,7 @@ define([
         },
         partials: [
             "partials/_toggleIconBlock.html",
-            "partials/settings/social/_openid_connect.html",
+            "partials/social/_google.html",
             "partials/form/_basicInput.html",
             "partials/form/_tagSelectize.html"
         ],
@@ -123,7 +121,7 @@ define([
                     this.deleteConfig(this.model.providers[index]);
                 }
 
-                if(providerCount === 0 && this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+                if(providerCount === 0 && this.model.userRegistration && this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
                     UserRegistrationConfigView.switchToUserDetails(this.model.userRegistration);
                 }
             }
@@ -209,8 +207,8 @@ define([
                     title: AdminUtils.capitalizeName(cardDetails.name) + " " + $.t("templates.socialProviders.provider"),
                     type: BootstrapDialog.TYPE_DEFAULT,
                     size: BootstrapDialog.SIZE_WIDE,
-                    message: $(handlebars.compile("{{> settings/social/_" + cardDetails.type + "}}")(providerConfig)),
-                    onshown: _.bind(function (dialogRef) {
+                    message: $(handlebars.compile("{{> social/_" + cardDetails.name + "}}")(providerConfig)),
+                    onshow: (dialogRef) => {
                         dialogRef.$modalBody.find(".array-selection").selectize({
                             delimiter: ",",
                             persist: false,
@@ -221,7 +219,9 @@ define([
                                 };
                             }
                         });
-                    }, this),
+
+                        dialogRef.$modalBody.find(".advanced-options-toggle").bind("click", this.advancedOptionToggle);
+                    },
                     buttons: [
                         {
                             label: $.t("common.form.close"),
@@ -247,6 +247,18 @@ define([
                     ]
                 });
             });
+        },
+
+        advancedOptionToggle: function(event) {
+            event.preventDefault();
+
+            var link = $(event.target);
+
+            if (link.hasClass("collapsed")) {
+                link.text($.t("templates.socialProviders.hideAdvanced"));
+            } else {
+                link.text($.t("templates.socialProviders.showAdvanced"));
+            }
         },
 
         generateSaveData: function(formData, currentData) {
