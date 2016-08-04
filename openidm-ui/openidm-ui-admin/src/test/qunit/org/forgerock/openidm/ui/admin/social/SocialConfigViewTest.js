@@ -1,5 +1,5 @@
 define([
-    "org/forgerock/openidm/ui/admin/settings/SocialConfigView",
+    "org/forgerock/openidm/ui/admin/social/SocialConfigView",
     "org/forgerock/openidm/ui/admin/util/AdminUtils"
 ], function (SocialConfigView,
              AdminUtils) {
