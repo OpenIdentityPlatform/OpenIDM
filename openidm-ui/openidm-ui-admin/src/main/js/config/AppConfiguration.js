@@ -150,6 +150,12 @@ define([
                                             "inactive": false
                                         },
                                         {
+                                            "url": "#social/",
+                                            "name": "config.AppConfiguration.Navigation.links.socialProviders",
+                                            "icon": "fa fa-user",
+                                            "inactive": false
+                                        },
+                                        {
                                             "url": "#settings/",
                                             "name": "config.AppConfiguration.Navigation.links.systemPref",
                                             "icon": "fa fa-cog",
