@@ -101,6 +101,7 @@
                             "key" : "openidm-sym-default"
                         },
                         "scope" : "private",
+                        "isProtected": true,
                         "policies" : [
                             {
                                 "policyId" : "at-least-X-capitals",
@@ -121,17 +122,6 @@
                                         "userName",
                                         "givenName",
                                         "sn"
-                                    ]
-                                }
-                            },
-                            {
-                                "policyId" : "re-auth-required",
-                                "params" : {
-                                    "exceptRoles" : [
-                                        "system",
-                                        "openidm-admin",
-                                        "openidm-reg",
-                                        "openidm-cert"
                                     ]
                                 }
                             }
@@ -157,6 +147,7 @@
                         "secureHash" : {
                             "algorithm" : "SHA-256"
                         },
+                        "isProtected": true,
                         "policies" : [
                             {
                                 "policyId" : "at-least-X-capitals",
@@ -181,17 +172,6 @@
                                 }
                             },
                             {
-                                "policyId" : "re-auth-required",
-                                "params" : {
-                                    "exceptRoles" : [
-                                        "system",
-                                        "openidm-admin",
-                                        "openidm-reg",
-                                        "openidm-cert"
-                                    ]
-                                }
-                            },
-                            {
                                 "policyId" : "is-new",
                                 "params" : {
                                     "historyLength" : 2
@@ -209,6 +189,7 @@
                         "encryption" : {
                             "key" : "openidm-sym-default"
                         },
+                        "isProtected": true,
                         "policies" : [
                             {
                                 "policyId" : "at-least-X-capitals",
@@ -229,17 +210,6 @@
                                         "userName",
                                         "givenName",
                                         "sn"
-                                    ]
-                                }
-                            },
-                            {
-                                "policyId" : "re-auth-required",
-                                "params" : {
-                                    "exceptRoles" : [
-                                        "system",
-                                        "openidm-admin",
-                                        "openidm-reg",
-                                        "openidm-cert"
                                     ]
                                 }
                             },

@@ -1,0 +1,12 @@
+[
+    {
+        "operation" : "transform",
+        "field" : "/serverAuthContext/authModules",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "content.map(function (a) { if (a.name === 'MANAGED_USER' && a.augmentSecurityContext === undefined) { a.augmentSecurityContext = { \"type\" : \"text/javascript\", \"source\" : \"require('auth/customAuthz').setProtectedAttributes(security)\" }; } return a; })"
+            }
+        }
+    },
+]

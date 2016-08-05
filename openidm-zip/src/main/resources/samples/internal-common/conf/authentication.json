@@ -26,6 +26,10 @@
             },
             {
                 "name" : "MANAGED_USER",
+                "augmentSecurityContext": {
+                    "type" : "text/javascript",
+                    "source" : "require('auth/customAuthz').setProtectedAttributes(security)"
+                },
                 "properties" : {
                     "queryId" : "credential-query",
                     "queryOnResource" : "managed/user",

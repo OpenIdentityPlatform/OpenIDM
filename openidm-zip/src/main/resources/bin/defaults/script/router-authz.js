@@ -251,6 +251,45 @@ function restrictPatchToFields(allowedFields) {
 }
 
 /**
+    Returns a list of fields which have been changed as part of this current request
+*/
+
+function getChangedValues() {
+    var currentObject,
+        JsonPatch = org.forgerock.json.JsonPatch,
+        JsonValue = org.forgerock.json.JsonValue,
+        simplePatchField = function (field) {
+            return field.replace(/^\//, '').split("/")[0];
+        };
+
+    if (request.method === "create") {
+        // all supplied fields are considered "changed" during a create
+        return _.keys(request.content);
+    } else if (request.method === "update") {
+        // during an update, it is necessary to actually compare each object
+        // to see if the field has changed
+        currentObject = openidm.read(request.resourcePath);
+        return _.filter(_.keys(request.content), function (propertyName) {
+            return JsonPatch.diff(
+                JsonValue(request.content[propertyName]),
+                JsonValue(currentObject[propertyName])
+            ).asList().size() !== 0;
+        });
+    } else if (request.method === "patch") {
+        // every field that is supplied as a patch operation is considered "changed"
+        return _.map(request.patchOperations, function (patchOp) {
+            return simplePatchField(patchOp.field);
+        });
+    } else if (request.method === "action" && request.action === "patch") {
+        return _.map(request.content, function (patchOp) {
+            return simplePatchField(patchOp.field);
+        });
+    } else {
+        return [];
+    }
+}
+
+/**
  * Given a managed object name and the global request details, look up the
  * schema for the object and ensure that each of the changed properties in
  * the request are marked as "userEditable" : true.
@@ -259,58 +298,31 @@ function restrictPatchToFields(allowedFields) {
  */
 function onlyEditableManagedObjectProperties(objectName) {
     var managedConfig = openidm.read("config/managed"),
-        managedObjectConfig = _.findWhere(managedConfig.objects, {"name": objectName}),
-        currentObject,
-        JsonPatch = org.forgerock.json.JsonPatch,
-        JsonValue = org.forgerock.json.JsonValue;
+        managedObjectConfig = _.findWhere(managedConfig.objects, {"name": objectName});
 
     if (!managedObjectConfig || !managedObjectConfig.schema || !managedObjectConfig.schema.properties) {
         return false;
     }
 
-    if (request.method === "create") {
-        // Every property provided during the create call must be checked
-        return _.reduce(_.keys(request.content), function (result, propertyName) {
-            return result &&
-                _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
-                managedObjectConfig.schema.properties[propertyName].userEditable === true;
-        }, true);
-    } else if (request.method === "update") {
-        // Only those properties which have changed must be checked
-        currentObject = openidm.read(request.resourcePath);
-        return _.reduce(_.keys(request.content), function (result, propertyName) {
-            return result &&
-                (
-                    // either the value has not changed...
-                    JsonPatch.diff(
-                        JsonValue(request.content[propertyName]),
-                        JsonValue(currentObject[propertyName])
-                    ).asList().size() === 0 ||
-                    // or the user is allowed to edit it
-                    (
-                        _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
-                        managedObjectConfig.schema.properties[propertyName].userEditable === true
-                    )
-                );
-        }, true);
-    } else if (request.method === "patch" || (request.method === "action" && request.action === "patch")) {
-        // Every field being patched must be checked
-        return restrictPatchToFields(
-            // generate an array of all userEditable properties in the schema
-            _.chain(managedObjectConfig.schema.properties)
-             .pairs()
-             .filter(function (pair) {
-                 // pair[1] is the property content
-                 return pair[1].userEditable === true;
-             })
-             .map(function (pair) {
-                 // pair[0] is the property name
-                 return pair[0];
-             })
-             .value()
-        );
+    return _.reduce(getChangedValues(), function (result, propertyName) {
+        return result &&
+            _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
+            managedObjectConfig.schema.properties[propertyName].userEditable === true;
+    }, true);
+
+}
+
+
+
+function reauthIfProtectedAttributeChange() {
+    if (_.any(getChangedValues(), function (attribute) {
+            return _.indexOf(context.security.authorization.protectedAttributeList, attribute) !== -1;
+        })) {
+        // expect a 403 error to be thrown if this call is unsuccessful
+        openidm.action("authentication", "reauthenticate", {}, {});
     }
-    return false;
+
+    return true;
 }
 
 /* DEPRECATED FUNCTION */

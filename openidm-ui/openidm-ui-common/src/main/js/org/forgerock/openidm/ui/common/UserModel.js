@@ -53,11 +53,15 @@ define([
                     this.clear();
                     this.set(previous);
                     if (_.isObject(xhr.responseJSON) && _.has(xhr.responseJSON, "code") && xhr.responseJSON.code === 403) {
-                        EventManager.sendEvent(Constants.EVENT_POLICY_FAILURE, {
-                            error: {
-                                responseObj: xhr.responseJSON
-                            }
-                        });
+                        if (xhr.responseJSON.message.indexOf("Reauthentication failed ") === 0) {
+                            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "reauthFailed");
+                        } else {
+                            EventManager.sendEvent(Constants.EVENT_POLICY_FAILURE, {
+                                error: {
+                                    responseObj: xhr.responseJSON
+                                }
+                            });
+                        }
                     }
                 }, this))
                 .always(_.bind(function () {
@@ -100,7 +104,6 @@ define([
                 // usually password won't be included in the response, but it will for openidm-admin
                 delete response.password;
             }
-            this.getValidationRules();
             return response;
         },
         login: function (username, password) {
@@ -136,39 +139,16 @@ define([
                     }
                 }
             }).then(_.bind(function (sessionDetails) {
-                delete this.policy;
                 this.id = sessionDetails.authorization.id;
                 this.url = "/" + Constants.context + "/" + sessionDetails.authorization.component;
                 this.component = sessionDetails.authorization.component;
+                this.protectedAttributeList = sessionDetails.authorization.protectedAttributeList || [];
                 this.baseEntity = this.component + "/" + this.id;
                 this.uiroles = this.getUIRoles(sessionDetails.authorization.roles);
                 return this.fetch().then(_.bind(function () {
                     return this;
                 }, this));
             }, this));
-        },
-        getValidationRules: function () {
-            if (!this.policy) {
-                return ServiceInvoker.restCall({
-                    "url": "/" + Constants.context + "/policy/" + this.component + "/" + this.id
-                }).then(_.bind(function (policyRules) {
-                    this.policy = policyRules;
-                    // derive protectedAttributeList from those properties which have a REAUTH_REQUIRED policy
-                    this.protectedAttributeList =
-                        _.chain(policyRules.properties)
-                         .filter(function (propertyRule) {
-                             return _.indexOf(propertyRule.policyRequirements, "REAUTH_REQUIRED") !== -1;
-                         })
-                         .map(function (propertyRule) {
-                             return propertyRule.name;
-                         })
-                         .value();
-
-                    return policyRules;
-                }, this));
-            } else {
-                return $.Deferred().resolve(this.policy);
-            }
         },
         getProtectedAttributes: function () {
             return this.protectedAttributeList;

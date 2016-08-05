@@ -78,6 +78,6 @@
                      security.authorization.roles
     };
 
-    return security;
+    return require('auth/customAuthz').setProtectedAttributes(security);
 
 }());
