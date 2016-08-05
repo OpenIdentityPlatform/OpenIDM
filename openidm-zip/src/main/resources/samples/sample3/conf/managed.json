@@ -84,6 +84,7 @@
                             "key" : "openidm-sym-default"
                         },
                         "scope" : "private",
+                        "isProtected": true,
                         "policies" : [
                             {
                                 "policyId" : "at-least-X-capitals",
@@ -104,17 +105,6 @@
                                         "userName",
                                         "givenName",
                                         "sn"
-                                    ]
-                                }
-                            },
-                            {
-                                "policyId" : "re-auth-required",
-                                "params" : {
-                                    "exceptRoles" : [
-                                        "system",
-                                        "openidm-admin",
-                                        "openidm-reg",
-                                        "openidm-cert"
                                     ]
                                 }
                             }

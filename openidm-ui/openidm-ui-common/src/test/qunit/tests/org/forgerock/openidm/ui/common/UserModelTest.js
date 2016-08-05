@@ -15,31 +15,26 @@ define([
         // stub the rest calls invoked by the UserModel to use these simple responses
         sinon.stub(ServiceInvoker, "restCall", function (options) {
             options.headers = options.headers || {};
-            if (options.url.indexOf("/" + Constants.context + "/policy/") !== -1 ) {
-                return $.Deferred().resolve({
-                    "url": options.url
-                });
-            } else {
-                return $.Deferred().resolve({
-                    authenticationId: Constants.HEADER_PARAM_USERNAME,
-                    authorization: {
-                        id: options.headers[Constants.HEADER_PARAM_USERNAME],
-                        component: "managed/user",
-                        roles: ["openidm-authorized"]
-                    }
-                });
-            }
+            return $.Deferred().resolve({
+                authenticationId: Constants.HEADER_PARAM_USERNAME,
+                authorization: {
+                    id: options.headers[Constants.HEADER_PARAM_USERNAME],
+                    component: "managed/user",
+                    roles: ["openidm-authorized"],
+                    // openidm-admin doesn't have any protectedAttributeList values; others do
+                    protectedAttributeList: options.headers[Constants.HEADER_PARAM_USERNAME] === "openidm-admin" ? [] : ["password"]
+                }
+            });
         });
 
-        QUnit.ok(UserModel.policy === undefined, "Policy initially undefined for UserModel");
         headers[Constants.HEADER_PARAM_USERNAME] = "openidm-admin";
         UserModel.getProfile(headers).then(function () {
-            QUnit.ok(UserModel.policy.url.indexOf('openidm-admin') !== -1, "Policy loaded for openidm-admin");
+            QUnit.equal(UserModel.getProtectedAttributes().length, 0, "No protected attributes for openidm-admin");
         }).then(function () {
             headers[Constants.HEADER_PARAM_USERNAME] = "bjensen";
             return UserModel.getProfile(headers);
         }).then(function () {
-            QUnit.ok(UserModel.policy.url.indexOf('bjensen') !== -1, "Policy loaded for bjensen");
+            QUnit.equal(UserModel.getProtectedAttributes()[0], "password", "Password is a protected attribute for bjensen");
         }).then(function () {
             ServiceInvoker.restCall.restore();
         });

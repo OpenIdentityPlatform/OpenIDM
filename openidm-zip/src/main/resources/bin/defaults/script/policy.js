@@ -125,44 +125,12 @@ var _ = require('lib/lodash'),
             "clientValidation": true,
             "validateOnlyIfPresent": true,
             "policyRequirements" : ["CANNOT_CONTAIN_DUPLICATES"]
-        },
-        {
-            "policyId" : "required-if-configured",
-            "policyExec": "requiredIfConfigured",
-            "policyRequirements" : ["REQUIRED"]
-
-        },
-        {   "policyId" : "re-auth-required",
-            "policyExec" : "reauthRequired",
-            "validateOnlyIfPresent": true,
-            "policyRequirements" : ["REAUTH_REQUIRED"]
         }
     ]
 },
 policyImpl = (function (){
 
-    // internal-use utility function
-    var checkExceptRoles = function (exceptRoles) {
-            var i, j, roles, role;
-            if (context.security.authorization !== null) {
-                roles = context.security.authorization.roles;
-                if (exceptRoles) {
-                    for (i = 0; i < exceptRoles.length; i++) {
-                        role = exceptRoles[i];
-                        if (roles) {
-                            for (j = 0; j < roles.length; j++) {
-                                if (role === roles[j]) {
-                                    return true;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            return false;
-        },
-        policyFunctions = {};
-
+    var policyFunctions = {};
 
     policyFunctions.regexpMatches = function(fullObject, value, params, property) {
         if (typeof(value) === "number") {
@@ -185,22 +153,22 @@ policyImpl = (function (){
 
         return [];
     };
-    
+
     policyFunctions.validType = function(fullObject, value, params, property) {
-        var type = _.isNull(value) 
-                ? "null" 
-                : (Array.isArray(value) || Object.prototype.toString.call(value) === "[object ScriptableList]") 
-                        ? "array" 
+        var type = _.isNull(value)
+                ? "null"
+                : (Array.isArray(value) || Object.prototype.toString.call(value) === "[object ScriptableList]")
+                        ? "array"
                         : typeof(value);
         if (value !== undefined && !_.contains(params.types, type)) {
-            return [ 
-                { 
-                    "policyRequirement" : "VALID_TYPE", 
-                    "params" : { 
-                        "invalidType" : type, 
-                        "validTypes" : params.types 
-                    } 
-                } 
+            return [
+                {
+                    "policyRequirement" : "VALID_TYPE",
+                    "params" : {
+                        "invalidType" : type,
+                        "validTypes" : params.types
+                    }
+                }
             ];
         }
         return [];
@@ -447,68 +415,6 @@ policyImpl = (function (){
                     return [{"policyRequirement": "CANNOT_CONTAIN_DUPLICATES", params: {"duplicateValue": value[i]}}];
                 }
                 checkedValues[value[i]] = true;
-            }
-        }
-        return [];
-    };
-
-    policyFunctions.requiredIfConfigured = function(fullObject, value, params, property) {
-        var currentValue = openidm.read("config/" + params.configBase),
-            baseKeyArray = params.baseKey.split("."),
-            i;
-
-        if (checkExceptRoles(params.exceptRoles)) {
-            return [];
-        }
-
-        for (i in baseKeyArray) {
-            currentValue = currentValue[baseKeyArray[i]];
-        }
-
-        if (currentValue && (!value || !value.length)) {
-            return [ {"policyRequirement": "REQUIRED"}];
-        }
-        else {
-            return [];
-        }
-    };
-
-    policyFunctions.reauthRequired = function(fullObject, value, params, propName) {
-        if (checkExceptRoles(params.exceptRoles) || context.selfservice !== undefined) {
-            return [];
-        }
-
-        var actionParams,response,currentObject;
-
-        // Perform reauth if the context indicates that the caller is external
-        // or if we have set a parameter to force reauth when handing a patch operation.
-        // Important: Interpret any value of additionalParameters.external as `true`
-        // so that an external caller cannot abuse this facility by passing in 'false'.
-        if (context.caller.external
-                || (request.additionalParameters !== null && typeof request.additionalParameters.external !== "undefined")) {
-
-            // don't do a read if the resource ends with "/*", which indicates that this is a new record
-            if (typeof request.resourcePath === "string" && !request.resourcePath.match('/\\*$')) {
-                currentObject = openidm.read(request.resourcePath);
-
-                // if the given resource doesn't exist, this also indicates that
-                // this is a new record (likely a client-assigned ID)
-                if (currentObject === null) {
-                    return [];
-                }
-
-                if (openidm.isEncrypted(currentObject[propName])) {
-                    currentObject[propName] = openidm.decrypt(currentObject[propName]);
-                }
-                if (currentObject[propName] === fullObject[propName]) {
-                    // this means the value hasn't changed, so don't complain about reauth
-                    return [];
-                }
-                try {
-                    response = openidm.action("authentication", "reauthenticate", {}, {});
-                } catch (error) {
-                    return [ { "policyRequirement" : "REAUTH_REQUIRED" } ];
-                }
             }
         }
         return [];
@@ -827,7 +733,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                             }
 
                         }
-                        
+
                         if (_.isString(pair[1].type)) {
                             types.push(pair[1].type);
                         } else {

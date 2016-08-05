@@ -38,6 +38,10 @@ define([
         "authenticationUnavailable" : {
             msg: "config.messages.AuthenticationMessages.authenticationUnavailable",
             type: "error"
+        },
+        "reauthFailed" : {
+            msg: "common.form.validation.incorrectPassword",
+            type: "error"
         }
     };
 

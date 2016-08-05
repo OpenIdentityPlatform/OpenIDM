@@ -25,13 +25,11 @@ define([
 
     // the various policies that we don't want to actually bind in the browser
     obj.excludedClientSidePolicies = [
-        "valid-type",
-        "re-auth-required"
+        "valid-type"
     ];
     // related to above, the various requirements that we don't want to show in the browser
     obj.excludedClientSideRequirements = [
-        "VALID_TYPE",
-        "REAUTH_REQUIRED"
+        "VALID_TYPE"
     ];
 
     /**

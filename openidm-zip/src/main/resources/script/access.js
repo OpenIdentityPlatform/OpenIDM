@@ -266,7 +266,7 @@ var httpAccessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "update,patch,action",
             "actions"   : "patch",
-            "customAuthz" : "ownDataOnly() && onlyEditableManagedObjectProperties('user')"
+            "customAuthz" : "ownDataOnly() && onlyEditableManagedObjectProperties('user') && reauthIfProtectedAttributeChange()"
         },
         {
             "pattern"   : "selfservice/user/*",
