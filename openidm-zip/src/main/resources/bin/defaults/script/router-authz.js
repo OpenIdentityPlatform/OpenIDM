@@ -261,7 +261,7 @@ function onlyEditableManagedObjectProperties(objectName) {
     var managedConfig = openidm.read("config/managed"),
         managedObjectConfig = _.findWhere(managedConfig.objects, {"name": objectName}),
         currentObject,
-        JsonPatch = org.forgerock.json.patch.JsonPatch,
+        JsonPatch = org.forgerock.json.JsonPatch,
         JsonValue = org.forgerock.json.JsonValue;
 
     if (!managedObjectConfig || !managedObjectConfig.schema || !managedObjectConfig.schema.properties) {
