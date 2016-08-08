@@ -2055,6 +2055,9 @@
         },
         "user" : {
             "userQuery" : {
+                "mainEnterPromptUsername": "Enter your $t(common.user.username)",
+                "mainEnterPromptEmailAddress": "Enter your $t(common.user.emailAddress)",
+                "optionalEnterPromptEmail": "or your $t(common.user.emailAddress)",
                 "mainEnterPrompt": "Enter your ",
                 "optionalEnterPrompt": "or your ",
                 "orAllEnterPrompt" : "or all of the following information",
