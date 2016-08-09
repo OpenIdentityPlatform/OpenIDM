@@ -28,7 +28,9 @@ define([
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView",
     "bootstrap-dialog",
-    "selectize"
+    "selectize",
+    "libs/codemirror/lib/codemirror",
+    "libs/codemirror/mode/xml/xml"
 ], function($, _,
             handlebars,
             form2js,
@@ -41,7 +43,8 @@ define([
             UIUtils,
             UserRegistrationConfigView,
             BootstrapDialog,
-            selectize) {
+            selectize,
+            codemirror) {
     var SocialConfigView = AdminAbstractView.extend({
         template: "templates/admin/social/SocialConfigTemplate.html",
         events: {
@@ -49,7 +52,7 @@ define([
             "click .btn-link" : "editConfig"
         },
         model: {
-
+            "iconCode" : null
         },
         partials: [
             "partials/_toggleIconBlock.html",
@@ -220,7 +223,25 @@ define([
                             }
                         });
 
-                        dialogRef.$modalBody.find(".advanced-options-toggle").bind("click", this.advancedOptionToggle);
+                        this.model.iconCode = codemirror.fromTextArea(dialogRef.$modalBody.find(".button-html")[0], {
+                            lineNumbers: true,
+                            viewportMargin: Infinity,
+                            theme: "forgerock",
+                            mode: "xml",
+                            htmlMode: true,
+                            lineWrapping: true
+                        });
+
+                        dialogRef.$modalBody.find("#advancedOptions").on("shown.bs.collapse", _.bind(function (e) {
+                            this.model.iconCode.refresh();
+                        }, this));
+
+                        dialogRef.$modalBody.find(".advanced-options-toggle").bind("click", (event) => {this.advancedOptionToggle(event);});
+                    },
+                    onclose: (dialogRef) => {
+                        if(this.model.iconCode) {
+                            this.model.iconCode = null;
+                        }
                     },
                     buttons: [
                         {
@@ -236,6 +257,10 @@ define([
                             action: (dialogRef) => {
                                 var formData = form2js("socialDialogForm", ".", true),
                                     saveData = this.generateSaveData(formData, providerConfig);
+
+                                if(this.model.iconCode) {
+                                    saveData.icon = this.model.iconCode.getValue();
+                                }
 
                                 this.saveConfig(saveData);
 

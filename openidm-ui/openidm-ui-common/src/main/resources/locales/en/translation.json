@@ -292,7 +292,8 @@
             "primary" : "Primary",
             "linkedAccounts" : "Linked Accounts",
             "socialIdentities" : "Social Identities",
-            "noSocialProviders" : "No Social Providers Available"
+            "noSocialProviders" : "No Social Providers Available",
+            "orUseEmailRegistration" : "or register with your email address"
         },
         "util" : {
             "scriptList" : {
@@ -952,7 +953,7 @@
             "socialIdentityTitle" : "Social Identity Providers",
             "provider" : "Provider",
             "providers" : "Providers",
-            "icon" : "Sign-In Button URL",
+            "icon" : "Sign-In Button HTML",
             "sectionDetails" : "Enable social identity providers for user authentication and registration.",
             "configureProvider" : "Configure provider for social provisioning",
             "clientId" : "Client ID",

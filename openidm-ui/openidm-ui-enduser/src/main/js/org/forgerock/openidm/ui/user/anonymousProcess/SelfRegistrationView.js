@@ -36,7 +36,7 @@ define([
             "partials/process/_coreProfileDetails.html",
             "partials/profile/_multiValueFormFields.html",
             "partials/profile/_emailEntry.html",
-            "partials/providers/_OAuth.html"
+            "partials/providers/_providerButton.html"
         ],
         events: _.extend({
             "click .oauth": "oauthHandler"
@@ -44,9 +44,9 @@ define([
         oauthHandler: function (e) {
             e.preventDefault();
             window.location.href = OAuth.getRequestURL(
-                $(e.target).attr("authorization_endpoint"),
-                $(e.target).attr("client_id"),
-                $(e.target).attr("scopes") || "openid profile email",
+                $(e.target).parents(".oauth").attr("authorization_endpoint"),
+                $(e.target).parents(".oauth").attr("client_id"),
+                $(e.target).parents(".oauth").attr("scopes") || "openid profile email",
                 Router.getLink(Router.currentRoute,
                     [
                         "/continue" +

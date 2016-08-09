@@ -43,7 +43,7 @@ define([
 
     obj.partials = (commonLoginView.partials || []).concat([
         "partials/login/_loginButtons.html",
-        "partials/providers/_OAuth.html"
+        "partials/providers/_providerButton.html"
     ]);
 
     _.extend(obj.events, {
@@ -54,8 +54,8 @@ define([
     obj.oauthHandler = function (e) {
         e.preventDefault();
         window.location.href = OAuth.getRequestURL(
-            $(e.target).attr("authorization_endpoint"),
-            $(e.target).attr("client_id"),
+            $(e.target).parents(".oauth").attr("authorization_endpoint"),
+            $(e.target).parents(".oauth").attr("client_id"),
             ["openid"],
             Router.getLink(Router.currentRoute,
                 [
