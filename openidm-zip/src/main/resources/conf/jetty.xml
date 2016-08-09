@@ -133,6 +133,9 @@
         <Set name="keyStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
         <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
         <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
+        <Set name="keyStoreProvider"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreProvider" /></Set>
+        <Set name="trustStoreProvider"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreProvider" /></Set>
+        <Set name="trustStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreType"/></Set>
         <Set name="trustStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
         <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
         <Set name="wantClientAuth">true</Set>
@@ -151,6 +154,9 @@
         <Set name="keyStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreLocation"/></Set>
         <Set name="keyStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="keystorePassword"/></Set>
         <Set name="keyStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreType"/></Set>
+        <Set name="keyStoreProvider"><Get class="org.forgerock.openidm.jetty.Param" name="keystoreProvider" /></Set>
+        <Set name="trustStoreProvider"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreProvider" /></Set>
+        <Set name="trustStoreType"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreType"/></Set>
         <Set name="trustStorePath"><Get class="org.forgerock.openidm.jetty.Param" name="truststoreLocation"/></Set>
         <Set name="trustStorePassword"><Get class="org.forgerock.openidm.jetty.Param" name="truststorePassword"/></Set>
         <Set name="needClientAuth">true</Set>

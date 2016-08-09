@@ -18,14 +18,12 @@
 package org.forgerock.openidm.crypto.impl;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.openidm.core.IdentityServer.*;
+import static org.forgerock.security.keystore.KeyStoreType.PKCS11;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-import java.io.File;
-import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -36,6 +34,8 @@ import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonTransformer;
@@ -62,6 +62,9 @@ import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
 import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.util.JsonUtil;
+import org.forgerock.security.keystore.KeyStoreBuilder;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -94,44 +97,15 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
         this.decryptionTransformers.addAll(decryptionTransformers);
     }
 
-    /**
-     * Opens a connection to the specified URI location and returns an input
-     * stream with which to read its content. If the URI is not absolute, it is
-     * resolved against the root of the local file system. If the specified
-     * location is or contains {@code null}, this method returns {@code null}.
-     *
-     * @param location
-     *            the location to open the stream for.
-     * @return an input stream for reading the content of the location, or
-     *         {@code null} if no location.
-     * @throws IOException
-     *             if there was exception opening the stream.
-     */
-    private InputStream openStream(String location) throws IOException {
-        InputStream result = null;
-        if (location != null) {
-            File configFile =
-                    IdentityServer.getFileForPath(location, IdentityServer.getInstance()
-                            .getInstallLocation());
-            if (configFile.exists()) {
-                result = new FileInputStream(configFile);
-            } else {
-                logger.error("ERROR - KeyStore not found under CryptoService#location {}",
-                        configFile.getAbsolutePath());
-            }
-        }
-        return result;
-    }
-
     /** Map of crypto secret key aliases and the algorithm they should use */
     private static final Map<String, String> configAliases = new LinkedHashMap<>(3);
     static {
         // each alias is stored under a specific property in boot.properties
         configAliases.put(
-                IdentityServer.getInstance().getProperty("openidm.config.crypto.alias"),
+                IdentityServer.getInstance().getProperty(CONFIG_CRYPTO_ALIAS),
                 "AES");
         configAliases.put(
-                IdentityServer.getInstance().getProperty("openidm.config.crypto.selfservice.sharedkey.alias"),
+                IdentityServer.getInstance().getProperty(CONFIG_CRYPTO_ALIAS_SELF_SERVICE),
                 "AES");
         configAliases.put(
                 // OPENIDM-6190 jwt-session signing key must be 256bit
@@ -141,61 +115,71 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
                 "HmacSHA256");
     }
 
-    public void activate(BundleContext context) {
+    public void activate(@SuppressWarnings("unused") BundleContext context) {
         logger.debug("Activating cryptography service");
         try {
             int keyCount = 0;
-            String password = IdentityServer.getInstance().getProperty("openidm.keystore.password");
-            if (password != null) { // optional
-                String instanceType = IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
-                String type = IdentityServer.getInstance().getProperty("openidm.keystore.type", KeyStore.getDefaultType());
-                String provider = IdentityServer.getInstance().getProperty("openidm.keystore.provider");
-                String location = IdentityServer.getInstance().getProperty("openidm.keystore.location");
+            final String password = IdentityServer.getInstance().getProperty(KEYSTORE_PASSWORD);
+            final String instanceType =
+                    IdentityServer.getInstance().getProperty(INSTANCE_TYPE, ClusterUtil.TYPE_STANDALONE);
+            final KeyStoreType type =
+                    Utils.asEnum(
+                            IdentityServer.getInstance().getProperty(KEYSTORE_TYPE, KeyStore.getDefaultType()),
+                            KeyStoreType.class);
+            final String provider = IdentityServer.getInstance().getProperty(KEYSTORE_PROVIDER);
+            final String location =
+                    IdentityServer.getFileForPath(
+                            IdentityServer.getInstance().getProperty(KEYSTORE_LOCATION),
+                            IdentityServer.getInstance().getInstallLocation()).getAbsolutePath();
 
-                try {
-                    logger.info(
-                            "Activating cryptography service of type: {} provider: {} location: {}",
-                            type, provider, location);
-                    KeyStore ks = (provider == null || provider.trim().length() == 0)
-                            ? KeyStore.getInstance(type)
-                            : KeyStore.getInstance(type, provider);
-                    InputStream in = openStream(location);
-                    if (null != in) {
-                        char[] clearPassword = Main.unfold(password);
-                        ks.load(in, password == null ? null : clearPassword);
-                        if (instanceType.equals(ClusterUtil.TYPE_STANDALONE)
-                                || instanceType.equals(ClusterUtil.TYPE_CLUSTERED_FIRST)) {
-                            for (Map.Entry<String, String> alias : configAliases.entrySet()) {
-                                Key key = ks.getKey(alias.getKey(), clearPassword);
-                                if (key == null) {
-                                    // Initialize the keys
-                                    logger.debug("Initializing secret key entry {} in the keystore", alias);
-                                    generateDefaultKey(ks, alias.getKey(), location, clearPassword, alias.getValue());
-                                }
-                            }
-                        }
-                        keySelector = new UpdatableKeyStoreSelector(ks, new String(clearPassword));
-                        Enumeration<String> aliases = ks.aliases();
-                        while (aliases.hasMoreElements()) {
-                            logger.info("Available cryptography key: {}", aliases.nextElement());
-                            keyCount++;
-                        }
-                    }
-                } catch (IOException ioe) {
-                    logger.error("IOException when loading KeyStore file of type: " + type
-                            + " provider: " + provider + " location:" + location, ioe);
-                    throw new RuntimeException("IOException when loading KeyStore file of type: "
-                            + type + " provider: " + provider + " location:" + location
-                            + " message: " + ioe.getMessage(), ioe);
-                } catch (GeneralSecurityException gse) {
-                    logger.error("GeneralSecurityException when loading KeyStore file", gse);
-                    throw new RuntimeException(
-                            "GeneralSecurityException when loading KeyStore file of type: " + type
-                                    + " provider: " + provider + " location:" + location
-                                    + " message: " + gse.getMessage(), gse);
+            final char[] clearPassword;
+            final KeyStore keyStore;
+
+            try {
+                clearPassword = Main.unfold(password);
+                if (PKCS11.equals(type)) {
+                    keyStore = new KeyStoreBuilder()
+                            .withKeyStoreType(type)
+                            .withPassword(clearPassword)
+                            .withProvider(provider)
+                            .build();
+                } else {
+                    keyStore = new KeyStoreBuilder()
+                            .withKeyStoreType(type)
+                            .withPassword(clearPassword)
+                            .withProvider(provider)
+                            .withKeyStoreFile(location)
+                            .build();
                 }
+                keySelector = new UpdatableKeyStoreSelector(keyStore, new String(clearPassword));
                 decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(
                         keySelector)));
+                Enumeration<String> aliases = keyStore.aliases();
+                while (aliases.hasMoreElements()) {
+                    logger.debug("Available cryptography key: {}", aliases.nextElement());
+                    keyCount++;
+                }
+            } catch (final FileNotFoundException e) {
+                throw new RuntimeException("Unable to open keystore with filename: " + location, e);
+            } catch (final GeneralSecurityException e) {
+                throw new RuntimeException("Unable to get clear text keystore password", e);
+            }
+
+            try {
+                if ((instanceType.equals(ClusterUtil.TYPE_STANDALONE)
+                        || instanceType.equals(ClusterUtil.TYPE_CLUSTERED_FIRST))
+                        && !PKCS11.equals(type)) {
+                    for (Map.Entry<String, String> alias : configAliases.entrySet()) {
+                        Key key = keyStore.getKey(alias.getKey(), clearPassword);
+                        if (key == null) {
+                            // Initialize the keys
+                            logger.debug("Initializing secret key entry {} in the keystore", alias);
+                            generateDefaultKey(keyStore, alias.getKey(), location, clearPassword, alias.getValue());
+                        }
+                    }
+                }
+            } catch (IOException | GeneralSecurityException e) {
+                throw new RuntimeException("Unable to initialize default keys in keystore", e);
             }
             logger.info("CryptoService is initialized with {} keys.", keyCount);
         } catch (final JsonValueException jve) {
@@ -219,11 +203,8 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
             throws IOException, GeneralSecurityException {
         SecretKey newKey = KeyGenerator.getInstance(algorithm).generateKey();
         ks.setEntry(alias, new SecretKeyEntry(newKey), new KeyStore.PasswordProtection(password));
-        OutputStream out = new FileOutputStream(location);
-        try {
+        try (final OutputStream out = new FileOutputStream(location)) {
             ks.store(out, password);
-        } finally {
-            out.close();
         }
     }
     
@@ -232,7 +213,7 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
         decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
     }
 
-    public void deactivate(BundleContext context) {
+    public void deactivate(@SuppressWarnings("unused") BundleContext context) {
         decryptionTransformers.clear();
         keySelector = null;
         logger.info("CryptoService stopped.");

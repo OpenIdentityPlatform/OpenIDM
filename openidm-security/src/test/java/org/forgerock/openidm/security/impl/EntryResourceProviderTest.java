@@ -17,22 +17,16 @@ package org.forgerock.openidm.security.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.util.Files.temporaryFolder;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.PatchOperation.add;
-import static org.forgerock.json.resource.Requests.newActionRequest;
-import static org.forgerock.json.resource.Requests.newCreateRequest;
-import static org.forgerock.json.resource.Requests.newDeleteRequest;
-import static org.forgerock.json.resource.Requests.newPatchRequest;
-import static org.forgerock.json.resource.Requests.newReadRequest;
-import static org.forgerock.json.resource.Requests.newUpdateRequest;
+import static org.forgerock.json.resource.Requests.*;
+import static org.forgerock.security.keystore.KeyStoreType.JCEKS;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.security.Key;
-import java.security.KeyRep;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
@@ -75,7 +69,6 @@ import org.testng.annotations.Test;
 
 public class EntryResourceProviderTest {
 
-    private static final String KEY_STORE_TYPE = "JCEKS";
     private static final String KEY_STORE_PASSWORD = "password";
     private static final String ENTRY_ID = "entry";
     private static final String RESOURCE_CONTAINER = "test";
@@ -95,7 +88,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -118,7 +111,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -145,7 +138,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -172,7 +165,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -199,7 +192,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -219,7 +212,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -239,7 +232,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -259,7 +252,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -281,7 +274,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -310,7 +303,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -330,7 +323,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -350,7 +343,7 @@ public class EntryResourceProviderTest {
         final EntryResourceProvider entryResourceProvider =
                 new TestEntryResourceProvider(
                         RESOURCE_CONTAINER,
-                        new JcaKeyStoreHandler(KEY_STORE_TYPE, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
+                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
                         new TestKeyStoreManager(),
                         new TestRepositoryService());
 
@@ -368,7 +361,7 @@ public class EntryResourceProviderTest {
             throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException {
         final File keystoreFile = File.createTempFile(CLASS_NAME, null, temporaryFolder());
         keystoreFile.deleteOnExit();
-        KeyStore ks = KeyStore.getInstance(KEY_STORE_TYPE);
+        KeyStore ks = KeyStore.getInstance(JCEKS.name());
 
         char[] password = KEY_STORE_PASSWORD.toCharArray();
         ks.load(null, password);
