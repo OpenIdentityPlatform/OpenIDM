@@ -53,6 +53,7 @@ define([
     // TODO: share oauthHandler logic between registration and login
     obj.oauthHandler = function (e) {
         e.preventDefault();
+
         window.location.href = OAuth.getRequestURL(
             $(e.target).parents(".oauth").attr("authorization_endpoint"),
             $(e.target).parents(".oauth").attr("client_id"),
@@ -89,8 +90,11 @@ define([
         }
 
         commonLoginView.render.call(this, args, _.bind(function () {
-
             oauthProviders.then(_.bind(function (response) {
+                _.each(response.providers, (provider) => {
+                    provider.scope = provider.scope.join(" ");
+                });
+
                 this.$el.find("[name=loginButton]").after(
                     Handlebars.compile("{{> login/_loginButtons}}")({providers: response.providers})
                 );
