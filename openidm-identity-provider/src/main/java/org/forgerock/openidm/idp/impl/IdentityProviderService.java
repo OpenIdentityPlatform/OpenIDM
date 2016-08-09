@@ -218,7 +218,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
             default:
                 return new BadRequestException("Not a supported Action").asPromise();
             }
-        } catch (JsonValueException e) {
+        } catch (JsonValueException | IllegalArgumentException e) {
             return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();

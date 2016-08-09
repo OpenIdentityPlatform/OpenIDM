@@ -15,7 +15,7 @@
           "well-known" : "",
           "client_id" : "",
           "client_secret" : "",
-          "scopes" : [
+          "scope" : [
             "openid",
             "profile",
             "email"

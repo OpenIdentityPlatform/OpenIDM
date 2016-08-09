@@ -19,7 +19,7 @@
         "userinfo_endpoint": "https://www.googleapis.com/oauth2/v3/userinfo",
         "well-known": "https://accounts.google.com/.well-known/openid-configuration",
         "enabled": true,
-        "scopes" : [
+        "scope" : [
           "openid",
           "profile",
           "email"

@@ -20,6 +20,8 @@ import static org.forgerock.json.JsonValue.json;
 import java.io.IOException;
 import java.net.URI;
 
+
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
 import org.forgerock.http.header.ContentTypeHeader;
 import org.forgerock.http.header.GenericHeader;
@@ -92,7 +94,7 @@ public class OpenIDConnectProvider implements SocialProvider {
                 URI.create(config.getTokenEndpoint()),
                 "application/x-www-form-urlencoded",
                 "grant_type=authorization_code"
-                        //                        + "&scope=openid%20email%20profile"
+                        + "&scope=" + Uris.formDecodeParameterNameOrValue(StringUtils.join(config.getScope(), " "))
                         + "&redirect_uri=" + Uris.formEncodeParameterNameOrValue(redirectUri)
                         + "&code=" + Uris.formDecodeParameterNameOrValue(code)
                         + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())

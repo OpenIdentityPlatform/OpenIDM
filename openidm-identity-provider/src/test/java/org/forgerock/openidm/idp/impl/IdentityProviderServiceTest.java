@@ -72,7 +72,7 @@ public class IdentityProviderServiceTest {
                 field("well-known", ""),
                 field("client_id", ""),
                 field("enabled", true),
-                field("scopes", array("openid", "profile", "email"))));
+                field("scope", array("openid", "profile", "email"))));
 
         IdentityProviderService service = new IdentityProviderService();
         service.bindIdentityProviderConfig(idpConfig);
