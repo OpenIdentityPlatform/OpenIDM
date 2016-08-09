@@ -4,9 +4,11 @@
 
     <div class="form-group">
     {{#each requirements.definitions.providers.items.oneOf}}
-        {{> providers/_OAuth}}
+        {{> providers/_providerButton}}
     {{/each}}
     </div>
+
+    <label class="separator"><span>{{t "templates.socialIdentities.orUseEmailRegistration"}}</span></label>
 
     {{> process/_coreProfileDetails}}
 

@@ -12,7 +12,7 @@
         </div>
     </div>
 
-    {{> form/_tagSelectize value=scope label="templates.socialProviders.scope" property="scope" noValidation="true" helpKey="templates.socialProviders.scopeHelp" }}
+    {{> form/_tagSelectize value=scopes label="templates.socialProviders.scope" property="scopes" noValidation="true" helpKey="templates.socialProviders.scopeHelp" }}
 
     <div class="form-group">
         <div class="col-sm-8 col-sm-offset-3">
@@ -25,6 +25,12 @@
         {{> form/_basicInput value=token_endpoint label="templates.socialProviders.tokenEndpoint" property="token_endpoint" noValidation="true"}}
         {{> form/_basicInput value=userinfo_endpoint label="templates.socialProviders.userInfoEndpoint" property="userinfo_endpoint" noValidation="true"}}
         {{> form/_basicInput value=discovery_url label="templates.socialProviders.wellKnown" property="discovery_url" noValidation="true"}}
-        {{> form/_basicInput value=icon label="templates.socialProviders.icon" property="icon" noValidation="true"}}
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{t "templates.socialProviders.icon"}}</label>
+            <div class="col-sm-6">
+                <textarea class="button-html" name="icon">{{icon}}</textarea>
+            </div>
+        </div>
     </div>
 </form>

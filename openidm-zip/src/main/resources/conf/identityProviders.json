@@ -3,7 +3,7 @@
     {
       "name" : "google",
       "type" : "openid_connect",
-      "icon" : "",
+      "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider btn-google\"><img src=\"images/g-logo.png\"> Sign in with Google</button>",
       "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
       "token_endpoint" : "https://www.googleapis.com/oauth2/v4/token",
       "userinfo_endpoint" : "https://www.googleapis.com/oauth2/v3/userinfo",
