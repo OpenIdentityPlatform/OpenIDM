@@ -42,24 +42,10 @@ define([
 
         /**
          * @param configs {object}
-         * @param configs.hasAM {boolean}
          * @param [callback]
          */
         render: function (configs, callback) {
-            this.model = _.extend(
-                {
-                    "amTokenTime": "5",
-                    "amTokenMinutes": false,
-                    "defaults": {
-                        "maxTokenLife": "120",
-                        "tokenIdleTime": "30",
-                        "maxTokenLifeMinutes": true,
-                        "tokenIdleTimeMinutes": true
-                    }
-                },
-                configs,
-                this.getAuthenticationData()
-            );
+            this.model = _.extend({},configs,this.getAuthenticationData());
 
             if (this.model.changes) {
                 this.data.sessionModule = this.model.changes;
@@ -89,25 +75,16 @@ define([
                 this.data.tokenIdleTimeMinutes = true;
             }
 
-            // If there is an OPENAM module and the configured token settings are the defaults, them to the OPENAM session defaults
-            if (this.model.hasAM &&
-                this.data.maxTokenLife === this.model.defaults.maxTokenLife && this.data.maxTokenLifeMinutes === this.model.defaults.maxTokenLifeMinutes &&
-                this.data.tokenIdleTime === this.model.defaults.tokenIdleTime && this.data.tokenIdleTimeMinutes === this.model.defaults.tokenIdleTimeMinutes) {
 
-                this.data.sessionModule.properties.maxTokenLifeSeconds = this.model.amTokenTime;
-                this.data.sessionModule.properties.tokenIdleTimeSeconds = this.model.amTokenTime;
-
-                this.data.maxTokenLife = this.model.amTokenTime;
-                this.data.maxTokenLifeMinutes = this.model.amTokenMinutes;
-                this.data.tokenIdleTime = this.model.amTokenTime;
-                this.data.tokenIdleTimeMinutes = this.model.amTokenMinutes;
-
-                // If the use wants to, changes these settings they can so we remove this flag so its only set when an OPENAM_SESSION auth module is created
-                delete this.model.hasAM;
-
-            } else if (this.model.hasAM) {
-                delete this.model.hasAM;
-            }
+            /**
+            * TODO handle issue of tokens being replaced => https://bugster.forgerock.org/jira/browse/OPENIDM-5297
+            * these properties are being replaced by their clear text values and should be:
+            * this.data.sessionModule.properties.keyAlias =  "&{openidm.https.keystore.cert.alias}";
+            * this.data.sessionModule.properties.privateKeyPassword =  "&{openidm.keystore.password}";
+            * this.data.sessionModule.properties.keystoreType =  "&{openidm.keystore.type}";
+            * this.data.sessionModule.properties.keystoreFile =  "&{openidm.keystore.location}";
+            * this.data.sessionModule.properties.keystorePassword =  "&{openidm.keystore.password}";
+            */
 
             this.parentRender(_.bind(function() {
                 // Watch for changes
@@ -162,10 +139,6 @@ define([
 
         reRender: function(options) {
             this.render(_.extend(this.model, options));
-        },
-
-        addedOpenAM: function() {
-            this.reRender({"hasAM": true, "changes": this.data.sessionModule});
         }
     });
 
