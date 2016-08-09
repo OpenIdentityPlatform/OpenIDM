@@ -45,6 +45,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -91,6 +92,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
                     field("type", provider.getType()),
                     field("icon", provider.getIcon()),
                     field("client_id", provider.getClientId()),
+                    field("scope", StringUtils.join(provider.getScope(), " ")),
                     field("authorization_endpoint", provider.getAuthorizationEndpoint())
             )));
         }

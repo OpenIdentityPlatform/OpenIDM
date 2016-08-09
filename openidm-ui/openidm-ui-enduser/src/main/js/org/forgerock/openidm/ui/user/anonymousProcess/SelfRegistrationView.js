@@ -46,12 +46,12 @@ define([
             window.location.href = OAuth.getRequestURL(
                 $(e.target).parents(".oauth").attr("authorization_endpoint"),
                 $(e.target).parents(".oauth").attr("client_id"),
-                $(e.target).parents(".oauth").attr("scopes") || "openid profile email",
+                $(e.target).parents(".oauth").attr("scope"),
                 Router.getLink(Router.currentRoute,
                     [
                         "/continue" +
                         (this.delegate.token ? ("&token=" + this.delegate.token) : "") +
-                        "&provider=" + $(e.target).val() +
+                        "&provider=" + $(e.target).parents(".oauth").attr("value") +
                         "&redirect_uri=" + OAuth.getRedirectURI()
                     ]
                 )

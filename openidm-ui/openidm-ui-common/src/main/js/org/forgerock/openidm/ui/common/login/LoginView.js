@@ -56,10 +56,10 @@ define([
         window.location.href = OAuth.getRequestURL(
             $(e.target).parents(".oauth").attr("authorization_endpoint"),
             $(e.target).parents(".oauth").attr("client_id"),
-            ["openid"],
+            $(e.target).parents(".oauth").attr("scope"),
             Router.getLink(Router.currentRoute,
                 [
-                    "&provider=" + $(e.target).val() +
+                    "&provider=" + $(e.target).parents(".oauth").attr("value") +
                     "&redirect_uri=" + OAuth.getRedirectURI()
                 ]
             )

@@ -8,7 +8,7 @@
   "well-known" : "",
   "client_id" : "",
   "client_secret" : "this_should_be_removed",
-  "scopes" : [
+  "scope" : [
     "openid",
     "profile",
     "email"

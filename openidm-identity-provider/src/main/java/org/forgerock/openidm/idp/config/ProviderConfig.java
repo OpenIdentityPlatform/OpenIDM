@@ -53,8 +53,8 @@ public class ProviderConfig {
     @JsonProperty("well-known")
     private String wellKnown;
 
-    @JsonProperty("scopes")
-    private List<String> scopes;
+    @JsonProperty("scope")
+    private List<String> scope;
 
     /** Default true, can disable
      * identity provider by setting to false
@@ -106,8 +106,8 @@ public class ProviderConfig {
         return enabled;
     }
 
-    public List<String> getScopes() {
-        return scopes;
+    public List<String> getScope() {
+        return scope;
     }
 
 }
