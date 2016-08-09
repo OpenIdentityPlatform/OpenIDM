@@ -968,7 +968,11 @@
             "disableOIDCAuthModule": "When you disable all social ID providers, OpenIDM disables the OpenID Connect module.",
             "googleGeneralHelp" : "Visit the Google <a href='https://console.developers.google.com' target='_blank'>API Manager</a> to generate a Client ID and Client Secret",
             "showAdvanced" : "Show Advanced Options",
-            "hideAdvanced" : "Hide Advanced Options"
+            "hideAdvanced" : "Hide Advanced Options",
+            "noRegistration" : "To use social ID provide data to register users, ",
+            "enableRegistration" : "enable user registration.",
+            "noAuthentication" : "To allow social logins,",
+            "enableNow" : "enable the openID Connector Authentication Module."
         },
         "audit": {
             "eventHandlers": {

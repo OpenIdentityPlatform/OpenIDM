@@ -56,6 +56,8 @@ define([
                         "Scope 2",
                         "Scope 3"
                     ];
+
+                    this.data.providers[0].displayIcon = "google";
                 }
 
                 this.parentRender(callback);
