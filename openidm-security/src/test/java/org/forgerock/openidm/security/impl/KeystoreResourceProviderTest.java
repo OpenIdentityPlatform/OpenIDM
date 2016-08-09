@@ -11,38 +11,18 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.security.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.json.resource.test.assertj.AssertJActionResponseAssert.assertThat;
+import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.forgerock.security.keystore.KeyStoreType.JCEKS;
+import static org.mockito.Mockito.mock;
 
-import org.apache.commons.lang3.StringUtils;
-import org.forgerock.services.context.RootContext;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.Requests;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.Resources;
-import org.forgerock.json.resource.Router;
-import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.security.KeyStoreHandler;
-import org.forgerock.openidm.security.KeyStoreManager;
-import org.forgerock.openidm.util.DateUtil;
-import org.forgerock.util.encode.Base64;
-import org.testng.annotations.AfterClass;
-import org.testng.annotations.AfterMethod;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
-
-import javax.net.ssl.KeyManagerFactory;
-import javax.net.ssl.TrustManagerFactory;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.security.KeyStore;
@@ -55,9 +35,29 @@ import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.util.HashMap;
 import java.util.Map;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
 
-import static org.forgerock.json.resource.Router.uriTemplate;
-import static org.mockito.Mockito.mock;
+import org.apache.commons.lang3.StringUtils;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.Resources;
+import org.forgerock.json.resource.Router;
+import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.security.KeyStoreHandler;
+import org.forgerock.openidm.security.KeyStoreManager;
+import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.util.encode.Base64;
+import org.testng.annotations.AfterClass;
+import org.testng.annotations.AfterMethod;
+import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 public class KeystoreResourceProviderTest {
 
@@ -68,7 +68,6 @@ public class KeystoreResourceProviderTest {
     private final Connection connection = Resources.newInternalConnection(router);
     private final String KEYSTORE = "keystore";
     private final String KEYSTORE_ROUTE = "security/keystore";
-    private final String KEYSTORE_TYPE = "JCEKS";
     private final String KEYSTORE_PASSWORD = "changeit";
     private final String TEST_CERT_ALIAS = "testCert";
     private KeyStoreHandler keyStoreHandler;
@@ -120,15 +119,15 @@ public class KeystoreResourceProviderTest {
     public void runInitalSetup() throws Exception {
         Security.addProvider(new org.bouncycastle.jce.provider.BouncyCastleProvider());
 
-        KeyStore keyStore = KeyStore.getInstance(KEYSTORE_TYPE);
+        KeyStore keyStore = KeyStore.getInstance(JCEKS.name());
         keyStore.load(null, KEYSTORE_PASSWORD.toCharArray());
 
-        keystoreFile = File.createTempFile(KEYSTORE, KEYSTORE_TYPE);
+        keystoreFile = File.createTempFile(KEYSTORE, JCEKS.name());
         FileOutputStream fileOutputStream = new FileOutputStream(keystoreFile);
         keyStore.store(fileOutputStream, KEYSTORE_PASSWORD.toCharArray());
         fileOutputStream.close();
 
-        keyStoreHandler = new JcaKeyStoreHandler(KEYSTORE_TYPE, keystoreFile.getAbsolutePath(), KEYSTORE_PASSWORD);
+        keyStoreHandler = new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEYSTORE_PASSWORD);
     }
 
     @AfterClass

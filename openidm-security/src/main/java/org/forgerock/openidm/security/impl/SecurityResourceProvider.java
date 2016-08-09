@@ -525,7 +525,7 @@ public class SecurityResourceProvider {
         try {
             KeyStore keystore = null;
             try {
-                keystore = KeyStore.getInstance(store.getType());     
+                keystore = KeyStore.getInstance(store.getType().name());
                 keystore.load(bais, store.getPassword().toCharArray());
             } finally {
                 bais.close();

@@ -1,35 +1,29 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.security;
 
 import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.openidm.core.IdentityServer.PKCS11_CONFIG;
+import static org.forgerock.openidm.core.IdentityServer.SSL_HOST_ALIASES;
+import static org.forgerock.security.keystore.KeyStoreType.PKCS11;
 
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
-
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -46,8 +40,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.forgerock.services.context.Context;
-import org.forgerock.services.context.RootContext;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
@@ -64,7 +56,6 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
@@ -73,15 +64,22 @@ import org.forgerock.openidm.jetty.Param;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.security.impl.CertificateResourceProvider;
 import org.forgerock.openidm.security.impl.EntryResourceProvider;
-import org.forgerock.openidm.security.impl.MappedAliasKeyManager;
-import org.forgerock.openidm.security.impl.JcaKeyStoreHandler;
+import org.forgerock.openidm.security.impl.KeyStoreHandlerFactory;
 import org.forgerock.openidm.security.impl.KeystoreResourceProvider;
+import org.forgerock.openidm.security.impl.MappedAliasKeyManager;
 import org.forgerock.openidm.security.impl.PrivateKeyResourceProvider;
+import org.forgerock.openidm.util.ClusterUtil;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.util.Utils;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import sun.security.pkcs11.SunPKCS11;
 
 /**
  * A Security Manager Service which handles operations on the java security
@@ -96,7 +94,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/security/*") })
 public class SecurityManager implements RequestHandler, KeyStoreManager {
 
-    public static final String PID = "org.forgerock.openidm.security";
+    static final String PID = "org.forgerock.openidm.security";
 
     /**
      * Setup logging for the {@link SecurityManager}.
@@ -113,14 +111,10 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
     
     private KeyStoreHandler trustStoreHandler = null;
     private KeyStoreHandler keyStoreHandler = null;
-    
-    private final String keyStoreType;
-    private final String keyStoreLocation;
-    private final String keyStorePassword; 
 
-    private final String trustStoreType;
-    private final String trustStoreLocation;
-    private final String trustStorePassword;
+    private final String keyStorePassword;
+    private final KeyStoreType keyStoreType;
+    private final KeyStoreType trustStoreType;
     
     private final String keyStoreHostAliases;
     
@@ -129,58 +123,74 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
     public SecurityManager() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
         
-        this.keyStoreHostAliases = Param.getProperty("openidm.ssl.host.aliases");
-        this.trustStorePassword = Param.getTruststorePassword(false);
-        this.trustStoreLocation = Param.getTruststoreLocation();
-        this.trustStoreType = Param.getTruststoreType();
+        this.keyStoreHostAliases = Param.getProperty(SSL_HOST_ALIASES);
+        final String trustStorePassword = Param.getTruststorePassword(false);
+        final String trustStoreLocation = Param.getTruststoreLocation();
+        this.trustStoreType = Utils.asEnum(Param.getTruststoreType(), KeyStoreType.class);
         this.keyStorePassword = Param.getKeystorePassword(false);
-        this.keyStoreLocation = Param.getKeystoreLocation();
-        this.keyStoreType = Param.getKeystoreType();
+        final String keyStoreLocation = Param.getKeystoreLocation();
+        this.keyStoreType = Utils.asEnum(Param.getKeystoreType(), KeyStoreType.class);
+
+        if (PKCS11.equals(keyStoreType) || PKCS11.equals(trustStoreType)) {
+            final String config = IdentityServer.getInstance().getProperty(PKCS11_CONFIG);
+            if (config != null) {
+                Security.addProvider(new SunPKCS11(config));
+            }
+        }
+
+        final KeyStoreHandlerFactory keyStoreHandlerFactory = new KeyStoreHandlerFactory();
+        this.trustStoreHandler =
+                keyStoreHandlerFactory.getKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
+        this.keyStoreHandler =
+                keyStoreHandlerFactory.getKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
 
         // Set System properties
         if (System.getProperty("javax.net.ssl.keyStore") == null) {
-            System.setProperty("javax.net.ssl.keyStore", keyStoreLocation);
-            System.setProperty("javax.net.ssl.keyStorePassword", keyStorePassword);
-            System.setProperty("javax.net.ssl.keyStoreType", keyStoreType);
+            System.setProperty("javax.net.ssl.keyStore", keyStoreHandler.getLocation());
+            System.setProperty("javax.net.ssl.keyStorePassword", keyStoreHandler.getPassword());
+            System.setProperty("javax.net.ssl.keyStoreType", keyStoreHandler.getType().name());
         }
         if (System.getProperty("javax.net.ssl.trustStore") == null) {
-            System.setProperty("javax.net.ssl.trustStore", trustStoreLocation);
-            System.setProperty("javax.net.ssl.trustStorePassword", trustStorePassword);
-            System.setProperty("javax.net.ssl.trustStoreType", trustStoreType);
+            System.setProperty("javax.net.ssl.trustStore", trustStoreHandler.getLocation());
+            System.setProperty("javax.net.ssl.trustStorePassword", trustStoreHandler.getPassword());
+            System.setProperty("javax.net.ssl.trustStoreType", trustStoreHandler.getType().name());
         }
-        
-        this.trustStoreHandler = new JcaKeyStoreHandler(trustStoreType, trustStoreLocation, trustStorePassword);
-        this.keyStoreHandler = new JcaKeyStoreHandler(keyStoreType, keyStoreLocation, keyStorePassword);
+
     }
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
         logger.debug("Activating Security Management Service {}", compContext);               
         
-        KeystoreResourceProvider keystoreProvider =
+        final KeystoreResourceProvider keystoreProvider =
                 new KeystoreResourceProvider("keystore", keyStoreHandler, this, repoService);
-        EntryResourceProvider keystoreCertProvider =
+        final EntryResourceProvider keystoreCertProvider =
                 new CertificateResourceProvider("keystore", keyStoreHandler, this, repoService);
-        EntryResourceProvider privateKeyProvider =
+        final EntryResourceProvider privateKeyProvider =
                 new PrivateKeyResourceProvider("keystore", keyStoreHandler, this, repoService);
 
         router.addRoute(uriTemplate("/keystore"), keystoreProvider);
         router.addRoute(uriTemplate("/keystore/cert"), keystoreCertProvider);
         router.addRoute(uriTemplate("/keystore/privatekey"), privateKeyProvider);
 
-        KeystoreResourceProvider truststoreProvider =
+        final KeystoreResourceProvider truststoreProvider =
                 new KeystoreResourceProvider("truststore", trustStoreHandler, this, repoService);
-        EntryResourceProvider truststoreCertProvider =
+        final EntryResourceProvider truststoreCertProvider =
                 new CertificateResourceProvider("truststore", trustStoreHandler, this, repoService);
 
         router.addRoute(uriTemplate("/truststore"), truststoreProvider);
         router.addRoute(uriTemplate("/truststore/cert"), truststoreCertProvider);
+
+        final String instanceType =
+                IdentityServer.getInstance().getProperty(IdentityServer.INSTANCE_TYPE, ClusterUtil.TYPE_STANDALONE);
         
-        String instanceType =
-                IdentityServer.getInstance().getProperty("openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
-        
-        String propValue = Param.getProperty("openidm.https.keystore.cert.alias");
+        String propValue = Param.getProperty(IdentityServer.HTTPS_KEYSTORE_CERT_ALIAS);
         String privateKeyAlias = (propValue == null) ? "openidm-localhost" : propValue;
+
+        if (PKCS11.equals(keyStoreType) || PKCS11.equals(trustStoreType)) {
+            // if pkcs11 is used skip keystore initialization
+            return;
+        }
 
         try {
             if (instanceType.equals(ClusterUtil.TYPE_CLUSTERED_ADDITIONAL)) {
