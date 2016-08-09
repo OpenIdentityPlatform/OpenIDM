@@ -23,7 +23,8 @@ define([
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/util/Constants"
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/ModuleLoader"
 ], function($, _,
             JSONEditor,
             Form2js,
@@ -31,7 +32,8 @@ define([
             InlineScriptEditor,
             ConfigDelegate,
             EventManager,
-            Constants) {
+            Constants,
+            ModuleLoader) {
 
     var authenticationDataChanges = {},
         authenticationData = {},
@@ -39,6 +41,20 @@ define([
             noBaseTemplate: true,
             element: "#AuthenticationModuleDialogContainer",
             model: {},
+            /*
+             * beforeSaveCallbacks is an array of optional functions that can be added to AuthenticationAbstractView
+             * via pushing to it a function that returns a promise. For example from the render function of the
+             * specific auth module's view add something like this:
+             *
+             *      this.beforeSaveCallbacks.push(this.handleOpenAMUISettings);
+             *
+             * these functions will recieve one arguement which is the value of authenticationDataChanges
+             * and will be run in succession before the actual save to authentication.json
+             * **NOTE**
+             * if you add one of these functions to an auth module view it will only be executed
+             * if that module has been edited
+             */
+            beforeSaveCallbacks: [],
             knownProperties: [
                 "enabled",
                 "queryOnResource",
@@ -87,7 +103,7 @@ define([
 
             getConfig: function() {
                 var basic = Form2js("basicFields", ".", true),
-                    advanced = Form2js("advancedForm", ".", true),
+                    advanced = Form2js("advancedFields", ".", true),
                     custom = this.getCustomProperties(this.customPropertiesEditor.getValue()),
                     augmentSecurityContext = this.getAugmentSecurityContext(),
                     userOrGroup = this.getUserOrGroupProperties();
@@ -414,10 +430,37 @@ define([
             },
 
             saveAuthentication: function() {
-                return ConfigDelegate.updateEntity("authentication", authenticationDataChanges).then(function() {
-                    EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
-                    authenticationData = _.clone(authenticationDataChanges, true);
-                });
+                var doSave = () => {
+                        return ConfigDelegate.updateEntity("authentication", authenticationDataChanges).then(function() {
+                            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
+                            authenticationData = _.clone(authenticationDataChanges, true);
+                        });
+                    },
+                    beforeSaveCallbacksPromise;
+
+                /*
+                 * Check to see if there have been any beforeSaveCallbacks pushed
+                 * to AuthenticationAbstractView.beforeSaveCallbacks[]
+                 * if so loop over all of them concatenating the promises together.
+                 * Once all their promises are resolved then save authentcation.json.
+                 */
+                if (this.beforeSaveCallbacks.length) {
+                    _.each(this.beforeSaveCallbacks, (callback) => {
+                        if (beforeSaveCallbacksPromise) {
+                            //concat the promise
+                            beforeSaveCallbacksPromise = beforeSaveCallbacksPromise.then( () => {
+                                return callback(authenticationDataChanges);
+                            });
+                        } else {
+                            beforeSaveCallbacksPromise = callback(authenticationDataChanges);
+                        }
+                    });
+                    return beforeSaveCallbacksPromise.then( () => {
+                        return doSave();
+                    });
+                } else {
+                    return doSave();
+                }
             }
 
         });

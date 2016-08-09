@@ -346,7 +346,7 @@ define([
         advancedFormSubmit: function(event) {
             event.preventDefault();
 
-            var advancedData = form2js('advancedForm', '.', true),
+            var advancedData = form2js('advancedFields', '.', true),
                 mergedResults = this.advancedDetailsGenerate(this.connectorDetails, advancedData);
 
             ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId,  mergedResults).then(_.bind(function () {
