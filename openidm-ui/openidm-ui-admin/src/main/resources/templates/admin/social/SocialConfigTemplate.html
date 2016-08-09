@@ -8,7 +8,29 @@
     <div id="socialProviderContent" class="panel">
         <div class="panel-body selfservice-holder">
             <p class="panel-description">{{t "templates.socialProviders.sectionDetails"}}</p>
-            <div class="">
+
+            {{> _alert
+                id="socialNoAuthWarningMessage"
+                type="warning"
+                heading="common.notification.types.warning"
+                message="templates.socialProviders.noAuthentication"
+                link="#settings/"
+                linkMessage="templates.socialProviders.enableNow"
+                hidden="true"
+            }}
+
+
+            {{> _alert
+                id="socialNoRegistrationWarningMessage"
+                type="warning"
+                heading="common.notification.types.warning"
+                message="templates.socialProviders.noRegistration"
+                link="#selfservice/userregistration/"
+                linkMessage="templates.socialProviders.enableRegistration"
+                hidden="true"
+            }}
+
+            <div class="provider-list">
                 {{#each providers}}
                 {{> _toggleIconBlock this}}
                 {{/each}}

@@ -1,44 +1,39 @@
 <div class="panel-body">
     <label class="control-label col-sm-3">{{t "templates.socialIdentities.linkedAccounts"}}</label>
     <form id="socialIdentities">
-    <div class="col-sm-7 social-holder">
-        {{#if providers}}
-        {{#each providers}}
-            <div class="panel panel-default card {{#unless enabled}}disabled{{/unless}}">
-                <div class="card-body">
-                    <div class="panel-heading">
-                        <div class="checkbox checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary social-toggle pull-left">
-                            <label><input type="checkbox" value="true" {{#if enabled}}checked{{/if}}><span></span></label>
-                        </div>
-                    </div>
-                    <div class="panel-body">
-                        <div class="media">
-                            <div class="media-body">
-                                <div class="image circle social-icon">
-                                    <i class="fa fa-{{icon}}"></i>
-                                </div>
-                                <div class="scopes">
-                                    <h4 class="block-header">{{t "templates.socialIdentities.linkedUsing"}}</h4>
-                                    <ul class="list-unstyled text-muted">
-                                        {{#each scope}}
-                                            <li><i class="fa fa-check text-success"></i> {{this}}</li>
-                                        {{/each}}
-                                    </ul>
-                                </div>
+        <div class="col-sm-7 social-holder">
+            {{#if providers}}
+            {{#each providers}}
+                <div class="panel panel-default card {{#unless enabled}}disabled{{/unless}}">
+                    <div class="card-body">
+                        <div class="panel-heading">
+                            <div class="checkbox checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary social-toggle pull-left">
+                                <label><input type="checkbox" value="true" {{#if enabled}}checked{{/if}}><span></span></label>
                             </div>
-                            <div class="media-right">
-                                {{#if primary}}
-                                    <span class="social-primary badge">{{t "templates.socialIdentities.primary"}}</span>
-                                {{/if}}
+                        </div>
+                        <div class="panel-body">
+                            <div class="media">
+                                <div class="media-body">
+                                    <div class="image circle social-icon">
+                                        <i class="fa fa-{{displayIcon}}"></i>
+                                    </div>
+                                    <div class="scopes">
+                                        <h4 class="block-header">{{t "templates.socialIdentities.linkedUsing"}}</h4>
+                                        <ul class="list-unstyled text-muted">
+                                            {{#each scope}}
+                                                <li><i class="fa fa-check text-success"></i> {{this}}</li>
+                                            {{/each}}
+                                        </ul>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
-        {{/each}}
-        {{else}}
-            <div class="no-providers text-muted">{{t "templates.socialIdentities.noSocialProviders"}}</div>
-        {{/if}}
+            {{/each}}
+            {{else}}
+                <div class="no-providers text-muted">{{t "templates.socialIdentities.noSocialProviders"}}</div>
+            {{/if}}
+        </div>
     </form>
-    </div>
 </div>

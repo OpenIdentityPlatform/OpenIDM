@@ -58,17 +58,28 @@ define([
             "partials/_toggleIconBlock.html",
             "partials/social/_google.html",
             "partials/form/_basicInput.html",
-            "partials/form/_tagSelectize.html"
+            "partials/form/_tagSelectize.html",
+            "partials/_alert.html"
         ],
 
         render: function(args, callback) {
+            this.model.userRegistration = null;
+
             $.when(
                 SocialDelegate.providerList(),
                 SocialDelegate.availableProviders(),
-                ConfigDelegate.readEntityAlways("selfservice/registration")
-            ).then((currentProviders, availableProviders, userRegistration) => {
+                ConfigDelegate.readEntityAlways("selfservice/registration"),
+                ConfigDelegate.readEntityAlways("authentication")
+            ).then((currentProviders, availableProviders, userRegistration, authentication) => {
                 this.data.providers = _.cloneDeep(availableProviders.providers);
                 this.model.providers = _.cloneDeep(availableProviders.providers);
+                this.model.authentication = authentication;
+
+                this.model.OIDCModulesEnabled = _.some(authentication.serverAuthContext.authModules, (module) => {
+                    if (module.name === "OPENID_CONNECT" && module.enabled) {
+                        return true;
+                    }
+                });
 
                 if (userRegistration) {
                     this.model.userRegistration = userRegistration;
@@ -96,7 +107,15 @@ define([
                     });
                 });
 
-                this.parentRender(() => {});
+                this.parentRender(() => {
+                    if(currentProviders.providers.length > 0 && _.isNull(this.model.userRegistration)) {
+                        this.$el.find("#socialNoRegistrationWarningMessage").show();
+                    }
+
+                    if(currentProviders.providers.length > 0 && !this.model.OIDCModulesEnabled) {
+                        this.$el.find("#socialNoAuthWarningMessage").show();
+                    }
+                });
             });
         },
 
@@ -109,9 +128,7 @@ define([
                 enabled;
 
             function configSocialProvider() {
-                var providerCount = _.filter(this.model.providers, function(provider) {
-                    return provider.enabled;
-                }).length - 1;
+                var providerCount;
 
                 card.toggleClass("disabled");
                 enabled = !card.hasClass("disabled");
@@ -124,8 +141,23 @@ define([
                     this.deleteConfig(this.model.providers[index]);
                 }
 
-                if(providerCount === 0 && this.model.userRegistration && this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+                providerCount = _.filter(this.model.providers, function(provider) {
+                    return provider.enabled;
+                }).length;
+
+                if(providerCount > 0 && this.model.userRegistration && this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
                     UserRegistrationConfigView.switchToUserDetails(this.model.userRegistration);
+                    this.$el.find("#socialNoRegistrationWarningMessage").hide();
+                } else if (_.isNull(this.model.userRegistration) && providerCount > 0) {
+                    this.$el.find("#socialNoRegistrationWarningMessage").show();
+                } else if (providerCount === 0) {
+                    this.$el.find("#socialNoRegistrationWarningMessage").hide();
+                }
+
+                if (!this.model.OIDCModulesEnabled && providerCount > 0) {
+                    this.$el.find("#socialNoAuthWarningMessage").show();
+                } else {
+                    this.$el.find("#socialNoAuthWarningMessage").hide();
                 }
             }
 
@@ -137,59 +169,50 @@ define([
 
                 // If the social provider to be disabled is the only enabled provider
                 if (numOfEnabledProviders === 0) {
+                    let self = this;
 
-                    ConfigDelegate.readEntity("authentication").then(_.bind(function (data) {
+                    if (this.model.OIDCModulesEnabled) {
 
-                        // There is at least one OIDC module and that module is enabled
-                        let self = this,
-                            OIDCModulesEnabled = _.some(data.serverAuthContext.authModules, (module) => {
-                                if (module.name === "OPENID_CONNECT" && module.enabled) {
-                                    return true;
-                                }
-                            });
-
-                        if (OIDCModulesEnabled) {
-
-                            BootstrapDialog.show({
-                                title: $.t('common.form.confirm'),
-                                type: "type-danger",
-                                message: $.t("templates.socialProviders.disableOIDCAuthModule"),
-                                id: "frConfirmationDialog",
-                                buttons: [
-                                    {
-                                        label: $.t('common.form.cancel'),
-                                        id: "frConfirmationDialogBtnClose",
-                                        action: function(dialog) {
-                                            $(event.currentTarget).prop("checked", originalVal);
-                                            dialog.close();
-                                        }
-                                    },
-                                    {
-                                        label: $.t('common.form.ok'),
-                                        cssClass: "btn-danger",
-                                        id: "frConfirmationDialogBtnOk",
-                                        action: function(dialog) {
-                                            _.each(data.serverAuthContext.authModules, (module) => {
-                                                if (module.name === "OPENID_CONNECT") {
-                                                    module.enabled = false;
-                                                }
-                                            });
-
-                                            ConfigDelegate.updateEntity("authentication", data).then(function() {
-                                                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
-                                            });
-
-                                            configSocialProvider.call(self);
-
-                                            dialog.close();
-                                        }
+                        BootstrapDialog.show({
+                            title: $.t('common.form.confirm'),
+                            type: "type-danger",
+                            message: $.t("templates.socialProviders.disableOIDCAuthModule"),
+                            id: "frConfirmationDialog",
+                            buttons: [
+                                {
+                                    label: $.t('common.form.cancel'),
+                                    id: "frConfirmationDialogBtnClose",
+                                    action: function(dialog) {
+                                        $(event.currentTarget).prop("checked", originalVal);
+                                        dialog.close();
                                     }
-                                ]
-                            });
-                        } else {
-                            configSocialProvider.call(this);
-                        }
-                    }, this));
+                                },
+                                {
+                                    label: $.t('common.form.ok'),
+                                    cssClass: "btn-danger",
+                                    id: "frConfirmationDialogBtnOk",
+                                    action: function(dialog) {
+                                        _.each(self.model.authentication.serverAuthContext.authModules, (module) => {
+                                            if (module.name === "OPENID_CONNECT") {
+                                                module.enabled = false;
+                                                self.model.OIDCModulesEnabled = false;
+                                            }
+                                        });
+
+                                        ConfigDelegate.updateEntity("authentication", self.model.authentication).then(function() {
+                                            EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "authSaveSuccess");
+                                        });
+
+                                        configSocialProvider.call(self);
+
+                                        dialog.close();
+                                    }
+                                }
+                            ]
+                        });
+                    } else {
+                        configSocialProvider.call(this);
+                    }
                 } else {
                     configSocialProvider.call(this);
                 }
