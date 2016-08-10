@@ -20,6 +20,7 @@ import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
 import static org.forgerock.openidm.util.ResourceUtil.isEqual;
+import static org.forgerock.util.crypto.CryptoConstants.*;
 import static org.forgerock.util.promise.Promises.*;
 
 import javax.script.ScriptException;
@@ -102,6 +103,9 @@ import org.slf4j.LoggerFactory;
  *
  */
 class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, ManagedObjectSetService {
+    public static final JsonPointer CRYPTO_KEY_PTR = new JsonPointer(new String[]{CRYPTO, CRYPTO_VALUE, CRYPTO_KEY});
+    public static final JsonPointer CRYPTO_CIPHER_PTR =
+            new JsonPointer(new String[]{CRYPTO, CRYPTO_VALUE, CRYPTO_CIPHER});
 
     /** Actions supported by this resource provider */
     enum Action {
@@ -169,7 +173,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private final ManagedObjectSchema schema;
 
     /** Map of scripts to execute on specific {@link ScriptHook}s. */
-    private final Map<ScriptHook, ScriptEntry> scriptHooks = new EnumMap<ScriptHook, ScriptEntry>(ScriptHook.class);
+    private final Map<ScriptHook, ScriptEntry> scriptHooks = new EnumMap<>(ScriptHook.class);
 
     /** reference to the sync service route; used to decided whether or not to perform a sync action */
     private final AtomicReference<RouteService> syncRoute;
@@ -185,6 +189,25 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     /**
      * Constructs a new managed object set.
      *
+     * @param scriptRegistry the script registry
+     * @param cryptoService the cryptographic service
+     * @param syncRoute a reference to the RouteService on "sync"
+     * @param connectionFactory the router connection factory
+     * @param config configuration object to use to initialize managed object set.
+     * @throws JsonValueException when the configuration is malformed
+     * @throws ScriptException when the script configuration is malformed or the script is
+     * invalid.
+     */
+    public ManagedObjectSet(final ScriptRegistry scriptRegistry, final CryptoService cryptoService,
+            final AtomicReference<RouteService> syncRoute, IDMConnectionFactory connectionFactory, JsonValue config)
+            throws JsonValueException, ScriptException {
+        this(scriptRegistry, cryptoService, syncRoute, connectionFactory, config,
+                new RouterActivityLogger(connectionFactory));
+    }
+
+    /**
+     * Constructs a new managed object set.
+     *
      * @param scriptRegistry
      *            the script registry
      * @param cryptoService
@@ -195,19 +218,22 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *            the router connection factory
      * @param config
      *            configuration object to use to initialize managed object set.
+     * @param activityLogger
+     *            The {@link ActivityLogger} to use for audit logging
      * @throws JsonValueException
      *             when the configuration is malformed
      * @throws ScriptException
      *             when the script configuration is malformed or the script is
      *             invalid.
      */
-    public ManagedObjectSet(final ScriptRegistry scriptRegistry, final CryptoService cryptoService,
-            final AtomicReference<RouteService> syncRoute, IDMConnectionFactory connectionFactory, JsonValue config)
+    ManagedObjectSet(final ScriptRegistry scriptRegistry, final CryptoService cryptoService,
+            final AtomicReference<RouteService> syncRoute, final IDMConnectionFactory connectionFactory,
+            final JsonValue config, final ActivityLogger activityLogger)
             throws JsonValueException, ScriptException {
         this.cryptoService = cryptoService;
         this.syncRoute = syncRoute;
         this.connectionFactory = connectionFactory;
-        this.activityLogger = new RouterActivityLogger(connectionFactory);
+        this.activityLogger = activityLogger;
         name = config.get("name").required().asString();
         if (name.trim().isEmpty() || name.indexOf('{') > 0 | name.indexOf('}') > 0) {
             throw new JsonValueException(config.get("name"), "Failed to validate the name");
@@ -475,22 +501,23 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param newValue the new value of the object, as specified by the user, or as constituted via a router read 
      *                 request in the triggerSyncCheck action.
      * @param relationshipFields a set of relationship fields to persist.
-     * @param alreadyPersistedRelationshipFields the set of relationship fields already persisted by the caller. Non-empty
-     *                                           set specified only when method invoked by RelationshipProvider when
-     *                                           consumed as a relationship endpoint, as it persists the relationship
-     *                                           prior to calling this method.
+     * @param alreadyPersistedRelationshipFields the set of relationship fields already persisted by the caller.
+     *                                           Non-empty set specified only when method invoked by
+     *                                           RelationshipProvider when consumed as a relationship endpoint, as it
+     *                                           persists the relationship prior to calling this method.
      * @return a {@link ResourceResponse} object representing the updated resource
      * @throws ResourceException
      */
     public ResourceResponse update(final Context context, Request request, String resourceId, String rev,
-    		JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields, Set<JsonPointer> alreadyPersistedRelationshipFields)
+            JsonValue oldValue, JsonValue newValue, Set<JsonPointer> relationshipFields,
+            Set<JsonPointer> alreadyPersistedRelationshipFields)
             throws ResourceException {
         Context managedContext = new ManagedObjectContext(context);
 
         JsonValue decryptedNew = decrypt(newValue);
         JsonValue decryptedOld = decrypt(oldValue);
-        
-        if (isEqual(decryptedOld, decryptedNew)) { // object hasn't changed
+
+        if (!encryptionValueChanged(oldValue) && isEqual(decryptedOld, decryptedNew)) { // object hasn't changed
             return newResourceResponse(resourceId, rev, oldValue);
         }
 
@@ -498,9 +525,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         execScript(context, ScriptHook.onUpdate, decryptedNew,
                 prepareScriptBindings(context, request, resourceId, decryptedOld, decryptedNew));
 
-        // determine if any onUpdate script manipulated a relationship field, and update the relationshipFields Set accordingly
-        // and insure that the oldObject contains the repo-resident relationship state so that diff logic can be performed
-        // appropriately.
+        // determine if any onUpdate script manipulated a relationship field, and update the relationshipFields Set
+        // accordingly and insure that the oldObject contains the repo-resident relationship state so that diff logic
+        // can be performed appropriately.
         updateRelationshipFields(context, resourceId, relationshipFields, decryptedOld, decryptedNew);
 
         //remove already-persisted relationship fields, as they should not be validated/persisted
@@ -1630,5 +1657,49 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      */
     JsonValue getConfig() {
         return config;
+    }
+
+    /**
+     * Tests if the presentedValue contains an encrypted field that was encrypted using a different key or cipher from
+     * what is currently configured in the schema of that field.
+     *
+     * @param presentedValue the json to search for changed encryption values.
+     * @return true if any single encryption value is using a different key or cipher than the current configuration.
+     */
+    private boolean encryptionValueChanged(final JsonValue presentedValue) {
+        final Map<JsonPointer, SchemaField> fields = getSchema().getFields();
+        for (JsonPointer schemaPointer : fields.keySet()) {
+            final SchemaField schemaField = fields.get(schemaPointer);
+            final JsonValue encryptedValue = presentedValue.get(schemaPointer);
+            if (schemaField.isEncrypted()) {
+                if (null != encryptedValue && encryptedValue.isNotNull()) {
+                    if (!cryptoService.isEncrypted(encryptedValue)) {
+                        // encryption was added to schema
+                        return true;
+                    }
+
+                    final String presentedKey = encryptedValue.get(CRYPTO_KEY_PTR).asString();
+                    final String configuredKey = schemaField.getEncryptionConfiguration().get(CRYPTO_KEY).asString();
+                    if (!presentedKey.equals(configuredKey)) {
+                        // key changed
+                        return true;
+                    }
+
+                    final String presentedCipher = encryptedValue.get(CRYPTO_CIPHER_PTR).asString();
+                    final String configuredCipher = schemaField.getEncryptionConfiguration().get(CRYPTO_CIPHER)
+                            .defaultTo(SchemaField.DEFAULT_CIPHER).asString();
+                    if (!presentedCipher.equals(configuredCipher)) {
+                        // cipher changed
+                        return true;
+                    }
+                }
+            } else {
+                if (null != encryptedValue && encryptedValue.isNotNull() && cryptoService.isEncrypted(encryptedValue)) {
+                    // encryption was removed from schema
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 }

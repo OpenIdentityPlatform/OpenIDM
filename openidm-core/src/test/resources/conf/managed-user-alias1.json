@@ -1,0 +1,58 @@
+{
+    "name" : "user",
+    "schema" : {
+        "id" : "http://jsonschema.net",
+        "title" : "User",
+        "viewable" : true,
+        "$schema" : "http://json-schema.org/draft-03/schema",
+        "order" : [
+            "_id",
+            "userName",
+            "mail",
+            "password"
+        ],
+        "properties" : {
+            "_id" : {
+                "type" : "string",
+                "viewable" : false,
+                "searchable" : false,
+                "userEditable" : false,
+                "policies" : [ ]
+            },
+            "password" : {
+                "title" : "Password",
+                "type" : "string",
+                "viewable" : false,
+                "searchable" : false,
+                "minLength" : 1,
+                "userEditable" : true,
+                "encryption" : {
+                    "key" : "alias1"
+                },
+                "scope" : "private",
+                "policies" : [ ]
+            },
+            "userName" : {
+                "title" : "Username",
+                "viewable" : true,
+                "type" : "string",
+                "searchable" : true,
+                "userEditable" : true,
+                "minLength" : 1,
+                "policies" : [ ]
+            },
+            "mail" : {
+                "title" : "Email Address",
+                "viewable" : true,
+                "type" : "string",
+                "searchable" : true,
+                "userEditable" : true,
+                "policies" : [ ]
+            }
+        },
+        "type" : "object",
+        "required" : [
+            "userName"
+        ]
+    }
+}
