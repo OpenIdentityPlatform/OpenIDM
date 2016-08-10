@@ -17,38 +17,49 @@
 define([
     "jquery",
     "underscore",
+    "backbone",
+    "backgrid",
     "form2js",
+    "handlebars",
     "org/forgerock/openidm/ui/admin/connector/AbstractConnectorView",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager",
-    "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "org/forgerock/openidm/ui/admin/connector/ConnectorTypeView",
-    "org/forgerock/openidm/ui/admin/connector/ConnectorRegistry",
-    "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
-    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
-    "org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog",
-    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
-    "org/forgerock/openidm/ui/admin/util/Scheduler",
+    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
+    "org/forgerock/openidm/ui/admin/connector/ConnectorRegistry",
+    "org/forgerock/openidm/ui/admin/connector/ConnectorTypeView",
+    "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
-    "org/forgerock/commons/ui/common/util/UIUtils"
-], function($, _, form2js,
+    "org/forgerock/openidm/ui/admin/connector/liveSyncDialog",
+    "org/forgerock/openidm/ui/admin/objectTypes/ObjectTypesDialog",
+    "org/forgerock/commons/ui/common/main/Router",
+    "org/forgerock/openidm/ui/admin/util/Scheduler",
+    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
+    "org/forgerock/commons/ui/common/util/UIUtils",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+], function($, _,
+            Backbone,
+            Backgrid,
+            form2js,
+            Handlebars,
             AbstractConnectorView,
-            eventManager,
-            validatorsManager,
-            constants,
-            ConnectorDelegate,
-            ConnectorType,
-            ConnectorRegistry,
-            connectorUtils,
-            router,
+            BackgridUtils,
             ConfigDelegate,
-            objectTypesDialog,
-            SchedulerDelegate,
-            Scheduler,
+            ConnectorDelegate,
+            ConnectorRegistry,
+            ConnectorType,
+            connectorUtils,
+            constants,
+            eventManager,
             InlineScriptEditor,
-            UIUtils) {
+            liveSyncDialog,
+            objectTypesDialog,
+            router,
+            Scheduler,
+            SchedulerDelegate,
+            UIUtils,
+            validatorsManager) {
 
     var AddEditConnectorView = AbstractConnectorView.extend({
         template: "templates/admin/connector/EditConnectorTemplate.html",
@@ -57,7 +68,7 @@ define([
             "click #updateObjectTypes" : "objectTypeFormSubmit",
             "click #updateSync" : "syncFormSubmit",
             "click #updateAdvanced" : "advancedFormSubmit",
-            "click .addLiveSync" : "addLiveSync",
+            "click .addSchedule" : "addLiveSync",
             "click .edit-objectType" : "editObjectType",
             "click .delete-objectType" : "deleteObjectType",
             "click #addObjectType" : "addObjectType",
@@ -69,8 +80,12 @@ define([
             "change #connectorForm :input" : "connectorChangesCheck",
             "keypress #connectorForm :input" : "connectorFlowCheck",
             "paste #connectorForm :input" : "connectorFlowCheck",
-            "change #advancedForm :input" : "advancedChangesCheck"
+            "change #advancedForm :input" : "advancedChangesCheck",
+            "click .editSchedule" : "editSchedule"
         },
+        partials: [
+            "partials/connector/_liveSyncGrid.html"
+        ],
         data: {
 
         },
@@ -103,11 +118,13 @@ define([
                 }
             ]
         },
-        connectorTypeRef: null,
         connectorList: null,
+        connectorTypeRef: null,
+        liveSyncCollection: null,
         oAuthConnector: false,
 
         render: function(args, callback) {
+            this.liveSyncCollection = new Backbone.Collection;
             this.data = {};
             this.data.docHelpUrl = constants.DOC_URL;
             this.data.versionDisplay = {};
@@ -118,12 +135,11 @@ define([
             this.connectorTypeRef = null;
             this.connectorList = null;
             this.postActionBlockScript = null;
-            this.addedLiveSyncSchedules = [];
             this.connectorTypeRef = null;
             this.userDefinedObjectTypes = null;
 
             //Get available list of connectors
-            $.when(ConnectorDelegate.availableConnectors()).then(_.bind(function(connectors){
+            $.when(ConnectorDelegate.availableConnectors()).then((connectors) => {
                 this.data.connectors = connectors.connectorRef;
 
                 //Build Connector type selection
@@ -145,7 +161,7 @@ define([
                     })
                     .value();
 
-                var splitDetails = args[0].match(/(.*?)_(.*)/).splice(1),
+                let splitDetails = args[0].match(/(.*?)_(.*)/).splice(1),
                     urlArgs = router.convertCurrentUrlToJSON(),
                     version;
 
@@ -154,8 +170,8 @@ define([
                 this.data.connectorId = splitDetails[1];
 
                 //Get current connector details
-                ConfigDelegate.readEntity(this.data.systemType + "/" + this.data.connectorId).then(_.bind(function(data){
-                    var tempVersion;
+                ConfigDelegate.readEntity(this.data.systemType + "/" + this.data.connectorId).then((data) => {
+                    let tempVersion;
 
                     this.data.connectorIcon = connectorUtils.getIcon(data.connectorRef.connectorName);
                     this.currentObjectTypeLoaded = "savedConfig";
@@ -199,20 +215,20 @@ define([
                     this.data.objectTypes = data.objectTypes;
 
                     //Filter down to the current edited connector Type
-                    this.data.versionDisplay = _.filter(this.data.versionDisplay, function(connector){
+                    this.data.versionDisplay = _.filter(this.data.versionDisplay, (connector) => {
                         return  data.connectorRef.connectorName  === connector.versions[0].connectorName;
-                    }, this);
+                    });
 
                     this.data.fullversion = this.versionRangeCheck(data.connectorRef.bundleVersion);
                     data.connectorRef.bundleVersion = this.data.fullversion;
                     this.data.currentMainVersion = this.findMainVersion(data.connectorRef.bundleVersion);
 
                     //Filter the connector types down to the current major version
-                    this.data.versionDisplay[0].versions = _.filter(this.data.versionDisplay[0].versions, function(version){
+                    this.data.versionDisplay[0].versions = _.filter(this.data.versionDisplay[0].versions, (version) => {
                         tempVersion = this.findMainVersion(version.bundleVersion);
 
                         return parseFloat(this.data.currentMainVersion) === parseFloat(tempVersion);
-                    }, this);
+                    });
 
                     version = this.data.fullversion;
 
@@ -239,14 +255,14 @@ define([
                     if (urlArgs.params && urlArgs.params.code) {
                         this.oAuthCode = urlArgs.params.code;
 
-                        ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" +this.data.currentMainVersion).then(_.bind(function (connectorTypeRef) {
+                        ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" +this.data.currentMainVersion).then((connectorTypeRef) => {
                             this.connectorTypeRef = connectorTypeRef;
-                            this.connectorTypeRef.getToken(data, this.oAuthCode).then(_.bind(function(tokenDetails) {
+                            this.connectorTypeRef.getToken(data, this.oAuthCode).then((tokenDetails) => {
                                 this.connectorTypeRef.setToken(tokenDetails, data, this.data.systemType + "/" +this.data.connectorId, urlArgs);
-                            }, this));
-                        }, this));
+                            });
+                        });
                     } else {
-                        this.parentRender(_.bind(function () {
+                        this.parentRender(() => {
 
                             //Sync settings
                             if (data.syncFailureHandler && _.has(data.syncFailureHandler, "maxRetries")) {
@@ -290,7 +306,7 @@ define([
                             }
 
                             //Get connector template
-                            ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" + this.data.currentMainVersion).then(_.bind(function (connectorTypeRef) {
+                            ConnectorRegistry.getConnectorModule(this.data.connectorTypeName + "_" + this.data.currentMainVersion).then((connectorTypeRef) => {
                                 this.connectorTypeRef = connectorTypeRef;
 
                                 //Determine if the template is OAuth
@@ -306,7 +322,7 @@ define([
                                         "connectorDefaults": data,
                                         "editState": this.data.editState,
                                         "systemType": this.data.systemType },
-                                    _.bind(function () {
+                                    () => {
                                         validatorsManager.validateAllFields(this.$el);
 
                                         //Set the current newest version incase there is a range
@@ -316,15 +332,15 @@ define([
                                         if (callback) {
                                             callback();
                                         }
-                                    }, this));
+                                    });
 
                                 this.setupLiveSync();
-                            }, this));
+                            });
 
-                        }, this));
+                        });
                     }
-                }, this));
-            }, this));
+                });
+            });
         },
 
         connectorFlowCheck: function() {
@@ -334,7 +350,7 @@ define([
         },
 
         deleteResource: function(event) {
-            var connectorPath = "config/" + this.data.systemType +"/" +this.data.connectorId;
+            let connectorPath = "config/" + this.data.systemType +"/" +this.data.connectorId;
 
             event.preventDefault();
 
@@ -346,10 +362,11 @@ define([
         advancedFormSubmit: function(event) {
             event.preventDefault();
 
-            var advancedData = form2js('advancedFields', '.', true),
+            let advancedData = form2js('advancedFields', '.', true),
+
                 mergedResults = this.advancedDetailsGenerate(this.connectorDetails, advancedData);
 
-            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId,  mergedResults).then(_.bind(function () {
+            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId,  mergedResults).then(() => {
                 this.connectorDetails = mergedResults;
 
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "advancedSaved");
@@ -357,11 +374,11 @@ define([
                 this.$el.find("#connectorWarningMessage .message .advanced-pending").remove();
 
                 this.warningMessageCheck();
-            }, this));
+            });
         },
 
         advancedDetailsGenerate: function(oldAdvanced, newAdvanced) {
-            var mergedResults = {},
+            let mergedResults = {},
                 tempNumber,
                 defaultOperationTimeout = -1,
                 defaultPoolConfigOption = 10;
@@ -369,7 +386,7 @@ define([
             $.extend(true, mergedResults, oldAdvanced, newAdvanced);
 
             //Need to convert all strings to numbers also some safety check to prevent bad values
-            _.each(mergedResults.operationTimeout, function(value, key) {
+            _.each(mergedResults.operationTimeout, (value, key) => {
                 tempNumber = parseInt(value, 10);
 
                 if(!_.isNaN(tempNumber)) {
@@ -379,7 +396,7 @@ define([
                 }
             });
 
-            _.each(mergedResults.poolConfigOption, function(value, key) {
+            _.each(mergedResults.poolConfigOption, (value, key) => {
                 tempNumber = parseInt(value, 10);
 
                 if(!_.isNaN(tempNumber)) {
@@ -396,7 +413,7 @@ define([
         connectorFormSubmit: function(event) {
             event.preventDefault();
 
-            var mergedResult = this.getProvisioner();
+            let mergedResult = this.getProvisioner();
 
             //Checks for connector specific save function to do any additional changes to data
             if(this.connectorTypeRef.connectorSaved) {
@@ -405,10 +422,10 @@ define([
 
             mergedResult.configurationProperties.readSchema = false;
 
-            ConnectorDelegate.testConnector(mergedResult).then(_.bind(function () {
+            ConnectorDelegate.testConnector(mergedResult).then(() => {
                 ConnectorDelegate.deleteCurrentConnectorsCache();
 
-                ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, mergedResult).then(_.bind(function () {
+                ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, mergedResult).then(() => {
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
                     this.connectorDetails = mergedResult;
@@ -417,17 +434,18 @@ define([
                     this.$el.find("#connectorWarningMessage .message .connector-pending").remove();
                     this.warningMessageCheck();
                     this.$el.find("#connectorErrorMessage").hide();
-                }, this));
-            }, this), _.bind(function(result) {
+                });
+            },
+            (result) => {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
 
                 this.showError(result);
-            }, this));
+            });
         },
 
         //Saves the sync tab
         syncFormSubmit: function() {
-            var syncData = form2js('syncForm', '.', true);
+            let syncData = form2js('syncForm', '.', true);
 
             this.connectorDetails.syncFailureHandler.maxRetries = parseInt(syncData.syncFailureHandler.maxRetries, 10);
             this.connectorDetails.syncFailureHandler.postRetryAction = syncData.syncFailureHandler.postRetryAction;
@@ -437,12 +455,12 @@ define([
                 this.connectorDetails.syncFailureHandler.postRetryAction = {"script": this.postActionBlockScript.generateScript()};
             }
 
-            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, this.connectorDetails).then(_.bind(function () {
+            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, this.connectorDetails).then(() => {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "liveSyncSaved");
 
                 this.$el.find("#connectorWarningMessage .message .sync-pending").remove();
                 this.warningMessageCheck();
-            }, this));
+            });
         },
 
         //Saves the object type tab
@@ -453,7 +471,7 @@ define([
 
             this.connectorDetails.objectTypes = this.userDefinedObjectTypes;
 
-            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, this.connectorDetails).then(_.bind(function () {
+            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, this.connectorDetails).then(() => {
                 this.previousObjectType = this.userDefinedObjectTypes;
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeSaved");
 
@@ -462,7 +480,7 @@ define([
                 this.warningMessageCheck();
 
                 this.updateActionDropdown(this.previousObjectType);
-            }, this));
+            });
         },
 
         //will hide warning message if no messages left
@@ -472,69 +490,180 @@ define([
             }
         },
 
-        addLiveSync: function(schedule) {
-            var source = this.$el.find(".sources option:selected");
+        addLiveSync: function() {
+            let source = this.$el.find(".sources option:selected");
 
             if (source.length > 0) {
-                this.$el.find("#schedules").append("<div class='liveSyncScheduleContainer'></div>");
 
-                Scheduler.generateScheduler({
-                    "element": this.$el.find("#schedules .liveSyncScheduleContainer").last(),
-                    "defaults": {
-                        "enabled" : true,
-                        "persisted" : true
-                    },
-                    "onDelete": _.bind(this.removeSchedule, this),
-                    "invokeService": "provisioner",
+                liveSyncDialog.render({
                     "source": source.val(),
-                    "newSchedule": true
-                });
+                    "changeType": "add"
+                }, _.bind(this.amendLiveSyncGrid, this));
+            }
+        },
 
-                this.addedLiveSyncSchedules.push(source.val());
-                source.remove();
+        amendLiveSyncGrid: function(schedule) {
+            let row = {
+                "source": schedule.source,
+                "id": schedule.scheduleId,
+                "enabled": schedule.enabled,
+                "persisted": schedule.persisted
+            };
 
-                if (this.$el.find(".sources option:selected").length === 0) {
-                    this.$el.find(".addLiveSync").prop('disabled', true);
-                    this.$el.find(".sources").prop('disabled', true);
+            if (schedule.changeType === "add") {
+                this.liveSyncCollection.add(row);
+                this.$el.find('.sources [value="' + schedule.source + '"]').remove();
+            } else if (schedule.changeType === "edit") {
+                this.liveSyncCollection.set(row, {remove: false});
+            }
+            this.renderGrid();
+            this.changeDropdown();
+        },
+
+        editSchedule: function(e) {
+            e.preventDefault();
+
+            let scheduleName = $(e.currentTarget.closest("tr")).data("source");
+            let scheduleId = $(e.currentTarget.closest("tr")).data("id");
+
+            liveSyncDialog.render({
+                "id": scheduleId,
+                "source": scheduleName,
+                "changeType": "edit"
+            }, _.bind(this.amendLiveSyncGrid, this));
+
+        },
+
+        renderGrid: function() {
+
+            let state = "",
+                liveSyncGrid,
+                RenderRow = null,
+                _this = this;
+
+            this.$el.find("#liveSyncSchedule table").remove();
+
+            RenderRow = Backgrid.Row.extend({
+                render: function () {
+                    RenderRow.__super__.render.apply(this, arguments);
+
+                    this.$el.attr('data-source', this.model.attributes.source);
+                    this.$el.attr('data-enabled', this.model.attributes.enabled);
+                    this.$el.attr('data-persisted', this.model.attributes.persisted);
+                    this.$el.attr('data-id', this.model.id);
+
+                    return this;
                 }
+            });
+
+            liveSyncGrid = new Backgrid.Grid({
+                className: "group-field-block table backgrid",
+                row: RenderRow,
+                columns: BackgridUtils.addSmallScreenCell([
+                    {
+                        name: "source",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            render: function () {
+                                var display = '<div data-sync="' + this.model.attributes.source + '">' + _.startCase(_.last(this.model.attributes.source.split("/"))) + '</div>';
+
+                                this.$el.html(display);
+
+                                return this;
+                            }
+                        })
+                    },
+                    {
+                        name: "enabled",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({className: "text-muted"})
+                    },
+                    {
+                        name: "persisted",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({className: "text-muted"})
+                    },
+                    {
+                        name: "",
+                        sortable: false,
+                        editable: false,
+                        cell: Backgrid.Cell.extend({
+                            events: {
+                                "click .deleteSchedule" : "deleteSchedule"
+                            },
+
+                            deleteSchedule: function(e) {
+                                e.preventDefault();
+
+                                let scheduleName = this.model.attributes.source;
+                                let scheduleId = this.model.id;
+
+                                _this.$el.find(".sources").append("<option value='" + scheduleName + "'>" +  _.startCase(_.last(scheduleName.split("/"))) + "</option>");
+
+                                SchedulerDelegate.deleteSchedule(scheduleId).then( () => {
+                                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "scheduleDeleted");
+                                    _this.$el.find("tr[data-id=" + scheduleId + "]").remove();
+                                    _this.liveSyncCollection.remove({id: scheduleId});
+                                    _this.changeDropdown();
+
+                                    if (_this.$el.find('tbody tr[data-source]').length === 0) {
+                                        _this.$el.find('#liveSyncSchedule table').remove();
+                                    }
+                                });
+                            },
+
+                            render: function () {
+                                this.$el.html(Handlebars.compile("{{> connector/_liveSyncGrid}}")());
+
+                                this.delegateEvents();
+                                return this;
+                            }
+                        })
+                    }
+                ]),
+                collection: this.liveSyncCollection
+            });
+
+            this.$el.find("#liveSyncTable").append(liveSyncGrid.render().el);
+
+        },
+
+        changeDropdown: function() {
+            if (this.$el.find(".sources option").length === 0) {
+                this.$el.find(".addSchedule").prop('disabled', true);
+                this.$el.find(".sources").prop('disabled', true);
+            } else {
+                this.$el.find(".addSchedule").prop('disabled', false);
+                this.$el.find(".sources").prop('disabled', false);
             }
         },
 
         setupLiveSync: function() {
-            var tempName = "",
-                sourcePieces = [];
 
-            this.updateLiveSyncObjects();
+            this.$el.find("#schedules table tbody").empty();
 
             SchedulerDelegate.getLiveSyncSchedulesByConnectorName(this.connectorDetails.name).then((schedules) => {
-                _.each(schedules, (schedule) => {
-                    this.$el.find(".sources option[value='" + schedule.invokeContext.source + "']").remove();
 
-                    this.$el.find("#schedules").append("<div class='liveSyncScheduleContainer'></div>");
-                    Scheduler.generateScheduler({
-                        "element": this.$el.find("#schedules .liveSyncScheduleContainer").last(),
-                        "defaults": {
+                if (schedules.length > 0) {
+                    _.each(schedules, (schedule) => {
+                        this.liveSyncCollection.add({
+                            source: schedule.invokeContext.source,
+                            id: schedule._id,
                             enabled: schedule.enabled,
-                            schedule: schedule.schedule,
-                            persisted: schedule.persisted,
-                            misfirePolicy: schedule.misfirePolicy,
-                            liveSyncSeconds: schedule.schedule
-                        },
-                        "onDelete": _.bind(this.removeSchedule, this),
-                        "invokeService": schedule.invokeService,
-                        "source": schedule.invokeContext.source,
-                        "scheduleId": schedule._id
-                    });
-                    this.addedLiveSyncSchedules.push(schedule.invokeContext.source);
-                });
+                            persisted: schedule.persisted}
+                        );
 
-                if (this.$el.find(".sources option").length === 0) {
-                    this.$el.find(".addLiveSync").prop('disabled', true);
-                    this.$el.find(".sources").prop('disabled', true);
-                } else {
-                    this.$el.find(".addLiveSync").prop('disabled', false);
-                    this.$el.find(".sources").prop('disabled', false);
+                    });
+                    this.renderGrid();
                 }
+
+
+                this.updateLiveSyncObjects();
+                this.changeDropdown();
+
             });
 
             if (!this.postActionBlockScript) {
@@ -547,19 +676,19 @@ define([
         },
 
         updateLiveSyncObjects: function() {
-            var objectTypes = [];
+            let objectTypes = [];
 
             if (this.connectorDetails.name) {
                 this.$el.find(".nameFieldMessage").hide();
 
                 if (this.userDefinedObjectTypes && _.size(this.userDefinedObjectTypes) > 0) {
-                    objectTypes = _.map(this.userDefinedObjectTypes, function (object, key) {
+                    objectTypes = _.map(this.userDefinedObjectTypes, (object, key) => {
                         return "system/" + this.connectorDetails.name + "/" + key;
-                    }, this);
+                    });
                 } else {
-                    objectTypes = _.map(this.data.objectTypes, function (object, key) {
+                    objectTypes = _.map(this.data.objectTypes, (object, key) => {
                         return "system/" + this.connectorDetails.name + "/" + key;
-                    }, this);
+                    });
                 }
 
                 this.$el.find(".sources").empty();
@@ -567,25 +696,15 @@ define([
                 if (objectTypes && _.size(objectTypes) > 0) {
                     this.$el.find(".objectTypeFieldMessage").hide();
 
-                    // For each schedule on the page
-                    _.each(this.addedLiveSyncSchedules, function (source) {
-                        // The schedule is not included in the livesync source list
-                        if (_.indexOf(objectTypes, source) === -1) {
-                            this.$el.find("#" + source.split("/").join("")).find(".deleteSchedule").click();
-                            this.addedLiveSyncSchedules.splice(_.indexOf(this.addLiveSyncScheduler, source), 1);
-                        }
-                    }, this);
-
-
                     // For each possible liveSync
-                    _.each(objectTypes, function (objectName) {
+                    _.each(objectTypes, (objectName) => {
                         // The source is not scheduled add it to dropdown
-                        if (_.indexOf(this.addedLiveSyncSchedules, objectName) === -1) {
-                            this.$el.find(".sources").append("<option value='" + objectName + "'>" + objectName + "</option>");
+                        if (this.liveSyncCollection.where({source: objectName}).length === 0) {
+                            this.$el.find(".sources").append("<option value='" + objectName + "'>" + _.startCase(_.last(objectName.split("/"))) + "</option>");
                             this.$el.find(".addLiveSync").prop('disabled', false);
                             this.$el.find(".sources").prop('disabled', false);
                         }
-                    }, this);
+                    });
                 } else {
                     this.$el.find(".objectTypeFieldMessage").show();
                     this.$el.find(".addLiveSync").prop('disabled', true);
@@ -597,17 +716,6 @@ define([
                 this.$el.find(".sources").prop('disabled', true);
                 this.$el.find(".nameFieldMessage").show();
             }
-        },
-
-        removeSchedule: function (id, name, element) {
-            this.addedLiveSyncSchedules.splice(_.indexOf(this.addLiveSyncScheduler, name), 1);
-
-            element.remove();
-            this.$el.find(".sources").append("<option value='"+ name +"'>"+ name +"</option>");
-            this.$el.find(".addLiveSync").prop('disabled', false);
-            this.$el.find(".sources").prop('disabled', false);
-
-            this.updateLiveSyncObjects();
         },
 
         retryOptionChanged: function() {
@@ -662,7 +770,7 @@ define([
 
         //This function is to find the newest version of a connector and select it if a user provides a range
         versionRangeCheck: function(version) {
-            var cleanVersion = null,
+            let cleanVersion = null,
                 tempVersion,
                 tempMinorVersion,
                 mainVersion,
@@ -673,7 +781,7 @@ define([
                 if(this.data.versionDisplay[0].versions.length === 1) {
                     cleanVersion = this.data.versionDisplay[0].versions[0].bundleVersion;
                 } else {
-                    _.each(this.data.versionDisplay[0].versions, function (versions) {
+                    _.each(this.data.versionDisplay[0].versions, (versions) => {
                         if (cleanVersion === null) {
                             cleanVersion = versions.bundleVersion;
                         } else {
@@ -692,7 +800,7 @@ define([
                                 }
                             }
                         }
-                    }, this);
+                    });
                 }
 
                 this.data.rangeFound = true;
@@ -707,7 +815,7 @@ define([
 
         //Returns the current provisioner based on a merged copy of the connector defaults and what was set in the template by the user
         getProvisioner: function() {
-            var connectorData = {},
+            let connectorData = {},
                 connDetails = this.connectorDetails,
                 mergedResult = {},
                 tempArrayObject,
@@ -731,10 +839,10 @@ define([
                 $.extend(true, mergedResult, connDetails, connectorData);
 
                 //Added logic to ensure array parts correctly add and delete what is set
-                _.each(arrayComponents, function (component) {
+                _.each(arrayComponents, (component) => {
                     tempArrayObject = form2js($(component).prop("id"), ".", true);
 
-                    _.each(tempArrayObject.configurationProperties, function(item, key) {
+                    _.each(tempArrayObject.configurationProperties, (item, key) => {
                         mergedResult.configurationProperties[key] = item;
 
                         //Need this check for when an array is saved with an empty string after containing data to properly remove it
@@ -742,7 +850,7 @@ define([
                             delete mergedResult.configurationProperties[key];
                         }
                     });
-                }, this);
+                });
             }
 
             mergedResult.objectTypes = this.userDefinedObjectTypes || this.data.objectTypes;
@@ -756,12 +864,12 @@ define([
 
             this.$el.find("#objectTypesTab table tbody").empty();
 
-            _.each(this.userDefinedObjectTypes, _.bind(function(object, key){
+            _.each(this.userDefinedObjectTypes, (object, key) => {
                 this.$el.find("#objectTypesTab table tbody").append(
-                        "<tr data-objecttype='" +key +"'><td>"+key +"</td>"
+                        "<tr data-objecttype='" + key + "'><td>" + key + "</td>"
                         + "<td><button class='btn btn-link edit-objectType'><i class='fa fa-pencil'></i></button>"
                         + "<button class='btn btn-link delete-objectType'><i class='fa fa-times'></i></button></td></tr>");
-            }, this));
+            });
 
 
             this.updateLiveSyncObjects();
@@ -787,14 +895,14 @@ define([
 
         //When clicking the pencil for an object type
         editObjectType: function(event) {
-            var objectTypeName = $(event.target).parents("tr").attr("data-objectType");
+            let objectTypeName = $(event.target).parents("tr").attr("data-objectType");
 
             objectTypesDialog.render(this.userDefinedObjectTypes || this.data.objectTypes, objectTypeName, this.getProvisioner(), _.bind(this.renderObjectTypes, this));
         },
 
         //When clicking the delete icon for an object type
         deleteObjectType: function(event){
-            var objectTypeName = $(event.target).parents("tr").attr("data-objectType");
+            let objectTypeName = $(event.target).parents("tr").attr("data-objectType");
 
             if(!this.userDefinedObjectTypes) {
                 this.userDefinedObjectTypes = this.data.objectTypes;
@@ -824,7 +932,7 @@ define([
 
         //Used when an object type template selector is available.
         changeObjectTypeConfig: function(event) {
-            var value = $(event.target).val(),
+            let value = $(event.target).val(),
                 type = $(event.target).attr("data-type");
 
             if(!this.userDefinedObjectTypes) {
@@ -833,18 +941,19 @@ define([
 
             $(event.target).val(this.currentObjectTypeLoaded);
 
-            UIUtils.jqConfirm($.t('templates.connector.objectTypes.changeConfiguration'), _.bind(function(){
+            UIUtils.jqConfirm($.t('templates.connector.objectTypes.changeConfiguration'), () => {
                 if(value === "fullConfig") {
                     this.connectorDetails.configurationProperties.readSchema = true;
 
                     ConnectorDelegate.testConnector(this.connectorDetails).then(
-                        _.bind(function (result) {
+                        (result) => {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeLoaded");
 
                             this.renderObjectTypes(result.objectTypes);
-                        }, this), _.bind(function () {
+                        },
+                        () => {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeFailedToLoad");
-                        }, this)
+                        }
                     );
                 } else if(value === "savedConfig") {
                     if(this.previousObjectType) {
@@ -852,20 +961,21 @@ define([
                     }
                 } else {
                     ConnectorDelegate.connectorDefault(value, type).then(
-                        _.bind(function (result) {
+                        (result) => {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeLoaded");
 
                             this.renderObjectTypes(result.objectTypes);
-                        }, this), _.bind(function () {
+                        },
+                        () => {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeFailedToLoad");
-                        }, this)
+                        }
                     );
                 }
 
                 this.currentObjectTypeLoaded = value;
                 $(event.target).val(this.currentObjectTypeLoaded);
 
-            }, this));
+            });
         }
     });
 

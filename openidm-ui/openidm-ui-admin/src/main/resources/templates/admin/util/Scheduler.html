@@ -44,52 +44,13 @@
 </div>
 {{/if}}
 
-{{#if liveSync}}
-<div class="schedulerBody" id="{{sourceCleaned}}">
+<div class="clearfix">
+    {{#if add}}
+    <input type="button" class="btn btn-primary pull-right addSchedule" value="{{t "templates.scheduler.addSchedule"}}" />
+    <input style="display:none;" type="button" class="btn btn-primary pull-right saveSchedule" value="{{t "common.form.save"}}" />
 
-    <h3>{{scheduleType}} {{t "templates.scheduler.scheduler"}} - {{source}}</h3>
-
-    <div class="group-field-block group-lead no-validation-block">
-        <div class="schedule">
-            <span class='cron-block cron-block-nseconds'>
-                {{t "templates.scheduler.fireEvery"}}<select class="liveSyncSchedule"></select>
-                <span class='cron-block'>{{t "templates.scheduler.seconds"}}</span>
-            </span>
-        </div>
-    </div>
-    <div class="form-inline">
-        <div class="group-field-block-inline no-validation-block">
-            <label class="light">
-                <input type="checkbox" value="true" class="enabled"/>
-                {{t "templates.scheduler.enabled"}}
-            </label>
-        </div>
-
-        <div class="group-field-block-inline no-validation-block">
-            <label class="light">
-                <input type="checkbox" value="false" class="persisted"/>
-                {{t "templates.scheduler.persisted"}}
-            </label>
-        </div>
-
-        <div style="display:none;" class="group-field-block-inline misfirePolicyBlock no-validation-block">
-            <label class="light">{{t "templates.scheduler.misfirePolicy"}}</label>
-            <select class="misfirePolicy form-control">
-                <option value="fireAndProceed">{{t "templates.scheduler.fireAndProceed"}}</option>
-                <option value="doNothing" selected>{{t "templates.scheduler.doNothing"}}</option>
-            </select>
-        </div>
-    </div>
+    {{else}}
+    <input type="button" class="btn btn-primary pull-right saveSchedule" value="{{t "common.form.save"}}" />
     {{/if}}
-
-    <div class="clearfix">
-        {{#if add}}
-        <input type="button" class="btn btn-primary pull-right addSchedule" value="{{t "templates.scheduler.addSchedule"}}" />
-        <input style="display:none;" type="button" class="btn btn-primary pull-right saveSchedule" value="{{t "common.form.save"}}" />
-
-        {{else}}
-        <input type="button" class="btn btn-primary pull-right saveSchedule" value="{{t "common.form.save"}}" />
-        {{/if}}
-        <input type="button" class="btn btn-default pull-right deleteSchedule" value="{{t "templates.scheduler.deleteSchedule"}}" />
-    </div>
+    <input type="button" class="btn btn-default pull-right deleteSchedule" value="{{t "templates.scheduler.deleteSchedule"}}" />
 </div>
