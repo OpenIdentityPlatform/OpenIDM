@@ -17,32 +17,26 @@
 // TODO: Expose as a set of resource actions.
 package org.forgerock.openidm.crypto.impl;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 
+import javax.crypto.KeyGenerator;
+import javax.crypto.SecretKey;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStore.SecretKeyEntry;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
-
-import org.bouncycastle.openssl.PEMWriter;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
@@ -53,44 +47,52 @@ import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.KeyRepresentation;
-import org.forgerock.openidm.crypto.SharedKeyService;
-import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.FieldStorageScheme;
+import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.crypto.SaltedMD5FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA1FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA256FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA384FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA512FieldStorageScheme;
+import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
+import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.util.JsonUtil;
-import org.forgerock.util.encode.Base64;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Cryptography Service
- *
  */
 public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, SharedKeyService {
 
-    /**
-     * Setup logging for the {@link CryptoServiceImpl}.
-     */
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
-
-    /** TODO: Description. */
+    private final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<>();
     private UpdatableKeyStoreSelector keySelector;
 
-    /** TODO: Description. */
-    private final ArrayList<JsonTransformer> decryptionTransformers =
-            new ArrayList<JsonTransformer>();
+    /**
+     * Constructs an implementation of the {@link CryptoService}.
+     */
+    public CryptoServiceImpl() {
+    }
+
+    /**
+     * Constructs an implementation of the {@link CryptoService} with a given
+     * {@link UpdatableKeyStoreSelector} and list of {@link JsonTransformer}'s.
+     *
+     * @param keySelector The {@link UpdatableKeyStoreSelector}.
+     * @param decryptionTransformers A list of {@link JsonTransformer}'s to use for decryption.
+     */
+    public CryptoServiceImpl(final UpdatableKeyStoreSelector keySelector,
+            final List<JsonTransformer> decryptionTransformers) {
+        this.keySelector = keySelector;
+        this.decryptionTransformers.addAll(decryptionTransformers);
+    }
 
     /**
      * Opens a connection to the specified URI location and returns an input

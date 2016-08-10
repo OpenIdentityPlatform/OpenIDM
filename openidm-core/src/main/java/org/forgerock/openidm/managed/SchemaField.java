@@ -17,6 +17,7 @@
 package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
+import static org.forgerock.util.crypto.CryptoConstants.*;
 
 import javax.script.ScriptException;
 
@@ -36,6 +37,7 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.crypto.CryptoConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,17 +50,21 @@ public class SchemaField {
      * Setup logging for the {@link SchemaField}.
      */
     private final static Logger logger = LoggerFactory.getLogger(SchemaField.class);
-    
-    public static JsonPointer FIELD_ALL_RELATIONSHIPS = new JsonPointer("*" + RelationshipUtil.REFERENCE_ID);
-    public static JsonPointer FIELD_REFERENCE = new JsonPointer(RelationshipUtil.REFERENCE_ID);
-    public static JsonPointer FIELD_PROPERTIES = new JsonPointer(RelationshipUtil.REFERENCE_PROPERTIES);
-    public static JsonPointer FIELD_ALL = new JsonPointer("*");
-    public static JsonPointer FIELD_EMPTY = new JsonPointer("");
+
+    public static final String DEFAULT_CIPHER = CryptoConstants.CIPHER_AES_CBC_PKCS5;
+    public static final String FIELD_ENCRYPTION = "encryption";
+    public static final JsonPointer FIELD_ALL_RELATIONSHIPS = new JsonPointer("*" + RelationshipUtil.REFERENCE_ID);
+    public static final JsonPointer FIELD_REFERENCE = new JsonPointer(RelationshipUtil.REFERENCE_ID);
+    public static final JsonPointer FIELD_PROPERTIES = new JsonPointer(RelationshipUtil.REFERENCE_PROPERTIES);
+    public static final JsonPointer FIELD_ALL = new JsonPointer("*");
+    public static final JsonPointer FIELD_EMPTY = new JsonPointer("");
 
     /**
      * Custom {@code relationship} JSON Schema type, which is essentially a sub-type of {@code object}.
      */
     public static final String TYPE_RELATIONSHIP = "relationship";
+    private final boolean isEncrypted;
+    private final JsonValue encryptionConfiguration;
 
     /** Schema field types */
     enum SchemaFieldType {
@@ -67,7 +73,7 @@ public class SchemaField {
     }
 
     /** Schema field scopes */
-    private static enum Scope {
+    private enum Scope {
         PUBLIC, PRIVATE
     }
     
@@ -154,15 +160,21 @@ public class SchemaField {
         }
 
         // Initialize the encryptor if encryption is defined.
-        JsonValue encrypttionValue = schema.get("encryption");
+        JsonValue encryptionValue = schema.get(FIELD_ENCRYPTION);
         try {
-            encryptor = encrypttionValue.isNotNull()
-                    ? cryptoService.getEncryptor(
-                        encrypttionValue.get("cipher").defaultTo("AES/CBC/PKCS5Padding").asString(),
-                        encrypttionValue.get("key").required().asString())
-                    : null;
+            if (encryptionValue.isNotNull()) {
+                encryptor = cryptoService.getEncryptor(
+                        encryptionValue.get(CRYPTO_CIPHER).defaultTo(DEFAULT_CIPHER).asString(),
+                        encryptionValue.get(CRYPTO_KEY).required().asString());
+                encryptionConfiguration = encryptionValue;
+                isEncrypted = true;
+            } else {
+                encryptor = null;
+                isEncrypted = false;
+                encryptionConfiguration = null;
+            }
         } catch (JsonCryptoException e) {
-            throw new JsonValueException(encrypttionValue, "Failed to create encryptor from cryptoService", e);
+            throw new JsonValueException(encryptionValue, "Failed to create encryptor from cryptoService", e);
         }
 
         // Set the hashing value, if a secure hash is defined, and make sure the hashing algorithm is defined.
@@ -417,5 +429,23 @@ public class SchemaField {
             logger.debug(msg, je);
             throw new InternalServerErrorException(msg, je);
         }
+    }
+
+    /**
+     * Retrieve the encryption configuration defined for this schema field.
+     *
+     * @return the encryption configuration defined for this schema field.
+     */
+    public JsonValue getEncryptionConfiguration() {
+        return encryptionConfiguration;
+    }
+
+    /**
+     * Returns true if this field had encryption attributes configured.
+     *
+     * @return True if this field had encryption attributes configured.
+     */
+    boolean isEncrypted() {
+        return isEncrypted;
     }
 }
