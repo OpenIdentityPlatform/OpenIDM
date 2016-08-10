@@ -50,6 +50,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;

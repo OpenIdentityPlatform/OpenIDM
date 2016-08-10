@@ -16,6 +16,7 @@
 package org.forgerock.openidm.sync.impl;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
  * An interface for handling different recon types

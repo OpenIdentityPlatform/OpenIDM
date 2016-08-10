@@ -14,6 +14,44 @@
         "openid",
         "profile",
         "email"
+      ],
+      "propertyMap" : [
+        {
+          "source" : "sub",
+          "target" : "id"
+        },
+        {
+          "source" : "name",
+          "target" : "displayName"
+        },
+        {
+          "source" : "given_name",
+          "target" : "name/givenName"
+        },
+        {
+          "source" : "family_name",
+          "target" : "name/familyName"
+        },
+        {
+          "source" : "picture",
+          "target" : "photoUrl"
+        },
+        {
+          "source" : "email",
+          "target" : "email",
+          "transform" : {
+            "type" : "text/javascript",
+            "source" : "var out = [ { \"address\" : source, \"primary\" : true } ]; out;"
+          }
+        },
+        {
+          "source" : "email",
+          "target" : "username"
+        },
+        {
+          "source" : "locale",
+          "target" : "locale"
+        }
       ]
     }
   ]

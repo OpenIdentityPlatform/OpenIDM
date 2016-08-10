@@ -12,5 +12,11 @@
     "openid",
     "profile",
     "email"
+  ],
+  "propertyMap" : [
+    {
+      "source" : "foo",
+      "target" : "bar"
+    }
   ]
 }

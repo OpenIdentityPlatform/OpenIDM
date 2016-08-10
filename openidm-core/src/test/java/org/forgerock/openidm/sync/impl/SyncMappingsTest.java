@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.util.Scripts;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;

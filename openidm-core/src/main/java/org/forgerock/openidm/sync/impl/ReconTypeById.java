@@ -25,6 +25,7 @@ import java.util.List;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
  * Represents a reconciliation by id(s).

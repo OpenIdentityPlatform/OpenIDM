@@ -32,6 +32,7 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.util.RequestUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

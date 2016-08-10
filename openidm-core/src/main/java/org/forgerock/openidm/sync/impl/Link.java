@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;

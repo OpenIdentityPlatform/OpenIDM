@@ -12,5 +12,6 @@
     "openid",
     "profile",
     "email"
-  ]
+  ],
+  "propertyMap" : null
 }

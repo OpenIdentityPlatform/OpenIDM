@@ -33,7 +33,10 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.idp.config.ProviderConfig;
+import org.forgerock.openidm.idp.config.SingleMapping;
 import org.forgerock.openidm.idp.relyingparty.OpenIDConnectProvider;
+import org.forgerock.openidm.sync.PropertyMapping;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
@@ -49,6 +52,10 @@ import javax.inject.Inject;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Stage is responsible for gathering social user profile details.
@@ -57,6 +64,8 @@ import com.fasterxml.jackson.databind.SerializationFeature;
  * passed in user object.
  */
 public final class SocialUserDetailsStage implements ProgressStage<SocialUserDetailsConfig> {
+
+    private static final Logger logger = LoggerFactory.getLogger(SocialUserDetailsStage.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
@@ -96,7 +105,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
         return RequirementsBuilder
                 .newInstance("New user details")
-                .addProperty("user", getUserSchemaRequirements(json(object()), true))
+                .addProperty("user", getUserSchemaRequirements(json(object())))
                 .addProperty("provider", "string", "OAuth IDP name")
                 .addProperty("code", "string", "OAuth Access code")
                 .addProperty("redirect_uri", "string", "OAuth redirect URI used to obtain the authorization code")
@@ -131,7 +140,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
 
             JsonValue requirements = RequirementsBuilder
                     .newInstance("Verify user profile")
-                    .addRequireProperty("user", getUserSchemaRequirements(userResponse, false))
+                    .addRequireProperty("user", getUserSchemaRequirements(userResponse))
                     .build();
 
             return StageResponse.newBuilder()
@@ -143,19 +152,32 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         throw new BadRequestException("Should respond with either user or provider/code");
     }
 
-    private RequirementsBuilder getUserSchemaRequirements(JsonValue user, boolean passwordRequired) {
-        return (passwordRequired
-                ? newObject("User details").addRequireProperty("password", "string", "Password")
-                : newObject("User details").addProperty("password", "string", "Password"))
-
-                .addRequireProperty("userName", "string", "User name", user.get("name").asString())
+    private RequirementsBuilder getUserSchemaRequirements(JsonValue user) {
+        return newObject("User details")
+                .addRequireProperty("id", "string", "User ID", user.get("id").asString())
+                .addRequireProperty("username", "string", "Username", user.get("username").asString())
+                .addProperty("profileUrl", "string", "Profile URL", user.get("profileUrl").asString())
+                .addProperty("photoUrl", "string", "Photo URL", user.get("photoUrl").asString())
+                .addProperty("preferredLanguage", "string", "Preferred Language", user.get("preferredLanguage").asString())
+                .addProperty("locale", "string", "Locale", user.get("locale").asString())
+                .addProperty("timezone", "string", "Timezone", user.get("timezone").asString())
+                .addRequireProperty("active", "boolean", "Active", user.get("active").asBoolean())
                 .addRequireProperty("name", newObject("Name")
-                        .addRequireProperty("familyName", "string", "Family Name", user.get("familyName").asString())
-                        .addRequireProperty("givenName", "string", "Given Name", user.get("giveName").asString())
-                        .addProperty("middleName", "string", "Middle Name", user.get("middleName").asString())
-                        .addProperty("honorificPrefix", "string", "Prefix", user.get("honorificPrefix").asString())
-                        .addProperty("honorificSuffix", "string", "Suffix", user.get("honorificSuffix").asString())
-                .addRequireProperty("email", "string", "Email", user.get("email").asString()));
+                        .addRequireProperty("familyName", "string", "Family Name", user.get("name").get("familyName").asString())
+                        .addRequireProperty("givenName", "string", "Given Name", user.get("name").get("giveName").asString())
+                        .addProperty("middleName", "string", "Middle Name", user.get("name").get("middleName").asString())
+                        .addProperty("honorificPrefix", "string", "Prefix", user.get("name").get("honorificPrefix").asString())
+                        .addProperty("honorificSuffix", "string", "Suffix", user.get("name").get("honorificSuffix").asString())
+                        .addProperty("fullName", "string", "Suffix", user.get("name").get("fullName").asString())
+                        .addProperty("nickname", "string", "Suffix", user.get("name").get("nickname").asString())
+                        .addProperty("displayName", "string", "Suffix", user.get("name").get("displayName").asString())
+                        .addProperty("title", "string", "Suffix", user.get("name").get("title").asString()))
+                .addRequireProperty("email", newArray(1, newObject("Email")
+                        .addRequireProperty("address", "string", "Email Address", user.get("email").get(0).get("address").asString())
+                        .addProperty("type", "string", "Type", user.get("email").get(0).get("type").asString())
+                        .addProperty("primary", "boolean", "Primary", user.get("email").get(0).get("primary").asBoolean())))
+                .addProperty("address", newArray(0, newObject("Address"), user.get("address").asList()))
+                .addProperty("phone", newArray(0, newObject("Phone"), user.get("phone").asList()));
     }
 
     private void processEmail(ProcessContext context, SocialUserDetailsConfig config, JsonValue user)
@@ -193,10 +215,31 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
     }
 
-    private JsonValue getSocialUser(String providerName, String code, String redirectUri, SocialUserDetailsConfig config)
-            throws ResourceException {
+    private JsonValue getSocialUser(String providerName, String code, String redirectUri,
+            SocialUserDetailsConfig config) throws ResourceException {
         OpenIDConnectProvider provider = getSocialProvider(providerName, config.getProviders());
-        return (provider == null) ? null : provider.getProfile(code, redirectUri);
+        return (provider == null)
+                ? null
+                : normalizeProfile(provider.getProfile(code, redirectUri),
+                        getProviderConfig(providerName, config.getProviders()));
+    }
+
+    private JsonValue normalizeProfile(JsonValue profile, ProviderConfig config) {
+        JsonValue target = json(object());
+        Context context = new RootContext();
+        if (config.getPropertyMap() != null) {
+            try {
+                for (SingleMapping mapping : config.getPropertyMap()) {
+                    PropertyMapping property = new PropertyMapping(mapping.asJsonValue());
+                    property.apply(profile, null, target, null, null, context);
+                }
+            } catch (SynchronizationException e) {
+                logger.warn("Unable to map profile data to common format", e);
+                return null;
+            }
+        }
+        target.add("rawProfile", profile);
+        return target;
     }
 
     public OpenIDConnectProvider getSocialProvider(String providerName, List<ProviderConfig> providers)

@@ -26,6 +26,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.services.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

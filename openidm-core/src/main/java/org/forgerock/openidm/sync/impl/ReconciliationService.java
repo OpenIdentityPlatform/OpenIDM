@@ -49,6 +49,7 @@ import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.sync.ReconContext;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;

@@ -18,6 +18,7 @@ package org.forgerock.openidm.sync.impl;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.sync.PendingActionContext;

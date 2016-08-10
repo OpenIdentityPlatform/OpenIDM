@@ -26,13 +26,13 @@ public class ProviderConfig {
 
     public final static String CLIENT_SECRET = "client_secret";
 
-    @JsonProperty("name")
+    @JsonProperty
     private String name;
 
-    @JsonProperty("type")
+    @JsonProperty
     private String type;
 
-    @JsonProperty("icon")
+    @JsonProperty
     private String icon;
 
     @JsonProperty("client_id")
@@ -53,13 +53,16 @@ public class ProviderConfig {
     @JsonProperty("well-known")
     private String wellKnown;
 
-    @JsonProperty("scope")
+    @JsonProperty
     private List<String> scope;
+
+    @JsonProperty
+    private List<SingleMapping> propertyMap;
 
     /** Default true, can disable
      * identity provider by setting to false
      * explicitly in config */
-    @JsonProperty("enabled")
+    @JsonProperty
     private boolean enabled = true;
 
     public String getName() {
@@ -110,4 +113,7 @@ public class ProviderConfig {
         return scope;
     }
 
+    public List<SingleMapping> getPropertyMap() {
+        return propertyMap;
+    }
 }
