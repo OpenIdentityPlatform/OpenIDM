@@ -1456,7 +1456,11 @@
                 "schedules": "LiveSync Schedules",
                 "noName": "You must specify a name for the connector before you can add LiveSync schedules.",
                 "noObjects": "There are no available objects.  Please validate your connector to retrieve any default objects.  You might have to manually add objects after validating.",
-                "addLiveSync": "Add a LiveSync schedule for:"
+                "addLiveSync": "Add a LiveSync schedule for:",
+                "objectTypes": "Object Types",
+                "enabled": "State",
+                "addTitle": "Add Schedule: ",
+                "editTitle": "Edit Schedule: "
             },
             "objectTypes": {
                 "saveObjectType": "Save Object Type and Close",
