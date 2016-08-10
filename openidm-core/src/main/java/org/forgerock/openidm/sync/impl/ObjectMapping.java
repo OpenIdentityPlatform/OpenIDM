@@ -37,8 +37,10 @@ import java.util.concurrent.Callable;
 import javax.script.ScriptException;
 
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.openidm.sync.PropertyMapping;
 import org.forgerock.openidm.sync.SyncContext;
 import org.forgerock.openidm.condition.Conditions;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.util.DurationStatistics;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;

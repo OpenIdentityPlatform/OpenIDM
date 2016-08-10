@@ -23,6 +23,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.condition.Conditions;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.util.Script;
 import org.forgerock.openidm.util.Scripts;
 import org.forgerock.services.context.Context;

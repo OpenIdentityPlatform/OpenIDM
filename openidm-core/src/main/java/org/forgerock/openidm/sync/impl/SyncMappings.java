@@ -33,6 +33,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.script.ScriptRegistry;
 import org.osgi.service.component.ComponentContext;
 import org.osgi.service.component.ComponentException;

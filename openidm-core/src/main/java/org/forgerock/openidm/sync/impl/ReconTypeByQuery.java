@@ -24,6 +24,7 @@ import java.util.LinkedHashSet;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
  * Represents a reconciliation of a set defined by query/queries,

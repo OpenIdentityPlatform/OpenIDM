@@ -24,6 +24,8 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import org.forgerock.openidm.sync.SynchronizationException;
+
 import java.util.Iterator;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;

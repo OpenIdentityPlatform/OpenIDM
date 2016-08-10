@@ -1,19 +1,19 @@
 /*
  * The contents of this file are subject to the terms of the Common Development and
- * Distribution License (the License). You may not use this file except in compliance with the
- * License.
+ * Distribution License (the License). You may not use this file except in compliance
+ * with the License.
  *
- * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
- * specific language governing permission and limitations under the License.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for
+ * the specific language governing permission and limitations under the License.
  *
- * When distributing Covered Software, include this CDDL Header Notice in each file and include
- * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
- * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions copyright [year] [name of copyright owner]".
+ * When distributing Covered Software, include this CDDL Header Notice in each file
+ * and include the License file at legal/CDDLv1.0.txt. If applicable, add the following
+ * below the CDDL Header, with the fields enclosed by brackets [] replaced by your
+ * own identifying information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
-package org.forgerock.openidm.sync.impl;
+package org.forgerock.openidm.sync;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.field;
@@ -48,7 +48,7 @@ import org.forgerock.openidm.condition.Condition;
  * This class contains the necessary logic to map an attribute from the source object to an attribute
  * on the target object.  It optionally contains a condition and transform scripts.. 
  */
-class PropertyMapping {
+public class PropertyMapping {
 
     /** Logger */
     private final static Logger LOGGER = LoggerFactory.getLogger(PropertyMapping.class);

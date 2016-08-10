@@ -16,6 +16,7 @@
 package org.forgerock.openidm.sync.impl;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.sync.SynchronizationException;
 
 /**
  * Interface to manage and access mappings
