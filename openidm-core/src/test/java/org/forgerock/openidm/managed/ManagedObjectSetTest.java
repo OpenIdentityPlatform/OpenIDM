@@ -18,9 +18,10 @@ package org.forgerock.openidm.managed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.*;
-import static org.forgerock.json.resource.ResourceResponse.FIELD_REVISION;
+import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.forgerock.openidm.managed.ManagedObjectSet.Action.triggerSyncCheck;
 import static org.forgerock.openidm.managed.ManagedObjectSet.CRYPTO_KEY_PTR;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.mockito.Mockito.mock;
@@ -38,6 +39,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -45,6 +47,8 @@ import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -80,8 +84,32 @@ public class ManagedObjectSetTest {
     private static final String CONF_MANAGED_USER_USING_ALIAS1 = "/conf/managed-user-alias1.json";
     private static final String CONF_MANAGED_USER_USING_NO_ENCRYPTION = "/conf/managed-user-no-encryption.json";
     private static final String RESOURCE_ID = "user1";
+    private static final String KEYSTORE_PASSWORD = "Password1";
+    private static final int NUMBER_OF_USERS = 5;
 
-    private final String KEYSTORE_PASSWORD = "Password1";
+    @Test
+    public void testTriggerSyncCheckOnActionCollection() throws Exception {
+        // given
+        final CryptoService cryptoService = createCryptoService();
+        final ConnectionObjects connectionObjects = createConnectionObjects();
+        final ManagedObjectSet managedObjectSet =
+                createManagedObjectSet(CONF_MANAGED_USER_USING_ALIAS, cryptoService,
+                        connectionObjects.getConnectionFactory());
+        addRoutesToRouter(connectionObjects.getRouter(), managedObjectSet, new MemoryBackend());
+
+        // create users
+        createUsers(NUMBER_OF_USERS, managedObjectSet);
+
+        // when triggerSync on all users.
+        ActionRequest actionRequest = newActionRequest(MANAGED_USER_RESOURCE_PATH, triggerSyncCheck.name());
+        ActionResponse actionResponse = managedObjectSet.actionCollection(new RootContext(), actionRequest)
+                .getOrThrowUninterruptibly();
+
+        // then
+        assertThat(actionResponse.getJsonContent().get(ManagedObjectSet.COUNT_TRIGGERED).asInteger())
+                .isEqualTo(NUMBER_OF_USERS);
+    }
+
 
     @Test
     public void testUpdateWithNoChanges() throws Exception {
@@ -231,6 +259,25 @@ public class ManagedObjectSetTest {
         assertThat(getKeyAlias(updatedUser)).isNull();
         assertThat(cryptoService.isEncrypted(updatedUser.get(FIELD_PASSWORD))).isFalse();
         assertThat(updatedUser.isEqualTo(createdUser)).isFalse();
+    }
+
+    /**
+     * Create a number of users with generated random content.
+     *
+     * @param numberOfUsers The number of users.
+     * @param managedObjectSet The {@link ManagedObjectSet} to create the users for.
+     * @return A list of users as {@link JsonValue}'s.
+     * @throws ResourceException If unable to create the users.
+     */
+    private List<JsonValue> createUsers(final int numberOfUsers, final ManagedObjectSet managedObjectSet)
+            throws ResourceException {
+        final List<JsonValue> resources = new LinkedList<>();
+        for (int i = 0; i < numberOfUsers; i++) {
+            JsonValue user = createUserObject(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+                    UUID.randomUUID().toString());
+            resources.add(createUser(user.get(FIELD_ID).asString(), user, managedObjectSet));
+        }
+        return resources;
     }
 
     private CryptoService createCryptoService() throws Exception {
