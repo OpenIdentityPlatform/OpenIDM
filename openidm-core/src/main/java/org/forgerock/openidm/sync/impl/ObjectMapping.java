@@ -2218,7 +2218,7 @@ class ObjectMapping {
                     field("reconId", reconId),
                     field("mapping", ObjectMapping.this.getName()),
                     field("situation", situation != null ? situation.name() : null),
-                    field("action", situation != null ? situation.getDefaultAction().name() : null),
+                    field("action", action !=null ? action.name() : null),
                     field("sourceId", getSourceObjectId()),
                     field("linkQualifier", linkObject.linkQualifier),
                     (targetObjectAccessor != null && targetObjectAccessor.getLocalId() != null) 
@@ -2820,8 +2820,8 @@ class ObjectMapping {
             return json(object(
                     field("reconId", reconId),
                     field("mapping", ObjectMapping.this.getName()),
-                    field("situation", situation.name()),
-                    field("action", situation.getDefaultAction().name()),
+                    field("situation", situation!=null ? situation.name() : null),
+                    field("action", action !=null ? action.name() : null),
                     field("target", "true"),
                     field("oldSource", getSourceObject()),
                     field("linkQualifier", linkObject.linkQualifier),
