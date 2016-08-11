@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2016 ForgeRock AS.
+ * Portions copyright 2013-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.cluster;
 
@@ -313,12 +313,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      * @return a map representing an instance's state and recovery statistics
      */
     private Map<String, Object> getInstanceMap(JsonValue instanceValue) {
-        DateUtil dateUtil = DateUtil.getDateUtil();
+        DateUtil dateUtil = DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC);
         Map<String, Object> instanceInfo = new HashMap<String, Object>();
         String instanceId = instanceValue.get("instanceId").asString();
         InstanceState state = new InstanceState(instanceId, instanceValue.asMap());
         instanceInfo.put("instanceId", instanceId);
-        instanceInfo.put("startup", dateUtil.formatDateTime(new Date(state.getStartup())));
+        instanceInfo.put("startup", dateUtil.getFormattedTime(state.getStartup()));
         instanceInfo.put("shutdown", "");
         Map<String, Object> recoveryMap = new HashMap<String, Object>();
         switch (state.getState()) {
@@ -331,12 +331,9 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 if (state.getRecoveryAttempts() > 0) {
                     recoveryMap.put("recoveredBy", state.getRecoveringInstanceId());
                     recoveryMap.put("recoveryAttempts", state.getRecoveryAttempts());
-                    recoveryMap.put("recoveryStarted", dateUtil.formatDateTime(new Date(state
-                            .getRecoveryStarted())));
-                    recoveryMap.put("recoveryFinished", dateUtil.formatDateTime(new Date(state
-                            .getRecoveryFinished())));
-                    recoveryMap.put("detectedDown", dateUtil.formatDateTime(new Date(state
-                            .getDetectedDown())));
+                    recoveryMap.put("recoveryStarted", dateUtil.getFormattedTime(state.getRecoveryStarted()));
+                    recoveryMap.put("recoveryFinished", dateUtil.getFormattedTime(state.getRecoveryFinished()));
+                    recoveryMap.put("detectedDown", dateUtil.getFormattedTime(state.getDetectedDown()));
                     instanceInfo.put("recovery", recoveryMap);
                 } else {
                     // Should never reach this state
@@ -345,15 +342,15 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
                 }
             } else {
                 instanceInfo
-                        .put("shutdown", dateUtil.formatDateTime(new Date(state.getShutdown())));
+                        .put("shutdown", dateUtil.getFormattedTime(state.getShutdown()));
             }
             break;
         case InstanceState.STATE_PROCESSING_DOWN:
             recoveryMap.put("state", "processing-down");
             recoveryMap.put("recoveryAttempts", state.getRecoveryAttempts());
             recoveryMap.put("recoveringBy", state.getRecoveringInstanceId());
-            recoveryMap.put("recoveryStarted", dateUtil.formatDateTime(new Date(state.getRecoveryStarted())));
-            recoveryMap.put("detectedDown", dateUtil.formatDateTime(new Date(state.getDetectedDown())));
+            recoveryMap.put("recoveryStarted", dateUtil.getFormattedTime(state.getRecoveryStarted()));
+            recoveryMap.put("detectedDown", dateUtil.getFormattedTime(state.getDetectedDown()));
             instanceInfo.put("recovery", recoveryMap);
         }
         return instanceInfo;

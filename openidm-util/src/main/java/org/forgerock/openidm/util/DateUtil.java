@@ -9,9 +9,9 @@
  * When distributing Covered Software, include this CDDL Header Notice in each file and include
  * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
- * information: "Portions Copyrighted [year] [name of copyright owner]".
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright © 2011-2016 ForgeRock AS. All rights reserved.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.util;
 
@@ -138,6 +138,21 @@ public final class DateUtil {
     }
 
     /**
+     * Formats a given time in milliseconds into a timestamp.
+     *
+     * @param epoch
+     *            time in milliseconds
+     * @return String containing the formatted timestamp
+     */
+    public String getFormattedTime(long epoch) {
+        String formatted = "";
+        if (epoch > 0) {
+            formatted = formatDateTime(new Date(epoch));
+        }
+        return formatted;
+    }
+    
+    /**
      * Parses an ISO8601 compliant timestamp into a DateTime object.
      *
      * @param timestamp
@@ -249,7 +264,7 @@ public final class DateUtil {
      *
      * For example, a scheduler expression for January 3, 2016 at 04:56 AM would be: "0 56 4 3 1 ? 2016". 
      * 
-     * @param intervalString a {@link String} object representing an ISO 8601 time interval.
+     * @param date a {@link String} object representing an ISO 8601 time interval.
      * @return a {@link String} representing a scheduler expression of the supplied date.
      * @throws IllegalArgumentException if an error occurs while parsing the intervalString.
      */
