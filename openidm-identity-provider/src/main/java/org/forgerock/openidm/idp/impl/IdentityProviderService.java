@@ -54,7 +54,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.idp.config.ProviderConfig;
-import org.forgerock.openidm.idp.relyingparty.AuthDetails;
 import org.forgerock.openidm.idp.relyingparty.OpenIDConnectProvider;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Options;
@@ -208,13 +207,13 @@ public class IdentityProviderService implements SingletonResourceProvider {
             case availableProviders:
                 return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
             case getauthtoken:
-                final AuthDetails authDetails = new OpenIDConnectProvider(getIdentityProvider(actionRequest.getContent()
+                final String idToken = new OpenIDConnectProvider(getIdentityProvider(actionRequest.getContent()
                         .get("provider").required().asString()), newHttpClient())
-                        .getAuthDetails(
+                        .getIdToken(
                                 actionRequest.getContent().get("code").required().asString(),
                                 actionRequest.getContent().get("redirect_uri").required().asString());
                 // just return id_token as "auth_token"
-                return newActionResponse(json(object(field("auth_token", authDetails.getIdToken())))).asPromise();
+                return newActionResponse(json(object(field("auth_token", idToken)))).asPromise();
             default:
                 return new BadRequestException("Not a supported Action").asPromise();
             }

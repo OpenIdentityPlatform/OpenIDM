@@ -19,7 +19,7 @@ import static org.forgerock.json.JsonValue.json;
 
 import java.io.IOException;
 import java.net.URI;
-
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
@@ -29,13 +29,11 @@ import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.util.Uris;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
-import org.forgerock.util.encode.Base64url;
 import org.forgerock.util.promise.NeverThrowsException;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -43,10 +41,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 
 /**
- * OpenID Connect {@link SocialProvider} implementation used to
+ * OpenID Connect implementation used to
  * perform the OAuth 2.0 flow using the OpenID Connect specification.
  */
-public class OpenIDConnectProvider implements SocialProvider {
+public class OpenIDConnectProvider {
 
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
@@ -64,33 +62,17 @@ public class OpenIDConnectProvider implements SocialProvider {
         this.httpClient = httpClient;
     }
 
-    @Override
-    public SocialUser getSocialUser(String code, String redirectUri) throws ResourceException {
-        AuthDetails authDetails = getAuthDetails(code, redirectUri);
-
-        final Claims claims = getClaims(authDetails);
-
-        final JsonValue userInfo = sendGetRequest(
-                URI.create(config.getUserInfoEndpoint()),
-                authDetails.getAccessToken());
-
-        SocialUser.Email email = new SocialUser.Email(userInfo.get("email").asString());
-
-        return new SocialUser(
-                // get the first part of their email address for the username
-                email.getValue().substring(0, email.getValue().indexOf('@')),
-                new SocialUser.Name(
-                        userInfo.get("family_name").asString(),
-                        userInfo.get("given_name").asString(),
-                        userInfo.get("name").asString()),
-                new SocialUser.Email[] { email },
-                new Claims[] { claims },
-                claims.getSubject());
-    }
-
-    @Override
-    public AuthDetails getAuthDetails(String code, String redirectUri) throws ResourceException {
-        AuthDetails authDetails = sendPostRequest(
+    /**
+     * Returns the user profile from the Idp.
+     *
+     * @param code authorization code used to specify grant type
+     * @param redirectUri url that the idp will redirect to with response
+     * @return
+     * @throws ResourceException
+     */
+    public JsonValue getProfile(String code, String redirectUri) throws ResourceException {
+        // Get the response from the token Endpoint
+        Map tokenEndpointResponse = sendPostRequest(
                 URI.create(config.getTokenEndpoint()),
                 "application/x-www-form-urlencoded",
                 "grant_type=authorization_code"
@@ -99,28 +81,39 @@ public class OpenIDConnectProvider implements SocialProvider {
                         + "&code=" + Uris.formDecodeParameterNameOrValue(code)
                         + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())
                         + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()),
-                AuthDetails.class);
+                Map.class);
 
-        if (authDetails == null
-                || authDetails.getIdToken() == null
-                || authDetails.getAccessToken() == null) {
-            throw new InternalServerErrorException("Unable to retrieve token");
-        }
-
-        return authDetails;
+        // Get the user profile from the identity provider using the access token
+        return sendGetRequest(
+                URI.create(config.getUserInfoEndpoint()),
+                tokenEndpointResponse.get("access_token").toString());
     }
 
-    private Claims getClaims(AuthDetails authDetails) throws BadRequestException {
-        final String[] jwt = authDetails.getIdToken().split("\\.");
-        if (jwt.length < 2) {
-            throw new BadRequestException("Unable to decode id_token JWT");
-        }
+    /**
+     * Returns a JWT ID Token used for OAuth2.0 flow when
+     * the provider type is openid_connect.
+     *
+     * @param code authorization code used to specify grant type
+     * @param redirectUri url that the idp will redirect to with response
+     * @return
+     * @throws ResourceException
+     */
+    public String getIdToken(String code, String redirectUri) throws ResourceException {
+        Map response = sendPostRequest(
+                URI.create(config.getTokenEndpoint()),
+                "application/x-www-form-urlencoded",
+                "grant_type=authorization_code"
+                        + "&scope=" + Uris.formDecodeParameterNameOrValue(StringUtils.join(config.getScope(), " "))
+                        + "&redirect_uri=" + Uris.formEncodeParameterNameOrValue(redirectUri)
+                        + "&code=" + Uris.formDecodeParameterNameOrValue(code)
+                        + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())
+                        + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()),
+                Map.class);
 
-        try {
-            return mapper.readValue(new String(Base64url.decode(jwt[1])), Claims.class);
-        } catch (IOException e) {
-            throw new BadRequestException("Unable to decode claims", e);
+        if (response.get("id_token") == null) {
+            throw new InternalServerErrorException("Unable to retrieve token");
         }
+        return response.get("id_token").toString();
     }
 
     private JsonValue sendGetRequest(URI uri, String access_token) {

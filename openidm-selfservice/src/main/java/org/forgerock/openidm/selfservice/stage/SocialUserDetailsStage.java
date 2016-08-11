@@ -25,6 +25,7 @@ import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.oneOf;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
 
+import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -38,14 +39,11 @@ import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.openidm.selfservice.util.RequirementsBuilder;
-import org.forgerock.openidm.idp.relyingparty.SocialUser;
-import org.forgerock.openidm.idp.relyingparty.SocialProvider;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import javax.inject.Inject;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -98,7 +96,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
         return RequirementsBuilder
                 .newInstance("New user details")
-                .addProperty("user", getUserSchemaRequirements(new SocialUser(), true))
+                .addProperty("user", getUserSchemaRequirements(json(object()), true))
                 .addProperty("provider", "string", "OAuth IDP name")
                 .addProperty("code", "string", "OAuth Access code")
                 .addProperty("redirect_uri", "string", "OAuth redirect URI used to obtain the authorization code")
@@ -124,12 +122,12 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         JsonValue code = context.getInput().get("code");
         JsonValue redirectUri = context.getInput().get("redirect_uri");
         if (provider.isNotNull() && code.isNotNull() && redirectUri.isNotNull()) {
-            SocialUser userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(), config);
+            JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(), config);
             if (userResponse == null) {
                 throw new BadRequestException("Unable to reach social provider or unknown provider given");
             }
 
-            context.putState(USER_FIELD, mapper.convertValue(userResponse, Map.class));
+            context.putState(USER_FIELD, userResponse.getObject());
 
             JsonValue requirements = RequirementsBuilder
                     .newInstance("Verify user profile")
@@ -145,24 +143,19 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         throw new BadRequestException("Should respond with either user or provider/code");
     }
 
-    private RequirementsBuilder getUserSchemaRequirements(SocialUser user, boolean passwordRequired) {
+    private RequirementsBuilder getUserSchemaRequirements(JsonValue user, boolean passwordRequired) {
         return (passwordRequired
                 ? newObject("User details").addRequireProperty("password", "string", "Password")
                 : newObject("User details").addProperty("password", "string", "Password"))
 
-                .addRequireProperty("userName", "string", "User name", user.getUserName())
+                .addRequireProperty("userName", "string", "User name", user.get("name").asString())
                 .addRequireProperty("name", newObject("Name")
-                        .addRequireProperty("familyName", "string", "Family Name", user.getName().getFamilyName())
-                        .addRequireProperty("givenName", "string", "Given Name", user.getName().getGivenName())
-                        .addProperty("middleName", "string", "Middle Name", user.getName().getMiddleName())
-                        .addProperty("honorificPrefix", "string", "Prefix", user.getName().getHonorificPrefix())
-                        .addProperty("honorificSuffix", "string", "Suffix", user.getName().getHonorificSuffix()))
-                .addRequireProperty("emails", newArray(
-                        newObject("Email")
-                                .addRequireProperty("value", "string", "Value")
-                                .addProperty("type", "string", "Type")
-                                .addProperty("primary", "boolean", "Primary"),
-                        mapper.convertValue(user.getEmails(), List.class)));
+                        .addRequireProperty("familyName", "string", "Family Name", user.get("familyName").asString())
+                        .addRequireProperty("givenName", "string", "Given Name", user.get("giveName").asString())
+                        .addProperty("middleName", "string", "Middle Name", user.get("middleName").asString())
+                        .addProperty("honorificPrefix", "string", "Prefix", user.get("honorificPrefix").asString())
+                        .addProperty("honorificSuffix", "string", "Suffix", user.get("honorificSuffix").asString())
+                .addRequireProperty("email", "string", "Email", user.get("email").asString()));
     }
 
     private void processEmail(ProcessContext context, SocialUserDetailsConfig config, JsonValue user)
@@ -200,13 +193,13 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
     }
 
-    private SocialUser getSocialUser(String providerName, String code, String redirectUri, SocialUserDetailsConfig config)
+    private JsonValue getSocialUser(String providerName, String code, String redirectUri, SocialUserDetailsConfig config)
             throws ResourceException {
-        SocialProvider provider = getSocialProvider(providerName, config.getProviders());
-        return (provider == null) ? null : provider.getSocialUser(code, redirectUri);
+        OpenIDConnectProvider provider = getSocialProvider(providerName, config.getProviders());
+        return (provider == null) ? null : provider.getProfile(code, redirectUri);
     }
 
-    public SocialProvider getSocialProvider(String providerName, List<ProviderConfig> providers)
+    public OpenIDConnectProvider getSocialProvider(String providerName, List<ProviderConfig> providers)
             throws InternalServerErrorException {
         ProviderConfig config = getProviderConfig(providerName, providers);
         if (config == null) {
