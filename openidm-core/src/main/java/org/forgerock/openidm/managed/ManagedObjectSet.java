@@ -16,6 +16,7 @@
 package org.forgerock.openidm.managed;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
@@ -34,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import org.forgerock.json.JsonException;
@@ -90,11 +92,13 @@ import org.forgerock.script.ScriptListener;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
 import org.forgerock.util.Pair;
 import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
+import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -106,6 +110,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public static final JsonPointer CRYPTO_KEY_PTR = new JsonPointer(new String[]{CRYPTO, CRYPTO_VALUE, CRYPTO_KEY});
     public static final JsonPointer CRYPTO_CIPHER_PTR =
             new JsonPointer(new String[]{CRYPTO, CRYPTO_VALUE, CRYPTO_CIPHER});
+    public static final String COUNT_TRIGGERED = "countTriggered";
 
     /** Actions supported by this resource provider */
     enum Action {
@@ -1131,7 +1136,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         }
                     }
                     // The action request to validate the policy of all the patched properties
-                    ActionRequest policyAction = Requests.newActionRequest(
+                    ActionRequest policyAction = newActionRequest(
                             ResourcePath.valueOf("policy").concat(managedId(resource.getId())).toString(), 
                             "validateProperty").setContent(propertiesToValidate);
                     if (ContextUtil.isExternal(context)) {
@@ -1186,9 +1191,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         String executeOnRetrieve = request.getAdditionalParameter("executeOnRetrieve");
         
         // The onRetrieve script should only be run queries that return full managed objects
-        final boolean onRetrieve = executeOnRetrieve == null
-                ? false
-                : Boolean.parseBoolean(executeOnRetrieve);
+        final boolean onRetrieve = executeOnRetrieve != null && Boolean.parseBoolean(executeOnRetrieve);
 
         final List<Map<String,Object>> results = new ArrayList<Map<String,Object>>();
         final ResourceException[] ex = new ResourceException[]{null};
@@ -1326,6 +1329,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             switch (request.getActionAsEnum(Action.class)) {
                 case patch:
                     return newActionResponse(patchAction(managedContext, request).getContent()).asPromise();
+                case triggerSyncCheck:
+                    return triggerSyncCheckOnCollection(managedContext, QueryFilter.<JsonPointer>alwaysTrue());
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
@@ -1335,6 +1340,52 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         	// from getActionAsEnum
         	return new BadRequestException(e.getMessage(), e).asPromise();
         }
+    }
+
+    /**
+     * Calls the action instance triggerSyncCheck for each resource that matches the query filter.
+     *
+     * @param context used for the query call and actionInstance call.
+     * @param queryFilter filter to use to find objects that need a triggerSyncCheck.
+     * @return promise ActionResponse if successful.
+     * @throws ResourceException
+     */
+    private Promise<ActionResponse, ResourceException> triggerSyncCheckOnCollection(final Context context,
+            final QueryFilter<JsonPointer> queryFilter) throws ResourceException {
+
+        final QueryRequest queryRequest = Requests.newQueryRequest(managedObjectPath);
+        queryRequest.setQueryFilter(queryFilter);
+        queryRequest.addField(FIELD_CONTENT_ID);
+
+        logger.debug("Running triggerSyncCheck on {}", queryRequest.getResourcePath());
+        final AtomicInteger triggerCount = new AtomicInteger(0);
+        return connectionFactory.getConnection()
+                .queryAsync(context, queryRequest, new QueryResourceHandler() {
+                    @Override
+                    public boolean handleResource(final ResourceResponse resourceResponse) {
+                        try {
+                            actionInstance(context, resourceResponse.getId(),
+                                    newActionRequest(managedObjectPath, Action.triggerSyncCheck.name()))
+                                    .getOrThrowUninterruptibly();
+                        } catch (ResourceException e) {
+                            logger.trace("failed triggerSyncCheck for " + resourceResponse.getId(), e);
+                            return false;
+                        }
+                        logger.trace("successful triggerSyncCheck for " + resourceResponse.getId());
+                        triggerCount.incrementAndGet();
+                        return true;
+                    }
+                })
+                .thenAsync(new AsyncFunction<QueryResponse, ActionResponse, ResourceException>() {
+                    @Override
+                    public Promise<ActionResponse, ResourceException> apply(QueryResponse queryResponse)
+                            throws ResourceException {
+                        return newActionResponse(json(object(
+                                field("status", "OK"),
+                                field(COUNT_TRIGGERED, triggerCount.intValue())
+                        ))).asPromise();
+                    }
+                });
     }
 
     // -------- Implements the ScriptListener
@@ -1584,8 +1635,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(2));
             content.put("oldValue", oldValue.getObject());
             content.put("newValue", newValue.getObject());
-            final ActionRequest syncRequest = Requests.newActionRequest("sync", action.name())
-                    .setAdditionalParameter(SynchronizationService.ACTION_PARAM_RESOURCE_CONTAINER, managedObjectPath.toString())
+            final ActionRequest syncRequest = newActionRequest("sync", action.name())
+                    .setAdditionalParameter(SynchronizationService.ACTION_PARAM_RESOURCE_CONTAINER, managedObjectPath
+                            .toString())
                     .setAdditionalParameter(SynchronizationService.ACTION_PARAM_RESOURCE_ID, resourceId)
                     .setContent(content);
 
