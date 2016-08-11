@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import org.forgerock.openidm.core.ServerConstants;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -35,7 +36,7 @@ public class DateUtilTest {
     
     @BeforeClass
     public void beforeClass() throws Exception {
-        dateUtil = DateUtil.getDateUtil("UTC");
+        dateUtil = DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC);
     }
     
     @DataProvider

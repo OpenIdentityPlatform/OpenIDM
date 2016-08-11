@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.scheduler.impl;
@@ -39,6 +39,7 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.util.ConfigMacroUtil;
 import org.forgerock.openidm.util.DateUtil;
@@ -52,7 +53,7 @@ import org.slf4j.LoggerFactory;
 
 public class TaskScannerJob {
     private final static Logger logger = LoggerFactory.getLogger(TaskScannerJob.class);
-    private final static DateUtil DATE_UTIL = DateUtil.getDateUtil("UTC");
+    private final static DateUtil DATE_UTIL = DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC);
 
     private ConnectionFactory connectionFactory;
     private TaskScannerContext taskScannerContext;

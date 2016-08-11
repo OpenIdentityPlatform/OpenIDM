@@ -11,14 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2016 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.openidm.util.DurationStatistics.nanoToMillis;
 import static org.forgerock.util.Reject.checkNotNull;
 
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -27,6 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.forgerock.openidm.audit.util.Status;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.DurationStatistics;
@@ -37,7 +37,7 @@ import org.forgerock.openidm.util.DurationStatistics;
  */
 public class ReconciliationStatistic {
     
-    static DateUtil dateUtil = DateUtil.getDateUtil("UTC");
+    private static final DateUtil dateUtil = DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC);
 
     public enum DurationMetric {
         activePolicyPostActionScript,
@@ -281,26 +281,18 @@ public class ReconciliationStatistic {
                 : -1;
     }
 
-    public String getFormattedTime(long epoch) {
-        String startFormatted = "";
-        if (epoch > 0) {
-            startFormatted = dateUtil.formatDateTime(new Date(epoch));
-        }
-        return startFormatted;
-    }
-
     /**
      * @return The reconciliation start time, formatted
      */
     public String getStarted() {
-        return getFormattedTime(startTime);
+        return dateUtil.getFormattedTime(startTime);
     }
     
     /**
      * @return The reconciliation end time, formatted, or empty string if not ended
      */
     public String getEnded() {
-        return getFormattedTime(endTime);
+        return dateUtil.getFormattedTime(endTime);
     }
 
     public boolean hasEnded() {

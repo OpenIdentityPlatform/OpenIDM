@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.scheduler.impl;
@@ -63,6 +63,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.promise.Promise;
@@ -83,6 +84,8 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
     private final static Logger logger = LoggerFactory.getLogger(TaskScannerService.class);
 
     private final static String INVOKE_CONTEXT = "invokeContext";
+    
+    private static final DateUtil dateUtil = DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC);
 
     private int maxCompletedRuns;
 
@@ -160,8 +163,8 @@ public class TaskScannerService implements RequestHandler, ScheduledService {
         Map<String, Object> result = new LinkedHashMap<String, Object>();
         result.put("_id", entry.getTaskScanID());
         result.put("progress", entry.getProgress());
-        result.put("started", entry.getStatistics().getJobStartTime());
-        result.put("ended", entry.getStatistics().getJobEndTime());
+        result.put("started", dateUtil.getFormattedTime(entry.getStatistics().getJobStartTime()));
+        result.put("ended", dateUtil.getFormattedTime(entry.getStatistics().getJobEndTime()));
         return result;
     }
 
