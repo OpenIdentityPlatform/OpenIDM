@@ -171,23 +171,32 @@ define([
                 });
             }, this);
 
-        this.serviceCall({
-            "type": "GET",
-            "serviceUrl": "/openidm/repo/audit/recon",
-            "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
-        }).then(function(qry){
-            if(qry.result.length){
-                _.each(qry.result, function(link){
-                    linkPromArray.push(getTargetObj(link));
-                });
+        /**
+         * when there is no endDate we know the recon is running
+         * in this case there is no need to run this query as no
+         * new links can be added to a recon unless there is an endDate
+         */
+        if (!endDate) {
+            prom.resolve([]);
+        } else {
+            this.serviceCall({
+                "type": "GET",
+                "serviceUrl": "/openidm/repo/audit/recon",
+                "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
+            }).then(function(qry){
+                if(qry.result.length){
+                    _.each(qry.result, function(link){
+                        linkPromArray.push(getTargetObj(link));
+                    });
 
-                $.when.apply($,linkPromArray).then(function(){
-                    prom.resolve(newLinks);
-                });
-            } else {
-                return prom.resolve(newLinks);
-            }
-        });
+                    $.when.apply($,linkPromArray).then(function(){
+                        prom.resolve(newLinks);
+                    });
+                } else {
+                    return prom.resolve([]);
+                }
+            });
+        }
 
         return prom;
     };
