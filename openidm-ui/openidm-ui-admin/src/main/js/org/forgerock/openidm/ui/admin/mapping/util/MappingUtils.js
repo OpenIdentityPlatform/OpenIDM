@@ -48,7 +48,7 @@ define([
             var objRepEl = $("<span>"),
                 wrapper = $("<div>");
             if(objToRep[prop]){
-                objRepEl.text(Handlebars.Utils.escapeExpression(objToRep[prop])).attr("title", prop);
+                objRepEl.text(_.escape(objToRep[prop])).attr("title", prop);
             }
             if(i === 0){
                 objRepEl.addClass("objectRepresentationHeader");
