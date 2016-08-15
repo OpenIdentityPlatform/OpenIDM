@@ -74,6 +74,34 @@ define([
 
             managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
 
+            if (!_.has(managedObject.schema.order, "preferences")) {
+                managedObject.schema.order.push("preferences");
+            }
+
+            if (!_.has(managedObject.schema.properties, "preferences")) {
+                _.set(managedObject.schema, "properties.preferences", {
+                    "title" : "Preferences",
+                    "viewable" : true,
+                    "searchable" : false,
+                    "userEditable" : true,
+                    "type" : "object",
+                    "properties" : {
+                        "updates" : {
+                            "description" : "Send me news and updates",
+                            "type" : "boolean"
+                        },
+                        "marketing": {
+                            "description" : "Send me special offers and services",
+                            "type" : "boolean"
+                        }
+                    }
+                });
+            }
+
+            if (this.getManagedPreferences) {
+                _.set(managedObject.schema, "properties.preferences.properties", this.getManagedPreferences());
+            }
+
             this.combineSchemaAndProperties();
 
             promises.push(ConfigDelegate.updateEntity("managed", {"objects" : saveObject.objects}));

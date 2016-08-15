@@ -53,7 +53,8 @@
                     "effectiveRoles",
                     "effectiveAssignments",
                     "lastSync",
-                    "kbaInfo"
+                    "kbaInfo",
+                    "preferences"
                 ],
                 "properties" : {
                     "_id" : {
@@ -125,6 +126,23 @@
                                 "questionId" : {
                                     "type" : "string"
                                 }
+                            }
+                        }
+                    },
+                    "preferences" : {
+                        "title" : "Preferences",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "userEditable" : true,
+                        "type" : "object",
+                        "properties" : {
+                            "updates" : {
+                                "description" : "Send me news and updates",
+                                "type" : "boolean"
+                            },
+                            "marketing": {
+                                "description" : "Send me special offers and services",
+                                "type" : "boolean"
                             }
                         }
                     },

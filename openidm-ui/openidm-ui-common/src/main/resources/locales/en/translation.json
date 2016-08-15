@@ -287,6 +287,12 @@
         }
     },
     "templates" : {
+        "preferences" : {
+            "preferences": "Preferences",
+            "emailPref": "Email Preferences",
+            "updates": "Send me news and updates",
+            "marketing": "Send me special offers and services"
+        },
         "socialIdentities" : {
             "linkedUsing" : "Linked using",
             "primary" : "Primary",

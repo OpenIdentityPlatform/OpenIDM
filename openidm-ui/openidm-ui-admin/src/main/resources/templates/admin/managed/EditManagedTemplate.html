@@ -40,10 +40,11 @@
             <li class="{{#if showSchema}}active{{/if}}"><a href="#managedSchemaContainer" role="tab" data-toggle="tab" aria-expanded="{{#if showSchema}}true{{else}}false{{/if}}">{{t "templates.managed.schema"}}</a></li>
             <li class=""><a href="#managedScriptsContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.scripts"}}</a></li>
             <li class="{{#if noSchema}}disabled{{/if}}"><a href="#managedPropertiesContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.managed.properties"}}</a></li>
+            <li class="{{#if noSchema}}disabled{{/if}}"><a href="#managedPreferencesContainer" role="tab" data-toggle="tab" aria-expanded="false">{{t "templates.preferences.preferences"}}</a></li>
         </ul>
     </div>
     <div class="tab-content">
-        <div role="tabpanel" class="tab-pane {{#unless showSchema}}active{{/unless}}" id="managedDetailsContainer">
+        <div role="tabpanel" class="managedContainers tab-pane {{#unless showSchema}}active{{/unless}}" id="managedDetailsContainer">
             <div class="panel no-margin-bottom">
                 <form id="managedObjectDetailsForm" class="form-horizontal" role="form" autocomplete="off">
                     <div id="managedForm2JS" class="panel-body">
@@ -79,7 +80,7 @@
                 </form>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="managedScriptsContainer">
+        <div role="tabpanel" class="managedContainers tab-pane" id="managedScriptsContainer">
             <div class="panel no-margin-bottom">
                 <form id="managedObjectScriptsForm" role="form">
                     <div id="managedScripts" class="panel-body"></div>
@@ -92,7 +93,7 @@
                 </form>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane" id="managedPropertiesContainer">
+        <div role="tabpanel" class="managedContainers tab-pane" id="managedPropertiesContainer">
             <div class="panel no-margin-bottom">
                 <form id="managedObjectPropertiesForm" role="form">
                     <div id="managedProperties" class="panel-body">
@@ -121,6 +122,22 @@
                 </form>
             </div>
         </div>
-        <div role="tabpanel" class="tab-pane {{#if showSchema}}active{{/if}}" id="managedSchemaContainer"></div>
+        <div role="tabpanel" class="managedContainers tab-pane" id="managedPreferencesContainer">
+            <div class="panel no-margin-bottom">
+                    <div id="managedPreferences" class="panel-body">
+                        <div class="panel-body">
+                            <div id="managedPreferencesWrapper">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="panel-footer clearfix">
+                        <div class="pull-right">
+                            <a href="#managed/"><input type="button" name="cancel" value="{{t 'common.form.cancel'}}" class="btn btn-default"></a>
+                            <input type="submit" id="saveManagedPreferences" value="{{t 'common.form.save'}}" class="btn btn-primary">
+                        </div>
+                    </div>
+            </div>
+        </div>
+        <div role="tabpanel" class="managedContainers tab-pane {{#if showSchema}}active{{/if}}" id="managedSchemaContainer"></div>
     </div>
 </div>
