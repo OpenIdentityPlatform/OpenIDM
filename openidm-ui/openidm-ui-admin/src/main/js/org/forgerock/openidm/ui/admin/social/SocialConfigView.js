@@ -262,6 +262,14 @@ define([
                                     saveData.icon = this.model.iconCode.getValue();
                                 }
 
+                                if(saveData.client_id.length) {
+                                    saveData.client_id = saveData.client_id.trim();
+                                }
+
+                                if(saveData.client_secret.length) {
+                                    saveData.client_secret = saveData.client_secret.trim();
+                                }
+
                                 this.saveConfig(saveData);
 
                                 this.model.providers[index] = saveData;
