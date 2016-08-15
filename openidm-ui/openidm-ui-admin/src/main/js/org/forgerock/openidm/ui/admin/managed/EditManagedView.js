@@ -55,6 +55,7 @@ define([
             "submit #managedObjectDetailsForm" : "saveManagedDetails",
             "submit #managedObjectScriptsForm" : "saveManagedScripts",
             "submit #managedObjectPropertiesForm" : "saveManagedProperties",
+            "click #saveManagedPreferences" : "saveManagedPreferences",
             "onValidate": "onValidate",
             "click #addManagedProperties": "addProperty",
             "click .property-remove" : "removeProperty",
@@ -148,6 +149,46 @@ define([
             this.parentRender(_.bind(function () {
                 validatorsManager.bindValidators(this.$el);
                 validatorsManager.validateAllFields(this.$el);
+
+                this.data.preferencesSchema = new JSONEditor(this.$el.find("#managedPreferencesWrapper")[0], _.extend({
+                    schema: {
+                        "type": "array",
+                        "format": "table",
+                        "title": "Preferences",
+                        "items": {
+                            "type": "object",
+                            "title": "Preference",
+                            "properties": {
+                                "key": {
+                                    "type": "string"
+                                },
+                                "description": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                }, {
+                    disable_edit_json: true,
+                    disable_array_delete_all: true,
+                    disable_array_reorder: false,
+                    disable_collapse: true,
+                    disable_properties: true,
+                    show_errors: 'always',
+                    template: 'handlebars',
+                    no_additional_properties: true,
+                    additionalItems: false,
+                    required_by_default: true
+                } ));
+
+                let formattedProps = _.map(_.get(this.data.currentManagedObject, "schema.properties.preferences.properties"), (property, key) => {
+                    return {
+                        "key": key,
+                        "description": property.description
+                    };
+                });
+
+                this.data.preferencesSchema.setValue(formattedProps || []);
 
                 this.propertiesCounter = this.$el.find(".add-remove-block").length;
 
@@ -266,6 +307,25 @@ define([
 
             this.data.currentManagedObject.properties = properties;
 
+            this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
+        },
+
+        getManagedPreferences: function() {
+            var preferences = {};
+
+            _.each(this.data.preferencesSchema.getValue(), (item) => {
+                if (item.key.length > 0 && item.description.length > 0) {
+                    preferences[item.key] = {
+                        "description": item.description,
+                        "type": "boolean"
+                    };
+                }
+            });
+
+            return preferences;
+        },
+
+        saveManagedPreferences: function(event) {
             this.saveManagedObject(this.data.currentManagedObject, this.data.managedObjects);
         },
 

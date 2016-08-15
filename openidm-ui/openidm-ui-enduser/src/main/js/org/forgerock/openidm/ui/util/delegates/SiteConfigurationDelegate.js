@@ -64,6 +64,8 @@ define([
             UserProfileView.resetTabs();
             // repo/internal/user records don't support "fancy" tabs like kba and social providers
             if (conf.loggedUser.component !== "repo/internal/user") {
+                tabList.push("org/forgerock/openidm/ui/user/profile/PreferencesTab");
+
                 if (hasSocialProviders) {
                     tabList.push("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab");
                 }
