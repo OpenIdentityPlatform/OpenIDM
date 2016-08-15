@@ -284,12 +284,12 @@ define([
                 objectHeader = this.$el.find("#resource").find("h3:eq(0)"),
                 objectDescriptionSpan = objectHeader.next(),
                 // this text escaped since it's being inserted into an attribute
-                tipDescription = handlebars.Utils.escapeExpression(objectDescriptionSpan.text()),
+                tipDescription = _.escape(objectDescriptionSpan.text()),
                 iconElement = $('<i class="fa fa-info-circle info" />');
 
             $.each(propertyDescriptionSpan, function() {
                 // this text escaped since it's being inserted into an attribute
-                var tipDescription = handlebars.Utils.escapeExpression($(this).text());
+                var tipDescription = _.escape($(this).text());
                 iconElement.attr('title', tipDescription);
                 $(this).parent().find("label").after(iconElement);
                 $(this).empty();

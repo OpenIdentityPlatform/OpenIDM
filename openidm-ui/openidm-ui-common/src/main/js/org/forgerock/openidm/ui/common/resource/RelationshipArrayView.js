@@ -158,7 +158,7 @@ define([
                     render: function () {
                         var propertyValuePath = resourceCollectionUtils.getPropertyValuePath(this.model.attributes),
                             resourceCollectionIndex = resourceCollectionUtils.getResourceCollectionIndex(_this.schema, propertyValuePath, _this.data.prop.propName),
-                            txt = Handlebars.Utils.escapeExpression(resourceCollectionUtils.getDisplayText(_this.data.prop, this.model.attributes, resourceCollectionIndex)),
+                            txt = _.escape(resourceCollectionUtils.getDisplayText(_this.data.prop, this.model.attributes, resourceCollectionIndex)),
                             link = '<a class="resourceEditLink" href="#resource/' + propertyValuePath + '/edit/' + this.model.attributes._id + '">' + txt + '</a>';
 
                         if (propertyValuePath.indexOf("repo") >= 0) {
