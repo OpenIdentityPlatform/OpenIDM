@@ -20,6 +20,7 @@ import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
 import static org.forgerock.openidm.util.ResourceUtil.isEqual;
 import static org.forgerock.util.crypto.CryptoConstants.*;
 import static org.forgerock.util.promise.Promises.*;
@@ -56,6 +57,7 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -75,6 +77,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -99,6 +102,7 @@ import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.query.QueryFilter;
+import org.forgerock.util.query.QueryFilterParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -111,6 +115,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     public static final JsonPointer CRYPTO_CIPHER_PTR =
             new JsonPointer(new String[]{CRYPTO, CRYPTO_VALUE, CRYPTO_CIPHER});
     public static final String COUNT_TRIGGERED = "countTriggered";
+    public static final String STATUS = "status";
 
     /** Actions supported by this resource provider */
     enum Action {
@@ -1330,7 +1335,11 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 case patch:
                     return newActionResponse(patchAction(managedContext, request).getContent()).asPromise();
                 case triggerSyncCheck:
-                    return triggerSyncCheckOnCollection(managedContext, QueryFilter.<JsonPointer>alwaysTrue());
+                    final String queryParam = request.getAdditionalParameter(QUERY_FILTER);
+                    final QueryFilter<JsonPointer> filter = null !=  queryParam
+                            ? QueryFilters.parse(queryParam)
+                            : QueryFilter.<JsonPointer>alwaysTrue();
+                    return triggerSyncCheckOnCollection(managedContext, filter);
                 default:
                     throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
@@ -1381,7 +1390,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     public Promise<ActionResponse, ResourceException> apply(QueryResponse queryResponse)
                             throws ResourceException {
                         return newActionResponse(json(object(
-                                field("status", "OK"),
+                                field(STATUS, "OK"),
                                 field(COUNT_TRIGGERED, triggerCount.intValue())
                         ))).asPromise();
                     }
