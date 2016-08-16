@@ -296,15 +296,22 @@ define([
                                         "default": false,
                                         "propertyOrder": 6
                                     },
+                                    "isProtected": {
+                                        "title": "Is a protected attribute?",
+                                        "type": "boolean",
+                                        "required": true,
+                                        "default": false,
+                                        "propertyOrder": 7
+                                    },
                                     "minLength": {
                                         "title": "Minimum Length",
                                         "type": "string",
-                                        "propertyOrder": 7
+                                        "propertyOrder": 8
                                     },
                                     "pattern": {
                                         "title": "Pattern",
                                         "type": "string",
-                                        "propertyOrder": 8
+                                        "propertyOrder": 9
                                     },
                                     "policies": {
                                         "title": "Validation policies",
@@ -323,21 +330,21 @@ define([
                                             }
                                         },
                                         "default": [],
-                                        "propertyOrder": 9
+                                        "propertyOrder": 10
                                     },
                                     "required": {
                                         "title": "Required",
                                         "type": "boolean",
                                         "required": true,
                                         "default": false,
-                                        "propertyOrder": 10
+                                        "propertyOrder": 11
                                     },
                                     "returnByDefault": {
                                         "title": "Return by Default",
                                         "type": "boolean",
                                         "required": true,
                                         "default": false,
-                                        "propertyOrder": 11
+                                        "propertyOrder": 12
                                     },
                                     "type": {
                                         "title": "Type",
