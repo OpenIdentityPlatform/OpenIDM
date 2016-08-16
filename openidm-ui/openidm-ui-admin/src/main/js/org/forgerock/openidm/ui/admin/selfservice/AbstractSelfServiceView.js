@@ -226,7 +226,11 @@ define([
                     }, this);
 
                     if (tempConfig.enabledByDefault) {
-                        $(card).find(".section-check").prop("checked", true).trigger("change");
+                        if($(card).find(".section-check").length > 0) {
+                            $(card).find(".section-check").prop("checked", true).trigger("change");
+                        } else {
+                            $(card).toggleClass("disabled", false);
+                        }
                     } else {
                         this.model.saveConfig.stageConfigs = _.reject(this.model.saveConfig.stageConfigs, function(stage) {
                             return stage.name === $(card).attr("data-type");
@@ -321,7 +325,7 @@ define([
                 card.toggleClass("disabled", true);
 
                 if(this.$el.find(".section-check:checked").length === 0 && this.$el.find(".all-check:checked").length !== 0) {
-                    this.$el.find(".all-check").prop("checked", false).trigger("change");
+                    this.$el.find(".all-check").trigger("click");
                     removeConfig = true;
                 }
 
