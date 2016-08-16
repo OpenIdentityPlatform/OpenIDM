@@ -58,6 +58,7 @@ import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
 import org.forgerock.openidm.crypto.impl.UpdatableKeyStoreSelector;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
 import org.forgerock.openidm.router.RouteService;
@@ -108,6 +109,31 @@ public class ManagedObjectSetTest {
         // then
         assertThat(actionResponse.getJsonContent().get(ManagedObjectSet.COUNT_TRIGGERED).asInteger())
                 .isEqualTo(NUMBER_OF_USERS);
+    }
+
+    @Test
+    public void testTriggerSyncCheckOnActionCollectionWithQuery() throws Exception {
+        // given
+        final CryptoService cryptoService = createCryptoService();
+        final ConnectionObjects connectionObjects = createConnectionObjects();
+        final ManagedObjectSet managedObjectSet =
+                createManagedObjectSet(CONF_MANAGED_USER_USING_ALIAS, cryptoService,
+                        connectionObjects.getConnectionFactory());
+        addRoutesToRouter(connectionObjects.getRouter(), managedObjectSet, new MemoryBackend());
+
+        // create users
+        createUsers(NUMBER_OF_USERS, managedObjectSet);
+
+        // when triggerSync on queried users.
+        ActionRequest actionRequest = newActionRequest(MANAGED_USER_RESOURCE_PATH, triggerSyncCheck.name())
+                .setAdditionalParameter(QueryConstants.QUERY_FILTER, FIELD_USERNAME+" sw \"0_\"");
+        ActionResponse actionResponse = managedObjectSet.actionCollection(new RootContext(), actionRequest)
+                .getOrThrowUninterruptibly();
+
+        // then
+        JsonValue responseContent = actionResponse.getJsonContent();
+        assertThat(responseContent.get(ManagedObjectSet.COUNT_TRIGGERED).asInteger()).isEqualTo(1);
+        assertThat(responseContent.get(ManagedObjectSet.STATUS).asString()).isEqualTo("OK");
     }
 
 
@@ -273,7 +299,7 @@ public class ManagedObjectSetTest {
             throws ResourceException {
         final List<JsonValue> resources = new LinkedList<>();
         for (int i = 0; i < numberOfUsers; i++) {
-            JsonValue user = createUserObject(UUID.randomUUID().toString(), UUID.randomUUID().toString(),
+            JsonValue user = createUserObject(i + "_" + UUID.randomUUID().toString(), UUID.randomUUID().toString(),
                     UUID.randomUUID().toString());
             resources.add(createUser(user.get(FIELD_ID).asString(), user, managedObjectSet));
         }
