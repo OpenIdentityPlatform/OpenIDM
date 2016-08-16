@@ -1377,7 +1377,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                                     newActionRequest(managedObjectPath, Action.triggerSyncCheck.name()))
                                     .getOrThrowUninterruptibly();
                         } catch (ResourceException e) {
-                            logger.trace("failed triggerSyncCheck for " + resourceResponse.getId(), e);
+                            logger.error("failed triggerSyncCheck for " + resourceResponse.getId(), e);
                             return false;
                         }
                         logger.trace("successful triggerSyncCheck for " + resourceResponse.getId());
