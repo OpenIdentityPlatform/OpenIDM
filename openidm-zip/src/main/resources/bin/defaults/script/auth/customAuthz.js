@@ -18,7 +18,10 @@
     var _ = require("lib/lodash");
 
     exports.setProtectedAttributes = function (security) {
-        var modifiedMap = _.cloneDeep(security.authorization);
+        var modifiedMap = {};
+        Object.keys(security.authorization).forEach(function (k) {
+            modifiedMap[k] = security.authorization[k];
+        });
 
         // find all of the attributes in the managed object schema associated
         // with the current component which have been declared as isProtected: true
