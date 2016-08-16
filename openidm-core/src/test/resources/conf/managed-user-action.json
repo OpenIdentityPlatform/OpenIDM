@@ -1,0 +1,19 @@
+{
+    "name" : "user",
+    "actions" : {
+        "toggleActive" : {
+            "type" : "text/javascript",
+            "source" : "object.active = !object.active; object;"
+        }
+    },
+    "schema" : {
+        "order" : [
+            "active"
+        ],
+        "properties" : {
+            "active" : {
+                "type" : "boolean"
+            }
+        }
+    }
+}

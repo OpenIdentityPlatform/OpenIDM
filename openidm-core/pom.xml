@@ -109,6 +109,11 @@
 
         <!-- Test Dependencies -->
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>script-javascript</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-router</artifactId>
             <version>${project.version}</version>

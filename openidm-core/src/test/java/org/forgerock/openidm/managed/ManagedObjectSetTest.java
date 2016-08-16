@@ -18,13 +18,16 @@ package org.forgerock.openidm.managed;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.*;
-import static org.forgerock.json.resource.ResourceResponse.*;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_REVISION;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.forgerock.openidm.managed.ManagedObjectSet.Action.triggerSyncCheck;
 import static org.forgerock.openidm.managed.ManagedObjectSet.CRYPTO_KEY_PTR;
 import static org.forgerock.util.Utils.closeSilently;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -39,6 +42,7 @@ import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -47,13 +51,16 @@ import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
-import org.forgerock.json.resource.ActionRequest;
-import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
@@ -63,10 +70,15 @@ import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.script.engine.ScriptEngineFactory;
+import org.forgerock.script.javascript.RhinoScriptEngineFactory;
+import org.forgerock.script.registry.ScriptRegistryImpl;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.testng.annotations.Test;
+import org.testng.annotations.BeforeClass;
 
 /**
  * Tests for {@link ManagedObjectSet}
@@ -76,7 +88,9 @@ public class ManagedObjectSetTest {
     private static final ObjectMapper mapper = new ObjectMapper();
     private static final String FIELD_USERNAME = "username";
     private static final String FIELD_PASSWORD = "password";
+    private static final String FIELD_ID = "_id";
     private static final String FIELD_EMAIL = "email";
+    private static final String FIELD_ACTIVE = "active";
     private static final String MANAGED_USER_RESOURCE_PATH = "managed/user";
     private static final String REPO_MANAGED_USER_RESOURCE_PATH = "/repo/managed/user";
     private static final String ALIAS = "alias";
@@ -84,9 +98,67 @@ public class ManagedObjectSetTest {
     private static final String CONF_MANAGED_USER_USING_ALIAS = "/conf/managed-user-alias.json";
     private static final String CONF_MANAGED_USER_USING_ALIAS1 = "/conf/managed-user-alias1.json";
     private static final String CONF_MANAGED_USER_USING_NO_ENCRYPTION = "/conf/managed-user-no-encryption.json";
+    private static final String CONF_MANAGED_USER_WITH_ACTION = "/conf/managed-user-action.json";
     private static final String RESOURCE_ID = "user1";
     private static final String KEYSTORE_PASSWORD = "Password1";
     private static final int NUMBER_OF_USERS = 5;
+    private static final String ACTION_TOGGLE_ACTIVE = "toggleActive";
+
+    private ScriptRegistryImpl scriptRegistry;
+
+    protected Map<String, Object> getConfiguration() {
+        Map<String, Object> configuration = new HashMap<>(1);
+        return configuration;
+    }
+
+    protected String getLanguageName() {
+        return RhinoScriptEngineFactory.LANGUAGE_NAME;
+    }
+
+    protected ScriptRegistryImpl getScriptRegistry(Map<String, Object> configuration) {
+        return new ScriptRegistryImpl(configuration,
+                Collections.<ScriptEngineFactory>singleton(new RhinoScriptEngineFactory()), null, null);
+    }
+
+    @BeforeClass
+    public void initScriptRegistry() throws Exception {
+        Map<String, Object> configuration = new HashMap<>(1);
+        configuration.put(getLanguageName(), getConfiguration());
+
+        scriptRegistry = getScriptRegistry(configuration);
+    }
+
+    /**
+     * Tests custom scripted actions registration on managed object endpoints.
+     */
+    @Test
+    public void testCustomScriptedActions() throws Exception {
+        final IDMConnectionFactory connectionFactory = mock(IDMConnectionFactory.class);
+        final Connection connection = mock(Connection.class);
+        when(connectionFactory.getConnection()).thenReturn(connection);
+
+        // create user
+        final JsonValue userContent = createUserObject("test1", true);
+        when(connection.read(any(Context.class), any(ReadRequest.class))).thenReturn(
+                newResourceResponse(userContent.get(FIELD_ID).asString(), "1", userContent));
+
+        // given
+        final CryptoService cryptoService = createCryptoService();
+        final AtomicReference<RouteService> routeService = (AtomicReference<RouteService>) mock(AtomicReference.class);
+        final JsonValue config = getResource(CONF_MANAGED_USER_WITH_ACTION);
+        final ManagedObjectSet managedObjectSet = new ManagedObjectSet(scriptRegistry, cryptoService, routeService,
+                connectionFactory, config, new NullActivityLogger());
+
+        final ActionRequest actionRequest = newActionRequest(ResourcePath.resourcePath(MANAGED_USER_RESOURCE_PATH),
+                ACTION_TOGGLE_ACTIVE);
+
+        // when
+        final Promise<ActionResponse, ResourceException> promise =
+                managedObjectSet.actionInstance(new RootContext(), userContent.get(FIELD_ID).asString(), actionRequest);
+        // then
+        final ActionResponse resourceResponse = promise.get();
+        assertThat(resourceResponse.getJsonContent().get(FIELD_ACTIVE).asBoolean()).isFalse();
+    }
 
     @Test
     public void testTriggerSyncCheckOnActionCollection() throws Exception {
@@ -393,6 +465,13 @@ public class ManagedObjectSetTest {
                 field(FIELD_USERNAME, username),
                 field(FIELD_PASSWORD, password),
                 field(FIELD_EMAIL, email)
+        ));
+    }
+
+    private JsonValue createUserObject(final String userid, final boolean activeValue) {
+        return json(object(
+                field(FIELD_ID, userid),
+                field(FIELD_ACTIVE, activeValue)
         ));
     }
 
