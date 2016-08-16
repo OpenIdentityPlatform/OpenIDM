@@ -18,8 +18,8 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.Responses.*;
-import static org.forgerock.openidm.managed.ManagedObjectSet.ScriptHook.onRead;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_FILTER;
 import static org.forgerock.openidm.util.ResourceUtil.isEqual;
 import static org.forgerock.util.crypto.CryptoConstants.*;
@@ -28,7 +28,7 @@ import static org.forgerock.util.promise.Promises.*;
 import javax.script.ScriptException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
+import java.util.Objects;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -67,7 +67,6 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
@@ -77,7 +76,6 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.patch.JsonValuePatch;
-import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.smartevent.EventEntry;
@@ -102,7 +100,6 @@ import org.forgerock.util.promise.ExceptionHandler;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.query.QueryFilter;
-import org.forgerock.util.query.QueryFilterParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -123,8 +120,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         triggerSyncCheck
     }
 
-    /** Supported script hooks */
-    enum ScriptHook {
+    /** A value object for a script-hook key in the map of script hooks */
+    private interface ScriptHook {
+        String name();
+    }
+
+    /** Builtin script hooks */
+    private enum BuiltinScriptHook implements ScriptHook {
         /** Script to execute when the creation of an object is being requested. */
         onCreate,
 
@@ -183,7 +185,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     private final ManagedObjectSchema schema;
 
     /** Map of scripts to execute on specific {@link ScriptHook}s. */
-    private final Map<ScriptHook, ScriptEntry> scriptHooks = new EnumMap<>(ScriptHook.class);
+    private final Map<ScriptHook, ScriptEntry> scriptHooks = new HashMap<>();
 
     /** reference to the sync service route; used to decided whether or not to perform a sync action */
     private final AtomicReference<RouteService> syncRoute;
@@ -255,19 +257,54 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
         for (JsonPointer relationship : schema.getRelationshipFields()) {
             final SchemaField field = schema.getField(relationship);
-            relationshipProviders.put(relationship, RelationshipProvider.newProvider(connectionFactory, 
+            relationshipProviders.put(relationship, RelationshipProvider.newProvider(connectionFactory,
                     managedObjectPath, field, activityLogger, this));
         }
-        
-        for (ScriptHook hook : ScriptHook.values()) {
+
+        // Add built-in script hooks, if defined
+        for (ScriptHook hook : BuiltinScriptHook.values()) {
             if (config.isDefined(hook.name())) {
                 scriptHooks.put(hook, scriptRegistry.takeScript(config.get(hook.name())));
             }
         }
-        
+
+        // Add custom action-based script-hooks as defined
+        final JsonValue configuredActions = config.get("actions").defaultTo(object());
+        for (String action : configuredActions.keys()) {
+            scriptHooks.put(newScriptHook(action), scriptRegistry.takeScript(configuredActions.get(action)));
+        }
+
         enforcePolicies = Boolean.parseBoolean(IdentityServer.getInstance()
                 .getProperty("openidm.policy.enforcement.enabled", "true"));
         logger.debug("Instantiated managed object set: {}", name);
+    }
+
+    /**
+     * Generate a ScriptHook from a hook name.
+     *
+     * @param name the hook name
+     * @return the ScriptHook
+     */
+    private ScriptHook newScriptHook(final String name) {
+        return new ScriptHook() {
+            @Override
+            public String name() {
+                return name;
+            }
+
+            @Override
+            public boolean equals(Object other) {
+                return other instanceof ScriptHook && Objects.equals(name(), ((ScriptHook) other).name());
+            }
+            @Override
+            public int hashCode() {
+                return Objects.hashCode(name());
+            }
+            @Override
+            public String toString() {
+                return name();
+            }
+        };
     }
 
     /**
@@ -308,43 +345,45 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @throws InternalServerErrorException
      *             if any other exception is encountered.
      */
-    private void execScript(final Context context, ScriptHook hook, JsonValue value, JsonValue additionalProps)
+    private Object execScript(final Context context, ScriptHook hook, JsonValue value, JsonValue additionalProps)
             throws ResourceException {
         final ScriptEntry scriptEntry = scriptHooks.get(hook);
         EventEntry measure = Publisher.start(Name.get("openidm/internal/managed/" + this.getName() + "/execScript/" + hook.name()), null, null);
 
         try {
-            if (null != scriptEntry && scriptEntry.isActive()) {
-                Script script = scriptEntry.getScript(context);
-                script.put("object", value);
-                if (additionalProps != null && !additionalProps.isNull()) {
-                    for (String key : additionalProps.keys()) {
-                        script.put(key, additionalProps.get(key));
-                    }
+            if (null == scriptEntry || !scriptEntry.isActive()) {
+                return null;
+            }
+
+            Script script = scriptEntry.getScript(context);
+            script.put("object", value);
+            if (additionalProps != null && !additionalProps.isNull()) {
+                for (String key : additionalProps.keys()) {
+                    script.put(key, additionalProps.get(key));
                 }
-                try {
-                    script.eval(); // allows direct modification to the object
-                } catch (ScriptThrownException ste) {
-                    // Allow for scripts to set their own exception
-                    throw ste.toResourceException(ResourceException.INTERNAL_ERROR,
-                            hook.name() + " script encountered exception");
-                } catch (ScriptException se) {
-                    String msg = hook.name() + " script encountered exception";
-                    logger.debug(msg, se);
-                    throw new InternalServerErrorException(msg, se);
-                }
+            }
+            try {
+                return script.eval(); // allows direct modification to the object
+            } catch (ScriptThrownException ste) {
+                // Allow for scripts to set their own exception
+                throw ste.toResourceException(ResourceException.INTERNAL_ERROR,
+                        hook.name() + " script encountered exception");
+            } catch (ScriptException se) {
+                String msg = hook.name() + " script encountered exception";
+                logger.debug(msg, se);
+                throw new InternalServerErrorException(msg, se);
             }
         } finally {
             measure.end();
         }
     }
-    
-    public void executePostUpdate(Context context, Request request, String resourceId, JsonValue oldValue, 
+
+    public void executePostUpdate(Context context, Request request, String resourceId, JsonValue oldValue,
             JsonValue newValue) throws ResourceException {
         // Execute the postUpdate script if configured
-        execScript(context, ScriptHook.postUpdate, newValue,
+        execScript(context, BuiltinScriptHook.postUpdate, newValue,
                 prepareScriptBindings(context, request, resourceId, oldValue, newValue));
-    };
+    }
 
     /**
      * Prepares a map of additional bindings for the script hook invocation.
@@ -382,7 +421,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      *             if any other exception occurs.
      */
     private void onRetrieve(Context context, Request request, String resourceId, ResourceResponse value) throws ResourceException {
-        execScript(context, ScriptHook.onRetrieve, value.getContent(),
+        execScript(context, BuiltinScriptHook.onRetrieve, value.getContent(),
                 prepareScriptBindings(context, request, resourceId, new JsonValue(null), new JsonValue(null)));
         for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
             getSchema().getField(key).onRetrieve(context, value.getContent());
@@ -419,17 +458,17 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
             getSchema().getField(key).onValidate(context, value);
         }
-        
+
         // Execute the root onValidate script
-        execScript(context, ScriptHook.onValidate, value, scriptBindings);
+        execScript(context, BuiltinScriptHook.onValidate, value, scriptBindings);
 
         // Execute all individual onStore scripts
         for (JsonPointer key : Collections.unmodifiableSet(getSchema().getFields().keySet())) {
             getSchema().getField(key).onStore(context, value); // includes per-property encryption
         }
-        
+
         // Execute the root onStore script
-        execScript(context, ScriptHook.onStore, value, scriptBindings);
+        execScript(context, BuiltinScriptHook.onStore, value, scriptBindings);
     }
 
     /**
@@ -532,7 +571,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
 
         // Execute the onUpdate script if configured
-        execScript(context, ScriptHook.onUpdate, decryptedNew,
+        execScript(context, BuiltinScriptHook.onUpdate, decryptedNew,
                 prepareScriptBindings(context, request, resourceId, decryptedOld, decryptedNew));
 
         // determine if any onUpdate script manipulated a relationship field, and update the relationshipFields Set
@@ -752,7 +791,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             JsonValue value = decrypt(content);
 
             // Execute onCreate script
-            execScript(managedContext, ScriptHook.onCreate, value, 
+            execScript(managedContext, BuiltinScriptHook.onCreate, value,
                     prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Validate relationships before persisting
@@ -784,7 +823,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     relationshipProviders.keySet()).asMap());
 
             // Execute the postCreate script if configured
-            execScript(managedContext, ScriptHook.postCreate, content,
+            execScript(managedContext, BuiltinScriptHook.postCreate, content,
                     prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Sync any targets after managed object is created
@@ -815,7 +854,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             readResponse.getContent().asMap().putAll(relationships.asMap());
 
             onRetrieve(managedContext, request, resourceId, readResponse);
-            execScript(managedContext, onRead, readResponse.getContent(), null);
+            execScript(managedContext, BuiltinScriptHook.onRead, readResponse.getContent(), null);
             activityLogger.log(managedContext, request, "read", managedId(readResponse.getId()).toString(),
                     null, readResponse.getContent(), Status.SUCCESS);
             
@@ -984,8 +1023,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             // Populate the relationship fields in the read resource
             final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
             resource.getContent().asMap().putAll(relationships.asMap());
-            
-            execScript(managedContext, ScriptHook.onDelete, decrypt(resource.getContent()), null);
+
+            execScript(managedContext, BuiltinScriptHook.onDelete, decrypt(resource.getContent()), null);
 
             // Delete the resource
             DeleteRequest deleteRequest = Requests.newDeleteRequest(repoId(resourceId));
@@ -1010,7 +1049,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     resource.getContent(), null, Status.SUCCESS);
 
             // Execute the postDelete script if configured
-            execScript(managedContext, ScriptHook.postDelete, null, prepareScriptBindings(managedContext, request, resourceId,
+            execScript(managedContext, BuiltinScriptHook.postDelete, null, prepareScriptBindings(managedContext, request, resourceId,
                     resource.getContent(), new JsonValue(null)));
 
             // Perform notifyDelete synchronization
@@ -1270,46 +1309,60 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     }
 
     @Override
-    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId, 
+    public Promise<ActionResponse, ResourceException> actionInstance(Context context, String resourceId,
     		ActionRequest request) {
         final Context managedContext = new ManagedObjectContext(context);
 
         try {
             activityLogger.log(managedContext, request, "Action: " + request.getAction(),
                     managedId(resourceId).toString(), null, null, Status.SUCCESS);
-            switch (request.getActionAsEnum(Action.class)) {
-                case patch:
-                    final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
-                    ResourceResponse patchResponse = patchResourceById(managedContext, request, resourceId, null, operations);
-                    return newActionResponse(patchResponse.getContent()).asPromise();
-                case triggerSyncCheck:
-                    // Sync changes if required
-                    // Read in managed object via the router to get updated virtual attributes. The result of the read request will be
-                    // compared against the last sync'd value stored in the repository (in the updateInstance() request 
-                    // below) to determine an update/sync is required.
-                    final List<JsonPointer> requestFields = request.getFields();
-                    final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId).toString());
-                    if (!requestFields.isEmpty()) {
-                        readRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
-                    }
-                    logger.debug("Attempt sync of {}", readRequest.getResourcePath());
-                    ResourceResponse currentResource = connectionFactory.getConnection().read(managedContext, readRequest);
-                    UpdateRequest updateRequest = Requests.newUpdateRequest(readRequest.getResourcePath(),
-                    		currentResource.getContent());
-                    if (!requestFields.isEmpty()) {
-                        updateRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
-                    }
-                    ResourceResponse updateResponse = updateInstance(managedContext, resourceId, updateRequest).get();
-                    logger.debug("Sync of {} complete", readRequest.getResourcePath());
-                    return Responses.newActionResponse(updateResponse.getContent()).asPromise();
-                default:
-                    throw new BadRequestException("Action " + request.getAction() + " is not supported.");
+
+            if (Action.patch.name().equals(request.getAction())) {
+                final List<PatchOperation> operations = PatchOperation.valueOfList(request.getContent());
+                ResourceResponse patchResponse = patchResourceById(managedContext, request, resourceId, null, operations);
+                return newActionResponse(patchResponse.getContent()).asPromise();
+            } else if (Action.triggerSyncCheck.name().equals(request.getAction())) {
+                // Sync changes if required
+                // Read in managed object via the router to get updated virtual attributes. The result of the read request will be
+                // compared against the last sync'd value stored in the repository (in the updateInstance() request
+                // below) to determine an update/sync is required.
+                final List<JsonPointer> requestFields = request.getFields();
+                final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId).toString());
+                if (!requestFields.isEmpty()) {
+                    readRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
+                }
+                logger.debug("Attempt sync of {}", readRequest.getResourcePath());
+                ResourceResponse currentResource = connectionFactory.getConnection().read(managedContext, readRequest);
+                UpdateRequest updateRequest = Requests.newUpdateRequest(readRequest.getResourcePath(),
+                        currentResource.getContent());
+                if (!requestFields.isEmpty()) {
+                    updateRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
+                }
+                ResourceResponse updateResponse = updateInstance(managedContext, resourceId, updateRequest).get();
+                logger.debug("Sync of {} complete", readRequest.getResourcePath());
+                return newActionResponse(updateResponse.getContent()).asPromise();
+            } else if (scriptHooks.containsKey(newScriptHook(request.getAction()))) {
+                // action is a script - invoke it
+                final List<JsonPointer> requestFields = request.getFields();
+                final ReadRequest readRequest = Requests.newReadRequest(managedId(resourceId).toString());
+                if (!requestFields.isEmpty()) {
+                    readRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
+                }
+                ResourceResponse currentResource = connectionFactory.getConnection().read(managedContext, readRequest);
+                JsonValue value = decrypt(request.getContent());
+                JsonValue scriptBindings = json(object());
+                scriptBindings.put("context", context);
+                scriptBindings.put("request", request);
+                scriptBindings.put("resourcePath", managedId(resourceId).toString());
+                scriptBindings.put("object", currentResource.getContent());
+                Object result = execScript(managedContext, newScriptHook(request.getAction()), value, scriptBindings);
+
+                return newActionResponse(json(result)).asPromise();
+            } else {
+                throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
         } catch (ResourceException e) {
         	return e.asPromise();
-        } catch (IllegalArgumentException e) { 
-        	// from getActionAsEnum
-        	return new BadRequestException(e.getMessage(), e).asPromise();
         } catch (Exception e) {
         	return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
@@ -1676,7 +1729,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 syncResults.put("action", action.name());
                 syncResults.put("syncDetails", details.getObject());
                 scriptBindings.put("syncResults", syncResults);
-                execScript(context, ScriptHook.onSync, null, scriptBindings);
+                execScript(context, BuiltinScriptHook.onSync, null, scriptBindings);
             } catch (ResourceException e) {
                 logger.warn("Failed executing onSync script on {} {}:{}",
                         syncRequest.getAction(), name, syncRequest.getResourcePath(), e);
