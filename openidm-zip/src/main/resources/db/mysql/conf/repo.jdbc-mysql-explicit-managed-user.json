@@ -97,6 +97,7 @@
                     "country":"country",
                     "city":"city",
                     "givenName":"givenName",
+                    "description":"description",
                     "sn":"sn",
                     "telephoneNumber":"telephoneNumber",
                     "mail":"mail"
