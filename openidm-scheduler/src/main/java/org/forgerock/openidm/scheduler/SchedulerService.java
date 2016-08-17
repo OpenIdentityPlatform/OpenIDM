@@ -37,6 +37,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -49,6 +50,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
@@ -664,7 +666,8 @@ public class SchedulerService implements RequestHandler {
                     throw new BadRequestException("Schedule already exists");
                 }
                 CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(params));
-                ResourceResponse response = handleCreate(context, createRequest).getOrThrow();
+                ResourceResponse response = handleCreate(context, createRequest)
+                        .getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
                 return newActionResponse(response.getContent()).asPromise();
             case listCurrentlyExecutingJobs:
                 JsonValue currentlyExecutingJobs = json(array());

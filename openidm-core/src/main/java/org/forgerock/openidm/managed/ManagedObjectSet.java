@@ -36,6 +36,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -691,8 +693,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     // in the new object so we will remove the relationships
                     relationshipValue =
                             (oldValue.isNotNull() && oldValue.expect(Map.class).get(relationshipField) != null)
-                                ? json(null)
-                                : null;
+                                    ? json(null)
+                                    : null;
                 }
                 // Relationships not present in the request will be null
                 // Relationships present in the request but set to null will be JsonValue(null)
@@ -721,7 +723,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
                     return joined;
                 }
-            }).getOrThrowUninterruptibly();
+            }).getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            throw ResourceException.newResourceException(500, "Timeout waiting for result", e);
         } finally {
             measurement.end();
         }
@@ -906,7 +910,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         || fieldHeads.contains(field)) { // only check head of request fields (see above)
                     try {
                         joined.put(field, provider.getRelationshipValueForResource(context,
-                                resourceId).getOrThrow().getObject());
+                                resourceId).getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS)
+                                .getObject());
                     } catch (NotFoundException e) {
                         logger.debug("No {} relationships found for {}", field, resourceId);
                         joined.put(field, null);
@@ -918,6 +923,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             }
 
             return joined;
+        } catch (TimeoutException e) {
+            throw new ExecutionException("Timed out waiting for result", e);
         } finally {
             measure.end();
         }
@@ -1043,7 +1050,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 deleted.add(relationshipProvider.clear(managedContext, resourceId));
             }
             // Wait for deletions to complete before continuing
-            when(deleted).getOrThrowUninterruptibly();
+            when(deleted).getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
 
             activityLogger.log(managedContext, request, "delete", managedId(resource.getId()).toString(),
                     resource.getContent(), null, Status.SUCCESS);
@@ -1338,7 +1345,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 if (!requestFields.isEmpty()) {
                     updateRequest.addField(requestFields.toArray(new JsonPointer[requestFields.size()]));
                 }
-                ResourceResponse updateResponse = updateInstance(managedContext, resourceId, updateRequest).get();
+                ResourceResponse updateResponse = updateInstance(managedContext, resourceId, updateRequest)
+                        .get(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
                 logger.debug("Sync of {} complete", readRequest.getResourcePath());
                 return newActionResponse(updateResponse.getContent()).asPromise();
             } else if (scriptHooks.containsKey(newScriptHook(request.getAction()))) {
@@ -1428,8 +1436,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         try {
                             actionInstance(context, resourceResponse.getId(),
                                     newActionRequest(managedObjectPath, Action.triggerSyncCheck.name()))
-                                    .getOrThrowUninterruptibly();
-                        } catch (ResourceException e) {
+                                    .getOrThrowUninterruptibly(
+                                            IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                        } catch (ResourceException | TimeoutException e) {
                             logger.error("failed triggerSyncCheck for " + resourceResponse.getId(), e);
                             return false;
                         }
@@ -1584,8 +1593,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
         
         try {
-            when(promises).getOrThrowUninterruptibly();
-        } catch (ResourceException e) {
+            when(promises).getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        } catch (ResourceException | TimeoutException e) {
             // Exceptions are already handled in expandResource, so this should never happen.
             logger.error("Error performing resource expansion", e);
         }

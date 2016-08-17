@@ -24,6 +24,7 @@
 */
 package org.forgerock.openidm.sync.impl;
 
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.sync.SynchronizationException;
 
 import java.util.Iterator;
@@ -33,6 +34,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 
 /**
@@ -92,8 +95,8 @@ public abstract class ReconFeeder {
                 Future<Void> future = completionService.take();
                 try {
                     // Get any exceptions
-                    Void result = future.get();
-                } catch (ExecutionException ex) {
+                    Void result = future.get(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                } catch (ExecutionException | TimeoutException ex) {
                     translateTaskThrowable(ex);
                 }
                 submitNextIfPresent();
@@ -125,7 +128,7 @@ public abstract class ReconFeeder {
 
     /**
      * Create the callable task for the given id
-     * @param id source or target id
+     * @param entry source or target entry
      * @return the task to reconcile the given id
      * @throws SynchronizationException if processing fails
      */

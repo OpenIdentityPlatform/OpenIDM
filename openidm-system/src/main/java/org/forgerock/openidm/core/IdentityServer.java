@@ -69,6 +69,9 @@ public final class IdentityServer implements PropertyAccessor {
     public static final String SSL_HOST_ALIASES = "openidm.ssl.host.aliases";
     public static final String HTTPS_KEYSTORE_CERT_ALIAS = "openidm.https.keystore.cert.alias";
 
+    public static final String PROMISE_TIMEOUT_MS = "openidm.promise.timeoutms";
+    public static final String DEFAULT_PROMISE_TIMEOUT_MS = "180000";
+
     // The set of properties for the environment config.
     // Keys are lower case for easier case insensitive searching
     // Precedences is 1. Boot file properties, 2. Explicit config properties, 3.
@@ -488,6 +491,15 @@ public final class IdentityServer implements PropertyAccessor {
                 IDENTITY_SERVER.get().getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE, null,
                         String.class);
         return (null != debug) && Boolean.valueOf(debug);
+    }
+
+    /**
+     * Return the current millisecond timeout to be used when calling get on a Promise.
+     *
+     * @return promise get timeout in milliseconds
+     */
+    public static long getPromiseTimeout() {
+        return Long.valueOf(IDENTITY_SERVER.get().getProperty(PROMISE_TIMEOUT_MS, DEFAULT_PROMISE_TIMEOUT_MS));
     }
 
     /**

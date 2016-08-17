@@ -24,7 +24,9 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
+import java.util.concurrent.TimeUnit;
 
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -127,7 +129,8 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ResourceResponse resourceResponse = promise.getOrThrow();
+        ResourceResponse resourceResponse =
+                promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
     }
     
@@ -143,7 +146,8 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ResourceResponse resourceResponse = promise.getOrThrow();
+        ResourceResponse resourceResponse =
+                promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
     }
     
@@ -159,7 +163,7 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow();
+        ActionResponse resourceResponse = promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
     }
     
@@ -175,7 +179,7 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow();
+        ActionResponse resourceResponse = promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
     }
     
@@ -191,7 +195,7 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow();
+        ActionResponse resourceResponse = promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         assertThat(resourceResponse.getJsonContent().asList().size()).isEqualTo(0);
     }
     
