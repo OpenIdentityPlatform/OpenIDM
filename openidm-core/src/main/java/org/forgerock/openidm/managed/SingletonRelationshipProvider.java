@@ -22,6 +22,8 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -43,6 +45,7 @@ import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
@@ -213,24 +216,33 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
         EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/singleton/clear"), resourceId, context);
 
         try {
-            return getRelationshipValueForResource(context, resourceId).then(new Function<JsonValue, JsonValue, ResourceException>() {
-                @Override
-                public JsonValue apply(JsonValue relationship) throws ResourceException {
-                    return deleteInstance(context, relationship.get(FIELD_ID).asString(),
-                            Requests.newDeleteRequest("").setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId))
-                                .getOrThrowUninterruptibly().getContent();
-                }
-            }).thenCatch(new Function<ResourceException, JsonValue, ResourceException>() {
-                @Override
-                public JsonValue apply(ResourceException e) throws ResourceException {
-                    // Since we wish to clear here NotFound is not an error. Return empty json
-                    if (e instanceof NotFoundException) {
-                        return json(null);
-                    } else {
-                        throw e;
-                    }
-                }
-            });
+            return getRelationshipValueForResource(context, resourceId)
+                    .then(new Function<JsonValue, JsonValue, ResourceException>() {
+                            @Override
+                            public JsonValue apply(JsonValue relationship) throws ResourceException {
+                                try {
+                                    return deleteInstance(context, relationship.get(FIELD_ID).asString(),
+                                            Requests.newDeleteRequest("")
+                                                    .setAdditionalParameter(PARAM_MANAGED_OBJECT_ID, resourceId))
+                                            .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(),
+                                                    TimeUnit.MILLISECONDS)
+                                            .getContent();
+                                } catch (TimeoutException e) {
+                                    logger.debug("Timeout waiting for result", e);
+                                    return null;
+                                }
+                            }
+                    }).thenCatch(new Function<ResourceException, JsonValue, ResourceException>() {
+                        @Override
+                        public JsonValue apply(ResourceException e) throws ResourceException {
+                            // Since we wish to clear here NotFound is not an error. Return empty json
+                            if (e instanceof NotFoundException) {
+                                return json(null);
+                            } else {
+                                throw e;
+                            }
+                        }
+                    });
         } finally {
             measure.end();
         }

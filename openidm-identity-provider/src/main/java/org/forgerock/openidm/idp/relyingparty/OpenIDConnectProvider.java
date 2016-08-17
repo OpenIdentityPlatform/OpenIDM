@@ -20,6 +20,8 @@ import static org.forgerock.json.JsonValue.json;
 import java.io.IOException;
 import java.net.URI;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
@@ -31,6 +33,7 @@ import org.forgerock.http.util.Uris;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
@@ -39,12 +42,17 @@ import org.forgerock.util.promise.NeverThrowsException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * OpenID Connect implementation used to
  * perform the OAuth 2.0 flow using the OpenID Connect specification.
  */
 public class OpenIDConnectProvider {
+
+    /** Logger */
+    private final static Logger logger = LoggerFactory.getLogger(OpenIDConnectProvider.class);
 
     private static final ObjectMapper mapper = new ObjectMapper();
     static {
@@ -121,27 +129,32 @@ public class OpenIDConnectProvider {
                 .setMethod("GET")
                 .setUri(uri);
         request.getHeaders().put(new GenericHeader("Authorization", "Bearer " + access_token));
-        return httpClient
-                .send(request)
-                .then(
-                        new Function<Response, JsonValue, NeverThrowsException>() {
-                            @Override
-                            public JsonValue apply(Response response) {
-                                try {
-                                    return json(response.getEntity().getJson());
-                                } catch (IOException e) {
-                                    throw new IllegalStateException("Unable to perform request", e);
+        try {
+            return httpClient
+                    .send(request)
+                    .then(
+                            new Function<Response, JsonValue, NeverThrowsException>() {
+                                @Override
+                                public JsonValue apply(Response response) {
+                                    try {
+                                        return json(response.getEntity().getJson());
+                                    } catch (IOException e) {
+                                        throw new IllegalStateException("Unable to perform request", e);
+                                    }
                                 }
-                            }
-                        },
-                        new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
-                            @Override
-                            public JsonValue apply(NeverThrowsException e) {
-                                // return null on Exceptions
-                                return null;
-                            }
-                        })
-                .getOrThrowUninterruptibly();
+                            },
+                            new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
+                                @Override
+                                public JsonValue apply(NeverThrowsException e) {
+                                    // return null on Exceptions
+                                    return null;
+                                }
+                            })
+                    .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            logger.error("Timeout waiting for results", e);
+            return null;
+        }
     }
 
     private <T> T sendPostRequest(URI uri, String contentType, Object body, final Class<T> clazz) {
@@ -154,26 +167,31 @@ public class OpenIDConnectProvider {
         if (body != null) {
             request.setEntity(body);
         }
-        return httpClient
-                .send(request)
-                .then(
-                        new Function<Response, T, NeverThrowsException>() {
-                            @Override
-                            public T apply(Response response) {
-                                try {
-                                    return mapper.convertValue(response.getEntity().getJson(), clazz);
-                                } catch (IOException e) {
-                                    throw new IllegalStateException("Unable to perform request", e);
+        try {
+            return httpClient
+                    .send(request)
+                    .then(
+                            new Function<Response, T, NeverThrowsException>() {
+                                @Override
+                                public T apply(Response response) {
+                                    try {
+                                        return mapper.convertValue(response.getEntity().getJson(), clazz);
+                                    } catch (IOException e) {
+                                        throw new IllegalStateException("Unable to perform request", e);
+                                    }
                                 }
-                            }
-                        },
-                        new Function<NeverThrowsException, T, NeverThrowsException>() {
-                            @Override
-                            public T apply(NeverThrowsException e) {
-                                // return null on Exceptions
-                                return null;
-                            }
-                        })
-                .getOrThrowUninterruptibly();
+                            },
+                            new Function<NeverThrowsException, T, NeverThrowsException>() {
+                                @Override
+                                public T apply(NeverThrowsException e) {
+                                    // return null on Exceptions
+                                    return null;
+                                }
+                            })
+                    .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        } catch (TimeoutException e) {
+            logger.error("Timeout waiting for results", e);
+            return null;
+        }
     }
 }
