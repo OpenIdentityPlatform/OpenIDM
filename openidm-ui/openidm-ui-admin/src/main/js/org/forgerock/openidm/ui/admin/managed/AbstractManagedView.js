@@ -74,7 +74,11 @@ define([
 
             managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
 
-            if (!_.has(managedObject.schema.order, "preferences")) {
+            if (!_.has(managedObject.schema, "order.preferences")) {
+                if(_.isUndefined(managedObject.schema.order)) {
+                    managedObject.schema.order = [];
+                }
+
                 managedObject.schema.order.push("preferences");
             }
 
