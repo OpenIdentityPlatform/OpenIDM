@@ -15,6 +15,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`managed_user` (
     `country` VARCHAR(255),
     `city` VARCHAR(255),
     `givenName` VARCHAR(255),
+    `description` VARCHAR(255),
     `sn` VARCHAR(255),
     `telephoneNumber` VARCHAR(255),
     `mail` VARCHAR(255),
