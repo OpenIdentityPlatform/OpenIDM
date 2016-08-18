@@ -2028,7 +2028,7 @@
                 "AT_LEAST_X_CAPITAL_LETTERS" : "At least __numCaps__ capital letters",
                 "AT_LEAST_X_NUMBERS" : "At least __numNums__ numbers",
                 "CANNOT_CONTAIN_OTHERS" : "Cannot contain values from: __disallowedFields__",
-                "CANNOT_CONTAIN_CHARACTERS" : "Cannot contain characters: __forbiddenChars__",
+                "CANNOT_CONTAIN_CHARACTERS" : "Can only include letters and numbers",
                 "MIN_LENGTH" : "At least __minLength__ characters",
                 "REQUIRED" : "Cannot be blank",
                 "VALID_DATE" : "Must be a valid date",
