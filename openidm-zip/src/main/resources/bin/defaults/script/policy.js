@@ -125,12 +125,31 @@ var _ = require('lib/lodash'),
             "clientValidation": true,
             "validateOnlyIfPresent": true,
             "policyRequirements" : ["CANNOT_CONTAIN_DUPLICATES"]
+        },
+        {
+            "policyId" : "mapping-exists",
+            "policyExec" : "mappingExists",
+            "policyRequirements" : ["MAPPING_EXISTS"]
         }
     ]
 },
 policyImpl = (function (){
 
     var policyFunctions = {};
+
+
+    policyFunctions.mappingExists = function(fullObject, value, params, property) {
+        var syncConfig = openidm.read('config/sync');
+
+        if (syncConfig && syncConfig.mappings.length) {
+            for (var i = 0; i < syncConfig.mappings.length; i++) {
+                if (syncConfig.mappings[i].name === value) {
+                    return [];
+                }
+            }
+        }
+        return [ {"policyRequirement": "MAPPING_EXISTS"}];
+    };
 
     policyFunctions.regexpMatches = function(fullObject, value, params, property) {
         if (typeof(value) === "number") {

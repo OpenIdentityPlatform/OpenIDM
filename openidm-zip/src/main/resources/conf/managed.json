@@ -756,7 +756,12 @@
                         "title" : "Mapping",
                         "viewable" : true,
                         "searchable" : true,
-                        "type" : "string"
+                        "type" : "string",
+                        "policies" : [
+                            {
+                                "policyId" : "mapping-exists"
+                            }
+                        ]
                     },
                     "attributes" : {
                         "description" : "The attributes operated on by this assignment.",
