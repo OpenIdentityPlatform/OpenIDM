@@ -28,7 +28,7 @@
                             <div class="form-group has-feedback">
                                 <label class="col-sm-3 control-label" for="connectorName">{{t "templates.connector.connectorName"}}</label>
                                 <div class="col-sm-8">
-                                    <input class="form-control" type="text" id="connectorName" name="name" value="{{connectorName}}" {{#if editState}} disabled="true" {{else}}data-validator="required spaceCheck" data-validator-event="keyup blur" required autofocus {{/if}} autofocus />
+                                    <input class="form-control" type="text" id="connectorName" name="name" value="{{connectorName}}" {{#if editState}} disabled="true" {{else}} data-validator="spaceCheck restrictedCharacters" data-validator-event="keyup blur" required autofocus {{/if}} autofocus />
                                     <div class="validation-message"></div>
 
                                     {{#unless editState}}
