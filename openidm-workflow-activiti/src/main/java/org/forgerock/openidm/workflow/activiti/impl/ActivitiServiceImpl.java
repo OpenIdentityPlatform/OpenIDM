@@ -39,7 +39,7 @@ import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.RepositoryService;
 import org.activiti.engine.delegate.JavaDelegate;
 import org.activiti.engine.impl.ProcessEngineImpl;
-import org.activiti.engine.impl.cfg.JtaProcessEngineConfiguration;
+import org.activiti.engine.impl.cfg.StandaloneProcessEngineConfiguration;
 import org.activiti.engine.impl.interceptor.SessionFactory;
 import org.activiti.engine.impl.scripting.ResolverFactory;
 import org.activiti.engine.impl.scripting.ScriptBindingsFactory;
@@ -258,7 +258,7 @@ public class ActivitiServiceImpl implements RequestHandler {
                 case embedded: //start our embedded ProcessEngine
 
                     //we need a TransactionManager to use this
-                    JtaProcessEngineConfiguration configuration = new JtaProcessEngineConfiguration();
+                    StandaloneProcessEngineConfiguration configuration = new StandaloneProcessEngineConfiguration();
 
                     if (!dataSourceServices.containsKey(useDataSource)) {
                         //no data source specified - use embedded h2
@@ -277,8 +277,6 @@ public class ActivitiServiceImpl implements RequestHandler {
                     }
                     configuration.setIdentityService(identityService);
 
-                    configuration.setTransactionManager(transactionManager);
-                    configuration.setTransactionsExternallyManaged(true);
                     configuration.setDatabaseSchemaUpdate("true");
                     configuration.setDatabaseTablePrefix(tablePrefix);
                     configuration.setTablePrefixIsSchema(tablePrefixIsSchema);
