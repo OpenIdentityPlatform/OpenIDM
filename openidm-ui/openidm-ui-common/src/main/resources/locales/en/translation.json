@@ -1027,7 +1027,7 @@
                     "watchedFields": "Watched Fields",
                     "passwordFields": "Password Fields",
                     "filterActionsDesc": "Configure actions to be audited",
-                    "noActions": "Schema cannot be edited on default event topics",
+                    "noActions": "None available for this event.",
                     "filterFieldsDesc": "Limit audit logs by entry type and value",
                     "filterFieldDelete": "Delete Field",
                     "filterFieldAddField": "Add Field",
