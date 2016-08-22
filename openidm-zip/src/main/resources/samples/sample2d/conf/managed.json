@@ -840,7 +840,20 @@
             }
         },
         {
-            "name": "group"
+            "name" : "group",
+            "schema" : {
+                "$schema" : "http://forgerock.org/json-schema#",
+                "type" : "object",
+                "title" : "",
+                "description" : "",
+                "icon" : "fa-asterisk",
+                "properties" : { },
+                "required" : [ ],
+                "order" : [ ]
+            },
+            "iconClass" : "icon-database",
+            "iconSrc" : "img/icon-managedobject.png",
+            "type" : "Managed Object"
         }
     ]
 }
