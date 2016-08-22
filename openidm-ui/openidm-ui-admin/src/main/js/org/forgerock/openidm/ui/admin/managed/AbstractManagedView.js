@@ -74,7 +74,7 @@ define([
 
             managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
 
-            if (!_.has(managedObject.schema, "order.preferences")) {
+            if (_.indexOf(managedObject.schema.order, "preferences") === -1) {
                 if(_.isUndefined(managedObject.schema.order)) {
                     managedObject.schema.order = [];
                 }
@@ -89,16 +89,7 @@ define([
                     "searchable" : false,
                     "userEditable" : true,
                     "type" : "object",
-                    "properties" : {
-                        "updates" : {
-                            "description" : "Send me news and updates",
-                            "type" : "boolean"
-                        },
-                        "marketing": {
-                            "description" : "Send me special offers and services",
-                            "type" : "boolean"
-                        }
-                    }
+                    "properties" : {}
                 });
             }
 
