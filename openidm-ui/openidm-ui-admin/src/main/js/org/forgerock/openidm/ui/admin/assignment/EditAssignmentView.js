@@ -144,17 +144,17 @@ define([
                     "disablePassedVariable": false
                 });
 
-                this.model.unAssignment = InlineScriptEditor.generateScriptEditor({
+                this.model.onUnassignment = InlineScriptEditor.generateScriptEditor({
                     "element": this.$el.find("#onUnassignmentHolder"),
                     "eventName": "onUnassignment",
                     "noValidation": true,
-                    "scriptData": this.data.resource.unAssignment,
+                    "scriptData": this.data.resource.onUnassignment || this.data.resource.unAssignment,
                     "disablePassedVariable": false
                 });
 
                 this.$el.find("#assignmentEventsTab").on("shown.bs.tab", _.bind(function (e) {
                     this.model.onAssignment.refresh();
-                    this.model.unAssignment.refresh();
+                    this.model.onUnassignment.refresh();
                 }, this));
 
                 _.each(this.data.resource.attributes, _.bind(function(attribute) {
@@ -371,7 +371,7 @@ define([
             event.preventDefault();
 
             var onAssignment = this.model.onAssignment.generateScript(),
-                unAssignment = this.model.unAssignment.generateScript(),
+                onUnassignment = this.model.onUnassignment.generateScript(),
                 resourceObject = _.clone(this.data.resource);
 
             if(_.isNull(onAssignment)) {
@@ -380,10 +380,10 @@ define([
                 resourceObject.onAssignment = onAssignment;
             }
 
-            if(_.isNull(unAssignment)) {
-                delete resourceObject.unAssignment;
+            if(_.isNull(onUnassignment)) {
+                delete resourceObject.onUnassignment;
             } else {
-                resourceObject.unAssignment = unAssignment;
+                resourceObject.onUnassignment = onUnassignment;
             }
 
             ResourceDelegate.updateResource(this.model.serviceUrl,  this.data.resource._id, resourceObject, _.bind(function(result){

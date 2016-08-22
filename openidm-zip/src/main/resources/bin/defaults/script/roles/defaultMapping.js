@@ -156,7 +156,9 @@ if (lastSyncProvided(source) || oldValueProvided() && lastSyncProvided(oldSource
                 var currentAssignment = findAssignment(oldAssignment, currentAssignments);
                 if (currentAssignment === null) {
                     // This assignment has been unassigned
-                    var onUnassignment = oldAssignment.onUnassignment;
+                    // unAssignment included here as an option to support assignments that
+                    // were mistakenly created with an incorrect name
+                    var onUnassignment = oldAssignment.onUnassignment || oldAssignment.unAssignment;
                     // Check if an onUnassignment script is configured
                     if (typeof onUnassignment !== 'undefined' && onUnassignment !== null) {
                         onUnassignment.attributes = oldAssignment.attributes;
