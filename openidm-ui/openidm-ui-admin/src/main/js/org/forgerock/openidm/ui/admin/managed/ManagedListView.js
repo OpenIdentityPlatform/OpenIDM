@@ -124,8 +124,10 @@ define([
                                     var icon = this.model.attributes.iconClass,
                                         display;
 
-                                    if(this.model.attributes.schema.icon)  {
+                                    if(this.model.attributes.schema && this.model.attributes.schema.icon)  {
                                         icon = "fa " +this.model.attributes.schema.icon;
+                                    } else {
+                                        icon = "fa fa-database";
                                     }
 
                                     display = '<a class="table-clink" href="#connectors/edit/'+this.model.attributes.cleanUrlName +'/"><div class="image circle">'

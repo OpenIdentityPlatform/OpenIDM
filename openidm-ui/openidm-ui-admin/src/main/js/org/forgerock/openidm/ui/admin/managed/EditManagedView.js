@@ -108,7 +108,11 @@ define([
                         this.data.currentManagedObjectIndex = iterator;
                         this.splitSchemaAndProperties();
 
-                        this.data.noSchema = _.isEmpty(this.data.currentManagedObject.schema.properties);
+                        if(this.data.currentManagedObject.schema) {
+                            this.data.noSchema = _.isEmpty(this.data.currentManagedObject.schema.properties);
+                        } else {
+                            this.data.noSchema = true;
+                        }
                     }
                 }, this));
 
@@ -247,6 +251,11 @@ define([
             nameCheck = this.checkManagedName(data.name, this.data.managedObjects.objects);
 
             if(!nameCheck || data.name === this.data.currentManagedObject.name) {
+
+                if(_.isUndefined(this.data.currentManagedObject.schema)) {
+                    this.data.currentManagedObject.schema = {};
+                }
+
                 this.data.currentManagedObject.name = data.name;
                 this.data.currentManagedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
                 this.$el.find("#managedErrorMessage").hide();

@@ -135,7 +135,7 @@ define([
                 properties = [],
                 schemaProperties = {};
 
-            if (this.data.currentManagedObject) {
+            if (this.data.currentManagedObject && this.data.currentManagedObject.schema) {
                 _.each(this.data.currentManagedObject.schema.properties, function (val, key) {
                     var property = _.pick(val,propertiesFields);
 
