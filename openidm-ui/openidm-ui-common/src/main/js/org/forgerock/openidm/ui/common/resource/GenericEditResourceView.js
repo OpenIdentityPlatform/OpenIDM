@@ -141,6 +141,11 @@ define([
                             this.$el.find("#resource"),
                             [this.data.objectType,this.objectName,this.objectId || "*"].join("/"),
                             _.bind(function () {
+
+                                this.editor.on('change', _.bind(function() {
+                                    this.showPendingChanges();
+                                }, this));
+
                                 if(!this.data.newObject) {
                                     this.linkedView = new LinkedView();
                                     this.linkedView.element = "#linkedView";
@@ -184,7 +189,17 @@ define([
             if(schema.order){
                 _.each(schema.order, _.bind(function(prop){
                     schema.properties[prop].propertyOrder = propCount++;
-                    if(schema.properties[prop].viewable && !_.has(filteredObject, prop)){
+
+                    if (!_.has(filteredObject, prop) &&
+                        schema.properties[prop].viewable &&
+                        schema.properties[prop].type === "object" &&
+                        _.keys(schema.properties[prop].properties).length > 0) {
+                        //set all sub props to null
+                        _.each(schema.properties[prop].properties, (subProperty, key) => {
+                            _.set(filteredObject, [prop, key], null);
+                        });
+
+                    } else if(schema.properties[prop].viewable && !_.has(filteredObject, prop)){
                         filteredObject[prop] = null;
                     }
                 }, this));
@@ -204,10 +219,6 @@ define([
             this.addTooltips();
 
             this.convertResourceCollectionFields(filteredObject,schema).then(_.bind(function () {
-
-                this.editor.on('change', _.bind(function() {
-                    this.showPendingChanges();
-                }, this));
 
                 this.$el.find(".json-editor-btn-collapse").prop("disabled", true);
             }, this));
@@ -284,19 +295,18 @@ define([
                 objectHeader = this.$el.find("#resource").find("h3:eq(0)"),
                 objectDescriptionSpan = objectHeader.next(),
                 // this text escaped since it's being inserted into an attribute
-                tipDescription = _.escape(objectDescriptionSpan.text()),
-                iconElement = $('<i class="fa fa-info-circle info" />');
+                tipDescription = _.escape(objectDescriptionSpan.text());
 
-            $.each(propertyDescriptionSpan, function() {
+            $.each(propertyDescriptionSpan, function(span) {
                 // this text escaped since it's being inserted into an attribute
-                var tipDescription = _.escape($(this).text());
-                iconElement.attr('title', tipDescription);
+                let tipDescription = _.escape($(this).text());
+                let iconElement = $('<i class="fa fa-info-circle info" title="'+ tipDescription+'"/>');
                 $(this).parent().find("label").after(iconElement);
                 $(this).empty();
             });
 
             if (objectDescriptionSpan.text().length > 0) {
-                iconElement.attr('title', tipDescription);
+                let iconElement = $('<i class="fa fa-info-circle info" title="'+ tipDescription+'"/>');
                 objectHeader.append(iconElement);
                 objectDescriptionSpan.empty();
             }
@@ -321,8 +331,14 @@ define([
                 This loop filters out previously null values that have not been changed.
                 */
                 _.each(_.keys(formVal), function(key){
-                    if ((this.oldObject[key] === null || this.oldObject[key] === undefined) && (!formVal[key] || !formVal[key].length)){
-                        formVal[key] = this.oldObject[key];
+                    // The old property must be null or undefined
+                    if (this.oldObject[key] === null || this.oldObject[key] === undefined) {
+                        // The property isn't an object and it is false or empty
+                        // OR it is an object and empty
+                        if ( (!_.isObject(formVal[key]) && (!formVal[key] || !formVal[key].length)) ||
+                            (_.isObject(formVal[key]) && _.isEmpty(formVal[key])) ) {
+                            formVal[key] = this.oldObject[key];
+                        }
                     }
                 }, this);
             } else {
@@ -442,12 +458,13 @@ define([
                 promises = _.map(properties, function(prop,key) {
                     prop.propName = key;
                     if (prop.type === "object") {
+                        let newparent;
                         if (parent) {
-                            parent += "\\." + key;
+                            newparent = parent + "\\." + key;
                         } else {
-                            parent = "\\." + key;
+                            newparent = "\\." + key;
                         }
-                        return getFields(prop.properties, parent);
+                        return getFields(prop.properties, newparent);
                     }
 
                     if (parent) {
