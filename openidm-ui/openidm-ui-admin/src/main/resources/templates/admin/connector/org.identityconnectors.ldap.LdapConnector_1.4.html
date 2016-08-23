@@ -106,7 +106,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContext"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]"  placeholder={{t "templates.connector.ldapConnector.baseDN"}} value="{{value}}" />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContexts[]"  placeholder="{{t "templates.connector.ldapConnector.baseDN"}}" value="{{value}}" />
                     <div class="input-group-addon">
                         <button field_type="baseContext" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -150,7 +150,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder={{t "templates.connector.ldapConnector.baseDN"}} value="{{value}}"  />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="{{t "templates.connector.ldapConnector.baseDN"}}" value="{{value}}"  />
                     <div class="input-group-addon">
                         <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -161,7 +161,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.baseContextToSync"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder={{t "templates.connector.ldapConnector.baseDN"}} value=""  />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.baseContextsToSynchronize[]" placeholder="{{t "templates.connector.ldapConnector.baseDN"}}" value=""  />
                     <div class="input-group-addon">
                         <button field_type="baseContextsToSynchronize" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -217,7 +217,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder={{t "templates.connector.ldapConnector.account"}} value="{{value}}"  />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="{{t "templates.connector.ldapConnector.account"}}" value="{{value}}"  />
                     <div class="input-group-addon">
                         <button field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -228,7 +228,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.accountObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder={{t "templates.connector.ldapConnector.account"}} value=""  />
+                    <input class="form-control" data-validator="required" autocomplete="off" type="text" name="configurationProperties.accountObjectClasses[]" placeholder="{{t "templates.connector.ldapConnector.account"}}" value=""  />
                     <div class="input-group-addon">
                         <button field_type="accountObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -280,7 +280,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" data-validator-event="keyup blur" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="{{t "templates.connector.ldapConnector.group"}} value="{{value}}"  />
+                    <input class="form-control" data-validator-event="keyup blur" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="{{t "templates.connector.ldapConnector.group"}}" value="{{value}}"  />
                     <div class="input-group-addon">
                         <button field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -291,7 +291,7 @@
             <div class="form-group has-feedback field">
                 <label class="control-label col-sm-3">{{t "templates.connector.ldapConnector.groupObjectClasses"}}</label>
                 <div class="input-group col-sm-8">
-                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder={{t "templates.connector.ldapConnector.group"}} value=""  />
+                    <input class="form-control" autocomplete="off" type="text" name="configurationProperties.groupObjectClasses[]" placeholder="{{t "templates.connector.ldapConnector.group"}}" value=""  />
                     <div class="input-group-addon">
                         <button field_type="groupObjectClasses" class="clean-btn remove-btn"><i class="fa fa-lg fa-times-circle"></i></button>
                     </div>
@@ -331,13 +331,15 @@
                 <label class="col-sm-3 control-label">{{t "templates.connector.ldapConnector.hashAlgorithm"}}</label>
                 <div class="col-sm-8">
                     <select name="configurationProperties.passwordHashAlgorithm" class="form-control" id="hashAlgorithm" data-validation-status="ok">
-                        <option value="null">None - Clear Text</option>
-                        <option value="WIN-AD">WIN-AD - Used for Active Directory</option>
-                        <option value="SHA">SHA - Secure Hash Algorithm</option>
-                        <option value="SHA-1">SHA-1 - 160-bit Hash Algorithm</option>
-                        <option value="SSHA">SSHA - Salted SHA</option>
-                        <option value="MD5">MD5 - 128-bit Message-Digest Algorithm</option>
-                        <option value="SMD5">SMD5 - Salted MD5</option>
+                        {{#staticSelect connectorDefaults.configurationProperties.passwordHashAlgorithm}}
+                        <option value="null">{{t "templates.connector.ldapConnector.selectNone"}}</option>
+                        <option value="WIN-AD">{{t "templates.connector.ldapConnector.selectWIN-AD"}}</option>
+                        <option value="SHA">{{t "templates.connector.ldapConnector.selectSHA"}}</option>
+                        <option value="SHA-1">{{t "templates.connector.ldapConnector.selectSHA-1"}}</option>
+                        <option value="SSHA">{{t "templates.connector.ldapConnector.selectSHHA"}}</option>
+                        <option value="MD5">{{t "templates.connector.ldapConnector.selectMD5"}}</option>
+                        <option value="SMD5">{{t "templates.connector.ldapConnector.selectSMD5"}}</option>
+                        {{/staticSelect}}
                     </select>
                 </div>
             </div>

@@ -1702,6 +1702,13 @@
                 "startTlsHelp": "Use StartTLS to initiate an SSL/TLS session, typically run over an insecure LDAP port. Requires disabling regular SSL",
                 "attrsToSynchronize": "Attributes to Synchronize",
                 "attrsToSynchronizeHelp": "If blank, all attributes are synchronized",
+                "selectNone": "None - Clear Text",
+                "selectWIN-AD": "WIN-AD - Used for Active Directory",
+                "selectSHA": "SHA - Secure Hash Algorithm",
+                "selectSHA-1": "SHA-1 - 160-bit Hash Algorithm",
+                "selectSHHA": "SSHA - Salted SHA",
+                "selectMD5": "MD5 - 128-bit Message-Digest Algorithm",
+                "selectSMD5": "SMD5 - Salted MD5",
                 "errorMessages": {
                     "unknownHost" : "Unknown Host",
                     "portOutOfRange" : "Port Out of Range",
