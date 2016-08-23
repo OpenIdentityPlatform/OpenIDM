@@ -187,14 +187,12 @@ define([
 
                         // default value for signatureInterval
                         if (_.has(schema, "properties.security.properties.signatureInterval") &&
-                                (
-                                    _.has(this.data.eventHandler, "config") &&
-                                    (
-                                        !_.has(this.data.eventHandler.config, "security.signatureInterval") ||
-                                        !this.data.eventHandler.config.security.signatureInterval
-                                     )
-                                )
+                            (
+                                !_.has(this.data.eventHandler.config, "security.signatureInterval") ||
+                                !this.data.eventHandler.config.security.signatureInterval
+                             )
                         ) {
+                            this.data.eventHandler.config = this.data.eventHandler.config || {};
                             this.data.eventHandler.config.security = this.data.eventHandler.config.security || {};
                             this.data.eventHandler.config.security.signatureInterval = "1 hour";
                         }
