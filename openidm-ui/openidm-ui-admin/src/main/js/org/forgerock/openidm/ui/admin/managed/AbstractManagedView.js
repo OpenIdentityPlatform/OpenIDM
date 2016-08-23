@@ -74,28 +74,7 @@ define([
 
             managedObject.schema.icon = this.$el.find("#managedObjectIcon").val();
 
-            if (_.indexOf(managedObject.schema.order, "preferences") === -1) {
-                if(_.isUndefined(managedObject.schema.order)) {
-                    managedObject.schema.order = [];
-                }
-
-                managedObject.schema.order.push("preferences");
-            }
-
-            if (!_.has(managedObject.schema.properties, "preferences")) {
-                _.set(managedObject.schema, "properties.preferences", {
-                    "title" : "Preferences",
-                    "viewable" : true,
-                    "searchable" : false,
-                    "userEditable" : true,
-                    "type" : "object",
-                    "properties" : {}
-                });
-            }
-
-            if (this.getManagedPreferences) {
-                _.set(managedObject.schema, "properties.preferences.properties", this.getManagedPreferences());
-            }
+            managedObject = this.handlePreferences(managedObject);
 
             this.combineSchemaAndProperties();
 
@@ -173,6 +152,58 @@ define([
 
                 delete this.data.currentManagedObject.properties;
             }
+        },
+        handlePreferences: function (managedObject) {
+            var preferencesTabValue,
+                preferencesIndex,
+                fullPreferencesSchema;
+            /**
+             * check to make sure preferences are defined and not an empty object before adding
+             * the property to the schema
+             */
+            if (this.getManagedPreferences && !_.isEmpty(this.getManagedPreferences())) {
+                preferencesTabValue = this.getManagedPreferences();
+                fullPreferencesSchema = {
+                    "description" : "",
+                    "title" : $.t("templates.preferences.preferences"),
+                    "viewable" : true,
+                    "searchable" : false,
+                    "userEditable" : true,
+                    "policies" : [ ],
+                    "returnByDefault" : false,
+                    "minLength" : null,
+                    "pattern" : "",
+                    "type" : "object",
+                    "properties" : preferencesTabValue,
+                    "required" : [ ],
+                    "order" : _.keys(preferencesTabValue)
+                };
+
+                if (!managedObject.schema.properties.preferences) {
+                    managedObject.schema.properties.preferences = fullPreferencesSchema;
+                } else {
+                    _.set(managedObject.schema, "properties.preferences.properties", preferencesTabValue);
+                    _.set(managedObject.schema, "properties.preferences.order", _.keys(preferencesTabValue));
+                }
+
+                if (_.indexOf(managedObject.schema.order, "preferences") === -1) {
+                    if(_.isUndefined(managedObject.schema.order)) {
+                        managedObject.schema.order = [];
+                    }
+
+                    managedObject.schema.order.push("preferences");
+                }
+            }
+            //if no preferences remove it from schema
+            if (this.getManagedPreferences && _.isEmpty(this.getManagedPreferences())) {
+                delete managedObject.schema.properties.preferences;
+                preferencesIndex = managedObject.schema.order.indexOf('preferences');
+                if (preferencesIndex !== -1) {
+                    managedObject.schema.order.splice(preferencesIndex, 1);
+                }
+            }
+
+            return managedObject;
         }
     });
 
