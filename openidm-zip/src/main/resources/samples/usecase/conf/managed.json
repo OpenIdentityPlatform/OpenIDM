@@ -61,7 +61,8 @@
                     "effectiveRoles",
                     "effectiveAssignments",
                     "lastSync",
-                    "kbaInfo"
+                    "kbaInfo",
+                    "preferences"
                 ],
                 "properties" : {
                     "_id" : {
@@ -143,8 +144,36 @@
                                 "questionId" : {
                                     "type" : "string"
                                 }
-                            }
+                            },
+                            "order": [
+                                "answer",
+                                "customQuestion",
+                                "questionId"
+                            ],
+                            "required": []
                         }
+                    },
+                    "preferences" : {
+                        "title" : "Preferences",
+                        "viewable" : true,
+                        "searchable" : false,
+                        "userEditable" : true,
+                        "type" : "object",
+                        "properties" : {
+                            "updates" : {
+                                "description" : "Send me news and updates",
+                                "type" : "boolean"
+                            },
+                            "marketing": {
+                                "description" : "Send me special offers and services",
+                                "type" : "boolean"
+                            }
+                        },
+                        "order": [
+                            "updates",
+                            "marketing"
+                        ],
+                        "required": []
                     },
                     "mail" : {
                         "title" : "Email Address",
@@ -497,7 +526,7 @@
                             }
                         ],
                         "userEditable" : false
-                    },
+                    }},
                     "lastSync" : {
                         "type" : "object",
                         "scope" : "private",
@@ -513,7 +542,12 @@
                             "timestamp" : {
                                 "type" : "string"
                             }
-                        }
+                        },
+                        "order" : [
+                            "effectiveAssignments",
+                            "timestamp"
+                        ],
+                        "required": []
                     }
                 },
                 "type" : "object",
@@ -740,6 +774,9 @@
                             },
                             "required" : [
                                 "duration"
+                            ],
+                            "order" : [
+                                "duration"
                             ]
                         }
                     }
@@ -819,7 +856,14 @@
                                 "value" : {
                                     "type" : "string"
                                 }
-                            }
+                            },
+                            "order" : [
+                                "assignmentOperation",
+                                "unassignmentOperation",
+                                "name",
+                                "value"
+                            ],
+                            "required": []
                         }
                     },
                     "linkQualifiers" : {

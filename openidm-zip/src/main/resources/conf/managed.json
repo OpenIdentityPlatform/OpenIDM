@@ -126,7 +126,13 @@
                                 "questionId" : {
                                     "type" : "string"
                                 }
-                            }
+                            },
+                            "order": [
+                                "answer",
+                                "customQuestion",
+                                "questionId"
+                            ],
+                            "required": []
                         }
                     },
                     "preferences" : {
@@ -144,7 +150,12 @@
                                 "description" : "Send me special offers and services",
                                 "type" : "boolean"
                             }
-                        }
+                        },
+                        "order": [
+                            "updates",
+                            "marketing"
+                        ],
+                        "required": []
                     },
                     "mail" : {
                         "title" : "Email Address",
@@ -477,7 +488,12 @@
                             "timestamp" : {
                                 "type" : "string"
                             }
-                        }
+                        },
+                        "order" : [
+                            "effectiveAssignments",
+                            "timestamp"
+                        ],
+                        "required": []
                     }
                 },
                 "type" : "object",
@@ -699,6 +715,9 @@
                             },
                             "required" : [
                                 "duration"
+                            ],
+                            "order" : [
+                                "duration"
                             ]
                         }
                     }
@@ -783,7 +802,14 @@
                                 "value" : {
                                     "type" : "string"
                                 }
-                            }
+                            },
+                            "order" : [
+                                "assignmentOperation",
+                                "unassignmentOperation",
+                                "name",
+                                "value"
+                            ],
+                            "required": []
                         }
                     },
                     "linkQualifiers" : {
