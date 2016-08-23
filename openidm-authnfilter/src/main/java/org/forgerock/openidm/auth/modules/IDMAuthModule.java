@@ -27,6 +27,7 @@ import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.jaspi.modules.session.openam.OpenAMSessionModule;
 import org.forgerock.openidm.auth.Authenticator;
 import org.forgerock.openidm.auth.AuthenticatorFactory;
+import org.forgerock.openidm.auth.modules.oauth.OAuthModule;
 import org.forgerock.util.Options;
 
 /**
@@ -107,6 +108,13 @@ public enum IDMAuthModule {
         @Override
         public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
             return new IWAModule();
+        }
+    },
+    /** OAuth Module. */
+    OAUTH {
+        @Override
+        public AsyncServerAuthModule newInstance(AuthenticatorFactory authenticatorFactory) {
+            return new OAuthModule();
         }
     },
     /** OpenID Connect Auth Module. */
