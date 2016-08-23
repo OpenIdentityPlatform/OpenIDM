@@ -423,6 +423,7 @@ define([
             mergedResult.configurationProperties.readSchema = false;
 
             ConnectorDelegate.testConnector(mergedResult).then(() => {
+
                 ConnectorDelegate.deleteCurrentConnectorsCache();
 
                 ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, mergedResult).then(() => {
