@@ -345,7 +345,7 @@ public class ReconciliationStatistic {
     }
 
     /**
-     * Exposes current duration statistics, gathered from calls to {@link #addDuration(String, long)}.
+     * Exposes current duration statistics, gathered from calls to {@link #addDuration(DurationMetric, long)}.
      *
      * @return Map of duration statistics
      */
@@ -354,11 +354,16 @@ public class ReconciliationStatistic {
         for (final Entry<String, DurationStatistics> entry : durationStat.entrySet()) {
             final Map<String, Long> valueMap = new HashMap<>();
             final DurationStatistics stats = entry.getValue();
+
+            // normalize mean, which is an approximation, to never be lower than min
+            final long min = nanoToMillis(stats.min());
+            final long mean = Math.max(nanoToMillis(stats.mean()), min);
+
             valueMap.put("count", stats.count());
             valueMap.put("sum", nanoToMillis(stats.sum()));
-            valueMap.put("min", nanoToMillis(stats.min()));
+            valueMap.put("min", min);
             valueMap.put("max", nanoToMillis(stats.max()));
-            valueMap.put("mean", nanoToMillis(stats.mean()));
+            valueMap.put("mean", mean);
             valueMap.put("stdDev", nanoToMillis(stats.stdDev()));
             resultMap.put(entry.getKey(), valueMap);
         }
