@@ -38,8 +38,8 @@ define([
                     errorCallback(reason);
                 }
             });
-        } else if (_.has(params, "authToken")) {
-            return UserModel.tokenLogin(params.authToken).then(successCallback, function (xhr) {
+        } else if (_.has(params, "authToken") && _.has(params, "provider")) {
+            return UserModel.tokenLogin(params.authToken, params.provider).then(successCallback, function (xhr) {
                 var reason = xhr.responseJSON.reason;
                 if (reason === "Unauthorized") {
                     reason = "authenticationFailed";

@@ -84,7 +84,8 @@ define([
             SocialDelegate.getAuthToken(params.provider, params.code, params.redirect_uri)
                 .then(function (authToken) {
                     EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
-                        authToken: authToken.auth_token
+                        authToken: authToken.auth_token,
+                        provider: params.provider
                     });
                 });
         }
