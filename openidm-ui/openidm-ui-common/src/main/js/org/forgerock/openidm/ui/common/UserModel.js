@@ -115,12 +115,13 @@ define([
 
             return this.getProfile(headers);
         },
-        tokenLogin: function (authToken) {
+        tokenLogin: function (authToken, provider) {
             var headers = {};
 
             headers[Constants.HEADER_PARAM_USERNAME] = "";
             headers[Constants.HEADER_PARAM_PASSWORD] = "";
             headers[Constants.HEADER_PARAM_AUTH_TOKEN] = authToken;
+            headers[Constants.HEADER_PARAM_AUTH_PROVIDER] = provider;
             headers[Constants.HEADER_PARAM_NO_SESSION] = false;
 
             return this.getProfile(headers);
