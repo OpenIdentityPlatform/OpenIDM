@@ -57,6 +57,7 @@ define([
         partials: [
             "partials/_toggleIconBlock.html",
             "partials/social/_google.html",
+            "partials/social/_facebook.html",
             "partials/form/_basicInput.html",
             "partials/form/_tagSelectize.html",
             "partials/_alert.html"
@@ -94,6 +95,9 @@ define([
                     switch (provider.name) {
                         case "google":
                             provider.displayIcon = "google";
+                            break;
+                        case "facebook":
+                            provider.displayIcon = "facebook";
                             break;
                     }
 
