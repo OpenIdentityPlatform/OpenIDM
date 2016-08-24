@@ -54,7 +54,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.idp.config.ProviderConfig;
-import org.forgerock.openidm.idp.relyingparty.OpenIDConnectProvider;
+import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Options;
 import org.forgerock.util.promise.Promise;
@@ -170,6 +170,24 @@ public class IdentityProviderService implements SingletonResourceProvider {
     }
 
     /**
+     * Returns all identity providers that are of the specified type.
+     *
+     * @param type authentication module type
+     * @return List of {@link ProviderConfig}
+     */
+    public List<ProviderConfig> getIdentityProviderByType(final String type) {
+        final List<ProviderConfig> providers = new ArrayList<>();
+        if (identityProviders == null || identityProviders.size() == 0) {
+            logger.debug("No Identity Providers have been configured.");
+            return providers;
+        }
+        for (final IdentityProviderConfig config : identityProviders.get(type)) {
+            providers.add(config.getIdentityProviderConfig());
+        }
+        return providers;
+    }
+
+    /**
      * Returns all identityProviders that have been registered.
      * @return
      */
@@ -207,9 +225,9 @@ public class IdentityProviderService implements SingletonResourceProvider {
             case availableProviders:
                 return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
             case getauthtoken:
-                final String idToken = new OpenIDConnectProvider(getIdentityProvider(actionRequest.getContent()
+                final String idToken = new OAuthHttpClient(getIdentityProvider(actionRequest.getContent()
                         .get("provider").required().asString()), newHttpClient())
-                        .getIdToken(
+                        .getAuthToken(
                                 actionRequest.getContent().get("code").required().asString(),
                                 actionRequest.getContent().get("redirect_uri").required().asString());
                 // just return id_token as "auth_token"

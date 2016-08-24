@@ -13,15 +13,11 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-package org.forgerock.openidm.idp.relyingparty;
+package org.forgerock.openidm.idp.client;
 
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
@@ -32,6 +28,7 @@ import org.forgerock.http.protocol.Response;
 import org.forgerock.http.util.Uris;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.idp.config.ProviderConfig;
@@ -39,48 +36,48 @@ import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.IOException;
+import java.net.URI;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * OpenID Connect implementation used to
- * perform the OAuth 2.0 flow using the OpenID Connect specification.
+ * OAuth Http Client used to perform the OAuth flow
+ * for both OpenID Connect and OAuth 2.0.
  */
-public class OpenIDConnectProvider {
+public class OAuthHttpClient {
 
     /** Logger */
-    private final static Logger logger = LoggerFactory.getLogger(OpenIDConnectProvider.class);
+    private static final Logger logger = LoggerFactory.getLogger(OAuthHttpClient.class);
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-    static {
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-    }
+    /** Supported OAuth modules **/
+    private static final String OAUTH = "OAUTH";
+    private static final String OPENID_CONNECT = "OPENID_CONNECT";
+    private static final String ID_TOKEN = "id_token";
+    private static final String ACCESS_TOKEN ="access_token";
 
     private final ProviderConfig config;
     private final Client httpClient;
 
-    public OpenIDConnectProvider(ProviderConfig config, Client httpClient) {
-        Reject.ifNull(config);
-        Reject.ifNull(httpClient);
-        this.config = config;
-        this.httpClient = httpClient;
+    public OAuthHttpClient(final ProviderConfig config, Client httpClient) {
+        this.config = Reject.checkNotNull(config);
+        this.httpClient = Reject.checkNotNull(httpClient);
     }
 
     /**
-     * Returns the user profile from the Idp.
+     * Returns the user profile from the identity provider.
      *
      * @param code authorization code used to specify grant type
      * @param redirectUri url that the idp will redirect to with response
      * @return
      * @throws ResourceException
      */
-    public JsonValue getProfile(String code, String redirectUri) throws ResourceException {
+    public JsonValue getProfile(final String code, final String redirectUri) throws ResourceException {
         // Get the response from the token Endpoint
-        Map tokenEndpointResponse = sendPostRequest(
+        final JsonValue tokenEndpointResponse = sendPostRequest(
                 URI.create(config.getTokenEndpoint()),
                 "application/x-www-form-urlencoded",
                 "grant_type=authorization_code"
@@ -88,44 +85,59 @@ public class OpenIDConnectProvider {
                         + "&redirect_uri=" + Uris.formEncodeParameterNameOrValue(redirectUri)
                         + "&code=" + Uris.formDecodeParameterNameOrValue(code)
                         + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())
-                        + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()),
-                Map.class);
+                        + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()));
 
         // Get the user profile from the identity provider using the access token
         return sendGetRequest(
                 URI.create(config.getUserInfoEndpoint()),
-                tokenEndpointResponse.get("access_token").toString());
+                tokenEndpointResponse.get(ACCESS_TOKEN).asString());
     }
 
     /**
-     * Returns a JWT ID Token used for OAuth2.0 flow when
-     * the provider type is openid_connect.
+     * Returns an auth token used for oauth flow.
      *
      * @param code authorization code used to specify grant type
      * @param redirectUri url that the idp will redirect to with response
      * @return
      * @throws ResourceException
      */
-    public String getIdToken(String code, String redirectUri) throws ResourceException {
-        Map response = sendPostRequest(
+    public String getAuthToken(final String code, final String redirectUri) throws ResourceException {
+        final JsonValue response = sendPostRequest(
                 URI.create(config.getTokenEndpoint()),
                 "application/x-www-form-urlencoded",
                 "grant_type=authorization_code"
-                        + "&scope=" + Uris.formDecodeParameterNameOrValue(StringUtils.join(config.getScope(), " "))
                         + "&redirect_uri=" + Uris.formEncodeParameterNameOrValue(redirectUri)
                         + "&code=" + Uris.formDecodeParameterNameOrValue(code)
                         + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())
-                        + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()),
-                Map.class);
-
-        if (response.get("id_token") == null) {
-            throw new InternalServerErrorException("Unable to retrieve token");
+                        + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()));
+        logger.debug("Response from identity provider is: " + response.toString());
+        switch (config.getType()) {
+        case OAUTH :
+            return getAccessToken(response);
+        case OPENID_CONNECT :
+            return getJwtToken(response);
+        default:
+            throw new InternalServerErrorException(
+                    "Authentication module of type " + config.getType() + " is not supported.");
         }
-        return response.get("id_token").toString();
     }
 
-    private JsonValue sendGetRequest(URI uri, String access_token) {
-        Request request = new Request()
+    private String getJwtToken(final JsonValue response) throws ResourceException {
+        if (response.get(ID_TOKEN).isNull()) {
+            throw new NotFoundException("Unable to retrieve token.");
+        }
+        return response.get(ID_TOKEN).asString();
+    }
+
+    private String getAccessToken(final JsonValue response) throws ResourceException {
+        if (response.get(ACCESS_TOKEN).isNull()) {
+            throw new NotFoundException("Unable to retrieve token.");
+        }
+        return response.get(ACCESS_TOKEN).asString();
+    }
+
+    private JsonValue sendGetRequest(final URI uri, final String access_token) {
+        final Request request = new Request()
                 .setMethod("GET")
                 .setUri(uri);
         request.getHeaders().put(new GenericHeader("Authorization", "Bearer " + access_token));
@@ -153,12 +165,12 @@ public class OpenIDConnectProvider {
                     .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             logger.error("Timeout waiting for results", e);
-            return null;
+            return json(object());
         }
     }
 
-    private <T> T sendPostRequest(URI uri, String contentType, Object body, final Class<T> clazz) {
-        Request request = new Request()
+    private JsonValue sendPostRequest(final URI uri, final String contentType, final Object body) {
+        final Request request = new Request()
                 .setMethod("POST")
                 .setUri(uri);
         if (contentType != null) {
@@ -171,19 +183,19 @@ public class OpenIDConnectProvider {
             return httpClient
                     .send(request)
                     .then(
-                            new Function<Response, T, NeverThrowsException>() {
+                            new Function<Response, JsonValue, NeverThrowsException>() {
                                 @Override
-                                public T apply(Response response) {
+                                public JsonValue apply(Response response) {
                                     try {
-                                        return mapper.convertValue(response.getEntity().getJson(), clazz);
+                                        return json(response.getEntity().getJson());
                                     } catch (IOException e) {
                                         throw new IllegalStateException("Unable to perform request", e);
                                     }
                                 }
                             },
-                            new Function<NeverThrowsException, T, NeverThrowsException>() {
+                            new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
                                 @Override
-                                public T apply(NeverThrowsException e) {
+                                public JsonValue apply(NeverThrowsException e) {
                                     // return null on Exceptions
                                     return null;
                                 }
@@ -191,7 +203,7 @@ public class OpenIDConnectProvider {
                     .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         } catch (TimeoutException e) {
             logger.error("Timeout waiting for results", e);
-            return null;
+            return json(object());
         }
     }
 }

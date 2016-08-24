@@ -15,13 +15,15 @@
  */
 package org.forgerock.openidm.idp.config;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.util.List;
 
 /**
- * Configuration of a Provider using the OIDC identity layer.
+ * Configuration of an Identity Provider.
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class ProviderConfig {
 
     public final static String CLIENT_SECRET = "client_secret";
@@ -55,6 +57,9 @@ public class ProviderConfig {
 
     @JsonProperty
     private List<String> scope;
+
+    @JsonProperty
+    private String authenticationId;
 
     @JsonProperty
     private List<SingleMapping> propertyMap;
@@ -111,6 +116,10 @@ public class ProviderConfig {
 
     public List<String> getScope() {
         return scope;
+    }
+
+    public String getAuthenticationId() {
+        return authenticationId;
     }
 
     public List<SingleMapping> getPropertyMap() {

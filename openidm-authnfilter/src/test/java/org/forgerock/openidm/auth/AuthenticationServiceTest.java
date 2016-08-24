@@ -20,6 +20,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -27,6 +28,7 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
+import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
@@ -37,9 +39,13 @@ import java.util.Map;
 public class AuthenticationServiceTest {
 
     private static final ObjectMapper OBJECT_MAPPER =
-            new ObjectMapper().configure(
-            JsonParser.Feature.ALLOW_COMMENTS, true).disable(
-            DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+            new ObjectMapper()
+                    .configure(JsonParser.Feature.ALLOW_COMMENTS, true)
+                    .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                    .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+
+    private static final String OPENID_CONNECT = "OPENID_CONNECT";
+    private static final String OAUTH = "OAUTH";
 
     private JsonValue amendedAuthentication;
     private JsonValue googleIdentityProvider;
@@ -61,18 +67,25 @@ public class AuthenticationServiceTest {
 
     }
 
+    @AfterMethod
+    public void tearDown() throws Exception {
+        amendedAuthentication = null;
+        googleIdentityProvider = null;
+        authenticationJson = null;
+    }
+
     @Test
     public void testAmendAuthConfig() throws Exception {
         // Mock of IdentityProviderService
         final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
 
         // Add the google provider to the list of provider configs
-        final List<ProviderConfig> providerConfigs = new ArrayList<>();
-        final ProviderConfig googleProviderConfig = ProviderConfigMapper.toProviderConfig(googleIdentityProvider);
-        providerConfigs.add(googleProviderConfig);
+        final List<ProviderConfig> openIdProviderConfigs = new ArrayList<>();
+        openIdProviderConfigs.add(ProviderConfigMapper.toProviderConfig(googleIdentityProvider));
 
         // Whenever we call getIdentityProviders() return the test case configs
-        when(identityProviderService.getIdentityProviders()).thenReturn(providerConfigs);
+        when(identityProviderService.getIdentityProviders()).thenReturn(openIdProviderConfigs);
+        when(identityProviderService.getIdentityProviderByType(OPENID_CONNECT)).thenReturn(openIdProviderConfigs);
 
         // Instantiate the object to be used with proper mocked IdentityProviderService
         AuthenticationService authenticationService = new AuthenticationService();
@@ -84,7 +97,52 @@ public class AuthenticationServiceTest {
 
         // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
         // the amendedAuthentication configuration
-        assertThat(amendedAuthentication.isEqualTo(authenticationJson.get("authModules").get(0))).isTrue();
+        assertThat(
+                amendedAuthentication.get("authModules").get(0)
+                .isEqualTo(authenticationJson.get("authModules").get(0)))
+                .isTrue();
+
+    }
+
+    @Test
+    public void testAmendAuthConfigWithTwoAuthTypes() throws Exception {
+
+        // Mock of IdentityProviderService
+        final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
+
+        // Add the google provider to the list of provider configs
+        final List<ProviderConfig> openIdProviderConfigs = new ArrayList<>();
+        openIdProviderConfigs.add(ProviderConfigMapper.toProviderConfig(googleIdentityProvider));
+
+
+        // Add Facebook provider of type OAuth 2
+        final List<ProviderConfig> oAuthProviderConfigs = new ArrayList<>();
+        oAuthProviderConfigs.add(ProviderConfigMapper.toProviderConfig(
+                        json(OBJECT_MAPPER.readValue(getClass()
+                                .getResource("/config/identityProvider-facebook.json"), Map.class))));
+
+        // Whenever we call getIdentityByType("OPENID_CONNECT") return the test case configs for openid_connect
+        when(identityProviderService.getIdentityProviderByType(OPENID_CONNECT)).thenReturn(openIdProviderConfigs);
+        // Whenever we call getIdentityByType("OAUTH") return the test case configs for openid_connect
+        when(identityProviderService.getIdentityProviderByType(OAUTH)).thenReturn(oAuthProviderConfigs);
+
+        final List<ProviderConfig> allConfigs = new ArrayList<>();
+        allConfigs.addAll(oAuthProviderConfigs);
+        allConfigs.addAll(openIdProviderConfigs);
+
+        when(identityProviderService.getIdentityProviders()).thenReturn(allConfigs);
+
+        // Instantiate the object to be used with proper mocked IdentityProviderService
+        AuthenticationService authenticationService = new AuthenticationService();
+        authenticationService.bindIdentityProviderService(identityProviderService);
+
+        // Call the amendAuthConfig to see the configuration of authentication.json be modified with
+        // the injected identityProvider config from the IdentityProviderService
+        authenticationService.amendAuthConfig(authenticationJson.get("authModules"));
+
+        // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
+        // the amendedAuthentication configuration
+        assertThat(amendedAuthentication.isEqualTo(authenticationJson)).isTrue();
     }
 
     @Test

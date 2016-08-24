@@ -1,6 +1,6 @@
 {
   "name" : "google",
-  "type" : "openid_connect",
+  "type" : "OPENID_CONNECT",
   "icon" : "google",
   "authorization_endpoint" : "authorization_endpoint",
   "token_endpoint" : "token_endpoint",
@@ -13,6 +13,7 @@
     "profile",
     "email"
   ],
+  "authenticationId" : "sub",
   "propertyMap" : [
     {
       "source" : "foo",

@@ -2,7 +2,7 @@
   "providers" : [
     {
       "name" : "google",
-      "type" : "openid_connect",
+      "type" : "OPENID_CONNECT",
       "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider btn-google\"><img src=\"images/g-logo.png\"> Sign in with Google</button>",
       "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
       "token_endpoint" : "https://www.googleapis.com/oauth2/v4/token",
@@ -15,6 +15,7 @@
         "profile",
         "email"
       ],
+      "authenticationId" : "subject",
       "propertyMap" : [
         {
           "source" : "sub",
@@ -53,6 +54,48 @@
           "target" : "locale"
         }
       ]
+    },
+    {
+      "name" : "facebook",
+      "type" : "OAUTH",
+      "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\">Sign in with Facebook</button>",
+      "authorization_endpoint" : "https://www.facebook.com/dialog/oauth",
+      "token_endpoint" : "https://graph.facebook.com/v2.3/oauth/access_token",
+      "userinfo_endpoint" : "https://graph.facebook.com/me?fields=id,name,picture,email,first_name,last_name,locale",
+      "client_id" : "",
+      "client_secret" : "",
+      "scope" : [
+        "email",
+        "user_birthday"
+      ],
+      "authenticationId" : "id",
+      "propertyMap" : [
+        {
+          "source" : "name",
+          "target" : "displayName"
+        },
+        {
+          "source" : "first_name",
+          "target" : "name/givenName"
+        },
+        {
+          "source" : "last_name",
+          "target" : "name/familyName"
+        },
+        {
+          "source" : "email",
+          "target" : "email"
+        },
+        {
+          "source" : "email",
+          "target" : "username"
+        },
+        {
+          "source" : "locale",
+          "target" : "locale"
+        }
+      ],
+      "propertyMap" : null
     }
   ]
 }

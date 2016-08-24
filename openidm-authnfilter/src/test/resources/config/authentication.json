@@ -3,17 +3,28 @@
     {
       "name": "OPENID_CONNECT",
       "properties": {
-        "openIdConnectHeader": "oidc_id_token",
+        "openIdConnectHeader": "authToken",
         "queryOnResource": "managed/user",
         "propertyMapping": {
-          "authenticationId": "subject",
+          "authenticationId": "sub",
           "userRoles": "authzRoles"
         },
-        "resolvers": [
-          {
-            "name": "google"
-          }
-        ],
+        "defaultUserRoles": [
+          "openidm-authorized"
+        ]
+      },
+      "enabled": true
+    },
+    {
+      "name": "OAUTH",
+      "properties": {
+        "authTokenHeader": "authToken",
+        "authProviderHeader" : "provider",
+        "queryOnResource": "managed/user",
+        "propertyMapping": {
+          "authenticationId": "id",
+          "userRoles": "authzRoles"
+        },
         "defaultUserRoles": [
           "openidm-authorized"
         ]

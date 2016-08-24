@@ -64,7 +64,7 @@ public class IdentityProviderServiceTest {
 
         JsonValue expected = json(object(
                 field("name", "google"),
-                field("type", "openid_connect"),
+                field("type", "OPENID_CONNECT"),
                 field("icon", "google"),
                 field("authorization_endpoint", "authorization_endpoint"),
                 field("token_endpoint", "token_endpoint"),
@@ -73,13 +73,11 @@ public class IdentityProviderServiceTest {
                 field("client_id", ""),
                 field("enabled", true),
                 field("scope", array("openid", "profile", "email")),
+                field("authenticationId", "sub"),
                 field("propertyMap", array(
                         object(
                                 field("source", "foo"),
-                                field("target", "bar"),
-                                field("condition", null),
-                                field("transform", null),
-                                field("default", null)
+                                field("target", "bar")
                         )
                 ))
         ));

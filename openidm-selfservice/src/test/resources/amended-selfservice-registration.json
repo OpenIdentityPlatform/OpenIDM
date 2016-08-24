@@ -6,7 +6,7 @@
       "providers" : [
         {
           "name" : "google",
-          "type" : "openid_connect",
+          "type" : "OPENID_CONNECT",
           "enabled" : true,
           "icon" : "google",
           "authorization_endpoint" : "authorization_endpoint",
@@ -20,7 +20,7 @@
             "profile",
             "email"
           ],
-          "propertyMap" : null
+          "authenticationId" : "sub"
         }
       ]
     }
