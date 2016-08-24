@@ -21,22 +21,7 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractDelegate"
 ], function(_, $, constants, AbstractDelegate) {
 
-    var obj = new AbstractDelegate(constants.host + "/openidm/scheduler"),
-        queryAllSchedules = function () {
-            // Get all schedule IDS
-            return obj.availableSchedules().then(_.bind(function (schedules) {
-                var schedulerPromises = [];
-
-                _.each(schedules.result, function (index) {
-                    // Get the schedule of each ID
-                    schedulerPromises.push(obj.specificSchedule(index._id));
-                }, this);
-
-                return $.when.apply($, schedulerPromises).then(_.bind(function () {
-                    return _.toArray(arguments);
-                }, this));
-            }, this));
-        };
+    var obj = new AbstractDelegate(constants.host + "/openidm/scheduler/job");
 
     obj.availableSchedules = function() {
         return obj.serviceCall({
@@ -97,31 +82,30 @@ define([
     };
 
     obj.getReconSchedulesByMappingName = function (mappingName) {
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        //                                                                                              //
-        // TODO: Use queryFilters to avoid having to pull back all schedules and sifting through them.  //
-        //                                                                                              //
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        return queryAllSchedules().then((scheduledTasks) => {
-            return _.filter(scheduledTasks, function (sched) {
-                return sched.invokeContext && sched.invokeContext.mapping && sched.invokeContext.mapping === mappingName;
-            });
+        return obj.serviceCall({
+            url: "?_queryFilter=invokeContext/action/ eq 'reconcile' and invokeContext/mapping/ eq '" + mappingName + "'",
+            type: "GET"
+        }).then((response) => {
+            return response.result;
         });
     };
 
     obj.getLiveSyncSchedulesByConnectorName = function (connectorName) {
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        //                                                                                              //
-        // TODO: Use queryFilters to avoid having to pull back all schedules and sifting through them.  //
-        //                                                                                              //
-        //////////////////////////////////////////////////////////////////////////////////////////////////
-        return queryAllSchedules().then((scheduledTasks) => {
-            return _.filter(scheduledTasks, function (sched) {
-                var nameFilter = sched.invokeContext && sched.invokeContext.source && sched.invokeContext.source.split("/")[1] === connectorName,
-                    liveSyncFilter = sched.invokeContext && sched.invokeContext.action && sched.invokeContext.action === "liveSync";
-
-                return nameFilter && liveSyncFilter;
+        return obj.serviceCall({
+            url: "?_queryFilter=invokeContext/action/ eq 'liveSync'",
+            type: "GET"
+        }).then((response) => {
+            return _.filter(response.result, (sched) => {
+                return sched.invokeContext.source.split("/")[1] === connectorName;
             });
+        });
+    };
+
+    obj.validate = function (cronString){
+        return obj.serviceCall({
+            url: "?_action=validateQuartzCronExpression",
+            type: "POST",
+            data: JSON.stringify({ "cronExpression" : cronString })
         });
     };
 

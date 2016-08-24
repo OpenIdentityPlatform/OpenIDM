@@ -1,0 +1,79 @@
+<!-- Copyright 2015 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<section>
+    <div class="container">
+        <div class="page-header">
+            <h1>{{t "templates.scheduler.schedules"}}</h1>
+        </div>
+        <div class="toolbar page-toolbar" role="toolbar">
+            <div class="btn-group pull-left left-group" role="group">
+                <a href="#scheduler/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.scheduler.addSchedule"}}</button></a>
+            </div>
+            <div class="pull-right">
+                <div class="toolbar-search">
+                    <div class="form-group">
+                        <div class="margin-top-5 pull-left">{{t "templates.scheduler.filterByType"}} :</div>
+                        <div class="pull-right">
+                            <select class="form-control" id="typeFilter">
+                                <option value="userDefined">{{t "templates.scheduler.allUserDefinedSchedules"}}</option>
+                                <option value="runningNow">{{t "templates.scheduler.runningNow"}}</option>
+                                <option value="reconciliation">{{t "templates.scheduler.reconciliation"}}</option>
+                                <option value="liveSync">{{t "templates.scheduler.liveSync"}}</option>
+                                <option value="script">{{t "templates.scheduler.script"}}</option>
+                                <option value="taskScanner">{{t "templates.scheduler.taskScanner"}}</option>
+                                <option value="temporalConstraintsOnRole">{{t "templates.scheduler.temporalConstraintsOnRole"}}</option>
+                                <option value="temporalConstraintsOnGrant">{{t "templates.scheduler.temporalConstraintsOnGrant"}}</option>
+                                <option value="inMemory">{{t "templates.scheduler.inMemory"}}</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pull-right subFilters" id="resourceSubfilter" style="display:none">
+                <div class="toolbar-search">
+                    <div class="form-group">
+                        <div class="margin-top-5 pull-left">{{t "templates.scheduler.filterByResource"}} :</div>
+                        <div class="pull-right">
+                            <select class="form-control">
+                                <option value="">{{t "templates.scheduler.showAll"}}</option>
+                                {{#each availableEnpoints}}
+                                <option value="{{@this}}">{{@this}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="pull-right subFilters" id="connectorTypeSubfilter" style="display:none">
+                <div class="toolbar-search">
+                    <div class="form-group">
+                        <div class="margin-top-5 pull-left">{{t "templates.scheduler.filterByConnectorType"}} :</div>
+                        <div class="pull-right">
+                            <select class="form-control">
+                                <option value="">{{t "templates.scheduler.showAll"}}</option>
+                                {{#each availableConnectorTypes}}
+                                <option value="{{type}}">{{display}}</option>
+                                {{/each}}
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="clearfix"></div>
+        </div>
+    </div>
+</section>
+
+<section>
+    <div class="container">
+        <div id="schedulerGridContainer">
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <div id="persistedSchedulesNote">{{t "templates.scheduler.persistedSchedulesNote"}}</div>
+                    <div class="table-responsive" id="schedulerGrid"></div>
+                    <div id="schedulerGrid-paginator"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

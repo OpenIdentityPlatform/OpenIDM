@@ -156,6 +156,12 @@ define([
                                             "inactive": false
                                         },
                                         {
+                                            "url": "#scheduler/",
+                                            "name": "config.AppConfiguration.Navigation.links.scheduler",
+                                            "icon": "fa fa-calendar",
+                                            "inactive": false
+                                        },
+                                        {
                                             "url": "#settings/",
                                             "name": "config.AppConfiguration.Navigation.links.systemPref",
                                             "icon": "fa fa-cog",
