@@ -133,7 +133,7 @@
                         <Export-Package>
                             org.forgerock.openidm.idp.impl;
                             org.forgerock.openidm.idp.config;
-                            org.forgerock.openidm.idp.relyingparty;
+                            org.forgerock.openidm.idp.client;
                         </Export-Package>
                     </instructions>
                 </configuration>

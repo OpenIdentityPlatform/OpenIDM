@@ -19,12 +19,14 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.forgerock.json.JsonValue;
 
 /**
  * Configuration for a single property mapping
  */
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class SingleMapping {
     @JsonProperty
     private String source;

@@ -34,7 +34,7 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.config.SingleMapping;
-import org.forgerock.openidm.idp.relyingparty.OpenIDConnectProvider;
+import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.sync.PropertyMapping;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.selfservice.core.ProcessContext;
@@ -115,30 +115,30 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
 
     @Override
     public StageResponse advance(ProcessContext context, SocialUserDetailsConfig config) throws ResourceException {
-        JsonValue user = context.getInput().get("user");
+        final JsonValue user = context.getInput().get("user");
         if (user.isNotNull()) {
             processEmail(context, config, user);
 
-            JsonValue userState = ensureUserInContext(context);
-            Map<String, Object> properties = user.asMap();
+            final JsonValue userState = ensureUserInContext(context);
+            final Map<String, Object> properties = user.asMap();
             updateUserJsonValue(userState, properties);
             context.putState(USER_FIELD, userState);
 
             return StageResponse.newBuilder().build();
         }
 
-        JsonValue provider = context.getInput().get("provider");
-        JsonValue code = context.getInput().get("code");
-        JsonValue redirectUri = context.getInput().get("redirect_uri");
+        final JsonValue provider = context.getInput().get("provider");
+        final JsonValue code = context.getInput().get("code");
+        final JsonValue redirectUri = context.getInput().get("redirect_uri");
         if (provider.isNotNull() && code.isNotNull() && redirectUri.isNotNull()) {
-            JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(), config);
+            final JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(), config);
             if (userResponse == null) {
                 throw new BadRequestException("Unable to reach social provider or unknown provider given");
             }
 
             context.putState(USER_FIELD, userResponse.getObject());
 
-            JsonValue requirements = RequirementsBuilder
+            final JsonValue requirements = RequirementsBuilder
                     .newInstance("Verify user profile")
                     .addRequireProperty("user", getUserSchemaRequirements(userResponse))
                     .build();
@@ -180,25 +180,25 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
                 .addProperty("phone", newArray(0, newObject("Phone"), user.get("phone").asList()));
     }
 
-    private void processEmail(ProcessContext context, SocialUserDetailsConfig config, JsonValue user)
+    private void processEmail(final ProcessContext context, final SocialUserDetailsConfig config, final JsonValue user)
             throws BadRequestException {
         if (context.containsState(EMAIL_FIELD)) {
-            JsonValue emailFieldContext = context.getState(EMAIL_FIELD);
-            JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
+            final JsonValue emailFieldContext = context.getState(EMAIL_FIELD);
+            final JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
             if (emailFieldUser == null) {
                 user.put(new JsonPointer(config.getIdentityEmailField()), emailFieldContext.asString());
             } else if (!emailFieldUser.asString().equalsIgnoreCase(emailFieldContext.asString())) {
                 throw new BadRequestException("Email address mismatch");
             }
         } else {
-            JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
+            final JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
             if (emailFieldUser != null) {
                 context.putState(EMAIL_FIELD, emailFieldUser.asString());
             }
         }
     }
 
-    private JsonValue ensureUserInContext(ProcessContext context) {
+    private JsonValue ensureUserInContext(final ProcessContext context) {
         JsonValue user = context.getState(USER_FIELD);
         if (user == null) {
             user = json(object());
@@ -207,30 +207,30 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         return user;
     }
 
-    private void updateUserJsonValue(JsonValue userState, Map<String, Object> properties) {
+    private void updateUserJsonValue(final JsonValue userState, final Map<String, Object> properties) {
         for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            String key = entry.getKey();
-            Object value = entry.getValue();
+            final String key = entry.getKey();
+            final Object value = entry.getValue();
             userState.put(key, value);
         }
     }
 
-    private JsonValue getSocialUser(String providerName, String code, String redirectUri,
-            SocialUserDetailsConfig config) throws ResourceException {
-        OpenIDConnectProvider provider = getSocialProvider(providerName, config.getProviders());
-        return (provider == null)
+    private JsonValue getSocialUser(final String providerName, final String code, final String redirectUri,
+            final SocialUserDetailsConfig config) throws ResourceException {
+        final OAuthHttpClient providerHttpClient = getHttpClient(providerName, config.getProviders());
+        return (providerHttpClient == null)
                 ? null
-                : normalizeProfile(provider.getProfile(code, redirectUri),
+                : normalizeProfile(providerHttpClient.getProfile(code, redirectUri),
                         getProviderConfig(providerName, config.getProviders()));
     }
 
-    private JsonValue normalizeProfile(JsonValue profile, ProviderConfig config) {
-        JsonValue target = json(object());
-        Context context = new RootContext();
+    private JsonValue normalizeProfile(final JsonValue profile, final ProviderConfig config) {
+        final JsonValue target = json(object());
+        final Context context = new RootContext();
         if (config.getPropertyMap() != null) {
             try {
-                for (SingleMapping mapping : config.getPropertyMap()) {
-                    PropertyMapping property = new PropertyMapping(mapping.asJsonValue());
+                for (final SingleMapping mapping : config.getPropertyMap()) {
+                    final PropertyMapping property = new PropertyMapping(mapping.asJsonValue());
                     property.apply(profile, null, target, null, null, context);
                 }
             } catch (SynchronizationException e) {
@@ -242,22 +242,17 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         return target;
     }
 
-    public OpenIDConnectProvider getSocialProvider(String providerName, List<ProviderConfig> providers)
+    private OAuthHttpClient getHttpClient(final String providerName, final List<ProviderConfig> providers)
             throws InternalServerErrorException {
-        ProviderConfig config = getProviderConfig(providerName, providers);
+        final ProviderConfig config = getProviderConfig(providerName, providers);
         if (config == null) {
             return null;
         }
-
-        if ("openid_connect".equalsIgnoreCase(config.getType())) {
-            return new OpenIDConnectProvider(config, httpClient);
-        } else {
-            throw new InternalServerErrorException(config.getName() + " is not a recognized social provider");
-        }
+        return new OAuthHttpClient(config, httpClient);
     }
 
-    private ProviderConfig getProviderConfig(String providerName, List<ProviderConfig> providers) {
-        for (ProviderConfig provider : providers) {
+    private ProviderConfig getProviderConfig(final String providerName, final List<ProviderConfig> providers) {
+        for (final ProviderConfig provider : providers) {
             if (provider.getName().equals(providerName)) {
                 return provider;
             }

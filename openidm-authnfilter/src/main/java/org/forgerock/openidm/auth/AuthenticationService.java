@@ -16,12 +16,6 @@
 
 package org.forgerock.openidm.auth;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.inject.Provider;
-
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
@@ -48,13 +42,13 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder;
 import org.forgerock.guava.common.base.Function;
-import org.forgerock.guava.common.base.Optional;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.http.Filter;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -71,7 +65,6 @@ import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
-import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
@@ -90,6 +83,11 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import javax.inject.Provider;
 
 
 /**
@@ -252,29 +250,26 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             // no configured identityProviders found to inject
             return;
         }
-        // get OpenIDConnect Properties
-        Optional<JsonValue> openidConnectModulePropertiesOption = FluentIterable.from(authModuleConfig)
-                .firstMatch(new Predicate<JsonValue>() {
-                    @Override
-                    public boolean apply(JsonValue authModuleConfig) {
-                        return authModuleConfig.get(AUTH_MODULE_NAME_KEY).asString()
-                                .equals(IDMAuthModule.OPENID_CONNECT.name());
-                    }
-                });
-
-        if (openidConnectModulePropertiesOption.isPresent()) {
-            JsonValue openidConnectModuleProperties = openidConnectModulePropertiesOption
-                    .get()
-                    .get(AUTH_MODULE_PROPERTIES_KEY);
-
-            if (openidConnectModuleProperties.isNotNull()) {
-                // populate the resolvers from IdentityProviderConfigs
-                openidConnectModuleProperties.put(RESOLVERS,
-                        ProviderConfigMapper
-                                .toJsonValue(identityProviderService.getIdentityProviders())
-                                .asList()
-                );
+        final List<JsonValue> authModuleConfigs = FluentIterable.from(authModuleConfig).filter(new Predicate<JsonValue>() {
+            @Override
+            public boolean apply(final JsonValue authModuleConfig) {
+                return authModuleConfig.get(AUTH_MODULE_NAME_KEY).asString()
+                                .equals(IDMAuthModule.OPENID_CONNECT.name())
+                        || authModuleConfig.get(AUTH_MODULE_NAME_KEY).asString()
+                                .equals(IDMAuthModule.OAUTH.name()) ;
             }
+        }).toList();
+
+        try {
+            for (final JsonValue authModule : authModuleConfigs) {
+                authModule.get(AUTH_MODULE_PROPERTIES_KEY)
+                        .put(RESOLVERS, ProviderConfigMapper.toJsonValue(identityProviderService
+                                .getIdentityProviderByType(authModule.get(AUTH_MODULE_NAME_KEY).asString()))
+                                .asList()
+                        );
+            }
+        } catch (IllegalArgumentException | JsonValueException e) {
+            logger.debug("Could not configure authModule with no resolvers.", e);
         }
     }
 

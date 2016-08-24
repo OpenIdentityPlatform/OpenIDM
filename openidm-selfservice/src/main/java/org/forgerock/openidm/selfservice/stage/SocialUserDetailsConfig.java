@@ -54,7 +54,7 @@ public final class SocialUserDetailsConfig implements StageConfig {
      *
      * @return this config instance
      */
-    public SocialUserDetailsConfig setIdentityEmailField(String identityEmailField) {
+    public SocialUserDetailsConfig setIdentityEmailField(final String identityEmailField) {
         this.identityEmailField = identityEmailField;
         return this;
     }
@@ -63,7 +63,7 @@ public final class SocialUserDetailsConfig implements StageConfig {
         return providers;
     }
 
-    public void setProviders(List<ProviderConfig> providers) {
+    public void setProviders(final List<ProviderConfig> providers) {
         this.providers = providers;
     }
 
