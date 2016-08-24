@@ -350,16 +350,16 @@ define([
                                 }
 
                                 if(!attributes.evalResult || !attributes.evalResult.conditionResults || attributes.evalResult.conditionResults.result) {
-                                    if (attributes.evalResult){
+                                    if (attributes.evalResult && attributes.evalResult.transformResults){
                                         locals.textMuted = attributes.evalResult.transformResults;
                                     } else if (attributes.sample !== null) {
-                                        if (attributes.evalResult && attributes.evalResult.transformResults) {
-                                            locals.textMuted = attributes.evalResult.transformResults;
-                                        } else {
-                                            locals.textMuted = attributes.sample;
-                                        }
+                                        locals.textMuted = attributes.sample;
                                     } else if (attributes.attribute["default"]) {
                                         locals.textMuted = attributes.attribute["default"];
+                                    }
+
+                                    if (attributes.evalResult && attributes.evalResult.conditionResults && attributes.evalResult.conditionResults.results === false) {
+                                        locals.textMuted = "";
                                     }
                                 }
 
@@ -526,6 +526,7 @@ define([
                     ScriptDelegate.parseQueryFilter(sampleDetails.condition)
                     .then(function (queryFilterTree) {
                         var qfe = new QueryFilterEditor();
+
                         return FilterEvaluator.evaluate(
                             qfe.transform(queryFilterTree),
                             {
