@@ -281,7 +281,8 @@
                     "userRegistration" : "User Registration",
                     "passwordReset" : "Password Reset",
                     "forgotUsername" : "Forgotten Username",
-                    "socialProviders" : "Social ID Providers"
+                    "socialProviders" : "Social ID Providers",
+                    "scheduler" : "Scheduler"
                 }
             }
         }
@@ -881,7 +882,9 @@
         },
         "scheduler": {
             "scheduler": "Scheduler",
+            "schedules": "Schedules",
             "enabled": "Enabled",
+            "disabled": "Disabled",
             "basicCron": "Basic Cron",
             "advanced": "Advanced",
             "complex": "Your expression is too complex for the editor.",
@@ -894,8 +897,26 @@
             "liveSync": "LiveSync",
             "fireEvery": "Fire every",
             "seconds": "second(s)",
-            "addSchedule": "Add Schedule"
-        },
+            "addSchedule": "Add Schedule",
+            "backToSchedulerList" : "Back to Scheduler List",
+            "script" : "Script",
+            "taskScanner" : "Task Scanner",
+            "temporalConstraintsOnRole" : "Temporal Constraints on Role",
+            "temporalConstraintsOnGrant" : "Temporal Constraints on Grant",
+            "filterByType" : "Filter by Type",
+            "filterByResource" : "Filter by Resource",
+            "filterByConnectorType" : "Filter by Connector Type",
+            "allUserDefinedSchedules" : "All User Defined Schedules",
+            "runningNow" : "Running Now",
+            "inMemory" : "In Memory (non-persisted)",
+            "persistedSchedulesNote" : "** Note: only persisted schedules are shown **",
+            "showAll" : "Show All",
+            "type" : "Type",
+            "schedule" : "Schedule",
+            "nextScheduledRun" : "Next Scheduled Run",
+            "unavailable" : "Unavailable",
+            "status" : "Status"
+         },
         "workflows": {
             "tasks": {
                 "title": "Workflow Tasks",

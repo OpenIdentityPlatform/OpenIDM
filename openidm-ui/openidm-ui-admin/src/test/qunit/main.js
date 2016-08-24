@@ -158,5 +158,6 @@ define([
     "./org/forgerock/openidm/ui/admin/workflow/ProcessInstanceViewTest",
     "./org/forgerock/openidm/ui/admin/workflow/ProcessListViewTest",
     "./org/forgerock/openidm/ui/admin/workflow/TaskInstanceViewTest",
-    "./org/forgerock/openidm/ui/admin/workflow/TaskListViewTest"
+    "./org/forgerock/openidm/ui/admin/workflow/TaskListViewTest",
+    "./org/forgerock/openidm/ui/admin/scheduler/SchedulerListViewTest"
 ]);

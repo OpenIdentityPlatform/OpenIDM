@@ -102,5 +102,13 @@ define([
         });
     };
 
+    obj.getConnectorsOfType = function(bundleName) {
+        return obj.currentConnectors().then((currentConnectors) => {
+            return _.reject(currentConnectors, (connector) => {
+                return bundleName !== connector.connectorRef.bundleName;
+            });
+        });
+    };
+
     return obj;
 });

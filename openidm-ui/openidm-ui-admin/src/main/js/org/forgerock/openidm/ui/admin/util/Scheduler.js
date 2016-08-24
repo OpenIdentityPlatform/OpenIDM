@@ -22,8 +22,7 @@ define([
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "cron",
-    "gentleSelect"
+    "cron"
 ], function($, _, AbstractView, constants, SchedulerDelegate, uiUtils, eventManager) {
     var schedulerInstance = {},
         Scheduler = AbstractView.extend({
@@ -142,17 +141,6 @@ define([
 
                             this.$el.find(".liveSyncSchedule").val(this.defaults.liveSyncSeconds);
                         }
-
-                        this.$el.find('.liveSyncSchedule').gentleSelect({
-                            title: "(n) seconds",
-                            columns: 3,
-                            itemWidth: 20,
-                            openSpeed: 400,
-                            closeSpeed: 400,
-                            openEffect: "slide",
-                            closeEffect: "slide",
-                            hideOnMouseOut: true
-                        });
                     }
 
                     if (this.defaults.enabled) {
@@ -234,7 +222,7 @@ define([
                     SchedulerDelegate.addSchedule({
                         "type": "cron",
                         "invokeService": this.invokeService,
-                        "schedule": "0/" + this.$el.find(".liveSyncSchedule").val() + " * * * * ?",
+                        "schedule": "*/" + this.$el.find(".liveSyncSchedule").val() + " * * * * ?",
                         "persisted": this.$el.find(".persisted").is(":checked"),
                         "misfirePolicy": this.$el.find(".misfirePolicy").val(),
                         "enabled": this.$el.find(".enabled").is(":checked"),
@@ -273,6 +261,47 @@ define([
         $.extend(true, scheduler, new Scheduler());
         scheduler.render(data);
         return scheduler;
+    };
+    /**
+     * Creates a human readable version of a cron string by using
+     * our version of jquery-cron to extract the text that is usually
+     * displayed in our schedule creation widget
+     *
+     * @param {string} - raw cron string
+     * @returns - human readable cron text
+     */
+    schedulerInstance.cronToHumanReadable = function (schedule) {
+        var cronDiv = $('<div class="readableCron"></div>'),
+            scheduleCron,
+            readableText = "Every ",
+            readableTextArray = [],
+            cronPeriod;
+
+        scheduleCron = cronDiv.cron();
+
+        scheduleCron.cron("value", scheduleCron.cron("convertCronVal", schedule));
+
+        cronPeriod = cronDiv.find(".cron-period").find("select").find("option:selected").text();
+
+        cronDiv.find(".cron-block").filter(function() { return $(this).css("display") === "inline"; }).each(function () {
+            $(this).find("select").find("option:not(:selected)").remove();
+            //$(this).find("select").remove();
+            readableTextArray.push($(this).text());
+        });
+
+        if (cronPeriod.indexOf("(n)") > -1) {
+            readableText += cronPeriod.replace("(n)", "(" + readableTextArray[0].trim() + ")");
+        } else {
+            readableText += cronPeriod + " ";
+            readableText += readableTextArray.join(" ");
+        }
+
+        //this means the schedule string is too complex for jquery-cron
+        if (readableText.trim() === "Every") {
+            return schedule;
+        } else {
+            return readableText;
+        }
     };
 
     return schedulerInstance;

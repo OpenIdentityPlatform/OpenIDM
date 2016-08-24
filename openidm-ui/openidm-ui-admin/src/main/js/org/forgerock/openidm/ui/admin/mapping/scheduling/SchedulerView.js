@@ -108,7 +108,7 @@ define([
             SchedulerDelegate.addSchedule({
                 "type": "cron",
                 "invokeService": "sync",
-                "schedule": "* * * * * ?",
+                "schedule": "0 0 * * * ?",
                 "persisted": true,
                 "enabled": false,
                 "invokeContext": {

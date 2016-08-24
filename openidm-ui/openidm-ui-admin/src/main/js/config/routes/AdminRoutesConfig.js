@@ -223,6 +223,11 @@ define([
             view: "org/forgerock/openidm/ui/admin/social/SocialConfigView",
             role: "ui-admin",
             url: "social/"
+        },
+        "scheduler" : {
+            view: "org/forgerock/openidm/ui/admin/scheduler/SchedulerListView",
+            role: "ui-admin",
+            url: "scheduler/"
         }
     };
 
