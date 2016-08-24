@@ -2877,7 +2877,7 @@ class ObjectMapping {
 
     /**
      * Gets a start-time, in nanoseconds, for the current thread. Calling thread must be the same thread used to call
-     * {@link #addDuration(ReconciliationContext, String, long)}.
+     * {@link #addDuration(ReconciliationContext, DurationMetric, long)}.
      *
      * @param reconContext Recon context or {@code null}
      * @return Start-time or {@code -1} if {@code reconContext} was {@code null}
@@ -2899,7 +2899,7 @@ class ObjectMapping {
     }
 
     /**
-     * Delegates a call to {@link ReconciliationStatistic#addDuration(String, long)}, in situations where
+     * Delegates a call to {@link ReconciliationStatistic#addDuration(DurationMetric, long)}, in situations where
      * {@code reconContext} may be {@code null} and/or {@code startNanoTime} may be {@code -1} to signal that
      * the duration statistic should <em>not</em> be recorded.
      *
