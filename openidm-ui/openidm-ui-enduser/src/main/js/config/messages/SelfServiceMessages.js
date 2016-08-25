@@ -35,6 +35,10 @@ define([
             msg: "config.messages.AdminMessages.startedProcess",
             type: "info"
         },
+        "saveSocialProvider": {
+            msg: "config.messages.socialProviders.save",
+            type: "info"
+        },
         "authenticationUnavailable" : {
             msg: "config.messages.AuthenticationMessages.authenticationUnavailable",
             type: "error"

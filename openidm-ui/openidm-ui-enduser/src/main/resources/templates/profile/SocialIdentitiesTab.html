@@ -1,23 +1,25 @@
 <div class="panel-body">
-    <label class="control-label col-sm-3">{{t "templates.socialIdentities.linkedAccounts"}}</label>
+    <p class="panel-description col-sm-12">{{t "templates.socialIdentities.linkedAccounts"}}</p>
     <form id="socialIdentities">
-        <div class="col-sm-7 social-holder">
+        <div class="col-sm-12 social-holder">
             {{#if providers}}
             {{#each providers}}
-                <div class="panel panel-default card {{#unless enabled}}disabled{{/unless}}">
-                    <div class="card-body">
+                <div class="panel panel-default card {{#unless active}}disabled{{/unless}}">
+                    <div class="card-body" data-name={{name}}>
                         <div class="panel-heading">
                             <div class="checkbox checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary social-toggle pull-left">
-                                <label><input type="checkbox" value="true" {{#if enabled}}checked{{/if}}><span></span></label>
+                                <label>
+                                    <input type="checkbox" value="true" {{#if active}}checked{{/if}}><span></span>
+                                </label>
                             </div>
                         </div>
                         <div class="panel-body">
                             <div class="media">
                                 <div class="media-body">
                                     <div class="image circle social-icon">
-                                        <i class="fa fa-{{displayIcon}}"></i>
+                                        <i class="fa fa-{{faIcon}}"></i>
                                     </div>
-                                    <div class="scopes">
+                                    <div class="scopes" {{#unless active}}style="display: none;{{/unless}}">
                                         <h4 class="block-header">{{t "templates.socialIdentities.linkedUsing"}}</h4>
                                         <ul class="list-unstyled text-muted">
                                             {{#each scope}}
