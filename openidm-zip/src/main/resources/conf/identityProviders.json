@@ -27,11 +27,11 @@
         },
         {
           "source" : "given_name",
-          "target" : "name/givenName"
+          "target" : "givenName"
         },
         {
           "source" : "family_name",
-          "target" : "name/familyName"
+          "target" : "familyName"
         },
         {
           "source" : "picture",
@@ -39,11 +39,7 @@
         },
         {
           "source" : "email",
-          "target" : "email",
-          "transform" : {
-            "type" : "text/javascript",
-            "source" : "var out = [ { \"address\" : source, \"primary\" : true } ]; out;"
-          }
+          "target" : "email"
         },
         {
           "source" : "email",
@@ -80,11 +76,11 @@
         },
         {
           "source" : "first_name",
-          "target" : "name/givenName"
+          "target" : "givenName"
         },
         {
           "source" : "last_name",
-          "target" : "name/familyName"
+          "target" : "familyName"
         },
         {
           "source" : "email",
@@ -125,11 +121,11 @@
         },
         {
           "source" : "firstName",
-          "target" : "name/givenName"
+          "target" : "givenName"
         },
         {
           "source" : "lastName",
-          "target" : "name/familyName"
+          "target" : "familyName"
         },
         {
           "source" : "emailAddress",

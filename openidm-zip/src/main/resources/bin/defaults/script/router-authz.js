@@ -294,9 +294,11 @@ function getChangedValues() {
  * schema for the object and ensure that each of the changed properties in
  * the request are marked as "userEditable" : true.
  * @param {string} objectName - the name of the managed object (ex: "user")
+ * @param {Array} exceptions - an array of properties within the object that
+ *                             are excepted from this check
  * @returns {Boolean}
  */
-function onlyEditableManagedObjectProperties(objectName) {
+function onlyEditableManagedObjectProperties(objectName, exceptions) {
     var managedConfig = openidm.read("config/managed"),
         managedObjectConfig = _.findWhere(managedConfig.objects, {"name": objectName});
 
@@ -306,8 +308,11 @@ function onlyEditableManagedObjectProperties(objectName) {
 
     return _.reduce(getChangedValues(), function (result, propertyName) {
         return result &&
-            _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
-            managedObjectConfig.schema.properties[propertyName].userEditable === true;
+            (
+                _.isObject(managedObjectConfig.schema.properties[propertyName]) &&
+                managedObjectConfig.schema.properties[propertyName].userEditable === true
+            )
+            || _.indexOf(exceptions, propertyName) > -1;
     }, true);
 
 }
