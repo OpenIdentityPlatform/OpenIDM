@@ -11,25 +11,22 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.scheduler;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.resource.QueryResponse.FIELD_RESULT;
-import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.json.resource.Responses.newQueryResponse;
-import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.openidm.repo.QueryConstants.QUERY_ALL_IDS;
 import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -39,6 +36,7 @@ import java.util.TimeZone;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -48,12 +46,10 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.JsonValueException;
-import org.forgerock.json.resource.PreconditionFailedException;
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonException;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -63,6 +59,7 @@ import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
@@ -74,12 +71,16 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.filter.JsonValueFilterVisitor;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.quartz.CronTrigger;
@@ -96,8 +97,6 @@ import org.quartz.simpl.CascadingClassLoadHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 /**
  * Scheduler service using Quartz.
  */
@@ -110,7 +109,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/scheduler*")
 })
 public class SchedulerService implements RequestHandler {
-    final static Logger logger = LoggerFactory.getLogger(SchedulerService.class);
+    private final static Logger logger = LoggerFactory.getLogger(SchedulerService.class);
 
     // Keys in the OSGi configuration
     public final static String SCHEDULE_ENABLED = "enabled";
@@ -133,14 +132,11 @@ public class SchedulerService implements RequestHandler {
     public final static String MISFIRE_POLICY_DO_NOTHING = "doNothing";
     public final static String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
 
-    // Internal service tracker
-    final static String SERVICE_TRACKER = "scheduler.service-tracker";
-    final static String SERVICE_PID = "scheduler.service-pid";
+    private final static String GROUP_NAME = "scheduler-service-group";
 
-    final static String GROUP_NAME = "scheduler-service-group";
+    private final static String CONFIG = "schedule.config";
+    private final static JsonValueFilterVisitor JSONVALUE_FILTER_VISITOR = new JsonValueFilterVisitor();
 
-    final static String CONFIG = "schedule.config";
-    
     /**
      * Supported actions on the scheduler service.
      */
@@ -149,16 +145,16 @@ public class SchedulerService implements RequestHandler {
         listCurrentlyExecutingJobs,
         pauseJobs,
         resumeJobs
-    };
+    }
 
     private static Scheduler inMemoryScheduler;
     private static Scheduler persistentScheduler = null;
     private static SchedulerConfig schedulerConfig = null;
 
-    private Map<String, ScheduleConfigService> configMap = new HashMap<String, ScheduleConfigService>();
-    private static Object CONFIG_SERVICE_LOCK = new Object();
+    private final Map<String, ScheduleConfigService> configMap = new HashMap<>();
+    private final static Object CONFIG_SERVICE_LOCK = new Object();
 
-    private static Object LOCK = new Object();
+    private final static Object LOCK = new Object();
 
     private boolean executePersistentSchedules = false;
     private boolean started = false;
@@ -323,17 +319,14 @@ public class SchedulerService implements RequestHandler {
      * @throws ObjectAlreadyExistsException
      */
     public boolean addSchedule(ScheduleConfig scheduleConfig, String jobName, boolean update)
-            throws SchedulerException, ParseException, ObjectAlreadyExistsException {
+            throws SchedulerException, ParseException {
         try {
             // Lock access to the scheduler so that a schedule is not added during a config update
             synchronized (LOCK) {
                 // Determine the schedule class based on whether the job has concurrent execution enabled/disabled
-                Class<?> scheduleClass = null;
-                if (scheduleConfig.getConcurrentExecution()) {
-                    scheduleClass = SchedulerServiceJob.class;
-                } else {
-                    scheduleClass = StatefulSchedulerServiceJob.class;
-                }
+                final Class<?> scheduleClass = scheduleConfig.getConcurrentExecution()
+                        ? SchedulerServiceJob.class
+                        : StatefulSchedulerServiceJob.class;
 
                 // Attempt to add the schedule
                 if (scheduleConfig.getCronSchedule() != null
@@ -543,7 +536,7 @@ public class SchedulerService implements RequestHandler {
             // Default incoming config to "persisted" if not specified
             Object persistedValue = object.get(SchedulerService.SCHEDULE_PERSISTED);
             if (persistedValue == null) {
-                object.put(SchedulerService.SCHEDULE_PERSISTED, new Boolean(true));
+                object.put(SchedulerService.SCHEDULE_PERSISTED, true);
             }
 
             ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(object));
@@ -603,42 +596,34 @@ public class SchedulerService implements RequestHandler {
     }
 
     @Override
-    public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request, 
-    		QueryResourceHandler handler) {
+    public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest request,
+    		final QueryResourceHandler handler) {
         try {
-            String queryId = request.getQueryId();
-            if (queryId == null) {
-                throw new BadRequestException( "query-id parameters");
-            }
-            JsonValue result = null;
-            if (queryId.equals("query-all-ids")) {
-                // Query all the Job IDs in both schedulers
-                String[] persistentJobNames = null;
-                persistentJobNames = persistentScheduler.getJobNames(GROUP_NAME);
-                String[] inMemoryJobNames = inMemoryScheduler.getJobNames(GROUP_NAME);
-                List<Map<String, String>> resultList = new ArrayList<Map<String, String>>();
-                if (persistentJobNames != null) {
-                    for (String job : persistentJobNames) {
-                        Map<String, String> idMap = new HashMap<String, String>();
-                        idMap.put("_id", job);
-                        resultList.add(idMap);
-                    }
-                }
-                if (inMemoryJobNames != null) {
-                    for (String job : inMemoryJobNames) {
-                        Map<String, String> idMap = new HashMap<String, String>();
-                        idMap.put("_id", job);
-                        resultList.add(idMap);
-                    }
-                }
-                result = json(object());
-                result.put(FIELD_RESULT, resultList);
-            } else {
-                throw new BadRequestException( "Unsupported query-id: " + queryId);
+            QueryFilter<JsonPointer> queryFilter = request.getQueryFilter();
+            if (null == queryFilter) {
+                queryFilter = QueryFilter.alwaysTrue();
             }
 
-            for (JsonValue r: result.get(FIELD_RESULT)){
-                handler.handleResource(newResourceResponse(r.get("_id").asString(), null, new JsonValue(r)));
+            final String queryId = request.getQueryId();
+            final boolean idOnly = queryId != null && QUERY_ALL_IDS.equals(queryId);
+
+            final List<String> allJobs = new ArrayList<>();
+            allJobs.addAll(Arrays.asList(getJobNames(persistentScheduler)));
+            allJobs.addAll(Arrays.asList(getJobNames(inMemoryScheduler)));
+            final JsonValue results = json(array());
+            for (final String jobName : allJobs) {
+                if (idOnly) {
+                    results.add(json(object(field(FIELD_CONTENT_ID, jobName))));
+                } else {
+                    final JsonValue schedule = getSchedule(jobName);
+                    if (queryFilter.accept(JSONVALUE_FILTER_VISITOR, schedule)) {
+                        results.add(schedule);
+                    }
+                }
+            }
+
+            for (final JsonValue r : results) {
+                handler.handleResource(newResourceResponse(r.get(FIELD_CONTENT_ID).asString(), null, json(r)));
             }
             return newQueryResponse().asPromise();
         } catch (JsonException e) {
@@ -650,6 +635,20 @@ public class SchedulerService implements RequestHandler {
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
+    }
+
+    /**
+     * Gets the job names of the scheduler, returning an empty array if no jobs are found.
+     *
+     * @param scheduler to get the jobNames from.
+     * @return array of job names, or empty array.
+     * @throws SchedulerException when there is trouble calling {@link Scheduler#getJobNames(String)}
+     */
+    private String[] getJobNames(Scheduler scheduler) throws SchedulerException {
+        String[] jobNames = scheduler.getJobNames(GROUP_NAME);
+        return null == jobNames
+                ? new String[0]
+                : jobNames;
     }
 
     @Override
@@ -714,11 +713,7 @@ public class SchedulerService implements RequestHandler {
                 persistentScheduler.shutdown();
             }
         }
-        if (schedulerConfig.executePersistentSchedulesEnabled()) {
-            executePersistentSchedules = true;
-        } else {
-            executePersistentSchedules = false;
-        }
+        executePersistentSchedules = schedulerConfig.executePersistentSchedulesEnabled();
         createPersistentScheduler();
     }
 
@@ -740,7 +735,7 @@ public class SchedulerService implements RequestHandler {
                 ClassLoader original = Thread.currentThread().getContextClassLoader();
                 Thread.currentThread().setContextClassLoader(CascadingClassLoadHelper.class.getClassLoader());
                 // Get the in-memory scheduler
-                // Must use DirectSchedulerFactory instance so that it does not confict with
+                // Must use DirectSchedulerFactory instance so that it does not conflict with
                 // the StdSchedulerFactory (used to create the persistent schedulers).
                 logger.info("Creating In-Memory Scheduler");
                 DirectSchedulerFactory.getInstance().createVolatileScheduler(10);
@@ -764,7 +759,7 @@ public class SchedulerService implements RequestHandler {
      * @throws ResourceException
      */
     private JsonValue getSchedule(String scheduleName) throws SchedulerException, ResourceException {
-        Scheduler scheduler = null;
+        final Scheduler scheduler;
         if (inMemoryScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
             scheduler = inMemoryScheduler;
         } else if (persistentScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
@@ -775,17 +770,15 @@ public class SchedulerService implements RequestHandler {
         JobDetail job = scheduler.getJobDetail(scheduleName, GROUP_NAME);
         JobDataMap dataMap = job.getJobDataMap();
         JsonValue resultMap = new ScheduleConfig(parseStringified((String) dataMap.get(CONFIG))).getConfig();
-        resultMap.put("_id", scheduleName);
+        resultMap.put(FIELD_CONTENT_ID, scheduleName);
         return resultMap;
     }
 
     private JsonValue parseStringified(String stringified) {
-        JsonValue jsonValue = null;
         try {
-            jsonValue = new JsonValue(mapper.readValue(stringified, Map.class));
+            return json(mapper.readValue(stringified, Map.class));
         } catch (IOException ex) {
             throw new JsonException("String passed into parsing is not valid JSON", ex);
         }
-        return jsonValue;
     }
 }
