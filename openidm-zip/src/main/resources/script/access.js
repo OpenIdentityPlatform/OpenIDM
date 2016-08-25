@@ -140,7 +140,7 @@ var httpAccessConfig =
             "roles"     : "openidm-reg",
             "methods"   : "create",
             "actions"   : "*",
-            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user')"
+            "customAuthz" : "checkIfUIIsEnabled('selfRegistration') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user', ['idpData'])"
         },
         {
             "pattern"   : "managed/user",
@@ -161,7 +161,7 @@ var httpAccessConfig =
             "roles"     : "*",
             "methods"   : "patch,action",
             "actions"   : "patch",
-            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user')"
+            "customAuthz" : "checkIfUIIsEnabled('passwordReset') && isSelfServiceRequest() && onlyEditableManagedObjectProperties('user', ['idpData'])"
         },
         {
             "pattern"   : "external/email",
@@ -262,14 +262,14 @@ var httpAccessConfig =
             "roles"     : "openidm-authorized",
             "methods"   : "update,patch,action",
             "actions"   : "patch",
-            "customAuthz" : "ownDataOnly() && onlyEditableManagedObjectProperties('user') && reauthIfProtectedAttributeChange()"
+            "customAuthz" : "ownDataOnly() && onlyEditableManagedObjectProperties('user', []) && reauthIfProtectedAttributeChange()"
         },
         {
             "pattern"   : "selfservice/user/*",
             "roles"     : "openidm-authorized",
             "methods"   : "patch,action",
             "actions"   : "patch",
-            "customAuthz" : "(request.resourcePath === 'selfservice/user/' + context.security.authorization.id) && onlyEditableManagedObjectProperties('user')"
+            "customAuthz" : "(request.resourcePath === 'selfservice/user/' + context.security.authorization.id) && onlyEditableManagedObjectProperties('user', [])"
         },
 
         // enforcement of which notifications you can read and delete is done within the endpoint

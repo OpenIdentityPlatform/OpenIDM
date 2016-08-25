@@ -35,6 +35,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.config.SingleMapping;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
+import org.forgerock.openidm.selfservice.impl.PropertyMappingService;
 import org.forgerock.openidm.sync.PropertyMapping;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.selfservice.core.ProcessContext;
@@ -43,15 +44,16 @@ import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
 import org.forgerock.openidm.selfservice.util.RequirementsBuilder;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.TimeZone;
 
 import javax.inject.Inject;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.slf4j.Logger;
@@ -59,7 +61,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Stage is responsible for gathering social user profile details.
- * It expects the "mai" field to be populated in the context which
+ * It expects the "mail" field to be populated in the context which
  * it uses to verify against the email address specified in the
  * passed in user object.
  */
@@ -67,15 +69,12 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
 
     private static final Logger logger = LoggerFactory.getLogger(SocialUserDetailsStage.class);
 
-    private static final ObjectMapper mapper = new ObjectMapper();
-    static {
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        mapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
-    }
-
     private static final String VALIDATE_USER_PROFILE_TAG = "validateUserProfile";
+    private static final String ORIGINAL_PROFILE = "originalProfile";
+    private static final String IDP_SUBJECT = "idpSubject";
 
     private final Client httpClient;
+    private final PropertyMappingService mappingService;
 
     /**
      * Constructs a new user details stage.
@@ -84,8 +83,9 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
      *         the http client
      */
     @Inject
-    public SocialUserDetailsStage(@SelfService Client httpClient) {
+    public SocialUserDetailsStage(@SelfService Client httpClient, @SelfService PropertyMappingService mappingService) {
         this.httpClient = httpClient;
+        this.mappingService = mappingService;
     }
 
     @Override
@@ -105,7 +105,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
         return RequirementsBuilder
                 .newInstance("New user details")
-                .addProperty("user", getUserSchemaRequirements(json(object())))
+                .addProperty("user", "object", "User Object", json(object()))
                 .addProperty("provider", "string", "OAuth IDP name")
                 .addProperty("code", "string", "OAuth Access code")
                 .addProperty("redirect_uri", "string", "OAuth redirect URI used to obtain the authorization code")
@@ -116,22 +116,41 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
     @Override
     public StageResponse advance(ProcessContext context, SocialUserDetailsConfig config) throws ResourceException {
         final JsonValue user = context.getInput().get("user");
+        final JsonValue provider = context.getInput().get("provider");
         if (user.isNotNull()) {
+            // This is the second pass through this stage.  Update the user object and advance.
             processEmail(context, config, user);
 
             final JsonValue userState = ensureUserInContext(context);
+
             final Map<String, Object> properties = user.asMap();
-            updateUserJsonValue(userState, properties);
+            for (Map.Entry<String, Object> entry : properties.entrySet()) {
+                final String key = entry.getKey();
+                final Object value = entry.getValue();
+                userState.put(key, value);
+            }
+
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+            df.setTimeZone(TimeZone.getTimeZone("UTC"));
+            userState.put("idpData", json(object(
+                    field(provider.asString(), object(
+                            field("subject", context.getState(IDP_SUBJECT).asString()),
+                            field("enabled", true),
+                            field("dateCollected", df.format(new Date())),
+                            field("rawProfile", context.getState(ORIGINAL_PROFILE).getObject())
+                    )))).getObject());
+
             context.putState(USER_FIELD, userState);
 
             return StageResponse.newBuilder().build();
         }
 
-        final JsonValue provider = context.getInput().get("provider");
+        // This is the first pass through this stage.  Gather the user profile to offer up for registration.
         final JsonValue code = context.getInput().get("code");
         final JsonValue redirectUri = context.getInput().get("redirect_uri");
         if (provider.isNotNull() && code.isNotNull() && redirectUri.isNotNull()) {
-            final JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(), config);
+            final JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(),
+                    config, context);
             if (userResponse == null) {
                 throw new BadRequestException("Unable to reach social provider or unknown provider given");
             }
@@ -140,7 +159,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
 
             final JsonValue requirements = RequirementsBuilder
                     .newInstance("Verify user profile")
-                    .addRequireProperty("user", getUserSchemaRequirements(userResponse))
+                    .addProperty("user", "object", "User Object", userResponse.getObject())
                     .build();
 
             return StageResponse.newBuilder()
@@ -150,34 +169,6 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
 
         throw new BadRequestException("Should respond with either user or provider/code");
-    }
-
-    private RequirementsBuilder getUserSchemaRequirements(JsonValue user) {
-        return newObject("User details")
-                .addRequireProperty("id", "string", "User ID", user.get("id").asString())
-                .addRequireProperty("username", "string", "Username", user.get("username").asString())
-                .addProperty("profileUrl", "string", "Profile URL", user.get("profileUrl").asString())
-                .addProperty("photoUrl", "string", "Photo URL", user.get("photoUrl").asString())
-                .addProperty("preferredLanguage", "string", "Preferred Language", user.get("preferredLanguage").asString())
-                .addProperty("locale", "string", "Locale", user.get("locale").asString())
-                .addProperty("timezone", "string", "Timezone", user.get("timezone").asString())
-                .addRequireProperty("active", "boolean", "Active", user.get("active").asBoolean())
-                .addRequireProperty("name", newObject("Name")
-                        .addRequireProperty("familyName", "string", "Family Name", user.get("name").get("familyName").asString())
-                        .addRequireProperty("givenName", "string", "Given Name", user.get("name").get("giveName").asString())
-                        .addProperty("middleName", "string", "Middle Name", user.get("name").get("middleName").asString())
-                        .addProperty("honorificPrefix", "string", "Prefix", user.get("name").get("honorificPrefix").asString())
-                        .addProperty("honorificSuffix", "string", "Suffix", user.get("name").get("honorificSuffix").asString())
-                        .addProperty("fullName", "string", "Suffix", user.get("name").get("fullName").asString())
-                        .addProperty("nickname", "string", "Suffix", user.get("name").get("nickname").asString())
-                        .addProperty("displayName", "string", "Suffix", user.get("name").get("displayName").asString())
-                        .addProperty("title", "string", "Suffix", user.get("name").get("title").asString()))
-                .addRequireProperty("email", newArray(1, newObject("Email")
-                        .addRequireProperty("address", "string", "Email Address", user.get("email").get(0).get("address").asString())
-                        .addProperty("type", "string", "Type", user.get("email").get(0).get("type").asString())
-                        .addProperty("primary", "boolean", "Primary", user.get("email").get(0).get("primary").asBoolean())))
-                .addProperty("address", newArray(0, newObject("Address"), user.get("address").asList()))
-                .addProperty("phone", newArray(0, newObject("Phone"), user.get("phone").asList()));
     }
 
     private void processEmail(final ProcessContext context, final SocialUserDetailsConfig config, final JsonValue user)
@@ -207,35 +198,29 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         return user;
     }
 
-    private void updateUserJsonValue(final JsonValue userState, final Map<String, Object> properties) {
-        for (Map.Entry<String, Object> entry : properties.entrySet()) {
-            final String key = entry.getKey();
-            final Object value = entry.getValue();
-            userState.put(key, value);
-        }
-    }
-
     private JsonValue getSocialUser(final String providerName, final String code, final String redirectUri,
-            final SocialUserDetailsConfig config) throws ResourceException {
+            final SocialUserDetailsConfig config, final ProcessContext context) throws ResourceException {
         final OAuthHttpClient providerHttpClient = getHttpClient(providerName, config.getProviders());
-        return (providerHttpClient == null)
-                ? null
-                : normalizeProfile(providerHttpClient.getProfile(code, redirectUri),
-                        getProviderConfig(providerName, config.getProviders()));
+        if (providerHttpClient == null) {
+            return null;
+        }
+        final ProviderConfig providerConfig = getProviderConfig(providerName, config.getProviders());
+        final JsonValue rawProfile = providerHttpClient.getProfile(code, redirectUri);
+        context.putState(ORIGINAL_PROFILE, rawProfile);
+        context.putState(IDP_SUBJECT, rawProfile.get(providerConfig.getAuthenticationId()).asString());
+
+        final JsonValue commonFormat = normalizeProfile(rawProfile, providerConfig);
+        return mappingService.apply(commonFormat, context.getRequestContext());
     }
 
-    private JsonValue normalizeProfile(final JsonValue profile, final ProviderConfig config) {
+    private JsonValue normalizeProfile(final JsonValue profile, final ProviderConfig config)
+            throws SynchronizationException {
         final JsonValue target = json(object());
         final Context context = new RootContext();
         if (config.getPropertyMap() != null) {
-            try {
-                for (final SingleMapping mapping : config.getPropertyMap()) {
-                    final PropertyMapping property = new PropertyMapping(mapping.asJsonValue());
-                    property.apply(profile, null, target, null, null, context);
-                }
-            } catch (SynchronizationException e) {
-                logger.warn("Unable to map profile data to common format", e);
-                return null;
+            for (final SingleMapping mapping : config.getPropertyMap()) {
+                final PropertyMapping property = new PropertyMapping(mapping.asJsonValue());
+                property.apply(profile, null, target, null, null, context);
             }
         }
         target.add("rawProfile", profile);

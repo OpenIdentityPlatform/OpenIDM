@@ -135,6 +135,9 @@ public class SelfService implements IdentityProviderListener {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile IdentityProviderService identityProviderService;
 
+    @Reference(policy = ReferencePolicy.STATIC)
+    private PropertyMappingService mappingService;
+
     private Dictionary<String, Object> properties = null;
     private JsonValue config;
     private RequestHandler processService;
@@ -232,6 +235,8 @@ public class SelfService implements IdentityProviderListener {
                         parameters[i] = connectionFactory;
                     } else if (parameterTypes[i].equals(Client.class)) {
                         parameters[i] = httpClient;
+                    } else if (parameterTypes[i].equals(PropertyMappingService.class)) {
+                        parameters[i] = mappingService;
                     } else {
                         throw new StageConfigException("Unexpected parameter type for configured progress stage "
                                 + parameters[i]);
