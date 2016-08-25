@@ -19,49 +19,51 @@ define([
     "lodash",
     "form2js",
     "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationAbstractView",
-    "org/forgerock/openidm/ui/common/delegates/SocialDelegate"
-
+    "libs/codemirror/lib/codemirror",
+    "libs/codemirror/mode/xml/xml"
 ], function($, _,
             Form2js,
             AuthenticationAbstractView,
-            SocialDelegate) {
+            codemirror) {
 
     var OpenIDConnectView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/modules/OPENID_CONNECT.html",
-        events: _.extend({
-            "change #toggle-enabled": "enableModule"
-        }, AuthenticationAbstractView.prototype.events),
 
         knownProperties: AuthenticationAbstractView.prototype.knownProperties.concat([
-            "openIdConnectHeader"
+            "openIdConnectHeader",
+            "resolvers"
         ]),
 
-        partials: AuthenticationAbstractView.prototype.partials.concat([
-            "partials/_alert.html"
-        ]),
+        getConfig: function () {
+            var config = AuthenticationAbstractView.prototype.getConfig.call(this);
 
-        enableModule: function(e) {
-            function setDisableState(state) {
-                this.$el.find("#noSocialProvidersAlert").toggle(state);
-                $("#submitAuditEventHandlers").toggleClass("disabled", state);
+            if (this.model.iconCode && _.has(config, "properties.resolvers[0].icon")) {
+                config.properties.resolvers[0].icon  = this.model.iconCode.getValue();
             }
 
-            if ($(e.currentTarget).is(":checked")) {
-                SocialDelegate.providerList().then(_.bind(function (data) {
-                    if (data.providers.length === 0) {
-                        setDisableState.call(this, true);
-                    } else {
-                        setDisableState.call(this, false);
-                    }
-                }, this));
-
-            } else {
-                setDisableState.call(this, false);
+            if (_.has(config, "properties.resolvers[0].client_id")) {
+                config.properties.resolvers[0].client_id = config.properties.resolvers[0].client_id.trim();
             }
+
+            if (_.has(config, "properties.resolvers[0].client_secret")) {
+                config.properties.resolvers[0].client_secret = config.properties.resolvers[0].client_secret.trim();
+            } else if (_.has(this.data.config, "properties.resolvers[0].client_secret")) {
+                // client_secret will be omitted from the config when it is left empty in the form
+                // this will restore the previous value for it, if there had been one
+                config.properties.resolvers[0].client_secret = this.data.config.properties.resolvers[0].client_secret;
+            }
+
+
+            return config;
         },
 
         render: function (args) {
             this.data = _.clone(args, true);
+            if (!_.has(this.data, "config.properties.resolvers") || !this.data.config.properties.resolvers.length) {
+                this.data.config.properties.resolvers = [{
+                    scope: ["openid", "profile", "email"]
+                }];
+            }
             this.data.userOrGroupValue = "userRoles";
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);
             this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
@@ -75,6 +77,16 @@ define([
                     "augmentSecurityContext": this.data.config.properties.augmentSecurityContext || {},
                     "userOrGroup": this.data.userOrGroupDefault
                 });
+
+                this.model.iconCode = codemirror.fromTextArea(this.$el.find(".button-html")[0], {
+                    lineNumbers: true,
+                    viewportMargin: Infinity,
+                    theme: "forgerock",
+                    mode: "xml",
+                    htmlMode: true,
+                    lineWrapping: true
+                });
+
             });
         }
 

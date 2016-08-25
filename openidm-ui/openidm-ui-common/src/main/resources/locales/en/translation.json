@@ -972,7 +972,7 @@
             "tokenEndpoint" : "Token Endpoint",
             "userInfoEndpoint" : "User Info Endpoint",
             "title" : "Social ID Provider",
-            "wellKnown" : "Discovery URL",
+            "wellKnown" : "Well-Known Endpoint",
             "scope" : "Scope",
             "scopeHelp" : "OAuth 2.0 scopes needed to access provider APIs",
             "disableOIDCAuthModule": "When you disable all social ID providers, OpenIDM disables the OpenID Connect module.",

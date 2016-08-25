@@ -6,18 +6,73 @@
         label="templates.auth.moduleEnabled"
         enabled=config.enabled}}
 
+        {{#each config.properties.resolvers}}
+
+        <input name="properties.resolvers[].name" value="OIDC" type="hidden" />
+
+        {{> form/_basicInput
+        value=client_id
+        label="templates.socialProviders.clientId"
+        property="properties.resolvers[].client_id"
+        required="true"
+        noValidation="true"}}
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="inputClientSecret">{{t "templates.socialProviders.clientSecret"}}</label>
+            <div class="col-sm-6">
+                <input id="inputClientSecret" class="form-control" name="properties.resolvers[].client_secret" type="text" {{#if client_secret}} placeholder="********" {{/if}} />
+            </div>
+        </div>
+
+        {{> form/_tagSelectize
+        value=scope
+        label="templates.socialProviders.scope"
+        property="properties.resolvers[].scope"
+        noValidation="true"
+        helpKey="templates.socialProviders.scopeHelp" }}
+
+        {{> form/_basicInput
+        value=authorization_endpoint
+        label="templates.socialProviders.authorizationEndpoint"
+        property="properties.resolvers[].authorization_endpoint"
+        default="https://openam.example.com/openam/oauth2/authorize"
+        noValidation="true"}}
+
+        {{> form/_basicInput
+        value=token_endpoint
+        label="templates.socialProviders.tokenEndpoint"
+        property="properties.resolvers[].token_endpoint"
+        default="https://openam.example.com/openam/oauth2/access_token"
+        noValidation="true"}}
+
+        {{> form/_basicInput
+        value=userinfo_endpoint
+        label="templates.socialProviders.userInfoEndpoint"
+        property="properties.resolvers[].userinfo_endpoint"
+        default="https://openam.example.com/openam/oauth2/userinfo"
+        noValidation="true"}}
+
+        {{> form/_basicInput
+        value=well-known
+        label="templates.socialProviders.wellKnown"
+        property="properties.resolvers[].well-known"
+        default="https://openam.example.com/openam/oauth2/.well-known/openid-configuration"
+        noValidation="true"}}
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{t "templates.socialProviders.icon"}}</label>
+            <div class="col-sm-6">
+                <textarea class="button-html" name="properties.resolvers[].icon">{{#if icon}}{{icon}}{{else}}<button class="btn btn-lg btn-default btn-block btn-social-provider"><img src="images/forgerock_logo.png">Sign in with OpenAM</button>{{/if}}</textarea>
+            </div>
+        </div>
+
+        {{/each}}
+
         {{> form/_basicSelect
         property="properties.queryOnResource"
         label="templates.auth.queryOnResource"
         options=resources
         value=config.properties.queryOnResource}}
-
-        {{> form/_basicInput
-        value=config.properties.queryId
-        label="templates.auth.queryId"
-        property="properties.queryId"
-        required="true"
-        noValidation="true"}}
 
         {{> form/_tagSelectize
         value=config.properties.defaultUserRoles
@@ -26,16 +81,10 @@
         options=defaultUserRoles
         default="openidm-authorized"}}
 
-        {{> form/_basicInput
-        value=config.properties.openIdConnectHeader
-        label="templates.auth.openIdConnectHeader"
-        property="properties.openIdConnectHeader"
-        default="authToken"
-        noValidation="true"}}
     </div>
 
     {{> settings/authentication/_propertyMapping
-    authenticationId="sub"
+    authenticationId="userName"
     userRoles="authzRoles"}}
 </div>
 
@@ -45,17 +94,25 @@
 </h3>
 
 <div class="form-horizontal well" id="advancedForm">
-    <div id="advancedFields" class="form-horizontal"></div>
+    <div id="advancedFields" class="form-horizontal">
+
+    {{> form/_basicInput
+    value=config.properties.queryId
+    label="templates.auth.queryId"
+    property="properties.queryId"
+    required="true"
+    noValidation="true"}}
+
+    {{> form/_basicInput
+    value=config.properties.openIdConnectHeader
+    label="templates.auth.openIdConnectHeader"
+    property="properties.openIdConnectHeader"
+    default="authToken"
+    noValidation="true"}}
+
+
     {{> settings/authentication/_augmentSecurityContext}}
     {{> settings/authentication/_customProperties}}
-</div>
 
-{{> _alert
-    id="noSocialProvidersAlert"
-    type="danger"
-    heading="templates.auth.noSocialProviderHeader"
-    message="templates.auth.noSocialProviderMessage"
-    link="#social/"
-    linkMessage="templates.auth.noSocialProviderLink"
-    hidden="true"
-}}
+    </div>
+</div>
