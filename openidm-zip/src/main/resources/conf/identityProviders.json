@@ -71,6 +71,10 @@
       "authenticationId" : "id",
       "propertyMap" : [
         {
+          "source" : "id",
+          "target" : "id"
+        },
+        {
           "source" : "name",
           "target" : "displayName"
         },
@@ -94,8 +98,56 @@
           "source" : "locale",
           "target" : "locale"
         }
+      ]
+    },
+    {
+      "name" : "linkedIn",
+      "type" : "OAUTH",
+      "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider\">Sign in with LinkedIn</button>",
+      "authorization_endpoint" : "https://www.linkedin.com/oauth/v2/authorization",
+      "token_endpoint" : "https://www.linkedin.com/oauth/v2/accessToken",
+      "userinfo_endpoint" : "https://api.linkedin.com/v1/people/~:(id,formatted-name,first-name,last-name,email-address,location)?format=json",
+      "client_id" : "",
+      "client_secret" : "",
+      "scope" : [
+        "r_basicprofile",
+        "r_emailaddress"
       ],
-      "propertyMap" : null
+      "authenticationId" : "id",
+      "propertyMap" : [
+        {
+          "source" : "id",
+          "target" : "id"
+        },
+        {
+          "source" : "formattedName",
+          "target" : "displayName"
+        },
+        {
+          "source" : "firstName",
+          "target" : "name/givenName"
+        },
+        {
+          "source" : "lastName",
+          "target" : "name/familyName"
+        },
+        {
+          "source" : "emailAddress",
+          "target" : "email"
+        },
+        {
+          "source" : "emailAddress",
+          "target" : "username"
+        },
+        {
+          "source" : "location",
+          "target" : "locale",
+          "transform" : {
+            "type" : "text/javascript",
+            "source" : "source.country.code"
+          }
+        }
+      ]
     }
   ]
 }
