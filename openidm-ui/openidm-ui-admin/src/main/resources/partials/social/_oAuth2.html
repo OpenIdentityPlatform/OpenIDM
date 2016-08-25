@@ -1,0 +1,36 @@
+<form id="socialDialogForm" class="form-horizontal">
+    <p class="panel-description">
+        {{t "templates.socialProviders.oAuthGeneralHelp"}}
+    </p>
+
+    {{> form/_basicInput value=client_id label="templates.socialProviders.clientId" property="client_id" noValidation="true"}}
+
+    <div class="form-group">
+        <label class="col-sm-3 control-label" for="inputClientSecret">{{t "templates.socialProviders.clientSecret"}}</label>
+        <div class="col-sm-6">
+            <input id="inputClientSecret" class="form-control" name="client_secret" type="text" {{#if client_secret}} placeholder="********" {{/if}} />
+        </div>
+    </div>
+
+    {{> form/_tagSelectize value=scope label="templates.socialProviders.scope" property="scope" noValidation="true" helpKey="templates.socialProviders.scopeHelp" }}
+
+    <div class="form-group">
+        <div class="col-sm-8 col-sm-offset-3">
+            <a class="advanced-options-toggle" role="button" data-toggle="collapse" href="#advancedOptions" aria-expanded="true" aria-controls="advancedOptions">{{t "templates.socialProviders.hideAdvanced"}}</a>
+        </div>
+    </div>
+
+    <div class="collapse in" aria-expanded="true" id="advancedOptions">
+        {{> form/_basicInput value=authorization_endpoint label="templates.socialProviders.authorizationEndpoint" property="authorization_endpoint" noValidation="true"}}
+        {{> form/_basicInput value=token_endpoint label="templates.socialProviders.tokenEndpoint" property="token_endpoint" noValidation="true"}}
+        {{> form/_basicInput value=userinfo_endpoint label="templates.socialProviders.userInfoEndpoint" property="userinfo_endpoint" noValidation="true"}}
+        {{> form/_basicInput value=well-known label="templates.socialProviders.wellKnown" property="well-known" noValidation="true"}}
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label">{{t "templates.socialProviders.icon"}}</label>
+            <div class="col-sm-6">
+                <textarea class="button-html" name="icon">{{icon}}</textarea>
+            </div>
+        </div>
+    </div>
+</form>
