@@ -1,31 +1,34 @@
+<!-- Copyright 2015-2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
 
-    {{#requirements.properties.user.properties}}
+{{#requirements.properties}}
 
-        <div class="form-group">
-            <label class="sr-only separator" for="input-userName">
-                <span>{{t 'common.user.username'}}</span>
-            </label>
-            <input type="text" placeholder="{{t 'common.user.username'}}" value="{{userName.default}}" id="input-userName" name="user.userName" class="form-control input-lg" required />
-        </div>
+    <div class="form-group">
+        <label class="sr-only separator" for="input-userId">
+            <span>{{t 'common.user.username'}}</span>
+        </label>
+        <input type="text" placeholder="{{t 'common.user.username'}}" id="input-userName" name="user.userName" value="{{user.default.userName}}" class="form-control input-lg" required />
+    </div>
 
-        {{#name.properties}}
+    <div class="form-group">
+        <label class="sr-only separator" for="input-givenName">
+            <span>{{t 'common.user.givenName'}}</span>
+        </label>
+        <input type="text" placeholder="{{t 'common.user.givenName'}}" id="input-givenName" name="user.givenName" value="{{user.default.givenName}}" class="form-control input-lg" />
+    </div>
 
-            <div class="form-group">
-                <label class="sr-only separator" for="input-givenName">
-                    <span>{{t 'common.user.givenName'}}</span>
-                </label>
-                <input type="text" placeholder="{{t 'common.user.givenName'}}" id="input-givenName" value="{{givenName.default}}" name="user.name.givenName" class="form-control input-lg" />
-            </div>
+    <div class="form-group">
+        <label class="sr-only separator" for="input-sn">
+            <span>{{t 'common.user.sn'}}</span>
+        </label>
+        <input type="text" placeholder="{{t 'common.user.sn'}}" id="input-sn" name="user.sn" value="{{user.default.sn}}" class="form-control input-lg" />
+    </div>
 
-            <div class="form-group">
-                <label class="sr-only separator" for="input-familyName">
-                    <span>{{t 'common.user.sn'}}</span>
-                </label>
-                <input type="text" placeholder="{{t 'common.user.sn'}}" id="input-familyName" value="{{familyName.default}}" name="user.name.familyName" class="form-control input-lg" />
-            </div>
+    <div class="form-group">
+        <label class="sr-only separator" for="input-email">
+            <span>{{t 'common.user.email'}}</span>
+        </label>
+        <input type="text" placeholder="{{t 'common.user.email'}}" id="input-email" name="user.mail" value="{{user.default.mail}}" {{#if user.default.mail}} readonly {{/if}} class="form-control input-lg" />
+    </div>
 
-        {{/name.properties}}
-
-        {{>profile/_multiValueFormFields field=emails subPartial="profile/_emailEntry" label="common.user.email"}}
-
-    {{/requirements.properties.user.properties}}
+{{/requirements.properties}}
