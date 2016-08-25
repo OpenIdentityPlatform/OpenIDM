@@ -80,29 +80,39 @@ define([
                 .then(function (authToken) {
                     EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
                         authToken: authToken.auth_token,
-                        provider: params.provider
+                        provider: params.provider,
+                        failureCallback: (reason) => {
+                            EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                                route: Router.configuration.routes.login,
+                                args: []
+                            });
+                        }
                     });
                 });
+
+        } else {
+
+            oauthProviders.then(_.bind(function (response) {
+                _.each(response.providers, (provider) => {
+                    provider.scope = provider.scope.join(" ");
+                });
+
+                this.data.providers = response.providers;
+
+                commonLoginView.render.call(this, args, _.bind(function () {
+                    if (callback) {
+                        callback();
+                    }
+
+                    if (amCallback) {
+                        amCallback();
+                    }
+
+                }, this));
+            }, this));
+
         }
 
-        oauthProviders.then(_.bind(function (response) {
-            _.each(response.providers, (provider) => {
-                provider.scope = provider.scope.join(" ");
-            });
-
-            this.data.providers = response.providers;
-
-            commonLoginView.render.call(this, args, _.bind(function () {
-                if (callback) {
-                    callback();
-                }
-
-                if (amCallback) {
-                    amCallback();
-                }
-
-            }, this));
-        }, this));
     };
 
     return obj;

@@ -226,7 +226,11 @@ define([
 
             if (!_.isNull(newModule)) {
                 AuthenticationModuleDialogView.render({
-                    "config": {"name": newModule, "properties": {}},
+                    "config": {
+                        "name": newModule,
+                        "enabled": true,
+                        "properties": {}
+                    },
                     "newModule": true,
                     "saveCallback": _.bind(function (config) {
                         this.model.changes.push(config);
