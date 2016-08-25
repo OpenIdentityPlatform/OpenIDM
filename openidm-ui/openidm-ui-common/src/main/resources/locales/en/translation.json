@@ -977,6 +977,7 @@
             "disableOIDCAuthModule": "When you disable all social ID providers, OpenIDM disables the OpenID Connect module.",
             "googleGeneralHelp" : "Visit the Google <a href='https://console.developers.google.com' target='_blank'>API Manager</a> to generate a Client ID and Client Secret",
             "facebookGeneralHelp" : "Visit the Facebook <a href='https://developers.facebook.com/apps/' target='_blank'>App Manager</a> to get the App ID and App Secret",
+            "oAuthGeneralHelp" : "To get a Client ID and Client Secret, refer to developer documentation from the target social provider",
             "showAdvanced" : "Show Advanced Options",
             "hideAdvanced" : "Hide Advanced Options",
             "noRegistration" : "To use social ID provide data to register users, ",

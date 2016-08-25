@@ -58,6 +58,7 @@ define([
             "partials/_toggleIconBlock.html",
             "partials/social/_google.html",
             "partials/social/_facebook.html",
+            "partials/social/_oAuth2.html",
             "partials/form/_basicInput.html",
             "partials/form/_tagSelectize.html",
             "partials/_alert.html"
@@ -98,6 +99,9 @@ define([
                             break;
                         case "facebook":
                             provider.displayIcon = "facebook";
+                            break;
+                        default:
+                            provider.displayIcon = "cloud";
                             break;
                     }
 
@@ -230,14 +234,22 @@ define([
 
             var card = $(event.target).parents(".wide-card"),
                 cardDetails = this.getCardDetails(card),
-                index = this.$el.find(".wide-card").index(card);
+                index = this.$el.find(".wide-card").index(card),
+                dialogDetails;
 
             ConfigDelegate.readEntity("identityProvider/" +cardDetails.name).then((providerConfig) => {
+
+                try {
+                    dialogDetails = $(handlebars.compile("{{> social/_" + cardDetails.name + "}}")(providerConfig));
+                } catch (e) {
+                    dialogDetails = $(handlebars.compile("{{> social/_oAuth2}}")(providerConfig));
+                }
+
                 this.dialog = BootstrapDialog.show({
                     title: AdminUtils.capitalizeName(cardDetails.name) + " " + $.t("templates.socialProviders.provider"),
                     type: BootstrapDialog.TYPE_DEFAULT,
                     size: BootstrapDialog.SIZE_WIDE,
-                    message: $(handlebars.compile("{{> social/_" + cardDetails.name + "}}")(providerConfig)),
+                    message: dialogDetails,
                     onshow: (dialogRef) => {
                         dialogRef.$modalBody.find(".array-selection").selectize({
                             delimiter: ",",
@@ -265,6 +277,9 @@ define([
 
                         dialogRef.$modalBody.find(".advanced-options-toggle").bind("click", (event) => {this.advancedOptionToggle(event);});
                     },
+                    onshown: () => {
+                        this.model.iconCode.refresh();
+                    },
                     onclose: (dialogRef) => {
                         if(this.model.iconCode) {
                             this.model.iconCode = null;
@@ -289,11 +304,11 @@ define([
                                     saveData.icon = this.model.iconCode.getValue();
                                 }
 
-                                if(saveData.client_id.length) {
+                                if(saveData.client_id && saveData.client_id.length) {
                                     saveData.client_id = saveData.client_id.trim();
                                 }
 
-                                if(saveData.client_secret.length) {
+                                if(saveData.client_secret && saveData.client_secret.length) {
                                     saveData.client_secret = saveData.client_secret.trim();
                                 }
 

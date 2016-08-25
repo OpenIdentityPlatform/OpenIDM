@@ -226,6 +226,12 @@ define([
                         case "google":
                             provider.displayIcon = "google";
                             break;
+                        case "facebook":
+                            provider.displayIcon = "facebook";
+                            break;
+                        default:
+                            provider.displayIcon = "cloud";
+                            break;
                     }
                 });
 
