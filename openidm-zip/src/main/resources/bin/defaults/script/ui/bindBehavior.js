@@ -26,7 +26,6 @@
     Returns the modified user account
 */
 (function () {
-
     var user = openidm.read(
         context.security.authorization.component + "/" + context.security.authorization.id
     );
@@ -47,7 +46,8 @@
     return openidm.update(
         context.security.authorization.component + "/" + context.security.authorization.id,
         user._rev,
-        user
+        user,
+        user.idpData[request.additionalParameters.provider].enabled = true
     );
 
 }());

@@ -296,10 +296,12 @@
         "socialIdentities" : {
             "linkedUsing" : "Linked using",
             "primary" : "Primary",
-            "linkedAccounts" : "Linked Accounts",
+            "linkedAccounts" : "Link your account to your social network ids to make signing in easier.",
             "socialIdentities" : "Social Identities",
             "noSocialProviders" : "No Social Providers Available",
-            "orUseEmailRegistration" : "or register with your email address"
+            "orUseEmailRegistration" : "or register with your email address",
+            "confirmTitle": "Disconnect ",
+            "confirmMessage" : "Are you sure you want to disconnect this social account? If you do you will no longer be able to login with "
         },
         "util" : {
             "scriptList" : {
