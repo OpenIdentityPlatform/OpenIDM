@@ -17,6 +17,7 @@ package org.forgerock.openidm.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -25,9 +26,15 @@ import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
+import org.forgerock.services.context.RootContext;
+import org.forgerock.util.promise.Promise;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -46,10 +53,15 @@ public class AuthenticationServiceTest {
 
     private static final String OPENID_CONNECT = "OPENID_CONNECT";
     private static final String OAUTH = "OAUTH";
+    private static final String AUTHENTICATION_PATH = "authentication";
+    private static final String CONF_AUTHENTICATION_MODULE = "/config/authenticationModule.json";
+    private static final String CONF_SERVER_AUTH_CONTEXT = "/config/serverAuthContext.json";
 
     private JsonValue amendedAuthentication;
     private JsonValue googleIdentityProvider;
     private JsonValue authenticationJson;
+    private JsonValue authenticationModule;
+    private JsonValue serverAuthContext;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -64,7 +76,6 @@ public class AuthenticationServiceTest {
         // the functionality of AuthenticationService.java#amendAuthConfig()
         authenticationJson = json(
                 OBJECT_MAPPER.readValue(getClass().getResource("/config/authentication.json"), Map.class));
-
     }
 
     @AfterMethod
@@ -170,5 +181,33 @@ public class AuthenticationServiceTest {
 
         // Assert that the authenticationJson has not been modified
         assertThat(authenticationJson.isEqualTo(authenticationJsonNoMod)).isTrue();
+    }
+
+    @Test
+    public void testReadInstance() throws Exception {
+        // set up
+        authenticationModule = json(
+                OBJECT_MAPPER.readValue(getClass().getResource(CONF_AUTHENTICATION_MODULE), Map.class));
+        serverAuthContext = json(
+                OBJECT_MAPPER.readValue(getClass().getResource(CONF_SERVER_AUTH_CONTEXT), Map.class));
+
+        // Instantiate the object to be used
+        AuthenticationService authenticationService = new AuthenticationService();
+
+        // Set the config.
+        authenticationService.setConfig(serverAuthContext);
+
+        // Read request
+        final ReadRequest readRequest = newReadRequest(ResourcePath.resourcePath(AUTHENTICATION_PATH));
+
+        // when
+        final Promise<ResourceResponse, ResourceException> promise =
+                authenticationService.readInstance(new RootContext(), readRequest);
+        // then
+        final ResourceResponse resourceResponse = promise.get();
+        assertThat(resourceResponse.getContent().isEqualTo(authenticationModule)).isTrue();
+
+        authenticationModule = null;
+        serverAuthContext = null;
     }
 }
