@@ -248,7 +248,7 @@ var httpAccessConfig =
             "pattern"   : "*",
             "roles"     : "openidm-authorized",
             "methods"   : "read,action",
-            "actions"   : "unbind",
+            "actions"   : "bind,unbind",
             "customAuthz" : "ownDataOnly()"
         },
         {
