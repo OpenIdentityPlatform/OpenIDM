@@ -47,6 +47,7 @@ import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -165,7 +166,8 @@ public class RestService implements SingletonResourceProvider {
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
-        httpClientHandler = newHttpClientHandler();
+        httpClientHandler = newHttpClientHandler(
+                IdentityServer.getInstance().getProperty("openidm.external.rest.tls.version", "TLSv1.2"));
         client = new Client(httpClientHandler);
         logger.info("External REST connectivity started.");
     }
@@ -371,10 +373,10 @@ public class RestService implements SingletonResourceProvider {
 
     /**
      * Builds an {@link AsyncHttpClientProvider} instance, which must be closed on shutdown/de-activation.
-     *
+     * @param tlsVersionSpecification the specification of the TLS version to use for this client
      * @return {@link AsyncHttpClientProvider} instance
      */
-    private HttpClientHandler newHttpClientHandler() {
+    private HttpClientHandler newHttpClientHandler(String tlsVersionSpecification) {
         try {
             return new HttpClientHandler(
                     Options.defaultOptions()
@@ -383,7 +385,8 @@ public class RestService implements SingletonResourceProvider {
                                 public <S> S load(Class<S> service, Options options) {
                                     return service.cast(new AsyncHttpClientProvider());
                                 }
-                            }));
+                            })
+                            .set(HttpClientHandler.OPTION_SSLCONTEXT_ALGORITHM, tlsVersionSpecification));
         } catch (HttpApplicationException e) {
             throw new RuntimeException("Error while building HTTP Client Handler", e);
         }
