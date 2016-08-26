@@ -53,7 +53,7 @@ var httpAccessConfig =
            "pattern"    : "identityProviders",
            "roles"      : "*",
            "methods"    : "read,action",
-           "actions"    : "getauthtoken"
+           "actions"    : "getAuthToken"
         },
         {
             "pattern"    : "config/ui/themeconfig",

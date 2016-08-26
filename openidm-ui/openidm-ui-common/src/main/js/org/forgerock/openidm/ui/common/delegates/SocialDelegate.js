@@ -55,7 +55,7 @@ define([
     obj.getAuthToken = function (provider, code, redirect_uri) {
         return this.serviceCall({
             "type": "POST",
-            "url": "?_action=getauthtoken",
+            "url": "?_action=getAuthToken",
             "data": JSON.stringify({
                 provider: provider,
                 code: code,
