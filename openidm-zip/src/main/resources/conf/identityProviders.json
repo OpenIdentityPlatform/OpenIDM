@@ -15,7 +15,7 @@
         "profile",
         "email"
       ],
-      "authenticationId" : "subject",
+      "authenticationId" : "sub",
       "propertyMap" : [
         {
           "source" : "sub",

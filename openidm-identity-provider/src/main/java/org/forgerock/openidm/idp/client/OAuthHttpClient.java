@@ -57,7 +57,12 @@ public class OAuthHttpClient {
     private static final String OAUTH = "OAUTH";
     private static final String OPENID_CONNECT = "OPENID_CONNECT";
     private static final String ID_TOKEN = "id_token";
-    private static final String ACCESS_TOKEN ="access_token";
+    private static final String ACCESS_TOKEN = "access_token";
+
+    public static final String REDIRECT_URI = "redirect_uri";
+    public static final String CODE = "code";
+    public static final String AUTH_TOKEN = "auth_token";
+    public static final String PROVIDER = "provider";
 
     private final ProviderConfig config;
     private final Client httpClient;

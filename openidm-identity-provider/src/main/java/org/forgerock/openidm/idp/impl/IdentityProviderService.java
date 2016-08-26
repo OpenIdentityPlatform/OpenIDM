@@ -91,6 +91,9 @@ public class IdentityProviderService implements SingletonResourceProvider {
     /** Constant unsupported exception for 501 response to unimplemented methods */
     private static final ResourceException NOT_SUPPORTED = new NotSupportedException("Operation is not implemented");
 
+    private static final String RAW_PROFILE = "rawProfile";
+    private static final String SUB = "sub";
+
     /** Transformation function to remove client secret */
     private static final Function<JsonValue, JsonValue> withoutClientSecret =
             new Function<JsonValue, JsonValue>() {
@@ -111,7 +114,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
                 }
             };
 
-    private enum Action { getauthtoken, availableProviders }
+    private enum Action { getAuthToken, availableProviders, getProfile }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -224,19 +227,35 @@ public class IdentityProviderService implements SingletonResourceProvider {
             switch (actionRequest.getActionAsEnum(Action.class)) {
             case availableProviders:
                 return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
-            case getauthtoken:
-                final String idToken = new OAuthHttpClient(getIdentityProvider(actionRequest.getContent()
-                        .get("provider").required().asString()), newHttpClient())
+            case getAuthToken:
+                final String authToken = new OAuthHttpClient(getIdentityProvider(actionRequest.getContent()
+                        .get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
                         .getAuthToken(
-                                actionRequest.getContent().get("code").required().asString(),
-                                actionRequest.getContent().get("redirect_uri").required().asString());
+                                actionRequest.getContent().get(OAuthHttpClient.CODE).required().asString(),
+                                actionRequest.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString());
                 // just return id_token as "auth_token"
-                return newActionResponse(json(object(field("auth_token", idToken)))).asPromise();
+                return newActionResponse(json(object(field(OAuthHttpClient.AUTH_TOKEN, authToken)))).asPromise();
+            case getProfile:
+                final ProviderConfig providerConfig =
+                        getIdentityProvider(actionRequest.getContent().get(OAuthHttpClient.PROVIDER).required().
+                                asString());
+                final JsonValue profile = new OAuthHttpClient(getIdentityProvider(actionRequest.getContent()
+                        .get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
+                        .getProfile(
+                                actionRequest.getContent().get(OAuthHttpClient.CODE).required().asString(),
+                                actionRequest.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString());
+                return newActionResponse(
+                            json(object(
+                                field(RAW_PROFILE, profile.getObject()),
+                                field(SUB, profile.get(providerConfig.getAuthenticationId()).asString()))))
+                        .asPromise();
             default:
                 return new BadRequestException("Not a supported Action").asPromise();
             }
         } catch (JsonValueException | IllegalArgumentException e) {
             return new BadRequestException(e.getMessage(), e).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException(e.getMessage(), e).asPromise();
         }
