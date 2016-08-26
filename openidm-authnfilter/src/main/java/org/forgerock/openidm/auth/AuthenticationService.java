@@ -16,8 +16,12 @@
 
 package org.forgerock.openidm.auth;
 
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
@@ -84,9 +88,7 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
 import javax.inject.Provider;
 
 
@@ -148,8 +150,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     private static final String AUTH_MODULE_NAME_KEY = "name";
     private static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
     private static final String MODULE_CONFIG_ENABLED = "enabled";
-    private static final String RESOLVERS = "resolvers";
-    private static final String RESOLVER_NAME_KEY = "name";
+    private static final String AUTH_MODULE_RESOLVERS_KEY = "resolvers";
 
     /** the encoded key location in the return value from {@link SharedKeyService#getSharedKey(String)} */
     private static final JsonPointer ENCODED_SECRET_PTR = new JsonPointer("/secret/encoded");
@@ -223,6 +224,16 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                 }
             };
 
+    /** A {@link Predicate} that determines if an auth module is either OPENID_CONNECT or OAUTH */
+    private static final Predicate<JsonValue> withAuthModule =
+            new Predicate<JsonValue>() {
+                @Override
+                public boolean apply(JsonValue jsonValue) {
+                    return jsonValue.get(AUTH_MODULE_NAME_KEY).asString().equals(IDMAuthModule.OPENID_CONNECT.name())
+                            || jsonValue.get(AUTH_MODULE_NAME_KEY).asString().equals(IDMAuthModule.OAUTH.name());
+                }
+            };
+
     /** A {link Predicate} that validates an auth module's properties for the purposes of instantiating an Authenticator */
     private static final Predicate<JsonValue> authModulesThatHaveValidAuthenticatorProperties =
             new Predicate<JsonValue>() {
@@ -263,7 +274,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         try {
             for (final JsonValue authModule : authModuleConfigs) {
                 authModule.get(AUTH_MODULE_PROPERTIES_KEY)
-                        .put(RESOLVERS, ProviderConfigMapper.toJsonValue(identityProviderService
+                        .put(AUTH_MODULE_RESOLVERS_KEY, ProviderConfigMapper.toJsonValue(identityProviderService
                                 .getIdentityProviderByType(authModule.get(AUTH_MODULE_NAME_KEY).asString()))
                                 .asList()
                         );
@@ -432,7 +443,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             throw new AuthenticationException("Auth module config lacks 'name' and 'className' attribute");
         }
 
-        JsonValue moduleProperties = moduleConfig.get("properties");
+        JsonValue moduleProperties = moduleConfig.get(AUTH_MODULE_PROPERTIES_KEY);
         if (moduleProperties.isDefined("privateKeyPassword")) {
             // decrypt/de-obfuscate privateKey password
             moduleProperties.put("privateKeyPassword",
@@ -524,7 +535,20 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        return new NotSupportedException("Read operation not supported").asPromise();
+        final List<Map> allAuthModules = new ArrayList<>();
+        if (config != null) {
+            final JsonValue authModuleConfig = config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
+            final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(withAuthModule).toList();
+            // Iterate the filtered list and get resolvers content
+            for (JsonValue authModule : authModules) {
+                allAuthModules.addAll(authModule
+                        .get(AUTH_MODULE_PROPERTIES_KEY)
+                        .get(AUTH_MODULE_RESOLVERS_KEY)
+                        .asList(Map.class));
+            }
+        }
+        return newResourceResponse(null, null, json(object(field(IdentityProviderService.PROVIDERS,
+                allAuthModules)))).asPromise();
     }
 
     /**
@@ -533,5 +557,13 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(Context context, UpdateRequest request) {
         return new NotSupportedException("Update operation not supported").asPromise();
+    }
+
+    /**
+     * Sets the configuration.
+     * This is created for testing purpose only.
+     */
+    protected void setConfig(final JsonValue config) {
+        this.config = config;
     }
 }
