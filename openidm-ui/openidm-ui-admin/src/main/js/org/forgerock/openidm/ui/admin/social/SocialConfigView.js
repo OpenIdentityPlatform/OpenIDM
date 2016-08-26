@@ -73,6 +73,10 @@ define([
                 ConfigDelegate.readEntityAlways("selfservice/registration"),
                 ConfigDelegate.readEntityAlways("authentication")
             ).then((currentProviders, availableProviders, userRegistration, authentication) => {
+                availableProviders.providers = _.map(availableProviders.providers, (p) => {
+                    p.enabled = false;
+                    return p;
+                });
                 this.data.providers = _.cloneDeep(availableProviders.providers);
                 this.model.providers = _.cloneDeep(availableProviders.providers);
                 this.model.authentication = authentication;
@@ -91,7 +95,6 @@ define([
                     provider.togglable = true;
                     provider.editable = true;
                     provider.details = $.t("templates.socialProviders.configureProvider");
-                    provider.enabled = false;
 
                     switch (provider.name) {
                         case "google":
@@ -143,17 +146,28 @@ define([
 
                 this.model.providers[index].enabled = enabled;
 
-                if (enabled) {
-                    this.createConfig(this.model.providers[index]);
-                } else {
-                    this.deleteConfig(this.model.providers[index]);
-                }
-
                 providerCount = _.filter(this.model.providers, function(provider) {
                     return provider.enabled;
                 }).length;
 
-                if(providerCount > 0 && this.model.userRegistration && this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+                if (enabled) {
+                    this.createConfig(this.model.providers[index]).then(() => {
+                        if (providerCount === 1) {
+                            this.addBindUnbindBehavior();
+                        }
+                    });
+                } else {
+                    this.deleteConfig(this.model.providers[index]).then(() => {
+                        if (providerCount === 0) {
+                            this.removeBindUnbindBehavior();
+                        }
+                    });
+                }
+
+                if (providerCount > 0 &&
+                    this.model.userRegistration &&
+                    this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+
                     UserRegistrationConfigView.switchToUserDetails(this.model.userRegistration);
                     this.$el.find("#socialNoRegistrationWarningMessage").hide();
                 } else if (_.isNull(this.model.userRegistration) && providerCount > 0) {
@@ -358,20 +372,55 @@ define([
         },
 
         createConfig: function(config) {
-            ConfigDelegate.createEntity("identityProvider/"+config.name, config).then(() => {
+            return ConfigDelegate.createEntity("identityProvider/"+config.name, config).then(() => {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "saveSocialProvider");
             });
         },
 
         deleteConfig: function(config) {
-            ConfigDelegate.deleteEntity("identityProvider/"+config.name).then(() => {
+            return ConfigDelegate.deleteEntity("identityProvider/"+config.name).then(() => {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteSocialProvider");
             });
         },
 
         saveConfig: function(config) {
-            ConfigDelegate.updateEntity("identityProvider/"+config.name, config).then(() => {
+            return ConfigDelegate.updateEntity("identityProvider/"+config.name, config).then(() => {
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "saveSocialProvider");
+            });
+        },
+
+        addBindUnbindBehavior: function () {
+            return ConfigDelegate.readEntity("managed").then((managedConfig) => {
+                let managedUser = _.find(managedConfig.objects, (o) => o.name === "user");
+                if (!_.has(managedUser, "actions")) {
+                    managedUser.actions = {};
+                }
+                if (!_.has(managedUser.actions, "unbind")) {
+                    managedUser.actions.unbind = {
+                        "type" : "text/javascript",
+                        "file" : "ui/unBindBehavior.js"
+                    };
+                }
+                if (!_.has(managedUser.actions, "bind")) {
+                    managedUser.actions.bind = {
+                        "type" : "text/javascript",
+                        "file" : "ui/bindBehavior.js"
+                    };
+                }
+                return ConfigDelegate.updateEntity("managed", managedConfig);
+            });
+        },
+
+        removeBindUnbindBehavior: function () {
+            return ConfigDelegate.readEntity("managed").then((managedConfig) => {
+                let managedUser = _.find(managedConfig.objects, (o) => o.name === "user");
+                if (_.has(managedUser, "actions.unbind")) {
+                    delete managedUser.actions.unbind;
+                }
+                if (_.has(managedUser, "actions.bind")) {
+                    delete managedUser.actions.bind;
+                }
+                return ConfigDelegate.updateEntity("managed", managedConfig);
             });
         }
     });
