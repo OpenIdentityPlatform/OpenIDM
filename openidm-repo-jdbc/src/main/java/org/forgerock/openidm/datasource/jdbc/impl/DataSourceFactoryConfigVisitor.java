@@ -52,4 +52,9 @@ class DataSourceFactoryConfigVisitor implements DataSourceConfigVisitor<DataSour
     public DataSourceFactory visit(BoneCPDataSourceConfig config, Void unused) {
         return new BoneCPDataSourceFactory(config);
     }
+
+    @Override
+    public DataSourceFactory visit(HikariCPDataSourceConfig config, Void unused) {
+        return new HikariCPDataSourceFactory(config);
+    }
 }

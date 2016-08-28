@@ -63,4 +63,12 @@ interface DataSourceConfigVisitor<R, P> {
      * @return the result of the visitor
      */
     R visit(BoneCPDataSourceConfig config, P parameters);
+    
+    /**
+     * Visit a {@link HikariCPDataSourceConfig}.
+     *
+     * @param config the datasource config
+     * @return the result of the visitor
+     */
+    R visit(HikariCPDataSourceConfig config, P parameters);
 }
