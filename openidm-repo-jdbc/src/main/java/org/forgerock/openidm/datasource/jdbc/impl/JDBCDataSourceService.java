@@ -31,6 +31,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import com.zaxxer.hikari.HikariConfig;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -122,6 +123,8 @@ public class JDBCDataSourceService implements DataSourceService {
                     final String type = element.getValue().get("type").asText();
                     if ("bonecp".equals(type)) {
                         return mapper.treeToValue(node, BoneCPDataSourceConfig.class);
+                    } else if ("hikari".equals(type)) {
+                        return mapper.treeToValue(node, HikariCPDataSourceConfig.class);
                     }
                     // implement other types of pooling configs here
                 }
@@ -138,7 +141,9 @@ public class JDBCDataSourceService implements DataSourceService {
                 .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
                 .registerModule(
                         new SimpleModule("DataSourceConfigModule", unknownVersion())
-                                .addDeserializer(DataSourceConfig.class, DESERIALZER));
+                                .addDeserializer(DataSourceConfig.class, DESERIALZER))
+                // we need a special mixin to avoid the non-unmarshallable aspects of HikariConfig
+                .addMixIn(HikariConfig.class, HikariConfigMixin.class);
     }
 
     private static DataSourceConfig parseJson(JsonValue config) {
