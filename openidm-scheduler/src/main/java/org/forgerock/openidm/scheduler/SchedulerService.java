@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.scheduler;
 
+import static java.lang.Math.min;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.*;
@@ -27,6 +28,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -54,6 +56,7 @@ import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
+import org.forgerock.json.resource.CountPolicy;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -68,6 +71,7 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
@@ -78,6 +82,7 @@ import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
 import org.forgerock.openidm.router.RouteService;
+import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
@@ -604,15 +609,23 @@ public class SchedulerService implements RequestHandler {
                 queryFilter = QueryFilter.alwaysTrue();
             }
 
-            final String queryId = request.getQueryId();
-            final boolean idOnly = queryId != null && QUERY_ALL_IDS.equals(queryId);
+            // default the sortKeys to include the _id field for consistency.
+            final List<SortKey> sortKeys = request.getSortKeys();
+            sortKeys.add(SortKey.ascendingOrder(FIELD_CONTENT_ID));
 
+            // if a queryId is set, verify that it is query-all-ids; no other is supported.
+            final String queryId = request.getQueryId();
+            if (null != queryId && !QUERY_ALL_IDS.equals(queryId)) {
+                throw new BadRequestException("only query-id of '" + QUERY_ALL_IDS + "' is supported.");
+            }
+
+            // Get all the jobs and then filter them.
             final List<String> allJobs = new ArrayList<>();
             allJobs.addAll(Arrays.asList(getJobNames(persistentScheduler)));
             allJobs.addAll(Arrays.asList(getJobNames(inMemoryScheduler)));
-            final JsonValue results = json(array());
+            final List<JsonValue> results = new ArrayList<>();
             for (final String jobName : allJobs) {
-                if (idOnly) {
+                if (queryId != null) {  // query-all-ids
                     results.add(json(object(field(FIELD_CONTENT_ID, jobName))));
                 } else {
                     final JsonValue schedule = getSchedule(jobName);
@@ -621,11 +634,39 @@ public class SchedulerService implements RequestHandler {
                     }
                 }
             }
+            final int totalResultsFound = results.size();
 
-            for (final JsonValue r : results) {
-                handler.handleResource(newResourceResponse(r.get(FIELD_CONTENT_ID).asString(), null, json(r)));
+            // we have to sort all the records so that pagination works consistently
+            Collections.sort(results, JsonUtil.getComparator(sortKeys));
+
+            // default the pageSize to all the records if it isn't set.
+            int pageSize = request.getPageSize();
+            if (pageSize <= 0) {
+                pageSize = totalResultsFound;
             }
-            return newQueryResponse().asPromise();
+
+            // default the page results Cookie to 0 if not passed in or isn't a integer.
+            String pagedResultsCookie = request.getPagedResultsCookie();
+            if (null == pagedResultsCookie || pagedResultsCookie.isEmpty() || !pagedResultsCookie.matches("\\d+")) {
+                pagedResultsCookie = "0";
+            }
+
+            // calculate what the last index will be after this page is returned, -1 if last page.
+            final int fromIndex = request.getPagedResultsOffset() + Integer.valueOf(pagedResultsCookie);
+
+            // extract the desired results.
+            final List<JsonValue> pageOfResults =
+                    results.subList(fromIndex, min(fromIndex + pageSize, totalResultsFound));
+
+            final String newPageCookie = fromIndex + pageSize >= totalResultsFound
+                    ? null
+                    : Integer.toString(fromIndex + pageSize);
+
+            for (final JsonValue result : pageOfResults) {
+                handler.handleResource(
+                        newResourceResponse(result.get(FIELD_CONTENT_ID).asString(), null, json(result)));
+            }
+            return newQueryResponse(newPageCookie, CountPolicy.EXACT, totalResultsFound).asPromise();
         } catch (JsonException e) {
         	return new BadRequestException("Error performing query", e).asPromise();
         } catch (SchedulerException e) {
