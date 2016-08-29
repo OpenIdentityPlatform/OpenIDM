@@ -17,5 +17,5 @@ if (object.idpData !== null
         && object.idpData[request.additionalParameters.provider] !== null
         && object.idpData[request.additionalParameters.provider].enabled === true) {
     object.idpData[request.additionalParameters.provider].enabled = false;
+    openidm.update(resourcePath, object._rev, object);
 }
-openidm.update(resourcePath, object._rev, object);
