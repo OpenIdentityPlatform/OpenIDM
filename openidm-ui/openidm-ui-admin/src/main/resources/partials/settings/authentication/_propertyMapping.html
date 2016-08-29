@@ -4,18 +4,21 @@
     <div id="propertyMapping" class="well">
         <div class="form-horizontal">
             <div id="basicPropertyMappingFields">
-                {{> form/_basicInput
-                    value=config.properties.propertyMapping.authenticationId
-                    label="templates.auth.authId"
-                    property="properties.propertyMapping.authenticationId"
-                    noValidation="true"
-                    default=authenticationId}}
-
-                {{> form/_basicInput
-                    value=config.properties.propertyMapping.userCredential
-                    label="templates.auth.userCred"
-                    property="properties.propertyMapping.userCredential"
-                    noValidation="true"}}
+                {{#unless hideAuthenticationId}}
+                    {{> form/_basicInput
+                        value=config.properties.propertyMapping.authenticationId
+                        label="templates.auth.authId"
+                        property="properties.propertyMapping.authenticationId"
+                        noValidation="true"
+                        default=authenticationId}}
+                {{/unless}}
+                {{#unless hideUserCredential}}
+                    {{> form/_basicInput
+                        value=config.properties.propertyMapping.userCredential
+                        label="templates.auth.userCred"
+                        property="properties.propertyMapping.userCredential"
+                        noValidation="true"}}
+                {{/unless}}
             </div>
             {{> form/_basicSelect
                 property="userOrGroup"

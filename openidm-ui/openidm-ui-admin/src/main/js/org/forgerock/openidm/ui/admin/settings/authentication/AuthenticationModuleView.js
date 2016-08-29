@@ -55,6 +55,7 @@ define([
                 "OPENAM_SESSION": null,
                 "INTERNAL_USER": null,
                 "OPENID_CONNECT": null,
+                "SOCIAL_PROVIDERS": null,
                 "PASSTHROUGH": null,
                 "TRUSTED_ATTRIBUTE": null
             }

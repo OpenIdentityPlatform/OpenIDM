@@ -81,8 +81,8 @@ define([
                 this.model.providers = _.cloneDeep(availableProviders.providers);
                 this.model.authentication = authentication;
 
-                this.model.OIDCModulesEnabled = _.some(authentication.serverAuthContext.authModules, (module) => {
-                    if (module.name === "OPENID_CONNECT" && module.enabled) {
+                this.model.AuthModuleEnabled = _.some(authentication.serverAuthContext.authModules, (module) => {
+                    if (module.name === "SOCIAL_PROVIDERS" && module.enabled) {
                         return true;
                     }
                 });
@@ -119,7 +119,7 @@ define([
                 });
 
                 this.parentRender(() => {
-                    var messageResult = this.getMessageState(currentProviders.providers.length, this.model.userRegistration, this.model.OIDCModulesEnabled);
+                    var messageResult = this.getMessageState(currentProviders.providers.length, this.model.userRegistration, this.model.AuthModuleEnabled);
 
                     if(messageResult.login) {
                         this.$el.find("#socialNoAuthWarningMessage").show();
@@ -136,7 +136,7 @@ define([
             });
         },
 
-        getMessageState: function(providerCount, userRegistration, OIDCModulesEnabled) {
+        getMessageState: function(providerCount, userRegistration, AuthModuleEnabled) {
             var messageDisplay = {
                 "login" : false,
                 "registration" : false
@@ -159,7 +159,7 @@ define([
                 messageDisplay.registration = false;
             }
 
-            if (!OIDCModulesEnabled && providerCount > 0) {
+            if (!AuthModuleEnabled && providerCount > 0) {
                 messageDisplay.login = true;
             } else {
                 messageDisplay.login = false;
@@ -205,7 +205,7 @@ define([
                     });
                 }
 
-                messageResult = this.getMessageState(providerCount, this.model.userRegistration, this.model.OIDCModulesEnabled);
+                messageResult = this.getMessageState(providerCount, this.model.userRegistration, this.model.AuthModuleEnabled);
 
                 if(messageResult.login) {
                     this.$el.find("#socialNoAuthWarningMessage").show();
@@ -230,12 +230,12 @@ define([
                 if (numOfEnabledProviders === 0) {
                     let self = this;
 
-                    if (this.model.OIDCModulesEnabled) {
+                    if (this.model.AuthModuleEnabled) {
 
                         BootstrapDialog.show({
                             title: $.t('common.form.confirm'),
                             type: "type-danger",
-                            message: $.t("templates.socialProviders.disableOIDCAuthModule"),
+                            message: $.t("templates.socialProviders.disableSocialAuthModule"),
                             id: "frConfirmationDialog",
                             buttons: [
                                 {
@@ -252,9 +252,9 @@ define([
                                     id: "frConfirmationDialogBtnOk",
                                     action: function(dialog) {
                                         _.each(self.model.authentication.serverAuthContext.authModules, (module) => {
-                                            if (module.name === "OPENID_CONNECT") {
+                                            if (module.name === "SOCIAL_PROVIDERS") {
                                                 module.enabled = false;
-                                                self.model.OIDCModulesEnabled = false;
+                                                self.model.AuthModuleEnabled = false;
                                             }
                                         });
 
