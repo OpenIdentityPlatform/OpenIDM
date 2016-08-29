@@ -1368,7 +1368,18 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 scriptBindings.put("object", currentResource.getContent());
                 Object result = execScript(managedContext, newScriptHook(request.getAction()), value, scriptBindings);
 
-                return newActionResponse(json(result)).asPromise();
+                final JsonValue scriptResult = json(result);
+                final ResourceResponse response = newResourceResponse(
+                        scriptResult.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
+                        scriptResult.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(),
+                        scriptResult);
+
+                final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
+
+                response.getContent().asMap().putAll(relationships.asMap());
+
+                return newActionResponse(prepareResponse(managedContext, response, request.getFields()).getContent())
+                        .asPromise();
             } else {
                 throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
