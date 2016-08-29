@@ -16,37 +16,44 @@
 package org.forgerock.openidm.scheduler;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.resource.Requests.newActionRequest;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.services.context.RootContext;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.QueryRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.scheduler.SchedulerService.SchedulerAction;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
@@ -198,6 +205,67 @@ public class SchedulerServiceTest {
         ActionResponse resourceResponse = promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
         assertThat(resourceResponse.getJsonContent().asList().size()).isEqualTo(0);
     }
-    
-    
+
+    @Test
+    public void testQueryJobs() throws Exception {
+        // given
+        for (int i = 0; i < 12; i++) {
+            JsonValue persisted = getConfig("/schedule-persisted.json");
+            Promise<ResourceResponse, ResourceException> createPromise =
+                    schedulerService.handleCreate(new RootContext(), Requests.newCreateRequest("", persisted));
+            assertThat(createPromise).isNotNull().succeeded();
+        }
+        // should have 13 now, 12 of them persisted.
+        validateQueryCount(Requests.newQueryRequest("").setQueryId(QueryConstants.QUERY_ALL_IDS), 13);
+
+        // then validate first page with a single offset.
+        QueryRequest queryRequest = Requests.newQueryRequest("");
+        queryRequest.setPagedResultsOffset(1); // offset shifts the results by 1 record.
+        queryRequest.setQueryFilter(QueryFilter.equalTo(new JsonPointer("persisted"), true));
+        queryRequest.setPageSize(5);
+        QueryResponse queryResponse = validateQueryCount(queryRequest, 5);
+        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(12);
+        assertThat(queryResponse.getPagedResultsCookie()).isEqualTo("6");
+
+        // then validate second page of 5 using cookie from last result.
+        queryRequest = Requests.newQueryRequest("");
+        queryRequest.setQueryFilter(QueryFilter.equalTo(new JsonPointer("persisted"), true));
+        queryRequest.setPageSize(5);
+        queryRequest.setPagedResultsCookie(queryResponse.getPagedResultsCookie());
+        queryResponse = validateQueryCount(queryRequest, 5);
+        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(12);
+        assertThat(queryResponse.getPagedResultsCookie()).isEqualTo("11");
+
+        // then validate last page, only 1 should be left
+        queryRequest = Requests.newQueryRequest("");
+        queryRequest.setQueryFilter(QueryFilter.equalTo(new JsonPointer("persisted"), true));
+        queryRequest.setPageSize(5);
+        queryRequest.setPagedResultsCookie(queryResponse.getPagedResultsCookie());
+        queryResponse = validateQueryCount(queryRequest, 1);
+        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(12);
+        assertThat(queryResponse.getPagedResultsCookie()).isNull();
+    }
+
+    /**
+     * runs the queryRequest and validates that the count of returned records matches the expectedCount
+     * @param request query to run.
+     * @param expectedCount expected results to find.
+     * @return the response from the query
+     * @throws ResourceException when terrible things happen.
+     */
+    private QueryResponse validateQueryCount(QueryRequest request, int expectedCount) throws ResourceException {
+        final AtomicInteger count = new AtomicInteger();
+        Promise<QueryResponse, ResourceException> queryPromise = schedulerService.handleQuery(
+                new RootContext(), request, new QueryResourceHandler() {
+                    @Override
+                    public boolean handleResource(ResourceResponse resource) {
+                        count.getAndIncrement();
+                        return true;
+                    }
+                });
+        assertThat(queryPromise).isNotNull().succeeded();
+        assertThat(count.get()).isEqualTo(expectedCount);
+        return queryPromise.getOrThrowUninterruptibly();
+    }
+
 }

@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2016 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.util;
@@ -27,6 +19,8 @@ package org.forgerock.openidm.util;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
 
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
@@ -45,6 +39,7 @@ import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCrypto;
+import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.core.PropertyAccessor;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.slf4j.Logger;
@@ -81,6 +76,82 @@ public final class JsonUtil {
     private JsonUtil() {
     }
 
+    /**
+     * In the context of two JsonValue.getObject() values, this will compare those two values.
+     * If the values are NOT a simple type of String, Number, or Boolean, the classname of the two objects
+     * is used as a fall-back sort order.
+     *
+     * @param left json object value to compare to the right.
+     * @param right json object value to compare to the left.
+     * @return less than 0 if left is 'greater' than the right, greater than 0 if right is 'greater' than the left,
+     * 0 if equal.
+     * @throws NullPointerException if left or right are null.
+     */
+    public static int compareJsonObjectValues(final Object left, final Object right) {
+        if (left == right) {
+            return 0;
+        } else if (left instanceof String && right instanceof String) {
+            final String s1 = (String) left;
+            final String s2 = (String) right;
+            return s1.compareToIgnoreCase(s2);
+        } else if (left instanceof Number && right instanceof Number) {
+            final Double n1 = ((Number) left).doubleValue();
+            final Double n2 = ((Number) right).doubleValue();
+            return n1.compareTo(n2);
+        } else if (left instanceof Boolean && right instanceof Boolean) {
+            final Boolean b1 = (Boolean) left;
+            final Boolean b2 = (Boolean) right;
+            return b1.compareTo(b2);
+        } else {
+            // Different types: we need to ensure predictable ordering,
+            // so use class name as secondary key.
+            return left.getClass().getName().compareTo(right.getClass().getName());
+        }
+    }
+
+    /**
+     * This returns a comparator that iterates through the provided sortKeys and finds the first comparative difference
+     * between the left and right side JsonValues.  To ensure consistency with sort order, at least one sortKey should
+     * be provided that will guarantee uniqueness between two JsonValues. A JsonValue that wraps a null object is
+     * considered less than one that is not. If both are wrapping a null, they are considered equal.
+     *
+     * @param sortKeys the sortKeys to utilize for sorting.
+     * @return a Comparator of JsonValues.
+     * @see #compareJsonObjectValues(Object, Object)
+     */
+    public static Comparator<JsonValue> getComparator(final List<SortKey> sortKeys) {
+        return new Comparator<JsonValue>() {
+            @Override
+            public int compare(final JsonValue left, final JsonValue right) {
+                if (left == right || left.isNull() && right.isNull()) {
+                    return 0;
+                } else if (left.isNull()) {
+                    return -1;
+                } else if (right.isNull()) {
+                    return 1;
+                }
+
+                for (final SortKey sortKey : sortKeys) {
+                    int orderMultiplier = sortKey.isAscendingOrder() ? 1: -1;
+                    JsonValue leftValue = left.get(sortKey.getField());
+                    JsonValue rightValue = right.get(sortKey.getField());
+
+                    if (null == leftValue && null == rightValue) {
+                        continue;
+                    } else if (null == leftValue) {
+                        return -1 * orderMultiplier;
+                    } else if (null == rightValue) {
+                        return orderMultiplier;
+                    }
+                    int compareTo = compareJsonObjectValues(leftValue.getObject(), rightValue.getObject());
+                    if (compareTo != 0) {
+                        return compareTo * orderMultiplier;
+                    }
+                }
+                return 0;
+            }
+        };
+    }
 
     public static boolean jsonIsNull(JsonValue value) {
         return (value == null || value.isNull());

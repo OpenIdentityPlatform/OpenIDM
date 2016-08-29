@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.filter;
 
+import static org.forgerock.openidm.util.JsonUtil.compareJsonObjectValues;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -57,7 +59,7 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
                     }
                 } else {
                     // Use equality matching for numbers and booleans.
-                    if (compareValues(valueAssertion, value) == 0) {
+                    if (compareJsonObjectValues(valueAssertion, value) == 0) {
                         return Boolean.TRUE;
                     }
                 }
@@ -70,7 +72,7 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
     public Boolean visitEqualsFilter(final JsonValue p, final JsonPointer field,
             final Object valueAssertion) {
         for (final Object value : getValues(p, field)) {
-            if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) == 0) {
+            if (isCompatible(value, valueAssertion) && compareJsonObjectValues(value, valueAssertion) == 0) {
                 return Boolean.TRUE;
             }
         }
@@ -88,7 +90,7 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
     public Boolean visitGreaterThanFilter(final JsonValue p, final JsonPointer field,
             final Object valueAssertion) {
         for (final Object value : getValues(p, field)) {
-            if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) > 0) {
+            if (isCompatible(value, valueAssertion) && compareJsonObjectValues(value, valueAssertion) > 0) {
                 return Boolean.TRUE;
             }
         }
@@ -99,7 +101,7 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
     public Boolean visitGreaterThanOrEqualToFilter(final JsonValue p, final JsonPointer field,
             final Object valueAssertion) {
         for (final Object value : getValues(p, field)) {
-            if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) >= 0) {
+            if (isCompatible(value, valueAssertion) && compareJsonObjectValues(value, valueAssertion) >= 0) {
                 return Boolean.TRUE;
             }
         }
@@ -110,7 +112,7 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
     public Boolean visitLessThanFilter(final JsonValue p, final JsonPointer field,
             final Object valueAssertion) {
         for (final Object value : getValues(p, field)) {
-            if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) < 0) {
+            if (isCompatible(value, valueAssertion) && compareJsonObjectValues(value, valueAssertion) < 0) {
                 return Boolean.TRUE;
             }
         }
@@ -121,7 +123,7 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
     public Boolean visitLessThanOrEqualToFilter(final JsonValue p, final JsonPointer field,
             final Object valueAssertion) {
         for (final Object value : getValues(p, field)) {
-            if (isCompatible(value, valueAssertion) && compareValues(value, valueAssertion) <= 0) {
+            if (isCompatible(value, valueAssertion) && compareJsonObjectValues(value, valueAssertion) <= 0) {
                 return Boolean.TRUE;
             }
         }
@@ -162,7 +164,7 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
                     }
                 } else {
                     // Use equality matching for numbers and booleans.
-                    if (compareValues(valueAssertion, value) == 0) {
+                    if (compareJsonObjectValues(valueAssertion, value) == 0) {
                         return Boolean.TRUE;
                     }
                 }
@@ -179,26 +181,6 @@ public class JsonValueFilterVisitor implements QueryFilterVisitor<Boolean, JsonV
             return value.asList();
         } else {
             return Collections.singletonList(value.getObject());
-        }
-    }
-
-    private int compareValues(final Object v1, final Object v2) {
-        if (v1 instanceof String && v2 instanceof String) {
-            final String s1 = (String) v1;
-            final String s2 = (String) v2;
-            return s1.compareToIgnoreCase(s2);
-        } else if (v1 instanceof Number && v2 instanceof Number) {
-            final Double n1 = ((Number) v1).doubleValue();
-            final Double n2 = ((Number) v2).doubleValue();
-            return n1.compareTo(n2);
-        } else if (v1 instanceof Boolean && v2 instanceof Boolean) {
-            final Boolean b1 = (Boolean) v1;
-            final Boolean b2 = (Boolean) v2;
-            return b1.compareTo(b2);
-        } else {
-            // Different types: we need to ensure predictable ordering,
-            // so use class name as secondary key.
-            return v1.getClass().getName().compareTo(v2.getClass().getName());
         }
     }
 
