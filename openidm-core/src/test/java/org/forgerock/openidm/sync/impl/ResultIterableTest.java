@@ -38,6 +38,7 @@ public class ResultIterableTest {
         ResultIterable riSource;
         ResultIterable riNew;
         Collection<String> ids;
+        Collection<String> idsAsList;
         Collection<String> expectedValues;
 
         // Create a new ResultIterable object
@@ -47,13 +48,14 @@ public class ResultIterableTest {
 
         // ids is the list of ids to be matched,
         // all other entries will be removed
-        ids = Arrays.asList("Id100", "Id101", "Id102", "Id103", "Id104", "Id105");
+        idsAsList = Arrays.asList("Id100", "Id101", "Id102", "Id103", "Id104", "Id105");
+        ids = new LinkedHashSet<String>(idsAsList);
         
         // Test removing the above ids
         riNew = riSource.removeNotMatchingEntries(ids);
         
         // riNew should now contain all ids that we wanted to match
-        assertThat(riNew.getAllIds()).containsExactlyElementsOf(ids);
+        assertThat(riNew.getAllIds()).containsExactlyElementsOf(idsAsList);
         
         // Using full objects the resulting values should be in sync with the ids
         expectedValues = Arrays.asList("Value100", "Value101", "Value102", "Value103", "Value104", "Value105");
@@ -61,26 +63,20 @@ public class ResultIterableTest {
         
         // Repeat the test a few times with different data 
         riSource = createResultIterable(numItems, true, 200);
-        ids = Arrays.asList("Id202", "Id203", "Id205");
+        idsAsList = Arrays.asList("Id202", "Id203", "Id205");
+        ids = new LinkedHashSet<String>(idsAsList);
         riNew = riSource.removeNotMatchingEntries(ids);
-        assertThat(riNew.getAllIds()).containsExactlyElementsOf(ids);
+        assertThat(riNew.getAllIds()).containsExactlyElementsOf(idsAsList);
         expectedValues = Arrays.asList("Value202", "Value203", "Value205");
         assertThat(getResultIterableValues(riNew)).containsExactlyElementsOf(expectedValues);
         
         riSource = createResultIterable(numItems, true, 300);
-        ids = Arrays.asList("Id301", "Id302", "Id304");
+        idsAsList = Arrays.asList("Id301", "Id302", "Id304");
+        ids = new LinkedHashSet<String>(idsAsList);
         riNew = riSource.removeNotMatchingEntries(ids);
-        assertThat(riNew.getAllIds()).containsExactlyElementsOf(ids);
+        assertThat(riNew.getAllIds()).containsExactlyElementsOf(idsAsList);
         expectedValues = Arrays.asList("Value301", "Value302", "Value304");
         assertThat(getResultIterableValues(riNew)).containsExactlyElementsOf(expectedValues);
-        
-        // Nothing should match the id "bogus",
-        // riNew should have empty ids and values
-        riSource = createResultIterable(numItems, false, 400);
-        ids = Arrays.asList("bogus");
-        riNew = riSource.removeNotMatchingEntries(ids);
-        assertThat(riNew.getAllIds()).isEmpty();
-        assertThat(getResultIterableValues(riNew)).isEmpty();
     }
 
     @Test
@@ -89,6 +85,7 @@ public class ResultIterableTest {
         ResultIterable riSource;
         ResultIterable riNew;
         Collection<String> ids;
+        Collection<String> idsAsList;
         Collection<String> expectedValues;
 
         // Create a new ResultIterable object
@@ -98,13 +95,14 @@ public class ResultIterableTest {
         
         // ids is the list of ids to be matched,
         // all other entries will be removed
-        ids = Arrays.asList("Id500", "Id501", "Id502", "Id503", "Id504", "Id505");
+        idsAsList = Arrays.asList("Id500", "Id501", "Id502", "Id503", "Id504", "Id505");
+        ids = new LinkedHashSet<String>(idsAsList);
         
         // Test removing the above ids
         riNew = riSource.removeNotMatchingEntries(ids);
                 
         // riNew should now contain all ids that we wanted to match
-        assertThat(riNew.getAllIds()).containsExactlyElementsOf(ids);
+        assertThat(riNew.getAllIds()).containsExactlyElementsOf(idsAsList);
         
         // If ResultIterable has no full objects the values should all be null
         expectedValues = Arrays.asList(null, null, null, null, null, null);
@@ -112,26 +110,20 @@ public class ResultIterableTest {
         
         // Repeat the test a few times with different data 
         riSource = createResultIterable(numItems, false, 600);
-        ids = Arrays.asList("Id602", "Id603", "Id605");
+        idsAsList = Arrays.asList("Id602", "Id603", "Id605");
+        ids = new LinkedHashSet<String>(idsAsList);
         riNew = riSource.removeNotMatchingEntries(ids);
-        assertThat(riNew.getAllIds()).containsExactlyElementsOf(ids);
+        assertThat(riNew.getAllIds()).containsExactlyElementsOf(idsAsList);
         expectedValues = Arrays.asList(null, null, null);
         assertThat(getResultIterableValues(riNew)).containsExactlyElementsOf(expectedValues);
         
         riSource = createResultIterable(numItems, false, 700);
-        ids = Arrays.asList("Id701", "Id702", "Id704");
+        idsAsList = Arrays.asList("Id701", "Id702", "Id704");
+        ids = new LinkedHashSet<String>(idsAsList);
         riNew = riSource.removeNotMatchingEntries(ids);
-        assertThat(riNew.getAllIds()).containsExactlyElementsOf(ids);
+        assertThat(riNew.getAllIds()).containsExactlyElementsOf(idsAsList);
         expectedValues = Arrays.asList(null, null, null);
         assertThat(getResultIterableValues(riNew)).containsExactlyElementsOf(expectedValues);
-        
-        // Nothing should match the id "bogus",
-        // riNew should have empty ids and values
-        riSource = createResultIterable(numItems, false, 800);
-        ids = Arrays.asList("bogus");
-        riNew = riSource.removeNotMatchingEntries(ids);
-        assertThat(riNew.getAllIds()).isEmpty();
-        assertThat(getResultIterableValues(riNew)).isEmpty();
     }
 
     ResultIterable createResultIterable(int numItems, boolean fullObject, int startId) {

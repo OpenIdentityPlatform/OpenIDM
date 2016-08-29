@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.LinkedList;
+import java.util.Set;
 
 import org.forgerock.json.JsonValue;
 
@@ -54,23 +55,27 @@ public class ResultIterable implements Iterable<ResultEntry> {
      */
     public ResultIterable removeNotMatchingEntries(Collection<String> ids) {
         Iterator<ResultEntry> entryIter = this.iterator();
-        Collection<String> newIds = Collections.synchronizedSet(new LinkedHashSet<String>());
+        Set<String> newIds = new LinkedHashSet<String>();
         JsonValue newObjList = null;
 
         if (this.values != null) {
             newObjList = new JsonValue(new LinkedList<>());
-        }
 
-        while (entryIter.hasNext()) {
-            ResultEntry entry = entryIter.next();
-            if (ids.contains(entry.getId())) {
-                newIds.add(entry.getId());
-                if (newObjList != null) {
+            while (ids.size() > 0 && entryIter.hasNext()) {
+                ResultEntry entry = entryIter.next();
+                String id = entry.getId();
+                if (ids.contains(id)) {
+                    newIds.add(id);
                     newObjList.add(entry.getValue());
+                    ids.remove(id);
                 }
             }
         }
-        return new ResultIterable(newIds, newObjList);
+        else {
+            newIds.addAll(ids);
+        }
+        
+        return new ResultIterable(Collections.synchronizedSet(newIds), newObjList);
     }
 
     /**
