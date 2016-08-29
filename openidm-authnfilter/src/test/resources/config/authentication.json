@@ -1,35 +1,37 @@
 {
-  "authModules": [
-    {
-      "name": "OPENID_CONNECT",
-      "properties": {
-        "openIdConnectHeader": "authToken",
-        "queryOnResource": "managed/user",
-        "propertyMapping": {
-          "authenticationId": "sub",
-          "userRoles": "authzRoles"
+  "serverAuthContext" : {
+    "authModules" : [
+      {
+        "name" : "OPENID_CONNECT",
+        "properties" : {
+          "openIdConnectHeader" : "authToken",
+          "queryOnResource" : "managed/user",
+          "propertyMapping" : {
+            "authenticationId" : "idpData/google/sub",
+            "userRoles" : "authzRoles"
+          },
+          "defaultUserRoles" : [
+            "openidm-authorized"
+          ]
         },
-        "defaultUserRoles": [
-          "openidm-authorized"
-        ]
+        "enabled" : true
       },
-      "enabled": true
-    },
-    {
-      "name": "OAUTH",
-      "properties": {
-        "authTokenHeader": "authToken",
-        "authProviderHeader" : "provider",
-        "queryOnResource": "managed/user",
-        "propertyMapping": {
-          "authenticationId": "id",
-          "userRoles": "authzRoles"
+      {
+        "name" : "OAUTH",
+        "properties" : {
+          "authTokenHeader" : "authToken",
+          "authProviderHeader" : "provider",
+          "queryOnResource" : "managed/user",
+          "propertyMapping" : {
+            "authenticationId" : "idpData/facebook/id",
+            "userRoles" : "authzRoles"
+          },
+          "defaultUserRoles" : [
+            "openidm-authorized"
+          ]
         },
-        "defaultUserRoles": [
-          "openidm-authorized"
-        ]
-      },
-      "enabled": true
-    }
-  ]
+        "enabled" : true
+      }
+    ]
+  }
 }

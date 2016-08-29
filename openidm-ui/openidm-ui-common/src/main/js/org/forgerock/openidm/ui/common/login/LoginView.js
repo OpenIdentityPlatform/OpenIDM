@@ -73,7 +73,7 @@ define([
 
     obj.render = function (args, callback) {
         var amCallback = amLoginUtils.init(this,true),
-            oauthProviders = SocialDelegate.providerList(),
+            oauthProviders = SocialDelegate.loginProviders(),
             params = Router.convertCurrentUrlToJSON().params;
 
         if (!_.isEmpty(params) &&
