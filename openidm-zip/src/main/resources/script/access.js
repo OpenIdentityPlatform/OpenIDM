@@ -50,10 +50,16 @@ var httpAccessConfig =
            "actions"    : "*"
         },
         {
-           "pattern"    : "identityProviders",
+           "pattern"    : "authentication",
            "roles"      : "*",
            "methods"    : "read,action",
            "actions"    : "getAuthToken"
+        },
+        {
+           "pattern"    : "identityProviders",
+           "roles"      : "openidm-authorized",
+           "methods"    : "read",
+           "actions"    : "*"
         },
         {
             "pattern"    : "config/ui/themeconfig",

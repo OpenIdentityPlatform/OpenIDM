@@ -55,13 +55,11 @@ public class AuthenticationServiceTest {
     private static final String OAUTH = "OAUTH";
     private static final String AUTHENTICATION_PATH = "authentication";
     private static final String CONF_AUTHENTICATION_MODULE = "/config/authenticationModule.json";
-    private static final String CONF_SERVER_AUTH_CONTEXT = "/config/serverAuthContext.json";
 
     private JsonValue amendedAuthentication;
     private JsonValue googleIdentityProvider;
     private JsonValue authenticationJson;
     private JsonValue authenticationModule;
-    private JsonValue serverAuthContext;
 
     @BeforeMethod
     public void setUp() throws Exception {
@@ -104,13 +102,13 @@ public class AuthenticationServiceTest {
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService
-        authenticationService.amendAuthConfig(authenticationJson.get("authModules"));
+        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
 
         // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
         // the amendedAuthentication configuration
         assertThat(
-                amendedAuthentication.get("authModules").get(0)
-                .isEqualTo(authenticationJson.get("authModules").get(0)))
+                amendedAuthentication.get("serverAuthContext").get("authModules").get(0)
+                .isEqualTo(authenticationJson.get("serverAuthContext").get("authModules").get(0)))
                 .isTrue();
 
     }
@@ -149,7 +147,7 @@ public class AuthenticationServiceTest {
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService
-        authenticationService.amendAuthConfig(authenticationJson.get("authModules"));
+        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
 
         // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
         // the amendedAuthentication configuration
@@ -177,7 +175,7 @@ public class AuthenticationServiceTest {
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService; in this test case
         // we should see no modifications taking place and the config should not have been modified
-        authenticationService.amendAuthConfig(authenticationJson.get("authModules"));
+        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
 
         // Assert that the authenticationJson has not been modified
         assertThat(authenticationJson.isEqualTo(authenticationJsonNoMod)).isTrue();
@@ -188,14 +186,12 @@ public class AuthenticationServiceTest {
         // set up
         authenticationModule = json(
                 OBJECT_MAPPER.readValue(getClass().getResource(CONF_AUTHENTICATION_MODULE), Map.class));
-        serverAuthContext = json(
-                OBJECT_MAPPER.readValue(getClass().getResource(CONF_SERVER_AUTH_CONTEXT), Map.class));
 
         // Instantiate the object to be used
         AuthenticationService authenticationService = new AuthenticationService();
 
         // Set the config.
-        authenticationService.setConfig(serverAuthContext);
+        authenticationService.setConfig(amendedAuthentication);
 
         // Read request
         final ReadRequest readRequest = newReadRequest(ResourcePath.resourcePath(AUTHENTICATION_PATH));
@@ -208,6 +204,5 @@ public class AuthenticationServiceTest {
         assertThat(resourceResponse.getContent().isEqualTo(authenticationModule)).isTrue();
 
         authenticationModule = null;
-        serverAuthContext = null;
     }
 }

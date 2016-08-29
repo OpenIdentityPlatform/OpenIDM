@@ -36,50 +36,21 @@ define([
     obj.adminCheck = false;
 
     obj.getConfiguration = function (successCallback, errorCallback) {
-        return $.when(
-            commonSiteConfigurationDelegate.getConfiguration(),
-            SocialDelegate.providerList()
-        ).then(function (configuration, socialProviders) {
-            if (socialProviders.providers.length > 0) {
-                hasSocialProviders = true;
-            }
-
+        return commonSiteConfigurationDelegate.getConfiguration().then(function (configuration) {
             if (configuration.kbaEnabled === true) {
                 hasKba = true;
             }
+            return obj.checkForDifferences().then(function () {
+                if (successCallback) {
+                    successCallback(configuration);
+                }
+                return configuration;
+            });
 
-            if (successCallback) {
-                successCallback(configuration);
-            }
-            return configuration;
         }, errorCallback);
     };
 
     obj.checkForDifferences = function(){
-        var tabList = [];
-
-        // every time the logged-in user component changes, reregister appropriate profile tabs
-        if (conf.loggedUser && conf.loggedUser.component !== cachedUserComponent) {
-            cachedUserComponent = conf.loggedUser.component;
-            UserProfileView.resetTabs();
-            // repo/internal/user records don't support "fancy" tabs like kba and social providers
-            if (conf.loggedUser.component !== "repo/internal/user") {
-                tabList.push("org/forgerock/openidm/ui/user/profile/PreferencesTab");
-
-                if (hasSocialProviders) {
-                    tabList.push("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab");
-                }
-                if (hasKba) {
-                    tabList.push("org/forgerock/commons/ui/user/profile/UserProfileKBATab");
-                }
-            }
-            if (tabList.length) {
-                require(tabList, function () {
-                    _.each(_.toArray(arguments), UserProfileView.registerTab, UserProfileView);
-                });
-            }
-        }
-
         if (conf.loggedUser && _.contains(conf.loggedUser.uiroles,"ui-admin") && !obj.adminCheck){
             nav.configuration.userBar.unshift({
                 "id": "admin_link",
@@ -91,6 +62,36 @@ define([
         }
 
         nav.reload();
+
+        // every time the logged-in user component changes, reregister appropriate profile tabs
+        if (conf.loggedUser && conf.loggedUser.component !== cachedUserComponent) {
+            cachedUserComponent = conf.loggedUser.component;
+            UserProfileView.resetTabs();
+            // repo/internal/user records don't support "fancy" tabs like kba and social providers
+            if (conf.loggedUser.component !== "repo/internal/user") {
+                return SocialDelegate.providerList().then(function (socialProviders) {
+                    var tabList = [],
+                        promise = $.Deferred();
+                    tabList.push("org/forgerock/openidm/ui/user/profile/PreferencesTab");
+                    if (socialProviders.providers.length > 0) {
+                        tabList.push("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab");
+                    }
+                    if (hasKba) {
+                        tabList.push("org/forgerock/commons/ui/user/profile/UserProfileKBATab");
+                    }
+                    if (tabList.length) {
+                        require(tabList, function () {
+                            _.each(_.toArray(arguments), UserProfileView.registerTab, UserProfileView);
+                            promise.resolve();
+                        });
+                    } else {
+                        promise.resolve();
+                    }
+                    return promise;
+                });
+            }
+        }
+
         return $.Deferred().resolve();
     };
 
