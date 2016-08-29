@@ -29,6 +29,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -1019,7 +1020,7 @@ class ObjectMapping {
             }
 
             // If we will handle a target phase, pre-load all relevant target identifiers
-            Collection<String> remainingTargetIds = new ArrayList<String>();
+            Set<String> remainingTargetIds = new LinkedHashSet<String>();
             ResultIterable targetIterable =
                     new ResultIterable(Collections.<String>emptyList(), Collections.<JsonValue>emptyList());
             if (reconContext.getReconHandler().isRunTargetPhase()) {
@@ -1028,6 +1029,7 @@ class ObjectMapping {
 
                 targetIterable = reconContext.queryTarget();
                 remainingTargetIds.addAll(targetIterable.getAllIds());
+                remainingTargetIds = Collections.synchronizedSet(remainingTargetIds);
 
                 stats.addDuration(DurationMetric.targetQuery, targetQueryStart);
                 stats.targetQueryEnd();
