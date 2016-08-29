@@ -73,6 +73,9 @@ public class Activator implements BundleActivator {
 
          logger.info("Bootstrapping JDBC repository");
 
+         // Don't allow connection pooling for Boot Service - OPENIDM-6481
+         dataSourceConfig.remove("connectionPool");
+
          // Init the bootstrap connection manager
          DataSourceService dataSourceService = JDBCDataSourceService.getBootService(dataSourceConfig, context);
          // Init the bootstrap repo
