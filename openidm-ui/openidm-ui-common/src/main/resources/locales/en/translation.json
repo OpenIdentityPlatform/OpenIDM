@@ -975,7 +975,7 @@
             "wellKnown" : "Well-Known Endpoint",
             "scope" : "Scope",
             "scopeHelp" : "OAuth 2.0 scopes needed to access provider APIs",
-            "disableOIDCAuthModule": "When you disable all social ID providers, OpenIDM disables the OpenID Connect module.",
+            "disableSocialAuthModule": "When you disable all social ID providers, OpenIDM disables the SOCIAL_PROVIDERS authentication module.",
             "googleGeneralHelp" : "Visit the Google <a href='https://console.developers.google.com' target='_blank'>API Manager</a> to generate a Client ID and Client Secret",
             "facebookGeneralHelp" : "Visit the Facebook <a href='https://developers.facebook.com/apps/' target='_blank'>App Manager</a> to get the App ID and App Secret",
             "oAuthGeneralHelp" : "To get a Client ID and Client Secret, refer to developer documentation from the target social provider",
@@ -984,7 +984,7 @@
             "noRegistration" : "To allow users to register with their Social IDs, ",
             "enableRegistration" : "enable Social Registration.",
             "noAuthentication" : "To allow social logins, enable the following authentication module: ",
-            "enableNow" : "OpenID Connect."
+            "enableNow" : "Social Providers"
         },
         "audit": {
             "eventHandlers": {
@@ -1248,6 +1248,10 @@
                 "OPENID_CONNECT": {
                   "name": "OpenID Connect",
                   "msg": "Supports OpenID Connect 1.0"
+                },
+                "SOCIAL_PROVIDERS": {
+                  "name": "Social Providers",
+                  "msg": "Enables authentication for all defined social providers"
                 },
                 "PASSTHROUGH": {
                   "name": "Passthrough",
