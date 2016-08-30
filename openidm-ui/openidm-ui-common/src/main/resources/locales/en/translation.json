@@ -589,7 +589,7 @@
             "tokenExpire" : "Token LifeTime (seconds)",
             "storageLookup" : "User Storage & Lookup",
             "userVerification" : "User Verification",
-            "socialSystemMessage" : "Configure social identity providers in <a href='#settings/social/'>system preferences</a>",
+            "socialSystemMessage" : "Configure social identity providers <a href='#social/'>here</a>",
             "securityQuestions" : "Security Questions",
             "licensingAndConsent" : "Licensing / Privacy Agreement",
             "password" : {
@@ -980,10 +980,10 @@
             "oAuthGeneralHelp" : "To get a Client ID and Client Secret, refer to developer documentation from the target social provider",
             "showAdvanced" : "Show Advanced Options",
             "hideAdvanced" : "Hide Advanced Options",
-            "noRegistration" : "To use social ID provide data to register users, ",
-            "enableRegistration" : "enable user registration.",
-            "noAuthentication" : "To allow social logins,",
-            "enableNow" : "enable the openID Connector Authentication Module."
+            "noRegistration" : "To allow users to register with their Social IDs, ",
+            "enableRegistration" : "enable Social Registration.",
+            "noAuthentication" : "To allow social logins, enable the following authentication module: ",
+            "enableNow" : "OpenID Connect."
         },
         "audit": {
             "eventHandlers": {
