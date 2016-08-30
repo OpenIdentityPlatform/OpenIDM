@@ -364,7 +364,8 @@
                 "problemLoggingQuestion" : "Having trouble logging in?",
                 "resetPassword" : "Reset your password",
                 "loginWithOpenAM": "Login with OpenAM",
-                "forgotUsername" : "Forgot Username?"
+                "forgotUsername" : "Forgot Username?",
+                "orSignInNormally" : "or login with your username and password"
             },
             "404" : {
                 "pageNotFound" : "Page not found",

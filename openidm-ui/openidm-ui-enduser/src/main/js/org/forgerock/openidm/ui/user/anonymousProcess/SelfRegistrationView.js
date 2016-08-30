@@ -39,19 +39,19 @@ define([
             "partials/providers/_providerButton.html"
         ],
         events: _.extend({
-            "click .oauth": "oauthHandler"
+            "click [data-oauth=button]": "oauthHandler"
         }, CommonSelfRegistrationView.events),
         oauthHandler: function (e) {
             e.preventDefault();
             window.location.href = OAuth.getRequestURL(
-                $(e.target).parents(".oauth").attr("authorization_endpoint"),
-                $(e.target).parents(".oauth").attr("client_id"),
-                $(e.target).parents(".oauth").attr("scope"),
+                $(e.target).parents("[data-oauth=button]").attr("authorization_endpoint"),
+                $(e.target).parents("[data-oauth=button]").attr("client_id"),
+                $(e.target).parents("[data-oauth=button]").attr("scope"),
                 Router.getLink(Router.currentRoute,
                     [
                         "/continue" +
                         (this.delegate.token ? ("&token=" + this.delegate.token) : "") +
-                        "&provider=" + $(e.target).parents(".oauth").attr("value") +
+                        "&provider=" + $(e.target).parents("[data-oauth=button]").attr("value") +
                         "&redirect_uri=" + OAuth.getRedirectURI()
                     ]
                 )
