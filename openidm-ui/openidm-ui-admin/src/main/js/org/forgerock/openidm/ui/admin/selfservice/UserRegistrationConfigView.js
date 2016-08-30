@@ -259,7 +259,7 @@ define([
 
                             if(stage.name === "userDetails") {
                                 this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
-                            } else if (stage.class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+                            } else if (stage.name === "socialUserDetails") {
                                 this.$el.find(".wide-card[data-type='socialUserDetails'] .section-check").prop("checked", true).trigger("change");
                             } else {
                                 this.$el.find(".wide-card[data-type='" + stage.name + "'] .section-check").prop("checked", true).trigger("change");
@@ -509,8 +509,7 @@ define([
                     stages.splice(saveOrder, 0, _.clone(defaultStages[defaultLocation]));
                 }
             } else {
-                stages[0].class = "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig";
-                delete stages[0].name;
+                stages[0].name = "socialUserDetails";
 
                 this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", false);
                 this.$el.find(".wide-card[data-type='userDetails']").toggleClass("disabled", true);

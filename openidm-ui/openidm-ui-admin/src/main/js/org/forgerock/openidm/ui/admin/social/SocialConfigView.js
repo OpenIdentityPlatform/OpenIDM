@@ -166,7 +166,7 @@ define([
 
                 if (providerCount > 0 &&
                     this.model.userRegistration &&
-                    this.model.userRegistration.stageConfigs[0].class === "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig") {
+                    this.model.userRegistration.stageConfigs[0].name === "socialUserDetails") {
 
                     UserRegistrationConfigView.switchToUserDetails(this.model.userRegistration);
                     this.$el.find("#socialNoRegistrationWarningMessage").hide();

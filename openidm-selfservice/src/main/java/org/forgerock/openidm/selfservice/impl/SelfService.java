@@ -54,6 +54,7 @@ import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
+import org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig;
 import org.forgerock.selfservice.core.ProcessStore;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.ProgressStageProvider;
@@ -172,9 +173,7 @@ public class SelfService implements IdentityProviderListener {
             if (stageConfig.isDefined(KBA_CONFIG)) {
                 // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
-            } else if (stageConfig.get("class").isNotNull()
-                    && stageConfig.get("class").asString()
-                            .equals("org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig")) {
+            } else if (SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())) {
                 // add oauth provider config
                 identityProviderService.registerIdentityProviderListener(this);
                 stageConfig.put(IdentityProviderService.PROVIDERS, ProviderConfigMapper.toJsonValue(
@@ -373,6 +372,7 @@ public class SelfService implements IdentityProviderListener {
             processService = JsonAnonymousProcessServiceBuilder.newBuilder()
                     .withClassLoader(this.getClass().getClassLoader())
                     .withJsonConfig(config)
+                    .withStageConfigMapping(SocialUserDetailsConfig.NAME, SocialUserDetailsConfig.class)
                     .withProgressStageProvider(newProgressStageProvider(newHttpClient()))
                     .withTokenHandlerFactory(newTokenHandlerFactory())
                     .withProcessStore(newProcessStore())
