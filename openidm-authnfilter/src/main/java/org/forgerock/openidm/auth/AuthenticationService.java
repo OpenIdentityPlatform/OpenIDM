@@ -69,7 +69,7 @@ import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
-import org.forgerock.openidm.idp.config.ProviderConfig;
+import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
@@ -477,7 +477,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
 
     // ----- Implementation of SingletonResourceProvider interface
 
-    private enum Action { reauthenticate }
+    private enum Action { reauthenticate, getauthtoken }
 
     /**
      * Action support, including reauthenticate action {@inheritDoc}
@@ -485,42 +485,53 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {
-            if (Action.reauthenticate.equals(request.getActionAsEnum(Action.class))) {
-                if (context.containsContext(HttpContext.class)
-                        && context.containsContext(SecurityContext.class)) {
-                    String authcid = context.asContext(SecurityContext.class).getAuthenticationId();
-                    HttpContext httpContext = context.asContext(HttpContext.class);
-                    String password = httpContext.getHeaderAsString(HEADER_REAUTH_PASSWORD);
-                    if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {
-                        logger.debug("Reauthentication failed, missing or empty headers");
-                        return new ForbiddenException("Reauthentication failed, missing or empty headers")
-                                .asPromise();
-                    }
-
-                    for (Authenticator authenticator : authenticators) {
-                        try {
-                            if (authenticator.authenticate(authcid, password, context).isAuthenticated()) {
-                                JsonValue result = new JsonValue(new HashMap<String, Object>());
-                                result.put("reauthenticated", true);
-                                return newActionResponse(result).asPromise();
-                            }
-                        } catch (ResourceException e) {
-                            // log error and try next authentication mechanism
-                            logger.debug("Reauthentication failed: {}", e.getMessage());
+            switch (request.getActionAsEnum(Action.class)) {
+                case reauthenticate:
+                    if (context.containsContext(HttpContext.class)
+                            && context.containsContext(SecurityContext.class)) {
+                        String authcid = context.asContext(SecurityContext.class).getAuthenticationId();
+                        HttpContext httpContext = context.asContext(HttpContext.class);
+                        String password = httpContext.getHeaderAsString(HEADER_REAUTH_PASSWORD);
+                        if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {
+                            logger.debug("Reauthentication failed, missing or empty headers");
+                            return new ForbiddenException("Reauthentication failed, missing or empty headers")
+                                    .asPromise();
                         }
-                    }
 
-                    return new ForbiddenException("Reauthentication failed for " + authcid).asPromise();
-                } else {
-                    return new InternalServerErrorException("Failure to reauthenticate - missing context").asPromise();
-                }
-            } else {
-                return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
-                        .asPromise();
+                        for (Authenticator authenticator : authenticators) {
+                            try {
+                                if (authenticator.authenticate(authcid, password, context).isAuthenticated()) {
+                                    JsonValue result = new JsonValue(new HashMap<String, Object>());
+                                    result.put("reauthenticated", true);
+                                    return newActionResponse(result).asPromise();
+                                }
+                            } catch (ResourceException e) {
+                                // log error and try next authentication mechanism
+                                logger.debug("Reauthentication failed: {}", e.getMessage());
+                            }
+                        }
+
+                        return new ForbiddenException("Reauthentication failed for " + authcid).asPromise();
+                    } else {
+                        return new InternalServerErrorException("Failure to reauthenticate - missing context").asPromise();
+                    }
+                case getauthtoken:
+                    final String authToken = new OAuthHttpClient(identityProviderService.getIdentityProvider(request.getContent()
+                            .get(OAuthHttpClient.PROVIDER).required().asString()), identityProviderService.newHttpClient())
+                            .getAuthToken(
+                                    request.getContent().get(OAuthHttpClient.CODE).required().asString(),
+                                    request.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString());
+                    // get auth token
+                    return newActionResponse(json(object(field(OAuthHttpClient.AUTH_TOKEN, authToken)))).asPromise();
+                default:
+                    return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
+                            .asPromise();
             }
         } catch (IllegalArgumentException e) { // from getActionAsEnum
             return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
                     .asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException("Error processing action", e).asPromise();
         }
