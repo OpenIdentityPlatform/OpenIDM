@@ -155,6 +155,8 @@ define([
                         if (providerCount === 1) {
                             this.addBindUnbindBehavior();
                         }
+
+                        card.find(".btn-link").trigger("click");
                     });
                 } else {
                     this.deleteConfig(this.model.providers[index]).then(() => {
