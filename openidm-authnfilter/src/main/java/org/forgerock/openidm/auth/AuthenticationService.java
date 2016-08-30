@@ -69,6 +69,7 @@ import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
+import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
@@ -544,10 +545,18 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(withAuthModule).toList();
             // Iterate the filtered list and get resolvers content
             for (JsonValue authModule : authModules) {
-                allAuthModules.addAll(authModule
-                        .get(AUTH_MODULE_PROPERTIES_KEY)
-                        .get(AUTH_MODULE_RESOLVERS_KEY)
-                        .asList(Map.class));
+                allAuthModules.addAll(FluentIterable
+                        .from(authModule
+                                .get(AUTH_MODULE_PROPERTIES_KEY)
+                                .get(AUTH_MODULE_RESOLVERS_KEY))
+                        .transform(IdentityProviderService.withoutClientSecret)
+                        .transform(new Function<JsonValue, Map>() {
+                            @Override
+                            public Map apply(JsonValue jsonValue) {
+                                return jsonValue.asMap();
+                            }
+                        })
+                        .toList());
             }
         }
         return newResourceResponse(null, null, json(object(field(IdentityProviderService.PROVIDERS,
