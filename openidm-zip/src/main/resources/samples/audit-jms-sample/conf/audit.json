@@ -3,6 +3,7 @@
         "handlerForQueries" : "repo",
         "availableAuditEventHandlers" : [
             "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
+            "org.forgerock.audit.handlers.json.JsonAuditEventHandler",
             "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
             "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",

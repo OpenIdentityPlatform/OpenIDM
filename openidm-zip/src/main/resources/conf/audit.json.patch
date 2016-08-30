@@ -1,0 +1,7 @@
+[
+   {
+        "operation" : "add",
+        "field" : "/auditServiceConfig/availableAuditEventHandlers/-",
+        "value" : "org.forgerock.audit.handlers.json.JsonAuditEventHandler"
+   }
+]
