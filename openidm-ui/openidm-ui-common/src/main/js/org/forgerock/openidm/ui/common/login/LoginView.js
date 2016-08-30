@@ -26,13 +26,13 @@ define([
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"
 ], function($, _, Handlebars,
-    SocialDelegate,
-    Constants,
-    EventManager,
-    commonLoginView,
-    OAuth,
-    Router,
-    amLoginUtils) {
+            SocialDelegate,
+            Constants,
+            EventManager,
+            commonLoginView,
+            OAuth,
+            Router,
+            amLoginUtils) {
 
     var LoginView = function () {},
         obj;
@@ -41,13 +41,8 @@ define([
 
     obj = new LoginView();
 
-    obj.partials = (commonLoginView.partials || []).concat([
-        "partials/login/_loginButtons.html",
-        "partials/providers/_providerButton.html"
-    ]);
-
     _.extend(obj.events, {
-        "click .oauth": "oauthHandler"
+        "click [data-oauth=button]": "oauthHandler"
     });
 
     // TODO: share oauthHandler logic between registration and login
@@ -55,12 +50,12 @@ define([
         e.preventDefault();
 
         window.location.href = OAuth.getRequestURL(
-            $(e.target).parents(".oauth").attr("authorization_endpoint"),
-            $(e.target).parents(".oauth").attr("client_id"),
-            $(e.target).parents(".oauth").attr("scope"),
+            $(e.target).parents("[data-oauth=button]").attr("authorization_endpoint"),
+            $(e.target).parents("[data-oauth=button]").attr("client_id"),
+            $(e.target).parents("[data-oauth=button]").attr("scope"),
             Router.getLink(Router.currentRoute,
                 [
-                    "&provider=" + $(e.target).parents(".oauth").attr("value") +
+                    "&provider=" + $(e.target).parents("[data-oauth=button]").attr("value") +
                     "&redirect_uri=" + OAuth.getRedirectURI()
                 ]
             )
@@ -90,25 +85,23 @@ define([
                 });
         }
 
-        commonLoginView.render.call(this, args, _.bind(function () {
-            oauthProviders.then(_.bind(function (response) {
-                _.each(response.providers, (provider) => {
-                    provider.scope = provider.scope.join(" ");
-                });
+        oauthProviders.then(_.bind(function (response) {
+            _.each(response.providers, (provider) => {
+                provider.scope = provider.scope.join(" ");
+            });
 
-                this.$el.find("[name=loginButton]").after(
-                    Handlebars.compile("{{> login/_loginButtons}}")({providers: response.providers})
-                );
+            this.data.providers = response.providers;
+
+            commonLoginView.render.call(this, args, _.bind(function () {
+                if (callback) {
+                    callback();
+                }
+
+                if (amCallback) {
+                    amCallback();
+                }
+
             }, this));
-
-            if (callback) {
-                callback();
-            }
-
-            if (amCallback) {
-                amCallback();
-            }
-
         }, this));
     };
 
