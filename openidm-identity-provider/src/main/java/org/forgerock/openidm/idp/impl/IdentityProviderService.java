@@ -16,10 +16,13 @@
 package org.forgerock.openidm.idp.impl;
 
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.*;
+import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toJsonValue;
+import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toProviderConfig;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -114,7 +117,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
                 }
             };
 
-    private enum Action { getAuthToken, availableProviders, getProfile }
+    private enum Action { availableProviders, getProfile }
 
     /** Enhanced configuration service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
@@ -227,14 +230,6 @@ public class IdentityProviderService implements SingletonResourceProvider {
             switch (actionRequest.getActionAsEnum(Action.class)) {
             case availableProviders:
                 return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
-            case getAuthToken:
-                final String authToken = new OAuthHttpClient(getIdentityProvider(actionRequest.getContent()
-                        .get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
-                        .getAuthToken(
-                                actionRequest.getContent().get(OAuthHttpClient.CODE).required().asString(),
-                                actionRequest.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString());
-                // just return id_token as "auth_token"
-                return newActionResponse(json(object(field(OAuthHttpClient.AUTH_TOKEN, authToken)))).asPromise();
             case getProfile:
                 final ProviderConfig providerConfig =
                         getIdentityProvider(actionRequest.getContent().get(OAuthHttpClient.PROVIDER).required().
@@ -312,7 +307,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
         }
     }
 
-    private Client newHttpClient() throws HttpApplicationException {
+    public Client newHttpClient() throws HttpApplicationException {
         return new Client(
                 new HttpClientHandler(
                         Options.defaultOptions()
