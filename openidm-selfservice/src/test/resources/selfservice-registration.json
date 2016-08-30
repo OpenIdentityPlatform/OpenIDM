@@ -1,7 +1,7 @@
 {
   "stageConfigs" : [
     {
-      "class" : "org.forgerock.openidm.selfservice.stage.SocialUserDetailsConfig",
+      "name" : "socialUserDetails",
       "identityEmailField" : "mail"
     }
   ],
