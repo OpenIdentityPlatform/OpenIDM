@@ -95,7 +95,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
     private static final String SUB = "sub";
 
     /** Transformation function to remove client secret */
-    private static final Function<JsonValue, JsonValue> withoutClientSecret =
+    public static final Function<JsonValue, JsonValue> withoutClientSecret =
             new Function<JsonValue, JsonValue>() {
                 @Override
                 public JsonValue apply(JsonValue value) {
