@@ -2552,6 +2552,23 @@
 
                 }
             },
+            "json": {
+                "logDirectory": {
+                    "help": "Directory in which to store audit log JSON files"
+                },
+                "elasticsearchCompatible": {
+                    "help": "Enable ElasticSearch JSON format compatibility"
+                },
+                "buffering": {
+                    "help": "Configuration for event buffering",
+                    "maxSize": {
+                        "help": "Fixed maximum number of events that can be buffered (default/minimum: 100000)"
+                    },
+                    "writeInterval": {
+                        "help": "Delay (default: 100 ms) after which the file-writer thread is scheduled to run after encountering an empty event buffer (units of 'ms' are recommended)"
+                    }
+                }
+            },
             "jms": {
                 "deliveryMode": {
                     "help": "JMS mode to deliver the messages in, either PERSISTENT or NON_PERSISTENT"

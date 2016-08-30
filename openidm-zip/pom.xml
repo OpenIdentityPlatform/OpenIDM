@@ -387,6 +387,10 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.commons</groupId>
+            <artifactId>forgerock-audit-handler-json</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.commons</groupId>
             <artifactId>forgerock-audit-handler-jms</artifactId>
         </dependency>
         <dependency>
