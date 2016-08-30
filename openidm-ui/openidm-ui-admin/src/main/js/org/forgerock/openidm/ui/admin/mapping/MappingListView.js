@@ -230,7 +230,7 @@ define([
                                     cell: Backgrid.Cell.extend({
                                         render: function () {
                                             var display;
-                                            if (this.model.attributes.sourceType === "managed" || this.model.attributes.targetConnector.connectorRef) {
+                                            if (this.model.attributes.targetType === "managed" || this.model.attributes.targetConnector.connectorRef) {
                                                 display = handlebars.compile("{{> mapping/list/_sourceTargetGridCellDisplay}}")({
                                                     linkUrl: this.model.attributes.targetConnector.url,
                                                     icon: this.model.attributes.targetIcon,
