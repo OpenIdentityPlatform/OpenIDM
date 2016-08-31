@@ -307,7 +307,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
         }
     }
 
-    public Client newHttpClient() throws HttpApplicationException {
+    private Client newHttpClient() throws HttpApplicationException {
         return new Client(
                 new HttpClientHandler(
                         Options.defaultOptions()

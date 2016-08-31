@@ -16,6 +16,7 @@
 
 package org.forgerock.openidm.auth;
 
+import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.field;
@@ -48,7 +49,12 @@ import org.forgerock.caf.authentication.framework.AuthenticationFilter.Authentic
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
+import org.forgerock.http.Client;
 import org.forgerock.http.Filter;
+import org.forgerock.http.HttpApplicationException;
+import org.forgerock.http.apache.async.AsyncHttpClientProvider;
+import org.forgerock.http.handler.HttpClientHandler;
+import org.forgerock.http.spi.Loader;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -83,6 +89,7 @@ import org.forgerock.json.resource.http.HttpContext;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.util.Options;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -516,8 +523,11 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                         return new InternalServerErrorException("Failure to reauthenticate - missing context").asPromise();
                     }
                 case getauthtoken:
-                    final String authToken = new OAuthHttpClient(identityProviderService.getIdentityProvider(request.getContent()
-                            .get(OAuthHttpClient.PROVIDER).required().asString()), identityProviderService.newHttpClient())
+                    final String authToken =
+                            new OAuthHttpClient(
+                                    identityProviderService.getIdentityProvider(
+                                            request.getContent().get(OAuthHttpClient.PROVIDER).required().asString()),
+                                    newHttpClient())
                             .getAuthToken(
                                     request.getContent().get(OAuthHttpClient.CODE).required().asString(),
                                     request.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString());
@@ -530,8 +540,6 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         } catch (IllegalArgumentException e) { // from getActionAsEnum
             return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
                     .asPromise();
-        } catch (ResourceException e) {
-            return e.asPromise();
         } catch (Exception e) {
             return new InternalServerErrorException("Error processing action", e).asPromise();
         }
@@ -588,5 +596,17 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      */
     protected void setConfig(final JsonValue config) {
         this.config = config;
+    }
+
+    private Client newHttpClient() throws HttpApplicationException {
+        return new Client(
+                new HttpClientHandler(
+                        Options.defaultOptions()
+                                .set(OPTION_LOADER, new Loader() {
+                                    @Override
+                                    public <S> S load(Class<S> service, Options options) {
+                                        return service.cast(new AsyncHttpClientProvider());
+                                    }
+                                })));
     }
 }
