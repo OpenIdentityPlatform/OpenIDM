@@ -995,17 +995,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             }
             ResourceResponse repoReadResponse = connectionFactory.getConnection().read(managedContext, repoReadRequest);
 
-            /*
-            Now populate the relationship fields as specified in the UpdateRequest.
-             */
+            // Now populate the relationship fields as specified in the UpdateRequest.
             final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
             repoReadResponse.getContent().asMap().putAll(relationships.asMap());
 
-            /*
-            Now call the update method, passing the repo-read object as the old object, and the caller-specified object
-            as the new object, so that the update method can perform the appropriate diff logic and the resulting sync
-            actions.
-             */
+            // Now call the update method, passing the repo-read object as the old object, and the caller-specified object
+            // as the new object, so that the update method can perform the appropriate diff logic and the resulting sync
+            // actions.
             ResourceResponse updatedResponse = update(managedContext, request, resourceId, request.getRevision(),
             		repoReadResponse.getContent(), request.getContent(), relationshipProviders.keySet(),
                     Collections.<JsonPointer>emptySet());
@@ -1368,18 +1364,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 scriptBindings.put("object", currentResource.getContent());
                 Object result = execScript(managedContext, newScriptHook(request.getAction()), value, scriptBindings);
 
-                final JsonValue scriptResult = json(result);
-                final ResourceResponse response = newResourceResponse(
-                        scriptResult.get(ResourceResponse.FIELD_CONTENT_ID).asString(),
-                        scriptResult.get(ResourceResponse.FIELD_CONTENT_REVISION).asString(),
-                        scriptResult);
+                logger.debug("Result returned by executing the script: ", result);
 
-                final JsonValue relationships = fetchRelationshipFields(managedContext, resourceId, request.getFields());
-
-                response.getContent().asMap().putAll(relationships.asMap());
-
-                return newActionResponse(prepareResponse(managedContext, response, request.getFields()).getContent())
-                        .asPromise();
+                // re-read the object for the response using the appropriate connection given our calling context
+                final Connection connection = ContextUtil.isExternal(context)
+                        ? connectionFactory.getExternalConnection()
+                        : connectionFactory.getConnection();
+                ResourceResponse updatedResource = connection.read(managedContext, readRequest);
+                return newActionResponse(updatedResource.getContent()).asPromise();
             } else {
                 throw new BadRequestException("Action " + request.getAction() + " is not supported.");
             }
