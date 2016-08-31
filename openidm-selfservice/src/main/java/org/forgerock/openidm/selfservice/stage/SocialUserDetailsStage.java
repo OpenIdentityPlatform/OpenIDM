@@ -20,7 +20,6 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.newArray;
-import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.newObject;
 import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.oneOf;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
@@ -70,8 +69,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
     private static final Logger logger = LoggerFactory.getLogger(SocialUserDetailsStage.class);
 
     private static final String VALIDATE_USER_PROFILE_TAG = "validateUserProfile";
-    private static final String ORIGINAL_PROFILE = "originalProfile";
-    private static final String IDP_SUBJECT = "idpSubject";
+    private static final String IDP_DATA_OBJECT = "idpData";
 
     private final Client httpClient;
     private final PropertyMappingService mappingService;
@@ -116,7 +114,6 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
     @Override
     public StageResponse advance(ProcessContext context, SocialUserDetailsConfig config) throws ResourceException {
         final JsonValue user = context.getInput().get("user");
-        final JsonValue provider = context.getInput().get("provider");
         if (user.isNotNull()) {
             // This is the second pass through this stage.  Update the user object and advance.
             processEmail(context, config, user);
@@ -130,16 +127,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
                 userState.put(key, value);
             }
 
-            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-            df.setTimeZone(TimeZone.getTimeZone("UTC"));
-            userState.put("idpData", json(object(
-                    field(provider.asString(), object(
-                            field("subject", context.getState(IDP_SUBJECT).asString()),
-                            field("enabled", true),
-                            field("dateCollected", df.format(new Date())),
-                            field("rawProfile", context.getState(ORIGINAL_PROFILE).getObject())
-                    )))).getObject());
-
+            userState.put(IDP_DATA_OBJECT, context.getState(IDP_DATA_OBJECT));
             context.putState(USER_FIELD, userState);
 
             return StageResponse.newBuilder().build();
@@ -148,6 +136,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         // This is the first pass through this stage.  Gather the user profile to offer up for registration.
         final JsonValue code = context.getInput().get("code");
         final JsonValue redirectUri = context.getInput().get("redirect_uri");
+        final JsonValue provider = context.getInput().get("provider");
         if (provider.isNotNull() && code.isNotNull() && redirectUri.isNotNull()) {
             final JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(),
                     config, context);
@@ -206,8 +195,16 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
         final ProviderConfig providerConfig = getProviderConfig(providerName, config.getProviders());
         final JsonValue rawProfile = providerHttpClient.getProfile(code, redirectUri);
-        context.putState(ORIGINAL_PROFILE, rawProfile);
-        context.putState(IDP_SUBJECT, rawProfile.get(providerConfig.getAuthenticationId()).asString());
+
+        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
+        df.setTimeZone(TimeZone.getTimeZone("UTC"));
+        context.putState(IDP_DATA_OBJECT, json(object(
+                field(providerName, object(
+                        field("subject", rawProfile.get(providerConfig.getAuthenticationId()).asString()),
+                        field("enabled", true),
+                        field("dateCollected", df.format(new Date())),
+                        field("rawProfile", rawProfile)
+                )))).getObject());
 
         final JsonValue commonFormat = normalizeProfile(rawProfile, providerConfig);
         return mappingService.apply(commonFormat, context.getRequestContext());
