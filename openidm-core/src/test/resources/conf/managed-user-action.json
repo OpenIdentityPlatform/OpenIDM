@@ -4,6 +4,14 @@
         "toggleActive" : {
             "type" : "text/javascript",
             "source" : "object.active = !object.active; object;"
+        },
+        "logMessage" : {
+            "type" : "text/javascript",
+            "source" : "logger.info('scripted action was triggered and we can read the variable object '+object)"
+        },
+        "scalar" : {
+            "type" : "text/javascript",
+            "source" : "true"
         }
     },
     "schema" : {
