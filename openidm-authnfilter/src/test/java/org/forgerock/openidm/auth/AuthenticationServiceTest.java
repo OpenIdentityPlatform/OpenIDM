@@ -16,7 +16,7 @@
 package org.forgerock.openidm.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newReadRequest;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -61,6 +61,8 @@ public class AuthenticationServiceTest {
     private JsonValue authenticationJson;
     private JsonValue authenticationModule;
 
+    private AuthenticationService authenticationService;
+
     @BeforeMethod
     public void setUp() throws Exception {
         // amendedAuthentication.json is what the configuration should look after injection
@@ -74,6 +76,9 @@ public class AuthenticationServiceTest {
         // the functionality of AuthenticationService.java#amendAuthConfig()
         authenticationJson = json(
                 OBJECT_MAPPER.readValue(getClass().getResource("/config/authentication.json"), Map.class));
+        // Instantiate the object to be used with proper mocked IdentityProviderService
+        authenticationService = new AuthenticationService();
+        authenticationService.setConfig(authenticationJson);
     }
 
     @AfterMethod
@@ -97,7 +102,6 @@ public class AuthenticationServiceTest {
         when(identityProviderService.getIdentityProviderByType(OPENID_CONNECT)).thenReturn(openIdProviderConfigs);
 
         // Instantiate the object to be used with proper mocked IdentityProviderService
-        AuthenticationService authenticationService = new AuthenticationService();
         authenticationService.bindIdentityProviderService(identityProviderService);
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
@@ -107,7 +111,7 @@ public class AuthenticationServiceTest {
         // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
         // the amendedAuthentication configuration
         assertThat(
-                amendedAuthentication.get("serverAuthContext").get("authModules").get(0)
+                amendedAuthentication.get("serverAuthContext").get("authModules").get(1)
                 .isEqualTo(authenticationJson.get("serverAuthContext").get("authModules").get(0)))
                 .isTrue();
 
@@ -142,7 +146,6 @@ public class AuthenticationServiceTest {
         when(identityProviderService.getIdentityProviders()).thenReturn(allConfigs);
 
         // Instantiate the object to be used with proper mocked IdentityProviderService
-        AuthenticationService authenticationService = new AuthenticationService();
         authenticationService.bindIdentityProviderService(identityProviderService);
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
@@ -156,8 +159,10 @@ public class AuthenticationServiceTest {
 
     @Test
     public void testNoProviderConfigsToInject() throws Exception {
-        // Copy the authenticationJson for later comparison to prove unmodified
-        final JsonValue authenticationJsonNoMod = authenticationJson.copy();
+        // This should be empty because this test should make sure that if we have no configured
+        // identity providers we should not inject auth modules into authentication.json
+        final JsonValue authenticationJsonNoMod =
+                json(object(field("serverAuthContext", object(field("authModules", array())))));
 
         // Mock of IdentityProviderService
         final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
@@ -168,8 +173,6 @@ public class AuthenticationServiceTest {
         // Whenever we call getIdentityProviders() return the test case configs
         when(identityProviderService.getIdentityProviders()).thenReturn(providerConfigs);
 
-        // Instantiate the object to be used with proper mocked IdentityProviderService
-        AuthenticationService authenticationService = new AuthenticationService();
         authenticationService.bindIdentityProviderService(identityProviderService);
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
@@ -192,6 +195,7 @@ public class AuthenticationServiceTest {
 
         // Set the config.
         authenticationService.setConfig(amendedAuthentication);
+        authenticationService.setAmendedConfig(amendedAuthentication);
 
         // Read request
         final ReadRequest readRequest = newReadRequest(ResourcePath.resourcePath(AUTHENTICATION_PATH));

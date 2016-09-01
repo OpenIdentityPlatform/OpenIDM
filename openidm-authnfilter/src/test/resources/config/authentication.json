@@ -2,28 +2,10 @@
   "serverAuthContext" : {
     "authModules" : [
       {
-        "name" : "OPENID_CONNECT",
+        "name" : "SOCIAL_PROVIDERS",
         "properties" : {
-          "openIdConnectHeader" : "authToken",
           "queryOnResource" : "managed/user",
           "propertyMapping" : {
-            "authenticationId" : "idpData/google/sub",
-            "userRoles" : "authzRoles"
-          },
-          "defaultUserRoles" : [
-            "openidm-authorized"
-          ]
-        },
-        "enabled" : true
-      },
-      {
-        "name" : "OAUTH",
-        "properties" : {
-          "authTokenHeader" : "authToken",
-          "authProviderHeader" : "provider",
-          "queryOnResource" : "managed/user",
-          "propertyMapping" : {
-            "authenticationId" : "idpData/facebook/id",
             "userRoles" : "authzRoles"
           },
           "defaultUserRoles" : [

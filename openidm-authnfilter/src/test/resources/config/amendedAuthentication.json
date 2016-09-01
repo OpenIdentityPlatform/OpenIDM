@@ -2,49 +2,12 @@
   "serverAuthContext" : {
     "authModules" : [
       {
-        "name" : "OPENID_CONNECT",
-        "properties" : {
-          "openIdConnectHeader" : "authToken",
-          "queryOnResource" : "managed/user",
-          "propertyMapping" : {
-            "authenticationId" : "idpData/google/sub",
-            "userRoles" : "authzRoles"
-          },
-          "defaultUserRoles" : [
-            "openidm-authorized"
-          ],
-          "resolvers" : [
-            {
-              "name" : "google",
-              "type" : "OPENID_CONNECT",
-              "icon" : "google",
-              "scope" : [
-                "openid",
-                "profile",
-                "email"
-              ],
-              "authenticationId" : "sub",
-              "enabled" : true,
-              "client_id" : "",
-              "client_secret" : "",
-              "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
-              "token_endpoint" : "https://www.googleapis.com/oauth2/v4/token",
-              "userinfo_endpoint" : "https://www.googleapis.com/oauth2/v3/userinfo",
-              "well-known" : "https://accounts.google.com/.well-known/openid-configuration"
-            }
-          ]
-        },
-        "enabled" : true
-      },
-      {
         "name" : "OAUTH",
         "properties" : {
           "queryOnResource" : "managed/user",
-          "authTokenHeader" : "authToken",
-          "authProviderHeader" : "provider",
           "propertyMapping" : {
             "userRoles" : "authzRoles",
-            "authenticationId" : "idpData/facebook/id"
+            "authenticationId" : "idpData/facebook/subject"
           },
           "defaultUserRoles" : [
             "openidm-authorized"
@@ -92,7 +55,44 @@
               "token_endpoint" : "https://graph.facebook.com/v2.3/oauth/access_token",
               "userinfo_endpoint" : "https://graph.facebook.com/me?fields=id,name,picture,email,first_name,last_name,locale"
             }
-          ]
+          ],
+          "authTokenHeader" : "authToken",
+          "authResolverHeader" : "provider"
+        },
+        "enabled" : true
+      },
+      {
+        "name" : "OPENID_CONNECT",
+        "properties" : {
+          "queryOnResource" : "managed/user",
+          "propertyMapping" : {
+            "authenticationId" : "idpData/google/subject",
+            "userRoles" : "authzRoles"
+          },
+          "defaultUserRoles" : [
+            "openidm-authorized"
+          ],
+          "resolvers" : [
+            {
+              "name" : "google",
+              "type" : "OPENID_CONNECT",
+              "icon" : "google",
+              "scope" : [
+                "openid",
+                "profile",
+                "email"
+              ],
+              "authenticationId" : "sub",
+              "enabled" : true,
+              "client_id" : "",
+              "client_secret" : "",
+              "authorization_endpoint" : "https://accounts.google.com/o/oauth2/v2/auth",
+              "token_endpoint" : "https://www.googleapis.com/oauth2/v4/token",
+              "userinfo_endpoint" : "https://www.googleapis.com/oauth2/v3/userinfo",
+              "well-known" : "https://accounts.google.com/.well-known/openid-configuration"
+            }
+          ],
+          "openIdConnectHeader" : "authToken"
         },
         "enabled" : true
       }
