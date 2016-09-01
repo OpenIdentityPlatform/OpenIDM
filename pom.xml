@@ -268,7 +268,7 @@
         <openicf.sshconnector.version>1.4.0.0</openicf.sshconnector.version>
         <openicf.kerberosconnector.version>1.4.0.0</openicf.kerberosconnector.version>
         <salesforce.api.version>29</salesforce.api.version>
-        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.3-SNAPSHOT</provisioner.salesforcemodule.version>
+        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.4-SNAPSHOT</provisioner.salesforcemodule.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
