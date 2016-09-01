@@ -16,10 +16,18 @@
 
 package org.forgerock.openidm.auth;
 
+import javax.inject.Provider;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.array;
+
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -47,6 +55,7 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder;
 import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.base.Optional;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.http.Client;
@@ -58,13 +67,13 @@ import org.forgerock.http.spi.Loader;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ForbiddenException;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
@@ -76,6 +85,7 @@ import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
+import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
@@ -95,13 +105,6 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 
 /**
  * Configures the authentication chains based on authentication.json.
@@ -158,15 +161,29 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     private static final String SESSION_MODULE_KEY = "sessionModule";
     private static final String AUTH_MODULES_KEY = "authModules";
     private static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
+    private static final String AUTH_MODULE_PROPERTY_MAPPING_KEY = "propertyMapping";
     private static final String AUTH_MODULE_NAME_KEY = "name";
     private static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
-    private static final String MODULE_CONFIG_ENABLED = "enabled";
+    private static final String AUTH_MODULE_CONFIG_ENABLED = "enabled";
     private static final String AUTH_MODULE_RESOLVERS_KEY = "resolvers";
+    private static final String SOCIAL_PROVIDERS = "SOCIAL_PROVIDERS";
 
     /** the encoded key location in the return value from {@link SharedKeyService#getSharedKey(String)} */
     private static final JsonPointer ENCODED_SECRET_PTR = new JsonPointer("/secret/encoded");
 
+    /**
+     * Configuration as it is represented in the authentication.json file.
+     */
     private JsonValue config;
+
+    /**
+     * Amended configuration of what the {@link AuthenticationService} configuration is in memory.
+     * It has all the injected configuration from the services it depends on. We need this because if
+     * SOCIAL_PROVIDERS configuration is present in the authentication.json it needs to auto populate
+     * all the associated auth modules (OAUTH and OPENID_CONNECT) and remove the SOCIAL_PROVIDERS
+     * authentication module in memory only so that it does not get initialized.
+     */
+    private JsonValue amendedConfig;
 
     /** The authenticators to delegate to.*/
     private List<Authenticator> authenticators = new ArrayList<>();
@@ -222,7 +239,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             new Predicate<JsonValue>() {
                 @Override
                 public boolean apply(JsonValue jsonValue) {
-                    return jsonValue.get(MODULE_CONFIG_ENABLED).defaultTo(true).asBoolean();
+                    return jsonValue.get(AUTH_MODULE_CONFIG_ENABLED).defaultTo(true).asBoolean();
                 }
             };
 
@@ -261,40 +278,155 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                 }
             };
 
+    /** A {@link Function} that converts a JsonValue to a Map */
+    private static final Function<JsonValue, Map<String, Object>> jsonValueToMap =
+            new Function<JsonValue, Map<String, Object>>() {
+                @Override
+                public Map<String, Object> apply(JsonValue jsonValue) {
+                    return jsonValue.asMap();
+                }
+            };
+
+    /** A {@link Function} that returns the auth module resolvers as JsonValue */
+    private static final Function<JsonValue, JsonValue> resolvers = new Function<JsonValue, JsonValue>() {
+        @Override
+        public JsonValue apply(JsonValue jsonValue) {
+            setType.apply(jsonValue);
+            return jsonValue.get(AUTH_MODULE_PROPERTIES_KEY).get(AUTH_MODULE_RESOLVERS_KEY);
+        }
+    };
+
+    /** A {@link Predicate} that returns whether the resolver is enabled */
+    private static final Predicate<JsonValue> enabledResolvers =
+            new Predicate<JsonValue>() {
+                @Override
+                public boolean apply(JsonValue jsonValue) {
+                    return jsonValue.get(AUTH_MODULE_CONFIG_ENABLED).defaultTo(true).asBoolean();
+                }
+            };
+
+    /** A {@link Predicate} that returns whether the idp config is associated with the provider name */
+    private static final Predicate<JsonValue> forProvider(final String providerName) {
+        return new Predicate<JsonValue>() {
+            @Override
+            public boolean apply(JsonValue jsonValue) {
+                return jsonValue.get(AUTH_MODULE_NAME_KEY).asString().equals(providerName);
+            }
+        };
+    }
+
+    /** A {@link Function} that sets the type of the resolver from the auth module name */
+    private static final Function<JsonValue, JsonValue> setType = new Function<JsonValue, JsonValue>() {
+        @Override
+        public JsonValue apply(JsonValue jsonValue) {
+            final JsonValue resolvers = jsonValue.get(AUTH_MODULE_PROPERTIES_KEY).get(AUTH_MODULE_RESOLVERS_KEY);
+            if (resolvers.isNotNull()) {
+                // currently we only support one resolver per auth module
+                return resolvers.get(0).put("type", jsonValue.get(AUTH_MODULE_NAME_KEY).asString());
+            }
+            // return with no modification
+            return jsonValue;
+        }
+    };
+
     /**
-     * Amends the config so that the OPENID_CONNECT
-     * module has the appropriate resolvers.
+     * Returns the SOCIAL_PROVIDERS template if one
+     * is available and it is enabled.
+     *
+     * @return social auth template as JsonValue
+     */
+    private JsonValue getSocialAuthTemplate() {
+        for (final JsonValue authModule : config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY)) {
+            if (authModule.get(AUTH_MODULE_NAME_KEY).asString().equals(SOCIAL_PROVIDERS)
+                    && authModule.get(AUTH_MODULE_CONFIG_ENABLED).defaultTo(true).asBoolean()) {
+                return authModule.copy();
+            }
+        }
+        return json(object());
+    }
+
+    /**
+     * Amends the config so that the we generate the appropriate
+     * OPENID_CONNECT and OAUTH modules.
      *
      * @param authModuleConfig configuration of the authentication modules.
      */
-    void amendAuthConfig(JsonValue authModuleConfig) {
-        if (identityProviderService.getIdentityProviders().isEmpty()) {
-            // no configured identityProviders found to inject
+    void amendAuthConfig(final JsonValue authModuleConfig) {
+        final JsonValue socialAuthTemplate = getSocialAuthTemplate();
+        if (socialAuthTemplate.asMap().isEmpty()) {
+            // because we don't have a SOCIAL_PROVIDER configured
+            // or it's not enabled, no need to modify config
+            // or no configured identityProviders found to inject
+            logger.debug("SOCIAL_PROVIDERS module was not found.");
             return;
         }
-        final List<JsonValue> authModuleConfigs = FluentIterable.from(authModuleConfig).filter(new Predicate<JsonValue>() {
-            @Override
-            public boolean apply(final JsonValue authModuleConfig) {
-                return authModuleConfig.get(AUTH_MODULE_NAME_KEY).asString()
-                                .equals(IDMAuthModule.OPENID_CONNECT.name())
-                        || authModuleConfig.get(AUTH_MODULE_NAME_KEY).asString()
-                                .equals(IDMAuthModule.OAUTH.name()) ;
-            }
-        }).toList();
 
-        try {
-            for (final JsonValue authModule : authModuleConfigs) {
-                authModule.get(AUTH_MODULE_PROPERTIES_KEY)
-                        .put(AUTH_MODULE_RESOLVERS_KEY, ProviderConfigMapper.toJsonValue(identityProviderService
-                                .getIdentityProviderByType(authModule.get(AUTH_MODULE_NAME_KEY).asString()))
-                                .asList()
-                        );
-            }
-        } catch (IllegalArgumentException | JsonValueException e) {
-            logger.debug("Could not configure authModule with no resolvers.", e);
-        }
+        // We need to remove the SOCIAL_PROVIDERS module from the list because it isn't an authentic
+        // module, it doesn't have an implementation, it is used as a template to create
+        // OAUTH and OPENID_CONNECT auth modules
+        authModuleConfig.asList(Map.class).remove(socialAuthTemplate.asMap());
+
+        authModuleConfig.asList().addAll(
+                FluentIterable.from(identityProviderService.getIdentityProviders())
+                    .transform(new SocialAuthModuleConfigFactory(socialAuthTemplate))
+                    .toList());
+
     }
 
+    /**
+     * Factory used to create OPENID_CONNECT and OAUTH auth module configurations.
+     */
+    private class SocialAuthModuleConfigFactory implements Function<ProviderConfig, Map<String, Object>> {
+
+        /** Header used to create OPENID_CONNECT Auth module */
+        private static final String OPENID_CONNECT_HEADER = "openIdConnectHeader";
+
+        /** Headers used to create OAUTH Module */
+        private static final String AUTH_TOKEN_HEADER = "authTokenHeader";
+        private static final String AUTH_RESOLVER_HEADER = "authResolverHeader";
+        private static final String PROVIDER = "provider";
+
+        private static final String AUTH_TOKEN = "authToken";
+        private static final String IDP_DATA = "idpData";
+        private static final String SUBJECT = "subject";
+
+        private final JsonValue socialAuthModuleTemplate;
+
+        SocialAuthModuleConfigFactory(final JsonValue socialAuthModuleTemplate) {
+            this.socialAuthModuleTemplate = socialAuthModuleTemplate;
+        }
+
+        @Override
+        public Map<String, Object> apply(final ProviderConfig providerConfig) {
+            final JsonValue authModule = socialAuthModuleTemplate.copy();
+            final JsonValue properties = authModule.get(AUTH_MODULE_PROPERTIES_KEY);
+            switch (IDMAuthModule.valueOf(providerConfig.getType())) {
+            case OPENID_CONNECT:
+                authModule.put(AUTH_MODULE_NAME_KEY, providerConfig.getType());
+                properties.put(AUTH_MODULE_RESOLVERS_KEY,
+                        array(ProviderConfigMapper.toJsonValue(providerConfig).asMap()));
+                properties.get(AUTH_MODULE_PROPERTY_MAPPING_KEY).asMap().put(AUTHENTICATION_ID,
+                        IDP_DATA + "/" + providerConfig.getName() + "/" + SUBJECT);
+                properties.put(OPENID_CONNECT_HEADER, AUTH_TOKEN);
+                authModule.put(AUTH_MODULE_CONFIG_ENABLED, providerConfig.isEnabled());
+                return authModule.asMap();
+            case OAUTH:
+                authModule.put(AUTH_MODULE_NAME_KEY, providerConfig.getType());
+                properties.put(AUTH_MODULE_RESOLVERS_KEY,
+                        array(ProviderConfigMapper.toJsonValue(providerConfig).asMap()));
+                properties.get(AUTH_MODULE_PROPERTY_MAPPING_KEY).asMap().put(AUTHENTICATION_ID,
+                        IDP_DATA + "/" + providerConfig.getName() + "/" + SUBJECT);
+                properties.put(AUTH_TOKEN_HEADER, AUTH_TOKEN);
+                properties.put(AUTH_RESOLVER_HEADER, PROVIDER);
+                authModule.put(AUTH_MODULE_CONFIG_ENABLED, providerConfig.isEnabled());
+                return authModule.asMap();
+            default :
+                // we will never get here because Enum.ValueOf will throw IllegalArgumentException
+                // if we do not recognize the authentication module type
+                return null;
+            }
+        }
+    }
 
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile IdentityProviderService identityProviderService;
@@ -322,12 +454,13 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             logger.debug("No configuration for Authentication Service");
             return;
         }
+        amendedConfig = config.copy();
         // the auth module list config lives under at /serverAuthConfig/authModule
-        JsonValue authModuleConfig = config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
+        final JsonValue authModuleConfig = amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
         amendAuthConfig(authModuleConfig);
 
         try {
-            authFilterWrapper.setFilter(configureAuthenticationFilter(config));
+            authFilterWrapper.setFilter(configureAuthenticationFilter(amendedConfig));
         } catch (AuthenticationException e) {
             logger.error("Error configuring authentication filter.", e);
         }
@@ -438,10 +571,10 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     private AuthenticationModuleBuilder processModuleConfiguration(JsonValue moduleConfig)
             throws AuthenticationException {
 
-        if (moduleConfig.isDefined(MODULE_CONFIG_ENABLED) && !moduleConfig.get(MODULE_CONFIG_ENABLED).asBoolean()) {
+        if (moduleConfig.isDefined(AUTH_MODULE_CONFIG_ENABLED) && !moduleConfig.get(AUTH_MODULE_CONFIG_ENABLED).asBoolean()) {
             return null;
         }
-        moduleConfig.remove(MODULE_CONFIG_ENABLED);
+        moduleConfig.remove(AUTH_MODULE_CONFIG_ENABLED);
 
         AsyncServerAuthModule module;
         if (moduleConfig.isDefined(AUTH_MODULE_NAME_KEY)) {
@@ -484,7 +617,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
 
     // ----- Implementation of SingletonResourceProvider interface
 
-    private enum Action { reauthenticate, getauthtoken }
+    private enum Action { reauthenticate, getAuthToken}
 
     /**
      * Action support, including reauthenticate action {@inheritDoc}
@@ -522,10 +655,10 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                     } else {
                         return new InternalServerErrorException("Failure to reauthenticate - missing context").asPromise();
                     }
-                case getauthtoken:
+                case getAuthToken:
                     final String authToken =
                             new OAuthHttpClient(
-                                    identityProviderService.getIdentityProvider(
+                                    getIdentityProviderConfig(
                                             request.getContent().get(OAuthHttpClient.PROVIDER).required().asString()),
                                     newHttpClient())
                             .getAuthToken(
@@ -537,11 +670,35 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                     return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
                             .asPromise();
             }
-        } catch (IllegalArgumentException e) { // from getActionAsEnum
-            return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
-                    .asPromise();
-        } catch (Exception e) {
+        }  catch (Exception e) {
             return new InternalServerErrorException("Error processing action", e).asPromise();
+        }
+    }
+
+    /**
+     * Returns a {@link ProviderConfig} for a specific identity provider iff the identity provider
+     * is enabled and available for authentication.
+     *
+     * @param providerName name of the identity provider
+     * @return a ProviderConfig if one is available
+     * @throws NotFoundException if no identity provider has been found
+     *         associated with that provider name
+     */
+    private ProviderConfig getIdentityProviderConfig(final String providerName) throws NotFoundException {
+        final Optional<ProviderConfig> providerConfig = FluentIterable
+                .from(amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY))
+                .filter(withAuthModule)
+                .transformAndConcat(resolvers)
+                .filter(enabledResolvers)
+                .filter(forProvider(providerName))
+                .transform(setType)
+                .transform(ProviderConfigMapper.toProviderConfig)
+                .first();
+
+        if (providerConfig.isPresent()) {
+            return providerConfig.get();
+        } else {
+            throw new NotFoundException("Identity provider " + providerName + " was not found.");
         }
     }
 
@@ -558,23 +715,19 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        final List<Map<String, Object>> allAuthModules = new ArrayList<>();
-        if (config != null) {
-            final JsonValue authModuleConfig = config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
+        final List<Map> allAuthModules = new ArrayList<>();
+        if (amendedConfig != null) {
+            final JsonValue authModuleConfig = amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
             final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(withAuthModule).toList();
             // Iterate the filtered list and get resolvers content
-            for (JsonValue authModule : authModules) {
+            for (final JsonValue authModule : authModules) {
                 allAuthModules.addAll(FluentIterable
                         .from(authModule
                                 .get(AUTH_MODULE_PROPERTIES_KEY)
                                 .get(AUTH_MODULE_RESOLVERS_KEY))
+                        .filter(enabledAuthModules)
                         .transform(IdentityProviderService.withoutClientSecret)
-                        .transform(new Function<JsonValue, Map<String, Object>>() {
-                            @Override
-                            public Map<String, Object> apply(JsonValue jsonValue) {
-                                return jsonValue.asMap();
-                            }
-                        })
+                        .transform(jsonValueToMap)
                         .toList());
             }
         }
@@ -594,8 +747,17 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      * Sets the configuration.
      * This is created for testing purpose only.
      */
-    protected void setConfig(final JsonValue config) {
+    void setConfig(final JsonValue config) {
         this.config = config;
+    }
+
+
+    /**
+     * Sets the amendedConfiguration.
+     * This is only used for testing.
+     */
+    void setAmendedConfig(final JsonValue config) {
+        this.amendedConfig = config;
     }
 
     private Client newHttpClient() throws HttpApplicationException {

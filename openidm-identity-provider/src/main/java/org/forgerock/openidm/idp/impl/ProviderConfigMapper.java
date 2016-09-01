@@ -44,7 +44,7 @@ public class ProviderConfigMapper {
     /**
      * A {@link Function} that returns a JSON provider configuration as a ProviderConfig bean
      */
-    static final Function<JsonValue, ProviderConfig> toProviderConfig =
+    public static final Function<JsonValue, ProviderConfig> toProviderConfig =
             new Function<JsonValue, ProviderConfig>() {
                 @Override
                 public ProviderConfig apply(JsonValue value) {
