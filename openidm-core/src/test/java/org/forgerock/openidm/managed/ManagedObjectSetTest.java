@@ -144,7 +144,7 @@ public class ManagedObjectSetTest {
 
         // given
         final CryptoService cryptoService = createCryptoService();
-        final AtomicReference<RouteService> routeService = (AtomicReference<RouteService>) mock(AtomicReference.class);
+        final AtomicReference<RouteService> routeService = new AtomicReference<>(mock(RouteService.class));
         final JsonValue config = getResource(CONF_MANAGED_USER_WITH_ACTION);
         final ManagedObjectSet managedObjectSet = new ManagedObjectSet(scriptRegistry, cryptoService, routeService,
                 connectionFactory, config, new NullActivityLogger());
@@ -437,12 +437,11 @@ public class ManagedObjectSetTest {
         router.addRoute(uriTemplate(MANAGED_USER_RESOURCE_PATH), managedObjectSet);
     }
 
-    @SuppressWarnings("unchecked")
     private ManagedObjectSet createManagedObjectSet(final String configJson, final CryptoService cryptoService,
             final IDMConnectionFactory connectionFactory) throws Exception {
         // given
         final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
-        final AtomicReference<RouteService> routeService = (AtomicReference<RouteService>) mock(AtomicReference.class);
+        final AtomicReference<RouteService> routeService = new AtomicReference<>(mock(RouteService.class));
         final JsonValue config = getResource(configJson);
         return new ManagedObjectSet(scriptRegistry, cryptoService, routeService, connectionFactory, config,
                 new NullActivityLogger());

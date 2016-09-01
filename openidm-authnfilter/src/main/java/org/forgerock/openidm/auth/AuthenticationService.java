@@ -558,7 +558,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        final List<Map> allAuthModules = new ArrayList<>();
+        final List<Map<String, Object>> allAuthModules = new ArrayList<>();
         if (config != null) {
             final JsonValue authModuleConfig = config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
             final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(withAuthModule).toList();
@@ -569,9 +569,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                                 .get(AUTH_MODULE_PROPERTIES_KEY)
                                 .get(AUTH_MODULE_RESOLVERS_KEY))
                         .transform(IdentityProviderService.withoutClientSecret)
-                        .transform(new Function<JsonValue, Map>() {
+                        .transform(new Function<JsonValue, Map<String, Object>>() {
                             @Override
-                            public Map apply(JsonValue jsonValue) {
+                            public Map<String, Object> apply(JsonValue jsonValue) {
                                 return jsonValue.asMap();
                             }
                         })
