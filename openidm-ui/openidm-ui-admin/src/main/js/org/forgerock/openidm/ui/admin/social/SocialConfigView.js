@@ -119,15 +119,53 @@ define([
                 });
 
                 this.parentRender(() => {
-                    if(currentProviders.providers.length > 0 && _.isNull(this.model.userRegistration)) {
-                        this.$el.find("#socialNoRegistrationWarningMessage").show();
+                    var messageResult = this.getMessageState(currentProviders.providers.length, this.model.userRegistration, this.model.OIDCModulesEnabled);
+
+                    if(messageResult.login) {
+                        this.$el.find("#socialNoAuthWarningMessage").show();
+                    } else {
+                        this.$el.find("#socialNoAuthWarningMessage").hide();
                     }
 
-                    if(currentProviders.providers.length > 0 && !this.model.OIDCModulesEnabled) {
-                        this.$el.find("#socialNoAuthWarningMessage").show();
+                    if(messageResult.registration) {
+                        this.$el.find("#socialNoRegistrationWarningMessage").show();
+                    } else {
+                        this.$el.find("#socialNoRegistrationWarningMessage").hide();
                     }
                 });
             });
+        },
+
+        getMessageState: function(providerCount, userRegistration, OIDCModulesEnabled) {
+            var messageDisplay = {
+                "login" : false,
+                "registration" : false
+            };
+
+            if (providerCount === 0 &&
+                userRegistration &&
+                userRegistration.stageConfigs[0].name === "socialUserDetails") {
+
+                UserRegistrationConfigView.switchToUserDetails(this.model.userRegistration);
+
+                messageDisplay.registration = false;
+            } else if (_.isNull(userRegistration) && providerCount > 0) {
+                messageDisplay.registration = true;
+            } else if(providerCount > 0 &&
+                userRegistration &&
+                userRegistration.stageConfigs[0].name === "userDetails") {
+                messageDisplay.registration = true;
+            } else if (providerCount === 0) {
+                messageDisplay.registration = false;
+            }
+
+            if (!OIDCModulesEnabled && providerCount > 0) {
+                messageDisplay.login = true;
+            } else {
+                messageDisplay.login = false;
+            }
+
+            return messageDisplay;
         },
 
         controlSectionSwitch: function(event) {
@@ -139,7 +177,8 @@ define([
                 enabled;
 
             function configSocialProvider() {
-                var providerCount;
+                var providerCount,
+                    messageResult;
 
                 card.toggleClass("disabled");
                 enabled = !card.hasClass("disabled");
@@ -166,22 +205,18 @@ define([
                     });
                 }
 
-                if (providerCount > 0 &&
-                    this.model.userRegistration &&
-                    this.model.userRegistration.stageConfigs[0].name === "socialUserDetails") {
+                messageResult = this.getMessageState(providerCount, this.model.userRegistration, this.model.OIDCModulesEnabled);
 
-                    UserRegistrationConfigView.switchToUserDetails(this.model.userRegistration);
-                    this.$el.find("#socialNoRegistrationWarningMessage").hide();
-                } else if (_.isNull(this.model.userRegistration) && providerCount > 0) {
-                    this.$el.find("#socialNoRegistrationWarningMessage").show();
-                } else if (providerCount === 0) {
-                    this.$el.find("#socialNoRegistrationWarningMessage").hide();
-                }
-
-                if (!this.model.OIDCModulesEnabled && providerCount > 0) {
+                if(messageResult.login) {
                     this.$el.find("#socialNoAuthWarningMessage").show();
                 } else {
                     this.$el.find("#socialNoAuthWarningMessage").hide();
+                }
+
+                if(messageResult.registration) {
+                    this.$el.find("#socialNoRegistrationWarningMessage").show();
+                } else {
+                    this.$el.find("#socialNoRegistrationWarningMessage").hide();
                 }
             }
 

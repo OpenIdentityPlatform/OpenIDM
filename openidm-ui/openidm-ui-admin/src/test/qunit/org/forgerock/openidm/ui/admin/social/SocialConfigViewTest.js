@@ -46,4 +46,25 @@ define([
     QUnit.test("Convert name to proper capitalization", function (assert) {
         assert.equal(AdminUtils.capitalizeName("google"), "Google", "Name correctly capitalized");
     });
+
+    QUnit.test("Verify social provider help messages", function (assert) {
+        var messageDisplay,
+            fakeRegistration = {
+                "stageConfigs" : [
+                    {
+                        "name" : "socialUserDetails"
+                    }
+                ]
+            };
+
+        messageDisplay = SocialConfigView.getMessageState(1, null, false);
+
+        assert.equal(messageDisplay.registration, true, "No registration message displayed");
+        assert.equal(messageDisplay.login, true, "No login message displayed");
+
+        messageDisplay = SocialConfigView.getMessageState(1, fakeRegistration, true);
+
+        assert.equal(messageDisplay.registration, false, "No registration message hidden");
+        assert.equal(messageDisplay.login, false, "No login message hidden");
+    });
 });

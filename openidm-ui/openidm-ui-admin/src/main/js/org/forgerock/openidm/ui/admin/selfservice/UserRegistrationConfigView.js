@@ -705,7 +705,6 @@ define([
         },
 
         switchToUserDetails: function(registrationConfig) {
-            delete registrationConfig.stageConfigs[0].class;
             registrationConfig.stageConfigs[0].name = "userDetails";
 
             ConfigDelegate.updateEntity("selfservice/registration", registrationConfig).then(() => {
