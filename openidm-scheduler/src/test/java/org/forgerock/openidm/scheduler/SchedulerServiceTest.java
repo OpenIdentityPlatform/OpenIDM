@@ -15,9 +15,8 @@
  */
 package org.forgerock.openidm.scheduler;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.forgerock.json.resource.Requests.newActionRequest;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
+import static org.assertj.core.api.Java6Assertions.assertThat;
+import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.*;
 
@@ -25,57 +24,27 @@ import java.io.InputStream;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.LinkedHashMap;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.QueryRequest;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.scheduler.SchedulerService.SchedulerAction;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
-import org.forgerock.util.query.QueryFilter;
-import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.component.ComponentContext;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 /**
  * Basic unit tests for the scheduler service
  */
 public class SchedulerServiceTest {
-    
-    /**
-     * The Scheduler Service
-     */
-    private SchedulerService schedulerService;
-    
-    /**
-     * The Scheduler configuration
-     */
-    private JsonValue testScheduleConfig;
-    
-    @BeforeClass
-    void setUp() throws Exception {
-        schedulerService = createSchedulerService("/scheduler.json");
-        testScheduleConfig = getConfig("/schedule-test1.json");
-    }
     
     /**
      * Returns a {@link JsonValue} object representing a JSON configuration.
@@ -85,7 +54,7 @@ public class SchedulerServiceTest {
      * @throws Exception
      */
     private JsonValue getConfig(final String configName) throws Exception {
-        InputStream configStream = getClass().getResourceAsStream(configName);
+        final InputStream configStream = getClass().getResourceAsStream(configName);
         return new JsonValue(new ObjectMapper().readValue(configStream, LinkedHashMap.class)); 
     }
     
@@ -101,6 +70,7 @@ public class SchedulerServiceTest {
         final ClusterManagementService clusterService = mock(ClusterManagementService.class);
         final SchedulerService schedulerService = new SchedulerService();
         when(jsonEnhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(getConfig(configFile));
+
         when(clusterService.getInstanceId()).thenReturn("test-node");
         // bind services
         schedulerService.bindEnhancedConfig(jsonEnhancedConfig);
@@ -115,157 +85,31 @@ public class SchedulerServiceTest {
      * @return a {@link ComponentContext} instance
      */
     private ComponentContext getMockedContext() {
-        ComponentContext mockedContext = mock(ComponentContext.class);
-        BundleContext mockedBundleContext = mock(BundleContext.class);
-        Dictionary<String, Object> compContextProperties = new Hashtable<>();
-        //compContextProperties.put("config.factory-pid", null);
+        final ComponentContext mockedContext = mock(ComponentContext.class);
+        final BundleContext mockedBundleContext = mock(BundleContext.class);
+        final Dictionary<String, Object> compContextProperties = new Hashtable<>();
         when(mockedContext.getProperties()).thenReturn(compContextProperties);
         when(mockedContext.getBundleContext()).thenReturn(mockedBundleContext);
         return mockedContext;
     }
-    
+
     @Test
-    public void testCreateSchedule() throws Exception {
-        //given
-        final CreateRequest createRequest = Requests.newCreateRequest("scheduler", "test1", testScheduleConfig);
-
-        //when
-        Promise<ResourceResponse, ResourceException> promise = schedulerService.handleCreate(new RootContext(), createRequest);
-
-        //then
-        AssertJPromiseAssert.assertThat(promise)
-                .isNotNull()
-                .succeeded();
-        ResourceResponse resourceResponse =
-                promise.getOrThrow();
-        assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
-    }
-    
-    @Test
-    public void testReadSchedule() throws Exception {
-        //given
-        final ReadRequest readRequest = Requests.newReadRequest("test1");
-
-        //when
-        Promise<ResourceResponse, ResourceException> promise = schedulerService.handleRead(new RootContext(), readRequest);
-
-        //then
-        AssertJPromiseAssert.assertThat(promise)
-                .isNotNull()
-                .succeeded();
-        ResourceResponse resourceResponse =
-                promise.getOrThrow();
-        assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
-    }
-    
-    @Test
-    public void testPauseJobsAction() throws Exception {
-        //given
-        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerAction.pauseJobs.toString());
-
-        //when
-        Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
-
-        //then
-        AssertJPromiseAssert.assertThat(promise)
-                .isNotNull()
-                .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow();
-        assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
-    }
-    
-    @Test
-    public void testResumeJobsAction() throws Exception {
-        //given
-        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerAction.resumeJobs.toString());
-
-        //when
-        Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
-
-        //then
-        AssertJPromiseAssert.assertThat(promise)
-                .isNotNull()
-                .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow();
-        assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
-    }
-    
-    @Test
-    public void testListCurrentlyExecutingJobsAction() throws Exception {
-        //given
-        final ActionRequest readRequest = Requests.newActionRequest("", SchedulerAction.listCurrentlyExecutingJobs.toString());
-
-        //when
-        Promise<ActionResponse, ResourceException> promise = schedulerService.handleAction(new RootContext(), readRequest);
-
-        //then
-        AssertJPromiseAssert.assertThat(promise)
-                .isNotNull()
-                .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow();
-        assertThat(resourceResponse.getJsonContent().asList().size()).isEqualTo(0);
+    public void testCreateSchedulerService() throws Exception {
+        final SchedulerService schedulerService = createSchedulerService("/scheduler.json");
+        assertThat(schedulerService).isNotNull();
     }
 
     @Test
-    public void testQueryJobs() throws Exception {
-        // given
-        for (int i = 0; i < 12; i++) {
-            JsonValue persisted = getConfig("/schedule-persisted.json");
-            Promise<ResourceResponse, ResourceException> createPromise =
-                    schedulerService.handleCreate(new RootContext(), Requests.newCreateRequest("", persisted));
-            assertThat(createPromise).isNotNull().succeeded();
-        }
-        // should have 13 now, 12 of them persisted.
-        validateQueryCount(Requests.newQueryRequest("").setQueryId(QueryConstants.QUERY_ALL_IDS), 13);
+    public void testValidateQuartzCronExpressionAction() throws Exception {
+        final SchedulerService schedulerService = createSchedulerService("/scheduler.json");
+        assertThat(schedulerService).isNotNull();
 
-        // then validate first page with a single offset.
-        QueryRequest queryRequest = Requests.newQueryRequest("");
-        queryRequest.setPagedResultsOffset(1); // offset shifts the results by 1 record.
-        queryRequest.setQueryFilter(QueryFilter.equalTo(new JsonPointer("persisted"), true));
-        queryRequest.setPageSize(5);
-        QueryResponse queryResponse = validateQueryCount(queryRequest, 5);
-        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(12);
-        assertThat(queryResponse.getPagedResultsCookie()).isEqualTo("6");
+        final ActionRequest request =
+                Requests.newActionRequest("/scheduler", SchedulerService.SchedulerAction.validateQuartzCronExpression.name());
+        request.setContent(json(object(field("cronExpression", "30 0/1 * * * ?"))));
+        final Promise<ActionResponse, ResourceException> promise =
+                schedulerService.handleAction(new RootContext(), request);
 
-        // then validate second page of 5 using cookie from last result.
-        queryRequest = Requests.newQueryRequest("");
-        queryRequest.setQueryFilter(QueryFilter.equalTo(new JsonPointer("persisted"), true));
-        queryRequest.setPageSize(5);
-        queryRequest.setPagedResultsCookie(queryResponse.getPagedResultsCookie());
-        queryResponse = validateQueryCount(queryRequest, 5);
-        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(12);
-        assertThat(queryResponse.getPagedResultsCookie()).isEqualTo("11");
-
-        // then validate last page, only 1 should be left
-        queryRequest = Requests.newQueryRequest("");
-        queryRequest.setQueryFilter(QueryFilter.equalTo(new JsonPointer("persisted"), true));
-        queryRequest.setPageSize(5);
-        queryRequest.setPagedResultsCookie(queryResponse.getPagedResultsCookie());
-        queryResponse = validateQueryCount(queryRequest, 1);
-        assertThat(queryResponse.getTotalPagedResults()).isEqualTo(12);
-        assertThat(queryResponse.getPagedResultsCookie()).isNull();
+        assertThat(promise.get().getJsonContent().get("valid").asBoolean()).isEqualTo(true);
     }
-
-    /**
-     * runs the queryRequest and validates that the count of returned records matches the expectedCount
-     * @param request query to run.
-     * @param expectedCount expected results to find.
-     * @return the response from the query
-     * @throws ResourceException when terrible things happen.
-     */
-    private QueryResponse validateQueryCount(QueryRequest request, int expectedCount) throws ResourceException {
-        final AtomicInteger count = new AtomicInteger();
-        Promise<QueryResponse, ResourceException> queryPromise = schedulerService.handleQuery(
-                new RootContext(), request, new QueryResourceHandler() {
-                    @Override
-                    public boolean handleResource(ResourceResponse resource) {
-                        count.getAndIncrement();
-                        return true;
-                    }
-                });
-        assertThat(queryPromise).isNotNull().succeeded();
-        assertThat(count.get()).isEqualTo(expectedCount);
-        return queryPromise.getOrThrowUninterruptibly();
-    }
-
 }
