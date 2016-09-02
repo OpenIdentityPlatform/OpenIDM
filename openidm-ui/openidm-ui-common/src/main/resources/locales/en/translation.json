@@ -562,6 +562,8 @@
 
             "options" : "Options",
             "advanced" : "Advanced",
+            "social" : "Social Registration Properties",
+            "socialRegEnabledMsg": "The content of this tab is only used when social registration is enabled.",
             "steps": "Steps",
             "users": "Users",
             "idenitityService": "Identity Resource",

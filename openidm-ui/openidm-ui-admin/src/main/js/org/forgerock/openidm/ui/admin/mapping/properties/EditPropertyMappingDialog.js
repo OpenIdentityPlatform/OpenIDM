@@ -28,6 +28,7 @@ define([
     "org/forgerock/commons/ui/common/main/SpinnerManager",
     "org/forgerock/openidm/ui/admin/util/InlineScriptEditor",
     "org/forgerock/openidm/ui/admin/mapping/util/LinkQualifierFilterEditor",
+    "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "bootstrap-dialog",
     "bootstrap-tabdrop",
@@ -43,6 +44,7 @@ define([
             spinner,
             inlineScriptEditor,
             LinkQualifierFilterEditor,
+            QueryFilterEditor,
             AdminUtils,
             BootstrapDialog,
             tabdrop,
@@ -75,7 +77,12 @@ define([
 
             if (type === "conditionalFilter") {
                 if(this.conditionFilterEditor === null) {
-                    this.conditionFilterEditor = new LinkQualifierFilterEditor();
+
+                    if (this.data.usesLinkQualifier) {
+                        this.conditionFilterEditor = new LinkQualifierFilterEditor();
+                    } else {
+                        this.conditionFilterEditor = new QueryFilterEditor();
+                    }
 
                     if (_.has(this.data.property, "condition")) {
                         if (!_.has(this.data.property.condition, "type")) {
@@ -202,9 +209,9 @@ define([
         },
 
         render: function(params, callback) {
-            var currentProperties,
-                sourceType;
+            var currentProperties;
 
+            this.data.usesLinkQualifier = params.usesLinkQualifier;
             this.data.mappingName = this.getMappingName();
             this.property = params.id;
             this.transform_script_editor = undefined;
@@ -213,6 +220,9 @@ define([
 
             this.data.saveCallback = params.saveCallback;
             this.data.availableSourceProps = params.availProperties || [];
+
+            this.data.resourcePropertiesList = _.chain(this.data.availableSourceProps).sortBy().value();
+
             this.data.currentProperties = currentProperties = params.mappingProperties || this.getCurrentMapping().properties;
             this.data.property = currentProperties[this.property - 1];
 
@@ -224,16 +234,6 @@ define([
 
             this.data.currentMappingDetails = this.getCurrentMapping();
 
-            sourceType = this.data.currentMappingDetails.source.split("/");
-
-            AdminUtils.findPropertiesList(sourceType).then(_.bind(function(properties){
-                this.data.resourcePropertiesList = _.chain(properties).keys().sortBy().value();
-
-                this.renderEditProperty(callback);
-            }, this));
-        },
-
-        renderEditProperty: function(callback) {
             var _this = this,
                 settings;
 
@@ -339,7 +339,11 @@ define([
                         this.currentDialog.find("#conditionalFilter").toggleClass("active", true);
                         this.currentDialog.find("#conditionFilterTab").toggleClass("active", true);
 
-                        this.conditionFilterEditor = new LinkQualifierFilterEditor();
+                        if (this.data.usesLinkQualifier) {
+                            this.conditionFilterEditor = new LinkQualifierFilterEditor();
+                        } else {
+                            this.conditionFilterEditor = new QueryFilterEditor();
+                        }
 
                         if (_.has(this.data.property, "condition")) {
                             if (!_.has(this.data.property.condition, "type")) {

@@ -15,6 +15,7 @@
     <div>
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation" id="optionTab" class="active"><a href="#options" data-toggle="tab" aria-controls="options" role="tab">{{t "templates.selfservice.options"}}</a></li>
+            <li role="presentation" id="socialTab"><a href="#social" data-toggle="tab" aria-controls="social" role="tab">{{t "templates.selfservice.social"}}</a></li>
             <li role="presentation" id="advancedTab"><a href="#advanced" data-toggle="tab" aria-controls="advanced" role="tab">{{t "templates.selfservice.advanced"}}</a></li>
         </ul>
         <div class="tab-content">
@@ -100,6 +101,19 @@
                 </div>
             </div>
         </div>
+
+        <div role="tabpanel" class="tab-pane" id="social">
+            <div class="panel panel-default fr-panel-tab">
+                <div class="panel-body">
+                    {{> _alert
+                        type="info"
+                        heading="common.notification.types.info"
+                        message="templates.selfservice.socialRegEnabledMsg"
+                    }}
+                <div id="attributesGrid"></div>
+            </div>
+        </div>
+
         {{> selfservice/_advancedoptions}}
     </div>
 </div>

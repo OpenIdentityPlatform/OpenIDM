@@ -27,7 +27,8 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/selfservice/SelfServiceStageDialogView",
-    "org/forgerock/openidm/ui/common/delegates/SocialDelegate"
+    "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
+    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView"
 ], function($, _,
             handlebars,
             form2js,
@@ -39,7 +40,8 @@ define([
             EventManager,
             Constants,
             SelfServiceStageDialogView,
-            SocialDelegate) {
+            SocialDelegate,
+            AttributesGridView) {
     var UserRegistrationConfigView = AdminAbstractView.extend({
         template: "templates/admin/selfservice/UserRegistrationConfigTemplate.html",
         events: {
@@ -52,7 +54,8 @@ define([
         },
         partials: [
             "partials/_toggleIconBlock.html",
-            "partials/selfservice/_advancedoptions.html"
+            "partials/selfservice/_advancedoptions.html",
+            "partials/_alert.html"
         ],
         model: {
             emailServiceAvailable: false,
@@ -212,11 +215,13 @@ define([
 
             $.when(
                 this.getResources(),
+                ConfigDelegate.readEntity("selfservice.propertymap"),
                 ConfigDelegate.readEntity("ui/configuration"),
                 ConfigDelegate.readEntityAlways(this.model.configUrl),
                 ConfigDelegate.readEntityAlways("external.email"),
                 SocialDelegate.providerList()
-            ).then(_.bind(function(resources, uiConfig, selfServiceConfig, emailConfig, availableProviders) {
+            ).then(_.bind(function(resources, propertyMap, uiConfig, selfServiceConfig, emailConfig, availableProviders) {
+                this.model.propertyMap = propertyMap;
                 this.model.emailServiceAvailable = !_.isUndefined(emailConfig) && _.has(emailConfig, "host");
                 this.model.resources = resources;
                 this.model.uiConfig = uiConfig;
@@ -243,11 +248,16 @@ define([
                 };
 
                 if (selfServiceConfig) {
+                    this.data.identityServiceUrl = _.get(_.filter(selfServiceConfig.stageConfigs, {
+                        "name": "selfRegistration"
+                    })[0], "identityServiceUrl");
+
                     $.extend(true, this.model.saveConfig, selfServiceConfig);
 
                     this.data.enableSelfService = true;
 
                     this.parentRender(_.bind(function () {
+                        this.renderAttributeGrid();
                         this.$el.find(".all-check").prop("checked", true);
                         this.$el.find(".section-check").prop("disabled", false);
 
@@ -276,6 +286,10 @@ define([
                     }, this));
 
                 } else {
+                    this.data.identityServiceUrl = _.get(_.filter(this.model.configDefault.stageConfigs, {
+                        "name": "selfRegistration"
+                    })[0], "identityServiceUrl");
+
                     $.extend(true, this.model.saveConfig, this.model.configDefault);
 
                     this.data.enableSelfService = false;
@@ -289,6 +303,109 @@ define([
                         }
                     }, this));
                 }
+            }, this));
+        },
+
+        renderAttributeGrid: function(propertiesList, requiredPropertiesList) {
+            var promise = $.Deferred();
+
+            if (!_.isUndefined(propertiesList)) {
+                promise.resolve(propertiesList, requiredPropertiesList);
+            } else {
+                $.when(
+                    AdminUtils.findPropertiesList(this.data.identityServiceUrl.split("/")),
+                    AdminUtils.findPropertiesList(this.data.identityServiceUrl.split("/"), true)
+                ).then(_.bind(function (propList, requiredProperties) {
+                    promise.resolve(propList, requiredProperties);
+                }, this));
+            }
+
+            $.when(promise).then(_.bind(function(propertiesList, requiredPropertiesList) {
+                var availableObjects = {
+                        source: {
+                            fullName: "mapIdpCommonSchemaToManagedUser",
+                            name: "mapIdpCommonSchemaToManagedUser",
+                            properties: [
+                                "honorificPrefix",
+                                "givenName",
+                                "middleName",
+                                "familyName",
+                                "honorificSuffix",
+                                "fullName",
+                                "nickname",
+                                "displayName",
+                                "title",
+                                "email",
+                                "postalAddress",
+                                "addressLocality",
+                                "addressRegion",
+                                "postalCode",
+                                "country",
+                                "phone",
+                                "id",
+                                "username",
+                                "profileUrl",
+                                "photoUrl",
+                                "preferredLanguage",
+                                "locale",
+                                "timezone",
+                                "active",
+                                "rawProfile"
+                            ]
+                        },
+                        target: {
+                            fullName: this.data.identityServiceUrl,
+                            name: "user",
+                            properties: _.chain(propertiesList).keys().sortBy().value()
+                        }
+                    },
+
+                    staticSourceObject = {
+                        IDMSampleMappingName: "mapIdpCommonSchemaToManagedUser",
+                        "honorificPrefgitix": "Ms",
+                        "givenName": "Emma",
+                        "middleName": "Ann",
+                        "familyName": "Smith",
+                        "honorificSuffix": "Jr",
+                        "fullName": "Emma Ann Smith Jr",
+                        "nickname": "Em",
+                        "displayName": "Emma Smith",
+                        "title": "Business Analyst",
+                        "email": "Emma.Smith@forgerock.com",
+                        "postalAddress": "123 Fake Street",
+                        "addressLocality": "San Francisco",
+                        "addressRegion": "CA",
+                        "postalCode": "94101",
+                        "country": "USA",
+                        "phone": "+1-555-555-5555",
+                        "id": "123456",
+                        "username": "Emma.smith",
+                        "profileUrl": "http://www.fakesocialprovider.com/123456",
+                        "photoUrl": "http://www.fakesocialprovider.com/123456/profilePhoto",
+                        "preferredLanguage": "en",
+                        "locale": "en_US",
+                        "timezone": "UTC−08:00",
+                        "active": true,
+                        "rawProfile" : { }
+                    };
+
+                var _this = this;
+                AttributesGridView.render({
+                    usesDragIcon: false,
+                    usesLinkQualifier: false,
+                    usesDynamicSampleSource: false,
+                    staticSourceSample: staticSourceObject,
+                    availableObjects: availableObjects,
+                    requiredProperties:  _.keys(requiredPropertiesList),
+                    mapping: _.extend(this.model.propertyMap, {"name": "mapIdpCommonSchemaToManagedUser"}),
+                    save: (mappingProperties) => {
+                        _this.model.propertyMap.properties = mappingProperties;
+                        ConfigDelegate.updateEntity("selfservice.propertymap", _this.model.propertyMap).then(() => {
+                            _this.renderAttributeGrid(propertiesList, requiredPropertiesList);
+                        });
+                    }
+                });
+
             }, this));
         },
 
@@ -675,6 +792,9 @@ define([
             this.$el.find("#advancedTab").toggleClass("disabled", true);
             this.$el.find("#advancedTab a").removeAttr("data-toggle");
 
+            this.$el.find("#socialTab").toggleClass("disabled", true);
+            this.$el.find("#socialTab a").removeAttr("data-toggle");
+
             this.$el.find("#optionTab a").trigger("click");
 
             this.$el.find("#optionTab").toggleClass("disabled", true);
@@ -696,6 +816,9 @@ define([
 
             this.$el.find("#advancedTab a").attr("data-toggle", "tab");
             this.$el.find("#advancedTab").toggleClass("disabled", false);
+
+            this.$el.find("#socialTab a").attr("data-toggle", "tab");
+            this.$el.find("#socialTab").toggleClass("disabled", false);
 
             this.$el.find("#optionTab a").attr("data-toggle", "tab");
             this.$el.find("#optionTab").toggleClass("disabled", false);

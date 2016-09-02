@@ -66,10 +66,13 @@ define([
 
                 this.close();
                 EditPropertyMappingDialog.render({
+                    usesLinkQualifier: this.data.usesLinkQualifier,
                     id: mappingProperties.length.toString(),
                     mappingProperties: mappingProperties,
+                    availProperties: this.data.sourcePropertiesList,
                     saveCallback: this.model.saveCallback
                 });
+
             }
         },
 
@@ -78,24 +81,13 @@ define([
         },
 
         render: function(params, callback) {
-            var targetType;
-
-            this.data.mappingName = this.getMappingName();
+            this.data.usesLinkQualifier = params.usesLinkQualifier;
             this.property = "_new";
-            this.data.currentProperties = params.mappingProperties || this.getCurrentMapping().properties;
+            this.data.currentProperties = params.mappingProperties;
             this.model.saveCallback = params.saveCallback;
-            this.model.mapping = this.getCurrentMapping();
+            this.data.targetPropertiesList = params.availProperties.target.properties;
+            this.data.sourcePropertiesList = params.availProperties.source.properties;
 
-            targetType = this.model.mapping.target.split("/");
-
-            AdminUtils.findPropertiesList(targetType).then(_.bind(function(properties){
-                this.data.resourcePropertiesList = _.chain(properties).keys().sortBy().value();
-
-                this.renderAddProperty(callback);
-            }, this));
-        },
-
-        renderAddProperty: function(callback) {
             var _this = this,
                 settings;
 

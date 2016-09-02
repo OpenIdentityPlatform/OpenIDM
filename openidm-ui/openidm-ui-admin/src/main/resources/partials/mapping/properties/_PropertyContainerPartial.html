@@ -1,7 +1,7 @@
 <!-- Copyright 2015-2016 ForgeRock AS.
 License terms: https://forgerock.org/cddlv1-0/ -->
 
-{{#if locals.isSource}}<i class="dragToSort fa fa-arrows pull-left"></i>{{/if}}
+{{#if locals.isSource}}{{#if locals.usesDragIcon}}<i class="dragToSort fa fa-arrows pull-left"></i>{{/if}}{{/if}}
 <div class="property-container-parent">
     <div class="property-container">
         <div class="title">{{locals.title}}</div>
