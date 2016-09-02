@@ -44,6 +44,7 @@ public class TriggerWrapper {
     private boolean acquired;
     private int state;
     private int previous_state = Trigger.STATE_NONE;
+    private String nodeId;
     
     /**
      * Create a new TriggerWrapper from the specified trigger.
@@ -74,7 +75,7 @@ public class TriggerWrapper {
         } else {
             state = Trigger.STATE_NORMAL;
         }
-        
+        this.nodeId = null;
     }
     
     /**
@@ -96,6 +97,7 @@ public class TriggerWrapper {
         } else {
             state = Trigger.STATE_NORMAL;
         }
+        nodeId = value.get("nodeId").asString();
     }
     
     /**
@@ -131,6 +133,7 @@ public class TriggerWrapper {
         previous_state = map.get("previous_state").asInteger();
         acquired = map.get("acquired").asBoolean();
         revision = map.get("_rev").asString();
+        nodeId = map.get("nodeId").asString();
     }
 
     /**
@@ -272,6 +275,7 @@ public class TriggerWrapper {
         map.put("previous_state", previous_state);
         map.put("state", state);
         map.put("acquired", acquired);
+        map.put("nodeId", nodeId);
         return new JsonValue(map);
     }
 
@@ -287,6 +291,7 @@ public class TriggerWrapper {
         sb.append("state:    ").append(state).append("\n");
         sb.append("p-state:  ").append(previous_state).append("\n");
         sb.append("acquired: ").append(acquired).append("\n");
+        sb.append("nodeId:   ").append(nodeId).append("\n");
         return sb.toString();
     }
     
@@ -333,5 +338,21 @@ public class TriggerWrapper {
      */
     public String getRevision() {
         return revision;
+    }
+
+    /**
+     * Gets the node id that has acquired this trigger.
+     * @return the nodeId.
+     */
+    public String getNodeId() {
+        return nodeId;
+    }
+
+    /**
+     * Sets the nodeId that has acquired this trigger.
+     * @param nodeId the nodeId.
+     */
+    public void setNodeId(String nodeId) {
+        this.nodeId = nodeId;
     }
 }
