@@ -9,11 +9,14 @@
         </div>
         <div class="tool-group-right">
             <form class="form-inline" role="form">
+                {{#if usesDynamicSampleSource}}
                 <div class="form-group selectize-holder">
                     <label for="findSampleSource" class="inline">{{t "templates.mapping.sampleSource"}}:</label>
                     <select style="width:250px;" type="text" placeholder="Search to see preview" id="findSampleSource" class="form-control" value="{{sampleSource_txt}}"></select>
                 </div>
+                {{/if}}
 
+                {{#if usesLinkQualifier}}
                 <div class="form-group selectize-holder">
                     <select style="width:200px;" type="select" id="linkQualifierSelect" class="form-control">
                         <option selected value=""></option>
@@ -22,7 +25,7 @@
                         {{/each}}
                     </select>
                 </div>
-
+                {{/if}}
             </form>
         </div>
     </div>

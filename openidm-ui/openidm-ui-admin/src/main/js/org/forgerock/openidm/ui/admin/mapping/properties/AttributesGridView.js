@@ -19,14 +19,11 @@ define([
     "underscore",
     "handlebars",
     "backbone",
-    "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
+    "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
-    "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingUtils",
-    "org/forgerock/openidm/ui/admin/util/LinkQualifierUtils",
     "org/forgerock/openidm/ui/admin/delegates/ScriptDelegate",
     "org/forgerock/openidm/ui/admin/util/FilterEvaluator",
     "org/forgerock/openidm/ui/admin/mapping/util/QueryFilterEditor",
@@ -34,17 +31,13 @@ define([
     "org/forgerock/openidm/ui/admin/mapping/properties/EditPropertyMappingDialog",
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
-    "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/openidm/ui/admin/util/AdminUtils"
+    "org/forgerock/commons/ui/common/util/UIUtils"
 ], function($, _, Handlebars, Backbone,
-            MappingAdminAbstractView,
+            AdminAbstractView,
             eventManager,
             conf,
             constants,
-            connectorDelegate,
-            configDelegate,
             mappingUtils,
-            LinkQualifierUtil,
             ScriptDelegate,
             FilterEvaluator,
             QueryFilterEditor,
@@ -52,10 +45,9 @@ define([
             EditPropertyMappingDialog,
             Backgrid,
             BackgridUtils,
-            UIUtils,
-            AdminUtils) {
+            UIUtils) {
 
-    var AttributesGridView = MappingAdminAbstractView.extend({
+    var AttributesGridView = AdminAbstractView.extend({
         template: "templates/admin/mapping/properties/AttributesGridTemplate.html",
         element: "#attributesGrid",
         noBaseTemplate: true,
@@ -73,66 +65,72 @@ define([
             availableObjects: {},
             mappingProperties: null
         },
-        data: {},
+        data: {
+            requiredProperties: [],
+            missingRequiredProperties: []
+        },
         sampleDisplay: [],
 
         render: function (args, callback) {
-            this.mapping = this.getCurrentMapping();
+            this.model.renderArgs = _.clone(args, true);
+            this.model.defaultMapping = _.clone(args.mapping, true);
 
-            this.data.requiredProperties = [];
+            this.model.usesDragIcon = args.useDragIcon;
+            this.model.staticSourceSample = args.staticSourceSample;
+            this.model.mapping = _.clone(args.mapping, true);
+            this.model.save = args.save;
+            this.model.numRepresentativeProps = args.numRepresentativeProps;
+            this.model.availableObjects = args.availableObjects;
+            this.model.mappingProperties = _.clone(args.mappingProperties, true);
+
+            this.data.usesDynamicSampleSource = args.usesDynamicSampleSource;
+            this.data.usesLinkQualifier = args.usesLinkQualifier;
+            this.data.requiredProperties = args.requiredProperties || [];
             this.data.missingRequiredProperties = [];
 
-            if(args && args.mappingProperties) {
-                this.model.mappingProperties = args.mappingProperties;
-            } else {
-                this.model.mappingProperties = null;
+            if (this.data.usesLinkQualifier) {
+                this.data.linkQualifiers = _.clone(args.linkQualifiers, true);
+                this.model.currentLinkQualifier = this.data.linkQualifiers[0];
+                this.data.hasLinkQualifiers = this.model.mapping.linkQualifiers;
             }
 
-            this.data.linkQualifiers = LinkQualifierUtil.getLinkQualifier(this.mapping.name);
-
-            this.currentLinkQualifier = this.data.linkQualifiers[0];
-            this.data.hasLinkQualifiers = this.mapping.linkQualifiers;
-
-            if (conf.globalData.sampleSource && conf.globalData.sampleSource.IDMSampleMappingName === this.mapping.name && this.mapping.properties.length) {
-                this.data.sampleSource_txt = conf.globalData.sampleSource[this.mapping.properties[0].source];
+            if (conf.globalData.sampleSource && conf.globalData.sampleSource.IDMSampleMappingName === this.model.mapping.name && this.model.mapping.properties.length) {
+                this.data.sampleSource_txt = conf.globalData.sampleSource[this.model.mapping.properties[0].source];
             }
 
-            this.buildAvailableObjectsMap().then(_.bind(function(availableObjects) {
-                this.model.availableObjects = availableObjects;
-                this.checkMissingRequiredProperties();
+            this.checkMissingRequiredProperties();
 
-                this.parentRender(_.bind(function () {
-                    var mapProps = this.model.mappingProperties || this.getCurrentMapping().properties,
-                        sampleSource = {},
-                        autocompleteProps = _.pluck(this.mapping.properties,"source").slice(0,this.getNumRepresentativeProps());
+            this.parentRender(_.bind(function () {
+                var mapProps = this.model.mappingProperties || _.clone(this.model.defaultMapping, true).properties,
+                    sampleSource = {};
 
+                if (conf.globalData.sampleSource && conf.globalData.sampleSource.IDMSampleMappingName === this.model.mapping.name) {
+                    sampleSource = conf.globalData.sampleSource;
+                }
 
-                    if(conf.globalData.sampleSource && conf.globalData.sampleSource.IDMSampleMappingName === this.mapping.name) {
-                        sampleSource = conf.globalData.sampleSource;
-                    }
+                this.data.mapProps = mapProps;
 
-                    this.data.mapProps = mapProps;
-                    this.gridFromMapProps(mapProps);
+                if (this.data.usesDynamicSampleSource) {
+                    let autocompleteProps = _.pluck(this.model.mapping.properties,"source").slice(0, this.model.numRepresentativeProps);
 
-                    autocompleteProps = _.filter(autocompleteProps, function(prop) {
-                        return !_.isUndefined(prop);
-                    });
-
-                    mappingUtils.setupSampleSearch($("#findSampleSource",this.$el), this.mapping, autocompleteProps, _.bind(function(item) {
-                        item.IDMSampleMappingName = this.mapping.name;
+                    mappingUtils.setupSampleSearch($("#findSampleSource", this.$el), this.model.mapping, autocompleteProps, (item)  => {
+                        item.IDMSampleMappingName = this.model.mapping.name;
                         conf.globalData.sampleSource = item;
                         sampleSource = item;
 
                         this.gridFromMapProps(mapProps);
-                    }, this));
+                    });
+                } else {
+                    conf.globalData.sampleSource = sampleSource = this.model.staticSourceSample;
+                }
 
-                    this.checkAvailableProperties();
-                    this.checkChanges();
+                this.gridFromMapProps(mapProps);
 
-                    if (callback){
-                        callback();
-                    }
-                }, this));
+                this.checkChanges();
+
+                if (callback){
+                    callback();
+                }
             }, this));
         },
 
@@ -144,7 +142,7 @@ define([
         },
 
         checkChanges: function () {
-            var currentProperties = this.getCurrentMapping().properties,
+            var currentProperties = _.clone(this.model.defaultMapping, true).properties,
                 changedProperties = this.model.mappingProperties || currentProperties,
                 changesPending = !_.isEqual(currentProperties, changedProperties);
 
@@ -164,8 +162,9 @@ define([
             e.preventDefault();
 
             AddPropertyMappingDialog.render({
+                usesLinkQualifier: this.data.usesLinkQualifier,
                 mappingProperties: this.model.mappingProperties,
-                availProperties: this.model.availableObjects.target.properties,
+                availProperties: this.model.availableObjects,
                 saveCallback: _.bind(function(props) {
                     this.setMappingProperties(props);
                 }, this)
@@ -174,14 +173,14 @@ define([
 
         clearChanges: function(e) {
             e.preventDefault();
-
-            this.render();
+            delete this.model.renderArgs.mappingProperties;
+            this.render(this.model.renderArgs);
         },
 
         checkMissingRequiredProperties: function() {
-            var props = this.model.mappingProperties || this.getCurrentMapping().properties;
+            var props = this.model.mappingProperties || _.clone(this.model.defaultMapping, true).properties;
 
-            _.each(this.data.requiredProperties, function(reqProp, key) {
+            _.each(this.data.requiredProperties, function(key) {
                 if (!_.filter(props, function(p) {return p.target === key;}).length) {
                     this.data.missingRequiredProperties.push(key);
                 }
@@ -194,7 +193,7 @@ define([
             if (e) {
                 e.preventDefault();
             }
-            _.each(this.data.requiredProperties, function(reqProp, key) {
+            _.each(this.data.requiredProperties, function(key) {
                 if (!_.filter(props, function(p) {return p.target === key;}).length){
                     props.push({target: key});
                 }
@@ -204,9 +203,9 @@ define([
         },
 
         setMappingProperties: function(mappingProperties) {
-            this.render({
+            this.render(_.extend(this.model.renderArgs, {
                 "mappingProperties" : mappingProperties
-            });
+            }));
         },
 
         loadGrid: function(evalResults, attributes) {
@@ -224,6 +223,7 @@ define([
                     rowClick: function (event) {
                         if (!$(event.target).hasClass("fa-times")) {
                             EditPropertyMappingDialog.render({
+                                usesLinkQualifier: _this.data.usesLinkQualifier,
                                 id: this.model.attributes.id,
                                 mappingProperties: _this.model.mappingProperties,
                                 availProperties: _this.model.availableObjects.source.properties,
@@ -245,7 +245,7 @@ define([
                     tempResults = null;
                 }
 
-                if(conf.globalData.sampleSource !== undefined && conf.globalData.sampleSource.IDMSampleMappingName === this.mapping.name && conf.globalData.sampleSource[attribute.source]) {
+                if(conf.globalData.sampleSource !== undefined && conf.globalData.sampleSource.IDMSampleMappingName === this.model.mapping.name && conf.globalData.sampleSource[attribute.source]) {
                     tempSample = conf.globalData.sampleSource[attribute.source];
                 } else {
                     tempSample = null;
@@ -275,6 +275,7 @@ define([
                                 var attributes = this.model.attributes,
                                     locals = {
                                         title: attributes.attribute.source,
+                                        usesDragIcon: _this.model.usesDragIcon,
                                         isSource: true
                                     };
 
@@ -388,9 +389,9 @@ define([
                                     UIUtils.confirmDialog($.t("templates.mapping.confirmRemoveProperty",{property: this.model.attributes.attribute.target}), "danger", _.bind(function(){
                                         _this.model.mappingProperties.splice(($(event.target).parents("tr")[0].rowIndex - 1), 1);
                                         _this.checkChanges();
-                                        _this.render({
+                                        _this.render(_.extend(_this.model.renderArgs, {
                                             "mappingProperties" : _this.model.mappingProperties
-                                        });
+                                        }));
                                     }, this));
                                 }
                             }
@@ -412,24 +413,26 @@ define([
                 title: ''
             });
 
-            this.$el.find("#linkQualifierSelect").change(_.bind(function(event) {
-                var element = event.target;
+            if (this.data.usesLinkQualifier) {
+                this.$el.find("#linkQualifierSelect").change(_.bind(function (event) {
+                    var element = event.target;
 
-                event.preventDefault();
+                    event.preventDefault();
 
-                if ($(element).val().length > 0) {
-                    this.currentLinkQualifier = $(element).val();
-                }
+                    if ($(element).val().length > 0) {
+                        this.model.currentLinkQualifier = $(element).val();
+                    }
 
-                this.gridFromMapProps(this.model.mappingProperties);
-                this.initSort();
-            }, this));
+                    this.gridFromMapProps(this.model.mappingProperties);
+                    this.initSort();
+                }, this));
 
-            this.$el.find("#linkQualifierSelect").selectize({
-                placeholder: $.t("templates.mapping.linkQualifier"),
-                create: false,
-                sortField: 'text'
-            });
+                this.$el.find("#linkQualifierSelect").selectize({
+                    placeholder: $.t("templates.mapping.linkQualifier"),
+                    create: false,
+                    sortField: 'text'
+                });
+            }
 
             this.initSort();
         },
@@ -451,7 +454,7 @@ define([
                 tempDetails = {},
                 sampleSource = conf.globalData.sampleSource || {};
 
-            if (sampleSource.IDMSampleMappingName !== this.mapping.name) {
+            if (sampleSource.IDMSampleMappingName !== this.model.mapping.name) {
                 sampleSource = {};
             }
 
@@ -466,7 +469,9 @@ define([
 
                     tempDetails = {};
 
-                    globals.linkQualifier = this.currentLinkQualifier;
+                    if (this.data.usesLinkQualifier) {
+                        globals.linkQualifier = this.model.currentLinkQualifier;
+                    }
 
                     if (item.source !== "") {
                         globals.source = sampleSource[item.source];
@@ -514,10 +519,9 @@ define([
         //Returns a promise and determines if a transform and/or conditional needs to be eval
         sampleEvalCheck: function(sampleDetails, globals) {
             var samplePromise = $.Deferred(),
-                filterCheck,
                 sampleSource = conf.globalData.sampleSource || {};
 
-            if (sampleSource.IDMSampleMappingName !== this.mapping.name) {
+            if (sampleSource.IDMSampleMappingName !== this.model.mapping.name) {
                 return samplePromise.resolve(null);
             }
 
@@ -618,90 +622,10 @@ define([
             return samplePromise;
         },
 
-        checkAvailableProperties: function(){
-            var availableProps;
-
-            availableProps = this.model.availableObjects.target.properties || [];
-
-            if (!availableProps.length || _.difference(availableProps, _.pluck(this.data.mapProps,"target")).length) {
-                this.$el.find('.addProperty').removeProp('disabled');
-                this.$el.find('#allPropertiesMapped').hide();
-            } else {
-                this.$el.find('.addProperty').prop('disabled',true);
-                this.$el.find('#allPropertiesMapped').show();
-            }
-        },
-
-        buildAvailableObjectsMap: function() {
-            var sourceProm = $.Deferred(),
-                targetProm = $.Deferred(),
-                currentConnectors = connectorDelegate.currentConnectors(),
-                managedConfig = configDelegate.readEntity("managed");
-
-            return $.when(currentConnectors, managedConfig).then(_.bind(function(currConnectors, managed) {
-
-                _.map(managed.objects,_.bind(function(o){
-                    if(this.getCurrentMapping().source === "managed/" + o.name){
-                        sourceProm.resolve({ name: o.name, fullName: "managed/" + o.name });
-                    }
-                    if(this.getCurrentMapping().target === "managed/" + o.name){
-                        targetProm.resolve({ name: o.name, fullName: "managed/" + o.name });
-                    }
-                }, this));
-
-                if (!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")) {
-                    _.each(currConnectors, function(connector) {
-                        _.each(connector.objectTypes, function(objType) {
-                            var objTypeMap = {
-                                    name: connector.name,
-                                    fullName: "system/" + connector.name + "/" + objType
-                                },
-                                getProps = function(){
-                                    return configDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector) {
-                                        return connector.objectTypes[objType].properties;
-                                    });
-                                };
-
-                            if (this.getCurrentMapping().source === objTypeMap.fullName) {
-                                getProps().then(function(props){
-                                    objTypeMap.properties = _.keys(props).sort();
-                                    sourceProm.resolve(objTypeMap);
-                                });
-                            }
-
-                            AdminUtils.findPropertiesList(this.getCurrentMapping().target.split("/"), true).then(_.bind(function(properties){
-                                this.data.requiredProperties = properties;
-                                targetProm.resolve(objTypeMap);
-                            }, this));
-                        }, this);
-                    }, this);
-                }
-
-                return $.when(sourceProm,targetProm).then(function(source,target) {
-                    return { source: source, target: target};
-                });
-
-            }, this));
-        },
-
         saveMapping: function(e) {
             e.preventDefault();
-
-            var mapping = this.getCurrentMapping();
-
-            if(mapping.recon) {
-                delete mapping.recon;
-            }
-
-            if (this.model.mappingProperties) {
-                mapping.properties = this.model.mappingProperties;
-                this.model.mappingProperties = null;
-
-                this.AbstractMappingSave(mapping, _.bind(function() {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingSaveSuccess");
-                    this.render();
-                }, this));
-            }
+            this.model.save(this.model.mappingProperties);
+            this.model.mappingProperties = null;
         }
     });
 

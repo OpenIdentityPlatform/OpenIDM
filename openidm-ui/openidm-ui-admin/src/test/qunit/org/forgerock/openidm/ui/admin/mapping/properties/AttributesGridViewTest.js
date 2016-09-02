@@ -24,7 +24,7 @@ define([
         // don't do anything with this one; just stub it out.
         sinon.stub(AttributesGridView, "loadGrid");
 
-        AttributesGridView.mapping = {name : "testMapping"};
+        AttributesGridView.model.mapping = {name : "testMapping"};
 
         // try loading the grid with a few different transform rules
         evalResult = AttributesGridView.gridFromMapProps([
