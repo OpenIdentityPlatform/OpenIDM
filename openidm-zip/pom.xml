@@ -233,6 +233,7 @@
             <artifactId>custom-scripted-connector-bundler</artifactId>
             <version>${project.version}</version>
         </dependency>
+
         <!-- Core OSGi -->
         <dependency>
             <groupId>org.osgi</groupId>
@@ -290,8 +291,7 @@
             <artifactId>commons-io</artifactId>
         </dependency>
 
-
-
+        <!-- other Felix -->
         <dependency>
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.configadmin</artifactId>
@@ -330,6 +330,7 @@
             <groupId>org.apache.felix</groupId>
             <artifactId>org.apache.felix.fileinstall</artifactId>
         </dependency>
+
         <!-- Declarative Services support -->
         <dependency>
             <groupId>org.apache.felix</groupId>
@@ -653,6 +654,13 @@
             <groupId>com.jcraft</groupId>
             <artifactId>jsch</artifactId>
             <version>0.1.53</version>
+        </dependency>
+
+        <!-- Dependency overrides to replace out-of-date transitive dependencies -->
+        <dependency>
+            <groupId>commons-collections</groupId>
+            <artifactId>commons-collections</artifactId>
+            <version>3.2.2</version>
         </dependency>
 
         <!-- Test Dependencies -->
