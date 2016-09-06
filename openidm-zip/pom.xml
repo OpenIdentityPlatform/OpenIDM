@@ -204,7 +204,7 @@
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-identity-provider</artifactId>
-            <version>5.0.0-SNAPSHOT</version>
+            <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
