@@ -482,12 +482,7 @@ define([
                     }, this);
 
                     if (tempConfig.enabledByDefault) {
-                        if(tempConfig.type === "userDetails") {
-                            $(card).toggleClass("disabled");
-                            $(card).toggleClass("active", true);
-                        } else {
-                            $(card).find(".section-check").prop("checked", true).trigger("change");
-                        }
+                        this.activateStage(this.model.emailServiceAvailable, card, $(card).attr("data-type"));
                     } else {
                         this.model.saveConfig.stageConfigs = _.reject(this.model.saveConfig.stageConfigs, function(stage) {
                             return stage.name === $(card).attr("data-type");
@@ -519,6 +514,25 @@ define([
 
             this.data.emailRequired = emailCheck.emailRequired;
             this.$el.find("#emailStepWarning").toggle(emailCheck.showWarning);
+        },
+
+        activateStage: function(emailServiceAvailable, card, type) {
+            if(type === "userDetails") {
+                $(card).toggleClass("disabled");
+                $(card).toggleClass("active", true);
+            } else {
+                if(type !== "emailValidation") {
+                    $(card).find(".section-check").prop("checked", true).trigger("change");
+                } else {
+                    if (emailServiceAvailable === true) {
+                        $(card).find(".section-check").prop("checked", true).trigger("change");
+                    } else {
+                        this.model.saveConfig.stageConfigs = _.reject(this.model.saveConfig.stageConfigs, function(stage) {
+                            return stage.name === "emailValidation";
+                        });
+                    }
+                }
+            }
         },
 
         controlSectionSwitch: function(event) {

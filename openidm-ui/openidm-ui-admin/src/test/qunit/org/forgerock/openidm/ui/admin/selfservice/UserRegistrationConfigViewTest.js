@@ -178,4 +178,26 @@ define([
             assert.equal(cardDetails.editable, "true", "Editable state correctly pulled from html card");
             assert.equal(cardDetails.disabled, false, "Disabled state correctly pulled from html card");
         });
+
+        QUnit.test('Correctly enable sections in user registration', function(assert) {
+            var userDetailsBlock = $("<div class='disabled' data-editable='true' data-type='userDetails'></div>"),
+                emailBlock = $("<div data-editable='true' data-type='emailValidation'><input class='section-check' type='checkbox'></div>"),
+                fakeBlock = $("<div data-editable='true' data-type='fake'><input class='section-check' type='checkbox'></div>");
+
+            UserRegistrationConfigView.activateStage(false, emailBlock, "emailValidation");
+
+            UserRegistrationConfigView.activateStage(false, userDetailsBlock, "userDetails");
+
+            assert.equal(userDetailsBlock.hasClass("active"), true, "User details section correctly activated");
+
+            assert.equal(emailBlock.find(".section-check").is(':checked'), false, "Section not activated because email service not available");
+
+            UserRegistrationConfigView.activateStage(true, emailBlock, "emailValidation");
+
+            assert.equal(emailBlock.find(".section-check").is(':checked'), true, "Section activated because email service available");
+
+            UserRegistrationConfigView.activateStage(false, fakeBlock, "fake");
+
+            assert.equal(fakeBlock.find(".section-check").is(':checked'), true, "None email section enabled with email service off");
+        });
     });
