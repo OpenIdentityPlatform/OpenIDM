@@ -82,28 +82,5 @@ define([
         });
     };
 
-    obj.bindProvider = function (id, provider, code, redirect_uri) {
-        return this.serviceCall({
-            "type": "POST",
-            "serviceUrl": "/openidm/managed/user/" + id,
-            "url": "?_action=bind&" +
-            $.param({
-                "provider": provider,
-                "redirect_uri": redirect_uri,
-                "code": code
-            })
-        });
-    };
-
-    obj.unbindProvider = function (id, provider) {
-        return this.serviceCall({
-            "type": "POST",
-            "serviceUrl": "/openidm/managed/user/" + id,
-            "url": "?_action=unbind&" +
-            $.param({
-                "provider": provider
-            })
-        });
-    };
     return obj;
 });
