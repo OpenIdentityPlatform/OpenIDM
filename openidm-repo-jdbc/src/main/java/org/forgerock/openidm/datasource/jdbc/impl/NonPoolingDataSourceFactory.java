@@ -22,6 +22,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.sql.SQLFeatureNotSupportedException;
+import java.util.Properties;
 import javax.sql.DataSource;
 
 import org.forgerock.openidm.config.enhanced.InvalidException;
@@ -55,7 +56,7 @@ class NonPoolingDataSourceFactory implements DataSourceFactory {
 
         logger.info("Using DB connection configured via Driver Manager with Driver {} and URL {}",
                 config.getDriverClass(), config.getJdbcUrl());
-        final java.util.Properties properties = new java.util.Properties();
+        final Properties properties = new java.util.Properties();
         if (!isNullOrEmpty(config.getUsername())) {
             properties.put("user", config.getUsername());
 
@@ -69,56 +70,64 @@ class NonPoolingDataSourceFactory implements DataSourceFactory {
         if (!isNullOrEmpty(config.getSecurityMechanism())) {
             properties.put(CONFIG_SECURITY_MECHANISM, config.getSecurityMechanism());
         }
-
-        return new DataSource() {
-            @Override
-            public Connection getConnection() throws SQLException {
-                return DriverManager.getConnection(config.getJdbcUrl(), properties);
-            }
-
-            @Override
-            public Connection getConnection(String username, String password) throws SQLException {
-                return DriverManager.getConnection(config.getJdbcUrl(), username, password);
-            }
-
-            @Override
-            public PrintWriter getLogWriter() throws SQLException {
-                return DriverManager.getLogWriter();
-            }
-
-            @Override
-            public void setLogWriter(PrintWriter out) throws SQLException {
-                DriverManager.setLogWriter(out);
-            }
-
-            @Override
-            public void setLoginTimeout(int seconds) throws SQLException {
-                DriverManager.setLoginTimeout(seconds);
-            }
-
-            @Override
-            public int getLoginTimeout() throws SQLException {
-                return DriverManager.getLoginTimeout();
-            }
-
-            @Override
-            public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
-                throw new SQLFeatureNotSupportedException("parent logger not supported");
-            }
-
-            @Override
-            public <T> T unwrap(Class<T> iface) throws SQLException {
-                return null;
-            }
-
-            @Override
-            public boolean isWrapperFor(Class<?> iface) throws SQLException {
-                return false;
-            }
-        };
+        return new NonPoolingDataSource(properties);
     }
 
     public void shutdown(DataSource dataSource) {
         // nothing to do
+    }
+
+    protected class NonPoolingDataSource implements DataSource
+    {
+        Properties properties;
+        
+        private NonPoolingDataSource(Properties properties) {
+            this.properties = properties;
+        }
+        
+        @Override
+        public Connection getConnection() throws SQLException {
+            return DriverManager.getConnection(config.getJdbcUrl(), properties);
+        }
+
+        @Override
+        public Connection getConnection(String username, String password) throws SQLException {
+            return DriverManager.getConnection(config.getJdbcUrl(), username, password);
+        }
+
+        @Override
+        public PrintWriter getLogWriter() throws SQLException {
+            return DriverManager.getLogWriter();
+        }
+
+        @Override
+        public void setLogWriter(PrintWriter out) throws SQLException {
+            DriverManager.setLogWriter(out);
+        }
+
+        @Override
+        public void setLoginTimeout(int seconds) throws SQLException {
+            DriverManager.setLoginTimeout(seconds);
+        }
+
+        @Override
+        public int getLoginTimeout() throws SQLException {
+            return DriverManager.getLoginTimeout();
+        }
+
+        @Override
+        public java.util.logging.Logger getParentLogger() throws SQLFeatureNotSupportedException {
+            throw new SQLFeatureNotSupportedException("parent logger not supported");
+        }
+
+        @Override
+        public <T> T unwrap(Class<T> iface) throws SQLException {
+            return null;
+        }
+
+        @Override
+        public boolean isWrapperFor(Class<?> iface) throws SQLException {
+            return false;
+        }
     }
 }
