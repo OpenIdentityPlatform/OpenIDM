@@ -23,24 +23,25 @@ define([
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/openidm/ui/common/login/LoginView",
     "org/forgerock/commons/ui/common/util/OAuth",
     "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/openidm/ui/common/delegates/SocialDelegate"
+    "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
+    "org/forgerock/openidm/ui/common/UserModel"
 ], function($, _, bootstrap,
             BootstrapDialog,
             AbstractUserProfileTab,
             Configuration,
             Constants,
             EventManager,
-            LoginView,
             OAuth,
             Router,
-            SocialDelegate) {
+            SocialDelegate,
+            UserModel
+        ) {
     var SocialIdentitiesView = AbstractUserProfileTab.extend({
         template: "templates/profile/SocialIdentitiesTab.html",
         events: _.extend({
-            "change .social-toggle" : "toggleAction"
+            "click .social-toggle" : "toggleAction"
         }, AbstractUserProfileTab.prototype.events),
 
         /**
@@ -56,44 +57,66 @@ define([
         model: {},
 
         render: function(args, callback) {
-            this.data.user = Configuration.loggedUser.toJSON();
+            let params = Router.convertCurrentUrlToJSON().params;
 
-            SocialDelegate.providerList().then((response) => {
-                this.data.providers = response.providers;
+            if (!_.isEmpty(params) && _.has(params, "provider") && _.has(params, "code") && _.has(params, "redirect_uri")) {
 
-                _.each(this.data.providers, (provider, index) => {
-                    this.data.providers[index].faIcon = provider.name.toLowerCase();
-                    this.activateProviders(provider, index);
+                opener.require("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab").oauthReturn(params);
+                window.close();
+                return;
+
+            } else {
+
+                this.data.user = Configuration.loggedUser.toJSON();
+                SocialDelegate.providerList().then((response) => {
+                    this.data.providers = response.providers;
+
+                    _.each(this.data.providers, (provider, index) => {
+                        switch (provider.name) {
+                            case "google":
+                                provider.faIcon = "google";
+                                break;
+                            case "facebook":
+                                provider.faIcon = "facebook";
+                                break;
+                            case "linkedIn":
+                                provider.faIcon = "linkedin";
+                                break;
+                            default:
+                                provider.faIcon = "cloud";
+                                break;
+                        }
+
+                        this.activateProviders(provider, index);
+                    });
+
+                    this.parentRender(callback);
                 });
 
-                this.parentRender(callback);
-            });
+            }
         },
 
         activateProviders: function(provider, index) {
             if (_.has(this.data.user, "idpData") &&
-                _.has(this.data.user.idpData, provider.name) && this.data.user.idpData[provider.name].enabled
-            ) {
-                    this.data.providers[index].active = true;
+                _.has(this.data.user.idpData, provider.name) &&
+                this.data.user.idpData[provider.name].enabled) {
+                this.data.providers[index].active = true;
             }
         },
 
         toggleSocialProvider: function(toggle) {
 
-            var check = $(toggle),
-                card = check.parents(".card");
-
-            if(check.is(":checked")) {
-                card.toggleClass("disabled", false);
-                card.find(".scopes").show();
+            if(toggle.find("[type=checkbox]").prop("checked")) {
+                toggle.toggleClass("disabled", false);
+                toggle.find(".scopes").show();
             } else {
-                card.toggleClass("disabled", true);
-                card.find(".scopes").hide();
+                toggle.toggleClass("disabled", true);
+                toggle.find(".scopes").hide();
             }
         },
 
         getProviderName(toggle) {
-            return $(toggle).parents().eq(3).data("name");
+            return $(toggle).find(".card-body").data("name");
         },
 
         getProviderObj(providerName) {
@@ -105,10 +128,10 @@ define([
         toggleAction: function(event) {
             event.preventDefault();
 
-            let toggle = event.target,
-                options = null;
+            let toggle = $(event.target).parents(".card");
+            let options = null;
 
-            if (toggle.checked) {
+            if (!toggle.find("[type=checkbox]").prop("checked")) {
 
                 options = this.getOptions(toggle, true);
                 this.oauthPopup(options);
@@ -119,45 +142,38 @@ define([
             }
         },
 
+        oauthReturn: function (params) {
+            Configuration.loggedUser.bindProvider(params.provider, params.code, params.redirect_uri).then(() => {
+                let toggle = this.$el.find(`.card-body[data-name="${params.provider}"]`).parents(".card");
+
+                toggle.find("[type=checkbox]").prop("checked", true);
+                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "saveSocialProvider");
+                this.toggleSocialProvider(toggle);
+            });
+        },
+
         getOptions: function(toggle, isBind) {
-            let options = {},
-                urls = {},
-                code = "",
-                authToken = "",
-                providerName = this.getProviderName(toggle),
-                redirect_uri = OAuth.getRedirectURI();
+            let options = {};
+            let urls = {};
+            let code = "";
+            let authToken = "";
+            let providerName = this.getProviderName(toggle);
+            let redirect_uri = OAuth.getRedirectURI();
 
             options.windowName = this.getProviderName(toggle);
             urls = this.getUrls(this.getProviderObj(options.windowName));
             options.path = urls.reqUrl + "&display=popup";
             options.return = urls.resUrl;
 
-            options.callback = (code) => {
-                if (code) {
-                    if (isBind) {
-                        this.bindProvider(toggle, code);
-                    } else {
-                        this.unbindProvider(toggle, code);
-                    }
-
-                } else {
-                    this.restoreToggle(toggle);
-                }
-            }
-
             return options;
         },
 
-        getReturnUrl(url) {
-
-        },
-
         oauthPopup: function (options) {
-            let oauthWindow = null,
-                oauthInterval = null,
-                width = "",
-                height = "",
-                fragments = [];
+            let oauthWindow = null;
+            let oauthInterval = null;
+            let width = "";
+            let height = "";
+            let fragments = [];
 
             width = screen.width * (2/3);
             height = screen.height * (2/3);
@@ -168,22 +184,6 @@ define([
 
             oauthWindow = window.open(options.path, options.windowName, options.windowOptions);
 
-            oauthInterval = window.setInterval(() => {
-                if (oauthWindow && oauthWindow.document) {
-                    fragments = oauthWindow.document.URL.split("&code=");
-                    if (fragments[0] === options.return) {
-                        window.clearInterval(oauthInterval);
-                        options.callback(fragments[1]);
-                        oauthWindow.close();
-                    }
-                } else if (oauthWindow && oauthWindow.closed) {
-                    window.clearInterval(oauthInterval);
-                    if (!oauthWindow.document || ! oauthWindow.document.URL) {
-                        options.callback(null);
-                    }
-                }
-
-            }, 1000);
         },
 
         restoreToggle: function(toggle) {
@@ -212,46 +212,33 @@ define([
                     action: _.bind(function(dialogRef) {
                         dialogRef.close();
 
-                        let options = this.getOptions(toggle, false);
-
-                        this.oauthPopup(options);
+                        this.unbindProvider(toggle);
                     }, this)
                 }]
             });
 
         },
 
-        bindProvider: function(toggle, code) {
-            let id = this.data.user._id,
-                providerName = this.getProviderName(toggle),
-                redirect_uri = OAuth.getRedirectURI();
+        unbindProvider: function(toggle) {
+            let id = this.data.user._id;
+            let providerName = this.getProviderName(toggle);
 
-            SocialDelegate.bindProvider(id, providerName, code, redirect_uri).then(() => {
-                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "saveSocialProvider");
-                this.toggleSocialProvider(toggle);
-            });
-        },
-
-        unbindProvider: function(toggle, code) {
-            let id = this.data.user._id,
-                providerName = this.getProviderName(toggle),
-                redirect_uri = OAuth.getRedirectURI();
-
-            SocialDelegate.unbindProvider(id, providerName, code, redirect_uri).then(() => {
+            Configuration.loggedUser.unbindProvider(providerName).then(() => {
+                toggle.find("[type=checkbox]").prop("checked", false);
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "saveSocialProvider");
                 this.toggleSocialProvider(toggle);
             });
         },
 
         getUrls: function(provider) {
-            let scopes = provider.scope.join(" "),
-                currentURL = Router.currentRoute,
-                state = Router.getLink(currentURL,
-                    [
-                        "&provider=" + provider.name +
-                        "&redirect_uri=" + OAuth.getRedirectURI()
-                    ]);
-                returnURL = Router.getCurrentUrlBasePart() + "/#" + state;
+            let scopes = provider.scope.join(" ");
+            let currentURL = Router.currentRoute;
+            let state = Router.getLink(currentURL,
+                [
+                    "&provider=" + provider.name +
+                    "&redirect_uri=" + OAuth.getRedirectURI()
+                ]);
+            let returnURL = Router.getCurrentUrlBasePart() + "/#" + state;
 
             return {
                 reqUrl: OAuth.getRequestURL(provider.authorization_endpoint, provider.client_id, scopes, state),

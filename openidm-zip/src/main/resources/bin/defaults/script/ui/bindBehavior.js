@@ -43,11 +43,12 @@
         }
     );
 
+    user.idpData[request.additionalParameters.provider].enabled = true;
+
     return openidm.update(
         context.security.authorization.component + "/" + context.security.authorization.id,
         user._rev,
-        user,
-        user.idpData[request.additionalParameters.provider].enabled = true
+        user
     );
 
 }());

@@ -156,7 +156,30 @@ define([
         },
         setCurrentPassword: function (currentPassword) {
             this.currentPassword = currentPassword;
+        },
+
+        bindProvider: function (provider, code, redirect_uri) {
+            return ServiceInvoker.restCall({
+                "type": "POST",
+                "url": this.url + "/" + this.id +"?_action=bind&" +
+                $.param({
+                    "provider": provider,
+                    "redirect_uri": redirect_uri,
+                    "code": code
+                })
+            });
+        },
+
+        unbindProvider: function (provider) {
+            return ServiceInvoker.restCall({
+                "type": "POST",
+                "url": this.url + "/" + this.id + "?_action=unbind&" +
+                $.param({
+                    "provider": provider
+                })
+            });
         }
     });
+
     return new UserModel();
 });
