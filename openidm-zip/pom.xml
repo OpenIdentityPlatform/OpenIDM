@@ -421,7 +421,7 @@
         <dependency>
             <groupId>org.ops4j.pax.swissbox</groupId>
             <artifactId>pax-swissbox-extender</artifactId>
-            <version>1.8.0</version>
+            <version>1.8.2</version>
             <exclusions>
                 <exclusion>
                     <artifactId>pax-swissbox-optional-jcl</artifactId>
