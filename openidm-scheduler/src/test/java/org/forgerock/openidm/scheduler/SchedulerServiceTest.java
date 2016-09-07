@@ -137,7 +137,7 @@ public class SchedulerServiceTest {
                 .isNotNull()
                 .succeeded();
         ResourceResponse resourceResponse =
-                promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                promise.getOrThrow();
         assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
     }
     
@@ -154,7 +154,7 @@ public class SchedulerServiceTest {
                 .isNotNull()
                 .succeeded();
         ResourceResponse resourceResponse =
-                promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                promise.getOrThrow();
         assertThat(resourceResponse.getContent().asMap()).isEqualTo(testScheduleConfig.asMap());
     }
     
@@ -170,7 +170,7 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        ActionResponse resourceResponse = promise.getOrThrow();
         assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
     }
     
@@ -186,7 +186,7 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        ActionResponse resourceResponse = promise.getOrThrow();
         assertThat(resourceResponse.getJsonContent().get("success").getObject()).isEqualTo(new Boolean(true));
     }
     
@@ -202,7 +202,7 @@ public class SchedulerServiceTest {
         AssertJPromiseAssert.assertThat(promise)
                 .isNotNull()
                 .succeeded();
-        ActionResponse resourceResponse = promise.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        ActionResponse resourceResponse = promise.getOrThrow();
         assertThat(resourceResponse.getJsonContent().asList().size()).isEqualTo(0);
     }
 

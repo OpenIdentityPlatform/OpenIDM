@@ -24,7 +24,6 @@ import static org.forgerock.security.keystore.KeyStoreType.PKCS11;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import javax.net.ssl.KeyManager;
 import javax.net.ssl.KeyManagerFactory;
 import javax.net.ssl.SSLContext;
@@ -360,8 +359,8 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
 
         //add the keystore default entry cert to the truststore
         final CreateRequest createRequest = Requests.newCreateRequest("/truststore/cert", alias,
-                result.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS).getContent());
+                result.getOrThrow().getContent());
         result = truststoreCertProvider.createInstance(new RootContext(), createRequest);
-        result.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+        result.getOrThrow();
     }
 }

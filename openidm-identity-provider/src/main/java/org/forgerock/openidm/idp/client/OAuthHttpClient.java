@@ -16,8 +16,6 @@
 package org.forgerock.openidm.idp.client;
 
 import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
-
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
@@ -30,7 +28,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
@@ -38,8 +35,6 @@ import org.forgerock.util.promise.NeverThrowsException;
 
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -146,32 +141,27 @@ public class OAuthHttpClient {
                 .setMethod("GET")
                 .setUri(uri);
         request.getHeaders().put(new GenericHeader("Authorization", "Bearer " + access_token));
-        try {
-            return httpClient
-                    .send(request)
-                    .then(
-                            new Function<Response, JsonValue, NeverThrowsException>() {
-                                @Override
-                                public JsonValue apply(Response response) {
-                                    try {
-                                        return json(response.getEntity().getJson());
-                                    } catch (IOException e) {
-                                        throw new IllegalStateException("Unable to perform request", e);
-                                    }
+        return httpClient
+                .send(request)
+                .then(
+                        new Function<Response, JsonValue, NeverThrowsException>() {
+                            @Override
+                            public JsonValue apply(Response response) {
+                                try {
+                                    return json(response.getEntity().getJson());
+                                } catch (IOException e) {
+                                    throw new IllegalStateException("Unable to perform request", e);
                                 }
-                            },
-                            new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
-                                @Override
-                                public JsonValue apply(NeverThrowsException e) {
-                                    // return null on Exceptions
-                                    return null;
-                                }
-                            })
-                    .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for results", e);
-            return json(object());
-        }
+                            }
+                        },
+                        new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
+                            @Override
+                            public JsonValue apply(NeverThrowsException e) {
+                                // return null on Exceptions
+                                return null;
+                            }
+                        })
+                .getOrThrowUninterruptibly();
     }
 
     private JsonValue sendPostRequest(final URI uri, final String contentType, final Object body) {
@@ -184,31 +174,26 @@ public class OAuthHttpClient {
         if (body != null) {
             request.setEntity(body);
         }
-        try {
-            return httpClient
-                    .send(request)
-                    .then(
-                            new Function<Response, JsonValue, NeverThrowsException>() {
-                                @Override
-                                public JsonValue apply(Response response) {
-                                    try {
-                                        return json(response.getEntity().getJson());
-                                    } catch (IOException e) {
-                                        throw new IllegalStateException("Unable to perform request", e);
-                                    }
+        return httpClient
+                .send(request)
+                .then(
+                        new Function<Response, JsonValue, NeverThrowsException>() {
+                            @Override
+                            public JsonValue apply(Response response) {
+                                try {
+                                    return json(response.getEntity().getJson());
+                                } catch (IOException e) {
+                                    throw new IllegalStateException("Unable to perform request", e);
                                 }
-                            },
-                            new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
-                                @Override
-                                public JsonValue apply(NeverThrowsException e) {
-                                    // return null on Exceptions
-                                    return null;
-                                }
-                            })
-                    .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
-        } catch (TimeoutException e) {
-            logger.error("Timeout waiting for results", e);
-            return json(object());
-        }
+                            }
+                        },
+                        new Function<NeverThrowsException, JsonValue, NeverThrowsException>() {
+                            @Override
+                            public JsonValue apply(NeverThrowsException e) {
+                                // return null on Exceptions
+                                return null;
+                            }
+                        })
+                .getOrThrowUninterruptibly();
     }
 }
