@@ -30,8 +30,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -50,7 +48,6 @@ import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ResourcePath;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.sync.SynchronizationException;
@@ -363,8 +360,6 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                 default:
                     throw new BadRequestException("Action" + request.getAction() + " is not supported.");
             }
-        } catch (TimeoutException e) {
-            return ResourceException.newResourceException(500, "Timeout waiting for result", e).asPromise();
         } catch (ResourceException e) {
         	return e.asPromise();
         } catch (IllegalArgumentException e) { 
@@ -385,7 +380,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
      * @throws ResourceException
      */
     private Promise<ActionResponse, ResourceException> getLinkedResources(
-            final Context context, ResourcePath resourceName) throws ResourceException, TimeoutException {
+            final Context context, ResourcePath resourceName) throws ResourceException {
 
         // IMPORTANT - Use external connection as this is called externally and we want to read the linked
         // resources with the same permissions / business-logic as if they were done externally as well.
@@ -507,7 +502,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                             }
                         })
                         .toList())
-                .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS); // wait for promises
+                .getOrThrowUninterruptibly(); // wait for promises
 
         JsonValue response = json(array());
         for (ResourceResponse linked : linkedResources) {

@@ -27,8 +27,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import org.forgerock.http.routing.RoutingMode;
 import org.forgerock.json.JsonPointer;
@@ -56,7 +54,6 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.http.HttpUtils;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
@@ -114,11 +111,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
     /** {@inheritDoc} */
     @Override
-    public Promise<JsonValue, ResourceException> getRelationshipValueForResource(final Context context,
-            final String resourceId) {
-        EventEntry measure = Publisher.start(
-                Name.get("openidm/internal/relationship/collection/getRelationshipValueForResource"),
-                resourceId, context);
+    public Promise<JsonValue, ResourceException> getRelationshipValueForResource(final Context context, final String resourceId) {
+        EventEntry measure = Publisher.start(Name.get("openidm/internal/relationship/collection/getRelationshipValueForResource"), resourceId, context);
 
         try {
             final QueryRequest queryRequest = Requests.newQueryRequest("")
@@ -126,25 +120,21 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                     .setQueryId(RELATIONSHIP_QUERY_ID);
             final List<ResourceResponse> relationships = new ArrayList<>();
 
-            return queryCollection(new ManagedObjectContext(context), queryRequest, new QueryResourceHandler() {
+            queryCollection(new ManagedObjectContext(context), queryRequest, new QueryResourceHandler() {
                 @Override
                 public boolean handleResource(ResourceResponse resourceResponse) {
                     relationships.add(resourceResponse);
                     return true;
                 }
-            }).thenAsync(new AsyncFunction<QueryResponse, JsonValue, ResourceException>() {
-                @Override
-                public Promise<? extends JsonValue, ? extends ResourceException> apply(QueryResponse value)
-                        throws ResourceException {
-                    final JsonValue buf = json(array());
+            }).getOrThrowUninterruptibly(); // call get() so we block until we have all items
 
-                    for (ResourceResponse resource : relationships) {
-                        buf.add(resource.getContent().getObject());
-                    }
+            final JsonValue buf = json(array());
 
-                    return newResultPromise(buf);
-                }
-            });
+            for (ResourceResponse resource : relationships) {
+                buf.add(resource.getContent().getObject());
+            }
+
+            return newResultPromise(buf);
         } catch (ResourceException e) {
             return e.asPromise();
         } finally {
@@ -188,8 +178,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
 
                     if (!clearExisting) {
                         // Call get() so we block until they are deleted.
-                        clearNotIn(context, resourceId, relationshipsToKeep)
-                                .getOrThrowUninterruptibly(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                        clearNotIn(context, resourceId, relationshipsToKeep).getOrThrowUninterruptibly();
                     }
                 } else {
                     // We didn't get any relations to persist. Clear and return empty array.
@@ -228,8 +217,6 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                         return value;
                     }
                 });
-            } catch (TimeoutException e) {
-                return ResourceException.newResourceException(500, "Timeout waiting for result", e).asPromise();
             } catch (ResourceException e) {
                 return e.asPromise();
             }
@@ -417,9 +404,8 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                         return handler.handleResource(filteredResourceResponse);
                     }
                     try {
-                        filteredResourceResponse =
-                                expandFields(context, request, filteredResourceResponse)
-                                        .getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                        filteredResourceResponse = 
+                                expandFields(context, request, filteredResourceResponse).getOrThrow();
                     } catch (Exception e) {
                         logger.error("Error expanding resource: " + e.getMessage(), e);
                     }
@@ -431,7 +417,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 return response;   
             }
             
-            QueryResponse result = response.getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+            QueryResponse result = response.getOrThrow();
             
             // Get the value of the managed object
             final ResourceResponse value = getManagedObject(context);

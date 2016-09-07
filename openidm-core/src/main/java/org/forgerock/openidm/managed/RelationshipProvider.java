@@ -33,7 +33,6 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.routing.UriRouterContext;
@@ -59,7 +58,6 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.audit.util.Status;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.patch.JsonValuePatch;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
@@ -412,22 +410,18 @@ public abstract class RelationshipProvider {
             final JsonValue beforeValue = getManagedObject(context).getContent();
 
             // Create the relationship
-            return syncReferencedObjectCreateHandler
+            ResourceResponse response = syncReferencedObjectCreateHandler
                     .performRequest(request.getContent().get(REFERENCE_ID).asString(), createRequest, context)
                     .then(formatResponse(context, request))
-                    .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                        @Override
-                        public Promise<? extends ResourceResponse, ? extends ResourceException>
-                                apply(ResourceResponse response) throws ResourceException {
-                            // Get the before value of the managed object
-                            final JsonValue afterValue = getManagedObject(context).getContent();
+                    .getOrThrow();
 
-                            // Perform update operations on the managed object
-                            performUpdateOperations(context, request, afterValue, beforeValue);
+            // Get the before value of the managed object
+            final JsonValue afterValue = getManagedObject(context).getContent();
 
-                            return expandFields(context, request, response);
-                        }
-                    });
+            // Perform update operations on the managed object
+            performUpdateOperations(context, request, afterValue, beforeValue);
+            
+            return expandFields(context, request, response);
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -470,8 +464,8 @@ public abstract class RelationshipProvider {
      * @param request The current request.
      * @return A promise containing the relationship object
      */
-    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, String relationshipId,
-            final ReadRequest request) {
+    public Promise<ResourceResponse, ResourceException> readInstance(Context context, String relationshipId, 
+            ReadRequest request) {
         try {
             final ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
             
@@ -484,21 +478,16 @@ public abstract class RelationshipProvider {
             }
             
             // Read the relationship
-            return promise
-                    .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                        @Override
-                        public Promise<? extends ResourceResponse, ? extends ResourceException>
-                                apply(ResourceResponse response) throws ResourceException {
-                            // Get the value of the managed object
-                            final ResourceResponse value = getManagedObject(context);
+            final ResourceResponse response = promise.getOrThrow();
+            
+            // Get the value of the managed object
+            final ResourceResponse value = getManagedObject(context);
+            
+            // Do activity logging.
+            activityLogger.log(context, request, "read", getManagedObjectPath(context), null, value.getContent(),
+                    Status.SUCCESS);
 
-                            // Do activity logging.
-                            activityLogger.log(context, request, "read", getManagedObjectPath(context), null,
-                                    value.getContent(), Status.SUCCESS);
-
-                            return expandFields(context, request, response);
-                        }
-                    });
+            return expandFields(context, request, response);
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -535,19 +524,17 @@ public abstract class RelationshipProvider {
                             }
                         });
             }
-
+            ResourceResponse result;
+            
             // Get the before value of the managed object
             final JsonValue beforeValue = getManagedObject(context).getContent();
 
-            ResourceResponse result = getConnection().readAsync(context, readRequest)
-                    .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                        @Override
-                        public Promise<? extends ResourceResponse, ? extends ResourceException>
-                                apply(ResourceResponse oldResource) throws ResourceException {
-                            return updateIfChanged(context, request, relationshipId, rev, oldResource, newValue);
-                        }
-                    }).getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
-
+            // Read the relationship
+            final ResourceResponse oldResource = getConnection().readAsync(context, readRequest).getOrThrow();
+            
+            // Perform update
+            result = updateIfChanged(context, request, relationshipId, rev, oldResource, newValue).getOrThrow();
+            
             // Get the after value of the managed object
             final JsonValue afterValue = getManagedObject(context).getContent();
 
@@ -582,23 +569,22 @@ public abstract class RelationshipProvider {
                 return deleteAsync(context, path, deleteRequest);
             }
 
+            // The result of the delete
+            ResourceResponse result;
+            
             // Get the before value of the managed object
             final JsonValue beforeValue = getManagedObject(context).getContent();
             
-            return deleteAsync(context, path, deleteRequest)
-                    .thenAsync(new AsyncFunction<ResourceResponse, ResourceResponse, ResourceException>() {
-                        @Override
-                        public Promise<? extends ResourceResponse, ? extends ResourceException>
-                                apply(ResourceResponse result) throws ResourceException {
-                            // Get the after value of the managed object
-                            final JsonValue afterValue = getManagedObject(context).getContent();
+            // Perform the delete and wait for result
+            result = deleteAsync(context, path, deleteRequest).getOrThrow();
+            
+            // Get the after value of the managed object
+            final JsonValue afterValue = getManagedObject(context).getContent();
 
-                            // Perform update operations on the managed object
-                            performUpdateOperations(context, request, afterValue, beforeValue);
-
-                            return expandFields(context, request, result);
-                        }
-                    });
+            // Perform update operations on the managed object
+            performUpdateOperations(context, request, afterValue, beforeValue);
+            
+            return expandFields(context, request, result);
         } catch (ResourceException e) {
             return e.asPromise();
         } catch (Exception e) {
@@ -697,8 +683,7 @@ public abstract class RelationshipProvider {
                 // Read in object
                 ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
                 ResourceResponse oldResource = connectionFactory.getConnection().readAsync(context, readRequest)
-                        .then(formatResponse(context, request))
-                        .getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                        .then(formatResponse(context, request)).getOrThrow();
                 
                 // If we haven't defined a revision, we need to get the current revision
                 if (revision == null) {

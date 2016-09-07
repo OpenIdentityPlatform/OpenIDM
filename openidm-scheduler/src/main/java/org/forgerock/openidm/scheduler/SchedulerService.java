@@ -36,7 +36,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TimeZone;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.felix.scr.annotations.Activate;
@@ -75,7 +74,6 @@ import org.forgerock.json.resource.SortKey;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.filter.JsonValueFilterVisitor;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
@@ -706,8 +704,7 @@ public class SchedulerService implements RequestHandler {
                     throw new BadRequestException("Schedule already exists");
                 }
                 CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(params));
-                ResourceResponse response = handleCreate(context, createRequest)
-                        .getOrThrow(IdentityServer.getPromiseTimeout(), TimeUnit.MILLISECONDS);
+                ResourceResponse response = handleCreate(context, createRequest).getOrThrow();
                 return newActionResponse(response.getContent()).asPromise();
             case listCurrentlyExecutingJobs:
                 JsonValue currentlyExecutingJobs = json(array());
