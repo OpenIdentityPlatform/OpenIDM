@@ -95,7 +95,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
     private static final ResourceException NOT_SUPPORTED = new NotSupportedException("Operation is not implemented");
 
     private static final String RAW_PROFILE = "rawProfile";
-    private static final String SUB = "sub";
+    private static final String SUB = "subject";
+    private static final String ENABLED = "enabled";
 
     /** Transformation function to remove client secret */
     public static final Function<JsonValue, JsonValue> withoutClientSecret =
@@ -242,6 +243,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
                 return newActionResponse(
                             json(object(
                                 field(RAW_PROFILE, profile.getObject()),
+                                field(ENABLED, true),
                                 field(SUB, profile.get(providerConfig.getAuthenticationId()).asString()))))
                         .asPromise();
             default:
