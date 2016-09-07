@@ -13,9 +13,17 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
-if (object.idpData !== null
-        && object.idpData[request.additionalParameters.provider] !== null
-        && object.idpData[request.additionalParameters.provider].enabled === true) {
+
+if (object.idpData != null
+    && object.idpData[request.additionalParameters.provider] != null
+    && object.idpData[request.additionalParameters.provider].enabled === true) {
+
+    // disable social provider via use of "enabled": false -
     object.idpData[request.additionalParameters.provider].enabled = false;
+
+    // uncomment below line to delete social provider data -
+    // delete object.idpData[request.additionalParameters.provider];
+
+    // update the object in every case:
     openidm.update(resourcePath, object._rev, object);
 }
