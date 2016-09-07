@@ -103,6 +103,9 @@ define([
                         case "facebook":
                             provider.displayIcon = "facebook";
                             break;
+                        case "linkedIn":
+                            provider.displayIcon = "linkedin";
+                            break;
                         default:
                             provider.displayIcon = "cloud";
                             break;
