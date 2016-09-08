@@ -58,6 +58,7 @@ define([
             "partials/_toggleIconBlock.html",
             "partials/social/_google.html",
             "partials/social/_facebook.html",
+            "partials/social/_linkedIn.html",
             "partials/social/_oAuth2.html",
             "partials/form/_basicInput.html",
             "partials/form/_tagSelectize.html",
