@@ -16,23 +16,16 @@
 package org.forgerock.openidm.auth.modules.oauth;
 
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.util.promise.Promises.newExceptionPromise;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static javax.security.auth.message.AuthStatus.SEND_FAILURE;
 import static javax.security.auth.message.AuthStatus.SEND_SUCCESS;
 
-import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
-import org.forgerock.caf.authentication.api.AuthenticationException;
-import org.forgerock.caf.authentication.api.MessageInfoContext;
-import org.forgerock.http.protocol.Request;
-import org.forgerock.http.protocol.Response;
-import org.forgerock.openidm.auth.modules.oauth.exceptions.OAuthVerificationException;
-import org.forgerock.openidm.auth.modules.oauth.resolvers.OAuthResolverImpl;
-import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverService;
-import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfigurator;
-import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfiguratorImpl;
-import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceImpl;
-import org.forgerock.util.promise.Promise;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Map;
 
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
@@ -42,11 +35,20 @@ import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
 import javax.security.auth.message.callback.CallerPrincipalCallback;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+
+import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
+import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.auth.modules.oauth.exceptions.OAuthVerificationException;
+import org.forgerock.openidm.auth.modules.oauth.resolvers.OAuthResolverImpl;
+import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverService;
+import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfigurator;
+import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfiguratorImpl;
+import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceImpl;
+import org.forgerock.util.promise.Promise;
 
 /**
  * Authentication Module used for OAuth authentication(Authorization).
@@ -121,7 +123,7 @@ public class OAuthModule implements AsyncServerAuthModule {
             return newExceptionPromise(new AuthenticationException("OAuthModule configuration is invalid."));
         }
 
-        final List<Map<String, String>> resolvers = (List<Map<String, String>>) config.get(RESOLVERS_KEY);
+        final JsonValue resolvers = json(config.get(RESOLVERS_KEY));
 
         resolverService = new OAuthResolverServiceImpl();
 

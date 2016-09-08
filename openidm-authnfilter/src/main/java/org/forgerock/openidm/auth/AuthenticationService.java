@@ -16,12 +16,6 @@
 
 package org.forgerock.openidm.auth;
 
-import javax.inject.Provider;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
@@ -37,6 +31,12 @@ import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
 import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
+
+import javax.inject.Provider;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
@@ -715,7 +715,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        final List<Map> allAuthModules = new ArrayList<>();
+        final List<Map<String, Object>> allAuthModules = new ArrayList<>();
         if (amendedConfig != null) {
             final JsonValue authModuleConfig = amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
             final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(withAuthModule).toList();

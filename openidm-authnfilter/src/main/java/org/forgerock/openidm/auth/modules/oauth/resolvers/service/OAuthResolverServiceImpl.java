@@ -18,18 +18,17 @@ package org.forgerock.openidm.auth.modules.oauth.resolvers.service;
 import static org.forgerock.caf.authentication.framework.AuthenticationFramework.LOG;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
+
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.async.AsyncHttpClientProvider;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.spi.Loader;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.auth.modules.oauth.resolvers.OAuthResolverImpl;
 import org.forgerock.util.Options;
-
-
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ConcurrentMap;
 
 /**
  * Populates a Map of current configured resolvers.
@@ -48,7 +47,7 @@ public class OAuthResolverServiceImpl implements OAuthResolverService {
     }
 
     @Override
-    public boolean configureOAuthResolver(final Map config) {
+    public boolean configureOAuthResolver(final JsonValue config) {
         try {
             final String resolverName = config.get(RESOLVER_NAME).toString();
             final OAuthResolverImpl impl = new OAuthResolverImpl(resolverName, config, newHttpClient());

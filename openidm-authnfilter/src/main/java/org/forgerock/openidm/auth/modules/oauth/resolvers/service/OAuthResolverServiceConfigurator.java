@@ -15,12 +15,11 @@
  */
 package org.forgerock.openidm.auth.modules.oauth.resolvers.service;
 
-import java.util.List;
-import java.util.Map;
+import org.forgerock.json.JsonValue;
 
 /**
  * Interface directing how to configure
- * ({@link OAuthResolverServiceConfigurator#configureService(OAuthResolverService, List)})
+ * ({@link OAuthResolverServiceConfigurator#configureService(OAuthResolverService, JsonValue)})
  * an {@link OAuthResolverService}.
  *
  * Implementing classes must be aware that the configurations are "flat" and enter
@@ -31,11 +30,11 @@ public interface OAuthResolverServiceConfigurator {
 
     /**
      * Configures a provided {@link OAuthResolverService} using the resolver information held
-     * in a {@link List} of {@link Map}.
+     * in a {@link JsonValue}.
      *
      * @param service to configure
      * @param resolvers the configuration for each individual resolver
      * @return false if any resolver configuration fails; true otherwise
      */
-    boolean configureService(final OAuthResolverService service, final List<Map<String, String>> resolvers);
+    boolean configureService(final OAuthResolverService service, final JsonValue resolvers);
 }

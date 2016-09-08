@@ -15,9 +15,8 @@
  */
 package org.forgerock.openidm.auth.modules.oauth.resolvers.service;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.auth.modules.oauth.resolvers.OAuthResolverImpl;
-
-import java.util.Map;
 
 /**
  * Interface through which OAuthResolvers are obtained, and the service providing
@@ -51,5 +50,5 @@ public interface OAuthResolverService {
      * @param config identity provider configuration details
      * @return true if the resolver is configured correctly; false otherwise
      */
-    boolean configureOAuthResolver(Map config);
+    boolean configureOAuthResolver(JsonValue config);
 }

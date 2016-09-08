@@ -15,6 +15,11 @@
  */
 package org.forgerock.openidm.auth.modules.oauth.resolvers;
 
+import static org.forgerock.json.JsonValue.json;
+
+import java.io.IOException;
+import java.net.URI;
+
 import org.forgerock.http.Client;
 import org.forgerock.http.header.GenericHeader;
 import org.forgerock.http.protocol.Request;
@@ -24,25 +29,19 @@ import org.forgerock.openidm.auth.modules.oauth.exceptions.OAuthVerificationExce
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.NeverThrowsException;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-
-import static org.forgerock.json.JsonValue.json;
-
 /**
  * Implementation for OAuth 2.0 resolvers.
  */
 public class OAuthResolverImpl implements OAuthResolver {
 
-    private final Map config;
+    private final JsonValue config;
     private final Client httpClient;
     private final String resolver;
     private final String subjectKey;
 
     private String subject;
 
-    public OAuthResolverImpl(final String resolver, final Map<String, Object> resolverConfig, final Client httpClient) {
+    public OAuthResolverImpl(final String resolver, final JsonValue resolverConfig, final Client httpClient) {
         this.config = resolverConfig;
         this.resolver = resolver;
         this.httpClient = httpClient;
@@ -64,7 +63,7 @@ public class OAuthResolverImpl implements OAuthResolver {
     @Override
     public void validateIdentity(final String accessToken) throws OAuthVerificationException {
         final JsonValue response = sendGetRequest(
-                URI.create(config.get(USER_INFO_ENDPOINT).toString()), accessToken);
+                URI.create(config.get(USER_INFO_ENDPOINT).asString()), accessToken);
         if (response.get(this.subjectKey) != null) {
             this.subject = response.get(this.subjectKey).asString();
         } else {
