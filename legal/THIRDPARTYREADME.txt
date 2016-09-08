@@ -638,27 +638,6 @@ Copyright: Copyright (c) 1997-2010 Oracle and/or its affiliates. All rights rese
 Version: activation-1.1.jar
 Copyright: Copyright 1997-2007 Sun Microsystems, Inc. All rights reserved.
 
-Version: org.restlet-2.1.2.jar
-Copyright: Copyright 2005-2012 Restlet S.A.S.
-
-Version: org.restlet.ext.httpclient-2.1.2.jar
-Copyright: Copyright 2005-2012 Restlet S.A.S.
-
-Version: org.restlet.ext.jackson-2.1.2.jar
-Copyright: Copyright 2005-2012 Restlet S.A.S.
-
-Version: org.restlet.ext.servlet-2.1.2.jar
-Copyright: Copyright 2005-2012 Restlet S.A.S.
-
-Version: org.restlet.ext.json-2.1.2.jar
-Copyright: Copyright 2005-2012 Restlet S.A.S.
-
-Version: org.restlet.ext.net-2.1.2.jar 
-Copyright: Copyright 2005-2012 Restlet S.A.S.
-
-Version: org.restlet.ext.ssl-2.1.2.jar
-Copyright: Copyright 2005-2012 Restlet S.A.S.
-
 Version: stax-api-1.0-2.jar
 Copyright: http://mvnrepository.com/artifact/javax.xml.stream/stax-api/1.0-2
 
@@ -667,12 +646,6 @@ Copyright: Copyright Sun 2005 Kohsuke KAWAGUCHI
 
 Version: ActiveDirectory.Connector.resources.dll
 Copyright: Copyright 2008-2009 Sun Microsystems
-
-Version: class files from org.restlet-2.0.10
-Copyright: Copyright 2005-2011 Noelios Technologies.
-
-Version: class files from org.restlet.ext.jackson-2.0.10
-Copyright: Copyright 2005-2011 Noelios Technologies.
 
 Version: i18n-core-1.4.1.jar
 Copyright: Copyright 2009 Sun Microsystems, Inc 

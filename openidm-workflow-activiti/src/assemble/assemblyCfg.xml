@@ -16,10 +16,6 @@
                 <include>com.fasterxml.jackson:*</include>
                 <include>org.slf4j:*</include>
                 <include>org.apache.*:*</include>
-                <include>org.restlet.osgi:org.restlet.ext.httpclient</include>
-                <include>org.restlet.osgi:org.restlet.ext.jackson</include>
-                <include>org.restlet.osgi:org.restlet.ext.servlet</include>
-                <include>org.restlet.osgi:org.restlet</include>
             </includes>
             <outputDirectory>/</outputDirectory>
             <useProjectArtifact>true</useProjectArtifact>
