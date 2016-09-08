@@ -526,7 +526,7 @@
                             }
                         ],
                         "userEditable" : false
-                    }},
+                    },
                     "lastSync" : {
                         "type" : "object",
                         "scope" : "private",
