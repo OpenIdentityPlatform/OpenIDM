@@ -39,6 +39,10 @@ define([
             msg: "config.messages.socialProviders.save",
             type: "info"
         },
+        "removeSocialProvider": {
+            msg: "config.messages.socialProviders.delete",
+            type: "info"
+        },
         "authenticationUnavailable" : {
             msg: "config.messages.AuthenticationMessages.authenticationUnavailable",
             type: "error"

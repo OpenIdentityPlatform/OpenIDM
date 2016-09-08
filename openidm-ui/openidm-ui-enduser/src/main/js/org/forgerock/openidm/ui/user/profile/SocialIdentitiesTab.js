@@ -225,7 +225,7 @@ define([
 
             Configuration.loggedUser.unbindProvider(providerName).then(() => {
                 toggle.find("[type=checkbox]").prop("checked", false);
-                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "saveSocialProvider");
+                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "removeSocialProvider");
                 this.toggleSocialProvider(toggle);
             });
         },
