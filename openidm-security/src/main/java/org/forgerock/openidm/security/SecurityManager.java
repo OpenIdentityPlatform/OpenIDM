@@ -21,6 +21,7 @@ import static org.forgerock.openidm.core.IdentityServer.PKCS11_CONFIG;
 import static org.forgerock.openidm.core.IdentityServer.SSL_HOST_ALIASES;
 import static org.forgerock.security.keystore.KeyStoreType.PKCS11;
 
+import java.security.Provider;
 import java.security.Security;
 import java.util.HashMap;
 import java.util.Map;
@@ -79,8 +80,6 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import sun.security.pkcs11.SunPKCS11;
-
 /**
  * A Security Manager Service which handles operations on the java security
  * keystore and truststore files.
@@ -122,7 +121,7 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
         
     public SecurityManager() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
-        
+
         this.keyStoreHostAliases = Param.getProperty(SSL_HOST_ALIASES);
         final String trustStorePassword = Param.getTruststorePassword(false);
         final String trustStoreLocation = Param.getTruststoreLocation();
@@ -133,8 +132,22 @@ public class SecurityManager implements RequestHandler, KeyStoreManager {
 
         if (PKCS11.equals(keyStoreType) || PKCS11.equals(trustStoreType)) {
             final String config = IdentityServer.getInstance().getProperty(PKCS11_CONFIG);
-            if (config != null) {
-                Security.addProvider(new SunPKCS11(config));
+            try {
+                // Use reflection to try and load the class at runtime this is necessary because SunPKCS11
+                // does not exist on windows when using a 64 bit JDK < 1.8b49.
+                // see  for details.
+                final Class<?> clazz = Class.forName("sun.security.pkcs11.SunPKCS11");
+                if (config != null) {
+                    Security.addProvider((Provider) clazz.getConstructor(String.class).newInstance(config));
+                } else {
+                    logger.error("SunPKCS11 config not provided");
+                    throw new InternalServerErrorException("SunPKCS11 config not provided");
+                }
+            } catch (final ClassNotFoundException e) {
+                // This should only happen if the user is trying to use PKCS11 on windows with a 64 bit JDK older than
+                // 8b49
+                logger.error("SunPKCS11 class not available.", e);
+                throw new InternalServerErrorException("SunPKCS11 class not available.", e);
             }
         }
 

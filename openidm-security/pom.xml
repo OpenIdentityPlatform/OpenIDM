@@ -136,6 +136,7 @@
                 <configuration>
                     <instructions>
                         <Bundle-Activator>org.forgerock.openidm.security.Activator</Bundle-Activator>
+                        <Import-Package>sun.security.pkcs11;resolution:=optional,*</Import-Package>
                     </instructions>
                 </configuration>
             </plugin>
