@@ -100,7 +100,7 @@ public class ComponentContextUtilTest {
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(ComponentContextUtil.COMPONENT_NAME, "org.forgerock.openidm.osgi");
         properties.put(ComponentContextUtil.COMPONENT_CONFIG_FACTORY_PID, "factoryPid");
-        Dictionary<String, Object> dictionary = new UnmodifiableDictionary(properties);
+        Dictionary<String, Object> dictionary = new UnmodifiableDictionary<>(properties);
 
         when(contextMock.getProperties()).thenReturn(dictionary);
 
@@ -114,7 +114,7 @@ public class ComponentContextUtilTest {
 
         Hashtable<String, Object> properties = new Hashtable<>();
         properties.put(ComponentContextUtil.COMPONENT_NAME, "org.forgerock.openidm.osgi");
-        Dictionary<String, Object> dictionary = new UnmodifiableDictionary(properties);
+        Dictionary<String, Object> dictionary = new UnmodifiableDictionary<>(properties);
 
         when(contextMock.getProperties()).thenReturn(dictionary);
 

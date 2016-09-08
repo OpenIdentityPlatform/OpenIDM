@@ -15,11 +15,8 @@
  */
 package org.forgerock.openidm.auth.modules.oauth.resolvers.service;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.auth.modules.oauth.resolvers.OAuthResolver;
-
-
-import java.util.List;
-import java.util.Map;
 
 /**
  * Implementation of the {@link OAuthResolverServiceConfigurator} interface which
@@ -28,15 +25,15 @@ import java.util.Map;
 public class OAuthResolverServiceConfiguratorImpl implements OAuthResolverServiceConfigurator {
 
     @Override
-    public boolean configureService(OAuthResolverService service, List<Map<String, String>> resolvers) {
+    public boolean configureService(OAuthResolverService service, JsonValue resolvers) {
         if (resolvers == null || resolvers.size() < 1) {
             return false;
         }
 
         boolean configured = false;
 
-        for (Map<String, String> resolverConfig : resolvers) {
-            final String userinfo_endpoint = resolverConfig.get(OAuthResolver.USER_INFO_ENDPOINT);
+        for (final JsonValue resolverConfig : resolvers) {
+            final String userinfo_endpoint = resolverConfig.get(OAuthResolver.USER_INFO_ENDPOINT).asString();
             if (userinfo_endpoint != null) {
                 service.configureOAuthResolver(resolverConfig);
                 configured = true;

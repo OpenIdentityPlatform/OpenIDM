@@ -20,24 +20,23 @@ import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.testng.Assert.assertEquals;
 
-import org.forgerock.caf.authentication.api.MessageInfoContext;
-import org.forgerock.http.protocol.Request;
-import org.forgerock.http.protocol.Response;
-import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverService;
-import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfigurator;
-import org.testng.annotations.BeforeMethod;
-import org.testng.annotations.Test;
+import java.io.UnsupportedEncodingException;
+import java.util.HashMap;
+import java.util.Map;
 
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthException;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
 
-import java.io.UnsupportedEncodingException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.http.protocol.Request;
+import org.forgerock.http.protocol.Response;
+import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverService;
+import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfigurator;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.Test;
 
 /**
  * Test basic OAuth Module.
@@ -89,7 +88,7 @@ public class OAuthModuleTest {
         final CallbackHandler callback =  mock(CallbackHandler.class);
         final Map<String, Object> config = getConfig();
 
-        given(mockConfigurator.configureService(any(OAuthResolverService.class), any(List.class))).willReturn(false);
+        given(mockConfigurator.configureService(any(OAuthResolverService.class), any(JsonValue.class))).willReturn(false);
 
         //when
         testModule.initialize(requestPolicy, responsePolicy, callback, config).getOrThrowUninterruptibly();
