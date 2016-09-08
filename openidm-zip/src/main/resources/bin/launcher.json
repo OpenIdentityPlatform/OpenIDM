@@ -59,7 +59,6 @@
                     "**/openidm-cluster*.jar",
                     "**/openidm-httpcontext-*.jar",
                     "**/groovy-all*.jar",
-                    "**/org.restlet*.jar"
                 ],
                 "start-level":9,
                 "action":"install.start"
@@ -90,7 +89,6 @@
                     "**/openidm-scheduler*.jar",
                     "**/groovy-all*.jar",
                     "**/openidm-httpclient-fragment*.jar",
-                    "**/org.restlet*.jar"
                 ]
             },
             {
