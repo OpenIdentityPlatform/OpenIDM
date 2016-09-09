@@ -18,17 +18,20 @@ define([
     "jquery",
     "lodash",
     "form2js",
+    "handlebars",
     "org/forgerock/commons/ui/user/anonymousProcess/AnonymousProcessView",
     "org/forgerock/commons/ui/common/util/OAuth",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/user/anonymousProcess/SelfRegistrationView",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
-], function($, _, form2js,
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "org/forgerock/commons/ui/common/util/UIUtils"
+], function($, _, form2js, Handlebars,
     AnonymousProcessView,
     OAuth,
     Router,
     CommonSelfRegistrationView,
-    ValidatorsManager) {
+    ValidatorsManager,
+    UIUtils) {
 
     var SelfRegistrationView = AnonymousProcessView.extend({
         baseEntity: "selfservice/registration",
@@ -56,6 +59,28 @@ define([
                     ]
                 )
             );
+        },
+
+
+        attemptCustomTemplate: function(stateData, baseTemplateUrl, response, processStatePromise) {
+            var templateUrl = baseTemplateUrl + this.processType
+                + "/" + response.type + "-" + response.tag + ".html",
+                type = {
+                    "action": $.t("templates.socialIdentities.register")
+                };
+
+            if (_.has(stateData, "requirements.definitions.providers.items.oneOf")) {
+                _.each(stateData.requirements.definitions.providers.items.oneOf, (provider) => {
+                    provider.icon =  Handlebars.compile(provider.icon)(type);
+                });
+            }
+
+            UIUtils.compileTemplate(templateUrl, stateData)
+            .then(function (renderedTemplate) {
+                processStatePromise.resolve(renderedTemplate);
+            }, _.bind(function () {
+                this.loadGenericTemplate(stateData, baseTemplateUrl, processStatePromise);
+            }, this));
         }
     });
 

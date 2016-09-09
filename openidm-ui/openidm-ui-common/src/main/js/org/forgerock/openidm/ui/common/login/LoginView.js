@@ -93,8 +93,14 @@ define([
         } else {
 
             oauthProviders.then(_.bind(function (response) {
+                let type = {
+                    "action" : $.t("templates.socialIdentities.signIn")
+                };
+
                 _.each(response.providers, (provider) => {
                     provider.scope = provider.scope.join(" ");
+
+                    provider.icon =  Handlebars.compile(provider.icon)(type);
                 });
 
                 this.data.providers = response.providers;
