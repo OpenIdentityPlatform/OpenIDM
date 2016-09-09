@@ -15,18 +15,24 @@
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testng.annotations.BeforeMethod;
@@ -43,6 +49,10 @@ public class UpdateManagerImplTest {
 
     private JsonValue testConfig = json(object());
     private File archiveFile;
+    private final List<Path> filesToBeIgnored =
+            new ArrayList<>(Arrays.asList(Paths.get("security/keystore.jceks"),
+                    Paths.get("security/realm.properties"),
+                    Paths.get("security/truststore")));
 
     @BeforeMethod
     public void setupListAvailableUpdates() throws Exception {
@@ -84,6 +94,29 @@ public class UpdateManagerImplTest {
         assertThat(responseJson).hasArray("rejects").hasSize(1);
         // Reject reason message is expected to be regarding properties testing.
         assertThat(responseJson.get("rejects").get(0)).stringAt("reason").endsWith("'.zip' extension.");
+    }
+
+    @DataProvider
+    public Object[][] files() {
+        return new Object[][] {
+                // @formatter:off
+                { "conf/config.properties", UpdateManagerImpl.FileType.STATIC },
+                { "conf/workflow.json.patch",  UpdateManagerImpl.FileType.PATCH },
+                { "bin/launcher.json", UpdateManagerImpl.FileType.CONF },
+                { "security/keystore.jceks", UpdateManagerImpl.FileType.IGNORE },
+                { "security/realm.properties", UpdateManagerImpl.FileType.IGNORE },
+                { "security/truststore", UpdateManagerImpl.FileType.IGNORE },
+                { "bundle/HelloWorld-2.0.jar", UpdateManagerImpl.FileType.BUNDLE }
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "files")
+    public void testDetermineFileType(final String fileName, final UpdateManagerImpl.FileType expectedFileType)
+            throws Exception {
+        UpdateManagerImpl updateManager = newUpdateManager();
+        Assertions.assertThat(updateManager.getFileType(filesToBeIgnored, Paths.get(fileName), null))
+                .isEqualTo(expectedFileType);
     }
 
     @Test

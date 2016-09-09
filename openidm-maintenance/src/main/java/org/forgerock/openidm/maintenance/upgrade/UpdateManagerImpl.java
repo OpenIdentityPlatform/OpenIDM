@@ -15,7 +15,11 @@
  */
 package org.forgerock.openidm.maintenance.upgrade;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValueFunctions.listOf;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -90,6 +94,7 @@ import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.openidm.util.NaturalOrderComparator;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.BundleException;
@@ -140,6 +145,7 @@ public class UpdateManagerImpl implements UpdateManager {
     static final JsonPointer UPDATE_RESOURCE = new JsonPointer("/update/resource");
     static final JsonPointer UPDATE_RESTARTREQUIRED = new JsonPointer("/update/restartRequired");
     static final JsonPointer REMOVEFILE = new JsonPointer("/removeFile");
+    static final JsonPointer FILES_TO_BE_IGNORED = new JsonPointer("/filesToBeIgnored");
 
     protected final AtomicBoolean restartImmediately = new AtomicBoolean(false);
 
@@ -159,6 +165,14 @@ public class UpdateManagerImpl implements UpdateManager {
         COMPLETE,
         PENDING_REPO_UPDATES,
         FAILED
+    }
+
+    enum FileType {
+        BUNDLE,      // a bundle file
+        STATIC,      // a normal static file
+        CONF,        // a conf file
+        PATCH,       // a patch file for a config in the repo
+        IGNORE       // files which we should not touch
     }
 
     /** The OSGiFramework Service **/
@@ -973,63 +987,75 @@ public class UpdateManagerImpl implements UpdateManager {
                 // if not in project, treat project/conf as static
                 // summary: prevent .json overwrite in project dir
 
+                // get a list of path to be ignored
+                final List<Path> pathsToBeIgnored = updateConfig.get(FILES_TO_BE_IGNORED)
+                        .as(listOf(new Function<JsonValue, Path, NeverThrowsException>() {
+                            @Override
+                            public Path apply(JsonValue value) throws NeverThrowsException {
+                                return Paths.get(value.asString());
+                            }
+                        }));
                 for (final Path path : archive.getFiles()) {
                     logger.trace("processing archive file: {}", path);
-                    if (path.startsWith(BUNDLE_PATH)) {
-                        // This is a bundle
-                        replaceBundle(bundleHandler, path);
-                    } else if (path.getFileName().toString().endsWith(JSON_EXT)) {
-                        // This is a conf file
+                    FileType filetype = getFileType(pathsToBeIgnored, path, repoConfPath);
+                    switch (filetype) {
+                        case IGNORE:
+                            // do nothing (e.g. security files)
+                            break;
+                        case BUNDLE:
+                            replaceBundle(bundleHandler, path);
+                            break;
+                        case CONF:
+                            // TODO: Support config deletion
 
-                        // TODO: Support config deletion
-
-                        if (!projectDir.equals(installDir) &&
-                                projectDir.startsWith(installDir) &&
-                                path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
-                            // Running in a project directory and this conf file targets that conf directory.
-                            // Ignore it if it already exists else create it.
-                            if (!configExists(path.getFileName())) {
-                                createNewConfig(path);
+                            if (!projectDir.equals(installDir) &&
+                                    projectDir.startsWith(installDir) &&
+                                    path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
+                                // Running in a project directory and this conf file targets that conf directory.
+                                // Ignore it if it already exists else create it.
+                                if (!configExists(path.getFileName())) {
+                                    createNewConfig(path);
+                                }
+                            } else if (!projectDir.equals(installDir) &&
+                                    !projectDir.startsWith(installDir) &&
+                                    path.startsWith(CONF_PATH)) {
+                                // Running in a project directory outside of the installation directory
+                                // and this conf file targets a config in the root conf
+                                // Create this config if it does not exist (might be required for proper functionality);
+                                // skip it otherwise (we'd expect a .patch file to patch existing config)
+                                if (!configExists(path.getFileName())) {
+                                    createNewConfig(path);
+                                }
+                            } else if (projectDir.equals(installDir) && path.startsWith(CONF_PATH)) {
+                                // Not running in a project directory and this conf file targets the root conf directory.
+                                // Ignore it if it already exists else create it.
+                                if (!configExists(path.getFileName())) {
+                                    createNewConfig(path);
+                                }
+                            } else {
+                                // Conf is in some non-project conf directory, treat it as a static file.
+                                updateStaticFile(path);
                             }
-                        } else if (!projectDir.equals(installDir) &&
-                                !projectDir.startsWith(installDir) &&
-                                path.startsWith(CONF_PATH)) {
-                            // Running in a project directory outside of the installation directory
-                            // and this conf file targets a config in the root conf
-                            // Create this config if it does not exist (might be required for proper functionality);
-                            // skip it otherwise (we'd expect a .patch file to patch existing config)
-                            if (!configExists(path.getFileName())) {
-                                createNewConfig(path);
-                            }
-                        } else if (projectDir.equals(installDir) && path.startsWith(CONF_PATH)) {
-                            // Not running in a project directory and this conf file targets the root conf directory.
-                            // Ignore it if it already exists else create it.
-                            if (!configExists(path.getFileName())) {
-                                createNewConfig(path);
-                            }
-                        } else {
-                            // Conf is in some non-project conf directory, treat it as a static file.
+                            break;
+                        case PATCH:
+                            applyConfigPatch(path);
+                            break;
+                        case STATIC:
+                            // This is a normal static file
+                            // 1. copy it into its normal place
                             updateStaticFile(path);
-                        }
-                    } else if ((path.startsWith(CONF_PATH) || (repoConfPath != null && path.startsWith(repoConfPath))) &&
-                            path.getFileName().toString().endsWith(PATCH_EXT)) {
-                        // This is a patch file for a config in the repo
-                        applyConfigPatch(path);
-                    } else {
-                        // This is a normal static file
-                        // 1. copy it into its normal place
-                        updateStaticFile(path);
-                        // 2. (OPENIDM-6182) copy non-conf project files to the project directory if the
-                        // project direct is external
-                        try {
-                            if (!projectDir.startsWith(installDir)
-                                    && (nonJsonConf.contains(path))) {
-                                staticFileUpdate.addToProjectDirectory(path, Paths.get(projectDir));
+                            // 2. (OPENIDM-6182) copy non-conf project files to the project directory if the
+                            // project direct is external
+                            try {
+                                if (!projectDir.startsWith(installDir)
+                                        && (nonJsonConf.contains(path))) {
+                                    staticFileUpdate.addToProjectDirectory(path, Paths.get(projectDir));
+                                }
+                            } catch (IOException e) {
+                                logger.warn("Unable to copy \"" + path.toString() + "\" to project directory "
+                                        + "\"" + projectDir + "\"", e);
                             }
-                        } catch (IOException e) {
-                            logger.warn("Unable to copy \"" + path.toString() + "\" to project directory "
-                                    + "\"" + projectDir + "\"", e);
-                        }
+                            break;
                     }
 
                     logUpdate(updateEntry.setCompletedTasks(updateEntry.getCompletedTasks() + 1)
@@ -1405,6 +1431,29 @@ public class UpdateManagerImpl implements UpdateManager {
             throw new UpdateException("Could not find repo service");
         } else {
             return (String) repoReference.getProperty("db.dirname");
+        }
+    }
+
+    /**
+     * Given a file path and repo conf path, return file type (IGNORE, BUNDLE, CONF, PATCH, STATIC).
+     * @param filesToBeIgnored a list of paths to be ignored
+     * @param path a file in archive
+     * @param repoConfPath repo config
+     * @return fileType
+     */
+    FileType getFileType(List<Path> filesToBeIgnored, Path path, Path repoConfPath) {
+        if (filesToBeIgnored.contains(path)) {
+            return FileType.IGNORE;
+        } else if (path.startsWith(BUNDLE_PATH)) {
+            return FileType.BUNDLE;
+        } else if (path.getFileName().toString().endsWith(JSON_EXT)) {
+            return FileType.CONF;
+        } else if ((path.startsWith(CONF_PATH) || (repoConfPath != null
+                && path.startsWith(repoConfPath)))
+                && path.getFileName().toString().endsWith(PATCH_EXT)) {
+            return FileType.PATCH;
+        } else {
+            return FileType.STATIC;
         }
     }
 }
