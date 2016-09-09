@@ -17,5 +17,10 @@
     },
     "removeFile" : [
 
+    ],
+    "filesToBeIgnored" : [
+        "security/keystore.jceks",
+        "security/realm.properties",
+        "security/truststore"
     ]
 }
