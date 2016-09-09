@@ -32,42 +32,42 @@
                     "size" : "large",
                     "cards" : [
                         {
-                            "name" : "Add New Connector",
+                            "name" : "Add Connector",
                             "icon" : "fa-database",
                             "href" : "#connectors/add/"
                         },
                         {
-                            "name" : "Add New Mapping",
+                            "name" : "Create Mapping",
                             "icon" : "fa-map-marker",
                             "href" : "#mapping/add/"
                         },
                         {
-                            "name" : "Managed Role",
+                            "name" : "Manage Roles",
                             "icon" : "fa-check-square-o",
                             "href" : "#resource/managed/role/list/"
                         },
                         {
-                            "name" : "Add New Device",
+                            "name" : "Add Device",
                             "icon" : "fa-tablet",
                             "href" : "#managed/add/"
                         },
                         {
-                            "name" : "Set up Registration",
+                            "name" : "Configure Registration",
                             "icon" : "fa-gear",
                             "href" : "#selfservice/userregistration/"
                         },
                         {
-                            "name" : "Set up Password Reset",
+                            "name" : "Configure Password Reset",
                             "icon" : "fa-gear",
                             "href" : "#selfservice/passwordreset/"
                         },
                         {
-                            "name" : "Manage User",
+                            "name" : "Manage Users",
                             "icon" : "fa-user",
                             "href" : "#resource/managed/user/list/"
                         },
                         {
-                            "name" : "Configure OpenIDM",
+                            "name" : "Configure System Preferences",
                             "icon" : "fa-user",
                             "href" : "#settings/"
                         }
