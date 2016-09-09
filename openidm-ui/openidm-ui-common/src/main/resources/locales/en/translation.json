@@ -294,6 +294,8 @@
             "marketing": "Send me special offers and services"
         },
         "socialIdentities" : {
+            "register" : "Register with",
+            "signIn" : "Sign In with",
             "linkedUsing" : "Linked using",
             "primary" : "Primary",
             "linkedAccounts" : "Enable signing in to this account with your social network IDs",
