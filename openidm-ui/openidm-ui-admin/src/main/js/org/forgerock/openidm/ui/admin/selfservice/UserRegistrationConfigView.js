@@ -622,7 +622,8 @@ define([
         setSwitchOn: function(card, stages, configList, defaultStages, type) {
             var configItem,
                 saveOrder,
-                defaultLocation;
+                defaultLocation,
+                currentStage;
 
             card.toggleClass("disabled", false);
             card.toggleClass("active", true);
@@ -643,7 +644,13 @@ define([
                     stages.splice(saveOrder, 0, _.clone(defaultStages[defaultLocation]));
                 }
             } else {
-                stages[0].name = "socialUserDetails";
+                currentStage = _.find(stages, function(stage){
+                    return stage.name === "userDetails";
+                });
+
+                if(!_.isUndefined(currentStage)) {
+                    currentStage.name = "socialUserDetails";
+                }
 
                 this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", false);
                 this.$el.find(".wide-card[data-type='userDetails']").toggleClass("disabled", true);
@@ -663,7 +670,8 @@ define([
          * This function updates the html to the off status for a stage and returns the updated stage list
         */
         setSwitchOff: function(card, stages, configList, type) {
-            var configItem;
+            var configItem,
+                currentStage;
 
             card.toggleClass("active", false);
             card.toggleClass("disabled", true);
@@ -679,8 +687,11 @@ define([
                     return stage.name === type;
                 });
             } else {
-                stages[0].name = "userDetails";
-                delete stages[0].class;
+                currentStage = _.find(stages, function(stage) {
+                    return stage.name === "socialUserDetails";
+                });
+
+                currentStage.name = "userDetails";
 
                 this.$el.find(".wide-card[data-type='userDetails']").toggleClass("active", true);
                 this.$el.find(".wide-card[data-type='userDetails']").toggleClass("disabled", false);

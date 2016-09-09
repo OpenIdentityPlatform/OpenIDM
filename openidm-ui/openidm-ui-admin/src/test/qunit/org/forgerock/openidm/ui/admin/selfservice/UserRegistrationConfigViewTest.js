@@ -121,6 +121,10 @@ define([
 
             assert.equal(testStages.length, 5, "Captcha stage turned on and added to staging list");
             assert.equal(config[0].toggledOn, true, "Config list toggle status turned on");
+
+            testStages = UserRegistrationConfigView.setSwitchOn($("<div></div>"), stages, config, defaultStages, "socialUserDetails");
+
+            assert.equal(testStages[1].name, "socialUserDetails", "Correctly change userDetails stage to socialUserDetails");
         });
 
         QUnit.test('Turning off a stage', function(assert) {
@@ -129,7 +133,7 @@ define([
                         "name": "captcha"
                     },
                     {
-                        "name": "userDetails"
+                        "name": "socialUserDetails"
                     },
                     {
                         "name": "emailValidation"
@@ -169,6 +173,10 @@ define([
 
             assert.equal(testStages.length, 4, "Captcha stage turned off and removed from staging list");
             assert.equal(config[0].toggledOn, false, "Config list toggle status turned off");
+
+            testStages = UserRegistrationConfigView.setSwitchOff($("<div></div>"), stages, config, "socialUserDetails");
+
+            assert.equal(testStages[1].name, "userDetails", "Correctly change socialUserDetails stage to userDetails");
         });
 
         QUnit.test('Extract stage details from html card', function(assert) {
