@@ -54,6 +54,7 @@ define([
                 "MANAGED_USER": null,
                 "OPENAM_SESSION": null,
                 "INTERNAL_USER": null,
+                "OAUTH": null,
                 "OPENID_CONNECT": null,
                 "SOCIAL_PROVIDERS": null,
                 "PASSTHROUGH": null,
