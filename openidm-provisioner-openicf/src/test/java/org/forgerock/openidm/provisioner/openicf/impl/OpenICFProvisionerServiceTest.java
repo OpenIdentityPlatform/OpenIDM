@@ -11,15 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.fail;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Router.uriTemplate;
 import static org.mockito.Mockito.mock;
@@ -113,10 +111,6 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
-/**
- * A NAME does ...
- *
- */
 public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailureHandlerFactory {
 
     public static final String LAUNCHER_INSTALL_LOCATION = "launcher.install.location";
@@ -363,21 +357,37 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
 
     }
 
-    @Test
-    public void testPatchInstance() throws Exception {
-        String name = "john";
-        String resourceContainer = "/system/XML/account/";
-        JsonValue object  = json(object(
+    /**
+     * Creates a user that will be used to test {@link PatchOperation}s on.
+     *
+     * @return the full resource path of the user created.
+     */
+    private String setUpUserForPatch() throws ResourceException {
+        final String name = "john";
+        final String resourceContainer =  "/system/XML/account/";
+        final JsonValue object  = json(object(
                 field("name", name),
                 field("__PASSWORD__", "password"),
                 field("lastname", "Doe"),
-                field("email", name + "@example.com"),
                 field("address", "1234 NE 56th AVE"),
                 field("age", 30)));
 
-        CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
-        JsonValue createdObject = connection.create(new SecurityContext(new RootContext(), "system", null ), createRequest).getContent();
-        String resourceName = resourceContainer + createdObject.get("_id").asString();
+        final CreateRequest createRequest = Requests.newCreateRequest(resourceContainer, object);
+        final JsonValue createdObject = connection
+                .create(new SecurityContext(new RootContext(), "system", null ), createRequest).getContent();
+        return resourceContainer + createdObject.get("_id").asString();
+    }
+
+    private void deleteUser(final String resourceName) throws ResourceException {
+        // clean up by deleting this user
+        connection.delete(new SecurityContext(new RootContext(), "system", null),
+                Requests.newDeleteRequest(resourceName));
+    }
+
+    @Test
+    public void testPatchInstance() throws Exception {
+
+        final String resourceName = setUpUserForPatch();
 
         // Test replace operation
         PatchOperation operation = PatchOperation.replace("lastname", "Doe2");
@@ -416,8 +426,102 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         assertThat(patchResult.get("gender").asString()).isEqualTo("m");
 
         // clean up by deleting this user
-        connection.delete(new SecurityContext(new RootContext(), "system", null),
-                Requests.newDeleteRequest(resourceContainer, patchResult.get("__UID__").asString()));
+        deleteUser(resourceName);
+    }
+
+    @Test
+    public void testPatchAddOnMultiValueAttrWithNoValuePresent() throws ResourceException {
+        // multi-valued attribute, no value present - should set value
+        final String resourceName = setUpUserForPatch();
+        try {
+            final PatchOperation operation = PatchOperation.add("email", "first.email@test.com");
+            final PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+            final JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("email").asList(String.class)).isEqualTo(array("first.email@test.com"));
+        } finally {
+            deleteUser(resourceName);
+        }
+    }
+
+    @Test
+    public void testPatchAddOnMultiValueAttrWithValuePresent() throws ResourceException {
+        // multi-valued attribute, value present - should add additional value
+        final String resourceName = setUpUserForPatch();
+        try {
+            // Patch the user so that it has a multivalue attribute with a value present
+            PatchOperation operation = PatchOperation.add("email", "first.email@test.com");
+            PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+            JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("email").asList(String.class)).isEqualTo(array("first.email@test.com"));
+
+            // Attempt to add another value to the multi value attribute
+            operation = PatchOperation.add("email", "second.email@test.com");
+            patchRequest = Requests.newPatchRequest(resourceName, operation);
+            patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("email").asList(String.class))
+                    .isEqualTo(array("first.email@test.com", "second.email@test.com"));
+        } finally {
+            deleteUser(resourceName);
+        }
+    }
+
+    @Test
+    public void testPatchAddOnSingleValueAttrWithNoValuePresent() throws ResourceException {
+        // single-valued attribute, no value present - should set value
+        final String resourceName = setUpUserForPatch();
+        try {
+            final PatchOperation operation = PatchOperation
+                    .add("__DESCRIPTION__", "a description for a single value attribute");
+            final PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+            final JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("__DESCRIPTION__").asString())
+                    .isEqualTo("a description for a single value attribute");
+        } finally {
+            deleteUser(resourceName);
+        }
+    }
+
+    @Test
+    public void testPatchAddOnSingleValueAttrWithValuePresent() throws ResourceException {
+        // single-valued attribute, value present - should replace value
+        final String resourceName = setUpUserForPatch();
+        try {
+            // Add the description to the user object
+            PatchOperation operation = PatchOperation
+                    .add("__DESCRIPTION__", "a description for a single value attribute");
+            PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+            JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("__DESCRIPTION__").asString())
+                    .isEqualTo("a description for a single value attribute");
+
+            operation = PatchOperation.add("__DESCRIPTION__", "replace existing attribute with new description");
+            patchRequest = Requests.newPatchRequest(resourceName, operation);
+            patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("__DESCRIPTION__").asString())
+                    .isEqualTo("replace existing attribute with new description");
+        } finally {
+            deleteUser(resourceName);
+        }
+    }
+
+    @Test(expectedExceptions = InternalServerErrorException.class)
+    public void testPatchAddOnSingleValuedAttributeWithMultiValue() throws ResourceException {
+        final String resourceName = setUpUserForPatch();
+
+        // single-valued attribute, not present, attempt to update with multi-value
+        final JsonValue userObject = connection.read(new RootContext(),
+                Requests.newReadRequest(resourceName)).getContent();
+        assertThat(userObject.get("employee-type").getObject()).isNull();
+        final PatchOperation operation = PatchOperation.add("employee-type", array("type1", "type2"));
+        final PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+
+        // should throw an exception because the value attempting to add to
+        // a single valued attribute is multivalued
+        try {
+            connection.patch(new RootContext(), patchRequest).getContent();
+        } finally {
+            deleteUser(resourceName);
+        }
     }
 
     @Test

@@ -352,7 +352,7 @@ class ObjectClassResourceProvider implements RequestHandler {
                 Attribute attribute = objectClassInfoHelper.getPatchAttribute(operation, beforeValue,
                         provisionerService.getCryptoService());
                 if (attribute != null) {
-                    if (operation.isAdd()) {
+                    if (operation.isAdd() && objectClassInfoHelper.isMultiValued(attribute)) {
                         addedAttributes.add(attribute);
                     } else if (operation.isRemove()) {
                         removedAttributes.add(attribute);

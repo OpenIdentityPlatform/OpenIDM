@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.commons;
@@ -535,5 +527,24 @@ public class ObjectClassInfoHelper {
      */
     public JsonValue getProperties() {
         return properties;
+    }
+
+    /**
+     * Determines if an attribute is multi valued.
+     *
+     * @param attribute to inspect if multi valued flag set
+     * @return true if attribute is multi valued; false otherwise
+     * @throws BadRequestException if attribute is not supported
+     */
+    public boolean isMultiValued(final Attribute attribute) throws BadRequestException {
+        checkForInvalidAttribute(attribute.getName());
+        for (final AttributeInfoHelper attributeInfo : attributes) {
+            // Get the attribute's nativeName and check if it is one of the attributes available
+            final String attributeName = attributeInfo.getAttributeInfo().getName();
+            if (attribute.getName().equals(attributeName)) {
+                return attributeInfo.getAttributeInfo().isMultiValued();
+            }
+        }
+        throw new BadRequestException("Target does not support attribute " + attribute.getName());
     }
 }
