@@ -130,7 +130,7 @@ define([
                                         icon = "fa fa-database";
                                     }
 
-                                    display = '<a class="table-clink" href="#connectors/edit/'+this.model.attributes.cleanUrlName +'/"><div class="image circle">'
+                                    display = '<a class="table-clink" href="#managed/edit/'+this.model.attributes.name +'/"><div class="image circle">'
                                         + '<i class="' +icon +'"></i></div>' +this.model.attributes.name +'</a>';
 
                                     this.$el.html(display);
