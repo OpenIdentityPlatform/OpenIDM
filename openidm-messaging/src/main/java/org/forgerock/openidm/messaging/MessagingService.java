@@ -17,6 +17,7 @@ package org.forgerock.openidm.messaging;
 
 import static org.forgerock.guava.common.collect.FluentIterable.from;
 
+import javax.jms.Message;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -147,10 +148,10 @@ public class MessagingService {
     /**
      * Function that constructs a MessageHandler from the provided json configuration.
      */
-    private final Function<JsonValue, MessageHandler<?>> withMessageHandler
-            = new Function<JsonValue, MessageHandler<?>>() {
+    private final Function<JsonValue, MessageHandler<Message>> withMessageHandler
+            = new Function<JsonValue, MessageHandler<Message>>() {
         @Override
-        public MessageHandler<?> apply(JsonValue handlerConfig) {
+        public MessageHandler<Message> apply(JsonValue handlerConfig) {
             String handlerType = handlerConfig.get(TYPE).asString();
             if (HANDLER_TYPE_SCRIPTED.equals(handlerType)) {
                 return new ScriptedMessageHandler<>(handlerConfig.get(PROPS), scriptRegistry);
@@ -167,7 +168,6 @@ public class MessagingService {
      */
     private final Function<JsonValue, List<MessageSubscriber<?>>> toSubscribedMessageSubscribers =
             new Function<JsonValue, List<MessageSubscriber<?>>>() {
-                @SuppressWarnings("unchecked")
                 @Override
                 public List<MessageSubscriber<?>> apply(final JsonValue subscribersJson) {
                     final List<MessageSubscriber<?>> subscribers = new ArrayList<>();
@@ -188,7 +188,8 @@ public class MessagingService {
                     for (int i = 0; i < instanceCount; i++) {
                         // Construct an instance of the subscriber to start subscribing.
                         String instanceName = namePrefix + "#" + i;
-                        MessageSubscriber subscriber = new JmsMessageSubscriber(instanceName, subscriberProperties);
+                        MessageSubscriber<Message> subscriber =
+                                new JmsMessageSubscriber(instanceName, subscriberProperties);
                         try {
                             subscriber.subscribe(withMessageHandler.apply(handlerConfig));
                             subscribers.add(subscriber);
