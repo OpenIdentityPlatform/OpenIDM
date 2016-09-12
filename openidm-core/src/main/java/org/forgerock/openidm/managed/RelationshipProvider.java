@@ -30,6 +30,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -400,10 +401,11 @@ public abstract class RelationshipProvider {
                 Calls directly from ManagedObjectSet will return in the block above. If we get to this point, it is because
                 the RelationshipProvider is functioning as a CollectionResourceProvider, and servicing a create call directly
                 on a relationship endpoint. When this occurs, the MO specified in the _ref in the request needs to be
-                validated for existence, the presence of the reversePropertyName confirmed. Finally, the invocation needs
+                validated for existence, the presence of the reversePropertyName confirmed. The invocation needs
                 to be rejected if the reversePropertyName is not a collection, and presently set. The latter check will
                 have to rely on the state obtained from the MO corresponding to the _ref itself, as the SchemaField in this
-                class will specify the reversePropertyName, but not its type.
+                class will specify the reversePropertyName, but not its type. Finally, the request will be rejected if the
+                MO specified in the _ref of the request has already been added to the relationship.
              */
             validateRelationshipEndpointOperand(request.getContent().get(REFERENCE_ID).asString(), context);
             // Get the before value of the managed object
@@ -446,7 +448,19 @@ public abstract class RelationshipProvider {
                         resourceContainer.toString() + "/" + schemaField.getName(), managedObjectRef));
             }
             final JsonValue relationshipField = response.getContent().get(schemaField.getReversePropertyName());
-            if (relationshipField.isNotNull() && !relationshipField.isCollection()) {
+            // Ensure that the relationship has not already been assigned.
+            if (relationshipField.isCollection()) {
+                final String relationshipHost = getManagedObjectPath(context);
+                for (JsonValue relationship : relationshipField) {
+                    if (relationshipHost.equals(relationship.get(REFERENCE_ID).getObject())) {
+                        throw new BadRequestException(format(
+                                "Managed object ''{0}'' has already been assigned to relationship ''{1}''.",
+                                managedObjectRef, relationshipHost));
+
+                    }
+                }
+            // Ensure that a singleton relationship is available for assignment
+            } else if (relationshipField.isNotNull()) {
                 throw new BadRequestException(format(
                         "In relationship endpoint ''{0}'', field ''{1}'' of managed object ''{2}'' is neither null nor a collection, " +
                                 "and thus not available for assignment.",
