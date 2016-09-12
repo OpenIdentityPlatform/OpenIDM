@@ -474,6 +474,8 @@ define([
             if (this.data.enableSelfService) {
                 this.enableForm();
 
+                this.renderAttributeGrid();
+
                 this.model.surpressSave = true;
 
                 _.each(this.$el.find(".wide-card"), function(card) {
