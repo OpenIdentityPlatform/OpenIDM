@@ -1306,6 +1306,10 @@
                   "name": "OpenID Connect",
                   "msg": "Supports OpenID Connect 1.0"
                 },
+                "OAUTH": {
+                  "name": "OAuth 2.0",
+                  "msg": "Generic OAuth 2.0 access_token validation"
+                },
                 "SOCIAL_PROVIDERS": {
                   "name": "Social Providers",
                   "msg": "Enables authentication for all defined social providers"
@@ -1391,6 +1395,8 @@
             "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
             "openamUserDatastoreMappingName": "OpenAM User Datastore Mapping Name",
             "openIdConnectHeader": "OpenID Connect Header",
+            "authTokenHeader": "OAuth Token Header",
+            "authResolverHeader": "OAuth Resolver Name Header",
             "resolvers": "Resolvers",
             "resolver": "Resolver",
             "name": "Name",
