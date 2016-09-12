@@ -85,13 +85,12 @@
                 </div>
             </div>
             <div role="tabpanel" class="tab-pane" id="Default_Values">
-                <div class="row">
-                    <div class="col-sm-11">
+                <div class="row list-table">
+                    <div class="col-sm-12">
                         <label>{{t "templates.mapping.propertyEdit.defaultValuesLabel"}}</label>
                     </div>
-                    <div class="col-sm-5">
-                        <input autocomplete="off" name="default" class="form-control" value="{{property.default}}"/>
-                        <span class="ok" id="default_desc" style="display:none"></span>
+                    <div class="col-sm-12 list-group">
+                        <div id="defaultPropertyValue" class="pull-left attribute-value compactJSON"></div>
                     </div>
                 </div>
             </div>

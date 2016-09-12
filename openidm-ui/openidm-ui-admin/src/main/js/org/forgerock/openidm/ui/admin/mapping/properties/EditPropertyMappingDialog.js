@@ -17,7 +17,6 @@
 define([
     "jquery",
     "underscore",
-    "form2js",
     "org/forgerock/openidm/ui/admin/mapping/util/MappingAdminAbstractView",
     "org/forgerock/openidm/ui/admin/delegates/SyncDelegate",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -32,8 +31,9 @@ define([
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "bootstrap-dialog",
     "bootstrap-tabdrop",
-    "selectize"
-], function($, _, form2js,
+    "selectize",
+    "jsonEditor"
+], function($, _,
             MappingAdminAbstractView,
             syncDelegate,
             validatorsManager,
@@ -48,7 +48,8 @@ define([
             AdminUtils,
             BootstrapDialog,
             tabdrop,
-            selectize) {
+            selectize,
+            JSONEditor) {
 
     var EditPropertyMappingDialog = MappingAdminAbstractView.extend({
         template: "templates/admin/mapping/properties/EditPropertyMappingDialogTemplate.html",
@@ -138,8 +139,7 @@ define([
                 event.preventDefault();
             }
 
-            var formContent = form2js(this.el),
-                mappingProperties = this.data.currentProperties,
+            var mappingProperties = this.data.currentProperties,
                 target = this.property,
                 propertyObj = mappingProperties[target - 1];
 
@@ -151,8 +151,8 @@ define([
                     .push(propertyObj);
             }
 
-            if (formContent.source) {
-                propertyObj.source = formContent.source;
+            if (this.$el.find("#sourcePropertySelect").val()) {
+                propertyObj.source = this.$el.find("#sourcePropertySelect").val();
             } else {
                 delete propertyObj.source;
             }
@@ -186,14 +186,10 @@ define([
                 delete propertyObj.condition;
             }
 
-            if (_.has(formContent, "default")) {
-                if($('#default_desc', this.currentDialog).text().length > 0){
-                    propertyObj["default"] = $('#default_desc', this.currentDialog).text();
-                } else{
-                    propertyObj["default"] = formContent["default"];
-                }
+            propertyObj["default"] = this.data.defaultEditor.getValue();
 
-            } else {
+            if ((_.isObject(propertyObj["default"]) && _.isEmpty(propertyObj["default"])) ||
+                (!propertyObj["default"] && propertyObj["default"] !== false)) {
                 delete propertyObj["default"];
             }
 
@@ -209,7 +205,9 @@ define([
         },
 
         render: function(params, callback) {
-            var currentProperties;
+            var currentProperties,
+                _this = this,
+                settings;
 
             this.data.usesLinkQualifier = params.usesLinkQualifier;
             this.data.mappingName = this.getMappingName();
@@ -217,6 +215,7 @@ define([
             this.transform_script_editor = undefined;
             this.conditional_script_editor = undefined;
             this.conditionFilterEditor = null;
+            this.data.targetSchema = params.targetSchema;
 
             this.data.saveCallback = params.saveCallback;
             this.data.availableSourceProps = params.availProperties || [];
@@ -233,9 +232,6 @@ define([
             }
 
             this.data.currentMappingDetails = this.getCurrentMapping();
-
-            var _this = this,
-                settings;
 
             settings = {
                 "title": $.t("templates.mapping.propertyEdit.title", {"property": this.data.property.target}),
@@ -258,6 +254,14 @@ define([
                     uiUtils.renderTemplate(settings.template, _this.currentDialog,
                         _.extend(conf.globalData, _this.data),
                         function () {
+                            var schema = {};
+
+                            if (_this.data.targetSchema) {
+                                schema = {
+                                    type: _this.data.targetSchema[_this.data.property.target].type
+                                };
+                            }
+
                             settings.postRender();
 
                             _this.$el.find("#sourcePropertySelect").selectize({
@@ -290,6 +294,23 @@ define([
                                 html: 'true',
                                 title: ''
                             });
+
+                            _this.data.defaultEditor = new JSONEditor(_this.$el.find("#defaultPropertyValue")[0], {
+                                disable_array_reorder: true,
+                                disable_collapse: true,
+                                disable_edit_json: false,
+                                disable_properties: false,
+                                iconlib: "fontawesome4",
+                                no_additional_properties: false,
+                                theme: "bootstrap3",
+                                schema:schema
+                            });
+
+                            if(_this.data.property.default !== undefined) {
+                                _this.data.defaultEditor.setValue(_this.data.property.default);
+                            }
+
+
                         }, "replace");
                 },
                 buttons: [{

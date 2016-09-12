@@ -70,6 +70,7 @@ define([
                     id: mappingProperties.length.toString(),
                     mappingProperties: mappingProperties,
                     availProperties: this.data.sourcePropertiesList,
+                    targetSchema: this.data.targetScehma,
                     saveCallback: this.model.saveCallback
                 });
 
@@ -87,6 +88,7 @@ define([
             this.model.saveCallback = params.saveCallback;
             this.data.targetPropertiesList = params.availProperties.target.properties;
             this.data.sourcePropertiesList = params.availProperties.source.properties;
+            this.data.targetScehma = params.availProperties.target.schema;
 
             var _this = this,
                 settings;

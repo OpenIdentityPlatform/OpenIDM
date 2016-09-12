@@ -165,6 +165,7 @@ define([
                 usesLinkQualifier: this.data.usesLinkQualifier,
                 mappingProperties: this.model.mappingProperties,
                 availProperties: this.model.availableObjects,
+                targetSchema: this.model.availableObjects.target.schema,
                 saveCallback: _.bind(function(props) {
                     this.setMappingProperties(props);
                 }, this)
@@ -227,6 +228,7 @@ define([
                                 id: this.model.attributes.id,
                                 mappingProperties: _this.model.mappingProperties,
                                 availProperties: _this.model.availableObjects.source.properties,
+                                targetSchema: _this.model.availableObjects.target.schema,
                                 saveCallback: function(props) {
                                     _this.setMappingProperties(props);
                                 }
