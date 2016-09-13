@@ -26,11 +26,11 @@
             },
             {
                 "name" : "MANAGED_USER",
-                "augmentSecurityContext": {
-                    "type" : "text/javascript",
-                    "source" : "require('auth/customAuthz').setProtectedAttributes(security)"
-                },
                 "properties" : {
+                    "augmentSecurityContext": {
+                        "type" : "text/javascript",
+                        "source" : "require('auth/customAuthz').setProtectedAttributes(security)"
+                    },
                     "queryId" : "credential-query",
                     "queryOnResource" : "managed/user",
                     "propertyMapping" : {
