@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -353,6 +353,11 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                                     // set to principal otherwise
                                     securityContextMapper.setUserId(principalName);
                                 }
+                            }
+
+                            // store the successful authenticating module name if not already set
+                            if (securityContextMapper.getModuleId() == null) {
+                                securityContextMapper.setModuleId(getModuleId());
                             }
 
                             // run the augmentation script, if configured (will no-op if none specified)
