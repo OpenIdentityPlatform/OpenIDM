@@ -60,17 +60,18 @@ define([
             }, this));
         },
         renderAttributesGrid: function(callback) {
-            this.buildAvailableObjectsMap().then(_.bind(function(availableObjects) {
+            var currentMapping = this.getCurrentMapping();
+            this.buildAvailableObjectsMap(currentMapping).then(_.bind(function(availableObjects) {
                 AttributesGridView.render({
                     useDragIcon: true,
                     usesLinkQualifier: true,
-                    linkQualifiers: LinkQualifierUtil.getLinkQualifier(this.getCurrentMapping().name),
+                    linkQualifiers: LinkQualifierUtil.getLinkQualifier(currentMapping.name),
                     usesDynamicSampleSource: true,
                     availableObjects: availableObjects[0],
                     requiredProperties: availableObjects[1],
-                    mapping: this.getCurrentMapping(),
+                    mapping: currentMapping,
                     save: (mappingProperties) => {
-                        var mapping = this.getCurrentMapping();
+                        var mapping = currentMapping;
 
                         if (mapping.recon) {
                             delete mapping.recon;
@@ -96,61 +97,73 @@ define([
             }, this));
         },
 
-        buildAvailableObjectsMap: function() {
-            var currentMapping = this.getCurrentMapping(),
-                sourceProm = $.Deferred(),
+        /**
+         * Takes an object with a source and target property and returns an Array.
+         * The first returned parameter is an object containing name and property information about
+         * the source and the target.  The second item is an Array of required target properties
+         *
+         * @param currentMapping {object}
+         * @param currentMapping.target {string}
+         * @param currentMapping.source {string}
+         *
+         * @returns {*}
+         */
+        buildAvailableObjectsMap: function(currentMapping) {
+            var sourceProm = $.Deferred(),
                 targetProm = $.Deferred(),
-                currentConnectors = ConnectorDelegate.currentConnectors(),
-                managedConfig = ConfigDelegate.readEntity("managed"),
-                targetProperties = AdminUtils.findPropertiesList(currentMapping.target.split("/"));
 
-            return $.when(currentConnectors, managedConfig, targetProperties).then(_.bind(function(currConnectors, managed, targetProps) {
-                let requiredProperties = {};
+                targetNameParts = currentMapping.target.split("/"),
+                sourceNameParts = currentMapping.source.split("/"),
 
-                _.map(managed.objects, _.bind(function(o) {
-                    if (currentMapping.source === "managed/" + o.name) {
-                        sourceProm.resolve({ name: o.name, fullName: "managed/" + o.name });
-                    }
-                    if (currentMapping.target === "managed/" + o.name) {
-                        let transformedTargetProps = _.chain(targetProps).keys().sortBy().value();
-                        targetProm.resolve({ name: o.name, fullName: "managed/" + o.name, properties: transformedTargetProps });
-                    }
-                }, this));
+                sourceProperties = AdminUtils.findPropertiesList(sourceNameParts),
+                targetProperties = AdminUtils.findPropertiesList(targetNameParts),
+                requiredProperties = AdminUtils.findPropertiesList(targetNameParts, true);
 
-                if (!(sourceProm.state() === "resolved" && targetProm.state() === "resolved")) {
-                    _.each(currConnectors, function(connector) {
-                        _.each(connector.objectTypes, function(objType) {
-                            var objTypeMap = {
-                                    name: connector.name,
-                                    fullName: "system/" + connector.name + "/" + objType
-                                },
-                                getProps = function(){
-                                    return ConfigDelegate.readEntity(connector.config.replace("config/", "")).then(function(connector) {
-                                        return connector.objectTypes[objType].properties;
-                                    });
-                                };
-
-                            if (currentMapping.source === objTypeMap.fullName) {
-                                getProps().then(function(props){
-                                    objTypeMap.properties = _.keys(props).sort();
-                                    sourceProm.resolve(objTypeMap);
-                                });
-                            }
-
-                            AdminUtils.findPropertiesList(currentMapping.target.split("/"), true).then(_.bind(function (properties) {
-                                requiredProperties = _.keys(properties);
-                                targetProm.resolve(objTypeMap);
-                            }, this));
-
-                        }, this);
-                    }, this);
-                }
-
-                return $.when(sourceProm, targetProm).then(function(source, target) {
-                    return [{ source: source, target: target}, requiredProperties];
+            function getManaged(name, promise, properties) {
+                promise.resolve({
+                    "name": name,
+                    "fullName": "managed/" + name,
+                    "properties": _.chain(properties).keys().sortBy().value(),
+                    "schema": properties
                 });
+            }
 
-            }, this));
+            function getSystem(nameParts, promise, properties) {
+                promise.resolve({
+                    "name": nameParts[1],
+                    "fullName":  nameParts.join("/"),
+                    "properties": _.chain(properties).keys().sortBy().value(),
+                    "schema": properties
+                });
+            }
+
+            return $.when(targetProperties, sourceProperties, requiredProperties)
+                .then(_.bind(function(targetProps, sourceProps, requiredProps) {
+
+                    // Target is a system object,
+                    // System properties are always returned as an array of objects, Managed properties are not.
+                    if (targetNameParts[0] === "system") {
+                        requiredProps = requiredProps[0];
+                        getSystem(targetNameParts, targetProm, targetProps[0]);
+
+                    // Target is a managed object
+                    } else {
+                        getManaged(targetNameParts[1], targetProm, targetProps);
+                    }
+
+                    // Source is a system object
+                    if (sourceNameParts[0] === "system") {
+                        getSystem(sourceNameParts, sourceProm, sourceProps[0]);
+
+                    // Source is a managed object
+                    } else {
+                        getManaged(sourceNameParts[1], sourceProm, sourceProps);
+                    }
+
+                    return $.when(sourceProm, targetProm).then(function(source, target) {
+                        return [{ source: source, target: target}, _.keys(requiredProps)];
+                    });
+                }, this));
         }
     });
 
