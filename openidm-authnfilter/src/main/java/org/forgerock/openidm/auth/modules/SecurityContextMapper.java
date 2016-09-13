@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -45,6 +45,7 @@ class SecurityContextMapper {
 
     public static final String AUTHENTICATION_ID = "authenticationId";
     public static final String AUTHORIZATION = "authorization";
+    private static final String MODULE_ID = "moduleId";
 
     /** the MessageInfo auth context-backing map */
     @SuppressWarnings("rawtypes")
@@ -148,6 +149,15 @@ class SecurityContextMapper {
 
     Map<String, Object> getAuthorizationId() {
         return Collections.unmodifiableMap(authData.get(AUTHORIZATION).asMap());
+    }
+
+    SecurityContextMapper setModuleId(String moduleId) {
+        authData.get(AUTHORIZATION).put(MODULE_ID, moduleId);
+        return this;
+    }
+
+    String getModuleId() {
+        return authData.get(AUTHORIZATION).get(MODULE_ID).asString();
     }
 
     JsonValue asJsonValue() {
