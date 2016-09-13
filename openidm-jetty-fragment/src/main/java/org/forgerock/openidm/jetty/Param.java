@@ -66,14 +66,14 @@ public class Param {
 
     /**
      * Gets the keystore location.
-     * @return OpenIDM keystore location, as absolute pathh, or if the path is NONE, return the jetty.xml file location.
+     * @return the keystore location, as absolute path, or if the path is NONE, return the jetty.xml file location.
      */
     public static String getKeystoreLocation() {
-        final String path = getPathProperty(KEYSTORE_LOCATION);
+        final String path = getProperty(KEYSTORE_LOCATION);
         if (path != null && NONE.equalsIgnoreCase(path)) {
             return IdentityServer.getFileForInstallPath(JETTY_CONF_LOCATION).getAbsolutePath();
         }
-        return path;
+        return getPathProperty(KEYSTORE_LOCATION);
     }
 
     /**
@@ -98,17 +98,17 @@ public class Param {
 
     /**
      * Gets the truststore location.
-     * @return the truststore location, as absolute path.
-     * If no truststore setting is set, the keystore setting (if present) is used.
+     * @return the truststore location, as absolute path, or if the path is NONE, return the jetty.xml file location.
+     * If no truststore location is provided this setting will default to the keystore location.
      */
     public static String getTruststoreLocation() {
-        String path = getPathProperty(TRUSTSTORE_LOCATION);
+        String path = getProperty(TRUSTSTORE_LOCATION);
         if (path == null) {
             path = getKeystoreLocation();
         } else if (NONE.equalsIgnoreCase(path)) {
             return IdentityServer.getFileForInstallPath(JETTY_CONF_LOCATION).getAbsolutePath();
         }
-        return path;
+        return getPathProperty(TRUSTSTORE_LOCATION);
     }
 
     /**
