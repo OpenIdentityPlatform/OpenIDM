@@ -755,7 +755,7 @@ public abstract class RelationshipProvider {
         final String managedId = getManagedObjectId(context);
         
         // Do activity logging.
-        activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue, null, 
+        activityLogger.log(context, request, "update", getManagedObjectPath(context), beforeValue, afterValue,
                 Status.SUCCESS);
         
         // Perform an update on the managed object
