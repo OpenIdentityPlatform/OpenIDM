@@ -16,11 +16,25 @@
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.resource.Responses.*;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
-import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.guava.common.collect.ArrayListMultimap;
 import org.forgerock.guava.common.collect.ImmutableSet;
 import org.forgerock.guava.common.collect.Multimap;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -84,22 +98,6 @@ import org.identityconnectors.framework.common.objects.Uid;
 import org.identityconnectors.framework.common.objects.filter.Filter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.json.resource.Responses.newQueryResponse;
-import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.util.promise.Promises.newResultPromise;
 
 /**
  * Handle request on /system/[systemName]/[objectClass]/{id}
@@ -248,6 +246,19 @@ class ObjectClassResourceProvider implements RequestHandler {
     @Override
     public Promise<ResourceResponse, ResourceException> handleCreate(Context context, CreateRequest request) {
         try {
+            if (null != request.getNewResourceId() && !request.getNewResourceId().isEmpty()) {
+                String unsupportedMessage= "Create with client provided ID is not supported.";
+                if (context.containsContext(HttpContext.class)) {
+                    HttpContext httpContext = context.asContext(HttpContext.class);
+                    if ("PUT".equals(httpContext.getMethod()) && httpContext.getHeader("if-none-match").isEmpty() ) {
+                        // This is an attempted UPSERT call.
+                        unsupportedMessage =
+                                "UPSERT (i.e. PUT without the 'if-match' nor 'if-none-match' header) is not supported.";
+                    }
+                }
+                throw new UnsupportedOperationException(unsupportedMessage);
+            }
+
             final ConnectorFacade facade = getConnectorFacade0(CreateApiOp.class);
             final Set<Attribute> createAttributes =
                     objectClassInfoHelper.getCreateAttributes(request, provisionerService.getCryptoService());
@@ -583,18 +594,18 @@ class ObjectClassResourceProvider implements RequestHandler {
                     }
                 }
             }
-                
+
             if (runAsAttributes.size() > 0) {
                 OperationOptionsBuilder builder = getOperationOptionsBuilder(reauthCreds.first, reauthCreds.second, UpdateApiOp.class);
                 uid = facade.update(objectClassInfoHelper.getObjectClass(), _uid, AttributeUtil.filterUid(runAsAttributes), builder.build());
             }
-            
+
             // update remaining attributes
             uid = facade.update(objectClassInfoHelper.getObjectClass(), uid,
-                    AttributeUtil.filterUid(attributes), 
+                    AttributeUtil.filterUid(attributes),
                     getOperationOptionsBuilder(null, null, UpdateApiOp.class).build()
             );
-            
+
             ResourceResponse resource = getCurrentResource(facade, uid, null);
             provisionerService.getActivityLogger().log(context, request, "message",
                     provisionerService.getSource(objectClass, uid.getUidValue()),
@@ -626,13 +637,13 @@ class ObjectClassResourceProvider implements RequestHandler {
             // there will not always be a HttpContext and this is acceptable so catch exception to
             // prevent the exception from stopping the remaining update
         }
-        
+
         if (reauthUser == null | reauthPassword == null) {
             return null;
         }
         return new Pair(reauthUser, new GuardedString(reauthPassword.toCharArray()));
     }
-        
+
     private List<String> getUsernameAttributes() {
         return jsonConfiguration.get(ConnectorUtil.OPENICF_CONFIGURATION_PROPERTIES)
                         .get(ACCOUNT_USERNAME_ATTRIBUTES)
@@ -648,10 +659,10 @@ class ObjectClassResourceProvider implements RequestHandler {
      * @param uid the Uid of the object to be updated
      * @return The Uid of the updated object
      */
-    private Uid executePatchOperations(ConnectorFacade facade, OperationOptions operationOptions, 
+    private Uid executePatchOperations(ConnectorFacade facade, OperationOptions operationOptions,
             Multimap<String, Attribute> operations, Uid uid) throws IOException, ResourceException {
-                    
-            Set<String> keys = operations.keySet();
+
+        Set<String> keys = operations.keySet();
             for (String key : keys) {
                 Set<Attribute> attrs = ImmutableSet.copyOf(operations.get(key));
                 if (attrs.size() > 0) {
