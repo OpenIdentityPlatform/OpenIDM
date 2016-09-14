@@ -405,7 +405,7 @@ policyImpl = (function (){
 
         // since this function runs on both the client and the server, we need to
         // check for the presence of our server-side functions before using them.
-        if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.resourcePath && !request.resourcePath.match('/*$')) {
+        if (typeof(openidm) !== "undefined" && typeof(request) !== "undefined"  && request.resourcePath && !request.resourcePath.match(/\/\*$/)) {
             fullObject_server = openidm.read(request.resourcePath);
             if (fullObject_server === null) {
                 fullObject_server = {};
