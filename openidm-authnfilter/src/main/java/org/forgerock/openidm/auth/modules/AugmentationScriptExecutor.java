@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
 
 import org.forgerock.caf.authentication.api.AuthenticationException;
+import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ServiceUnavailableException;
@@ -48,7 +49,7 @@ class AugmentationScriptExecutor {
      * @param securityContextMapper A SecurityContextMapper instance.
      * @throws AuthenticationException If any problem occurs whilst executing the script.
      */
-    void executeAugmentationScript(ScriptEntry augmentScript, JsonValue properties,
+    void executeAugmentationScript(ScriptEntry augmentScript, MessageInfoContext messageInfo, JsonValue properties,
             SecurityContextMapper securityContextMapper) throws AuthenticationException {
 
         if (augmentScript == null) {
@@ -65,6 +66,8 @@ class AugmentationScriptExecutor {
             Context context = ContextUtil.createInternalContext();
             final Script script = augmentScript.getScript(context);
             // Pass auth module properties and SecurityContextWrapper details to augmentation script
+            script.put("context",  messageInfo);
+            script.put("httpRequest",  messageInfo.getRequest());
             script.put("properties", properties);
             JsonValue security = new JsonValue(new HashMap<String, Object>(2));
             security.put(SecurityContextMapper.AUTHENTICATION_ID, securityContextMapper.getAuthenticationId());

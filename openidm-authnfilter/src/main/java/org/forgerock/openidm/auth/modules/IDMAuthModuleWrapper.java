@@ -361,7 +361,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                             }
 
                             // run the augmentation script, if configured (will no-op if none specified)
-                            augmentationScriptExecutor.executeAugmentationScript(augmentScript, properties,
+                            augmentationScriptExecutor.executeAugmentationScript(augmentScript, messageInfo, properties,
                                     securityContextMapper);
 
                         } catch (ResourceException e) {
