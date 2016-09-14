@@ -49,7 +49,7 @@ public class OAuthResolverServiceImpl implements OAuthResolverService {
     @Override
     public boolean configureOAuthResolver(final JsonValue config) {
         try {
-            final String resolverName = config.get(RESOLVER_NAME).toString();
+            final String resolverName = config.get(RESOLVER_NAME).asString();
             final OAuthResolverImpl impl = new OAuthResolverImpl(resolverName, config, newHttpClient());
             oauthResolvers.put(resolverName, impl);
         } catch (IllegalArgumentException e) {
