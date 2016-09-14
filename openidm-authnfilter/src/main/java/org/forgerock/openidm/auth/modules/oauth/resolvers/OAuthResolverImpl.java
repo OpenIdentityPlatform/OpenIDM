@@ -45,7 +45,7 @@ public class OAuthResolverImpl implements OAuthResolver {
         this.config = resolverConfig;
         this.resolver = resolver;
         this.httpClient = httpClient;
-        this.subjectKey = resolverConfig.get(AUTHENTICATION_ID).toString();
+        this.subjectKey = resolverConfig.get(AUTHENTICATION_ID).asString();
     }
 
     /**
