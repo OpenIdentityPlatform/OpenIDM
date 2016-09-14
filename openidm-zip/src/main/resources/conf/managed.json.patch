@@ -5,7 +5,7 @@
         "value" : {
             "script" : {
                 "type" : "text/javascript",
-                "source" : "require('managedPatchHelper').remove(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items').add(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items', '{\"type\":\"object\"}');"
+                "source" : "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.remove(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items'); content = managedPatchHelper.add(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items', '{\"type\":\"object\"}'); content;"
             }
         }
     },
@@ -15,8 +15,8 @@
         "value" : {
             "script" : {
                 "type" : "text/javascript",
-                "source" : "content.map(function (obj) { var schemaProps = obj.schema.properties; Object.keys(schemaProps).forEach(function (prop) { var propSchema = schemaProps[prop], withoutReauthPolicy; if (propSchema.policies) { withoutReauthPolicy = propSchema.policies.filter(function (p) { return p.policyId !== "re-auth-required"; }); if (propSchema.policies.length !== withoutReauthPolicy.length) { propSchema.isProtected = true; propSchema.policies = withoutReauthPolicy; } } }); return obj; })"
+                "source" : "content.map(function (obj) { var schemaProps = obj.schema.properties; Object.keys(schemaProps).forEach(function (prop) { var propSchema = schemaProps[prop], withoutReauthPolicy; if (propSchema.policies) { withoutReauthPolicy = propSchema.policies.filter(function (p) { return p.policyId !== 're-auth-required'; }); if (propSchema.policies.length !== withoutReauthPolicy.length) { propSchema.isProtected = true; propSchema.policies = withoutReauthPolicy; } } }); return obj; })"
             }
         }
-    },
+    }
 ]
