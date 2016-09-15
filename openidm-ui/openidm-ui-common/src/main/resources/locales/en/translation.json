@@ -1397,7 +1397,7 @@
             "openamUserDatastoreMappingName": "OpenAM User Datastore Mapping Name",
             "openIdConnectHeader": "OpenID Connect Header",
             "authTokenHeader": "OAuth Token Header",
-            "authResolverHeader": "OAuth Resolver Name Header",
+            "authResolverHeader": "OAuth Resolver Header",
             "resolvers": "Resolvers",
             "resolver": "Resolver",
             "name": "Name",
