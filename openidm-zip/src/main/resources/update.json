@@ -7,7 +7,6 @@
     "origin": {
         "product": "OpenIDM",
         "version": [
-            "4.0.0",
             "4.5.0"
         ]
     },
@@ -16,7 +15,7 @@
         "version": "5.0.0-SNAPSHOT"
     },
     "removeFile" : [
-
+        "bundle/json-patch-20.1.0.jar"
     ],
     "filesToBeIgnored" : [
         "security/keystore.jceks",
