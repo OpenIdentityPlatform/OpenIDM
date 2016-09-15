@@ -32,7 +32,7 @@ import org.forgerock.services.context.SecurityContext;
  */
 public abstract class AbstractSyncAuditEventLogger<T extends AbstractSyncAuditEventBuilder<T>> {
 
-    private final ObjectMapping.SyncOperation syncOperation;
+    private final SyncOperation syncOperation;
 
     private Context context;
     private Exception exception;
@@ -51,7 +51,7 @@ public abstract class AbstractSyncAuditEventLogger<T extends AbstractSyncAuditEv
      * @param mapping
      * @param context
      */
-    public AbstractSyncAuditEventLogger(ObjectMapping.SyncOperation syncOperation, String mapping,
+    public AbstractSyncAuditEventLogger(SyncOperation syncOperation, String mapping,
             Context context) {
 
         this.syncOperation = syncOperation;

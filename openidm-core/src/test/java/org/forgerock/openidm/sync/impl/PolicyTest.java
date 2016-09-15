@@ -173,7 +173,7 @@ public class PolicyTest {
 
         assertEquals(policies.size(), 8);
 
-        ObjectMapping.SyncOperation syncOperationMock = mock(ObjectMapping.SyncOperation.class);
+        SyncOperation syncOperationMock = mock(SyncOperation.class);
         when(syncOperationMock.toJsonValue()).thenReturn(json(object()));
 
         Map<String, Object> sourceMap = new HashMap<String, Object>();
@@ -282,7 +282,7 @@ public class PolicyTest {
         LazyObjectAccessor lazyObjectAccessorTargetMock = mock(LazyObjectAccessor.class);
         when(lazyObjectAccessorTargetMock.asMap()).thenReturn(targetMap);
 
-        ObjectMapping.SyncOperation syncOperationMock = mock(ObjectMapping.SyncOperation.class);
+        SyncOperation syncOperationMock = mock(SyncOperation.class);
         when(syncOperationMock.toJsonValue()).thenReturn(json(object()));
 
         ReconAction absentAction = pAbsent.getAction(lazyObjectAccessorSourceMock, lazyObjectAccessorTargetMock, 

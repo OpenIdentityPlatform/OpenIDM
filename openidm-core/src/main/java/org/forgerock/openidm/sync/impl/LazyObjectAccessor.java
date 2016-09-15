@@ -37,7 +37,7 @@ import org.slf4j.LoggerFactory;
  *
  */
 public class LazyObjectAccessor {
-    private static final Logger logger = LoggerFactory.getLogger(ObjectMapping.class);
+    private static final Logger logger = LoggerFactory.getLogger(LazyObjectAccessor.class);
 
     public static final Name EVENT_READ_OBJ = Name.get("openidm/internal/discovery-engine/sync/read-object");
 

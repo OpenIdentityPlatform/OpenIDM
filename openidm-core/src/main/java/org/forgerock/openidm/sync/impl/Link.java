@@ -100,11 +100,6 @@ class Link {
      */
     public String linkQualifier;
 
-    /**
-     * TODO: Description.
-     *
-     * @param mapping TODO.
-     */
     public Link(ObjectMapping mapping) {
         this.mapping = mapping;
     }
@@ -177,12 +172,6 @@ class Link {
         return results;
     }
 
-    /**
-     * TODO: Description.
-     *
-     * @param value TODO.
-     * @throws org.forgerock.json.JsonValueException
-     */
     private void fromJsonValue(JsonValue value) throws JsonValueException {
         _id = value.get("_id").required().asString();
         _rev = value.get("_rev").asString(); // optional
@@ -352,11 +341,6 @@ class Link {
         }
     }
 
-    /**
-     * TODO: Description.
-     *
-     * @throws SynchronizationException TODO.
-     */
     void create(Context context) throws SynchronizationException {
         _id = UUID.randomUUID().toString(); // client-assigned identifier
         JsonValue jv = toJsonValue();
@@ -373,11 +357,6 @@ class Link {
         }
     }
 
-    /**
-     * TODO: Description.
-     *
-     * @throws SynchronizationException TODO.
-     */
     void delete(Context context) throws SynchronizationException {
         if (_id != null) { // forgiving delete
             try {

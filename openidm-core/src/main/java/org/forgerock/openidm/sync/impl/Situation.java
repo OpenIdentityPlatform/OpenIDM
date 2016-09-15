@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyrighted [year] [name of copyright owner]".
  *
- * Copyright © 2011 ForgeRock AS. All rights reserved.
+ * Copyright 2011-2016 ForgeRock AS. All rights reserved.
  */
 
 package org.forgerock.openidm.sync.impl;
@@ -19,8 +19,7 @@ package org.forgerock.openidm.sync.impl;
 import org.forgerock.openidm.sync.ReconAction;
 
 /**
- * TODO: Description.
- *
+ * Sync-operation situation.
  */
 enum Situation {
 
@@ -116,22 +115,12 @@ enum Situation {
      */
     ALL_GONE(ReconAction.NOREPORT);
 
-    /** TODO: Description. */
     private ReconAction defaultAction;
     
-    /**
-     * TODO: Description.
-     *
-     * @param defaultAction TODO.
-     */
     Situation(ReconAction defaultAction) {
         this.defaultAction = defaultAction;
     }
     
-    /**
-     * TODO: Description.
-     * @return
-     */
     public ReconAction getDefaultAction() {
         return defaultAction;
     }
