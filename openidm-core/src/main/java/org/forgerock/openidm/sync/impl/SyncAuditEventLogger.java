@@ -26,7 +26,7 @@ class SyncAuditEventLogger extends AbstractSyncAuditEventLogger<SyncAuditEventBu
     public static final String SYNC_AUDIT_PATH = "audit/sync";
     public static final String SYNC_AUDIT_EVENT_NAME = "sync";
 
-    public SyncAuditEventLogger(ObjectMapping.SyncOperation op, String mappingName, Context context) {
+    public SyncAuditEventLogger(SyncOperation op, String mappingName, Context context) {
         super(op, mappingName, context);
     }
 

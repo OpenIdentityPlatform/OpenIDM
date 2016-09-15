@@ -33,7 +33,6 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.SynchronizationException;
-import org.forgerock.openidm.sync.impl.ObjectMapping.SyncOperation;
 import org.forgerock.openidm.sync.ReconAction;
 import org.forgerock.openidm.sync.ReconContext;
 import org.forgerock.openidm.util.Scripts;
@@ -152,13 +151,13 @@ public class ObjectMappingTest {
         }
 
         public TestSyncOperation getSyncOperation() throws Exception {
-            return new TestSyncOperation(new RootContext());
+            return new TestSyncOperation(this, new RootContext());
         }
         
         class TestSyncOperation extends SyncOperation {
 
-            public TestSyncOperation(Context context) {
-                super(context);
+            public TestSyncOperation(ObjectMapping objectMapping, Context context) {
+                super(objectMapping, context);
             }
 
             @Override

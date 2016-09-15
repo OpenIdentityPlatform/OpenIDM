@@ -96,7 +96,7 @@ class Policy {
     /**
      * Returns the condition for this policy.
      *  
-     * @return a {@link org.forgerock.openidm.sync.impl.Condition} object representing 
+     * @return a {@link Condition} object representing
      * * a condition for this policy
      */
     public Condition getCondition() {
@@ -117,7 +117,7 @@ class Policy {
      *
      * @param source a {@link LazyObjectAccessor} representing the source object
      * @param target a {@link LazyObjectAccessor} representing the target object
-     * @param syncOperation the parent {@link ObjectMapping.SyncOperation} instance
+     * @param syncOperation the parent {@link SyncOperation} instance
      * @param linkQualifier the linkQualifier for the policy
      * @param context a {@link Context} associated with this call
      * @return a {@link ReconAction} object representing the action for this policy
@@ -125,7 +125,7 @@ class Policy {
      */
     public ReconAction getAction(LazyObjectAccessor source, 
                                  LazyObjectAccessor target, 
-                                 final ObjectMapping.SyncOperation syncOperation, 
+                                 final SyncOperation syncOperation,
                                  String linkQualifier,
                                  Context context) throws SynchronizationException {
         if (action != null) { // static action specified
@@ -139,7 +139,7 @@ class Policy {
             actionParam.put(HttpUtils.PARAM_ACTION, "performAction");
             recon.put("actionParam", actionParam.getObject());
 
-            scope.put("sourceAction", (syncOperation instanceof ObjectMapping.SourceSyncOperation));
+            scope.put("sourceAction", (syncOperation instanceof SourceSyncOperation));
             scope.put("linkQualifier", linkQualifier);
             if (source != null) {
                 scope.put("source", source.asMap());

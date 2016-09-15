@@ -48,7 +48,7 @@ class ReconAuditEventLogger extends AbstractSyncAuditEventLogger<ReconAuditEvent
     private String ambiguousTargetIds;
     private ReconciliationService.ReconAction reconciliationServiceReconAction;
 
-    public ReconAuditEventLogger(ObjectMapping.SyncOperation syncOperation, String mapping,
+    public ReconAuditEventLogger(SyncOperation syncOperation, String mapping,
             Context context) {
         super(syncOperation, mapping, context);
     }

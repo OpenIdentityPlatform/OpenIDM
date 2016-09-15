@@ -49,7 +49,7 @@ public class AbstractSyncAuditEventLoggerTest {
     public static final String AUTHENTICATION_ID = "principal";
     public static final String TEST_MAPPING = "testMapping";
     private Context context;
-    private ObjectMapping.SourceSyncOperation syncOperation;
+    private SourceSyncOperation syncOperation;
 
     @BeforeClass
     public void setup() throws Exception {
@@ -59,7 +59,7 @@ public class AbstractSyncAuditEventLoggerTest {
                                 new RootContext("test_id"), AUTHENTICATION_ID, null),
                         new TransactionId());
 
-        syncOperation = mock(ObjectMapping.SourceSyncOperation.class);
+        syncOperation = mock(SourceSyncOperation.class);
         syncOperation.action = ReconAction.CREATE;
         syncOperation.situation = Situation.FOUND;
     }
