@@ -79,7 +79,7 @@ define([
             .then(function (renderedTemplate) {
                 processStatePromise.resolve(renderedTemplate);
             }, _.bind(function () {
-                this.loadGenericTemplate(stateData, baseTemplateUrl, processStatePromise);
+                this.loadGenericTemplate(stateData, baseTemplateUrl, response, processStatePromise);
             }, this));
         }
     });
