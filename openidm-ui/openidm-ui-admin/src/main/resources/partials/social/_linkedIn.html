@@ -1,3 +1,12 @@
+<p class="form-steps">
+    1. {{t "templates.socialProviders.configureLinkedIn"}}
+</p>
+
+{{> social/_callback callBackHelp="templates.socialProviders.linkedInGeneralHelp" admin=adminCallback enduser=enduserCallback}}
+
+<div class="form-steps">
+    2. {{t "templates.socialProviders.enterConfigure"}}
+</div>
 <form id="socialDialogForm" class="form-horizontal">
     <p class="panel-description">
         {{t "templates.socialProviders.linkedInGeneralHelp"}}

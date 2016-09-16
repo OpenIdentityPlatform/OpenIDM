@@ -1,7 +1,13 @@
+<p class="form-steps">
+    1. {{t "templates.socialProviders.configureGoogle"}}
+</p>
+
+{{> social/_callback callBackHelp="templates.socialProviders.googleGeneralHelp" admin=adminCallback enduser=enduserCallback}}
+
+<div class="form-steps">
+    2. {{t "templates.socialProviders.enterConfigure"}}
+</div>
 <form id="socialDialogForm" class="form-horizontal">
-    <p class="panel-description">
-        {{t "templates.socialProviders.googleGeneralHelp"}}
-    </p>
 
     {{> form/_basicInput value=client_id label="templates.socialProviders.clientId" property="client_id" noValidation="true"}}
 
