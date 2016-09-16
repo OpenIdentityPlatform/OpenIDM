@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -22,8 +22,9 @@ import java.util.NoSuchElementException;
 import org.forgerock.services.context.Context;
 
 /**
- * A NAME does ...
- *
+ *  This class implements a stack of Context objects, stored in a thread-local. This allows the Context object to be
+ *  referenced as needed, without needing to explicitly pass it as a parameter. This allows e.g. audit state to be passed
+ *  to audit methods without method parameter change.
  */
 public class ObjectSetContext {
 

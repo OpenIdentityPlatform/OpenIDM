@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2016 ForgeRock AS.
+ * Copyright 2012-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.sync.impl;
 
-import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.Callable;
 
@@ -38,11 +37,11 @@ class ReconTask implements Callable<Void> {
     private final ReconciliationContext reconContext;
     private final Context parentContext;
     private final Map<String, Map<String, Link>> allLinks;
-    private final Collection<String> remainingIds;
+    private final SourcePhaseTargetIdRegistration targetIdRegistration;
     private final Recon reconById;
 
     ReconTask(ResultEntry resultEntry, ReconciliationContext reconContext, Context parentContext,
-            Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds, Recon reconById) {
+            Map<String, Map<String, Link>> allLinks, SourcePhaseTargetIdRegistration targetIdRegistration, Recon reconById) {
         this.id = resultEntry.getId();
         // This value is null if it wasn't pre-queried
         this.objectEntry = resultEntry.getValue();
@@ -51,7 +50,7 @@ class ReconTask implements Callable<Void> {
         this.reconContext = reconContext;
         this.parentContext = parentContext;
         this.allLinks = allLinks;
-        this.remainingIds = remainingIds;
+        this.targetIdRegistration = targetIdRegistration;
         this.reconById = reconById;
     }
 
@@ -59,7 +58,7 @@ class ReconTask implements Callable<Void> {
         //TODO I miss the Request Context
         ObjectSetContext.push(parentContext);
         try {
-            reconById.recon(id, objectEntry, reconContext, parentContext, allLinks, remainingIds);
+            reconById.recon(id, objectEntry, reconContext, parentContext, allLinks, targetIdRegistration);
         } finally {
             ObjectSetContext.pop();
         }

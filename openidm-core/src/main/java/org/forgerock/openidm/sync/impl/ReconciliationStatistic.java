@@ -11,13 +11,14 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2016 ForgeRock AS.
+ * Portions copyright 2012-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.openidm.util.DurationStatistics.nanoToMillis;
 import static org.forgerock.util.Reject.checkNotNull;
 
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Map;
@@ -25,6 +26,7 @@ import java.util.Map.Entry;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.forgerock.guava.common.base.Optional;
 import org.forgerock.openidm.audit.util.Status;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.sync.ReconAction;
@@ -62,6 +64,7 @@ public class ReconciliationStatistic {
         sourceLinkQuery,
         sourceObjectQuery,
         sourcePhase,
+        sourcePagePhase,
         sourceQuery,
         targetLinkQuery,
         targetObjectQuery,
@@ -72,33 +75,91 @@ public class ReconciliationStatistic {
         validTargetScript
     }
     
-    private ReconciliationContext reconContext;    
+    private final ReconciliationContext reconContext;
     private long startTime;
     private long endTime;
     
     long linkQueryStartTime;
     long linkQueryEndTime;
     
-    private AtomicInteger sourceProcessed = new AtomicInteger();
-    private AtomicInteger linkProcessed = new AtomicInteger();
-    private AtomicInteger linkCreated = new AtomicInteger();
-    private AtomicInteger targetProcessed = new AtomicInteger();
-    private AtomicInteger targetCreated = new AtomicInteger();
-    private Map<Status, AtomicInteger> statusProcessed = new EnumMap<>(Status.class);
+    private final AtomicInteger sourceProcessed;
+    private final AtomicInteger linkProcessed;
+    private final AtomicInteger linkCreated;
+    private final AtomicInteger targetProcessed;
+    private final AtomicInteger targetCreated;
+    private final Map<Status, AtomicInteger> statusProcessed;
 
-    private PhaseStatistic sourceStat;
-    private PhaseStatistic targetStat;
+    private final PhaseStatistic sourceStat;
+    private final PhaseStatistic targetStat;
     
-    private Map<ReconStage, Map<String, Object>> stageStat = new ConcurrentHashMap<>();
-    private ConcurrentHashMap<String, DurationStatistics> durationStat = new ConcurrentHashMap<>();
+    private final Map<ReconStage, Map<String, Object>> stageStat;
+    private final ConcurrentHashMap<String, DurationStatistics> durationStat;
 
     public ReconciliationStatistic(ReconciliationContext reconContext) {
         this.reconContext = reconContext;
         sourceStat = new PhaseStatistic(this, PhaseStatistic.Phase.SOURCE, reconContext.getObjectMapping().getSourceObjectSet());
         targetStat = new PhaseStatistic(this, PhaseStatistic.Phase.TARGET, reconContext.getObjectMapping().getTargetObjectSet());
+        stageStat = new ConcurrentHashMap<>();
+        durationStat = new ConcurrentHashMap<>();
+        sourceProcessed = new AtomicInteger();
+        linkProcessed = new AtomicInteger();
+        linkCreated = new AtomicInteger();
+        targetProcessed = new AtomicInteger();
+        targetCreated = new AtomicInteger();
+        statusProcessed = new EnumMap<>(Status.class);
+
         for (Status status : Status.values()) {
             statusProcessed.put(status, new AtomicInteger());
         }
+    }
+
+    /**
+     * Consumed by the ReconciliationStatisticsPersistence when creating aggregated statics for a clustered recon run.
+     * @param instances The ReconciliationStatistic instances constituted from repo-persisted state corresponding to each
+     *                  source page and the target phase of a clustered recon run. Note that this Collection could be empty
+     *                  if e.g. the logging corresponding to a failure on another node already cleared the persisted
+     *                  ReconciliationStatistic instances for this recon run.
+     * @return an {@code Optional<ReconciliationStatistic>} instance which encapsulated state aggregated from the members of the instances array
+     */
+    public static Optional<ReconciliationStatistic> getAggregatedInstance(Collection<ReconciliationStatistic> instances) {
+        if ((instances == null) || instances.size() == 0) {
+            return Optional.absent();
+        }
+        final ReconciliationStatistic aggregator = new ReconciliationStatistic(instances.iterator().next().reconContext);
+        for (ReconciliationStatistic instance : instances) {
+            aggregator.sourceProcessed.addAndGet(instance.sourceProcessed.get());
+            aggregator.linkProcessed.addAndGet(instance.linkProcessed.get());
+            aggregator.linkCreated.addAndGet(instance.linkCreated.get());
+            aggregator.targetProcessed.addAndGet(instance.targetProcessed.get());
+            aggregator.targetCreated.addAndGet(instance.targetCreated.get());
+            if ((aggregator.startTime == 0) || (aggregator.startTime > instance.startTime)) {
+                aggregator.startTime = instance.startTime;
+            }
+            if (aggregator.endTime < instance.endTime) {
+                aggregator.endTime = instance.endTime;
+            }
+            for (Status status : Status.values()) {
+                aggregator.statusProcessed.put(status,
+                        new AtomicInteger(aggregator.statusProcessed.get(status).intValue() +
+                                instance.statusProcessed.get(status).intValue()));
+            }
+            aggregator.sourceStat.aggregateValues(instance.getSourceStat());
+            aggregator.targetStat.aggregateValues(instance.getTargetStat());
+        }
+        /** TODO: until OPENIDM-6776 is implemented, where ReconciliationStatistics are persisted in the repo,
+         * it is possible that clustered recon will be started, and finished, on different nodes. The node which
+         * finishes clustered recon always logs the aggregated ReconciliationStatistics for that node, so the
+         * endTime will always be set. It is possible, however, that the startTime is still 0, if the current
+         * clustered recon run was not started on this node (as stats are only aggregated per node, pending
+         * repo persistence in OPENIDM-6776). A recon start-time of 0 confuses the UI, so if the value has not
+         * been set, set it to an arbitrary value so that the UI displays correctly.
+         */
+        if (aggregator.startTime == 0) {
+            aggregator.startTime = aggregator.endTime - (1000 * 60 * 5);
+        }
+        // Note that the linkQueryStartTime and linkQueryEndTime are not set, as links are not prefetched for clustered recon
+        // as the link prefetch cannot be segmented to a set of source ids. Possible future enhancement.
+        return Optional.of(aggregator);
     }
 
     /**

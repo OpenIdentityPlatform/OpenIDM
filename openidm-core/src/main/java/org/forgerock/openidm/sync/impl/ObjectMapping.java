@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2016 ForgeRock AS.
+ * Portions copyright 2011-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -36,6 +36,14 @@ import javax.script.ScriptException;
 
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.impl.cluster.ClusteredReconJobDispatch;
+import org.forgerock.openidm.sync.impl.cluster.SchedulerClusteredReconJobDispatch;
+import org.forgerock.openidm.sync.impl.cluster.ClusteredSourcePhaseTargetIdRegistry;
+import org.forgerock.openidm.sync.impl.cluster.ClusteredSourcePhaseTargetIdRegistryImpl;
+import org.forgerock.openidm.sync.impl.cluster.NoOpClusteredSourcePhaseTargetIdRegistry;
+import org.forgerock.openidm.sync.impl.cluster.ReconciliationStatisticsPersistence;
+import org.forgerock.openidm.sync.impl.cluster.ReconciliationStatisticsPersistenceImpl;
+import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.openidm.util.DurationStatistics;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
@@ -84,8 +92,8 @@ class ObjectMapping {
     static final Name EVENT_RECON = Name.get("openidm/internal/discovery-engine/reconciliation");
     static final Name EVENT_RECON_ID_QUERIES = Name.get("openidm/internal/discovery-engine/reconciliation/id-queries-phase");
     static final Name EVENT_RECON_SOURCE = Name.get("openidm/internal/discovery-engine/reconciliation/source-phase");
-    static final Name EVENT_RECON_TARGET = Name.get(
-            "openidm/internal/discovery-engine/reconciliation/target-phase");
+    static final Name EVENT_RECON_SOURCE_PAGE = Name.get("openidm/internal/discovery-engine/reconciliation/source-phase");
+    static final Name EVENT_RECON_TARGET = Name.get("openidm/internal/discovery-engine/reconciliation/target-phase");
 
     /** Default number of executor threads to process ReconTasks */
     private static final int DEFAULT_TASK_THREADS = 10;
@@ -187,6 +195,9 @@ class ObjectMapping {
      */
     private final Recon targetRecon = new TargetRecon(this);
 
+    /** Whether source recon pages should be distributed across cluster nodes. */
+    private final boolean clusteredSourceReconEnabled;
+
     /**
      * Create an instance of a mapping between source and target
      *
@@ -203,6 +214,7 @@ class ObjectMapping {
         targetObjectSet = config.get("target").required().asString();
         sourceIdsCaseSensitive = config.get("sourceIdsCaseSensitive").defaultTo(true).asBoolean();
         targetIdsCaseSensitive = config.get("targetIdsCaseSensitive").defaultTo(true).asBoolean();
+        clusteredSourceReconEnabled = config.get("clusteredSourceReconEnabled").defaultTo(false).asBoolean();
         JsonValue linkQualifiersValue = config.get("linkQualifiers");
         if (linkQualifiersValue.isNull()) {
             // No link qualifiers configured, so add only the default
@@ -271,6 +283,22 @@ class ObjectMapping {
      */
     public String getName() {
         return name;
+    }
+
+    int getFeedSize() {
+        return feedSize;
+    }
+
+    Recon getSourceRecon() {
+        return sourceRecon;
+    }
+
+    Recon getTargetRecon() {
+        return targetRecon;
+    }
+
+    int getReconSourceQueryPageSize() {
+        return reconSourceQueryPageSize;
     }
 
     /**
@@ -368,13 +396,19 @@ class ObjectMapping {
     }
 
     /**
-     * @return The setting for whether to link
-     * target IDs in a case sensitive fashion.
-     * Only effective if the mapping defines the links,
-     * not if the mapping re-uses another mapping's links
+     * @return The setting for whether to link target IDs in a case sensitive fashion.
+     * Only effective if the mapping defines the links, not if the mapping re-uses another mapping's links
      */
     public boolean getTargetIdsCaseSensitive() {
         return targetIdsCaseSensitive;
+    }
+
+    /**
+     * @return The setting for whether to clustered
+     * source recon is enabled.
+     */
+    boolean getClusteredSourceReconEnabled() {
+        return clusteredSourceReconEnabled;
     }
 
     /**
@@ -654,7 +688,7 @@ class ObjectMapping {
         }
     }
 
-    private void doResults(ReconciliationContext reconContext, Context context)
+    void doResults(ReconciliationContext reconContext, Context context)
             throws SynchronizationException {
         if (resultScript != null) {
             Map<String, Object> scope = new HashMap<>();
@@ -684,8 +718,31 @@ class ObjectMapping {
      */
     public void recon(ReconciliationContext reconContext) throws SynchronizationException {
         EventEntry measure = Publisher.start(EVENT_RECON, reconContext.getReconId(), null);
-        doRecon(reconContext);
+        if (clusteredSourceReconEnabled) {
+            new ClusteredRecon(this, reconContext, newClusteredSourcePhaseTargetIdRegistry(reconContext),
+                    newClusteredSourceReconSchedulerDispatch(), newReconciliationStatisticsPersistence()).dispatchClusteredRecon();
+        } else {
+            doRecon(reconContext);
+        }
         measure.end();
+    }
+
+    protected ClusteredSourcePhaseTargetIdRegistry newClusteredSourcePhaseTargetIdRegistry(ReconciliationContext reconContext) {
+        if (reconContext.getReconHandler().isRunTargetPhase()) {
+            return new ClusteredSourcePhaseTargetIdRegistryImpl(
+                    connectionFactory, LoggerFactory.getLogger(ClusteredSourcePhaseTargetIdRegistryImpl.class));
+        } else {
+            return new NoOpClusteredSourcePhaseTargetIdRegistry();
+        }
+    }
+
+    protected ClusteredReconJobDispatch newClusteredSourceReconSchedulerDispatch() {
+        return new SchedulerClusteredReconJobDispatch(connectionFactory, DateUtil.getDateUtil(),
+                LoggerFactory.getLogger(SchedulerClusteredReconJobDispatch.class));
+    }
+
+    protected ReconciliationStatisticsPersistence newReconciliationStatisticsPersistence() {
+        return new ReconciliationStatisticsPersistenceImpl();
     }
 
     /**
@@ -726,22 +783,24 @@ class ObjectMapping {
                     return;
                 }
             }
-
-            // If we will handle a target phase, pre-load all relevant target identifiers
-            Set<String> remainingTargetIds = new LinkedHashSet<>();
             ResultIterable targetIterable =
                     new ResultIterable(Collections.<String>emptyList(), Collections.<JsonValue>emptyList());
+            LocalSourcePhaseTargetIdRegistry targetIdRegistry;
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 stats.targetQueryStart();
+                // If we will handle a target phase, pre-load all relevant target identifiers
+                Set<String> remainingTargetIds = new LinkedHashSet<>();
                 final long targetQueryStart = startNanoTime(reconContext);
 
                 targetIterable = reconContext.queryTarget();
                 remainingTargetIds.addAll(targetIterable.getAllIds());
-                remainingTargetIds = Collections.synchronizedSet(remainingTargetIds);
 
                 stats.addDuration(DurationMetric.targetQuery, targetQueryStart);
                 stats.targetQueryEnd();
-            }            
+                targetIdRegistry = new LocalSourcePhaseTargetIdRegistryImpl(remainingTargetIds);
+            } else {
+                targetIdRegistry = new NoOpLocalSourcePhaseTargetIdRegistry();
+            }
 
             // Optionally get all links up front as well
             Map<String, Map<String, Link>> allLinks = null;
@@ -784,7 +843,7 @@ class ObjectMapping {
                 }
                 // Perform source recon phase on current set of source ids
                 ReconPhase sourcePhase = 
-                        new ReconPhase(sourceIter, reconContext, context, allLinks, remainingTargetIds, sourceRecon);
+                        new ReconPhase(sourceIter, reconContext, context, allLinks, targetIdRegistry, sourceRecon);
                 sourcePhase.setFeedSize(feedSize);
                 sourcePhase.execute();
                 queryNextPage = true;
@@ -794,13 +853,13 @@ class ObjectMapping {
             stats.sourcePhaseEnd();
             measureSource.end();
 
-            LOGGER.debug("Remaining targets after source phase : {}", remainingTargetIds);
+            LOGGER.debug("Remaining targets after source phase : {}", targetIdRegistry.getTargetPhaseIds());
 
             if (reconContext.getReconHandler().isRunTargetPhase()) {
                 EventEntry measureTarget = Publisher.start(EVENT_RECON_TARGET, reconId, null);
                 final long targetPhaseStart = startNanoTime(reconContext);
                 reconContext.setStage(ReconStage.ACTIVE_RECONCILING_TARGET);
-                targetIterable = targetIterable.removeNotMatchingEntries(remainingTargetIds);
+                targetIterable = targetIterable.removeNotMatchingEntries(targetIdRegistry.getTargetPhaseIds());
                 stats.targetPhaseStart();
                 ReconPhase targetPhase = new ReconPhase(targetIterable.iterator(), reconContext, context,
                         allLinks, null, targetRecon);
@@ -854,7 +913,7 @@ class ObjectMapping {
 // TODO: cleanup orphan link objects (no matching source or target) here
     }
     
-    private void executeOnRecon(Context context, final ReconciliationContext reconContext) throws SynchronizationException {
+    void executeOnRecon(Context context, final ReconciliationContext reconContext) throws SynchronizationException {
         if (onReconScript != null) {
             Map<String, Object> scope = new HashMap<>();
             scope.put("context", context);
@@ -940,7 +999,7 @@ class ObjectMapping {
      * @param context
      * @throws SynchronizationException
      */
-    private void logReconStart(ReconciliationContext reconContext, Context context)
+    void logReconStart(ReconciliationContext reconContext, Context context)
             throws SynchronizationException {
         ReconAuditEventLogger reconStartEntry = new ReconAuditEventLogger(null, name, context);
         reconStartEntry.setEntryType(ReconAuditEventLogger.RECON_LOG_ENTRY_TYPE_RECON_START);
@@ -959,26 +1018,25 @@ class ObjectMapping {
      * @param context
      * @throws SynchronizationException
      */
-    private void logReconEndSuccess(ReconciliationContext reconContext, Context context)
+    void logReconEndSuccess(ReconciliationContext reconContext, Context context)
             throws SynchronizationException {
         logReconEnd(reconContext, context, Status.SUCCESS, "Reconciliation completed.");
     }
 
     /**
      * Record the premature failure of a reconciliation.
-     *
+     * 
      * @param reconContext
      * @param context
      * @throws SynchronizationException
      */
-    private void logReconEndFailure(ReconciliationContext reconContext, Context context)
+    void logReconEndFailure(ReconciliationContext reconContext, Context context)
             throws SynchronizationException {
         logReconEnd(reconContext, context, Status.FAILURE, "Reconciliation failed.");
     }
 
     /**
      * Record a final entry for a reconciliation.
-     *
      * @param reconContext
      * @param rootContext
      * @param status

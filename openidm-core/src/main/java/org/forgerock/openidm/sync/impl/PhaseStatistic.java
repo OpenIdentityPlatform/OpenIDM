@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2016 ForgeRock AS.
+ * Portions copyright 2016-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -40,12 +40,12 @@ public class PhaseStatistic {
 
     public enum Phase { SOURCE, TARGET }
     
-    private ReconciliationStatistic parentStat;
-    Phase phase;
-    private String name;
-    private Map<Situation, List<String>> ids = Collections.synchronizedMap(new EnumMap<Situation, List<String>>(Situation.class));
-    private AtomicLong processedEntries = new AtomicLong();
-    private List<String> notValid;
+    private final ReconciliationStatistic parentStat;
+    final Phase phase;
+    private final String name;
+    private final Map<Situation, List<String>> ids;
+    private final AtomicLong processedEntries;
+    private final List<String> notValid;
 
     long queryStartTime;
     long queryEndTime;
@@ -57,18 +57,21 @@ public class PhaseStatistic {
         this.parentStat = parentStat;
         this.phase = phase;
         this.name = name;
-        ids.put(Situation.CONFIRMED, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.FOUND, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.ABSENT, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.AMBIGUOUS, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.MISSING, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.UNQUALIFIED, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.UNASSIGNED, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.SOURCE_MISSING, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.SOURCE_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.TARGET_IGNORED, Collections.synchronizedList(new ArrayList<String>()));
-        ids.put(Situation.FOUND_ALREADY_LINKED, Collections.synchronizedList(new ArrayList<String>()));
+        processedEntries = new AtomicLong();
+        ids = Collections.synchronizedMap(new EnumMap<Situation, List<String>>(Situation.class));
+
+        for (Situation situation : Situation.values()) {
+            ids.put(situation, Collections.synchronizedList(new ArrayList<String>()));
+        }
         notValid = Collections.synchronizedList(new ArrayList<String>());
+    }
+
+    void aggregateValues(PhaseStatistic otherStatistic) {
+        processedEntries.set(processedEntries.longValue() + otherStatistic.processedEntries.longValue());
+        for (Situation situation : Situation.values()) {
+            ids.get(situation).addAll(otherStatistic.ids.get(situation));
+        }
+        notValid.addAll(otherStatistic.notValid);
     }
 
     /**

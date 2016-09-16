@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.sync.impl;
 
-import java.util.Collection;
 import java.util.Map;
 
 import org.forgerock.json.JsonValue;
@@ -43,7 +42,7 @@ class TargetRecon implements Recon {
      */
     @Override
     public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context context,
-            Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds)  throws SynchronizationException {
+            Map<String, Map<String, Link>> allLinks, SourcePhaseTargetIdRegistration targetIdRegistration)  throws SynchronizationException {
         reconContext.checkCanceled();
         for (String linkQualifier : objectMapping.getAllLinkQualifiers(context, reconContext)) {
             TargetSyncOperation op = new TargetSyncOperation(objectMapping, context);

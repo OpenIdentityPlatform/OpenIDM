@@ -118,12 +118,10 @@ public class SchedulerConfig {
     public String getRmiExport() {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_RMI_EXPORT, "false");
     }
-    
 
     public String getRmiProxy() {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_RMI_PROXY, "false");
     }
-    
 
     public String getWrapJobExecutionInUserTransaction() {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_WRAP_JOB_IN_USER_TX, "false");
@@ -132,7 +130,7 @@ public class SchedulerConfig {
     public String getThreadPoolClass() {
         return props.getProperty(StdSchedulerFactory.PROP_THREAD_POOL_CLASS, "org.quartz.simpl.SimpleThreadPool");
     }
-    
+
     public String getThreadPoolThreadCount() {
         if (threadCount != null) {
             return threadCount;
@@ -140,24 +138,28 @@ public class SchedulerConfig {
         StringBuilder prop = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadCount");
         return props.getProperty(prop.toString(), "10");
     }
-    
+
     public String getThreadPoolThreadPriority() {
         StringBuilder prop = new StringBuilder(StdSchedulerFactory.PROP_THREAD_POOL_PREFIX).append(".threadPriority");
         return props.getProperty(prop.toString(), "5");
     }
-    
+
     public String getThreadPoolThreadsInheritContextClassLoaderOfInitializingThread() {
         return props.getProperty(
                 StdSchedulerFactory.PROP_SCHED_SCHEDULER_THREADS_INHERIT_CONTEXT_CLASS_LOADER_OF_INITIALIZING_THREAD, 
                 "true");
     }
-    
+
     public String getJobStoreClass() {
         return props.getProperty(StdSchedulerFactory.PROP_JOB_STORE_CLASS, "org.forgerock.openidm.quartz.impl.RepoJobStore");
     }
     
     public String getInterruptJobsOnShutdown() {
         return props.getProperty(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN, "true");
+    }
+
+    public String getSchedulerIdleWaitTime() {
+        return props.getProperty(StdSchedulerFactory.PROP_SCHED_IDLE_WAIT_TIME, "5000");
     }
 
     public Properties toProps() {
@@ -176,6 +178,7 @@ public class SchedulerConfig {
                 getThreadPoolThreadsInheritContextClassLoaderOfInitializingThread());
         props.put(StdSchedulerFactory.PROP_JOB_STORE_CLASS, getJobStoreClass());
         props.put(StdSchedulerFactory.PROP_SCHED_INTERRUPT_JOBS_ON_SHUTDOWN, getInterruptJobsOnShutdown());
+        props.put(StdSchedulerFactory.PROP_SCHED_IDLE_WAIT_TIME, getSchedulerIdleWaitTime());
         return props;
     }
 }

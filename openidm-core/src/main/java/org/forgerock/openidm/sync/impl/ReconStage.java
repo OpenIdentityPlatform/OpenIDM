@@ -11,8 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2016 ForgeRock AS.
+ * Copyright 2012-2017 ForgeRock AS.
  */
+
 package org.forgerock.openidm.sync.impl;
 
 import static org.forgerock.openidm.sync.impl.ReconState.*;
@@ -29,14 +30,25 @@ public enum ReconStage {
     ACTIVE_INITIALIZED("initialized"),
 
     /**
-     * Querying the source, target and possibly link sets (ids) to reconcile
+     * Querying the source, target and possibly link sets (ids) to reconcile. Not set in clustered
+     * recon, as target ids and links are not pre-queried in clustered recon.
      */
     ACTIVE_QUERY_ENTRIES("querying sets of entries to reconcile"),
 
     /**
-     * Reconciling the set of ids retrieved from the mapping source
+     * Querying the source entries to reconcile. Set only in clustered recon.
+     */
+    ACTIVE_QUERY_SOURCE_PAGE("querying source entries reconcile"),
+
+    /**
+     * Reconciling the set of ids retrieved from the mapping source.
      */
     ACTIVE_RECONCILING_SOURCE("reconciling source entries"),
+
+    /**
+     * Reconciling the ids corresponding to a single page of the mapping source.
+     */
+    ACTIVE_RECONCILING_SOURCE_PAGE("reconciling page of source entries"),
 
     /**
      * Reconciling any remaining entries from the set of ids 

@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.sync.impl;
 
-import java.util.Collection;
 import java.util.Map;
 
 import org.forgerock.json.JsonValue;
@@ -36,9 +35,9 @@ interface Recon {
      * @param reconContext reconciliation context
      * @param rootContext json resource root ctx
      * @param allLinks all links if pre-queried, or null for on-demand link querying
-     * @param remainingIds The set to update/remove any targets that were matched
+     * @param targetIdRegistration to register the target ids correlated to a source id during the source phase
      * @throws SynchronizationException if there is a failure reported in reconciling this id
      */
     void recon(String id, JsonValue entry, ReconciliationContext reconContext, Context rootContext,
-            Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds) throws SynchronizationException;
+            Map<String, Map<String, Link>> allLinks, SourcePhaseTargetIdRegistration targetIdRegistration) throws SynchronizationException;
 }

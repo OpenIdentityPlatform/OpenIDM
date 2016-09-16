@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016 ForgeRock AS.
+ * Copyright 2016-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.scheduler;
 
@@ -179,7 +179,7 @@ abstract class AbstractScheduler implements Scheduler {
         Date fireTime = triggers[0].getFireTimeAfter(new Date());
         for (final Trigger trigger : triggers) {
             final Date newFireTime = trigger.getFireTimeAfter(new Date());
-            if (newFireTime.before(fireTime)) {
+            if ((newFireTime != null) && newFireTime.before(fireTime)) {
                 fireTime = newFireTime;
             }
         }

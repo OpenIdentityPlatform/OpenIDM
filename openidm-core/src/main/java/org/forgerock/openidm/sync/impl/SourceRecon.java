@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2016 ForgeRock AS.
+ * Copyright 2014-2017 ForgeRock AS.
  */
 
 package org.forgerock.openidm.sync.impl;
 
-import java.util.Collection;
 import java.util.Map;
 
 import org.forgerock.json.JsonValue;
@@ -43,7 +42,7 @@ class SourceRecon implements Recon {
      */
     @Override
     public void recon(String id, JsonValue objectEntry, ReconciliationContext reconContext, Context context,
-            Map<String, Map<String, Link>> allLinks, Collection<String> remainingIds)
+            Map<String, Map<String, Link>> allLinks, SourcePhaseTargetIdRegistration targetIdRegistration)
             throws SynchronizationException {
         reconContext.checkCanceled();
         LazyObjectAccessor sourceObjectAccessor = objectEntry == null
@@ -89,7 +88,7 @@ class SourceRecon implements Recon {
             for (String handledId : targetIds) {
                 // If target system has case insensitive IDs, remove without regard to case
                 String normalizedHandledId = objectMapping.getLinkType().normalizeTargetId(handledId);
-                remainingIds.remove(normalizedHandledId);
+                targetIdRegistration.targetIdReconciled(normalizedHandledId);
                 LOGGER.trace("Removed target from remaining targets: {}", normalizedHandledId);
             }
             if (!ReconAction.NOREPORT.equals(op.action) && (status == Status.FAILURE || op.action != null)) {
