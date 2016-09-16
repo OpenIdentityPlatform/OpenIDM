@@ -167,20 +167,28 @@ public class UpdateCommand {
         registerStepExecutor(new EnableSchedulerStepExecutor());
         registerStepExecutor(new ForceRestartStepExecutor());
 
-        // Set the sequence of execution for the steps.
-        setExecuteSequence(PREVIEW_ARCHIVE,
-                           ACCEPT_LICENSE,
-                           LIST_REPO_UPDATES,
-                           PAUSING_SCHEDULER,
-                           WAIT_FOR_JOBS_TO_COMPLETE,
-                           ENTER_MAINTENANCE_MODE,
-                           INSTALL_ARCHIVE,
-                           WAIT_FOR_INSTALL_DONE,
-                           MARK_REPO_UPDATES_COMPLETE);
-        // Set the sequence of execution of the recovery steps.
-        setRecoverySequence(EXIT_MAINTENANCE_MODE,
-                            ENABLE_SCHEDULER,
-                            FORCE_RESTART);
+        if (config.isSkipRepoUpdatePreview()) {
+            // Set the sequence of execution for the steps.
+            setExecuteSequence(PREVIEW_ARCHIVE,
+                    ACCEPT_LICENSE,
+                    LIST_REPO_UPDATES,
+                    PAUSING_SCHEDULER,
+                    WAIT_FOR_JOBS_TO_COMPLETE,
+                    ENTER_MAINTENANCE_MODE,
+                    INSTALL_ARCHIVE,
+                    WAIT_FOR_INSTALL_DONE,
+                    MARK_REPO_UPDATES_COMPLETE);
+            // Set the sequence of execution of the recovery steps.
+            setRecoverySequence(EXIT_MAINTENANCE_MODE,
+                    ENABLE_SCHEDULER,
+                    FORCE_RESTART);
+        } else {
+            setExecuteSequence(PREVIEW_ARCHIVE,
+                    ACCEPT_LICENSE,
+                    LIST_REPO_UPDATES);
+            // no recovery steps
+            setRecoverySequence(new UpdateStep[0]);
+        }
     }
 
     /**
@@ -1049,7 +1057,7 @@ public class UpdateCommand {
                             try {
                                 writeToFile(Paths.get(targetPath + "/" + file), fileContent.asString());
                             } catch (IOException e) {
-                                log("There was trouble storing repo update file " + file +
+                                log("Unable to save repository update file " + file +
                                         " to the path " + targetPath + ".", e);
                                 return ExecutorStatus.FAIL;
                             }
@@ -1060,6 +1068,7 @@ public class UpdateCommand {
                             "after updates have been reviewed.");
                     return ExecutorStatus.ABORT;
                 }
+                log("No repository updates included in the archive.");
                 return ExecutorStatus.SUCCESS;
             } catch (ResourceException e) {
                 log("Unable to retrieve repository scripts.", e);
