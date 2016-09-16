@@ -60,6 +60,7 @@ define([
             "partials/social/_facebook.html",
             "partials/social/_linkedIn.html",
             "partials/social/_oAuth2.html",
+            "partials/social/_callback.html",
             "partials/form/_basicInput.html",
             "partials/form/_tagSelectize.html",
             "partials/_alert.html"
@@ -79,6 +80,7 @@ define([
                     return p;
                 });
                 this.data.providers = _.cloneDeep(availableProviders.providers);
+
                 this.model.providers = _.cloneDeep(availableProviders.providers);
                 this.model.authentication = authentication;
 
@@ -289,14 +291,20 @@ define([
             var card = $(event.target).parents(".wide-card"),
                 cardDetails = this.getCardDetails(card),
                 index = this.$el.find(".wide-card").index(card),
-                dialogDetails;
+                dialogDetails,
+                additionalDisplayData = {};
 
             ConfigDelegate.readEntity("identityProvider/" +cardDetails.name).then((providerConfig) => {
+                additionalDisplayData.adminCallback = window.location.protocol+"//"+window.location.host + "/admin/oauthReturn.html";
+                additionalDisplayData.enduserCallback =  window.location.protocol+"//"+window.location.host + "/oauthReturn.html";
 
                 try {
-                    dialogDetails = $(handlebars.compile("{{> social/_" + cardDetails.name + "}}")(providerConfig));
+                    dialogDetails = $(handlebars.compile("{{> social/_" + cardDetails.name + "}}")(_.extend(additionalDisplayData, providerConfig)));
                 } catch (e) {
-                    dialogDetails = $(handlebars.compile("{{> social/_oAuth2}}")(providerConfig));
+                    additionalDisplayData.configureGeneral = $.t("templates.socialProviders.configureGeneral", {"providerType" : providerConfig.name});
+                    additionalDisplayData.generalHelp =  $.t("templates.socialProviders.generalHelp", {"providerType" : providerConfig.name});
+
+                    dialogDetails = $(handlebars.compile("{{> social/_oAuth2}}")(_.extend(additionalDisplayData, providerConfig)));
                 }
 
                 this.dialog = BootstrapDialog.show({
