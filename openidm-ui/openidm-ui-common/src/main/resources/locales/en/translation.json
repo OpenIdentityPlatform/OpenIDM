@@ -2474,8 +2474,10 @@
                 "facility": {
                     "help": "Syslog facility value to apply to all events"
                 },
-                "severityFieldMappings": {
-                    "help": "Defaults to INFORMATIONAL if no mapping is defined",
+                "severityFieldMappings" : {
+                    "help": "Defaults to INFORMATIONAL if no mapping is defined"
+                },
+                "severityFieldMapping": {
                     "topic": {
                         "help": "Audit Event Topic"
                     },
