@@ -658,19 +658,21 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                 case getAuthToken:
                     final String authToken =
                             new OAuthHttpClient(
-                                    getIdentityProviderConfig(
-                                            request.getContent().get(OAuthHttpClient.PROVIDER).required().asString()),
-                                    newHttpClient())
+                                    getIdentityProviderConfig(request.getContent()
+                                            .get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
                             .getAuthToken(
                                     request.getContent().get(OAuthHttpClient.CODE).required().asString(),
-                                    request.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString());
+                                    request.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString())
+                            .getOrThrow();
                     // get auth token
                     return newActionResponse(json(object(field(OAuthHttpClient.AUTH_TOKEN, authToken)))).asPromise();
                 default:
                     return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
                             .asPromise();
             }
-        }  catch (Exception e) {
+        }  catch (ResourceException e) {
+            return e.asPromise();
+        } catch (Exception e) {
             return new InternalServerErrorException("Error processing action", e).asPromise();
         }
     }
