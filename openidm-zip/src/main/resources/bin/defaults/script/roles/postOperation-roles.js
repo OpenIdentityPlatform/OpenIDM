@@ -275,7 +275,7 @@ function createJobsForConstraint(constraint, startJobId, endJobId, script) {
     if (startDate.isAfterNow()) {
         logger.debug("create startJob: " + startJobId);
         try {
-            openidm.create("scheduler", startJobId, startJob);
+            openidm.create("scheduler/job", startJobId, startJob);
         } catch (e) {
             logger.error("Error while attempting to create start schedule for temporal constraint on resource "
                 + resourceName + " with id of: " + startJobId);
@@ -286,7 +286,7 @@ function createJobsForConstraint(constraint, startJobId, endJobId, script) {
     if (endDate.isAfterNow()) {
         logger.debug("create endJob: " + endJobId);
         try {
-            openidm.create("scheduler", endJobId, endJob);
+            openidm.create("scheduler/job", endJobId, endJob);
         } catch (e) {
             logger.error("Error while attempting to create end schedule for temporal constraint on resource "
                 + resourceName + " with id of: " + endJobId);
@@ -305,7 +305,7 @@ function createJobsForConstraint(constraint, startJobId, endJobId, script) {
 function deleteJobsForConstraint(startJobId, endJobId, index) {
     try {
         logger.debug("delete startJob: " + resourceName);
-        openidm.delete("scheduler/" + startJobId, null);
+        openidm.delete("scheduler/job/" + startJobId, null);
     } catch (e) {
         if (e.javaException.getCode() !== 404) {
             logger.error("Error while attempting to delete start schedule for temporal constraint on resource "
@@ -318,7 +318,7 @@ function deleteJobsForConstraint(startJobId, endJobId, index) {
     }
     try {
         logger.debug("delete endJob:   " + resourceName);
-        openidm.delete("scheduler/" + endJobId, null);
+        openidm.delete("scheduler/job/" + endJobId, null);
     } catch (e) {
         if (e.javaException.getCode() !== 404) {
             logger.error("Error while attempting to delete end schedule for temporal constraint on resource "
