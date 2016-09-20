@@ -3,11 +3,42 @@
     "actions" : {
         "toggleActive" : {
             "type" : "text/javascript",
-            "source" : "object.active = !object.active; object;"
+            "source" : "object.active = !object.active; object;",
+            "apiDescriptor" : {
+                "parameters" : [
+                    {
+                        "name" : "code",
+                        "type" : "integer",
+                        "required" : true
+                    },
+                    {
+                        "name" : "redirect_url",
+                        "type" : "string",
+                        "required" : false
+                    },
+                    {
+                        "name" : "optional",
+                        "type" : "boolean"
+                    }
+                ],
+                "requestSchema" : {
+                    "type" : "string"
+                }
+            }
         },
         "logMessage" : {
             "type" : "text/javascript",
-            "source" : "logger.info('scripted action was triggered and we can read the variable object '+object)"
+            "source" : "logger.info('scripted action was triggered and we can read the variable object '+object)",
+            "apiDescriptor" : {
+                "responseSchema": {
+                    "type": "object",
+                    "properties": {
+                            "status": {
+                                "type": "string"
+                            }
+                    }
+                }
+            }
         },
         "scalar" : {
             "type" : "text/javascript",
