@@ -16,6 +16,22 @@
 # "Portions copyright [year] [name of copyright owner]".
 #
 
+function abspath() {
+    if [ -d "$1" ]; then
+        # dir
+        (cd "$1"; pwd)
+    elif [ -f "$1" ]; then
+        # file
+        if [[ $1 == */* ]]; then
+            echo "$(cd "${1%/*}"; pwd)/${1##*/}"
+        else
+            echo "$(pwd)/$1"
+        fi
+    else
+        echo "$2"
+    fi
+}
+
 JAVA_VER=$(java -version 2>&1 | sed 's/.* version "\(.*\)\.\(.*\)\..*"/\1\2/; 1q')
 if [ "$JAVA_VER" -lt 17 ]; then
   echo "Java version 1.7 or higher required";
@@ -67,7 +83,13 @@ while [ "$1" ]; do
         JPDA=$1
     else
         if [ "$1" = "-p" ] && [ "$2" ]; then
-            PROJECT_HOME="$OPENIDM_HOME/$2"
+            if [[ $2 == /* ]]; then
+                PROJECT_HOME="$2"
+            elif [[ $2 == ..* ]]; then
+                PROJECT_HOME=$(abspath $2 $OPENIDM_HOME)
+            else
+                PROJECT_HOME="$OPENIDM_HOME/$2"
+            fi
         fi
         CLOPTS="$CLOPTS $1"
     fi
