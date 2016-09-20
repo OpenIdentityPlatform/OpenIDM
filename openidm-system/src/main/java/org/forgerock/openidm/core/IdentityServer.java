@@ -69,12 +69,15 @@ public final class IdentityServer implements PropertyAccessor {
     public static final String SSL_HOST_ALIASES = "openidm.ssl.host.aliases";
     public static final String HTTPS_KEYSTORE_CERT_ALIAS = "openidm.https.keystore.cert.alias";
 
-    // The set of properties for the environment config.
-    // Keys are lower case for easier case insensitive searching
-    // Precedences is 1. Boot file properties, 2. Explicit config properties, 3.
-    // System properties
-    private final PropertyAccessor configProperties;
+    /**
+     * Precedence is
+     * 1. System Properties
+     * 2. Boot file properties,
+     * 3. Explicit config properties
+     */
+    private final SystemPropertyAccessor systemPropertyAccessor = new SystemPropertyAccessor(null);
     private final Map<String, String> bootFileProperties;
+    private final PropertyAccessor configProperties;
     private File bootPropertyFile = null;
 
     /**
@@ -87,11 +90,7 @@ public final class IdentityServer implements PropertyAccessor {
      *            properties.
      */
     private IdentityServer(PropertyAccessor properties, IdentityServer identityServer) {
-        if (null == properties) {
-            configProperties = new SystemPropertyAccessor(null);
-        } else {
-            configProperties = properties;
-        }
+        configProperties = properties;
         String bootFileName =
                 getProperty(ServerConstants.PROPERTY_BOOT_FILE_LOCATION,
                         ServerConstants.DEFAULT_BOOT_FILE_LOCATION);
@@ -156,16 +155,40 @@ public final class IdentityServer implements PropertyAccessor {
         return IDENTITY_SERVER.get();
     }
 
+    /**
+     * Retrieves the property value by looking in System properties, boot properties, and then config properties.
+     *
+     * @param key The name of the requested property.
+     * @param defaultValue the value returned if not found in the propertyAccessors.
+     * @param expected the expected class of the returned value.
+     * @param <T> Type bound to the returned value.
+     * @return The value of the stored property if found, else the defaultValue.
+     */
     @SuppressWarnings("unchecked")
     public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
-        T value = null;
-        if (null != bootFileProperties
+        // First check System properties for our value.
+        T value = systemPropertyAccessor.getProperty(key, null, expected);
+        if (null == value) {
+            // Not found in system properties, now check the boot file, if the property is expected to be a String.
+            boolean expectsString = ((null != expected && expected.isAssignableFrom(String.class))
+                    || defaultValue instanceof String);
+
+            if (null != bootFileProperties
                 && null != key
-                && ((null != expected && expected.isAssignableFrom(String.class)) || defaultValue instanceof String)) {
-            value = (T) bootFileProperties.get(key);
+                && expectsString) {
+                value = (T) bootFileProperties.get(key);
+            }
         }
-        return null != value ? value : (null != configProperties) ? configProperties.getProperty(
-                key, defaultValue, expected) : null;
+        if (null == value) {
+            // Not found in System or Boot, now check the configProperties, if it was set.
+            if (null != configProperties) {
+                value = configProperties.getProperty(key, defaultValue, expected);
+            }
+        }
+        // If still not found at this point, return the default.
+        return (null != value)
+                ? value
+                : defaultValue;
 
     }
 
@@ -497,7 +520,7 @@ public final class IdentityServer implements PropertyAccessor {
      */
     private Map<String, String> loadProps(String bootFileLocation, IdentityServer identityServer) {
         File bootFile = IdentityServer.getFileForPath(bootFileLocation, getServerRoot());
-        Map<String, String> entries = new HashMap<String, String>();
+        Map<String, String> entries = new HashMap<>();
 
         if (null == bootFile) {
             System.out.println("No boot file properties: "
@@ -510,8 +533,6 @@ public final class IdentityServer implements PropertyAccessor {
         } else if (null != identityServer && bootFile.equals(identityServer.bootPropertyFile)) {
             return identityServer.bootFileProperties;
         } else {
-            // logger.info("Using boot properties at {}.",
-            // bootFile.getAbsolutePath());
             System.out.println("Using boot properties at " + bootFile.getAbsolutePath());
             bootPropertyFile = bootFile;
             InputStream in = null;
