@@ -16,10 +16,20 @@
 
 package org.forgerock.openidm.managed;
 
-import static org.forgerock.api.enums.PatchOperation.*;
+import static org.forgerock.api.enums.PatchOperation.ADD;
+import static org.forgerock.api.enums.PatchOperation.REMOVE;
+import static org.forgerock.api.enums.PatchOperation.REPLACE;
+import static org.forgerock.api.enums.PatchOperation.INCREMENT;
+import static org.forgerock.api.enums.PatchOperation.COPY;
+import static org.forgerock.api.enums.PatchOperation.MOVE;
 import static org.forgerock.api.enums.PatchOperation.TRANSFORM;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValueFunctions.listOf;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.forgerock.api.enums.CreateMode;
 import org.forgerock.api.enums.ParameterSource;
@@ -43,6 +53,8 @@ import org.forgerock.api.transform.OpenApiTransformer;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.schema.validator.Constants;
+import org.forgerock.util.Function;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +68,7 @@ class ManagedObjectApiDescription {
     private static final JsonPointer ITEMS_TYPE_POINTER =
             new JsonPointer(new String[]{Constants.ITEMS, Constants.TYPE});
 
-    private static final JsonValue STATUS_RESPONSE_JSON =
+    static final JsonValue STATUS_RESPONSE_JSON =
             json(object(
                     field(Constants.TYPE,
                             Constants.TYPE_OBJECT),
@@ -65,6 +77,12 @@ class ManagedObjectApiDescription {
                                     field(Constants.TYPE, Constants.TYPE_STRING)
                             ))
                     ))));
+
+    private static final String ACTIONS = "actions";
+    private static final String APIDESCRIPTOR = "apiDescriptor";
+    private static final String REQUESTSCHEMA = "requestSchema";
+    private static final String RESPONSESCHEMA = "responseSchema";
+    private static final String PARAMETERS = "parameters";
 
     private ManagedObjectApiDescription() {
         // empty
@@ -187,12 +205,7 @@ class ManagedObjectApiDescription {
                                                             .operations(ADD, REMOVE, REPLACE, INCREMENT, COPY, MOVE,
                                                                     TRANSFORM)
                                                             .build())
-                                                    .action(Action.action()
-                                                            .name("triggerSyncCheck")
-                                                            .response(Schema.schema()
-                                                                    .schema(STATUS_RESPONSE_JSON)
-                                                                    .build())
-                                                            .build())
+                                                    .actions(getActions(config, schema))
                                                     .subresources(itemsSubResources)
                                                     .build())
                                             .build())
@@ -209,4 +222,67 @@ class ManagedObjectApiDescription {
         }
     }
 
+    /**
+     * Get custom actions from managed.json plus triggerSyncCheck.
+     *
+     * @param config a json config
+     * @param schema a json schema
+     * @return list of actions
+     */
+    static List<Action> getActions(JsonValue config, JsonValue schema) {
+        List<Action> actions = new ArrayList<>();
+        // add triggerSyncCheck
+        actions.add(Action.action()
+                .name("triggerSyncCheck")
+                .response(Schema.schema()
+                        .schema(STATUS_RESPONSE_JSON)
+                        .build())
+                .build());
+
+        final JsonValue configuredActions = config.get(ACTIONS).defaultTo(object());
+        for (String actionName : configuredActions.keys()) {
+            final JsonValue apiDescriptor = configuredActions.get(actionName).get(APIDESCRIPTOR);
+            final JsonValue requestSchema = apiDescriptor.get(REQUESTSCHEMA);
+            final List<JsonValue> parameters = apiDescriptor.get(PARAMETERS)
+                    .as(listOf(new Function<JsonValue, JsonValue, NeverThrowsException>() {
+                        @Override
+                        public JsonValue apply(JsonValue value) throws NeverThrowsException {
+                            return value;
+                        }
+                    }));
+
+            // build an action
+            Action.Builder actionBuilder = Action.action()
+                    .name(actionName)
+                    // the response schema is resource-schema by default
+                    .response(Schema.schema()
+                            .schema(schema)
+                            .build());
+
+            // add request schema if specified
+            if (requestSchema.isNotNull()) {
+                actionBuilder = actionBuilder.request(Schema.schema()
+                        .schema(requestSchema)
+                        .build());
+            }
+            // add parameters if specified
+            if (parameters != null && !parameters.isEmpty()) {
+                List<Parameter> parameterList = new ArrayList<>();
+                for (JsonValue parameterDef : parameters) {
+                    parameterList.add(Parameter.parameter()
+                            .name(parameterDef.get("name").asString())
+                            .type(parameterDef.get(Constants.TYPE).asString())
+                            .source(ParameterSource.ADDITIONAL)
+                            .required(parameterDef.get("required").isNull()
+                                    ? false : parameterDef.get("required").asBoolean())
+                            .build());
+                }
+                actionBuilder = actionBuilder.parameters(parameterList);
+            }
+
+            actions.add(actionBuilder.build());
+        }
+
+        return actions;
+    }
 }

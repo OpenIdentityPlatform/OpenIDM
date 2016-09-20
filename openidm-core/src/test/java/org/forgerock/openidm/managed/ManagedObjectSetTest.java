@@ -31,7 +31,6 @@ import static org.mockito.Mockito.when;
 
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
-import javax.script.ScriptException;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -50,7 +49,6 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCryptoTransformer;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.resource.MemoryBackend;
@@ -79,7 +77,6 @@ import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.ResultHandler;
-import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 import org.testng.annotations.BeforeClass;
 
