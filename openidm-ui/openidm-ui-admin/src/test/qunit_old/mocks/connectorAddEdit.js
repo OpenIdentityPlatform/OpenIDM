@@ -52,7 +52,7 @@ define([ ], function () {
 
         server.respondWith(
             "GET",
-            "/openidm/scheduler?_queryId=query-all-ids",
+            "/openidm/scheduler/job?_queryId=query-all-ids",
             [
                 200,
                 { },
@@ -72,7 +72,7 @@ define([ ], function () {
 
         server.respondWith(
             "GET",
-            "/openidm/scheduler/recon",
+            "/openidm/scheduler/job/recon",
             [
                 200,
                 { },

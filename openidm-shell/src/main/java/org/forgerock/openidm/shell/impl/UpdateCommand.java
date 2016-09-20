@@ -15,30 +15,33 @@
  */
 package org.forgerock.openidm.shell.impl;
 
+import static java.util.Arrays.asList;
 import static org.forgerock.openidm.shell.impl.UpdateCommand.UpdateStep.*;
 
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.io.BufferedWriter;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Iterator;
-import java.util.Arrays;
-import static java.util.Arrays.asList;
 
 import org.apache.felix.service.command.CommandSession;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.*;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 
 /**
@@ -46,7 +49,7 @@ import org.forgerock.services.context.Context;
  * running OpenIDM system.
  */
 public class UpdateCommand {
-    static final String SCHEDULER_ROUTE = "scheduler";
+    static final String SCHEDULER_JOB_ROUTE = "scheduler/job";
     static final String SCHEDULER_ACTION_RESUME_JOBS = "resumeJobs";
     static final String SCHEDULER_ACTION_LIST_JOBS = "listCurrentlyExecutingJobs";
     static final String SCHEDULER_ACTION_PAUSE = "pauseJobs";
@@ -500,7 +503,7 @@ public class UpdateCommand {
             try {
                 log("Pausing the Scheduler");
                 ActionResponse response = resource.action(context,
-                        Requests.newActionRequest(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE));
+                        Requests.newActionRequest(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE));
                 // Test if the pause request was successful.
                 if (response.getJsonContent().get("success").defaultTo(false).asBoolean()) {
                     log("Scheduler has been paused.");
@@ -599,7 +602,7 @@ public class UpdateCommand {
          */
         private boolean isJobRunning(Context context) throws ResourceException {
             ActionResponse response = resource.action(context,
-                    Requests.newActionRequest(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS));
+                    Requests.newActionRequest(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS));
             //return true if more than 1 job is running.
             return response.getJsonContent().asList().size() > 0;
         }
@@ -899,7 +902,7 @@ public class UpdateCommand {
             try {
                 log("Resuming the job scheduler.");
                 ActionResponse response = resource.action(context,
-                        Requests.newActionRequest(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS));
+                        Requests.newActionRequest(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS));
                 // Pull the success value from the response.
                 if (response.getJsonContent().get("success").defaultTo(false).asBoolean()) {
                     log("Scheduler has been resumed.");

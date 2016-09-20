@@ -69,7 +69,7 @@ public class UpdateCommandTest {
                                 field("updates", array(object(field("archive", "xyz.zip")))),
                                 field("rejects", array())
                         ))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -101,7 +101,7 @@ public class UpdateCommandTest {
                                                 field("reason", "Fake failed message.")
                                         )))
                         ))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -130,8 +130,8 @@ public class UpdateCommandTest {
                                 field("rejects", array())
                         ))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", false)))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", false)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -160,13 +160,13 @@ public class UpdateCommandTest {
                                 field("rejects", array())
                         ))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 // mock our running jobs listing responses, with jobs running.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object()))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object()))),
                 // mock the next step to fail.
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", false)))),
                 // mock the calls on recovery.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -195,15 +195,15 @@ public class UpdateCommandTest {
                                 field("rejects", array())
                         ))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
                 // mock our running jobs listing responses, with 3 iterations of mocked responses.
                 // this will help simulate waiting for a job to finish.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS,
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS,
                         json(array(object())), json(array(object())), json(array(object())), json(array())),
                 // mock the next step to fail.
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", false)))),
                 // mock the calls on recovery.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -239,15 +239,15 @@ public class UpdateCommandTest {
                         ))
                 ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", true)))),
 
                 // mock with empty response to simulate early error
                 mc(UPDATE_ROUTE, UPDATE_ACTION_UPDATE, json(object())),
 
                 // mock the calls on recovery.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -283,8 +283,8 @@ public class UpdateCommandTest {
                         ))
                 ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array())),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array())),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", true)))),
 
                 mc(UPDATE_ROUTE, UPDATE_ACTION_UPDATE,
@@ -299,7 +299,7 @@ public class UpdateCommandTest {
                 ),
 
                 // mock the calls on recovery.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -336,8 +336,8 @@ public class UpdateCommandTest {
                         ))
                 ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", true)))),
 
                 mc(UPDATE_ROUTE, UPDATE_ACTION_UPDATE,
@@ -356,7 +356,7 @@ public class UpdateCommandTest {
                         ))),
 
                 // mock the calls on recovery.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -394,8 +394,8 @@ public class UpdateCommandTest {
                         ))
                 ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", true)))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_UPDATE,
                         json(object(field("status", "IN_PROGRESS"), field(ResourceResponse.FIELD_CONTENT_ID, "1234")))),
@@ -417,7 +417,7 @@ public class UpdateCommandTest {
                         ))),
 
                 // mock the calls on recovery.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
@@ -455,8 +455,8 @@ public class UpdateCommandTest {
                         ))
                 ),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_GET_LICENSE, json(object(field("license", "This is the license")))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_PAUSE, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_LIST_JOBS, json(array(object())), json(array())),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_ENABLE, json(object(field("maintenanceEnabled", true)))),
                 mc(UPDATE_ROUTE, UPDATE_ACTION_UPDATE,
                         json(object(field("status", "IN_PROGRESS"), field(ResourceResponse.FIELD_CONTENT_ID, "1234")))),
@@ -478,7 +478,7 @@ public class UpdateCommandTest {
                         ))),
 
                 // mock the calls on recovery.
-                mc(SCHEDULER_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
+                mc(SCHEDULER_JOB_ROUTE, SCHEDULER_ACTION_RESUME_JOBS, json(object(field("success", true)))),
                 mc(MAINTENANCE_ROUTE, MAINTENANCE_ACTION_DISABLE, json(object(field("maintenanceEnabled", false))))
         );
 
