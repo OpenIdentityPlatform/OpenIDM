@@ -51,13 +51,19 @@ define([
         headers[Constants.HEADER_PARAM_PASSWORD] = "anonymous";
         headers[Constants.HEADER_PARAM_NO_SESSION] = "true";
 
-        return obj.serviceCall({
+        obj.serviceCall({
             url: "",
             type: "get",
-            headers: headers
+            headers: headers,
+            errorsHandlers: {
+                "notfound": {status: 404}
+            }
         }).then((results) => {
-            return results;
+            promise.resolve(results);
+        }, () => {
+            promise.resolve({providers:[]});
         });
+        return promise;
     };
 
     obj.availableProviders = function() {
