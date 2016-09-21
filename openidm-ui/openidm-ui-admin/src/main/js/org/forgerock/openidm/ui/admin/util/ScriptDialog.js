@@ -43,20 +43,22 @@ define([
             this.setElement(this.currentDialog);
 
             BootstrapDialog.show({
-                title: "Script Manager",
+                title: args.scriptDialogTitle || "Script Manager",
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.currentDialog,
                 size: BootstrapDialog.SIZE_WIDE,
                 cssClass: "script-large-dialog",
                 onshown : function (dialogRef) {
                     args.element = _this.$el;
-                    args.validationCallback = _.bind(function(result){
-                        if(result) {
-                            $("#scriptDialogOkay").prop("disabled", false);
-                        } else {
-                            $("#scriptDialogOkay").prop("disabled", true);
-                        }
-                    }, _this);
+                    if(!args.disableValidation) {
+                        args.validationCallback = _.bind(function (result) {
+                            if (result) {
+                                $("#scriptDialogOkay").prop("disabled", false);
+                            } else {
+                                $("#scriptDialogOkay").prop("disabled", true);
+                            }
+                        }, _this);
+                    }
 
                     _this.scriptEditor = InlineScriptEditor.generateScriptEditor(args, _.bind(function(){
                         if(callback) {
@@ -75,10 +77,8 @@ define([
                     id: "scriptDialogOkay",
                     cssClass: "btn-primary",
                     action: _.bind(function(dialogRef) {
-                        this.generateScript();
-
                         if (args.saveCallback) {
-                            args.saveCallback();
+                            args.saveCallback(this.generateScript());
                         }
 
                         dialogRef.close();

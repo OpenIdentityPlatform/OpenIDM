@@ -231,7 +231,8 @@
                 "triggeredBySituationSaved": "The triggered by situation script(s) have been saved.",
                 "objectFiltersSaved": "The object filter script(s) have been saved.",
                 "triggeredByReconSaved": "The triggered by reconciliation script(s) have been saved.",
-                "linkQualifierSaveSuccess": "The link qualifier(s) have been saved."
+                "linkQualifierSaveSuccess": "The link qualifier(s) have been saved.",
+                "individualRecordValidationSaveSuccess" : "The individual record validation scripts have been saved."
             },
             "settingMessages" : {
                 "saveSelfServiceSuccess": "Self service URL has been updated.",
@@ -1944,6 +1945,18 @@
                 "title": "Choose Target Property",
                 "listLabel": "Property:",
                 "choicePrompt": "Choose One"
+            },
+            "recordValidation": {
+                "sourceDefinition" : "Valid Source",
+                "targetDefinition" : "Valid Target",
+                "preferenceHelp" : "Reconcile records with these user preferences",
+                "allRecords" : "All records valid",
+                "validateBasedOnPreferences" : "Validate based on user preferences",
+                "validateBasedOnScript" : "Validate based on custom script",
+                "sectionHelp" : "Define valid source and target records for reconciliation",
+                "editValidScript" : "Edit __script__ script",
+                "inlineScript" : "Inline Script",
+                "fileScript" : "File:"
             },
             "analysis": {
                 "analysis": "Analysis",

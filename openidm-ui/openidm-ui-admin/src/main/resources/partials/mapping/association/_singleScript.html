@@ -1,0 +1,18 @@
+<div class="scripts-container">
+    <table class="group-field-block table">
+        <tbody>
+        <tr class="event-hook">
+            <td>
+                {{#if script.source}}
+                    {{t "templates.mapping.recordValidation.inlineScript"}}  <span class="lightenColor">({{script.type}})</span>
+                {{else}}
+                    {{t "templates.mapping.recordValidation.fileScript"}}  {{script.file}} <span class="lightenColor">({{script.type}})</span>
+                {{/if}}
+            </td>
+            <td class="text-right event-hook-body" data-type="{{type}}">
+                <span class="icon-button edit-btn"><i class="fa fa-pencil"></i></span>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>

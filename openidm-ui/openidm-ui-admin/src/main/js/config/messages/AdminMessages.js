@@ -170,6 +170,10 @@ define([
             msg: "config.messages.SyncMessages.correlationQuerySaved",
             type: "info"
         },
+        "individualRecordValidationSaveSuccess": {
+            msg: "config.messages.SyncMessages.individualRecordValidationSaveSuccess",
+            type: "info"
+        },
         "reconQueryFilterSaveSuccess": {
             msg: "config.messages.SyncMessages.reconQueryFilterSaveSuccess",
             type: "info"

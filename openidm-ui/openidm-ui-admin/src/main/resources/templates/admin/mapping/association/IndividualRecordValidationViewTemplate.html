@@ -1,0 +1,52 @@
+<div class="panel-body">
+    <p class="panel-description">{{t "templates.mapping.recordValidation.sectionHelp"}}</p>
+
+    <form class="form-horizontal" role="form">
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="validSourceDefinition">{{t "templates.mapping.recordValidation.sourceDefinition"}}</label>
+            <div id="validSourceHolder" class="col-sm-8">
+                <select data-type="source" class="form-control validation-select" type="text" id="validSourceDefinition">
+                    {{#staticSelect sourceDefinition.value}}
+                        <option value="allRecords">{{t "templates.mapping.recordValidation.allRecords"}}</option>
+                        <option value="userPreferences">{{t "templates.mapping.recordValidation.validateBasedOnPreferences"}}</option>
+                        <option value="customScript">{{t "templates.mapping.recordValidation.validateBasedOnScript"}}</option>
+                    {{/staticSelect}}
+                </select>
+
+                <div class="definition-holder">
+                    {{#if sourceDefinition.hasScript}}
+                        {{#if sourceDefinition.hasPreferences}}
+                                {{> mapping/association/_individualPreferences}}
+                            {{else}}
+                                {{> mapping/association/_singleScript script=sourceDefinition.script type="source"}}
+                        {{/if}}
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="validSourceDefinition">{{t "templates.mapping.recordValidation.targetDefinition"}}</label>
+            <div id="validTargetHolder" class="col-sm-8">
+                <select data-type="target" class="form-control validation-select" type="text" id="validTargetDefinition">
+                    {{#staticSelect targetDefinition.value}}
+                        <option value="allRecords">{{t "templates.mapping.recordValidation.allRecords"}}</option>
+                        <option value="customScript">{{t "templates.mapping.recordValidation.validateBasedOnScript"}}</option>
+                    {{/staticSelect}}
+                </select>
+
+                <div class="definition-holder">
+                    {{#if targetDefinition.hasScript}}
+                        {{> mapping/association/_singleScript script=targetDefinition.script type="target"}}
+                    {{/if}}
+                </div>
+            </div>
+        </div>
+    </form>
+    <div id="indvidualRecordMessages">
+
+    </div>
+</div>
+<div class="panel-footer clearfix">
+    <input type="submit" value="{{t 'common.form.save'}}" id="individualValidationSave" class="btn btn-primary pull-right">
+</div>
