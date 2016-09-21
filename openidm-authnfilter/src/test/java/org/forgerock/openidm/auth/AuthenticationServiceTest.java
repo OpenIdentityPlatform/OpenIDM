@@ -209,4 +209,18 @@ public class AuthenticationServiceTest {
 
         authenticationModule = null;
     }
+
+    @Test
+    public void amendAuthConfigShouldRemoveSocialProvidersModuleWhenIdentityProviderServiceIsNotConfigured() {
+        // Instantiate the object to be used with proper mocked IdentityProviderService
+        final AuthenticationService authenticationService = new AuthenticationService();
+        authenticationService.setConfig(authenticationJson);
+
+        // Call the amendAuthConfig to see the configuration of authentication.json be unmodified
+        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
+
+        // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
+        // the amendedAuthentication configuration
+        assertThat(authenticationJson.get("serverAuthContext").get("authModules").size()).isEqualTo(0);
+    }
 }

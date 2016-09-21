@@ -47,6 +47,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 
@@ -222,7 +223,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.auth.config)")
     private volatile AuthFilterWrapper authFilterWrapper;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC)
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private volatile IdentityProviderService identityProviderService;
 
     void bindIdentityProviderService(IdentityProviderService identityProviderService) {
@@ -389,11 +390,12 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         // OAUTH and OPENID_CONNECT auth modules
         authModuleConfig.asList(Map.class).remove(socialAuthTemplate.asMap());
 
-        authModuleConfig.asList().addAll(
-                FluentIterable.from(identityProviderService.getIdentityProviders())
-                    .transform(new SocialAuthModuleConfigFactory(socialAuthTemplate))
-                    .toList());
-
+        if (identityProviderService != null) {
+            authModuleConfig.asList().addAll(
+                    FluentIterable.from(identityProviderService.getIdentityProviders())
+                            .transform(new SocialAuthModuleConfigFactory(socialAuthTemplate))
+                            .toList());
+        }
     }
 
     /**

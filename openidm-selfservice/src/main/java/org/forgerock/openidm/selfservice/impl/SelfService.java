@@ -24,6 +24,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
@@ -132,7 +134,7 @@ public class SelfService implements IdentityProviderListener {
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile CryptoService cryptoService;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC)
+    @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private volatile IdentityProviderService identityProviderService;
 
     @Reference(policy = ReferencePolicy.STATIC)
@@ -176,7 +178,8 @@ public class SelfService implements IdentityProviderListener {
             if (stageConfig.isDefined(KBA_CONFIG)) {
                 // overwrite kbaConfig with config from KBA config service
                 stageConfig.put(KBA_CONFIG, kbaConfiguration.getConfig().getObject());
-            } else if (SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())) {
+            } else if (identityProviderService != null
+                    && SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())) {
                 // add oauth provider config
                 identityProviderService.registerIdentityProviderListener(this);
                 stageConfig.put(IdentityProviderService.PROVIDERS, ProviderConfigMapper.toJsonValue(
@@ -341,7 +344,9 @@ public class SelfService implements IdentityProviderListener {
         LOGGER.debug("Deactivating Service {}", compContext.getProperties());
         try {
             unregisterServiceRegistration();
-            identityProviderService.unregisterIdentityProviderListener(this);
+            if (identityProviderService != null) {
+                identityProviderService.unregisterIdentityProviderListener(this);
+            }
         } catch (IllegalStateException e) {
             /* Catch if the service was already removed */
             serviceRegistration = null;
@@ -368,8 +373,10 @@ public class SelfService implements IdentityProviderListener {
 
     @Override
     public void identityProviderConfigChanged() {
-        LOGGER.debug("Configuring {} with changes from IdentityProviderConfig {}",
-                PID, identityProviderService.getIdentityProviders());
+        LOGGER.debug("Configuring {} with changes from IdentityProviderConfig {}", PID,
+                identityProviderService != null
+                        ? identityProviderService.getIdentityProviders()
+                        : Collections.emptyList());
         try {
             unregisterServiceRegistration();
             amendConfig(config);
