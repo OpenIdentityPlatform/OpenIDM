@@ -150,22 +150,32 @@ import org.slf4j.LoggerFactory;
 public class AuthenticationService implements SingletonResourceProvider, IdentityProviderListener {
 
     /** The PID for this Component. */
-    public static final String PID = "org.forgerock.openidm.authentication";
+    static final String PID = "org.forgerock.openidm.authentication";
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     /** Re-authentication password header. */
     private static final String HEADER_REAUTH_PASSWORD = "X-OpenIDM-Reauth-Password";
 
-    private static final String SERVER_AUTH_CONTEXT_KEY = "serverAuthContext";
-    private static final String SESSION_MODULE_KEY = "sessionModule";
-    private static final String AUTH_MODULES_KEY = "authModules";
-    private static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
-    private static final String AUTH_MODULE_PROPERTY_MAPPING_KEY = "propertyMapping";
-    private static final String AUTH_MODULE_NAME_KEY = "name";
-    private static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
-    private static final String AUTH_MODULE_CONFIG_ENABLED = "enabled";
-    private static final String AUTH_MODULE_RESOLVERS_KEY = "resolvers";
+    /** The serverAuthContext key in the authentication config. */
+    public static final String SERVER_AUTH_CONTEXT_KEY = "serverAuthContext";
+    /** The sessionModule key in the authentication config. */
+    public static final String SESSION_MODULE_KEY = "sessionModule";
+    /** The authModules key in the authentication config. */
+    public static final String AUTH_MODULES_KEY = "authModules";
+    /** The properties key within an auth module stanza in the authentication config. */
+    public static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
+    /** The propertyMapping key within an auth module stanza in the authentication config. */
+    public static final String AUTH_MODULE_PROPERTY_MAPPING_KEY = "propertyMapping";
+    /** The name key within an auth module stanza in the authentication config. */
+    public static final String AUTH_MODULE_NAME_KEY = "name";
+    /** The className key within an auth module stanza in the authentication config. */
+    public static final String AUTH_MODULE_CLASS_NAME_KEY = "className";
+    /** The enabled key within an auth module stanza in the authentication config. */
+    public static final String AUTH_MODULE_CONFIG_ENABLED = "enabled";
+    /** The resolvers key within an auth module stanza in the authentication config. */
+    public static final String AUTH_MODULE_RESOLVERS_KEY = "resolvers";
+
     private static final String SOCIAL_PROVIDERS = "SOCIAL_PROVIDERS";
 
     /** the encoded key location in the return value from {@link SharedKeyService#getSharedKey(String)} */
@@ -266,7 +276,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
             };
 
     /** A {@link Predicate} that determines if an auth module is either OPENID_CONNECT or OAUTH */
-    private static final Predicate<JsonValue> withAuthModule =
+    public static final Predicate<JsonValue> oidcAndOauth2Modules =
             new Predicate<JsonValue>() {
                 @Override
                 public boolean apply(JsonValue jsonValue) {
@@ -689,7 +699,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     private ProviderConfig getIdentityProviderConfig(final String providerName) throws NotFoundException {
         final Optional<ProviderConfig> providerConfig = FluentIterable
                 .from(amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY))
-                .filter(withAuthModule)
+                .filter(oidcAndOauth2Modules)
                 .transformAndConcat(resolvers)
                 .filter(enabledResolvers)
                 .filter(forProvider(providerName))
@@ -720,7 +730,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         final List<Map<String, Object>> allAuthModules = new ArrayList<>();
         if (amendedConfig != null) {
             final JsonValue authModuleConfig = amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
-            final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(withAuthModule).toList();
+            final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(oidcAndOauth2Modules).toList();
             // Iterate the filtered list and get resolvers content
             for (final JsonValue authModule : authModules) {
                 allAuthModules.addAll(FluentIterable

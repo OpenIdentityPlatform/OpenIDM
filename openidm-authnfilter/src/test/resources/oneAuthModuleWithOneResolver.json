@@ -1,0 +1,21 @@
+{
+  "serverAuthContext" : {
+    "authModules" : [
+      {
+        "name" : "OAUTH",
+        "enabled" : true,
+        "properties" : {
+          "resolvers" : [
+            {
+              "name" : "resolver1",
+              "type" : "OAUTH",
+              "enabled" : true,
+              "client_id" : "resolver1",
+              "client_secret" : "secret1"
+            }
+          ]
+        }
+      }
+    ]
+  }
+}
