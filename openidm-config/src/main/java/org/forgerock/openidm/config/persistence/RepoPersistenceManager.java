@@ -74,6 +74,8 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
 
     private static final String BUNDLE_LOCATION = "service__bundleLocation";
     private static final String FELIX_FILEINSTALL_FILENAME = "felix__fileinstall__filename";
+    private static final String FACTORY_PID = "factory__pid";
+    private static final String SERVICE_PID = "servicePid";
 
     final static Logger logger = LoggerFactory.getLogger(RepoPersistenceManager.class);
 
@@ -211,6 +213,12 @@ public class RepoPersistenceManager implements PersistenceManager, ConfigPersist
                 }
                 String configString = serializeConfig(configMap);
                 existingConfig.put(JSONEnhancedConfig.JSON_CONFIG_PROPERTY, configString);
+                // OPENIDM-6538 Convert the map form of this property to a simple String
+                if (existing.getContent().get(FACTORY_PID).isMap()
+                        && existing.getContent().get(FACTORY_PID).isDefined(SERVICE_PID)
+                        && existing.getContent().get(FACTORY_PID).get(SERVICE_PID).isString()) {
+                    existingConfig.put(FACTORY_PID, existing.getContent().get(FACTORY_PID).get(SERVICE_PID).asString());
+                }
                 logger.debug("Config loaded {} {}", pid, existing);
                 result = mapToDict(existingConfig);
             } else if (!requireRepository) {
