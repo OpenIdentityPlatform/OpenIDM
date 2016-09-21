@@ -275,7 +275,9 @@
             },
             "socialProviders" : {
                 "save" : "Social provider configuration saved",
-                "delete" : "Social provider configuration deleted"
+                "delete" : "Social provider configuration deleted",
+                "cannotUnbind" : "Before disabling __provider__,",
+                "cannotUnbindLink" : "create a local password"
             }
         },
         "AppConfiguration" : {
