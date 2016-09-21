@@ -1,17 +1,22 @@
 <!-- Copyright 2015-2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div class="panel-body">
+    <div role="alert" id="idpUnbindError" class="alert alert-warning" style="">
+        <i class="fa fa-times pull-right closeErrorMsg"></i>
+        {{unbindText}}
+        <a href="#profile/password" role="button">{{t "config.messages.socialProviders.cannotUnbindLink"}}</a>
+    </div>
     <p class="panel-description col-sm-12">{{t "templates.socialIdentities.linkedAccounts"}}</p>
     <form id="socialIdentities">
         <div class="col-sm-12 social-holder">
             {{#if providers}}
             {{#each providers}}
-                <div class="panel panel-default card {{#unless active}}disabled{{/unless}}">
+                <div class="panel panel-default card {{#unless enabled}}disabled{{/unless}}">
                     <div class="card-body" data-name={{name}}>
                         <div class="panel-heading">
                             <div class="checkbox checkbox-slider-md checkbox-slider--b-flat checkbox-slider-primary social-toggle pull-left">
                                 <label>
-                                    <input type="checkbox" value="true" {{#if active}}checked{{/if}}><span></span>
+                                    <input type="checkbox" value="true" {{#if enabled}}checked{{/if}}><span></span>
                                 </label>
                             </div>
                         </div>
@@ -21,7 +26,7 @@
                                     <div class="image circle social-icon">
                                         <i class="fa fa-{{faIcon}}"></i>
                                     </div>
-                                    <div class="scopes" {{#unless active}}style="display: none;{{/unless}}">
+                                    <div class="scopes" {{#unless enabled}}style="display: none;{{/unless}}">
                                         <h4 class="block-header">{{t "templates.socialIdentities.linkedUsing"}}</h4>
                                         <ul class="list-unstyled text-muted">
                                             {{#each scope}}
