@@ -212,6 +212,19 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     @Reference(policy = ReferencePolicy.DYNAMIC, target="(service.pid=org.forgerock.openidm.auth.config)")
     private volatile AuthFilterWrapper authFilterWrapper;
 
+    @Reference(policy = ReferencePolicy.DYNAMIC)
+    private volatile IdentityProviderService identityProviderService;
+
+    void bindIdentityProviderService(IdentityProviderService identityProviderService) {
+        this.identityProviderService = identityProviderService;
+        identityProviderService.registerIdentityProviderListener(this);
+    }
+
+    void unbindIdentityProviderService() {
+        identityProviderService.unregisterIdentityProviderListener(this);
+        identityProviderService = null;
+    }
+
     /** An on-demand Provider for the ConnectionFactory */
     private final Provider<ConnectionFactory> connectionFactoryProvider =
             new Provider<ConnectionFactory>() {
@@ -426,19 +439,6 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                 return null;
             }
         }
-    }
-
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile IdentityProviderService identityProviderService;
-
-    protected void bindIdentityProviderService(IdentityProviderService identityProviderService) {
-        this.identityProviderService = identityProviderService;
-        identityProviderService.registerIdentityProviderListener(this);
-    }
-
-    protected void unbindIdentityProviderService() {
-        identityProviderService.unregisterIdentityProviderListener(this);
-        identityProviderService = null;
     }
 
     /** Implementation of IdentityProviderListener */
