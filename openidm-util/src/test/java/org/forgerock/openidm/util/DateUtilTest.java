@@ -16,10 +16,13 @@
 package org.forgerock.openidm.util;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.openidm.core.ServerConstants.TIME_ZONE_UTC;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import org.forgerock.openidm.core.ServerConstants;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.TimeZone;
 
 import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
@@ -32,11 +35,15 @@ import org.testng.annotations.Test;
  */
 public class DateUtilTest {
 
-    DateUtil dateUtil;
+    private DateUtil dateUtil;
+    private Date unixEpoc;
     
     @BeforeClass
     public void beforeClass() throws Exception {
-        dateUtil = DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC);
+        dateUtil = DateUtil.getDateUtil(TIME_ZONE_UTC);
+        final Calendar calendar = Calendar.getInstance(TimeZone.getTimeZone(TIME_ZONE_UTC));
+        calendar.setTimeInMillis(0);
+        unixEpoc = calendar.getTime();
     }
     
     @DataProvider
@@ -84,6 +91,24 @@ public class DateUtilTest {
                 "2016-03-01T09:01:00.000Z"},
         };
     }
+
+    @DataProvider
+    public Object[][] dateFormats() {
+        return new Object[][] {
+                /** Test custom format */
+                { unixEpoc, "yyyy-MM-dd'T'HH:mm:ss", "1970-01-01T00:00:00"},
+                /** Test null format */
+                { unixEpoc, null, "1970-01-01T00:00:00.000Z"},
+        };
+    }
+
+    @DataProvider
+    public Object[][] parseDateFormats() {
+        return new Object[][] {
+                /** Test custom format */
+                { "1970-01-01T00:00:00", "yyyy-MM-dd'T'HH:mm:ss"}
+        };
+    }
     
     @Test(dataProvider = "timestampIntervalData")
     public void testIsTimestampWithinInterval(String timestamp, String interval, boolean result) {
@@ -127,5 +152,30 @@ public class DateUtilTest {
     public void testGetStartAndEndOfInterval(String interval, String start, String end) {
         assertThat(dateUtil.getStartOfInterval(interval).withZone(DateTimeZone.UTC).toString()).isEqualTo(start);
         assertThat(dateUtil.getEndOfInterval(interval).withZone(DateTimeZone.UTC).toString()).isEqualTo(end);
+    }
+
+    @Test(dataProvider = "dateFormats")
+    public void testFormatDateTime(final Date date, final String format, final String expectedString) {
+        // given
+
+        // when
+        final String formattedTime = dateUtil.formatDateTime(date, format);
+
+        // then
+        assertThat(formattedTime).isNotNull().isEqualTo(expectedString);
+    }
+
+    @Test(dataProvider = "parseDateFormats")
+    public void testParseTime(final String date, final String pattern) throws Exception {
+        // given
+
+        // when
+        final Date time = dateUtil.parseTime(date, pattern);
+
+        // then
+        final SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+        formatter.setTimeZone(TimeZone.getTimeZone(TIME_ZONE_UTC));
+        final Date expectedDate = formatter.parse(date);
+        assertThat(time).isNotNull().isEqualTo(expectedDate);
     }
 }

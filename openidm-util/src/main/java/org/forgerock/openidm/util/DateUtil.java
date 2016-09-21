@@ -15,6 +15,7 @@
  */
 package org.forgerock.openidm.util;
 
+import java.text.SimpleDateFormat;
 import java.util.Date;
 
 import org.forgerock.openidm.core.ServerConstants;
@@ -23,6 +24,7 @@ import org.joda.time.DateTime;
 import org.joda.time.DateTimeZone;
 import org.joda.time.Interval;
 import org.joda.time.chrono.ISOChronology;
+import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 import org.joda.time.format.ISODateTimeFormat;
 
@@ -130,11 +132,22 @@ public final class DateUtil {
      *
      * @param date
      *            date object to convert
-     * @return String containing the formatted timestamp
+     * @return string containing the formatted date
      */
     public String formatDateTime(Date date) {
-        DateTime dt = new DateTime(date, chrono);
-        return dt.toString();
+        return formatDateTime(date, null);
+    }
+
+    /**
+     * Formats a given date into a timestamp.
+     *
+     * @param date {@link Date} object to convert.
+     * @param format the format to output. Should conform to formats available in {@link SimpleDateFormat}.
+     * @return string containing the formatted timestamp
+     */
+    public String formatDateTime(final Date date, final String format) {
+        final DateTime dateTime = new DateTime(date, chrono);
+        return format == null ? dateTime.toString() : dateTime.toString(format);
     }
 
     /**
@@ -318,6 +331,20 @@ public final class DateUtil {
             }
         }
         return result;
+    }
+
+    /**
+     * Parses a string for a {@link Date} given a pattern for the date string.
+     * @param date the date string to parse.
+     * @param pattern the pattern of the date string.
+     * @return a {@link Date}.
+     */
+    public Date parseTime(final String date, final String pattern) {
+        return DateTimeFormat
+                .forPattern(pattern)
+                .withChronology(chrono)
+                .parseDateTime(date)
+                .toDate();
     }
 
     public static void main(String[] args) {

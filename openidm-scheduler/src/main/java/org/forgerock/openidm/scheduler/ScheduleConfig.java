@@ -11,20 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.scheduler;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 
-import java.util.Calendar;
 import java.util.Date;
 import java.util.TimeZone;
-
-import javax.xml.bind.DatatypeConverter;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonValue;
@@ -32,11 +27,21 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.util.DateUtil;
+import org.joda.time.DateTimeZone;
 import org.quartz.CronTrigger;
 import org.quartz.JobDataMap;
 
 public class ScheduleConfig {
 
+    /**
+     * The time format that the scheduler config expects. This is basically ISO-8601 format with the timezone removed.
+     * The timezone is then specified in the timeZone field. It would be best if this format was removed and startTime
+     * and endTime were full ISO-8601. The timezone could then be extracted from the start or end time string.
+     *
+     * Please see https://bugster.forgerock.org/jira/browse/OPENIDM-6712.
+     */
+    private static final String SCHEDULER_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private Boolean enabled = null;
     private Boolean persisted = null;
     private String misfirePolicy = null;
@@ -49,6 +54,8 @@ public class ScheduleConfig {
     private Object invokeContext = null;
     private String invokeLogLevel = null;
     private Boolean concurrentExecution = null;
+
+    private final DateUtil dateUtil;
 
     public ScheduleConfig(JsonValue config) throws ResourceException {
         JsonValue enabledValue = config.get(SchedulerService.SCHEDULE_ENABLED);
@@ -101,15 +108,16 @@ public class ScheduleConfig {
                 throw new BadRequestException("Scheduler configured timezone is not understood: " + timeZoneString);
             }
         }
+        dateUtil = timeZone != null
+                ? DateUtil.getDateUtil(DateTimeZone.forTimeZone(timeZone))
+                :  DateUtil.getDateUtil();
         if (StringUtils.isNotBlank(startTimeString)) {
-            Calendar parsed = DatatypeConverter.parseDateTime(startTimeString);
-            startTime = parsed.getTime();
+            startTime = dateUtil.parseTime(startTimeString, SCHEDULER_TIME_FORMAT);
             // TODO: enhanced logging for failure
         }
 
         if (StringUtils.isNotBlank(endTimeString)) {
-            Calendar parsed = DatatypeConverter.parseDateTime(endTimeString);
-            endTime = parsed.getTime();
+            endTime = dateUtil.parseTime(endTimeString, SCHEDULER_TIME_FORMAT);
             // TODO: enhanced logging for failure
         }
 
@@ -139,6 +147,9 @@ public class ScheduleConfig {
         } else {
             this.misfirePolicy = SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED;
         }
+        dateUtil = timeZone != null
+                ? DateUtil.getDateUtil(DateTimeZone.forTimeZone(timeZone))
+                :  DateUtil.getDateUtil();
     }
 
     public JsonValue getConfig() {
@@ -150,9 +161,11 @@ public class ScheduleConfig {
                 field(SchedulerService.SCHEDULE_INVOKE_SERVICE, getInvokeService()),
                 field(SchedulerService.SCHEDULE_INVOKE_CONTEXT, getInvokeContext()),
                 field(SchedulerService.SCHEDULE_INVOKE_LOG_LEVEL, getInvokeLogLevel()),
-                field(SchedulerService.SCHEDULE_TIME_ZONE, getTimeZone()),
-                field(SchedulerService.SCHEDULE_START_TIME, getStartTime()),
-                field(SchedulerService.SCHEDULE_END_TIME, getEndTime()),
+                field(SchedulerService.SCHEDULE_TIME_ZONE, getTimeZone() == null ? null : getTimeZone().getID()),
+                field(SchedulerService.SCHEDULE_START_TIME,
+                        getStartTime() == null ? null : dateUtil.formatDateTime(getStartTime(), SCHEDULER_TIME_FORMAT)),
+                field(SchedulerService.SCHEDULE_END_TIME,
+                        getEndTime() == null ? null : dateUtil.formatDateTime(getEndTime(), SCHEDULER_TIME_FORMAT)),
                 field(SchedulerService.SCHEDULE_CONCURRENT_EXECUTION, getConcurrentExecution())));
     }
 
