@@ -16,7 +16,7 @@
 # "Portions copyright [year] [name of copyright owner]".
 #
 
-function abspath() {
+abspath() {
     if [ -d "$1" ]; then
         # dir
         (cd "$1"; pwd)
