@@ -170,7 +170,9 @@
                 "securityDataChanged" : "Security data has been changed.",
                 "userAlreadyExists" : "User already exists.",
                 "errorDeletingNotification" : "Error deleting notification.",
-                "errorFetchingNotifications" : "Error fetching notifications."
+                "errorFetchingNotifications" : "Error fetching notifications.",
+                "userPasswordResetSuccess": "Password reset and an email has been sent to the user.",
+                "userPasswordResetEmailFailure": "The reset password email has failed to send, please check your configurations and try again."
             },
             "AdminMessages" : {
                 "cannotDeleteYourself" : "You cannot delete your own user record.",
@@ -426,7 +428,10 @@
             },
             "ChangeUserPasswordDialogTemplate" : {
                 "securityDataChange" : "Security data change",
-                "enterNewPasswordToChange" : "Please enter a new password below."
+                "enterNewPasswordToChange" : "Please enter a new password below.",
+                "outboundEmailConfigRequired": "Configure outbound email before resetting user passwords.",
+                "outboundEmailConfigRequiredLinkMessage": "Configure it here.",
+                "resetPassword": "Reset Password"
             },
             "UsersTemplate" : {
                 "remainingUsers" : "Remaining users"
