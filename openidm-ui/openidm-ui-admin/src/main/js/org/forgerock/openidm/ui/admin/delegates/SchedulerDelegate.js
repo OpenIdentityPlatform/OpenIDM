@@ -100,6 +100,43 @@ define([
             });
         });
     };
+    /**
+    * This function takes an array of nodeIds, loops over each calling out to the
+    * scheduler/jobs endpoint looking for any jobs with triggers that have been aquired
+    * by that node then returns a promise with an array of all the running jobs from
+    * the list of nodeIds
+    * @param nodeIds {array} - list of nodeIds
+    * @returns {promise} - an array of scheduler jobs that are currently running on the
+    *                      cluster nodes with the ids provided to this function
+    **/
+    obj.getSchedulerTriggersByNodeIds = function (nodeIds) {
+        var promiseArray = [],
+            resultsArray = [],
+            jobsPromise = (nodeId) => {
+                return obj.serviceCall({
+                    url: "?_queryFilter=persisted eq true and triggers/0/nodeId pr and triggers/0/state gt 0 and triggers/0/nodeId eq '" + nodeId +"'",
+                    type: "GET",
+                    suppressSpinner: true
+                }).then((response) => {
+                    _.each(response.result, (job) => {
+                        resultsArray.push(job);
+                    });
+
+                    return;
+                });
+            }
+            ;
+        //loop over each node and push the individual promises onto the promisesArray
+        //once the last search promise is resolved the main promise
+        //returned by this funciton will be resolved
+        _.each(nodeIds, function (nodeId) {
+            promiseArray.push(jobsPromise(nodeId));
+        });
+
+        return $.when.apply($, promiseArray).then(() => {
+            return resultsArray;
+        });
+    };
 
     obj.validate = function (cronString){
         return obj.serviceCall({

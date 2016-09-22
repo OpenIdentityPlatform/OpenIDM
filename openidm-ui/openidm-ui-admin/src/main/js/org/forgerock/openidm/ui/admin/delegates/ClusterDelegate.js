@@ -22,10 +22,19 @@ define([
 
     var obj = new AbstractDelegate(constants.host + "/openidm");
 
-    obj.getClusters = function() {
+    obj.getNodes = function() {
         return obj.serviceCall({
             url: "/cluster",
-            type: "GET"
+            type: "GET",
+            suppressSpinner: true
+        });
+    };
+
+    obj.getIndividualNode = function(nodeId) {
+        return obj.serviceCall({
+            url: "/cluster/" + nodeId,
+            type: "GET",
+            suppressSpinner: true
         });
     };
 

@@ -17,8 +17,7 @@ define([
                     "source": "system/ldap/group"
                 }
             },
-            expectedHtml: 'LiveSync<br><span class="text-muted">system/ldap/group</span>',
-            expectedType: 'liveSync'
+            expectedResult: 'LiveSync<br><span class="text-muted">system/ldap/group</span>'
         },
         //recon
         {
@@ -29,8 +28,7 @@ define([
                     "mapping": "managedUser_systemLdapAccounts"
                 }
             },
-            expectedHtml: 'Reconciliation<br><span class="text-muted">managedUser_systemLdapAccounts</span>',
-            expectedType: 'recon'
+            expectedResult: 'Reconciliation<br><span class="text-muted">managedUser_systemLdapAccounts</span>'
         },
         //script with file
         {
@@ -43,8 +41,7 @@ define([
                     }
                 }
             },
-            expectedHtml: 'Script<br><span class="text-muted">script/someJSFile.js</span>',
-            expectedType: 'genericScript'
+            expectedResult: 'Script<br><span class="text-muted">script/someJSFile.js</span>'
         },
         //script with source
         {
@@ -57,8 +54,7 @@ define([
                     }
                 }
             },
-            expectedHtml: 'Script<br><span class="text-muted">console.log(myVar)</span>',
-            expectedType: 'genericScript'
+            expectedResult: 'Script<br><span class="text-muted">console.log(myVar)</span>'
         },
         //taskscanner
         {
@@ -72,8 +68,7 @@ define([
                     "task" : true
                 }
             },
-            expectedHtml: 'Task Scanner<br><span class="text-muted">system/ldap/account</span>',
-            expectedType: 'taskScanner'
+            expectedResult: 'Task Scanner<br><span class="text-muted">system/ldap/account</span>'
         }
         ],
         queryFilterObjArray = [
@@ -142,6 +137,12 @@ define([
                     { name: "myOtherLdapConnector"}
                 ],
                 expectedResult: "persisted eq true and invokeContext/action/ eq 'liveSync' and (invokeContext/source/ co 'system/ldap/' or invokeContext/source/ co 'system/myOtherLdapConnector/')"
+            },
+            {
+                filters: {
+                    "typeFilter": "runningNow"
+                },
+                expectedResult: "persisted eq true and triggers/0/nodeId pr and triggers/0/state gt 0"
             }
         ];
 
@@ -169,17 +170,11 @@ define([
             });
 
             _.each(scheduleObjArray, function (obj) {
-                assert.equal(SchedulerListView.getScheduleTypeDisplay(obj.schedule),obj.expectedHtml);
+                assert.equal(SchedulerListView.getScheduleTypeDisplay(obj.schedule),obj.expectedResult);
             });
             start();
         });
 
 
-    });
-
-    QUnit.test("getScheduleType", function(assert) {
-        _.each(scheduleObjArray, function (obj) {
-            assert.equal(SchedulerListView.getScheduleType(obj.schedule),obj.expectedType);
-        });
     });
 });

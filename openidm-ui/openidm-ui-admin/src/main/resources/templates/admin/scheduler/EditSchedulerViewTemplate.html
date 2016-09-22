@@ -10,7 +10,7 @@
         <div class="page-header clearfix">
             <span class="header-icon pull-left"><i class="fa fa-calendar"></i></span>
             <h4 class="page-type">
-                {{pageType}}
+                {{sheduleTypeData.display}}
             </h4>
             <div class="page-header-button-group">
                 <div class="btn-group">
@@ -22,8 +22,13 @@
                     </ul>
                 </div>
             </div>
-            <h1>{{schedule._id}}</h1>
+            <h1>{{sheduleTypeData.meta}}</h1>
         </div>
+        {{#if nodeId}}
+        <div class="alert alert-info">
+            <i class="fa fa-circle-o-notch fa-spin fa-fw"></i> {{t "templates.scheduler.currentlyExecutingOn"}} <a href="#" class="alert-link" id="nodeDetailsButton" nodeId="{{nodeId}}">{{nodeId}}</a>
+        </div>
+        {{/if}}
     </div>
 </section>
 <div class="tab-menu">

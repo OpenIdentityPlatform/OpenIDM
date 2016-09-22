@@ -28,7 +28,8 @@ define([
     "org/forgerock/openidm/ui/admin/dashboard/widgets/ResourceListWidget",
     "org/forgerock/openidm/ui/common/dashboard/widgets/QuickStartWidget",
     "org/forgerock/openidm/ui/admin/dashboard/widgets/FrameWidget",
-    "org/forgerock/openidm/ui/admin/dashboard/widgets/RelationshipWidget"
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/RelationshipWidget",
+    "org/forgerock/openidm/ui/admin/dashboard/widgets/ClusterStatusWidget"
 ], function($, _,
             AdminAbstractView,
             eventManager,
@@ -41,7 +42,8 @@ define([
             ResourceListWidget,
             QuickStartWidget,
             FrameWidget,
-            RelationshipWidget) {
+            RelationshipWidget,
+            ClusterStatusWidget) {
     var dwlInstance = {},
         widgetList = {
             lifeCycleMemoryHeap: {
@@ -97,6 +99,12 @@ define([
                 widget : RelationshipWidget,
                 desc : $.t("dashboard.widgetDescriptions.relationship"),
                 defaultSize: "large"
+            },
+            clusterStatus : {
+                name: $.t("dashboard.clusterStatusWidget.clusterStatusTitle"),
+                widget : ClusterStatusWidget,
+                desc : $.t("dashboard.widgetDescriptions.clusterStatus"),
+                defaultSize: "large"
             }
         },
         DashboardWidgetLoader = AdminAbstractView.extend({
@@ -104,7 +112,7 @@ define([
             noBaseTemplate: true,
             model: {},
             data: {},
-            
+
             /*
              Available Widgets:
              lifeCycleMemoryHeap - Current heap memory

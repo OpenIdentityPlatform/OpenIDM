@@ -14,34 +14,63 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-define(["lodash", "moment", "moment-timezone",
+define(["jquery", "lodash", "moment", "moment-timezone",
     "org/forgerock/openidm/ui/admin/scheduler/AbstractSchedulerView",
-    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate"
-
-
-], function(_, moment, momentTimezone, AbstractSchedulerView, SchedulerDelegate) {
+    "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
+    "org/forgerock/openidm/ui/admin/util/SchedulerUtils",
+    "org/forgerock/openidm/ui/admin/util/ClusterUtils",
+    "org/forgerock/openidm/ui/admin/delegates/ClusterDelegate"
+], function($, _,
+    moment,
+    momentTimezone,
+    AbstractSchedulerView,
+    SchedulerDelegate,
+    SchedulerUtils,
+    ClusterUtils,
+    ClusterDelegate
+) {
 
     var EditSchedulerView;
 
     EditSchedulerView = AbstractSchedulerView.extend({
         template: "templates/admin/scheduler/EditSchedulerViewTemplate.html",
         isNew: false,
+        events: _.extend({
+            "click #nodeDetailsButton": "openNodeDetailDialog"
+        }, AbstractSchedulerView.prototype.events),
         render: function(args, callback) {
             this.data.schedulerId = args[0];
 
-
             SchedulerDelegate.specificSchedule(args[0]).then((schedule) => {
+                if (schedule.triggers.length > 0) {
+                    this.data.nodeId = schedule.triggers[0].nodeId;
+                }
                 schedule = _.set(schedule, "invokeService", this.serviceType(schedule.invokeService));
                 schedule = _.omit(schedule, "triggers", "nextRunDate");
                 this.data.schedule = _.cloneDeep(schedule);
                 this.schedule = _.cloneDeep(schedule);
                 this.data.scheduleJSON = JSON.stringify(schedule, null, 4);
-                this.data.pageType = schedule.invokeService || "Script";
+                this.data.sheduleTypeData = SchedulerUtils.getScheduleTypeData(schedule);
 
                 this.renderForm(() => {
                     this.disable(".save-cancel-btn");
                 });
 
+            });
+        },
+        /**
+        * This function is called on node row click and opens up a BootstrapDialog which loads node details
+        **/
+        openNodeDetailDialog: function (e) {
+            var nodeId = $(e.target).closest("a").attr("nodeId");
+
+            e.preventDefault();
+
+            ClusterDelegate.getIndividualNode(nodeId).then( (node) => {
+                ClusterUtils.getDetailsForNodes([node]).then( (nodes) => {
+                    //since we are passing in only one node we need node[0]
+                    ClusterUtils.openNodeDetailDialog(nodes[0]);
+                });
             });
         }
 
