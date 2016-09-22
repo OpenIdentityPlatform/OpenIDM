@@ -212,6 +212,7 @@ define([
                 toggledOn: true
             }];
 
+            this.data.advancedConfig = {};
 
             $.when(
                 this.getResources(),
@@ -258,6 +259,7 @@ define([
                     $.extend(true, this.model.saveConfig, selfServiceConfig);
 
                     this.data.enableSelfService = true;
+                    this.data.advancedConfig.snapshotToken = selfServiceConfig.snapshotToken;
 
                     this.parentRender(_.bind(function () {
                         this.renderAttributeGrid();
@@ -294,6 +296,8 @@ define([
                     })[0], "identityServiceUrl");
 
                     $.extend(true, this.model.saveConfig, this.model.configDefault);
+
+                    this.data.advancedConfig.snapshotToken = this.model.configDefault.snapshotToken;
 
                     this.data.enableSelfService = false;
 
