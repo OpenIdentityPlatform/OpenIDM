@@ -26,6 +26,23 @@
                 "type" : "text/javascript",
                 "file" : "roles/postOperation-roles.js"
             },
+            "actions" : {
+                "resetPassword": {
+                    "type": "text/javascript",
+                    "source": "require('ui/resetPassword').sendMail(object, subject, message, passwordRules, passwordLength);",
+                    "globals": {
+                        "subject": "Your password has been reset by an administrator",
+                        "message": "<html><body><p>{{object.userName}}'s new password is: {{password}}</p></body></html>",
+                        "passwordRules": [
+                          { "rule": "UPPERCASE", "minimum": 1 },
+                          { "rule": "LOWERCASE", "minimum": 1 },
+                          { "rule": "INTEGERS", "minimum": 1 },
+                          { "rule": "SPECIAL", "minimum": 1 }
+                        ],
+                      "passwordLength": 16
+                    }
+                }
+            },
             "schema" : {
                 "id" : "http://jsonschema.net",
                 "title" : "User",

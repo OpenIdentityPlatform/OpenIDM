@@ -214,6 +214,14 @@ define([
             msg: "config.messages.settingMessages.saveEmailSuccess",
             type: "info"
         },
+        "userPasswordResetSuccess": {
+            msg: "config.messages.UserMessages.userPasswordResetSuccess",
+            type: "info"
+        },
+        "userPasswordResetEmailFailure": {
+            msg: "config.messages.UserMessages.userPasswordResetEmailFailure",
+            type: "info"
+        },
         "selfServiceUserRegistrationSave" : {
             msg: "config.messages.selfService.userRegistrationSave",
             type: "info"
