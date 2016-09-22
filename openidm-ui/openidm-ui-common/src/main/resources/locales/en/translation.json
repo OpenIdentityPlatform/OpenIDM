@@ -29,7 +29,8 @@
             "quickStart": "Links to common tasks",
             "frame": "Add external content",
             "userRelationship": "Links between accounts",
-            "relationship": "Links between objects"
+            "relationship": "Links between objects",
+            "clusterStatus": "Status and currently executing jobs of individual cluster nodes"
         },
         "memoryUsageBoth" : "Memory Usage (Heap and NonHeap)",
         "memoryUsageHeap" : "Memory Usage (JVM Heap)",
@@ -119,6 +120,22 @@
             "height" : "Height",
             "width" : "Width",
             "title" : "Title"
+        },
+        "clusterStatusWidget" : {
+            "clusterStatusTitle" : "Cluster Node Status",
+            "scheduler" : "Currently Executing Jobs",
+            "running" : "Running",
+            "down" : "Down",
+            "refresh": "Refresh",
+            "refreshRate" : "Refresh Rate",
+            "seconds" : "seconds",
+            "status" : "Status",
+            "startup" : "Startup",
+            "shutdown" : "Shutdown",
+            "job" : "Job",
+            "jobs" : "Jobs",
+            "meta" : "Meta",
+            "notApplicable" : "n/a"
         }
     },
     "config" : {
@@ -941,7 +958,8 @@
             "temporalConstraintsOnRole" : "Temporal Constraints on Role",
             "timeZone": "Timezone",
             "type" : "Type",
-            "unavailable" : "Unavailable"
+            "unavailable" : "Unavailable",
+            "currentlyExecutingOn" : "Currently executing on"
          },
         "workflows": {
             "tasks": {

@@ -90,7 +90,7 @@ define([
 
                     this.data.noVersions = data.updates.length === 0;
 
-                    ClusterDelegate.getClusters().then(_.bind(function(data) {
+                    ClusterDelegate.getNodes().then(_.bind(function(data) {
 
                         // There is only 1 node running, you can update using ui.
                         if (_.filter(data.results, {"state": "running"}).length === 1) {

@@ -27,6 +27,7 @@ define([
     "backgrid",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/openidm/ui/admin/util/Scheduler",
+    "org/forgerock/openidm/ui/admin/util/SchedulerUtils",
     "backgrid-paginator"
 ], function($, _,
             handlebars,
@@ -38,7 +39,8 @@ define([
             AdminUtils,
             Backgrid,
             BackgridUtils,
-            scheduler
+            scheduler,
+            SchedulerUtils
         ) {
     var SchedulerListView = AdminAbstractView.extend({
         template: "templates/admin/scheduler/SchedulerListViewTemplate.html",
@@ -242,33 +244,6 @@ define([
             })).html().toString();
         },
         /**
-         * Determines type of scheduler job
-         *
-         * @param {object} schedule
-         * @returns type of schedule
-         */
-        getScheduleType: function (schedule) {
-            var scheduleType,
-                action = schedule.invokeContext.action,
-                script = schedule.invokeContext.script;
-
-            if (action && action === "liveSync") {
-                scheduleType = "liveSync";
-            } else if (action && action === "reconcile") {
-                scheduleType = "recon";
-            } else if (_.has(schedule.invokeContext,"task")) {
-                scheduleType = "taskScanner";
-            } else if (script && script.source && script.source.indexOf("roles/onSync-roles") > -1) {
-                scheduleType = "temporalConstraintsOnRole";
-            }  else if (script && script.source && script.source.indexOf("triggerSyncCheck") > -1) {
-                scheduleType = "temporalConstraintsOnGrant";
-            } else if (script) {
-                scheduleType = "genericScript";
-            }
-
-            return scheduleType;
-        },
-        /**
          * Builds a the display for the cells in the "Type" column
          * each scheduler "Type" has it's own specific meta-data
          *
@@ -277,36 +252,10 @@ define([
          */
         getScheduleTypeDisplay: function (schedule) {
             var scheduleName = schedule._id,
-                script = schedule.invokeContext.script,
-                scheduleType = this.getScheduleType(schedule);
+                scheduleTypeData = SchedulerUtils.getScheduleTypeData(schedule);
 
-            switch (scheduleType) {
-                case "liveSync":
-                    scheduleName = this.renderTypePartial($.t("templates.scheduler.liveSync"), schedule.invokeContext.source);
-                    break;
-                case "recon":
-                    scheduleName = this.renderTypePartial($.t("templates.scheduler.reconciliation"), schedule.invokeContext.mapping);
-                    break;
-                case "taskScanner":
-                    scheduleName = this.renderTypePartial($.t("templates.scheduler.taskScanner"), schedule.invokeContext.scan.object);
-                    break;
-                case "temporalConstraintsOnRole":
-                    scheduleName = this.renderTypePartial($.t("templates.scheduler.temporalConstraintsOnRole"), script.globals.object.name);
-                    break;
-                case "temporalConstraintsOnGrant":
-                    scheduleName = this.renderTypePartial($.t("templates.scheduler.temporalConstraintsOnGrant"), script.globals.userId);
-                    break;
-                case "genericScript":
-                    if (script.source) {
-                        scheduleName = this.renderTypePartial($.t("templates.scheduler.script"), script.source);
-                    }
-                    if (script.file) {
-                        scheduleName = this.renderTypePartial($.t("templates.scheduler.script"), script.file);
-                    }
-                    break;
-            }
 
-            return scheduleName;
+            return this.renderTypePartial(scheduleTypeData.display, scheduleTypeData.meta);
         },
         /**
          * Reads the value of the filter selections
