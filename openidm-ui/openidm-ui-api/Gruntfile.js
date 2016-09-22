@@ -22,26 +22,14 @@ module.exports = function (grunt) {
                     cwd: 'node_modules/swagger-ui/dist/',
                     src: ['swagger-ui.js', 'css/*', 'fonts/*', 'images/*', 'lang/*', 'lib/*'],
                     dest: 'target/www/'
-                }],
-                options: {
-                    noProcess: ['**/*.{png,gif,jpg,ico,svg,ttf,eot,woff}'],
-                    process: function (content, srcpath) {
-                        // https://github.com/swagger-api/swagger-js/pull/780
-                        if (srcpath.indexOf('swagger-ui.js') !== -1) {
-                            return content.replace(
-                                /var requestUrl = this\.path;/,
-                                "var requestUrl = this.path.replace(/#.*/, '');");
-                        }
-                        return content;
-                    }
-                }
+                }]
             },
             swaggerThemes: {
                 files: [{
                     expand: true,
                     cwd: 'node_modules/swagger-ui-themes/themes/',
                     src: ['theme-flattop.css'],
-                    dest: 'target/www/'
+                    dest: 'target/www/css/'
                 }]
             },
             resources: {
