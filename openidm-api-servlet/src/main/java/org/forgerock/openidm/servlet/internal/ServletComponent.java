@@ -29,7 +29,6 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 
 import io.swagger.models.Info;
-import io.swagger.models.Scheme;
 import io.swagger.models.Swagger;
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -50,6 +49,7 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.handler.Handlers;
 import org.forgerock.http.io.Buffer;
 import org.forgerock.http.servlet.HttpFrameworkServlet;
+import org.forgerock.http.swagger.OpenApiRequestFilter;
 import org.forgerock.http.swagger.SwaggerApiProducer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -181,12 +181,12 @@ public class ServletComponent implements EventHandler {
                 new DescribedHttpApplication() {
                     @Override
                     public ApiProducer<Swagger> getApiProducer() {
-                        return new SwaggerApiProducer(new Info().title(API_TITLE), null, null, (List<Scheme>)null);
+                        return new SwaggerApiProducer(new Info().title(API_TITLE));
                     }
 
                     @Override
                     public Handler start() throws HttpApplicationException {
-                        return Handlers.chainOf(handler, authFilter);
+                        return Handlers.chainOf(handler, new OpenApiRequestFilter(), authFilter);
                     }
 
                     @Override
