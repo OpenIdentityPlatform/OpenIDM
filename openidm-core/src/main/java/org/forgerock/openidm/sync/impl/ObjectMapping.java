@@ -20,6 +20,7 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
+import static org.forgerock.json.JsonValueFunctions.setOf;
 import static org.forgerock.openidm.sync.impl.ReconciliationStatistic.DurationMetric;
 
 import java.util.Collections;
@@ -206,8 +207,8 @@ class ObjectMapping {
         if (linkQualifiersValue.isNull()) {
             // No link qualifiers configured, so add only the default
             linkQualifiersList.add(Link.DEFAULT_LINK_QUALIFIER);
-        } else if (linkQualifiersValue.isList() || linkQualifiersValue.isSet()) {
-            linkQualifiersList.addAll(config.get("linkQualifiers").asSet(String.class));
+        } else if (linkQualifiersValue.isList()) {
+            linkQualifiersList.addAll(config.get("linkQualifiers").as(setOf(String.class)));
         } else if (linkQualifiersValue.isMap()) {
             linkQualifiersScript = Scripts.newScript(linkQualifiersValue);
         } else {
@@ -316,7 +317,7 @@ class ObjectMapping {
 
             final long startNanoTime = startNanoTime(reconContext);
             try {
-                return json(linkQualifiersScript.exec(scope, context)).asSet(String.class);
+                return json(linkQualifiersScript.exec(scope, context)).as(setOf(String.class));
             } catch (ScriptException se) {
                 LOGGER.debug("{} {} script encountered exception", name, "linkQualifiers", se);
                 throw new SynchronizationException(se);
