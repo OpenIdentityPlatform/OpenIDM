@@ -32,6 +32,7 @@ import javax.security.auth.message.MessagePolicy;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverService;
 import org.forgerock.openidm.auth.modules.oauth.resolvers.service.OAuthResolverServiceConfigurator;
@@ -100,7 +101,7 @@ public class OAuthModuleTest {
     public void shouldReturnFailureWhenNoAccessToken() throws AuthException {
         //given
         final Request request = new Request();
-        final Response response = new Response();
+        final Response response = new Response(Status.OK);
 
         final MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         final String accessToken = null;
@@ -121,7 +122,7 @@ public class OAuthModuleTest {
     public void shouldReturnFailureWhenNoResolverName() throws AuthException {
         //given
         final Request request = new Request();
-        final Response response = new Response();
+        final Response response = new Response(Status.OK);
 
         final MessageInfoContext mockMessage = mock(MessageInfoContext.class);
         final String resolverName = null;
