@@ -84,5 +84,5 @@ private boolean cacheEffectiveAssignments(JsonValue lastSyncEffectiveAssignments
  * @return true is they are the same; false otherwise
  */
 private boolean sameAssignments(JsonValue lastSyncEA, JsonValue sourceObjectEA) {
-    return lastSyncEA.asSet().equals(sourceObjectEA.asSet())
+    return lastSyncEA.isEqualTo(sourceObjectEA)
 }

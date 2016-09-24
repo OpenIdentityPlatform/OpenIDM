@@ -11,12 +11,11 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
@@ -55,6 +54,8 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.Set;
+
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.TaskService;
 import org.activiti.engine.form.FormProperty;
@@ -233,19 +234,20 @@ public class TaskInstanceResource implements CollectionResourceProvider {
      * @return JsonValue of candidates
      */
     private JsonValue getCandidateIdentities(Task task) {
-        JsonValue candidates = json(object())
-                .add("candidateUsers", new HashSet<>())
-                .add("candidateGroups", new HashSet<>());
+        Set<String> candidateUsers = new HashSet<>();
+        Set<String> candidateGroups = new HashSet<>();
         List<IdentityLink> candidateIdentity = processEngine.getTaskService().getIdentityLinksForTask(task.getId());
         for (IdentityLink identityLink : candidateIdentity) {
             if (identityLink.getUserId() != null) {
-                candidates.get("candidateUsers").asSet().add(identityLink.getUserId());
+                candidateUsers.add(identityLink.getUserId());
             }
             if (identityLink.getGroupId() != null) {
-                candidates.get("candidateGroups").asSet().add(identityLink.getGroupId());
+                candidateGroups.add(identityLink.getGroupId());
             }
         }
-        return candidates;
+        return json(object(
+                field("candidateUsers", array(candidateUsers.toArray())),
+                field("candidateGroups", array(candidateGroups.toArray()))));
     }
 
     @Override

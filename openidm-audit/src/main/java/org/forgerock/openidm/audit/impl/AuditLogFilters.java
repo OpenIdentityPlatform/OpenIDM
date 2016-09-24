@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions Copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
 
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
+import static org.forgerock.json.JsonValueFunctions.setOf;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -82,7 +83,7 @@ public class AuditLogFilters {
                 public AuditLogFilter apply(JsonValue value) {
                     return newFieldValueFilter(
                             new JsonPointer(value.get("name").required().asString()),
-                            value.get("values").required().asSet(String.class),
+                            value.get("values").required().as(setOf(String.class)),
                             AS_STRING); // currently assumes values are strings
                 }
             };
