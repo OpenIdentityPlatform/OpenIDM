@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -37,6 +37,7 @@ import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
+import org.forgerock.http.protocol.Status;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.script.ScriptRegistry;
@@ -93,7 +94,7 @@ public class IDMAuthModuleWrapperTest {
         Map<String, Object> contextMap = new HashMap<>();
 
         Request request = new Request();
-        Response response = new Response();
+        Response response = new Response(Status.OK);
 
         given(messageInfo.getRequest()).willReturn(request);
         given(messageInfo.getResponse()).willReturn(response);
@@ -130,7 +131,7 @@ public class IDMAuthModuleWrapperTest {
         Map<String, Object> contextMap = new HashMap<String, Object>();
 
         Request request = new Request();
-        Response response = new Response();
+        Response response = new Response(Status.OK);
 
         given(messageInfo.getRequest()).willReturn(request);
         given(messageInfo.getResponse()).willReturn(response);
@@ -167,7 +168,7 @@ public class IDMAuthModuleWrapperTest {
         Map<String, Object> contextMap = new HashMap<String, Object>();
 
         Request request = new Request();
-        Response response = new Response();
+        Response response = new Response(Status.OK);
 
         given(messageInfo.getRequest()).willReturn(request);
         given(messageInfo.getResponse()).willReturn(response);
@@ -204,7 +205,7 @@ public class IDMAuthModuleWrapperTest {
         Map<String, Object> contextMap = new HashMap<>();
 
         Request request = new Request();
-        Response response = new Response();
+        Response response = new Response(Status.OK);
 
         Principal principalOne = mock(Principal.class);
         Principal principalTwo = mock(Principal.class);
@@ -251,7 +252,7 @@ public class IDMAuthModuleWrapperTest {
         Map<String, Object> contextMap = new HashMap<>();
 
         Request request = new Request();
-        Response response = new Response();
+        Response response = new Response(Status.OK);
 
         Principal principalOne = mock(Principal.class);
         Principal principalTwo = mock(Principal.class);
