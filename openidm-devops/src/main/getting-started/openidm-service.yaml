@@ -1,0 +1,12 @@
+metadata:
+  name: openidm 
+  labels:
+    app: getting-started
+spec:
+  ports:
+    - port: 8080
+      nodePort: 30080
+  selector:
+    app: getting-started
+    tier: frontend
+  type: NodePort
