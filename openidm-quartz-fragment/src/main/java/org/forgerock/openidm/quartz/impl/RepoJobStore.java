@@ -1440,8 +1440,10 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
 
             // Remove the acquired trigger (if acquired)
             removeAcquiredTrigger(trigger, instanceId);
-            tw.setAcquired(false);
-            tw.setNodeId(null);
+            if (tw != null) {
+                tw.setAcquired(false);
+                tw.setNodeId(null);
+            }
 
             if (jw != null) {
                 JobDetail jd;
