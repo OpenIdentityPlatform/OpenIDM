@@ -42,5 +42,28 @@
 
          }
          */
-    }
+    };
+
+    /**
+     * Creates a relationship between an managed/user/{id} and managed/idpData.
+     *
+     * @param object managed user
+     */
+    exports.createIdpRelationships = function (object) {
+        // if managed object contains identity provider data
+        if (object.idpData) {
+            object.idpDataRelationships = Object.keys(object.idpData).filter(function (provider) {
+                // filter on which identity providers have been enabled
+                return object.idpData[provider].enabled !== false;
+            }).map(function (provider) {
+                // creates an entry in managed/idpData, returns entry ref to be associated with a managed user
+                // so that the relationship can be created
+                openidm.create("managed/" + provider, object.idpData[provider].subject, object.idpData[provider].rawProfile);
+                return {
+                    _ref: "managed/" + provider + "/" + object.idpData[provider].subject
+                };
+            });
+        }
+    };
+
 }());

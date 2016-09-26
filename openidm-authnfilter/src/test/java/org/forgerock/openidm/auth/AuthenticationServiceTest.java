@@ -68,9 +68,9 @@ public class AuthenticationServiceTest {
         // amendedAuthentication.json is what the configuration should look after injection
         amendedAuthentication = json(
                 OBJECT_MAPPER.readValue(getClass().getResource("/config/amendedAuthentication.json"), Map.class));
-        // identityProvider-google.json is a sample identityProvider configuration
+        // identityProvider-oidc.json is a sample identityProvider configuration
         googleIdentityProvider = json(
-                OBJECT_MAPPER.readValue(getClass().getResource("/config/identityProvider-google.json"), Map.class));
+                OBJECT_MAPPER.readValue(getClass().getResource("/config/identityProvider-oidc.json"), Map.class));
         // authentication.json is what a sample authentication.json file will look like on the filesystem
         // Note: The authentication.json file here has been modified to include only the minimum config needed to test
         // the functionality of AuthenticationService.java#amendAuthConfig()
@@ -132,7 +132,7 @@ public class AuthenticationServiceTest {
         final List<ProviderConfig> oAuthProviderConfigs = new ArrayList<>();
         oAuthProviderConfigs.add(ProviderConfigMapper.toProviderConfig(
                         json(OBJECT_MAPPER.readValue(getClass()
-                                .getResource("/config/identityProvider-facebook.json"), Map.class))));
+                                .getResource("/config/identityProvider-oauth.json"), Map.class))));
 
         // Whenever we call getIdentityByType("OPENID_CONNECT") return the test case configs for openid_connect
         when(identityProviderService.getIdentityProviderByType(OPENID_CONNECT)).thenReturn(openIdProviderConfigs);

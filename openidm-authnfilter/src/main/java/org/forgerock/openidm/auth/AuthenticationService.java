@@ -168,6 +168,8 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     public static final String AUTH_MODULE_PROPERTIES_KEY = "properties";
     /** The propertyMapping key within an auth module stanza in the authentication config. */
     public static final String AUTH_MODULE_PROPERTY_MAPPING_KEY = "propertyMapping";
+    /** The queryOnResource key within an auth module stanza in the authentication config. */
+    public static final String AUTH_MODULE_QUERY_ON_RESOURCE = "queryOnResource";
     /** The name key within an auth module stanza in the authentication config. */
     public static final String AUTH_MODULE_NAME_KEY = "name";
     /** The className key within an auth module stanza in the authentication config. */
@@ -178,6 +180,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     public static final String AUTH_MODULE_RESOLVERS_KEY = "resolvers";
 
     private static final String SOCIAL_PROVIDERS = "SOCIAL_PROVIDERS";
+    private static final String MANAGED = "managed";
 
     /** the encoded key location in the return value from {@link SharedKeyService#getSharedKey(String)} */
     private static final JsonPointer ENCODED_SECRET_PTR = new JsonPointer("/secret/encoded");
@@ -430,8 +433,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                 authModule.put(AUTH_MODULE_NAME_KEY, providerConfig.getType());
                 properties.put(AUTH_MODULE_RESOLVERS_KEY,
                         array(ProviderConfigMapper.toJsonValue(providerConfig).asMap()));
-                properties.get(AUTH_MODULE_PROPERTY_MAPPING_KEY).asMap().put(AUTHENTICATION_ID,
-                        IDP_DATA + "/" + providerConfig.getName() + "/" + SUBJECT);
+                properties.put(AUTH_MODULE_QUERY_ON_RESOURCE, MANAGED + "/" + providerConfig.getName());
+                properties.put(new JsonPointer(AUTH_MODULE_PROPERTY_MAPPING_KEY).child(AUTHENTICATION_ID),
+                        providerConfig.getAuthenticationId());
                 properties.put(OPENID_CONNECT_HEADER, AUTH_TOKEN);
                 authModule.put(AUTH_MODULE_CONFIG_ENABLED, providerConfig.isEnabled());
                 return authModule.asMap();
@@ -439,8 +443,9 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                 authModule.put(AUTH_MODULE_NAME_KEY, providerConfig.getType());
                 properties.put(AUTH_MODULE_RESOLVERS_KEY,
                         array(ProviderConfigMapper.toJsonValue(providerConfig).asMap()));
-                properties.get(AUTH_MODULE_PROPERTY_MAPPING_KEY).asMap().put(AUTHENTICATION_ID,
-                        IDP_DATA + "/" + providerConfig.getName() + "/" + SUBJECT);
+                properties.put(AUTH_MODULE_QUERY_ON_RESOURCE, MANAGED + "/" + providerConfig.getName());
+                properties.put(new JsonPointer(AUTH_MODULE_PROPERTY_MAPPING_KEY).child(AUTHENTICATION_ID),
+                        providerConfig.getAuthenticationId());
                 properties.put(AUTH_TOKEN_HEADER, AUTH_TOKEN);
                 properties.put(AUTH_RESOLVER_HEADER, PROVIDER);
                 authModule.put(AUTH_MODULE_CONFIG_ENABLED, providerConfig.isEnabled());
