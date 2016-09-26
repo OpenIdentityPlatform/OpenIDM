@@ -1782,6 +1782,16 @@
                 "clientSecret" : "Consumer Secret",
                 "clientId" : "Consumer Key"
             },
+            "marketo" : {
+                "instance" : "Instance",
+                "instanceHelp" : "The Marketo-assigned FQDN for your instance",
+                "clientIdHelp" : "Your OAuth2 client ID",
+                "clientSecretHelp" : "Your OAuth2 client secret",
+                "leadFields" : "Lead Fields",
+                "leadFieldsHelp" : "Comma-delimited list of lead fields to fetch; leave empty for default set",
+                "partitionName" : "Partition Name",
+                "partitionNameHelp" : "Name of the partition in which to create and update leads; may be left empty"
+            },
             "oAuthGeneral" : {
                 "base" : "Base OAuth Details",
                 "clientSecret": "Client Secret",
