@@ -4,11 +4,11 @@
             "name" : "user",
             "onCreate" : {
                 "type" : "text/javascript",
-                "source" : "require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
+                "source" : "require('ui/onCreateUser').setDefaultFields(object);require('ui/onCreateUser').createIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
             },
             "onUpdate" : {
                 "type" : "text/javascript",
-                "source" : "require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
+                "source" : "require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('ui/onUpdateUser').updateIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');"
             },
             "onDelete" : {
                 "type" : "text/javascript",
@@ -473,6 +473,43 @@
                         ],
                         "userEditable" : false
                     },
+                    "idpDataRelationships" : {
+                        "description" : "",
+                        "title" : "Identity Provider Data",
+                        "viewable" : true,
+                        "userEditable" : false,
+                        "returnByDefault" : false,
+                        "type" : "array",
+                        "items" : {
+                            "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "user",
+                            "validate" : true,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : { }
+                            },
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/google",
+                                    "label" : "Identity Provider",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "provider",
+                                            "subject"
+                                        ],
+                                        "sortKeys" : [
+                                            "provider",
+                                            "subject"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
                     "lastSync" : {
                         "type" : "object",
                         "scope" : "private",
@@ -876,6 +913,320 @@
                     "attributes",
                     "linkQualifiers"
                 ]
+            }
+        },
+        {
+            "name": "google",
+            "title": "google User Info",
+            "schema": {
+                "properties": {
+                    "user": {
+                        "description": "",
+                        "title": "",
+                        "viewable": true,
+                        "searchable": false,
+                        "userEditable": false,
+                        "policies": [],
+                        "returnByDefault": false,
+                        "minLength": null,
+                        "pattern": "",
+                        "type": "relationship",
+                        "reverseRelationship": true,
+                        "reversePropertyName": "idpDataRelationships",
+                        "validate": true,
+                        "properties": {
+                            "_ref": {
+                                "type": "string"
+                            },
+                            "_refProperties": {
+                                "type": "object",
+                                "properties": {}
+                            }
+                        },
+                        "resourceCollection": [
+                            {
+                                "path": "managed/user",
+                                "label": "User",
+                                "query": {
+                                    "queryFilter": "true",
+                                    "fields": [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ],
+                                    "sortKeys": [
+                                        "userName"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "sub": {
+                        "title": "sub",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "name": {
+                        "title": "name",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "given_name": {
+                        "title": "given_name",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "family_name": {
+                        "title": "family_name",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "picture": {
+                        "title": "picture",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "email": {
+                        "title": "email",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "locale": {
+                        "title": "locale",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    }
+                },
+                "order": [
+                    "user",
+                    "sub",
+                    "name",
+                    "given_name",
+                    "family_name",
+                    "picture",
+                    "email",
+                    "email",
+                    "locale"
+                ],
+                "required": []
+            }
+        },
+        {
+            "name": "facebook",
+            "title": "facebook User Info",
+            "schema": {
+                "properties": {
+                    "user": {
+                        "description": "",
+                        "title": "",
+                        "viewable": true,
+                        "searchable": false,
+                        "userEditable": false,
+                        "policies": [],
+                        "returnByDefault": false,
+                        "minLength": null,
+                        "pattern": "",
+                        "type": "relationship",
+                        "reverseRelationship": true,
+                        "reversePropertyName": "idpDataRelationships",
+                        "validate": true,
+                        "properties": {
+                            "_ref": {
+                                "type": "string"
+                            },
+                            "_refProperties": {
+                                "type": "object",
+                                "properties": {}
+                            }
+                        },
+                        "resourceCollection": [
+                            {
+                                "path": "managed/user",
+                                "label": "User",
+                                "query": {
+                                    "queryFilter": "true",
+                                    "fields": [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ],
+                                    "sortKeys": [
+                                        "userName"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "id": {
+                        "title": "id",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "name": {
+                        "title": "name",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "first_name": {
+                        "title": "first_name",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "last_name": {
+                        "title": "last_name",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "email": {
+                        "title": "email",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "locale": {
+                        "title": "locale",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    }
+                },
+                "order": [
+                    "user",
+                    "id",
+                    "name",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "email",
+                    "locale"
+                ],
+                "required": []
+            }
+        },
+        {
+            "name": "linkedIn",
+            "title": "linkedIn User Info",
+            "schema": {
+                "properties": {
+                    "user": {
+                        "description": "",
+                        "title": "",
+                        "viewable": true,
+                        "searchable": false,
+                        "userEditable": false,
+                        "policies": [],
+                        "returnByDefault": false,
+                        "minLength": null,
+                        "pattern": "",
+                        "type": "relationship",
+                        "reverseRelationship": true,
+                        "reversePropertyName": "idpDataRelationships",
+                        "validate": true,
+                        "properties": {
+                            "_ref": {
+                                "type": "string"
+                            },
+                            "_refProperties": {
+                                "type": "object",
+                                "properties": {}
+                            }
+                        },
+                        "resourceCollection": [
+                            {
+                                "path": "managed/user",
+                                "label": "User",
+                                "query": {
+                                    "queryFilter": "true",
+                                    "fields": [
+                                        "userName",
+                                        "givenName",
+                                        "sn"
+                                    ],
+                                    "sortKeys": [
+                                        "userName"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    "id": {
+                        "title": "id",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "formattedName": {
+                        "title": "formattedName",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "firstName": {
+                        "title": "firstName",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "lastName": {
+                        "title": "lastName",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "emailAddress": {
+                        "title": "emailAddress",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    },
+                    "location": {
+                        "title": "location",
+                        "viewable": true,
+                        "type": "string",
+                        "searchable": true,
+                        "userEditable": false
+                    }
+                },
+                "order": [
+                    "user",
+                    "id",
+                    "formattedName",
+                    "firstName",
+                    "lastName",
+                    "emailAddress",
+                    "emailAddress",
+                    "location"
+                ],
+                "required": []
             }
         }
     ]

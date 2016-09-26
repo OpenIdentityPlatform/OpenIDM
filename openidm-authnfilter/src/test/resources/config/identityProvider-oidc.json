@@ -1,0 +1,15 @@
+{
+  "name" : "oidc",
+  "type" : "OPENID_CONNECT",
+  "icon" : "oidc",
+  "authorization_endpoint" : "authorization endpoint url",
+  "token_endpoint" : "token endpoint url",
+  "userinfo_endpoint" : "userinfo endpoint url",
+  "well-known" : "well-known url",
+  "client_id" : "",
+  "client_secret" : "",
+  "scope" : [
+    "foo"
+  ],
+  "authenticationId" : "_id"
+}

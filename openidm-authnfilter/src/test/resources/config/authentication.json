@@ -4,7 +4,10 @@
       {
         "name" : "SOCIAL_PROVIDERS",
         "properties" : {
-          "queryOnResource" : "managed/user",
+          "augmentSecurityContext": {
+            "type" : "text/javascript",
+            "file" : "auth/augmentScript.js"
+          },
           "propertyMapping" : {
             "userRoles" : "authzRoles"
           },

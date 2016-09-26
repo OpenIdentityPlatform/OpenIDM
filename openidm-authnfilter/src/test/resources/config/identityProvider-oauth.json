@@ -1,0 +1,21 @@
+{
+  "name" : "oauth",
+  "type" : "OAUTH",
+  "icon" : "oauth",
+  "authorization_endpoint" : "authorization endpoint url",
+  "token_endpoint" : "token endpoint url",
+  "userinfo_endpoint" : "userinfo endpoint url",
+  "client_id" : "",
+  "client_secret" : "",
+  "scope" : [
+    "foo",
+    "bar"
+  ],
+  "authenticationId" : "_id",
+  "propertyMap" : [
+    {
+      "source" : "source",
+      "target" : "target"
+    }
+  ]
+}

@@ -18,5 +18,25 @@
                 "source" : "content.map(function (obj) { var schemaProps = obj.schema.properties; Object.keys(schemaProps).forEach(function (prop) { var propSchema = schemaProps[prop], withoutReauthPolicy; if (propSchema.policies) { withoutReauthPolicy = propSchema.policies.filter(function (p) { return p.policyId !== 're-auth-required'; }); if (propSchema.policies.length !== withoutReauthPolicy.length) { propSchema.isProtected = true; propSchema.policies = withoutReauthPolicy; } } }); return obj; })"
             }
         }
+    },
+    {
+        "operation" : "transform",
+        "field" : "/objects",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "content.map(function (obj) { if (obj.name === 'user' && obj.onCreate.source === \"require('ui/onCreateUser').setDefaultFields(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\") {obj.onCreate.source = \"require('ui/onCreateUser').setDefaultFields(object);require('ui/onCreateUser').createIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\"} return obj;})"
+            }
+        }
+    },
+    {
+        "operation" : "transform",
+        "field" : "/objects",
+        "value" : {
+            "script" : {
+                "type" : "text/javascript",
+                "source" : "content.map(function (obj) { if (obj.name === 'user' && obj.onUpdate.source === \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\") {obj.onUpdate.source = \"require('ui/onUpdateUser').preserveLastSync(object, oldObject, request);require('ui/onUpdateUser').updateIdpRelationships(object);require('roles/conditionalRoles').updateConditionalGrantsForUser(object, 'roles');\"} return obj;})"
+            }
+        }
     }
 ]
