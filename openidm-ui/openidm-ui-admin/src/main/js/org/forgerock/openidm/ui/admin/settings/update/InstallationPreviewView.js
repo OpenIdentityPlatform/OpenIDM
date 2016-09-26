@@ -124,26 +124,6 @@ define([
             },this), 1);
         },
 
-        showUpdatesOrInstall: function() {
-            var repoUpdates = new Backbone.Collection();
-
-            MaintenanceDelegate.getRepoUpdates(this.model.archiveModel.get("archive")).then(
-                _.bind(function(data) {
-                    if (data && data.length > 0) {
-                        this.data.repoUpdatesList = data;
-                        this.data.repoUpdatesExist = true;
-
-                        _.each(data, function (model) {
-                            repoUpdates.add(model);
-                        }, this);
-                        this.model.repoUpdates({"archiveModel": this.model.archiveModel, "data": this.data, "files": this.model.files});
-                    } else {
-                        this.model.install(this.model.archiveModel, this.data.repoUpdatesList);
-                    }
-                }, this)
-            );
-        },
-
         showModifiedTreegrid: function(e) {
             if (e) {
                 e.preventDefault();
@@ -193,13 +173,13 @@ define([
                                     cssClass: "btn-primary",
                                     action: _.bind(function (dialog) {
                                         dialog.close();
-                                        self.showUpdatesOrInstall();
+                                        self.model.install(this.model.archiveModel);
                                     }, this)
                                 }
                             ]
                         });
                     } else {
-                        this.showUpdatesOrInstall();
+                        this.model.install(this.model.archiveModel);
                     }
                 }, this),
                 _.bind(function() {
