@@ -25,6 +25,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
+    "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView",
     "bootstrap-dialog",
@@ -40,6 +41,7 @@ define([
             EventManager,
             Constants,
             AdminUtils,
+            SiteConfigurationDelegate,
             UIUtils,
             UserRegistrationConfigView,
             BootstrapDialog,
@@ -178,12 +180,14 @@ define([
             var originalVal = !$(event.currentTarget).is(":checked"),
                 toggle = $(event.target),
                 card = toggle.parents(".wide-card"),
+                cardDetails = this.getCardDetails(card),
                 index = this.$el.find(".wide-card").index(card),
                 enabled;
 
             function configSocialProvider() {
                 var providerCount,
-                    messageResult;
+                    messageResult,
+                    managedConfigPromise = ConfigDelegate.readEntity("managed");
 
                 card.toggleClass("disabled");
                 enabled = !card.hasClass("disabled");
@@ -196,17 +200,51 @@ define([
 
                 if (enabled) {
                     this.createConfig(this.model.providers[index]).then(() => {
-                        if (providerCount === 1) {
-                            this.addBindUnbindBehavior();
-                        }
+                        managedConfigPromise
+                            .then((managedConfig) => {
+                                if (providerCount === 1) {
+                                    return this.addBindUnbindBehavior(
+                                        this.addIDPsProperty(managedConfig)
+                                    );
+                                } else {
+                                    return managedConfig;
+                                }
+                            })
+                            .then((managedConfig) =>
+                                this.addManagedObjectForIDP(this.model.providers[index], managedConfig)
+                            )
+                            .then((managedConfig) =>
+                                ConfigDelegate.updateEntity("managed", managedConfig)
+                            ).then(() => {
+                                SiteConfigurationDelegate.updateConfiguration(function () {
+                                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                                });
+                            });
 
                         card.find(".btn-link").trigger("click");
                     });
                 } else {
                     this.deleteConfig(this.model.providers[index]).then(() => {
-                        if (providerCount === 0) {
-                            this.removeBindUnbindBehavior();
-                        }
+                        managedConfigPromise
+                            .then((managedConfig) => {
+                                if (providerCount === 0) {
+                                    return this.removeBindUnbindBehavior(
+                                        this.removeIDPsProperty(managedConfig)
+                                    );
+                                } else {
+                                    return managedConfig;
+                                }
+                            })
+                            .then((managedConfig) =>
+                                this.removeManagedObjectForIDP(this.model.providers[index], managedConfig)
+                            )
+                            .then((managedConfig) =>
+                                ConfigDelegate.updateEntity("managed", managedConfig)
+                            ).then(() => {
+                                SiteConfigurationDelegate.updateConfiguration(function () {
+                                    EventManager.sendEvent(Constants.EVENT_UPDATE_NAVIGATION);
+                                });
+                            });
                     });
                 }
 
@@ -437,40 +475,189 @@ define([
             });
         },
 
-        addBindUnbindBehavior: function () {
-            return ConfigDelegate.readEntity("managed").then((managedConfig) => {
-                let managedUser = _.find(managedConfig.objects, (o) => o.name === "user");
-                if (!_.has(managedUser, "actions")) {
-                    managedUser.actions = {};
-                }
-                if (!_.has(managedUser.actions, "unbind")) {
-                    managedUser.actions.unbind = {
-                        "type" : "text/javascript",
-                        "file" : "ui/unBindBehavior.js"
-                    };
-                }
-                if (!_.has(managedUser.actions, "bind")) {
-                    managedUser.actions.bind = {
-                        "type" : "text/javascript",
-                        "file" : "ui/bindBehavior.js"
-                    };
-                }
-                return ConfigDelegate.updateEntity("managed", managedConfig);
-            });
+        addBindUnbindBehavior: function (managedConfig) {
+            let updatedManagedConfig = _.cloneDeep(managedConfig),
+                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
+
+            if (!_.has(managedUser, "actions")) {
+                managedUser.actions = {};
+            }
+            if (!_.has(managedUser.actions, "unbind")) {
+                managedUser.actions.unbind = {
+                    "type" : "text/javascript",
+                    "file" : "ui/unBindBehavior.js"
+                };
+            }
+            if (!_.has(managedUser.actions, "bind")) {
+                managedUser.actions.bind = {
+                    "type" : "text/javascript",
+                    "file" : "ui/bindBehavior.js"
+                };
+            }
+            return updatedManagedConfig;
         },
 
-        removeBindUnbindBehavior: function () {
-            return ConfigDelegate.readEntity("managed").then((managedConfig) => {
-                let managedUser = _.find(managedConfig.objects, (o) => o.name === "user");
-                if (_.has(managedUser, "actions.unbind")) {
-                    delete managedUser.actions.unbind;
+        removeBindUnbindBehavior: function (managedConfig) {
+            let updatedManagedConfig = _.cloneDeep(managedConfig),
+                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
+
+            if (_.has(managedUser, "actions.unbind")) {
+                delete managedUser.actions.unbind;
+            }
+            if (_.has(managedUser, "actions.bind")) {
+                delete managedUser.actions.bind;
+            }
+            return updatedManagedConfig;
+        },
+
+        /**
+         *
+         */
+        addManagedObjectForIDP : (provider, managedConfig) => {
+            let updatedManagedConfig = _.cloneDeep(managedConfig),
+                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
+
+            managedUser.schema.properties.idps.items.resourceCollection.push({
+                "path" : "managed/" + provider.name,
+                "label" : provider.name + " Info",
+                "query" : {
+                    "queryFilter" : "true",
+                    // take the top three properties from the propertyMap config as the default
+                    // representative values for the resourceCollection
+                    "fields" : provider.propertyMap.map((prop) => prop.source).slice(0,3),
+                    "sortKeys" : provider.propertyMap.map((prop) => prop.source).slice(0,3)
                 }
-                if (_.has(managedUser, "actions.bind")) {
-                    delete managedUser.actions.bind;
-                }
-                return ConfigDelegate.updateEntity("managed", managedConfig);
             });
+
+            if (!_.find(updatedManagedConfig.objects, (o) =>
+                o.name === provider.name
+            )) {
+                updatedManagedConfig.objects.push({
+                    "name": provider.name,
+                    "title": provider.name + " User Info",
+                    "schema": {
+                        "id" : "http://jsonschema.net",
+                        "title" : provider.name,
+                        "viewable" : true,
+                        "type" : "object",
+                        "$schema" : "http://json-schema.org/draft-03/schema",
+                        "properties": provider.propertyMap.reduce(
+                            function(result, prop) {
+                                result[prop.source] = ({
+                                    "title" : prop.source,
+                                    "viewable" : true,
+                                    "type" : "string",
+                                    "searchable" : true,
+                                    "userEditable" : false
+                                });
+                                return result;
+                            },
+                            {
+                                "user" : {
+                                    "viewable" : true,
+                                    "searchable" : false,
+                                    "type" : "relationship",
+                                    "reverseRelationship" : true,
+                                    "reversePropertyName" : "idps",
+                                    "validate" : true,
+                                    "properties" : {
+                                        "_ref" : {
+                                            "type" : "string"
+                                        },
+                                        "_refProperties" : {
+                                            "type" : "object",
+                                            "properties" : { }
+                                        }
+                                    },
+                                    "resourceCollection" : [
+                                        {
+                                            "path" : "managed/user",
+                                            "label" : "User",
+                                            "query" : {
+                                                "queryFilter" : "true",
+                                                "fields" : [
+                                                    "userName",
+                                                    "givenName",
+                                                    "sn"
+                                                ],
+                                                "sortKeys" : [
+                                                    "userName"
+                                                ]
+                                            }
+                                        }
+                                    ]
+                                }
+                            }
+                        ),
+                        "order" : provider.propertyMap.map((prop) => prop.source).concat(["user"]),
+                        "required": []
+                    }
+                });
+            }
+            return updatedManagedConfig;
+        },
+        removeManagedObjectForIDP : (provider, managedConfig) => {
+            let updatedManagedConfig = _.cloneDeep(managedConfig),
+                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user"),
+                idps = managedUser.schema.properties.idps;
+
+            // idps may be undefined if all of them have been removed
+            if (idps) {
+                idps.items.resourceCollection =
+                _.filter(idps.items.resourceCollection, (r) => r.path !== 'managed/' + provider.name);
+            }
+
+            updatedManagedConfig.objects = _.filter(updatedManagedConfig.objects, (o) =>
+                o.name !== provider.name
+            );
+            return updatedManagedConfig;
+        },
+        addIDPsProperty : (managedConfig) => {
+            let updatedManagedConfig = _.cloneDeep(managedConfig),
+                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
+
+            managedUser.schema.properties.idps = {
+                "title" : "Identity Providers",
+                "viewable" : true,
+                "searchable" : false,
+                "userEditable" : false,
+                "returnByDefault" : false,
+                "type" : "array",
+                "items" : {
+                    "type" : "relationship",
+                    "reverseRelationship" : true,
+                    "reversePropertyName" : "user",
+                    "validate" : true,
+                    "properties" : {
+                        "_ref" : {
+                            "type" : "string"
+                        },
+                        "_refProperties" : {
+                            "type" : "object",
+                            "properties" : { }
+                        }
+                    },
+                    "resourceCollection" : []
+                }
+            };
+
+            if (_.indexOf(managedUser.schema.order, "idps") === -1) {
+                managedUser.schema.order.push("idps");
+            }
+
+            return updatedManagedConfig;
+        },
+        removeIDPsProperty : (managedConfig) => {
+            let updatedManagedConfig = _.cloneDeep(managedConfig),
+                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
+
+            managedUser.schema.order = _.filter(managedUser.schema.order, (o) => o !== "idps");
+
+            delete managedUser.schema.properties.idps;
+
+            return updatedManagedConfig;
         }
+
     });
 
     return new SocialConfigView();

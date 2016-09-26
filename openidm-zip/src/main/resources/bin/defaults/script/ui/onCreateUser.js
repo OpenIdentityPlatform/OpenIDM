@@ -52,7 +52,7 @@
     exports.createIdpRelationships = function (object) {
         // if managed object contains identity provider data
         if (object.idpData) {
-            object.idpDataRelationships = Object.keys(object.idpData).filter(function (provider) {
+            object.idps = Object.keys(object.idpData).filter(function (provider) {
                 // filter on which identity providers have been enabled
                 return object.idpData[provider].enabled !== false;
             }).map(function (provider) {

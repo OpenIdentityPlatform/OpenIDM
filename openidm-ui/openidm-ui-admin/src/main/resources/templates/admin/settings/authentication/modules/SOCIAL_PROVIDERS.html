@@ -6,12 +6,6 @@
         label="templates.auth.moduleEnabled"
         enabled=config.enabled}}
 
-        {{> form/_basicSelect
-        property="properties.queryOnResource"
-        label="templates.auth.queryOnResource"
-        options=resources
-        value=config.properties.queryOnResource}}
-
         {{> form/_tagSelectize
         value=config.properties.defaultUserRoles
         label="templates.auth.defaultUserRole"
