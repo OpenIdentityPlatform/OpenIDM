@@ -63,7 +63,6 @@ define([
                     } else if (this.data.successful && !this.model.archiveModel.get("restartRequired")) {
                         this.installationReport();
                     } else if (this.data.repoUpdates) {
-
                         this.showRepoUpdates(this.data.lastID);
                     } else if (this.model.runningID) {
                         this.model.failedOnce = 0;
@@ -106,18 +105,10 @@ define([
         showRepoUpdates: function() {
             this.data.final = true;
 
-            // var repoUpdates = new Backbone.Collection();
-
             MaintenanceDelegate.getRepoUpdates(this.model.archiveModel.get("archive")).then(
 
-                _.bind(function(data) {
-                    // debugger;
+                (data) => {
                     this.data.repoUpdatesList = data;
-                    // this.data.repoUpdatesExist = true;
-
-                    // _.each(data, function (model) {
-                    //     repoUpdates.add(model);
-                    // }, this);
 
                     this.model.repoUpdates({
                         "archiveModel": this.model.archiveModel,
@@ -126,7 +117,7 @@ define([
                     });
                     this.showUI();
 
-                }, this)
+                }
             );
 
         },
