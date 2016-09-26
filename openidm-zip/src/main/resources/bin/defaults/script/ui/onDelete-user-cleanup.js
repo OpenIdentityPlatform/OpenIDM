@@ -1,4 +1,4 @@
-/** 
+/**
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
  * Copyright (c) 2012 ForgeRock AS. All Rights Reserved
@@ -34,10 +34,16 @@ var userId = object._id,
 
 notificationQueryResult = openidm.query("repo/ui/notification", findUserNotificationsParams);
 if (notificationQueryResult.result && notificationQueryResult.result.length!==0) {
-        
+
     for (notificationPointer=0;notificationPointer<notificationQueryResult.result.length;notificationPointer++) {
         var notification = notificationQueryResult.result[notificationPointer];
         openidm['delete']('repo/ui/notification/' + notification._id, notification._rev);
     }
-        
+
 }
+
+// delete idpData related to this user
+openidm.query("managed/user/" + object._id + "/idps",
+    { "_queryFilter": "true"}, ["*"]).result.forEach(function (relationship) {
+    openidm['delete'](relationship._ref, relationship._rev);
+});

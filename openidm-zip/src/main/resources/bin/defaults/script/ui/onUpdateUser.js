@@ -32,8 +32,10 @@
      */
     exports.updateIdpRelationships = function (object) {
 
-        // query all existing identity provider relationships for managed/user/{id}
-        var existingIDPRelationships = openidm.query("managed/user/" + object._id + "/idpDataRelationships", { "_queryFilter": "true"}, ["*"]),
+
+        var _ = require("lib/lodash"),
+            // query all existing identity provider relationships for managed/user/{id}
+            existingIDPRelationships = openidm.query("managed/user/" + object._id + "/idps", { "_queryFilter": "true"}),
             relationshipsToRemove = [];
 
         // if there is any idp data associated with the current user,
@@ -45,25 +47,29 @@
                 // looks for any existing relationship which matches the current subject and provider
                 // within the current managed user object
                     doesNotExist = existingIDPRelationships.result.filter(function (existingRelationship) {
-                            return existingRelationship.subject === subject && existingRelationship.provider === provider;
+                            return existingRelationship._ref === "managed/" + provider + "/" + subject;
                         }).length === 0;
 
                 // current provider has to be enabled AND not exist already
                 return object.idpData[provider].enabled !== false && doesNotExist;
             }).forEach(function (provider) {
-                // creates a relationship between managed/user/{id} and managed/idpData
-                openidm.create("managed/" + provider, object.idpData[provider].subject, object.idpData[provider].rawProfile);
-                return {
-                    _ref: "managed/" + provider + "/" + object.idpData[provider].subject
-                };
+                // creates a relationship between managed/user/${id} and managed/${provider}
+                openidm.create("managed/" + provider, object.idpData[provider].subject,
+                    _.extend({
+                        "user" : {
+                            _ref: "managed/user/" + object._id
+                        }
+                    }, object.idpData[provider].rawProfile));
             });
 
             // determines if a relationship needs to be removed by filtering on the following :
             // 1) if the identity provider is no longer present in the managedUser
             // 2) the identity provider is disabled in the managed user properties
             relationshipsToRemove = existingIDPRelationships.result.filter(function (existingRelationship) {
-                return object.idpData[existingRelationship.provider] === undefined ||
-                    object.idpData[existingRelationship.provider].enabled === false;
+                // find the managed object name from within the path to the resource (managed/google/123 => google)
+                var provider = /^managed\/([^\/]+)/.exec(existingRelationship._ref)[1];
+                return object.idpData[provider] === undefined ||
+                    object.idpData[provider].enabled === false;
             });
 
         } else {

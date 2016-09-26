@@ -62,8 +62,8 @@
 (function () {
     logger.debug("Augment context for: {}", security.authenticationId);
 
-    var managedUserRef =
-        openidm.read(security.authorization.component + "/" + security.authorization.id, null, ["*","user"]).user;
+    var _ = require("lib/lodash"),
+        managedUserRef = openidm.read(security.authorization.component + "/" + security.authorization.id, null, ["*","user"]).user;
 
     if (!managedUserRef) {
         throw {
