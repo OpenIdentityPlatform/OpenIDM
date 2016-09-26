@@ -1110,11 +1110,7 @@
         "update": {
             "title": "Update",
             "repoUpdates" : {
-                "header": "Repository Update Script Preview",
-                "headerText": "Review repository updates to be performed manually below.",
-                "description": "OpenIDM will stay in maintenance mode until repository updates are complete.",
                 "tableHeader": "DATABASE FILE",
-                "continue": "Continue",
                 "cancel": "Cancel",
                 "link": "LINK",
                 "complete": "Mark Complete",
