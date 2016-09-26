@@ -1,0 +1,33 @@
+metadata:
+  name: openidm
+  labels:
+    app: getting-started
+spec:
+  selector:
+    matchLabels:
+      app: getting-started
+      tier: frontend
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: getting-started
+        tier: frontend
+    spec:
+      containers:
+      - image: forgerock/openidm-zip:latest
+        name: openidm
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DB_HOST
+          value: postgres
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-pass
+              key: password.txt
+        ports:
+        - containerPort: 8080
+          name: openidm
+        args: ["-p","samples/getting-started"]

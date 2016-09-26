@@ -325,6 +325,7 @@
         <!--module>openidm-workflow-remote</module-->
         <module>openidm-zip</module>
         <module>custom-scripted-connector-bundler</module>
+        <module>openidm-devops</module>
     </modules>
 
     <profiles>
@@ -804,6 +805,26 @@
                             <id>attach-javadocs</id>
                             <goals>
                                 <goal>jar</goal>
+                            </goals>
+                        </execution>
+                    </executions>
+                </plugin>
+
+                <plugin>
+                    <groupId>io.fabric8</groupId>
+                    <artifactId>fabric8-maven-plugin</artifactId>
+                    <version>3.1.52</version>
+                    <inherited>false</inherited>
+                    <configuration>
+                        <skip>true</skip>
+                    </configuration>
+                    <executions>
+                        <execution>
+                            <id>fmp</id>
+                            <goals>
+                                <goal>resource</goal>
+                                <goal>helm</goal>
+                                <goal>build</goal>
                             </goals>
                         </execution>
                     </executions>
