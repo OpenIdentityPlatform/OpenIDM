@@ -2,12 +2,14 @@
     "auditServiceConfig" : {
         "handlerForQueries" : "repo",
         "availableAuditEventHandlers" : [
-            "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
-            "org.forgerock.audit.handlers.json.JsonAuditEventHandler",
             "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+            "org.forgerock.audit.handlers.elasticsearch.ElasticsearchAuditEventHandler",
             "org.forgerock.audit.handlers.jms.JmsAuditEventHandler",
+            "org.forgerock.audit.handlers.json.JsonAuditEventHandler",
             "org.forgerock.openidm.audit.impl.RepositoryAuditEventHandler",
-            "org.forgerock.openidm.audit.impl.RouterAuditEventHandler"
+            "org.forgerock.openidm.audit.impl.RouterAuditEventHandler",
+            "org.forgerock.audit.handlers.splunk.SplunkAuditEventHandler",
+            "org.forgerock.audit.handlers.syslog.SyslogAuditEventHandler"
         ],
         "filterPolicies" : {
             "value" : {
