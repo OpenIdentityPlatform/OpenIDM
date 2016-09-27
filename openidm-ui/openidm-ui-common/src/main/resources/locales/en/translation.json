@@ -1232,6 +1232,7 @@
                 "successHeader": "Installation complete.",
                 "successMsg": "You have successfully updated OpenIDM to version",
                 "header": "Installation Report",
+                "failedDesc": "The update process failed. See openidm/logs/openidm0.log.0 for an error message. For more information, see ",
                 "desc": "All files were successfully installed. Modified files were backed up to locations specified below.  You will need to refresh your browser to see any UI changes.",
                 "expand": "Expand All",
                 "collapse": "Collapse All",

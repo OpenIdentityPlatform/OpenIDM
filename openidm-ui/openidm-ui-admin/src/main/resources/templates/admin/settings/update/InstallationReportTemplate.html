@@ -25,7 +25,12 @@
     {{/if}}
 
     <p class="panel-description">
-        {{t "templates.update.review.desc"}}
+        {{#if failed}}
+            {{t "templates.update.review.failedDesc"}}
+            <strong><a href="{{docHelpUrl}}install-guide/#update-errors" target="_blank">here</a></strong>
+        {{else}}
+            {{t "templates.update.review.desc"}}
+        {{/if}}
     </p>
 
     <div class="form-inline toolbar">
