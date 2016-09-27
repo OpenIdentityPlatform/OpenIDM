@@ -1004,7 +1004,7 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
                             new DefaultSQLExceptionHandler());
         case MYSQL:
             return
-                    new GenericTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
+                    new MySQLTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new MySQLExceptionHandler());
         case SQLSERVER:
             return
