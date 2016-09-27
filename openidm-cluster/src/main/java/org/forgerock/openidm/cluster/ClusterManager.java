@@ -15,17 +15,15 @@
  */
 package org.forgerock.openidm.cluster;
 
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.core.IdentityServer.NODE_ID;
 import static org.forgerock.openidm.util.ResourceUtil.notSupported;
 
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,8 +42,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.openidm.router.IDMConnectionFactory;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -59,13 +55,16 @@ import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourcePath;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -120,7 +119,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     /**
      * Resource name when issuing cluster event requests directly with the Repository Service
      */
-    private static final ResourcePath EVENTS_RESOURCE_CONTAINER = new ResourcePath("cluster", "events"); 
+    private static final ResourcePath EVENTS_RESOURCE_CONTAINER = new ResourcePath("cluster", "events");
 
     /**
      * The instance ID
@@ -189,9 +188,13 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      */
     protected void init(JsonValue config) {
         ClusterConfig clstrCfg = new ClusterConfig(config);
+        instanceId = clstrCfg.getInstanceId();
+        // If the instanceId is empty or still contains the unevaluated nodeId property, then IDM should not ACTIVATE.
+        if (null == instanceId || instanceId.isEmpty() || PropertyUtil.containsProperty(instanceId, NODE_ID)) {
+            throw new IllegalStateException(
+                    "No property of '" + NODE_ID + "' could be found in configuration.");
+        }
         clusterConfig = clstrCfg;
-        instanceId = clusterConfig.getInstanceId();
-
         if (clusterConfig.isEnabled()) {
             enabled = true;
             clusterManagerThread = new ClusterManagerThread(clusterConfig.getInstanceCheckInInterval(), 
