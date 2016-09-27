@@ -2616,6 +2616,35 @@
                     }
                 }
             },
+            "splunk": {
+                "authzToken": {
+                    "help": "Authorization token associated with the Splunk configured HTTP event collector"
+                },
+                "connection": {
+                    "help": "Splunk connection",
+                    "useSSL": {
+                        "help": "Use SSL/TLS to connect to Splunk"
+                    },
+                    "host": {
+                        "help": "Hostname or IP address of Splunk (default: localhost)"
+                    },
+                    "port": {
+                        "help": "Port used by Splunk (default: 8088)"
+                    }
+                },
+                "buffering": {
+                    "help": "Configuration for buffering events and sending in batches (increases write-throughput)",
+                    "maxSize": {
+                        "help": "Fixed maximum number of events that can be buffered (default: 10000)"
+                    },
+                    "writeInterval": {
+                        "help": "Interval (default: 100 ms) at which buffered events are written to Splunk (units of 'ms' or 's' are recommended)"
+                    },
+                    "maxBatchedEvents": {
+                        "help": "Maximum number of events per batch-write to Splunk for each Write Interval (default: 500)"
+                    }
+                }
+            },
             "jms": {
                 "deliveryMode": {
                     "help": "JMS mode to deliver the messages in, either PERSISTENT or NON_PERSISTENT"
