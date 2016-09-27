@@ -64,17 +64,21 @@ define([
          * @param [callback]
          */
         render: function(configs, callback) {
-
             // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
             SpinnerManager.showSpinner();
 
             this.model = configs;
             this.data = _.extend(this.data, _.pick(this.model, ["treeGrid", "responseB64", "version"]));
+            this.data.docHelpUrl = Constants.DOC_URL;
 
             if (configs.isHistoricalInstall) {
                 this.data.isHistoricalInstall = true;
                 this.data.date = DateUtil.formatDate(this.model.response.endDate, "MMM dd, yyyy");
                 this.data.user = this.model.response.userName;
+
+                if (configs.response.status === "FAILED") {
+                    this.data.failed = true;
+                }
             }
 
             MaintenanceDelegate.getLogDetails(this.model.runningID)
