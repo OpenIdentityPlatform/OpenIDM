@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2013 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.core;
@@ -63,6 +55,17 @@ public class PropertyUtil {
     public static final String DELIM_START_DOLLAR = "${";
     public static final String DELIM_START_AMPERSAND = "&{";
     public static final char DELIM_STOP = '}';
+
+    /**
+     * Tests if the passed in value contains the delimited property, ie &{property} or ${property}
+     * @param value the value to test
+     * @param property the property to look for in the passed value.
+     * @return true if the passed value contains the delimited property.
+     */
+    public static boolean containsProperty(String value, String property) {
+        return null != value && (value.contains(DELIM_START_AMPERSAND + property + DELIM_STOP)
+                || value.contains(DELIM_START_DOLLAR + property + DELIM_STOP));
+    }
 
     /**
      * <p>

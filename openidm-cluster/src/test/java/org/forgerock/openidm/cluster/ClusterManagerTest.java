@@ -110,4 +110,9 @@ public class ClusterManagerTest {
     	Assertions.assertThat(node.isStarted()).isTrue();
     }
 
+    @Test(expectedExceptions = IllegalStateException.class)
+    public void testNoClusterNodeIdInConfig() throws Exception  {
+        final ClusterManager clusterManager = new ClusterManager();
+        clusterManager.init(json(object(field("instanceId","&{openidm.node.id}"))));
+    }
 }

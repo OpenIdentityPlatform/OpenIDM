@@ -68,6 +68,7 @@ public final class IdentityServer implements PropertyAccessor {
     public static final String PKCS11_CONFIG = "openidm.security.pkcs11.config";
     public static final String SSL_HOST_ALIASES = "openidm.ssl.host.aliases";
     public static final String HTTPS_KEYSTORE_CERT_ALIAS = "openidm.https.keystore.cert.alias";
+    public static final String NODE_ID = "openidm.node.id";
 
     /**
      * Precedence is
