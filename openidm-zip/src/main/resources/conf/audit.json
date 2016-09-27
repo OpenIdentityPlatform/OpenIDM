@@ -26,9 +26,9 @@
     },
     "eventHandlers" : [
         {
-            "class" : "org.forgerock.audit.handlers.csv.CsvAuditEventHandler",
+            "class" : "org.forgerock.audit.handlers.json.JsonAuditEventHandler",
             "config" : {
-                "name" : "csv",
+                "name" : "json",
                 "logDirectory" : "&{launcher.working.location}/audit",
                 "topics" : [
                     "access",
