@@ -35,8 +35,14 @@
 
         var _ = require("lib/lodash"),
             // query all existing identity provider relationships for managed/user/{id}
-            existingIDPRelationships = openidm.query("managed/user/" + object._id + "/idps", { "_queryFilter": "true"}),
+            existingIDPRelationships = { "result": [] },
             relationshipsToRemove = [];
+
+        try {
+            existingIDPRelationships = openidm.query("managed/user/" + object._id + "/idps", { "_queryFilter": "true"});
+        } catch (e) {
+            // no problem, simply unable to find an /idps endpoint
+        }
 
         // if there is any idp data associated with the current user,
         // compare it with the existing idp relationships
