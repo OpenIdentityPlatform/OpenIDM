@@ -43,7 +43,11 @@ if (notificationQueryResult.result && notificationQueryResult.result.length!==0)
 }
 
 // delete idpData related to this user
-openidm.query("managed/user/" + object._id + "/idps",
-    { "_queryFilter": "true"}, ["*"]).result.forEach(function (relationship) {
-    openidm['delete'](relationship._ref, relationship._rev);
-});
+try {
+    openidm.query("managed/user/" + object._id + "/idps",
+        { "_queryFilter": "true"}, ["*"]).result.forEach(function (relationship) {
+        openidm['delete'](relationship._ref, relationship._rev);
+    });
+} catch (e) {
+    // no problem, simply unable to find an /idps endpoint
+}
