@@ -45,16 +45,11 @@ define([
     };
 
     obj.providerList = function() {
-        var headers = {},
-            promise = $.Deferred();
-        headers[Constants.HEADER_PARAM_USERNAME] = "anonymous";
-        headers[Constants.HEADER_PARAM_PASSWORD] = "anonymous";
-        headers[Constants.HEADER_PARAM_NO_SESSION] = "true";
+        var promise = $.Deferred();
 
         obj.serviceCall({
             url: "",
             type: "get",
-            headers: headers,
             errorsHandlers: {
                 "notfound": {status: 404}
             }
@@ -66,13 +61,20 @@ define([
         return promise;
     };
 
-    obj.availableProviders = function() {
-        return obj.serviceCall({
+    obj.availableProviders = function() {var headers = {},
+        promise = $.Deferred();
+        obj.serviceCall({
             url: "?_action=availableProviders",
-            type: "post"
+            type: "post",
+            errorsHandlers: {
+                "notfound": {status: 404}
+            }
         }).then((results) => {
-            return results;
+            promise.resolve(results);
+        }, () => {
+            promise.resolve({providers:[]});
         });
+        return promise;
     };
 
     obj.getAuthToken = function (provider, code, redirect_uri) {
