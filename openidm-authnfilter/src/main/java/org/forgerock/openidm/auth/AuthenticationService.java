@@ -151,7 +151,7 @@ import org.slf4j.LoggerFactory;
 public class AuthenticationService implements SingletonResourceProvider, IdentityProviderListener {
 
     /** The PID for this Component. */
-    static final String PID = "org.forgerock.openidm.authentication";
+    public static final String PID = "org.forgerock.openidm.authentication";
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
