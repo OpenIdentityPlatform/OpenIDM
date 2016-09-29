@@ -42,14 +42,19 @@ define([
     var MappingAddView = AdminAbstractView.extend({
         template: "templates/admin/mapping/AddMappingTemplate.html",
         events: {
-            "click #resourceConnectorContainer .card" : "addResourceMapping",
-            "click #resourceManagedContainer .card" : "addResourceMapping"
+            "click #resourceConnectorContainer .card" : "addResourceEvent",
+            "click #resourceManagedContainer .card" : "addResourceEvent"
         },
         addMappingView: false,
+        data : {
+
+        },
+        model : {
+
+        },
         render: function(args, callback) {
             var connectorPromise,
                 managedPromise,
-                splitConfig,
                 tempIconClass;
 
             this.data.docHelpUrl = constants.DOC_URL;
@@ -58,35 +63,14 @@ define([
             managedPromise = ConfigDelegate.readEntity("managed");
 
             $.when(connectorPromise, managedPromise).then(_.bind(function(connectors, managedObjects){
+                _.each(connectors, _.bind(function(connector, index){
+                    connectors[index] = this.setupDisplayConnector(connector);
 
-                _.each(connectors, _.bind(function(connector){
-                    connector.displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connector.connectorRef.connectorName));
+                    connectors[index].displayName = $.t("templates.connector." +connectorUtils.cleanConnectorName(connectors[index].connectorRef.connectorName));
 
-                    tempIconClass = connectorUtils.getIcon(connector.connectorRef.connectorName);
-                    connector.iconClass = tempIconClass.iconClass;
-                    connector.iconSrc = tempIconClass.src;
-
-                    if(connector.objectTypes) {
-                        connector.objectTypes = _.chain(connector.objectTypes)
-                            .filter(function(objectTypes){
-                                return objectTypes !== "__ALL__";
-                            })
-                            .sortBy(function(objectType) {
-                                return objectType;
-                            })
-                            .value();
-
-                        if(connector.objectTypes.length > 2) {
-                            connector.displayObjectType = connector.objectTypes[0] +", " +connector.objectTypes[1]+ ", (" +(connector.objectTypes.length - 2) +" " +$.t("templates.mapping.more") +")";
-                        } else {
-                            connector.displayObjectType = connector.objectTypes.join(", ");
-                        }
-                    }
-
-                    splitConfig = connector.config.split("/");
-
-                    connector.cleanUrlName = splitConfig[1] + "_" +splitConfig[2];
-                    connector.cleanEditName = splitConfig[2];
+                    tempIconClass = connectorUtils.getIcon(connectors[index].connectorRef.connectorName);
+                    connectors[index].iconClass = tempIconClass.iconClass;
+                    connectors[index].iconSrc = tempIconClass.src;
                 }, this));
 
                 this.data.currentConnectors = _.filter(connectors, function(connector) {
@@ -103,6 +87,8 @@ define([
                 }, this));
 
                 this.parentRender(_.bind(function(){
+                    let preselectResult;
+
                     this.$el.find('#resourceMappingBody').affix({
                         offset: {
                             top: 240
@@ -120,7 +106,12 @@ define([
                         }, this)},
                         _.bind(function(){
                             if(args.length > 0) {
-                                this.preselectMappingCard(args);
+                                preselectResult = this.preselectMappingCard(args, this.data.currentConnectors, this.data.currentManagedObjects);
+
+
+                                if(preselectResult !== null) {
+                                    MapResourceView.addMapping(preselectResult);
+                                }
                             }
 
                             if (callback) {
@@ -132,50 +123,110 @@ define([
             }, this));
         },
 
-        preselectMappingCard: function(selected) {
+        /**
+         * @param displayConnector - Standard connector object returned from IDM (config and objecttypes)
+         * @returns {*} - Returns a modified connector object containing display elements for listing objectType, icon, and sorting
+         */
+        setupDisplayConnector : function(displayConnector) {
+            var connector = _.clone(displayConnector),
+                splitConfig;
+
+            if(connector.objectTypes) {
+                connector.objectTypes = _.chain(connector.objectTypes)
+                    .filter(function(objectTypes){
+                        return objectTypes !== "__ALL__";
+                    })
+                    .sortBy(function(objectType) {
+                        return objectType;
+                    })
+                    .value();
+
+                if(connector.objectTypes.length > 2) {
+                    connector.displayObjectType = connector.objectTypes[0] +", " +connector.objectTypes[1]+ ", (" +(connector.objectTypes.length - 2) +" " +$.t("templates.mapping.more") +")";
+                } else {
+                    connector.displayObjectType = connector.objectTypes.join(", ");
+                }
+            }
+
+            splitConfig = connector.config.split("/");
+
+            connector.cleanUrlName = splitConfig[1] + "_" +splitConfig[2];
+            connector.cleanEditName = splitConfig[2];
+
+            return connector;
+        },
+
+        /**
+         * @param selected - Array of URL arguments with type and name ["connector", "ldap"]
+         * @param connectors - Array of connector object details
+         * @param managedObjects - Array of managed object details
+         * @returns {*} Returns the correct connector or managed object details based on the URL arguments to allow for on load selection of a resource
+         */
+        preselectMappingCard: function(selected, connectors, managedObjects) {
             var resourceData = null;
 
             if(selected[0] === "connector") {
-                resourceData =  _.find(this.data.currentConnectors, function(connector) {
+                resourceData =  _.find(connectors, function(connector) {
                     return selected[1] === connector.name;
                 });
 
                 if(resourceData !== null) {
-                    resourceData.resourceType = "connector";
+                    resourceData.resourceType = selected[0];
                 }
             } else {
-                resourceData =  _.find(this.data.currentManagedObjects, function(managed) {
+                resourceData =  _.find(managedObjects, function(managed) {
                     return selected[1] === managed.name;
                 });
 
                 if(resourceData !== null) {
-                    resourceData.resourceType = "managed";
+                    resourceData.resourceType = selected[0];
                 }
             }
 
-            if(resourceData !== null) {
-                MapResourceView.addMapping(resourceData);
-            }
+            return resourceData;
         },
 
-        addResourceMapping: function(event) {
+        /**
+         * @param event - Click event on a card selected in the add mapping view
+         *
+         * This event finds the dom location of the card and type and passes the details onto addResourceMapping to find the appropriate resource details
+         */
+        addResourceEvent: function(event) {
             var resourceSelected = $(event.currentTarget).closest(".card"),
                 resourceType = resourceSelected.attr("data-resource-type"),
-                resourceData = null,
                 resourceLocation = null;
 
             if(resourceType === "connector") {
                 resourceLocation = this.$el.find("#resourceConnectorContainer .resource-body").index(resourceSelected);
-                resourceData = this.data.currentConnectors[resourceLocation];
-                resourceData.resourceType = "connector";
             } else {
                 resourceLocation = this.$el.find("#resourceManagedContainer .resource-body").index(resourceSelected);
-                resourceData = this.data.currentManagedObjects[resourceLocation];
-                resourceData.resourceType = "managed";
             }
 
-            MapResourceView.addMapping(resourceData);
+            MapResourceView.addMapping(this.addResourceMapping(resourceType,  resourceLocation, this.data.currentConnectors, this.data.currentManagedObjects));
+        },
+
+        /**
+         *
+         * @param resourceType - Current resource type connector or managed
+         * @param resourceLocation - The numerical location of the resource based on the DOM location
+         * @param connectors - Array of connector object details
+         * @param managedObjects - Array of managed object details
+         * @returns {*} Returns the correct connector or managed object details based on the URL arguments to allow for on load selection of a resource
+         */
+        addResourceMapping: function(resourceType, resourceLocation, connectors, managedObjects) {
+            var resourceData = null;
+
+            if(resourceType === "connector") {
+                resourceData = connectors[resourceLocation];
+                resourceData.resourceType = resourceType;
+            } else {
+                resourceData = managedObjects[resourceLocation];
+                resourceData.resourceType = resourceType;
+            }
+
+            return resourceData;
         }
+
     });
 
     return new MappingAddView();
