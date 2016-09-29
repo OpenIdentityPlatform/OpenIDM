@@ -1,9 +1,0 @@
-{
-  "src_folders" : [
-    "tests"
-  ],
-  "custom_commands_path" : "custom/commands",
-  "output_folder" : "reports",
-  "page_objects_path" : "pages",
-  "globals_path" : "data/devGlobals.js"
-}

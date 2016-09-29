@@ -16,47 +16,6 @@
 
 module.exports = function(grunt) {
     grunt.initConfig({
-        nightwatch: {
-            /**
-             * Run the integration tests using Nightwatch and Firefox or Chrome.
-             */
-            admin: {
-                config_path: 'openidm-ui-admin/src/test/nightwatchjs/config.json'
-            },
-            enduser: {
-                config_path: 'openidm-ui-enduser/src/test/nightwatchjs/config.json'
-            },
-            options: {
-                selenium: {
-                    start_process: true,
-                    server_path: "./selenium/selenium-server-standalone.jar",
-                    log_path: "reports",
-                    host: "127.0.0.1",
-                    port: 4445,
-                    cli_args: {
-                        "webdriver.chrome.driver": "/usr/local/bin/chromedriver",
-                        "webdriver.ie.driver": ""
-                    }
-                },
-                test_settings: {
-                    "default": {
-                        launch_url: "http://localhost",
-                        selenium_port: 4445,
-                        selenium_host: "localhost",
-                        silent: true,
-                        screenshots: {
-                            enabled: false,
-                            path: ""
-                        },
-                        desiredCapabilities: {
-                            browserName: "firefox",
-                            javascriptEnabled: true,
-                            acceptSslCerts: true
-                        }
-                    }
-                }
-            }
-        },
         parallel: {
             /**
              * Run the dev tasks for the sub-projects in parallel.
@@ -82,10 +41,8 @@ module.exports = function(grunt) {
         }
     });
 
-    grunt.loadNpmTasks("grunt-nightwatch");
     grunt.loadNpmTasks('grunt-parallel');
 
-    grunt.registerTask('test', ['nightwatch:admin', 'nightwatch:enduser']);
     grunt.registerTask('dev', ['parallel']);
     grunt.registerTask('default', 'dev');
 };
