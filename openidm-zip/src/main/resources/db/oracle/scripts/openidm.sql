@@ -406,6 +406,19 @@ CREATE TABLE relationshipproperties (
 );
 
 
+PROMPT Creating Foreign Key Constraint fk_relationshipproperties_conf on table relationshipproperties...
+ALTER TABLE relationshipproperties
+ADD CONSTRAINT fk_relationshipproperties_conf FOREIGN KEY
+(
+  relationships_id
+)
+REFERENCES relationships
+(
+  id
+)
+ON DELETE CASCADE
+ENABLE
+;
 PROMPT Creating Index fk_relationshipproperties_conf on relationshipproperties ...
 CREATE INDEX fk_relationshipproperties_conf ON relationshipproperties
 (
