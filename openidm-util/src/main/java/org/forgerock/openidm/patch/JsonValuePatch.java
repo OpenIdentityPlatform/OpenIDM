@@ -192,6 +192,16 @@ public class JsonValuePatch {
 
         if (operations != null) {
             for (final PatchOperation operation : operations) {
+                // Remove ALL support for patch using /field/4 to refer to an index of a list.
+                // If it is field with position and its parent's value is a list, throw 400 error.
+                final JsonPointer field = (operation.isMove() || operation.isCopy())
+                        ? operation.getFrom()
+                        : operation.getField();
+                if (field.leaf().matches("\\d")
+                        && subject.get(field.parent()) != null
+                        && subject.get(field.parent()).isList()) {
+                    throw new BadRequestException("Position-based operation is not allowed: " + field);
+                }
                 isModified |=
                         operation.isAdd() ? add(subject, operation)
                                 : operation.isRemove() ? remove(subject, operation)
