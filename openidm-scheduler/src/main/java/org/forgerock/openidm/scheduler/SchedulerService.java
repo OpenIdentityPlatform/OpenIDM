@@ -68,7 +68,6 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.quartz.Job;
 import org.quartz.ObjectAlreadyExistsException;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.quartz.impl.DirectSchedulerFactory;
@@ -217,7 +216,7 @@ public class SchedulerService implements RequestHandler {
 
     private void setupRouter() {
         router.addRoute(STARTS_WITH, Router.uriTemplate(JOB_RESOURCE_PATH),
-                new JobRequestHandler(persistentScheduler, inMemoryScheduler, connectionFactory));
+                new JobRequestHandler(persistentScheduler, inMemoryScheduler, clusterManager.getInstanceId()));
         router.addRoute(STARTS_WITH, Router.uriTemplate(TRIGGER_RESOURCE_PATH),
                 new TriggerRequestHandler(connectionFactory));
         router.addRoute(STARTS_WITH, Router.uriTemplate(WAITING_TRIGGERS_RESOURCE_PATH),
@@ -373,7 +372,7 @@ public class SchedulerService implements RequestHandler {
         logger.info("Creating Persistent Scheduler");
         StdSchedulerFactory sf = new StdSchedulerFactory();
         sf.initialize(schedulerConfig.toProps());
-        persistentScheduler = sf.getScheduler();
+        persistentScheduler = new PersistedScheduler(sf.getScheduler(), connectionFactory);
     }
 
     private void initInMemoryScheduler() throws SchedulerException {
@@ -390,7 +389,7 @@ public class SchedulerService implements RequestHandler {
                 // the StdSchedulerFactory (used to create the persistent schedulers).
                 logger.info("Creating In-Memory Scheduler");
                 DirectSchedulerFactory.getInstance().createVolatileScheduler(10);
-                inMemoryScheduler = DirectSchedulerFactory.getInstance().getScheduler();
+                inMemoryScheduler = new MemoryScheduler(DirectSchedulerFactory.getInstance().getScheduler());
                 // Set back to the original thread context classloader
                 Thread.currentThread().setContextClassLoader(original);
             }
