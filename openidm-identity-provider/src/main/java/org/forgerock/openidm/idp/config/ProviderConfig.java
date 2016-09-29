@@ -15,10 +15,11 @@
  */
 package org.forgerock.openidm.idp.config;
 
+import java.util.List;
+import java.util.Map;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-
-import java.util.List;
 
 /**
  * Configuration of an Identity Provider.
@@ -63,6 +64,9 @@ public class ProviderConfig {
 
     @JsonProperty
     private List<SingleMapping> propertyMap;
+
+    @JsonProperty
+    private Map<String, Object> schema;
 
     /** Default true, can disable
      * identity provider by setting to false

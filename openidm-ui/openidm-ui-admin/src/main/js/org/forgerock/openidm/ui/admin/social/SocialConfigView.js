@@ -475,6 +475,10 @@ define([
             });
         },
 
+        /**
+         * Update the managedConfig for the user object to add bind and unbind actions
+         * @param {object} managedConfig the full managed config value
+         */
         addBindUnbindBehavior: function (managedConfig) {
             let updatedManagedConfig = _.cloneDeep(managedConfig),
                 managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
@@ -497,6 +501,10 @@ define([
             return updatedManagedConfig;
         },
 
+        /**
+         * Update the managedConfig for the user object to remove bind and unbind actions
+         * @param {object} managedConfig the full managed config value
+         */
         removeBindUnbindBehavior: function (managedConfig) {
             let updatedManagedConfig = _.cloneDeep(managedConfig),
                 managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
@@ -511,91 +519,97 @@ define([
         },
 
         /**
-         *
+         * Add a new managed object for the given provider, including user relationship references
+         * @param {object} provider the full config of the provider
+         * @param {string} provider.name the name of the provider
+         * @param {object} provider.schema the JSON schema describing the userInfo response
+         * @param {object} managedConfig the full managed config value
          */
         addManagedObjectForIDP : (provider, managedConfig) => {
             let updatedManagedConfig = _.cloneDeep(managedConfig),
-                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
+                managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user"),
+                // take the top three properties from the schema config as the default
+                // representative values for the resourceCollection; if no schema available, use _id
+                fields = (provider.schema && provider.schema.order) ? provider.schema.order.slice(0,3) : ["_id"];
 
             managedUser.schema.properties.idps.items.resourceCollection.push({
                 "path" : "managed/" + provider.name,
                 "label" : provider.name + " Info",
                 "query" : {
                     "queryFilter" : "true",
-                    // take the top three properties from the propertyMap config as the default
-                    // representative values for the resourceCollection
-                    "fields" : provider.propertyMap.map((prop) => prop.source).slice(0,3),
-                    "sortKeys" : provider.propertyMap.map((prop) => prop.source).slice(0,3)
+                    "fields" : fields,
+                    "sortKeys" : fields
                 }
             });
 
             if (!_.find(updatedManagedConfig.objects, (o) =>
                 o.name === provider.name
             )) {
+                let newObjectSchema = _.merge({
+                    "title" : provider.name,
+                    "properties" : {
+                        "user" : {
+                            "viewable" : true,
+                            "searchable" : false,
+                            "type" : "relationship",
+                            "reverseRelationship" : true,
+                            "reversePropertyName" : "idps",
+                            "validate" : true,
+                            "properties" : {
+                                "_ref" : {
+                                    "type" : "string"
+                                },
+                                "_refProperties" : {
+                                    "type" : "object",
+                                    "properties" : { }
+                                }
+                            },
+                            "resourceCollection" : [
+                                {
+                                    "path" : "managed/user",
+                                    "label" : "User",
+                                    "query" : {
+                                        "queryFilter" : "true",
+                                        "fields" : [
+                                            "userName"
+                                        ],
+                                        "sortKeys" : [
+                                            "userName"
+                                        ]
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    "order": []
+                },
+                // use the provider schema if it is available, otherwise have an _id-only schema
+                provider.schema || {
+                    "properties": {
+                        "_id": {
+                            "title" : "ID",
+                            "viewable" : true,
+                            "searchable" : true,
+                            "type": "string"
+                        }
+                    },
+                    "order": ["_id"]
+                });
+                newObjectSchema.order.push("user");
                 updatedManagedConfig.objects.push({
                     "name": provider.name,
                     "title": provider.name + " User Info",
-                    "schema": {
-                        "id" : "http://jsonschema.net",
-                        "title" : provider.name,
-                        "viewable" : true,
-                        "type" : "object",
-                        "$schema" : "http://json-schema.org/draft-03/schema",
-                        "properties": provider.propertyMap.reduce(
-                            function(result, prop) {
-                                result[prop.source] = ({
-                                    "title" : prop.source,
-                                    "viewable" : true,
-                                    "type" : "string",
-                                    "searchable" : true,
-                                    "userEditable" : false
-                                });
-                                return result;
-                            },
-                            {
-                                "user" : {
-                                    "viewable" : true,
-                                    "searchable" : false,
-                                    "type" : "relationship",
-                                    "reverseRelationship" : true,
-                                    "reversePropertyName" : "idps",
-                                    "validate" : true,
-                                    "properties" : {
-                                        "_ref" : {
-                                            "type" : "string"
-                                        },
-                                        "_refProperties" : {
-                                            "type" : "object",
-                                            "properties" : { }
-                                        }
-                                    },
-                                    "resourceCollection" : [
-                                        {
-                                            "path" : "managed/user",
-                                            "label" : "User",
-                                            "query" : {
-                                                "queryFilter" : "true",
-                                                "fields" : [
-                                                    "userName",
-                                                    "givenName",
-                                                    "sn"
-                                                ],
-                                                "sortKeys" : [
-                                                    "userName"
-                                                ]
-                                            }
-                                        }
-                                    ]
-                                }
-                            }
-                        ),
-                        "order" : provider.propertyMap.map((prop) => prop.source).concat(["user"]),
-                        "required": []
-                    }
+                    "schema": newObjectSchema
                 });
             }
             return updatedManagedConfig;
         },
+        /**
+         * Remove a provider from the managed config, and from the user's idps collection
+         * @param {object} provider the full config of the provider
+         * @param {string} provider.name the name of the provider
+         * @param {object} managedConfig the full managed config value
+         */
         removeManagedObjectForIDP : (provider, managedConfig) => {
             let updatedManagedConfig = _.cloneDeep(managedConfig),
                 managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user"),
@@ -612,6 +626,10 @@ define([
             );
             return updatedManagedConfig;
         },
+        /**
+         * Update the managedConfig for the user object to add a new "idps" relationship property
+         * @param {object} managedConfig the full managed config value
+         */
         addIDPsProperty : (managedConfig) => {
             let updatedManagedConfig = _.cloneDeep(managedConfig),
                 managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
@@ -647,6 +665,10 @@ define([
 
             return updatedManagedConfig;
         },
+        /**
+         * Update the managedConfig for the user object to remove "idps" relationship property
+         * @param {object} managedConfig the full managed config value
+         */
         removeIDPsProperty : (managedConfig) => {
             let updatedManagedConfig = _.cloneDeep(managedConfig),
                 managedUser = _.find(updatedManagedConfig.objects, (o) => o.name === "user");
