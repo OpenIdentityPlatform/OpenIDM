@@ -144,6 +144,26 @@ kubernetes   10.0.0.1     <none>        443/TCP   50d
 For more info, please the [section](https://github.com/kubernetes/minikube/#interacting-with-your-cluster)
 on kubectl and also the [reference](http://kubernetes.io/docs/user-guide/kubectl-overview/) .
 
+## Before you press the "Eject" button
+
+The `openidm` deployment is using the Kubernetes `secrets` feature. But
+we haven't currently described this in terms of fragments. So... before
+you start you need to create the following secret :
+
+```
+$ echo "openidm" > password.txt
+$ more password.txt
+openidm
+$ kubectl create secret generic postgres-pass --from-file=password.txt
+secret "postgres-pass" created
+$ kubectl get secrets
+NAME                  TYPE                                  DATA      AGE
+default-token-x4bb7   kubernetes.io/service-account-token   3         1h
+postgres-pass         Opaque                                1         23m
+```
+
+Once the `postgres-pass` is created, you should be good to go.
+
 ## Running Kubernetes from mvn
 
 ### Building the docker images
