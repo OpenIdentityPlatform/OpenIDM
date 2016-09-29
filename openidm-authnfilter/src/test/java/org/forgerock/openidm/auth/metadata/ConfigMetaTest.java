@@ -27,6 +27,7 @@ import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.auth.AuthenticationService;
 import org.forgerock.openidm.metadata.WaitForMetaData;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -56,7 +57,8 @@ public class ConfigMetaTest {
         final JsonValue authModuleConfig = json(mapper.readValue(getClass().getResource(resource), Map.class));
 
         // get the list of properties to encrypt from the config
-        List<JsonPointer> clientSecretProperties = configMeta.getPropertiesToEncrypt("", "", authModuleConfig);
+        List<JsonPointer> clientSecretProperties = configMeta.getPropertiesToEncrypt(
+                AuthenticationService.PID, "", authModuleConfig);
 
         // get the list of property values to encrypt using the List<JsonPointer> provided by getPropertiesToEncrypt
         List<String> clientSecretValues = FluentIterable.from(clientSecretProperties)
@@ -70,5 +72,17 @@ public class ConfigMetaTest {
 
         // assert that these are the proper values for encryption
         assertThat(clientSecretValues).containsExactlyInAnyOrder(clientSecrets);
+    }
+
+    @Test
+    public void testGetPropertiesToEncryptWithUnsupportedPidOrFactory(String resource, String[] clientSecrets)
+            throws IOException, WaitForMetaData {
+
+        // when
+        List<JsonPointer> clientSecretProperties = configMeta.getPropertiesToEncrypt(
+                "Unsupported PID", "", null);
+
+        // assert that null was returned because the pidOrFactory did not match AuthenticationService.PID
+        assertThat(clientSecretProperties).isNull();
     }
 }

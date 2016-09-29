@@ -23,6 +23,7 @@ import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.auth.AuthenticationService;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
@@ -64,6 +65,9 @@ public class ConfigMeta implements MetaDataProvider {
     @Override
     public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config)
             throws WaitForMetaData {
+        if (!AuthenticationService.PID.equalsIgnoreCase(pidOrFactory)) {
+            return null;
+        }
         return FluentIterable.from(config.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY))
                 .filter(oidcAndOauth2Modules)
                 .transform(toResolvers)
