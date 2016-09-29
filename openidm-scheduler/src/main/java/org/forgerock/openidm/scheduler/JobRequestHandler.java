@@ -16,12 +16,17 @@
 package org.forgerock.openidm.scheduler;
 
 import static java.lang.Math.min;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
-import static org.forgerock.json.resource.Responses.*;
-import static org.forgerock.openidm.quartz.impl.RepoJobStore.getTriggerId;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+import static org.forgerock.json.resource.Responses.newQueryResponse;
+import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.repo.QueryConstants.QUERY_ALL_IDS;
-import static org.forgerock.openidm.scheduler.SchedulerService.*;
+import static org.forgerock.openidm.scheduler.SchedulerService.CONFIG;
+import static org.forgerock.openidm.scheduler.SchedulerService.GROUP_NAME;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
@@ -35,7 +40,6 @@ import java.util.Map;
 import java.util.TimeZone;
 import java.util.UUID;
 
-import org.forgerock.http.util.Json;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -70,15 +74,11 @@ import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
-import org.joda.time.DateTime;
-import org.joda.time.DateTimeZone;
 import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
-import org.quartz.JobExecutionContext;
 import org.quartz.ObjectAlreadyExistsException;
-import org.quartz.Scheduler;
 import org.quartz.SchedulerException;
 import org.quartz.Trigger;
 import org.slf4j.Logger;
@@ -90,9 +90,6 @@ import org.slf4j.LoggerFactory;
 class JobRequestHandler extends AbstractRequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(JobRequestHandler.class);
 
-    private static final String TRIGGERS = "triggers";
-    private static final String NEXT_RUN_DATE = "nextRunDate";
-
     // Misfire Policies
     private static final String MISFIRE_POLICY_DO_NOTHING = "doNothing";
     private static final String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
@@ -103,7 +100,7 @@ class JobRequestHandler extends AbstractRequestHandler {
 
     private final Scheduler persistentScheduler;
     private final Scheduler inMemoryScheduler;
-    private final ConnectionFactory connectionFactory;
+    private final String nodeId;
 
     /**
      * The resource path for jobs.
@@ -125,13 +122,13 @@ class JobRequestHandler extends AbstractRequestHandler {
      * a {@link ConnectionFactory}.
      * @param persistentScheduler the persistent {@link Scheduler}.
      * @param inMemoryScheduler the in-memory {@link Scheduler}.
-     * @param connectionFactory the {@link ConnectionFactory}.
+     * @param nodeId the node id of this node.
      */
     JobRequestHandler(final Scheduler persistentScheduler, final Scheduler inMemoryScheduler,
-            final ConnectionFactory connectionFactory) {
+            final String nodeId) {
         this.persistentScheduler = persistentScheduler;
         this.inMemoryScheduler = inMemoryScheduler;
-        this.connectionFactory = connectionFactory;
+        this.nodeId = nodeId;
     }
 
     @Override
@@ -283,8 +280,8 @@ class JobRequestHandler extends AbstractRequestHandler {
 
             // Get all the jobs and then filter them.
             final List<String> allJobs = new ArrayList<>();
-            allJobs.addAll(Arrays.asList(getJobNames(persistentScheduler)));
-            allJobs.addAll(Arrays.asList(getJobNames(inMemoryScheduler)));
+            allJobs.addAll(Arrays.asList(persistentScheduler.getJobNames()));
+            allJobs.addAll(Arrays.asList(inMemoryScheduler.getJobNames()));
             final List<JsonValue> results = new ArrayList<>();
             for (final String jobName : allJobs) {
                 if (queryId != null) {  // query-all-ids
@@ -338,20 +335,6 @@ class JobRequestHandler extends AbstractRequestHandler {
         } catch (Exception e) {
             return new InternalServerErrorException(e).asPromise();
         }
-    }
-
-    /**
-     * Gets the job names of the scheduler, returning an empty array if no jobs are found.
-     *
-     * @param scheduler to get the jobNames from.
-     * @return array of job names, or empty array.
-     * @throws SchedulerException when there is trouble calling {@link Scheduler#getJobNames(String)}
-     */
-    private String[] getJobNames(Scheduler scheduler) throws SchedulerException {
-        String[] jobNames = scheduler.getJobNames(GROUP_NAME);
-        return null == jobNames
-                ? new String[0]
-                : jobNames;
     }
 
     @Override
@@ -470,12 +453,8 @@ class JobRequestHandler extends AbstractRequestHandler {
      * @throws SchedulerException if unable to delete schedule
      */
     private void deleteSchedule(String jobName) throws SchedulerException {
-        if (inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
-            inMemoryScheduler.deleteJob(jobName, GROUP_NAME);
-        }
-        if (persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null) {
-            persistentScheduler.deleteJob(jobName, GROUP_NAME);
-        }
+        inMemoryScheduler.deleteJobIfPresent(jobName);
+        persistentScheduler.deleteJobIfPresent(jobName);
     }
 
     /**
@@ -543,9 +522,7 @@ class JobRequestHandler extends AbstractRequestHandler {
      * @throws SchedulerException if unable to get job detail for check
      */
     private boolean jobExists(String jobName) throws SchedulerException {
-        final boolean existsInMemory = inMemoryScheduler.getJobDetail(jobName, GROUP_NAME) != null;
-        final boolean existsInPersistent = persistentScheduler.getJobDetail(jobName, GROUP_NAME) != null;
-        return existsInMemory || existsInPersistent;
+        return inMemoryScheduler.jobExists(jobName) || persistentScheduler.jobExists(jobName);
     }
 
     /**
@@ -556,74 +533,20 @@ class JobRequestHandler extends AbstractRequestHandler {
      * @throws SchedulerException if unable to get job detail
      * @throws NotFoundException if job does not exist
      */
-    private JsonValue getSchedule(Context context, String scheduleName) throws SchedulerException, IOException {
-        final Scheduler scheduler;
-        if (inMemoryScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
-            scheduler = inMemoryScheduler;
-        } else if (persistentScheduler.getJobDetail(scheduleName, GROUP_NAME) != null) {
-            scheduler = persistentScheduler;
+    private JsonValue getSchedule(Context context, String scheduleName) throws Exception {
+        if (inMemoryScheduler.jobExists(scheduleName)) {
+            return inMemoryScheduler.getSchedule(context, scheduleName, nodeId);
+        } else if (persistentScheduler.jobExists(scheduleName)) {
+            return persistentScheduler.getSchedule(context, scheduleName, nodeId);
         } else {
             throw new NotFoundException("Schedule does not exist");
         }
-        final JobDetail job = scheduler.getJobDetail(scheduleName, GROUP_NAME);
-        final JsonValue resultMap =
-                new ScheduleConfig(json(Json.readJson((String) job.getJobDataMap().get(CONFIG)))).getConfig();
-        resultMap.put(TRIGGERS, getAllTriggersOfJob(context, scheduler, job).getObject());
-        resultMap.put(NEXT_RUN_DATE, getNextFireTime(scheduler, job));
-        resultMap.put(ResourceResponse.FIELD_CONTENT_ID, scheduleName);
-        return resultMap;
-    }
-
-    private JsonValue getAllTriggersOfJob(final Context context, final Scheduler scheduler, final JobDetail jobDetail)
-            throws SchedulerException {
-        final JsonValue results = json(array());
-        final Trigger[] triggers = scheduler.getTriggersOfJob(jobDetail.getName(), jobDetail.getGroup());
-        for (final Trigger trigger : triggers) {
-            final String triggerId = getTriggerId(GROUP_NAME, trigger.getKey().getName());
-            final ReadRequest readRequest = Requests.newReadRequest("/scheduler/trigger", triggerId);
-            try {
-                final ResourceResponse triggerResponse = connectionFactory.getConnection().read(context, readRequest);
-                results.add(triggerResponse.getContent().getObject());
-            } catch (final ResourceException e) {
-                logger.warn("Unable to read trigger: {}", triggerId, e);
-            }
-        }
-        return results;
-    }
-
-    private String getNextFireTime(final Scheduler scheduler, final JobDetail jobDetail) throws SchedulerException {
-        final Trigger[] triggers = scheduler.getTriggersOfJob(jobDetail.getName(), jobDetail.getGroup());
-        if (triggers.length <= 0 ) {
-            return null;
-        }
-        Date fireTime = triggers[0].getFireTimeAfter(new Date());
-        for (final Trigger trigger : triggers) {
-            final Date newFireTime = trigger.getFireTimeAfter(new Date());
-            if (newFireTime.before(fireTime)) {
-                fireTime = newFireTime;
-            }
-        }
-        return new DateTime(fireTime).withZone(DateTimeZone.UTC).toString();
     }
 
     private JsonValue getCurrentlyExecutingJobs() throws SchedulerException, IOException {
         final JsonValue currentlyExecutingJobs = json(array());
-        List<?> jobs = persistentScheduler.getCurrentlyExecutingJobs();
-        for (final Object job : jobs) {
-            final JobDetail jobDetail = ((JobExecutionContext) job).getJobDetail();
-            final JsonValue config =
-                    json(Json.readJson((String) jobDetail.getJobDataMap().get(CONFIG)));
-            config.put(ResourceResponse.FIELD_CONTENT_ID, jobDetail.getName());
-            currentlyExecutingJobs.add(new ScheduleConfig(config).getConfig().getObject());
-        }
-        jobs = inMemoryScheduler.getCurrentlyExecutingJobs();
-        for (final Object job : jobs) {
-            final JobDetail jobDetail = ((JobExecutionContext) job).getJobDetail();
-            final JsonValue config =
-                    json(Json.readJson((String) jobDetail.getJobDataMap().get(CONFIG)));
-            config.put(ResourceResponse.FIELD_CONTENT_ID, jobDetail.getName());
-            currentlyExecutingJobs.add(new ScheduleConfig(config).getConfig().getObject());
-        }
+        currentlyExecutingJobs.asList().addAll(persistentScheduler.getCurrentlyExecutingJobs().asList());
+        currentlyExecutingJobs.asList().addAll(inMemoryScheduler.getCurrentlyExecutingJobs().asList());
         return currentlyExecutingJobs;
     }
 }

@@ -25,8 +25,9 @@
 
 package org.forgerock.openidm.quartz.impl;
 
-import java.util.HashMap;
-import java.util.Map;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import org.forgerock.json.JsonValue;
 import org.quartz.JobPersistenceException;
@@ -45,16 +46,44 @@ public class TriggerWrapper {
     private int state;
     private int previous_state = Trigger.STATE_NONE;
     private String nodeId;
-    
+
     /**
-     * Create a new TriggerWrapper from the specified trigger.
+     * Create a new TriggerWrapper from the specified trigger and specifying the trigger pause state.
      * 
-     * @param trigger the Trigger object
+     * @param trigger the {@link Trigger} object
      * @param paused if the trigger is paused
-     * @throws Exception
+     * @throws JobPersistenceException if unable to serialize trigger
      */
-    public TriggerWrapper(Trigger trigger, boolean paused) throws Exception {
+    public TriggerWrapper(final Trigger trigger, final boolean paused) throws JobPersistenceException {
         this(trigger.getName(), trigger.getGroup(), RepoJobStoreUtils.serialize(trigger), paused);
+    }
+
+    /**
+     * Create a new TriggerWrapper from the specified trigger and specifying the pause and acquired state.
+     *
+     * @param trigger the {@link Trigger} object
+     * @param paused if the trigger is paused
+     * @param acquired if the trigger is acquired
+     * @throws JobPersistenceException if unable to serialize trigger
+     */
+    public TriggerWrapper(final Trigger trigger, final boolean paused, final boolean acquired)
+            throws JobPersistenceException {
+        this(trigger.getName(), trigger.getGroup(), RepoJobStoreUtils.serialize(trigger), paused, acquired, null);
+    }
+
+    /**
+     * Create a new TriggerWrapper from the specified trigger and specifying the pause state, aquired state, and the
+     * nodeId.
+     *
+     * @param trigger the {@link Trigger} object
+     * @param paused if the trigger is paused
+     * @param acquired if the trigger is paused
+     * @param nodeId the nodeId that acquired the trigger
+     * @throws JobPersistenceException if unable to serialize trigger
+     */
+    public TriggerWrapper(final Trigger trigger, final boolean paused, final boolean acquired, final String nodeId)
+            throws JobPersistenceException {
+        this(trigger.getName(), trigger.getGroup(), RepoJobStoreUtils.serialize(trigger), paused, acquired, nodeId);
     }
     
     /**
@@ -65,17 +94,30 @@ public class TriggerWrapper {
      * @param serializedValue a string representing the serialized trigger
      * @param paused if the trigger is paused
      */
-    public TriggerWrapper(String name, String group, String serializedValue, boolean paused) {
+    public TriggerWrapper(final String name, final String group, final String serializedValue, final boolean paused) {
+        this(name, group, serializedValue, paused, false, null);
+    }
+
+    /**
+     * Create a new TriggerWrapper from parameters.
+     *
+     * @param name the name of the trigger
+     * @param group the trigger group
+     * @param serializedValue a string representing the serialized trigger
+     * @param paused if the trigger is paused
+     */
+    public TriggerWrapper(final String name, final String group, final String serializedValue, boolean paused,
+            final boolean acquired, final String nodeId) {
         this.name = name;
         this.group = group;
-        this.acquired = false;
+        this.acquired = acquired;
         this.serialized = serializedValue;
         if (paused) {
             state = Trigger.STATE_PAUSED;
         } else {
             state = Trigger.STATE_NORMAL;
         }
-        this.nodeId = null;
+        this.nodeId = nodeId;
     }
     
     /**
@@ -84,7 +126,7 @@ public class TriggerWrapper {
      * @param value the JsonValue object
      * @param paused if the trigger is paused
      */
-    public TriggerWrapper(JsonValue value, boolean paused) {
+    public TriggerWrapper(final JsonValue value, final boolean paused) {
         //this(value.asMap(), paused);
         serialized = value.get("serialized").asString();
         name = value.get("name").asString();
@@ -104,28 +146,8 @@ public class TriggerWrapper {
      * Create a new TriggerWrapper from a repo Map object.
      * 
      * @param map repo Map object
-     * @param paused if the trigger is paused
      */
-    /*public TriggerWrapper(Map<String, Object> map, boolean paused) {
-        serialized = (String)map.get("serialized");
-        name = (String)map.get("name");
-        group = (String)map.get("group");
-        previous_state = (Integer)map.get("previous_state");
-        acquired = (Boolean)map.get("acquired");
-        revision = (String)map.get("_rev");
-        if (paused) {
-            state = Trigger.STATE_PAUSED;
-        } else {
-            state = Trigger.STATE_NORMAL;
-        }
-    }*/
-    
-    /**
-     * Create a new TriggerWrapper from a repo Map object.
-     * 
-     * @param map repo Map object
-     */
-    public TriggerWrapper(JsonValue map) {
+    public TriggerWrapper(final JsonValue map) {
         serialized = map.get("serialized").asString();
         name = map.get("name").asString();
         group = map.get("group").asString();
@@ -165,10 +187,7 @@ public class TriggerWrapper {
      * @return  true if the TriggerWrapper is paused, false otherwise
      */
     public boolean isPaused() {
-        if (state == Trigger.STATE_PAUSED) {
-            return true;
-        }
-        return false;
+        return state == Trigger.STATE_PAUSED;
     }
 
     /**
@@ -268,15 +287,15 @@ public class TriggerWrapper {
      * @return a JsonValue object
      */
     public JsonValue getValue() {
-        Map<String, Object> map = new HashMap<String, Object>();
-        map.put("serialized", serialized);
-        map.put("name", name);
-        map.put("group", group);
-        map.put("previous_state", previous_state);
-        map.put("state", state);
-        map.put("acquired", acquired);
-        map.put("nodeId", nodeId);
-        return new JsonValue(map);
+        return json(object(
+                field("serialized", serialized),
+                field("name", name),
+                field("group", group),
+                field("previous_state", previous_state),
+                field("state", state),
+                field("acquired", acquired),
+                field("nodeId", nodeId)
+        ));
     }
 
     /**

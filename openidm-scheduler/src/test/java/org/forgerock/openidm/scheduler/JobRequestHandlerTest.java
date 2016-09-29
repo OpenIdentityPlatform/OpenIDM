@@ -17,11 +17,16 @@ package org.forgerock.openidm.scheduler;
 
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
-import static org.quartz.impl.StdSchedulerFactory.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_ID;
+import static org.quartz.impl.StdSchedulerFactory.PROP_SCHED_INSTANCE_NAME;
+import static org.quartz.impl.StdSchedulerFactory.PROP_THREAD_POOL_CLASS;
 
 import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.assertj.core.api.Assertions;
@@ -39,29 +44,31 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
+import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.quartz.Scheduler;
+import org.quartz.SchedulerException;
 import org.quartz.impl.StdSchedulerFactory;
 import org.quartz.simpl.SimpleThreadPool;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 public class JobRequestHandlerTest {
 
-    /**
-     * The Scheduler configuration
-     */
-    private JsonValue testScheduleConfig;
+    private static final String INSTANCE_ID = "instanceId";
 
-    @BeforeClass
-    void setUp() throws Exception {
-        testScheduleConfig = getConfig("/schedule-test1.json");
+    @DataProvider(name = "scheduleFiles")
+    public Object[][] createCompositeData() throws Exception {
+        return new Object[][] {
+                { getConfig("/schedule-test1.json")},
+                { getConfig("/schedule-persisted.json")}
+        };
     }
 
     /**
@@ -81,36 +88,28 @@ public class JobRequestHandlerTest {
         return newInternalConnectionFactory(router);
     }
 
-    @Test
-    public void testCreateJob() throws Exception {
+    @Test(dataProvider = "scheduleFiles")
+    public void testCreateJob(final JsonValue scheduleConfig) throws Exception {
         // given
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
-                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", testScheduleConfig));
+                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", scheduleConfig));
 
         // then
         assertThat(promise).succeeded().isNotNull();
         Assertions.assertThat(promise.get().getId()).isNotNull().isNotEqualTo("");
     }
 
-    @Test
-    public void testReadJob() throws Exception {
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+    @Test(dataProvider = "scheduleFiles")
+    public void testReadJob(final JsonValue scheduleConfig) throws Exception {
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         // when
         // create job
         final Promise<ResourceResponse, ResourceException> job =
-                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", testScheduleConfig));
+                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", scheduleConfig));
 
         final Promise<ResourceResponse, ResourceException> promise =
                 jobRequestHandler.handleRead(new RootContext(), Requests.newReadRequest("", job.get().getId()));
@@ -120,41 +119,33 @@ public class JobRequestHandlerTest {
         Assertions.assertThat(promise.get().getId()).isNotNull().isEqualTo(job.get().getId());
     }
 
-    @Test
-    public void testUpdateJob() throws Exception {
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+    @Test(dataProvider = "scheduleFiles")
+    public void testUpdateJob(final JsonValue scheduleConfig) throws Exception {
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         // when
         // create job
         final Promise<ResourceResponse, ResourceException> job =
-                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", testScheduleConfig));
+                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", scheduleConfig));
 
-        testScheduleConfig.put("enabled", true);
+        scheduleConfig.put("enabled", true);
         final Promise<ResourceResponse, ResourceException> promise =
                 jobRequestHandler.handleUpdate(
-                        new RootContext(), Requests.newUpdateRequest("", job.get().getId(), testScheduleConfig));
+                        new RootContext(), Requests.newUpdateRequest("", job.get().getId(), scheduleConfig));
 
         // then
         assertThat(promise).succeeded().isNotNull();
         Assertions.assertThat(promise.get().getContent().get("enabled").asBoolean()).isNotNull().isEqualTo(true);
     }
 
-    @Test
-    public void testDeleteJob() throws Exception {
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+    @Test(dataProvider = "scheduleFiles")
+    public void testDeleteJob(final JsonValue scheduleConfig) throws Exception {
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         // when
         // create job
         final Promise<ResourceResponse, ResourceException> job =
-                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", testScheduleConfig));
+                jobRequestHandler.handleCreate(new RootContext(), Requests.newCreateRequest("", scheduleConfig));
 
         final Promise<ResourceResponse, ResourceException> promise =
                 jobRequestHandler.handleDelete(new RootContext(), Requests.newDeleteRequest("", job.get().getId()));
@@ -166,11 +157,7 @@ public class JobRequestHandlerTest {
 
     @Test
     public void testPatchJob() throws Exception {
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -184,11 +171,7 @@ public class JobRequestHandlerTest {
     public void testPauseJobsAction() throws Exception {
         //given
         final ActionRequest actionRequest = Requests.newActionRequest("", JobRequestHandler.JobAction.pauseJobs.name());
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         //when
         final Promise<ActionResponse, ResourceException> promise =
@@ -205,11 +188,7 @@ public class JobRequestHandlerTest {
         //given
         final ActionRequest actionRequest =
                 Requests.newActionRequest("", JobRequestHandler.JobAction.resumeJobs.name());
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         //when
         final Promise<ActionResponse, ResourceException> promise =
@@ -226,11 +205,7 @@ public class JobRequestHandlerTest {
         //given
         final ActionRequest actionRequest =
                 Requests.newActionRequest("", JobRequestHandler.JobAction.listCurrentlyExecutingJobs.name());
-        final Scheduler persistedScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final Scheduler inMemoryScheduler = StdSchedulerFactory.getDefaultScheduler();
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
 
         //when
         final Promise<ActionResponse, ResourceException> promise =
@@ -245,11 +220,7 @@ public class JobRequestHandlerTest {
     @Test
     public void testQueryJobs() throws Exception {
         // given
-        final Scheduler persistedScheduler = createScheduler("persisted");
-        final Scheduler inMemoryScheduler = createScheduler("memory");
-        final ConnectionFactory connectionFactory = createConnectionFactory();
-        final JobRequestHandler jobRequestHandler =
-                new JobRequestHandler(persistedScheduler, inMemoryScheduler, connectionFactory);
+        final JobRequestHandler jobRequestHandler = createJobRequestHandler();
         for (int i = 0; i < 12; i++) {
             JsonValue persisted = getConfig("/schedule-persisted.json");
             Promise<ResourceResponse, ResourceException> createPromise =
@@ -312,7 +283,7 @@ public class JobRequestHandlerTest {
         return queryPromise.getOrThrowUninterruptibly();
     }
 
-    private Scheduler createScheduler(final String name) throws Exception {
+    private Scheduler createScheduler(final String name) throws SchedulerException {
         final StdSchedulerFactory sf = new StdSchedulerFactory();
         final Properties properties = new Properties();
         properties.put(PROP_SCHED_INSTANCE_NAME, name);
@@ -323,5 +294,14 @@ public class JobRequestHandlerTest {
         properties.put("org.quartz.threadPool.threadsInheritContextClassLoaderOfInitializingThread", true);
         sf.initialize(properties);
         return sf.getScheduler();
+    }
+
+    private JobRequestHandler createJobRequestHandler() throws SchedulerException {
+        final ClusterManagementService clusterManager = mock(ClusterManagementService.class);
+        when(clusterManager.getInstanceId()).thenReturn(INSTANCE_ID);
+        return new JobRequestHandler(
+                new PersistedScheduler(createScheduler(UUID.randomUUID().toString()), createConnectionFactory()),
+                new MemoryScheduler(createScheduler(UUID.randomUUID().toString())),
+                INSTANCE_ID);
     }
 }
