@@ -294,7 +294,14 @@ effective).
                --data '[
                    {
                        "operation" : "remove",
-                       "field" : "/roles/0"
+                       "field" : "/roles",
+                       "value":  {
+                          "_ref" : "managed/role/06128fc1-b89b-4fe8-b9b3-4de30fd17b9e",
+                          "_refProperties" : {
+                            "_id" : "ce91cea9-1caf-4760-9a4e-56779317dd9f",
+                            "_rev" : "1"
+                          }
+                       }
                    }
                ]' \
                'http://localhost:8080/openidm/managed/user/0c470c71-bb4e-4cf1-bc9d-77d7b35b180b'
