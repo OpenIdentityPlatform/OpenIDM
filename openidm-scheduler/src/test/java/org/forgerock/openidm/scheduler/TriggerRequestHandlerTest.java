@@ -18,7 +18,7 @@ package org.forgerock.openidm.scheduler;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Resources.newInternalConnectionFactory;
-import static org.forgerock.openidm.quartz.impl.RepoJobStore.TRIGGERS_RESOURCE_PATH;
+import static org.forgerock.openidm.scheduler.TriggerRequestHandler.TRIGGERS_REPO_RESOURCE_PATH;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 
 import java.util.UUID;
@@ -160,13 +160,13 @@ public class TriggerRequestHandlerTest {
 
     private ConnectionFactory createConnectionFactory() {
         final Router router = new Router();
-        router.addRoute(Router.uriTemplate(TRIGGERS_RESOURCE_PATH), new MemoryBackend());
+        router.addRoute(Router.uriTemplate(TRIGGERS_REPO_RESOURCE_PATH), new MemoryBackend());
         return newInternalConnectionFactory(router);
     }
 
     private void createTrigger(final ConnectionFactory connectionFactory, final String name) throws ResourceException {
         connectionFactory.getConnection().createAsync(
                 new RootContext(),
-                Requests.newCreateRequest(TRIGGERS_RESOURCE_PATH, name, JsonValue.json(object())));
+                Requests.newCreateRequest(TRIGGERS_REPO_RESOURCE_PATH, name, JsonValue.json(object())));
     }
 }
