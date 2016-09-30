@@ -19,7 +19,6 @@ package org.forgerock.openidm.scheduler;
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
-import static org.forgerock.openidm.quartz.impl.RepoJobStore.*;
 import static org.forgerock.openidm.scheduler.JobRequestHandler.JOB_RESOURCE_PATH;
 import static org.forgerock.openidm.scheduler.RepoProxyRequestHandler.*;
 import static org.forgerock.openidm.scheduler.TriggerRequestHandler.TRIGGER_RESOURCE_PATH;
@@ -116,6 +115,12 @@ public class SchedulerService implements RequestHandler {
     static final String GROUP_NAME = "scheduler-service-group";
 
     static final String CONFIG = "schedule.config";
+
+    private static final String SCHEDULER_REPO_RESOURCE_PATH = "/repo/scheduler/";
+
+    private static final String WAITING_TRIGGERS_REPO_RESOURCE_PATH = SCHEDULER_REPO_RESOURCE_PATH + "waitingTriggers";
+
+    private static final String ACQUIRED_TRIGGERS_REPO_RESOURCE_PATH = SCHEDULER_REPO_RESOURCE_PATH + "acquiredTriggers";
 
     /**
      * Supported actions on the scheduler service.

@@ -15,8 +15,6 @@
  */
 package org.forgerock.openidm.scheduler;
 
-import static org.forgerock.openidm.quartz.impl.RepoJobStore.TRIGGERS_RESOURCE_PATH;
-
 import org.forgerock.json.resource.AbstractRequestHandler;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -45,6 +43,8 @@ class TriggerRequestHandler extends AbstractRequestHandler {
      */
     static final String TRIGGER_RESOURCE_PATH = "/trigger";
 
+    static final String TRIGGERS_REPO_RESOURCE_PATH = "/repo/scheduler/triggers";
+
     private final ConnectionFactory connectionFactory;
 
     /**
@@ -59,7 +59,7 @@ class TriggerRequestHandler extends AbstractRequestHandler {
     public Promise<QueryResponse, ResourceException> handleQuery(Context context, QueryRequest request,
             QueryResourceHandler handler) {
         final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
-        queryRequest.setResourcePath(TRIGGERS_RESOURCE_PATH);
+        queryRequest.setResourcePath(TRIGGERS_REPO_RESOURCE_PATH);
         try {
             return connectionFactory.getConnection().queryAsync(context, queryRequest, handler);
         } catch (final ResourceException e) {
@@ -74,7 +74,7 @@ class TriggerRequestHandler extends AbstractRequestHandler {
             return new BadRequestException("No id was supplied to read").asPromise();
         }
         final String triggerId = request.getResourcePath();
-        final ReadRequest readRequest = Requests.newReadRequest(TRIGGERS_RESOURCE_PATH, triggerId);
+        final ReadRequest readRequest = Requests.newReadRequest(TRIGGERS_REPO_RESOURCE_PATH, triggerId);
         try {
             return connectionFactory.getConnection().readAsync(context, readRequest);
         } catch (final ResourceException e) {
