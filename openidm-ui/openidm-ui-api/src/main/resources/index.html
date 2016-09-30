@@ -77,6 +77,9 @@
                 defaultModelRendering: 'schema',
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
                 onComplete: function (swaggerApi, swaggerUi) {
+                    // ensure that correct host is set at runtime
+                    window.swaggerUi.api.setHost(location.hostname + ':' + location.port);
+
                     // NOTE: OpenIDM requires X-Requested-With header
                     window.swaggerUi.api.clientAuthorizations.add("X-Requested-With",
                             new SwaggerClient.ApiKeyAuthorization("X-Requested-With", "Swagger-UI", "header"));
