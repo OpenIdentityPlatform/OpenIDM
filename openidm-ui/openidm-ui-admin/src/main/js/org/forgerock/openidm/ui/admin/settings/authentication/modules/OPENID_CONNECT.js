@@ -19,20 +19,33 @@ define([
     "lodash",
     "form2js",
     "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationAbstractView",
+    "org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate",
     "libs/codemirror/lib/codemirror",
     "libs/codemirror/mode/xml/xml"
 ], function($, _,
             Form2js,
             AuthenticationAbstractView,
+            ExternalAccessDelegate,
             codemirror) {
 
     var OpenIDConnectView = AuthenticationAbstractView.extend({
         template: "templates/admin/settings/authentication/modules/OPENID_CONNECT.html",
+        events : _.extend({
+            "change input[name='properties.resolvers[].well-known']" : "handleWellKnownChange"
+        }, AuthenticationAbstractView.prototype.events),
 
         knownProperties: AuthenticationAbstractView.prototype.knownProperties.concat([
             "openIdConnectHeader",
             "resolvers"
         ]),
+
+        handleWellKnownChange : function (e) {
+            ExternalAccessDelegate.externalRestRequest($(e.target).val()).then((config) => {
+                _.keys(config).forEach((k) => {
+                    this.$el.find(`[name='properties.resolvers[].${k}']`).val(config[k]);
+                });
+            });
+        },
 
         getConfig: function () {
             var config = AuthenticationAbstractView.prototype.getConfig.call(this);
@@ -61,7 +74,7 @@ define([
             this.data = _.clone(args, true);
             if (!_.has(this.data, "config.properties.resolvers") || !this.data.config.properties.resolvers.length) {
                 this.data.config.properties.resolvers = [{
-                    scope: ["openid", "profile", "email"]
+                    scope: ["openid"]
                 }];
             }
             this.data.userOrGroupValue = "userRoles";
