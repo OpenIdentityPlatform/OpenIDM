@@ -38,8 +38,10 @@
         window.require = stashedRequire.original;
 
         require([
-            "org/forgerock/commons/ui/common/main/i18nManager"
-        ], function (i18nManager) {
+            "org/forgerock/commons/ui/common/main/i18nManager",
+            "org/forgerock/commons/ui/common/main/ServiceInvoker"
+        ], function (i18nManager,ServiceInvoker) {
+            ServiceInvoker.configuration = { defaultHeaders: {} };
             i18nManager.init({
                 paramLang: {
                     locale: "en"
