@@ -20,9 +20,10 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function ($, _, AbstractModel, Configuration, Constants, EventManager, ServiceInvoker) {
+], function ($, _, AbstractModel, Configuration, Constants, CookieHelper, EventManager, ServiceInvoker) {
     var UserModel = AbstractModel.extend({
         protectedAttributeList: [],
         sync: function (method, model, options) {
@@ -106,9 +107,12 @@ define([
             }
             return response;
         },
+        removeSessionCookie: function () {
+            CookieHelper.deleteCookie("session-jwt", "/", "");
+        },
         login: function (username, password) {
             var headers = {};
-
+            this.removeSessionCookie(); // resets the session cookie to discard old session that may still exist
             headers[Constants.HEADER_PARAM_USERNAME] = username;
             headers[Constants.HEADER_PARAM_PASSWORD] = password;
             headers[Constants.HEADER_PARAM_NO_SESSION] = false;
@@ -124,9 +128,43 @@ define([
             headers[Constants.HEADER_PARAM_AUTH_PROVIDER] = provider;
             headers[Constants.HEADER_PARAM_NO_SESSION] = false;
 
+            sessionStorage.setItem("authDetails", JSON.stringify({authToken,provider}));
             return this.getProfile(headers);
         },
+        /**
+         * Updates a header map to include AUTH TOKEN and PROVIDER values from a separate map
+         * Will remove them if the separate map is empty.
+         * @param {object} currentHeaders the headers that exist present
+         * @param {object} authDetails may contain authToken and provider; if present, wil be set in returned header map
+         * @returns {object} possibly modified copy of currentHeaders
+         */
+        setAuthTokenHeaders: (currentHeaders, authDetails) => {
+            let updatedHeaders = _.cloneDeep(currentHeaders);
+            if (authDetails) {
+                updatedHeaders = _.extend({
+                    [Constants.HEADER_PARAM_AUTH_TOKEN] : authDetails.authToken,
+                    [Constants.HEADER_PARAM_AUTH_PROVIDER] : authDetails.provider
+                }, updatedHeaders);
+            } else {
+                delete updatedHeaders[Constants.HEADER_PARAM_AUTH_TOKEN];
+                delete updatedHeaders[Constants.HEADER_PARAM_AUTH_PROVIDER];
+            }
+            return updatedHeaders;
+        },
+        logout: function () {
+            this.removeSessionCookie();
+            sessionStorage.removeItem("authDetails");
+            ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
+                ServiceInvoker.configuration.defaultHeaders || {},
+                null
+            );
+        },
         getProfile: function (headers) {
+            ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
+                ServiceInvoker.configuration.defaultHeaders || {},
+                JSON.parse(sessionStorage.getItem("authDetails"))
+            );
+
             return ServiceInvoker.restCall({
                 "url": "/" + Constants.context + "/info/login",
                 "type" : "GET",
@@ -139,7 +177,11 @@ define([
                         status: "401"
                     }
                 }
-            }).then(_.bind(function (sessionDetails) {
+            })
+            .fail(() => {
+                this.logout();
+            })
+            .then(_.bind(function (sessionDetails) {
                 this.id = sessionDetails.authorization.id;
                 this.url = "/" + Constants.context + "/" + sessionDetails.authorization.component;
                 this.component = sessionDetails.authorization.component;

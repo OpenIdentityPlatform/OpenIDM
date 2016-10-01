@@ -21,7 +21,6 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils",
     "org/forgerock/openidm/ui/common/util/Constants"
 ], function (_,
@@ -30,13 +29,11 @@ define([
              AbstractConfigurationAware,
              serviceInvoker,
              conf,
-             cookieHelper,
              amLoginUtils,
              Constants) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
-        cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
         if (_.has(params, "userName") && _.has(params, "password")) {
             return UserModel.login(params.userName, params.password).then(successCallback, function (xhr) {
                 var reason = xhr.responseJSON.reason;
@@ -62,8 +59,10 @@ define([
     };
 
     obj.logout = function (successCallback, errorCallback) {
-        delete conf.loggedUser;
-        cookieHelper.deleteCookie("session-jwt", "/", ""); // resets the session cookie to discard old session that may still exist
+        if (conf.loggedUser) {
+            conf.loggedUser.logout();
+            delete conf.loggedUser;
+        }
 
         if(conf.globalData.openamAuthEnabled){
             amLoginUtils.openamLogout(successCallback);
