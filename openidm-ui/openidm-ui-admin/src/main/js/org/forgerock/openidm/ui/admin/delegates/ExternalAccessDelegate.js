@@ -38,5 +38,27 @@ define([
         });
     };
 
+    /**
+     * Uses the external/rest endpoint to make outbound rest calls to arbitrary services
+     * @param {string} url the full url to request
+     * @param {string} method http verb; one of POST/GET/PUT/etc...
+     * @param {string} body raw content to include with the request
+     * @param {Object} headers map of headerName : headerValue
+     */
+    obj.externalRestRequest = (url, method, body, headers) => {
+        method = method || "GET";
+        return obj.serviceCall({
+            serviceUrl: constants.host + "/openidm/external/rest",
+            url: "?_action=call",
+            type: "POST",
+            data: JSON.stringify({
+                url,
+                method,
+                body,
+                headers
+            })
+        });
+    };
+
     return obj;
 });

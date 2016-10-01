@@ -8,6 +8,13 @@
 
         {{#each config.properties.resolvers}}
 
+        {{> form/_basicInput
+        value=well-known
+        label="templates.socialProviders.wellKnown"
+        property="properties.resolvers[].well-known"
+        default="https://openam.example.com/openam/oauth2/.well-known/openid-configuration"
+        noValidation="true"}}
+
         <input name="properties.resolvers[].name" value="OIDC" type="hidden" />
 
         {{> form/_basicInput
@@ -35,28 +42,12 @@
         value=authorization_endpoint
         label="templates.socialProviders.authorizationEndpoint"
         property="properties.resolvers[].authorization_endpoint"
-        default="https://openam.example.com/openam/oauth2/authorize"
         noValidation="true"}}
 
         {{> form/_basicInput
         value=token_endpoint
         label="templates.socialProviders.tokenEndpoint"
         property="properties.resolvers[].token_endpoint"
-        default="https://openam.example.com/openam/oauth2/access_token"
-        noValidation="true"}}
-
-        {{> form/_basicInput
-        value=userinfo_endpoint
-        label="templates.socialProviders.userInfoEndpoint"
-        property="properties.resolvers[].userinfo_endpoint"
-        default="https://openam.example.com/openam/oauth2/userinfo"
-        noValidation="true"}}
-
-        {{> form/_basicInput
-        value=well-known
-        label="templates.socialProviders.wellKnown"
-        property="properties.resolvers[].well-known"
-        default="https://openam.example.com/openam/oauth2/.well-known/openid-configuration"
         noValidation="true"}}
 
         <div class="form-group">
