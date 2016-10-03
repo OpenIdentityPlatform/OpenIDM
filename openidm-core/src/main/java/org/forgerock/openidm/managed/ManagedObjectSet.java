@@ -1704,7 +1704,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 				success = false;
 				details = new InternalServerErrorException(e.getMessage(), e).getDetail();
 			}
-            
+
+            final ScriptEntry onSyncScriptEntry = scriptHooks.get(ScriptHook.onSync);
+            if (onSyncScriptEntry == null || !onSyncScriptEntry.isActive()) {
+                logger.debug("onSync script not defined or not active");
+                return;
+            }
+
             try {
             	// Execute the sync script
                 ResourceResponse readResponse = newValue.isNotNull()
