@@ -32,24 +32,22 @@ Once Docker is installed, you can test it out with the following command
 and get a result back -- if Docker isn't installed you will get an error
 from your shell :
 
-```bash
-$ docker version
-Client:
- Version:      1.12.1
- API version:  1.23
- Go version:   go1.7.1
- Git commit:   6f9534c
- Built:        Thu Sep  8 10:31:18 2016
- OS/Arch:      darwin/amd64
-
-Server:
- Version:      1.11.1
- API version:  1.23
- Go version:   go1.5.4
- Git commit:   5604cbe
- Built:        Wed Apr 27 00:34:20 2016
- OS/Arch:      linux/amd64
- ```
+    $ docker version
+    Client:
+     Version:      1.12.1
+     API version:  1.23
+     Go version:   go1.7.1
+     Git commit:   6f9534c
+     Built:        Thu Sep  8 10:31:18 2016
+     OS/Arch:      darwin/amd64
+    
+    Server:
+     Version:      1.11.1
+     API version:  1.23
+     Go version:   go1.5.4
+     Git commit:   5604cbe
+     Built:        Wed Apr 27 00:34:20 2016
+     OS/Arch:      linux/amd64
 
 ### Installing Kubernetes
 
@@ -70,10 +68,9 @@ steps in the [Quickstart](https://github.com/kubernetes/minikube/#quickstart)
 
 You should be able to get the minikube version with no errors :
 
-```bash
-$ minikube version
-minikube version: v0.9.0
-```
+    $ minikube version
+    minikube version: v0.9.0
+
 
 ## Putting things together
 
@@ -87,45 +84,35 @@ Minikube needs to be started as well ; please make sure you followed the
 steps on how to configure it the first time when using xhyve since
 virtualbox is the default virtualization engine.
 
-```
-$ minikube start --vm-driver=xhyve [...other config options]
-```
+    $ minikube start --vm-driver=xhyve [...other config options]
 
 Otherwise, you will simply issue the following command and you should
 obtain similar results as indicated below :
 
-```
-$ minikube start
-Starting local Kubernetes cluster...
-Kubectl is now configured to use the cluster.
-```
+    $ minikube start
+    Starting local Kubernetes cluster...
+    Kubectl is now configured to use the cluster.
 
 Now in order for Docker to "execute" within the same space as Minikube,
 you will need to run :
 
-```
-$ eval $(minikube docker-env)
-```
+    $ eval $(minikube docker-env)
 
 Since Minikube runs several containers as part of the Kubernetes framework,
 you should see something similar to the following now :
 
-```
-$ docker ps
-CONTAINER ID        IMAGE                                                        COMMAND                  CREATED             STATUS              PORTS               NAMES
-7c7f3f3ffc6c        gcr.io/google_containers/kubernetes-dashboard-amd64:v1.1.0   "/dashboard --port=90"   27 minutes ago      Up 27 minutes                           k8s_kubernetes-dashboard.b3dad817_kubernetes-dashboard-7izep_kube-system_0c722cd1-5a5c-11e6-b60d-4ea7f0f3ed1a_4e7f99b9
-fd07bdf1c017        gcr.io/google_containers/pause-amd64:3.0                     "/pause"                 27 minutes ago      Up 27 minutes                           k8s_POD.d5030529_openidm-devops-3650949797-0lgwk_verycloudy_9b1fae4a-81c8-11e6-bbab-520f42146fc7_ad685ccf
-c1fce80f8b22        gcr.io/google_containers/pause-amd64:3.0                     "/pause"                 27 minutes ago      Up 27 minutes                           k8s_POD.2225036b_kubernetes-dashboard-7izep_kube-system_0c722cd1-5a5c-11e6-b60d-4ea7f0f3ed1a_34df2ef4
-d581e99a4488        gcr.io/google-containers/kube-addon-manager-amd64:v2         "/opt/kube-addons.sh"    27 minutes ago      Up 27 minutes                           k8s_kube-addon-manager.a1c58ca2_kube-addon-manager-boot2docker_kube-system_48abed82af93bb0b941173334110923f_01dd1554
-c981440fa134        gcr.io/google_containers/pause-amd64:3.0                     "/pause"                 27 minutes ago      Up 27 minutes                           k8s_POD.d8dbe16c_kube-addon-manager-boot2docker_kube-system_48abed82af93bb0b941173334110923f_1fe99adb
-```
+    $ docker ps
+    CONTAINER ID        IMAGE                                                        COMMAND                  CREATED             STATUS              PORTS               NAMES
+    7c7f3f3ffc6c        gcr.io/google_containers/kubernetes-dashboard-amd64:v1.1.0   "/dashboard --port=90"   27 minutes ago      Up 27 minutes                           k8s_kubernetes-dashboard.b3dad817_kubernetes-dashboard-7izep_kube-system_0c722cd1-5a5c-11e6-b60d-4ea7f0f3ed1a_4e7f99b9
+    fd07bdf1c017        gcr.io/google_containers/pause-amd64:3.0                     "/pause"                 27 minutes ago      Up 27 minutes                           k8s_POD.d5030529_openidm-devops-3650949797-0lgwk_verycloudy_9b1fae4a-81c8-11e6-bbab-520f42146fc7_ad685ccf
+    c1fce80f8b22        gcr.io/google_containers/pause-amd64:3.0                     "/pause"                 27 minutes ago      Up 27 minutes                           k8s_POD.2225036b_kubernetes-dashboard-7izep_kube-system_0c722cd1-5a5c-11e6-b60d-4ea7f0f3ed1a_34df2ef4
+    d581e99a4488        gcr.io/google-containers/kube-addon-manager-amd64:v2         "/opt/kube-addons.sh"    27 minutes ago      Up 27 minutes                           k8s_kube-addon-manager.a1c58ca2_kube-addon-manager-boot2docker_kube-system_48abed82af93bb0b941173334110923f_01dd1554
+    c981440fa134        gcr.io/google_containers/pause-amd64:3.0                     "/pause"                 27 minutes ago      Up 27 minutes                           k8s_POD.d8dbe16c_kube-addon-manager-boot2docker_kube-system_48abed82af93bb0b941173334110923f_1fe99adb
 
 You can also get access to the Kubernetes Dashboard via :
 
-```
-$ minikube dashboard
-Opening kubernetes dashboard in default browser...
-```
+    $ minikube dashboard
+    Opening kubernetes dashboard in default browser...
 
 ### Using kubectl
 
@@ -135,11 +122,9 @@ namespaces, volumes, etc.
 
 You can get a good sense of what's going on without using the Dashboard :
 
-```
-$ kubectl get deployments,svc
-NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
-kubernetes   10.0.0.1     <none>        443/TCP   50d
-```
+    $ kubectl get deployments,svc
+    NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+    kubernetes   10.0.0.1     <none>        443/TCP   50d
 
 For more info, please the [section](https://github.com/kubernetes/minikube/#interacting-with-your-cluster)
 on kubectl and also the [reference](http://kubernetes.io/docs/user-guide/kubectl-overview/) .
@@ -150,17 +135,18 @@ The `openidm` deployment is using the Kubernetes `secrets` feature. But
 we haven't currently described this in terms of fragments. So... before
 you start you need to create the following secret :
 
-```
-$ echo "openidm" > password.txt
-$ more password.txt
-openidm
-$ kubectl create secret generic postgres-pass --from-file=password.txt
-secret "postgres-pass" created
-$ kubectl get secrets
-NAME                  TYPE                                  DATA      AGE
-default-token-x4bb7   kubernetes.io/service-account-token   3         1h
-postgres-pass         Opaque                                1         23m
-```
+
+    $ echo "openidm" > password.txt
+    $ more password.txt
+    openidm
+
+    $ kubectl create secret generic postgres-pass --from-file=password.txt
+    secret "postgres-pass" created
+    
+    $ kubectl get secrets
+    NAME                  TYPE                                  DATA      AGE
+    default-token-x4bb7   kubernetes.io/service-account-token   3         1h
+    postgres-pass         Opaque                                1         23m
 
 Once the `postgres-pass` is created, you should be good to go.
 
@@ -171,30 +157,24 @@ We are now going to use the [Fabric8 Maven Plugin](https://github.com/fabric8io/
 (fmp) to build the necessary docker images to run OpenIDM with the
 "Getting Started" sample on Postgres.
 
-```
-$ cd Development/Stash/openidm
-$ git pull
-$ mvn clean install
-```
+    $ cd Development/Stash/openidm
+    $ git pull
+    $ mvn clean install
 
 This should build the latest version of OpenIDM (currently 5.0.0-SNAPSHOT). 
 Now let's play in our dev-ops sandbox :
 
-```
-$ cd openidm-devops
-$ mvn fabric8:build  -Dk8env=getting-started
-[...]
-```
+    $ cd openidm-devops
+    $ mvn fabric8:build  -Dk8env=getting-started
+    [...]
 
 If your build is successful, now you should see the following docker
 images :
 
-```
-$ docker images forgerock/*
-REPOSITORY                   TAG                 IMAGE ID            CREATED             SIZE
-forgerock/openidm-postgres   latest              ee371984988a        9 minutes ago       459.3 MB
-forgerock/openidm-zip        latest              0337bbcc64bb        10 minutes ago      943.3 MB
-```
+    $ docker images forgerock/*
+    REPOSITORY                   TAG                 IMAGE ID            CREATED             SIZE
+    forgerock/openidm-postgres   latest              ee371984988a        9 minutes ago       459.3 MB
+    forgerock/openidm-zip        latest              0337bbcc64bb        10 minutes ago      943.3 MB
 
 ### Creating the Kubernetes resources
 
@@ -206,25 +186,19 @@ fmp.
 So we have to first generate the resources we need to deploy our
 environment.
 
-```
-$ mvn fabric8:resource  -Dk8env=getting-started
-... 
-$ ls target/classes/META-INF/fabric8/
-kubernetes	kubernetes.json	kubernetes.yml	openshift	openshift.json	openshift.yml
-```
+    $ mvn fabric8:resource  -Dk8env=getting-started
+    ... 
+    $ ls target/classes/META-INF/fabric8/
+    kubernetes	kubernetes.json	kubernetes.yml	openshift	openshift.json	openshift.yml
 
 As you can see several files were created in the `target` directory. The
 one of interest for us in the `kubernetes.yml` file. Which, because
 of the aformentioned issue we will need to edit :
 
-```
-$ vi target/classes/META-INF/fabric8/kubernetes.yml
-
-```
+    $ vi target/classes/META-INF/fabric8/kubernetes.yml
 
 There are 2 sections that we need to remove that look like this :
 
-```
         - env:
           - name: "KUBERNETES_NAMESPACE"
             valueFrom:
@@ -235,45 +209,40 @@ There are 2 sections that we need to remove that look like this :
           name: "forgerock-openidm-devops"
           securityContext:
             privileged: false
-```
 
 Here's the diff between the original file and what will work :
 
-```
-$ diff target/classes/META-INF/fabric8/kubernetes.yml ./kubernetes.yml
-153,162d152
-<         - env:
-<           - name: "KUBERNETES_NAMESPACE"
-<             valueFrom:
-<               fieldRef:
-<                 fieldPath: "metadata.namespace"
-<           image: "forgerock/openidm-postgres"
-<           imagePullPolicy: "IfNotPresent"
-<           name: "forgerock-openidm-devops"
-<           securityContext:
-<             privileged: false
-227,236d216
-<         - env:
-<           - name: "KUBERNETES_NAMESPACE"
-<             valueFrom:
-<               fieldRef:
-<                 fieldPath: "metadata.namespace"
-<           image: "forgerock/openidm-postgres"
-<           imagePullPolicy: "IfNotPresent"
-<           name: "forgerock-openidm-devops"
-<           securityContext:
-<             privileged: false
-```
+    $ diff target/classes/META-INF/fabric8/kubernetes.yml ./kubernetes.yml
+    153,162d152
+    <         - env:
+    <           - name: "KUBERNETES_NAMESPACE"
+    <             valueFrom:
+    <               fieldRef:
+    <                 fieldPath: "metadata.namespace"
+    <           image: "forgerock/openidm-postgres"
+    <           imagePullPolicy: "IfNotPresent"
+    <           name: "forgerock-openidm-devops"
+    <           securityContext:
+    <             privileged: false
+    227,236d216
+    <         - env:
+    <           - name: "KUBERNETES_NAMESPACE"
+    <             valueFrom:
+    <               fieldRef:
+    <                 fieldPath: "metadata.namespace"
+    <           image: "forgerock/openidm-postgres"
+    <           imagePullPolicy: "IfNotPresent"
+    <           name: "forgerock-openidm-devops"
+    <           securityContext:
+    <             privileged: false
 
 ### Starting the deployment
 
 First let's make sure that only the kubernetes service is running :
 
-```
-$ kubectl get svc,deployments,pv,pvc,pods
-NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
-kubernetes   10.0.0.1     <none>        443/TCP   22h
-```
+    $ kubectl get svc,deployments,pv,pvc,pods
+    NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+    kubernetes   10.0.0.1     <none>        443/TCP   22h
 
 Now it's okay if you have other services or deployments running, as
 long at they don't conflict with what is generated in the `kubernetes.yml`
@@ -282,45 +251,41 @@ file.
 Note : make sure you've modified the `target/classes/META-INF/fabric8/kubernetes.yml`
 file as indicated above. This is what we'll use to create the deployment.
 
-```
-$ kubectl create -f target/classes/META-INF/fabric8/kubernetes.yml
-You have exposed your service on an external port on all nodes in your
-cluster.  If you want to expose this service to the external internet, you may
-need to set up firewall rules for the service port(s) (tcp:30080) to serve traffic.
-
-See http://releases.k8s.io/release-1.3/docs/user-guide/services-firewalls.md for more details.
-service "openidm" created
-service "postgres" created
-persistentvolume "local-pv" created
-persistentvolumeclaim "postgres-pv-claim" created
-deployment "openidm" created
-deployment "postgres" created
-
-$ kubectl get svc,deployments,pv,pvc,pods
-NAME                        CLUSTER-IP   EXTERNAL-IP   PORT(S)      AGE
-kubernetes                  10.0.0.1     <none>        443/TCP      22h
-openidm                     10.0.0.232   <nodes>       8080/TCP     41s
-postgres                    None         <none>        5432/TCP     41s
-NAME                        DESIRED      CURRENT       UP-TO-DATE   AVAILABLE                   AGE
-openidm                     1            1             1            1                           41s
-postgres                    1            1             1            1                           41s
-NAME                        CAPACITY     ACCESSMODES   STATUS       CLAIM                       REASON    AGE
-local-pv                    5Gi          RWO           Bound        default/postgres-pv-claim             41s
-NAME                        STATUS       VOLUME        CAPACITY     ACCESSMODES                 AGE
-postgres-pv-claim           Bound        local-pv      5Gi          RWO                         41s
-NAME                        READY        STATUS        RESTARTS     AGE
-openidm-2347877805-51vnj    1/1          Running       0            41s
-postgres-4084076017-r0xo8   1/1          Running       0            41s
-```
+    $ kubectl create -f target/classes/META-INF/fabric8/kubernetes.yml
+    You have exposed your service on an external port on all nodes in your
+    cluster.  If you want to expose this service to the external internet, you may
+    need to set up firewall rules for the service port(s) (tcp:30080) to serve traffic.
+    
+    See http://releases.k8s.io/release-1.3/docs/user-guide/services-firewalls.md for more details.
+    service "openidm" created
+    service "postgres" created
+    persistentvolume "local-pv" created
+    persistentvolumeclaim "postgres-pv-claim" created
+    deployment "openidm" created
+    deployment "postgres" created
+    
+    $ kubectl get svc,deployments,pv,pvc,pods
+    NAME                        CLUSTER-IP   EXTERNAL-IP   PORT(S)      AGE
+    kubernetes                  10.0.0.1     <none>        443/TCP      22h
+    openidm                     10.0.0.232   <nodes>       8080/TCP     41s
+    postgres                    None         <none>        5432/TCP     41s
+    NAME                        DESIRED      CURRENT       UP-TO-DATE   AVAILABLE                   AGE
+    openidm                     1            1             1            1                           41s
+    postgres                    1            1             1            1                           41s
+    NAME                        CAPACITY     ACCESSMODES   STATUS       CLAIM                       REASON    AGE
+    local-pv                    5Gi          RWO           Bound        default/postgres-pv-claim             41s
+    NAME                        STATUS       VOLUME        CAPACITY     ACCESSMODES                 AGE
+    postgres-pv-claim           Bound        local-pv      5Gi          RWO                         41s
+    NAME                        READY        STATUS        RESTARTS     AGE
+    openidm-2347877805-51vnj    1/1          Running       0            41s
+    postgres-4084076017-r0xo8   1/1          Running       0            41s
 
 You should now be able to access OpenIDM on port 30080 of your Kubernetes
 cluster IP address.
 
 The best way to do this is to use the following command :
 
-```
-$ minikube dashboard
-```
+    $ minikube dashboard
 
 The Kubernetes Dashboard will start in your web browser. By simply
 changing the port number you should be able to access OpenIDM.
@@ -335,19 +300,17 @@ instructions on how to use the [`fabric8:deploy`](https://maven.fabric8.io/#fabr
 The best way to completely clean what you just did, is to use the same
 YAML file :
 
-```
-$ kubectl delete -f target/classes/META-INF/fabric8/kubernetes.yml
-service "openidm" deleted
-service "postgres" deleted
-persistentvolume "local-pv" deleted
-persistentvolumeclaim "postgres-pv-claim" deleted
-deployment "openidm" deleted
-deployment "postgres" deleted
-
-$ kubectl get svc,deployments,pv,pvc,pods
-NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
-kubernetes   10.0.0.1     <none>        443/TCP   23h
-```
+    $ kubectl delete -f target/classes/META-INF/fabric8/kubernetes.yml
+    service "openidm" deleted
+    service "postgres" deleted
+    persistentvolume "local-pv" deleted
+    persistentvolumeclaim "postgres-pv-claim" deleted
+    deployment "openidm" deleted
+    deployment "postgres" deleted
+    
+    $ kubectl get svc,deployments,pv,pvc,pods
+    NAME         CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+    kubernetes   10.0.0.1     <none>        443/TCP   23h
 
 The last command shows that everything has been deleted properly.
 
