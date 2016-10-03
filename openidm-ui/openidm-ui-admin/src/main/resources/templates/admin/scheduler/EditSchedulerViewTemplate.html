@@ -1,0 +1,71 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<section>
+    <div class="back-bar">
+        <div class="container">
+            <a href="#scheduler/">{{t "templates.scheduler.backToSchedulerList"}}</a>
+        </div>
+    </div>
+    <div class="container">
+        <div class="page-header clearfix">
+            <span class="header-icon pull-left"><i class="fa fa-calendar"></i></span>
+            <h4 class="page-type">
+                {{pageType}}
+            </h4>
+            <div class="page-header-button-group">
+                <div class="btn-group">
+                    <button type="button" class="btn btn-default btn-secondary dropdown-toggle btn-actions" data-toggle="dropdown" aria-expanded="false">
+                        <i class="fa fa-ellipsis-v fa-lg"></i>
+                    </button>
+                    <ul class="dropdown-menu pull-right" role="menu">
+                        <li id="deleteSchedule"><a href="#"><i class="fa fa-times"></i>{{t "common.form.delete"}}</a></li>
+                    </ul>
+                </div>
+            </div>
+            <h1>{{schedule._id}}</h1>
+        </div>
+    </div>
+</section>
+<div class="tab-menu">
+    <div class="container">
+        <ul class="nav nav-tabs" role="tablist">
+            <li class="dropdown pull-right tabdrop hide">
+                <a class="dropdown-toggle" data-toggle="dropdown" href="#">
+                    <i class="icon-align-justify"></i>
+                    <i class="fa fa-ellipsis-v"></i>
+                </a>
+                <ul class="dropdown-menu"></ul>
+            </li>
+            <li role="presentation" class="active">
+                <a href="#scheduleDetailsTab" aria-controls="attributes" role="tab" data-toggle="tab">
+                    <span class="glyph-title hidden-xs">{{t "templates.connector.detailsTab"}}</span>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+<div class="container schedule-container">
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane active" id="scheduleDetailsTab">
+            <form class="form-horizontal" role="form" id="scheduleForm">
+                <!-- inputs prevent browser autocompletion of form fields -->
+                <input type="text" class="hidden">
+                <input type="password" class="hidden">
+                <div class="panel no-margin-bottom panel-connector panel-default panel-content panel-collapse-group">
+                    <div id="scheduleDetails" class="panel-body">
+                        {{> scheduler/_scheduleForm}}
+                        <div class="changes-pending-container"></div>
+                    </div>
+
+                </div>
+                <div class="panel-footer clearfix">
+                    <div class="pull-right save-cancel-btn-panel" disabled>
+                        <a href="#scheduler/"><button class="btn save-cancel-btn btn-default btn-cancel" type="button">{{t 'common.form.cancel'}}</button></a>
+                        <button  id="submitSchedule" name="submitSchedule" class="btn save-cancel-btn btn-primary btn-save" type="button">{{t "common.form.save"}}</button>
+                        <div class="clearfix"></div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -228,6 +228,18 @@ define([
             view: "org/forgerock/openidm/ui/admin/scheduler/SchedulerListView",
             role: "ui-admin",
             url: "scheduler/"
+        },
+        "editSchedulerView" : {
+            view: "org/forgerock/openidm/ui/admin/scheduler/EditSchedulerView",
+            role: "ui-admin",
+            defaults : ["", ""],
+            url: /^scheduler\/edit\/(.+?)\/(.*)$/,
+            pattern: "scheduler/edit/?/?"
+        },
+        "addSchedulerView" : {
+            view: "org/forgerock/openidm/ui/admin/scheduler/AddSchedulerView",
+            role: "ui-admin",
+            url: "scheduler/add/"
         }
     };
 

@@ -158,9 +158,17 @@ define([
             msg: "config.messages.SyncMessages.scheduleSaved",
             type: "info"
         },
+        "scheduleSaveFailed" : {
+            msg: "config.messages.SyncMessages.scheduleSaveFailed",
+            type: "error"
+        },
         "scheduleDeleted" : {
             msg: "config.messages.SyncMessages.scheduleDeleted",
             type: "info"
+        },
+        "scheduleDeletedFailed" : {
+            msg: "config.messages.SyncMessages.scheduleDeletedFailed",
+            type: "error"
         },
         "syncLiveSyncSaveSuccess": {
             msg: "config.messages.SyncMessages.liveSyncSaved",
