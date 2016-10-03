@@ -80,22 +80,13 @@ define([
                                 return event.isUsableForQueries;
                             }), function(event) {
                                 return event.class;
-                            }),
-                            usableForQueriesCount = 0;
+                            });
 
-                        _.each(allUsedClasses, function(classTest){
-                            if(usableForQueriesClasses.indexOf(classTest) !== -1){
-                                usableForQueriesCount++;
-                            }
-                        });
-
-                        if (usableForQueriesCount > 1 || !handler.isUsableForQueries) {
-                            handler.deletable = true;
-                        }
-
-
+                        // do not allow deleting the handler-for-queries
                         if (handler.config.name === this.model.useForQueries) {
                             handler.useForQueries = true;
+                        } else {
+                            handler.deletable = true;
                         }
 
                         if (_.has(handler, "class")) {
@@ -188,6 +179,10 @@ define([
             }
 
             this.model.auditData.auditServiceConfig.handlerForQueries = eventHandlerName;
+
+            // event handler used for queries must be enabled
+            _.find(this.model.auditData.eventHandlers, (eventHandler) => eventHandler.config.name === eventHandlerName).config.enabled = true;
+
             this.reRender();
         },
 
@@ -202,26 +197,6 @@ define([
                 found = false;
 
             this.model.auditData.eventHandlers.splice(_.findIndex(this.model.auditData.eventHandlers, {"config": {"name": eventHandlerName}}), 1);
-
-            if (_.has(this.model.auditData, "auditServiceConfig") &&
-                _.has(this.model.auditData.auditServiceConfig, "handlerForQueries") &&
-                this.model.auditData.auditServiceConfig.handlerForQueries === eventHandlerName &&
-                this.model.auditData.eventHandlers.length > 0) {
-
-                _.each(this.model.auditData.eventHandlers, function(eventHandler) {
-                    if (_.find(this.model.availableHandlers, {"class": eventHandler.class}).isUsableForQueries) {
-                        this.model.auditData.auditServiceConfig.handlerForQueries = eventHandler.config.name;
-                        found = true;
-                        return false;
-                    }
-                }, this);
-
-                if (!found && this.model.auditData.eventHandlers.length > 0) {
-                    this.model.auditData.auditServiceConfig.handlerForQueries = this.model.auditData.eventHandlers[0].config.name;
-                } else if (!found) {
-                    this.model.auditData.auditServiceConfig.handlerForQueries = "";
-                }
-            }
 
             this.reRender();
         },
