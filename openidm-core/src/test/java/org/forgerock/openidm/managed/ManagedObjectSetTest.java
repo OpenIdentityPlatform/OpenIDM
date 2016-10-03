@@ -416,9 +416,7 @@ public class ManagedObjectSetTest {
     private CryptoService createCryptoService() throws Exception {
         final KeyStore keyStore = createKeyStore();
         final UpdatableKeyStoreSelector keySelector = new UpdatableKeyStoreSelector(keyStore, KEYSTORE_PASSWORD);
-        return new CryptoServiceImpl(keySelector,
-                Collections.<JsonTransformer>singletonList(
-                        new JsonCryptoTransformer(new SimpleDecryptor(keySelector))));
+        return new CryptoServiceImpl(keySelector, new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
     }
 
     private KeyStore createKeyStore() throws Exception {

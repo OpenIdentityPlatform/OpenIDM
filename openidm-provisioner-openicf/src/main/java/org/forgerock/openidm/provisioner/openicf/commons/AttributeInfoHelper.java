@@ -223,7 +223,8 @@ public class AttributeInfoHelper {
                     && (GuardedString.class.isAssignableFrom(getAttributeInfo().getType())
                         || GuardedByteArray.class.isAssignableFrom(getAttributeInfo().getType()))) {
                 JsonValue decryptedValue =
-                        new JsonValue(source, new JsonPointer(), cryptoService.getDecryptionTransformers());
+                        new JsonValue(source, new JsonPointer(),
+                                Collections.singletonList(cryptoService.getDecryptionTransformer()));
                 return build(attributeInfo, decryptedValue.getObject());
             } else {
                 return build(attributeInfo, source);
