@@ -11,11 +11,9 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2015 ForgeRock AS.
+ * Portions copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.crypto;
-
-import java.util.List;
 
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
@@ -44,11 +42,11 @@ public interface CryptoService {
     JsonEncryptor getEncryptor(String cipher, String alias) throws JsonCryptoException;
 
     /**
-     * Returns a list of decryption transformers that can decrypt JSON values.
+     * Returns a decryption transformer that can decrypt JSON values.
      *
-     * @return a list of transformers that can decrypt JSON values.
+     * @return a transformer that can decrypt JSON values.
      */
-    List<JsonTransformer> getDecryptionTransformers();
+    JsonTransformer getDecryptionTransformer();
 
     /**
      * Encrypts a JSON value.

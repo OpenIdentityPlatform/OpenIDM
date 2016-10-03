@@ -29,10 +29,8 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.KeyStore;
 import java.security.KeyStore.SecretKeyEntry;
-import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
@@ -75,7 +73,7 @@ import org.slf4j.LoggerFactory;
 public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, SharedKeyService {
 
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
-    private final ArrayList<JsonTransformer> decryptionTransformers = new ArrayList<>();
+    private JsonTransformer decryptionTransformer = NullJsonTransformer.INSTANCE;
     private UpdatableKeyStoreSelector keySelector;
 
     /**
@@ -86,15 +84,14 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
 
     /**
      * Constructs an implementation of the {@link CryptoService} with a given
-     * {@link UpdatableKeyStoreSelector} and list of {@link JsonTransformer}'s.
+     * {@link UpdatableKeyStoreSelector} and a {@link JsonTransformer}.
      *
      * @param keySelector The {@link UpdatableKeyStoreSelector}.
-     * @param decryptionTransformers A list of {@link JsonTransformer}'s to use for decryption.
+     * @param decryptionTransformer A {@link JsonTransformer} to use for decryption.
      */
-    public CryptoServiceImpl(final UpdatableKeyStoreSelector keySelector,
-            final List<JsonTransformer> decryptionTransformers) {
+    public CryptoServiceImpl(final UpdatableKeyStoreSelector keySelector, final JsonTransformer decryptionTransformer) {
         this.keySelector = keySelector;
-        this.decryptionTransformers.addAll(decryptionTransformers);
+        this.decryptionTransformer = decryptionTransformer;
     }
 
     /** Map of crypto secret key aliases and the algorithm they should use */
@@ -152,8 +149,7 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
                             .build();
                 }
                 keySelector = new UpdatableKeyStoreSelector(keyStore, new String(clearPassword));
-                decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(
-                        keySelector)));
+                decryptionTransformer = new JsonCryptoTransformer(new SimpleDecryptor(keySelector));
                 Enumeration<String> aliases = keyStore.aliases();
                 while (aliases.hasMoreElements()) {
                     logger.debug("Available cryptography key: {}", aliases.nextElement());
@@ -210,11 +206,10 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
     
     public void updateKeySelector(KeyStore ks, String password) {
         keySelector.update(ks, password);
-        decryptionTransformers.add(new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
     }
 
     public void deactivate(@SuppressWarnings("unused") BundleContext context) {
-        decryptionTransformers.clear();
+        decryptionTransformer = NullJsonTransformer.INSTANCE;
         keySelector = null;
         logger.info("CryptoService stopped.");
     }
@@ -231,8 +226,8 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
     }
 
     @Override
-    public List<JsonTransformer> getDecryptionTransformers() {
-        return decryptionTransformers;
+    public JsonTransformer getDecryptionTransformer() {
+        return decryptionTransformer;
     }
 
     @Override
@@ -251,7 +246,7 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
         JsonValue result = null;
         if (value != null) {
             result = new JsonValue(value);
-            result.getTransformers().addAll(0, getDecryptionTransformers());
+            result.getTransformers().add(decryptionTransformer);
             result.applyTransformers();
             result = result.copy();
         }
