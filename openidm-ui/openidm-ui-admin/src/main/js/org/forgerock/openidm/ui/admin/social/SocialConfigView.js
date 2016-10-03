@@ -547,6 +547,8 @@ define([
             )) {
                 let newObjectSchema = _.merge({
                     "title" : provider.name,
+                    "type" : "object",
+                    "viewable" : true,
                     "properties" : {
                         "user" : {
                             "viewable" : true,

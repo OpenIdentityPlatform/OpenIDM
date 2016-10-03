@@ -175,6 +175,8 @@ define([
             advancedProviderConfig = {
                 "name" : "testProvider",
                 "schema": {
+                    "viewable" : true,
+                    "type": "object",
                     "properties" : {
                         "name" : {
                             "type" : "string"
@@ -186,7 +188,10 @@ define([
             amendedConfig = SocialConfigView.addManagedObjectForIDP(basicProviderConfig, managedConfig);
 
         assert.equal(amendedConfig.objects[1].name, "testProvider", "new managed object defined with name of provider");
-        assert.ok(amendedConfig.objects[1].schema.properties.user && amendedConfig.objects[1].schema.properties._id,
+        assert.ok(amendedConfig.objects[1].schema.properties.user &&
+                amendedConfig.objects[1].schema.type === "object" &&
+                amendedConfig.objects[1].schema.viewable === true &&
+                amendedConfig.objects[1].schema.properties._id,
             "provider definition with no schema results in default managed object schema with default properties");
 
         assert.deepEqual(amendedConfig.objects[1].schema.order, ["_id", "user"], "default order generated for managed object without schema");
