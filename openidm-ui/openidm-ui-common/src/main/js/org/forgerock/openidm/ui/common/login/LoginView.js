@@ -19,6 +19,7 @@ define([
     "lodash",
     "handlebars",
     "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
+    "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/LoginView",
@@ -27,6 +28,7 @@ define([
     "org/forgerock/openidm/ui/common/util/AMLoginUtils"
 ], function($, _, Handlebars,
             SocialDelegate,
+            Configuration,
             Constants,
             EventManager,
             commonLoginView,
@@ -45,20 +47,26 @@ define([
         "click [data-oauth=button]": "oauthHandler"
     });
 
-    // TODO: share oauthHandler logic between registration and login
+    obj.redirectToIDP = function (authorization_endpoint, client_id, scope, provider) {
+        // TODO: share oauthHandler logic between registration and login
+        window.location.href = OAuth.getRequestURL(authorization_endpoint, client_id, scope,
+            Router.getLink(Router.currentRoute,
+                [
+                    "&provider=" + provider +
+                    "&redirect_uri=" + OAuth.getRedirectURI() +
+                    "&gotoURL=" + (Configuration.gotoURL || "#")
+                ]
+            )
+        );
+    };
+
     obj.oauthHandler = function (e) {
         e.preventDefault();
-
-        window.location.href = OAuth.getRequestURL(
+        this.redirectToIDP(
             $(e.target).parents("[data-oauth=button]").attr("authorization_endpoint"),
             $(e.target).parents("[data-oauth=button]").attr("client_id"),
             $(e.target).parents("[data-oauth=button]").attr("scope"),
-            Router.getLink(Router.currentRoute,
-                [
-                    "&provider=" + $(e.target).parents("[data-oauth=button]").attr("value") +
-                    "&redirect_uri=" + OAuth.getRedirectURI()
-                ]
-            )
+            $(e.target).parents("[data-oauth=button]").attr("value")
         );
     };
     // TODO: share providerPartialFromType between registration and login
@@ -78,13 +86,16 @@ define([
 
             SocialDelegate.getAuthToken(params.provider, params.code, params.redirect_uri)
                 .then(function (authToken) {
+                    if (_.has(params, "gotoURL")) {
+                        Configuration.gotoURL = params.gotoURL;
+                    }
                     EventManager.sendEvent(Constants.EVENT_LOGIN_REQUEST, {
                         authToken: authToken.auth_token,
                         provider: params.provider,
                         failureCallback: (reason) => {
                             EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
                                 route: Router.configuration.routes.login,
-                                args: []
+                                args: ["&preventAutoLogin=true"]
                             });
                         }
                     });
@@ -105,16 +116,28 @@ define([
 
                 this.data.providers = response.providers;
 
-                commonLoginView.render.call(this, args, _.bind(function () {
-                    if (callback) {
-                        callback();
-                    }
+                if (this.data.providers.length === 1 &&
+                    !_.has(params, "preventAutoLogin") &&
+                    this.data.providers[0].name === "OPENAM") {
+                    this.redirectToIDP(
+                        this.data.providers[0].authorization_endpoint,
+                        this.data.providers[0].client_id,
+                        this.data.providers[0].scope,
+                        this.data.providers[0].name
+                    );
+                } else {
+                    commonLoginView.render.call(this, args, _.bind(function () {
+                        if (callback) {
+                            callback();
+                        }
 
-                    if (amCallback) {
-                        amCallback();
-                    }
+                        if (amCallback) {
+                            amCallback();
+                        }
 
-                }, this));
+                    }, this));
+                }
+
             }, this));
 
         }
