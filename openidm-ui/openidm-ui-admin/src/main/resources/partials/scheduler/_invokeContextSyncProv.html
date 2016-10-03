@@ -1,0 +1,19 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+<div class="form-group schedule-form-element">
+    <label for="{{type}}" class="col-sm-3 control-label">{{type}}</label>
+    <div class="col-sm-6">
+        <select id="select-{{type}}" class="form-control " {{#unless noForm2js}}name="{{type}}"{{/unless}}>
+            {{#staticSelect resourceMapping}}
+                {{#each resourceMappingOptions as |option| }}
+                    <option value="{{option}}">{{option}}</option>
+                {{/each}}
+            {{/staticSelect}}
+        </select>
+
+
+        {{#if helpKey}}
+        <div class="help-block">{{t helpKey}}</div>
+        {{/if}}
+    </div>
+</div>

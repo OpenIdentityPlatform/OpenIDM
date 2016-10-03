@@ -1,0 +1,198 @@
+<!-- Copyright 2016 ForgeRock AS.
+    License terms: https://forgerock.org/cddlv1-0/ -->
+
+<!-- enabled -->
+<div class="form-group schedule-form-element">
+    <label for="toggle-enabled" class="col-sm-3 control-label">{{t "templates.scheduler.enabled"}}</label>
+    <div class="col-sm-6">
+        <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+            <label>
+                <input id="toggle-enabled" name="enabled" type="checkbox" {{#if schedule.enabled}}checked{{/if}} value="true"><span></span>
+            </label>
+        </div>
+    </div>
+</div>
+<!-- endabled end -->
+
+<!-- schedule -->
+<div class="cron-editor-container">
+    <div class="form-group  ">
+      <label class="col-sm-3 control-label" for="schedule-schedule">{{t "templates.scheduler.schedule"}}</label>
+      <div class="col-sm-6">
+        <div class="form-inline cron-builder-basic cron-builder">
+            <div class="cronField"></div>
+               <span class="help-block">
+                 <button class="btn btn-link cron-controls btn-cron-advanced">{{t "templates.scheduler.advanced"}}</button>
+               </span>
+        </div>
+        <div class="cron-builder-advanced cron-builder hidden">
+          <input type="text" name="schedule" class="form-control complexExpression" value="{{schedule.schedule}}"/>
+          <span class="help-block">
+            <button class="btn btn-link cron-controls btn-cron-basic">{{t "templates.scheduler.basicCron"}}</button>
+            <span class="advanced-cron-msg text-warning hidden" >{{t "templates.scheduler.complex"}}</span>
+          </span>
+
+        </div>
+      </div>
+  </div>
+</div>
+<!-- schedule end -->
+
+<!-- invokeService -->
+<div class="form-group schedule-form-element">
+    <label for="select-invokeService" class="col-sm-3 control-label">{{t "templates.scheduler.invokeService"}}</label>
+    <div class="col-sm-6">
+        <select id="select-invokeService" class="form-control schedule-form" {{#unless noForm2js}}name="invokeService"{{/unless}}>
+            {{#staticSelect schedule.invokeService}}
+                {{#each invokeServiceOptions as |option|}}
+                    <option value="{{option.value}}">{{option.name}}</option>
+                {{/each}}
+            {{/staticSelect}}
+        </select>
+
+
+        {{#if helpKey}}
+        <div class="help-block">{{t helpKey}}</div>
+        {{/if}}
+    </div>
+</div>
+<!-- invokeService end -->
+
+<!-- invokeContext -->
+<!-- recon/liveSync -->
+<div class="invoke-context-well-select-container invoke-context-part hidden" ></div>
+<!-- inline script editor -->
+<div class="form-group invoke-context-ise-container invoke-context-part hidden">
+    <label for="invoke-context-script-editor" class="col-sm-3 control-label" id="iseLabel">Script</label>
+    <div class="col-sm-6">
+
+        <div class="script-editor-container panel panel-body"></div>
+        {{#if helpKey}}
+        <div class="help-block">{{t helpKey}}</div>
+        {{/if}}
+    </div>
+</div>
+<!-- invokeContext end -->
+
+<!-- advanced options controller -->
+<div class="form-group">
+  <div class="col-sm-7 col-sm-offset-3">
+    <a class="advanced-options-toggle" role="button" data-toggle="collapse" href="#advancedOptions" aria-expanded="false" aria-controls="advancedOptions">Show Advanced Options</a>
+  </div>
+</div>
+<!-- advanced options controller end -->
+<!-- advanced options well -->
+<div class="collapse" id="advancedOptions" aria-expanded="true">
+    <div class="well">
+        <!-- persisted -->
+        <div class="form-group schedule-form-element">
+            <label for="toggle-persisted" class="col-sm-3 control-label">{{t "templates.scheduler.persisted"}}</label>
+            <div class="col-sm-6">
+                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                    <label>
+                        <input id="toggle-persisted" name="persisted" type="checkbox" {{#if schedule.persisted}}checked{{/if}} value="true"><span></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- persisted end-->
+        <!-- misfirePolicy -->
+        <div class="form-group schedule-form-element">
+            <label for="select-misfirePolicy" class="col-sm-3 control-label">{{t "templates.scheduler.misfirePolicy"}}</label>
+            <div class="col-sm-6">
+                <select id="select-misfirePolicy" class="form-control schedule-form" {{#unless noForm2js}}name="misfirePolicy"{{/unless}}>
+                    {{#staticSelect schedule.misfirePolicy}}
+                        {{#each misfirePolicyOptions}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    {{/staticSelect}}
+                </select>
+
+                {{#if helpKey}}
+                <div class="help-block">{{t helpKey}}</div>
+                {{/if}}
+            </div>
+        </div>
+        <!-- misfirePolicy end-->
+
+        <!-- invokeLogLevel -->
+        <div class="form-group schedule-form-element">
+            <label for="select-invokeLogLevel" class="col-sm-3 control-label">{{t "templates.scheduler.invokeLogLevel"}}</label>
+            <div class="col-sm-6">
+                <select id="select-invokeLogLevel" class="form-control schedule-form" {{#unless noForm2js}}name="invokeLogLevel"{{/unless}}>
+                    {{#staticSelect schedule.invokeLogLevel}}
+                        {{#each invokeLogLevelOptions}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    {{/staticSelect}}
+                </select>
+
+                {{#if helpKey}}
+                <div class="help-block">{{t helpKey}}</div>
+                {{/if}}
+            </div>
+        </div>
+        <!-- invokeLogLevel end -->
+        <!-- concurrentExecution -->
+        <div class="form-group schedule-form-element">
+            <label for="toggle-concurrentExecution" class="col-sm-3 control-label">{{t "templates.scheduler.concurrentExecution"}}</label>
+            <div class="col-sm-6">
+                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                    <label>
+                        <input id="toggle-concurrentExecution" name="concurrentExecution" type="checkbox" {{#if concurrentExecution}}checked{{/if}} value="true"><span></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- concurrentExecution end -->
+
+        <!-- timeZone -->
+        <!-- <div class="form-group schedule-form-element">
+            <label for="select-timeZone" class="col-sm-3 control-label">{{t "templates.scheduler.timeZone"}}</label>
+            <div class="col-sm-6">
+                <select id="select-timeZone" class="form-control" {{#unless noForm2js}}name="timeZone"{{/unless}}>
+                    {{#staticSelect timeZone}}
+                        {{#each timzoneOptions}}
+                            <option value="{{this}}">{{this}}</option>
+                        {{/each}}
+                    {{/staticSelect}}
+                </select>
+
+                {{#if helpKey}}
+                <div class="help-block">{{t helpKey}}</div>
+                {{/if}}
+            </div>
+        </div> -->
+
+        <!-- timeZone end -->
+
+        <!-- startTime -->
+        <!-- <div class="form-group schedule-form-element">
+            <label class="col-sm-3 control-label" for="schedule-startTime">{{t "templates.scheduler.startTime"}}</label>
+            <div class="col-sm-6">
+                <input id="schedule-startTime"
+                        class="form-control"
+                        type="time"
+                        name="startTime"
+                />
+                <div class="validation-message"></div>
+                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+            </div>
+        </div> -->
+        <!-- endTime -->
+        <!-- <div class="form-group">
+            <label class="col-sm-3 control-label" for="schedule-endTime">{{t "templates.scheduler.endTime"}}</label>
+            <div class="col-sm-6">
+                <input id="schedule-endTime"
+                        class="form-control"
+                        type="time"
+                        name="endTime"
+                />
+                <div class="validation-message"></div>
+                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+            </div>
+        </div> -->
+        <!-- endTime end -->
+    </div>
+</div>
+<!-- advanced options well -->

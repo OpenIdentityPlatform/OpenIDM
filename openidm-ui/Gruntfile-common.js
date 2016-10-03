@@ -366,7 +366,8 @@ module.exports = function(grunt, options) {
         "newer:babel:test",
         'copy:test',
         "sync:deploy",
-        'qunit'
+        'qunit',
+        'eslint'
     ]);
 
     grunt.registerTask("dev", ["copy:compose", "deploy", "watch"]);

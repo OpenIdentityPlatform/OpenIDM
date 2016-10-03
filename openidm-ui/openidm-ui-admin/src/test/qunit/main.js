@@ -64,7 +64,7 @@ define([
     "./org/forgerock/openidm/ui/admin/managed/EditManagedViewTest",
     "./org/forgerock/openidm/ui/admin/managed/ManagedListViewTest",
     "./org/forgerock/openidm/ui/admin/mapping/AddMappingViewTest",
-    "./org/forgerock/openidm/ui/admin/mapping/AdvancedViewTest",
+    // "./org/forgerock/openidm/ui/admin/mapping/AdvancedViewTest",
     "./org/forgerock/openidm/ui/admin/mapping/AssociationViewTest",
     "./org/forgerock/openidm/ui/admin/mapping/BehaviorsViewTest",
     "./org/forgerock/openidm/ui/admin/mapping/MappingBaseViewTest",
@@ -159,5 +159,6 @@ define([
     "./org/forgerock/openidm/ui/admin/workflow/ProcessListViewTest",
     "./org/forgerock/openidm/ui/admin/workflow/TaskInstanceViewTest",
     "./org/forgerock/openidm/ui/admin/workflow/TaskListViewTest",
-    "./org/forgerock/openidm/ui/admin/scheduler/SchedulerListViewTest"
+    "./org/forgerock/openidm/ui/admin/scheduler/SchedulerListViewTest",
+    "./org/forgerock/openidm/ui/admin/scheduler/SchedulerDetailsViewTest"
 ]);
