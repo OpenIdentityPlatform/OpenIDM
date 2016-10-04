@@ -1010,10 +1010,6 @@ public class JDBCRepoService implements RequestHandler, RepoBootService, Reposit
             return
                     new MSSQLTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
                             new MSSQLExceptionHandler());
-        case H2:
-            return
-                    new H2TableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
-                            new DefaultSQLExceptionHandler());
         default:
             return
                     new GenericTableHandler(tableConfig, dbSchemaName, queries, commands, maxBatchSize,
