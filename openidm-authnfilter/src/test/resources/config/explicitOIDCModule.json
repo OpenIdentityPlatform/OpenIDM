@@ -1,0 +1,37 @@
+{
+  "name" : "OPENID_CONNECT",
+  "properties" : {
+    "augmentSecurityContext": {
+      "type" : "text/javascript",
+      "file" : "auth/augmentScript.js"
+    },
+    "propertyMapping" : {
+      "userRoles" : "authzRoles",
+      "authenticationId" : "_id"
+    },
+    "defaultUserRoles" : [
+      "openidm-authorized"
+    ],
+    "resolvers" : [
+      {
+        "name" : "explicit-oidc",
+        "type" : "OPENID_CONNECT",
+        "icon" : "oidc",
+        "scope" : [
+          "foo"
+        ],
+        "authenticationId" : "_id",
+        "enabled" : true,
+        "client_id" : "",
+        "client_secret" : "",
+        "authorization_endpoint" : "authorization endpoint url",
+        "token_endpoint" : "token endpoint url",
+        "userinfo_endpoint" : "userinfo endpoint url",
+        "well-known" : "well-known url"
+      }
+    ],
+    "queryOnResource" : "managed/oidc",
+    "openIdConnectHeader" : "authToken"
+  },
+  "enabled" : false
+}
