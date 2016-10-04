@@ -1,0 +1,13 @@
+{
+  "enabled":true,
+  "type":"simple",
+  "persisted":true,
+  "invokeService":"script",
+  "invokeContext": {
+    "script": {
+      "type":"text/javascript",
+      "source":"java.lang.System.out.println(new java.util.Date());"
+    }
+  },
+  "concurrentExecution": true
+}

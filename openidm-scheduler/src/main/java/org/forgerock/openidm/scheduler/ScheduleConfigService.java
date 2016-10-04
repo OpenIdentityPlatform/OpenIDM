@@ -59,14 +59,7 @@ public class ScheduleConfigService {
     private volatile EnhancedConfig enhancedConfig;
 
     @Reference
-    SchedulerService schedulerService;
-    protected void bindSchedulerService(final SchedulerService service) {
-        schedulerService = service;
-    }
-
-    protected void unbindSchedulerService(final SchedulerService service) {
-        schedulerService = null;
-    }
+    private SchedulerService schedulerService;
 
     @Activate
     void activate(ComponentContext compContext) throws SchedulerException, ParseException, ResourceException {

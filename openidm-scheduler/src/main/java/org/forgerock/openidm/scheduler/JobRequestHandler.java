@@ -37,7 +37,6 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-import java.util.TimeZone;
 import java.util.UUID;
 
 import org.forgerock.json.JsonException;
@@ -70,6 +69,7 @@ import org.forgerock.openidm.filter.JsonValueFilterVisitor;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
+import org.forgerock.openidm.scheduler.impl.TriggerFactory;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
@@ -397,45 +397,36 @@ class JobRequestHandler extends AbstractRequestHandler {
                         ? SchedulerServiceJob.class
                         : StatefulSchedulerServiceJob.class;
 
-                // Attempt to add the schedule
-                if (scheduleConfig.getCronSchedule() != null
-                        && scheduleConfig.getCronSchedule().length() > 0) {
-                    final JobDetail job = new JobDetail(jobName, GROUP_NAME, scheduleClass);
-                    job.setVolatility(scheduleConfig.isPersisted());
-                    job.setJobDataMap(createJobDataMap(jobName, scheduleConfig));
-                    final Trigger trigger = createTrigger(scheduleConfig, jobName);
-                    final Scheduler scheduler = scheduleConfig.isPersisted() ? persistentScheduler : inMemoryScheduler;
+                final JobDetail job = new JobDetail(jobName, GROUP_NAME, scheduleClass);
+                job.setVolatility(scheduleConfig.isPersisted());
+                job.setJobDataMap(createJobDataMap(jobName, scheduleConfig));
+                final Trigger trigger = scheduleConfig.getTriggerType().newTrigger(scheduleConfig, jobName);
+                final Scheduler scheduler = scheduleConfig.isPersisted() ? persistentScheduler : inMemoryScheduler;
 
-                    if (update) {
-                        // Update the job by first deleting it, then scheduling the new version
-                        deleteSchedule(jobName);
-                    }
+                if (update) {
+                    // Update the job by first deleting it, then scheduling the new version
+                    deleteSchedule(jobName);
+                }
 
-                    // check if it is enabled
-                    if (scheduleConfig.isEnabled()) {
-                        // Set to non-durable so that jobs won't persist after last firing
-                        job.setDurability(false);
-                        // Schedule the Job (with trigger)
-                        scheduler.scheduleJob(job, trigger);
-                        logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.",
-                                jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
-                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime());
-                    } else {
-                        // Set the job to durable so that it can exist without a trigger (since the job is "disabled")
-                        job.setDurability(true);
-                        // Add the job (no trigger)
-                        scheduler.addJob(job, false);
-                        logger.info("Job {} added with schedule {}, timezone {}, start time {}, end time {}.",
-                                jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
-                                scheduleConfig.getStartTime(), scheduleConfig.getEndTime());
-                    }
-
+                // check if it is enabled
+                if (scheduleConfig.isEnabled()) {
+                    // Set to non-durable so that jobs won't persist after last firing
+                    job.setDurability(false);
+                    // Schedule the Job (with trigger)
+                    scheduler.scheduleJob(job, trigger);
+                    logger.info("Job {} scheduled with schedule {}, timezone {}, start time {}, end time {}.",
+                            jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
+                            scheduleConfig.getStartTime(), scheduleConfig.getEndTime());
+                } else {
+                    // Set the job to durable so that it can exist without a trigger (since the job is "disabled")
+                    job.setDurability(true);
+                    // Add the job (no trigger)
+                    scheduler.addJob(job, false);
+                    logger.info("Job {} added with schedule {}, timezone {}, start time {}, end time {}.",
+                            jobName, scheduleConfig.getCronSchedule(), scheduleConfig.getTimeZone(),
+                            scheduleConfig.getStartTime(), scheduleConfig.getEndTime());
                 }
             }
-        } catch (ParseException ex) {
-            logger.warn("Parsing of scheduler configuration failed, can not create scheduler service for "
-                    + jobName + ": " + ex.getMessage(), ex);
-            throw ex;
         } catch (ObjectAlreadyExistsException ex) {
             throw ex;
         } catch (SchedulerException ex) {
@@ -455,44 +446,6 @@ class JobRequestHandler extends AbstractRequestHandler {
     private void deleteSchedule(String jobName) throws SchedulerException {
         inMemoryScheduler.deleteJobIfPresent(jobName);
         persistentScheduler.deleteJobIfPresent(jobName);
-    }
-
-    /**
-     * Creates and returns a CronTrigger using the supplied schedule configuration.
-     *
-     * @param scheduleConfig    The schedule configuration
-     * @param jobName           The name of the job to associate the trigger with
-     * @return                  The created Trigger
-     * @throws ParseException if unable to create trigger
-     */
-    private CronTrigger createTrigger(ScheduleConfig scheduleConfig, String jobName) throws ParseException {
-        String cronSchedule = scheduleConfig.getCronSchedule();
-        Date startTime = scheduleConfig.getStartTime();
-        Date endTime = scheduleConfig.getEndTime();
-        String misfirePolicy = scheduleConfig.getMisfirePolicy();
-        TimeZone timeZone = scheduleConfig.getTimeZone();
-
-        CronTrigger trigger = new CronTrigger("trigger-" + jobName, GROUP_NAME, cronSchedule);
-        trigger.setJobName(jobName);
-        trigger.setJobGroup(GROUP_NAME);
-
-        if (startTime != null) {
-            trigger.setStartTime(startTime); // TODO: review time zone consistency with cron trigger timezone
-        }
-
-        if (endTime != null) {
-            trigger.setEndTime(endTime);
-        }
-        if (timeZone != null) {
-            trigger.setTimeZone(timeZone);
-        }
-
-        if (misfirePolicy.equals(MISFIRE_POLICY_FIRE_AND_PROCEED)) {
-            trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_FIRE_ONCE_NOW);
-        } else if (misfirePolicy.equals(MISFIRE_POLICY_DO_NOTHING)) {
-            trigger.setMisfireInstruction(CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING);
-        }
-        return trigger;
     }
 
     /**
