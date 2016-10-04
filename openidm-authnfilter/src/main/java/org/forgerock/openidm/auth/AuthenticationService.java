@@ -30,6 +30,7 @@ import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_M
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
+import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClientSecret;
 import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 
 import javax.inject.Provider;
@@ -734,24 +735,24 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      */
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
-        final List<Map<String, Object>> allAuthModules = new ArrayList<>();
-        if (amendedConfig != null) {
-            final JsonValue authModuleConfig = amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY);
-            final List<JsonValue> authModules = FluentIterable.from(authModuleConfig).filter(oidcAndOauth2Modules).toList();
-            // Iterate the filtered list and get resolvers content
-            for (final JsonValue authModule : authModules) {
-                allAuthModules.addAll(FluentIterable
-                        .from(authModule
-                                .get(AUTH_MODULE_PROPERTIES_KEY)
-                                .get(AUTH_MODULE_RESOLVERS_KEY))
-                        .filter(enabledAuthModules)
-                        .transform(IdentityProviderService.withoutClientSecret)
-                        .transform(jsonValueToMap)
-                        .toList());
-            }
+        if (amendedConfig == null) {
+            return newResourceResponse(null, null,
+                        json(object(
+                                field(IdentityProviderService.PROVIDERS, array()))))
+                    .asPromise();
         }
-        return newResourceResponse(null, null, json(object(field(IdentityProviderService.PROVIDERS,
-                allAuthModules)))).asPromise();
+        return newResourceResponse(null, null,
+                    json(object(
+                            field(IdentityProviderService.PROVIDERS, FluentIterable
+                                .from(amendedConfig.get(SERVER_AUTH_CONTEXT_KEY).get(AUTH_MODULES_KEY))
+                                .filter(enabledAuthModules)
+                                .filter(oidcAndOauth2Modules)
+                                .transformAndConcat(resolvers)
+                                .filter(enabledResolvers)
+                                .transform(withoutClientSecret)
+                                .transform(jsonValueToMap)
+                                .toList()))))
+                .asPromise();
     }
 
     /**

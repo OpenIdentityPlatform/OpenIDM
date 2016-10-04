@@ -25,6 +25,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
@@ -54,12 +56,11 @@ public class AuthenticationServiceTest {
     private static final String OPENID_CONNECT = "OPENID_CONNECT";
     private static final String OAUTH = "OAUTH";
     private static final String AUTHENTICATION_PATH = "authentication";
-    private static final String CONF_AUTHENTICATION_MODULE = "/config/authenticationModule.json";
+    private static final JsonPointer AUTH_MODULES = new JsonPointer("serverAuthContext/authModules");
 
     private JsonValue amendedAuthentication;
     private JsonValue googleIdentityProvider;
     private JsonValue authenticationJson;
-    private JsonValue authenticationModule;
 
     private AuthenticationService authenticationService;
 
@@ -106,14 +107,13 @@ public class AuthenticationServiceTest {
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService
-        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
+        authenticationService.amendAuthConfig(authenticationJson.get(AUTH_MODULES));
 
         // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
         // the amendedAuthentication configuration
-        assertThat(
-                amendedAuthentication.get("serverAuthContext").get("authModules").get(1)
-                .isEqualTo(authenticationJson.get("serverAuthContext").get("authModules").get(0)))
-                .isTrue();
+
+        assertThat(amendedAuthentication.get(AUTH_MODULES).asList())
+                .containsAll(authenticationJson.get(AUTH_MODULES).asList());
 
     }
 
@@ -150,7 +150,7 @@ public class AuthenticationServiceTest {
 
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService
-        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
+        authenticationService.amendAuthConfig(authenticationJson.get(AUTH_MODULES));
 
         // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
         // the amendedAuthentication configuration
@@ -159,10 +159,12 @@ public class AuthenticationServiceTest {
 
     @Test
     public void testNoProviderConfigsToInject() throws Exception {
-        // This should be empty because this test should make sure that if we have no configured
-        // identity providers we should not inject auth modules into authentication.json
+        // This should only have one auth module declared, the auth module that was explicitly defined,
+        // the explicitOIDCModule.json holds a config for an explicitly declared authentication module
+        final Map<String, Object> explicitAuthModule =
+                OBJECT_MAPPER.readValue(getClass().getResource("/config/explicitOIDCModule.json"), Map.class);
         final JsonValue authenticationJsonNoMod =
-                json(object(field("serverAuthContext", object(field("authModules", array())))));
+                json(object(field("serverAuthContext", object(field("authModules", array(explicitAuthModule))))));
 
         // Mock of IdentityProviderService
         final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
@@ -178,17 +180,19 @@ public class AuthenticationServiceTest {
         // Call the amendAuthConfig to see the configuration of authentication.json be modified with
         // the injected identityProvider config from the IdentityProviderService; in this test case
         // we should see no modifications taking place and the config should not have been modified
-        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
+        authenticationService.amendAuthConfig(authenticationJson.get(AUTH_MODULES));
 
-        // Assert that the authenticationJson has not been modified
+        // Assert that the authenticationJson has not been modified from the original
+        // there should only be one auth module, an OPENID_CONNECT module that was created in explicitly
+        // and not managed by the IdentityProviderService
         assertThat(authenticationJson.isEqualTo(authenticationJsonNoMod)).isTrue();
     }
 
     @Test
     public void testReadInstance() throws Exception {
         // set up
-        authenticationModule = json(
-                OBJECT_MAPPER.readValue(getClass().getResource(CONF_AUTHENTICATION_MODULE), Map.class));
+        final JsonValue providerList = json(
+                OBJECT_MAPPER.readValue(getClass().getResource("/config/providersList.json"), Map.class));
 
         // Instantiate the object to be used
         AuthenticationService authenticationService = new AuthenticationService();
@@ -205,9 +209,8 @@ public class AuthenticationServiceTest {
                 authenticationService.readInstance(new RootContext(), readRequest);
         // then
         final ResourceResponse resourceResponse = promise.get();
-        assertThat(resourceResponse.getContent().isEqualTo(authenticationModule)).isTrue();
+        assertThat(resourceResponse.getContent().isEqualTo(providerList)).isTrue();
 
-        authenticationModule = null;
     }
 
     @Test
@@ -217,10 +220,10 @@ public class AuthenticationServiceTest {
         authenticationService.setConfig(authenticationJson);
 
         // Call the amendAuthConfig to see the configuration of authentication.json be unmodified
-        authenticationService.amendAuthConfig(authenticationJson.get("serverAuthContext").get("authModules"));
+        authenticationService.amendAuthConfig(authenticationJson.get(AUTH_MODULES));
 
-        // Assert that the authenticationJson in memory has been modified to have the resolver that is shown in
-        // the amendedAuthentication configuration
-        assertThat(authenticationJson.get("serverAuthContext").get("authModules").size()).isEqualTo(0);
+        // Assert that the authenticationJson in memory has been modified to only have the stand-alone
+        // OPENID_CONNECT module declared separately and wasn't generated as part of the IdentityProviderService
+        assertThat(authenticationJson.get(AUTH_MODULES).size()).isEqualTo(1);
     }
 }
