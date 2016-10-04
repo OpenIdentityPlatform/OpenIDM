@@ -6,6 +6,8 @@
     "password" : "openidm",
     "connectionTimeout" : 30000,
     "connectionPool" : {
-        "type" : "hikari"
+        "type" : "hikari",
+        "minimumIdle" : 20,
+        "maximumPoolSize" : 50
     }
 }
