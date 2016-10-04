@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  ~ DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+  ~
+  ~ Copyright (c) 2016 ForgeRock AS. All Rights Reserved
+  -->
+<assembly xmlns="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2"
+          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+          xsi:schemaLocation="http://maven.apache.org/plugins/maven-assembly-plugin/assembly/1.1.2 http://maven.apache.org/xsd/assembly-1.1.2.xsd">
+    <id>bin</id>
+    <baseDirectory>/</baseDirectory>
+    <formats>
+        <format>zip</format>
+    </formats>
+    <fileSets>
+        <!-- start by copying all of the public openidm zip contents -->
+        <fileSet>
+            <directory>${project.build.directory}/idm-staging/openidm</directory>
+            <outputDirectory>/openidm</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/conf</directory>
+            <outputDirectory>/openidm/conf</outputDirectory>
+        </fileSet>
+        <!-- Include the Forgerock binary license file if exists -->
+        <fileSet>
+            <directory>${project.build.directory}</directory>
+            <outputDirectory>/openidm/legal-notices</outputDirectory>
+            <includes>
+                <include>Forgerock_License.txt</include>
+            </includes>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/orientdb-community-${orientdb.studio.version}/www</directory>
+            <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
+        </fileSet>
+        <!-- google connector-->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>${google.provisioner}</include>
+            </includes>
+            <outputDirectory>/openidm/samples/google-connector/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/idm-staging/openidm</directory>
+            <includes>
+                <include>${saas.connectors.conf}</include>
+                <include>${saas.connectors.script}</include>
+            </includes>
+            <outputDirectory>/openidm/samples/google-connector</outputDirectory>
+        </fileSet>
+        <!-- salesforce connector-->
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>${salesforce.provisioner}</include>
+            </includes>
+            <outputDirectory>/openidm/samples/salesforce-connector/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/idm-staging/openidm</directory>
+            <includes>
+                <include>${saas.connectors.conf}</include>
+                <include>${saas.connectors.script}</include>
+            </includes>
+            <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf*ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
+        </fileSet>
+    </fileSets>
+    <!--
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/bundle</outputDirectory>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            -->
+            <!--<useTransitiveFiltering>true</useTransitiveFiltering>-->
+    <!--
+            <excludes>
+                <exclude>org.forgerock.commons.ui:forgerock-ui-commons</exclude>
+                <exclude>org.forgerock.openidm:openidm-zip</exclude>
+                <exclude>org.forgerock.openicf.connectors*</exclude>
+            </excludes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/connectors</outputDirectory>
+            <useTransitiveDependencies>false</useTransitiveDependencies>
+            -->
+            <!--<useTransitiveFiltering>true</useTransitiveFiltering>-->
+    <!--
+            <includes>
+                <include>org.forgerock.openicf.connectors*</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+    -->
+</assembly>

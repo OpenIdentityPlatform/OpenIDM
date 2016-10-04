@@ -1,0 +1,525 @@
+{
+    "name": "google",
+    "enabled": false,
+    "connectorRef": {
+        "connectorHostRef": "#LOCAL",
+        "connectorName": "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
+        "bundleName": "org.forgerock.openicf.connectors.googleapps-connector",
+        "bundleVersion": "[1.4.0.0,2.0.0.0)"
+    },
+    "poolConfigOption": {
+        "maxObjects": 10,
+        "maxIdle": 10,
+        "maxWait": 150000,
+        "minEvictableIdleTimeMillis": 120000,
+        "minIdle": 1
+    },
+    "resultsHandlerConfig": {
+        "enableNormalizingResultsHandler": true,
+        "enableFilteredResultsHandler": true,
+        "enableCaseInsensitiveFilter": false,
+        "enableAttributesToGetSearchResultsHandler": true
+    },
+    "operationTimeout": {
+        "CREATE": -1,
+        "UPDATE": -1,
+        "DELETE": -1,
+        "TEST": -1,
+        "SCRIPT_ON_CONNECTOR": -1,
+        "SCRIPT_ON_RESOURCE": -1,
+        "GET": -1,
+        "RESOLVEUSERNAME": -1,
+        "AUTHENTICATE": -1,
+        "SEARCH": -1,
+        "VALIDATE": -1,
+        "SYNC": -1,
+        "SCHEMA": -1
+    },
+    "configurationProperties": {
+        "domain": "",
+        "clientId": "",
+        "clientSecret": null,
+        "refreshToken": null
+    },
+    "objectTypes": {
+        "Member": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "Member",
+            "type": "object",
+            "nativeType": "Member",
+            "properties": {
+                "groupKey": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "groupKey",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "role": {
+                    "type": "string",
+                    "nativeName": "role",
+                    "nativeType": "string"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "nativeName": "__NAME__",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "email": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "email",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "type": {
+                    "type": "string",
+                    "nativeName": "type",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                }
+            }
+        },
+        "__GROUP__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__GROUP__",
+            "type": "object",
+            "nativeType": "__GROUP__",
+            "properties": {
+                "adminCreated": {
+                    "type": "boolean",
+                    "nativeName": "adminCreated",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "members": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "__MEMBERS__",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "name": {
+                    "type": "string",
+                    "nativeName": "name",
+                    "nativeType": "string"
+                },
+                "aliases": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "aliases",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "directMembersCount": {
+                    "type": "number",
+                    "nativeName": "directMembersCount",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_LONG",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "nonEditableAliases": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "nonEditableAliases",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                }
+            }
+        },
+        "OrgUnit": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "OrgUnit",
+            "type": "object",
+            "nativeType": "OrgUnit",
+            "properties": {
+                "__DESCRIPTION__": {
+                    "type": "string",
+                    "nativeName": "__DESCRIPTION__",
+                    "nativeType": "string"
+                },
+                "blockInheritance": {
+                    "type": "boolean",
+                    "nativeName": "blockInheritance",
+                    "nativeType": "boolean"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                },
+                "orgUnitPath": {
+                    "type": "string",
+                    "nativeName": "orgUnitPath",
+                    "nativeType": "string"
+                },
+                "parentOrgUnitPath": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "parentOrgUnitPath",
+                    "nativeType": "string"
+                }
+            }
+        },
+        "__ACCOUNT__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__ACCOUNT__",
+            "type": "object",
+            "nativeType": "__ACCOUNT__",
+            "properties": {
+                "changePasswordAtNextLogin": {
+                    "type": "boolean",
+                    "nativeName": "changePasswordAtNextLogin",
+                    "nativeType": "boolean"
+                },
+                "agreedToTerms": {
+                    "type": "boolean",
+                    "nativeName": "agreedToTerms",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "emails": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "emails",
+                    "nativeType": "object"
+                },
+                "deletionTime": {
+                    "type": "string",
+                    "nativeName": "deletionTime",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "customerId": {
+                    "type": "string",
+                    "nativeName": "customerId",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "suspended": {
+                    "type": "boolean",
+                    "nativeName": "suspended",
+                    "nativeType": "boolean"
+                },
+                "ipWhitelisted": {
+                    "type": "boolean",
+                    "nativeName": "ipWhitelisted",
+                    "nativeType": "boolean"
+                },
+                "__GROUPS__": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "__GROUPS__",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "familyName": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "familyName",
+                    "nativeType": "string"
+                },
+                "__PASSWORD__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__PASSWORD__",
+                    "nativeType": "JAVA_TYPE_GUARDEDSTRING",
+                    "flags": [
+                        "NOT_READABLE",
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                },
+                "lastLoginTime": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "lastLoginTime",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "includeInGlobalAddressList": {
+                    "type": "boolean",
+                    "nativeName": "includeInGlobalAddressList",
+                    "nativeType": "boolean"
+                },
+                "externalIds": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "externalIds",
+                    "nativeType": "object"
+                },
+                "aliases": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "aliases",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "relations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "relations",
+                    "nativeType": "object"
+                },
+                "orgUnitPath": {
+                    "type": "string",
+                    "nativeName": "orgUnitPath",
+                    "nativeType": "string"
+                },
+                "suspensionReason": {
+                    "type": "string",
+                    "nativeName": "suspensionReason",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "phones": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "phones",
+                    "nativeType": "object"
+                },
+                "thumbnailPhotoUrl": {
+                    "type": "string",
+                    "nativeName": "thumbnailPhotoUrl",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "ims": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "ims",
+                    "nativeType": "object"
+                },
+                "fullName": {
+                    "type": "string",
+                    "nativeName": "fullName",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "isAdmin": {
+                    "type": "boolean",
+                    "nativeName": "isAdmin",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+                },
+                "isMailboxSetup": {
+                    "type": "boolean",
+                    "nativeName": "isMailboxSetup",
+                    "nativeType": "boolean",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "creationTime": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "creationTime",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "givenName": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "givenName",
+                    "nativeType": "string"
+                },
+                "isDelegatedAdmin": {
+                    "type": "boolean",
+                    "nativeName": "isDelegatedAdmin",
+                    "nativeType": "JAVA_TYPE_PRIMITIVE_BOOLEAN",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "nonEditableAliases": {
+                    "type": "array",
+                    "items": {
+                        "type": "string",
+                        "nativeType": "string"
+                    },
+                    "nativeName": "nonEditableAliases",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "addresses": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "addresses",
+                    "nativeType": "object"
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                },
+                "organizations": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "nativeType": "object"
+                    },
+                    "nativeName": "organizations",
+                    "nativeType": "object"
+                },
+                "photo": {
+                    "type": "string",
+                    "nativeName": "__PHOTO__",
+                    "nativeType": "JAVA_TYPE_BYTE_ARRAY",
+                    "flags": [
+                        "NOT_RETURNED_BY_DEFAULT"
+                    ]
+                }
+            }
+        },
+        "LicenseAssignment": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "LicenseAssignment",
+            "type": "object",
+            "nativeType": "LicenseAssignment",
+            "properties": {
+                "selfLink": {
+                    "type": "string",
+                    "nativeName": "selfLink",
+                    "nativeType": "string",
+                    "flags": [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "__NAME__": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "__NAME__",
+                    "nativeType": "string"
+                },
+                "skuId": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "skuId",
+                    "nativeType": "string"
+                },
+                "productId": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "productId",
+                    "nativeType": "string"
+                },
+                "userId": {
+                    "type": "string",
+                    "required": true,
+                    "nativeName": "userId",
+                    "nativeType": "string"
+                }
+            }
+        }
+    },
+    "operationOptions": {}
+}
