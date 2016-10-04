@@ -27,6 +27,7 @@ function(_, moment, momentTimezone, AbstractSchedulerView) {
                 "schedule": "0 0 * * * ?",
                 "enabled": false,
                 "persisted": true,
+                "type": "cron",
                 "misfirePolicy": "fireAndProceed",
                 "invokeService": "sync",
                 "invokeLogLevel": "info",
