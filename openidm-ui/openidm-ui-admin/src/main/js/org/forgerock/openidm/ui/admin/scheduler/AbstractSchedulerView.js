@@ -342,7 +342,9 @@ define([
         formChangeHandler(event) {
             let prop = $(event.target).attr("name"),
                 value = $(event.target).val();
-
+            if ($(event.target).attr("type") === "checkbox") {
+                value = $(event.target).prop("checked");
+            }
             // kick off invokeContext changes on invokeService change
             if (prop === "mapping" || prop === "source") {
                 this.setInvokeContextObject(prop, value);
@@ -451,7 +453,7 @@ define([
 
             if (this.changeWatcher.isChanged() || this.isNew) {
                 this.enable(".save-cancel-btn");
-                this.data.schedule = mutatedSchedule;
+                this.data.schedule = _.cloneDeep(mutatedSchedule);
             } else {
                 this.disable(".save-cancel-btn");
             }

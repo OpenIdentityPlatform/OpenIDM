@@ -27,15 +27,15 @@ define([
         iseSpy = sinon.spy(abstractSchedulerView, "showInlineScriptEditor");
 
         // make calls and check spies
-        assert.equal(mappingOptionsSpy.callCount, 0, "mapping options spy not called")
+        assert.equal(mappingOptionsSpy.callCount, 0, "mapping options spy not called");
         abstractSchedulerView.updateInvokeContextVisibleElement("sync");
         assert.ok(mappingOptionsSpy.calledOnce, "mapping options");
 
-        assert.equal(liveSyncOptionsSpy.callCount, 0, "mapping options spy not called")
+        assert.equal(liveSyncOptionsSpy.callCount, 0, "mapping options spy not called");
         abstractSchedulerView.updateInvokeContextVisibleElement("provisioner");
         assert.ok(liveSyncOptionsSpy.calledOnce, "liveSync options");
 
-        assert.equal(iseSpy.callCount, 0, "mapping options spy not called")
+        assert.equal(iseSpy.callCount, 0, "mapping options spy not called");
         abstractSchedulerView.updateInvokeContextVisibleElement("script");
         assert.ok(iseSpy.calledOnce, "ise");
     });
@@ -145,6 +145,13 @@ define([
                 name: "generic",
                 value: "generic test value"
             }),
+            checkboxInput = $("<input>", {
+                "class": "schedule-form-element",
+                type: "checkbox",
+                name: "checkbox",
+                value: "true",
+                checked: false
+            }),
             invokeContextInput = $("<input>", {
                 "class": "schedule-form-element",
                 name: "mapping",
@@ -152,6 +159,7 @@ define([
 
         // set up event handlers
         genericInput.on("change", formChangeHandler);
+        checkboxInput.on("change", formChangeHandler);
         invokeContextInput.on("change", formChangeHandler);
 
         // trigger generic input change event and spy the calls
@@ -161,12 +169,19 @@ define([
         assert.ok(updateScheduleSpy.calledOnce);
         assert.ok(updateScheduleSpy.calledWith("generic", "generic test value"), "generic input");
 
-        // trigger generic input change event and spy the calls
+        // trigger checkbox input change event and spy the calls
+        checkboxInput.trigger("change");
+
+        // checkbox assertions
+        assert.ok(updateScheduleSpy.calledTwice, "checkbox input called");
+        assert.deepEqual(updateScheduleSpy.secondCall.args, ["checkbox", false], "checkbox input");
+
+        // trigger invokeContext input change event and spy the calls
         invokeContextInput.trigger("change");
-        invokeContextInputSpyArgs = updateScheduleSpy.secondCall.args;
+        invokeContextInputSpyArgs = updateScheduleSpy.thirdCall.args;
 
         // invoke context assertions
-        assert.ok(updateScheduleSpy.calledTwice);
+        assert.ok(updateScheduleSpy.calledThrice);
         assert.equal(invokeContextInputSpyArgs[0], "invokeContext", "invokeContext args");
         assert.deepEqual(invokeContextInputSpyArgs[1], {
             action: "reconcile", mapping: "mapping test value"
@@ -180,7 +195,7 @@ define([
 
         // send in prop/value for "source", "script", "mapping"
         abstractSchedulerView.setInvokeContextObject("source", "test source");
-        spyArgs = updateScheduleSpy.firstCall.args
+        spyArgs = updateScheduleSpy.firstCall.args;
 
         assert.ok(updateScheduleSpy.calledOnce, "source");
         assert.equal(spyArgs[0], "invokeContext", "source");
