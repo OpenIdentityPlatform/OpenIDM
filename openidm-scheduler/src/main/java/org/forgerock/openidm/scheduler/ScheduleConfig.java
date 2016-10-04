@@ -26,11 +26,9 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.openidm.scheduler.impl.TriggerType;
 import org.joda.time.DateTimeZone;
-import org.quartz.CronTrigger;
-import org.quartz.JobDataMap;
 
 public class ScheduleConfig {
 
@@ -45,7 +43,7 @@ public class ScheduleConfig {
     private Boolean enabled = null;
     private Boolean persisted = null;
     private String misfirePolicy = null;
-    private String scheduleType = null;
+    private TriggerType triggerType;
     private Date startTime = null;
     private Date endTime = null;
     private String cronSchedule = null;
@@ -77,12 +75,26 @@ public class ScheduleConfig {
             concurrentExecution = concurrentExecutionValue.defaultTo(Boolean.FALSE).asBoolean();
         }
         misfirePolicy = config.get(SchedulerService.SCHEDULE_MISFIRE_POLICY).defaultTo(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED).asString();
-        if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) &&
-                !misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_DO_NOTHING)) {
-            throw new BadRequestException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
-        }
         cronSchedule = config.get(SchedulerService.SCHEDULE_CRON_SCHEDULE).asString();
-        scheduleType = config.get(SchedulerService.SCHEDULE_TYPE).asString();
+        final String configTriggerType = config.get(SchedulerService.SCHEDULE_TYPE).asString();
+        if (StringUtils.isNotBlank(configTriggerType)) {
+            try {
+                triggerType = TriggerType.valueOf(configTriggerType);
+            } catch (IllegalArgumentException e) {
+                throw new BadRequestException("Specified type value invalid: " + configTriggerType);
+            }
+        } else {
+            triggerType = TriggerType.cron;
+        }
+        if (TriggerType.cron == triggerType) {
+            if (StringUtils.isBlank(cronSchedule)) {
+                throw new BadRequestException("A schedule of type cron must provide a cron schedule");
+            }
+            if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) &&
+                    !misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_DO_NOTHING)) {
+                throw new BadRequestException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
+            }
+        }
         invokeService = config.get(SchedulerService.SCHEDULE_INVOKE_SERVICE).asString();
         if (!StringUtils.isNotBlank(invokeService)) {
             throw new BadRequestException("Invalid scheduler configuration, the "
@@ -120,36 +132,6 @@ public class ScheduleConfig {
             endTime = dateUtil.parseTime(endTimeString, SCHEDULER_TIME_FORMAT);
             // TODO: enhanced logging for failure
         }
-
-        if (StringUtils.isNotBlank(scheduleType)) {
-            if (!scheduleType.equals(SchedulerService.SCHEDULE_TYPE_CRON)) {
-                throw new BadRequestException("Scheduler configuration contains unknown schedule type "
-                        + scheduleType + ". Known types include " + SchedulerService.SCHEDULE_TYPE_CRON);
-            }
-        }
-    }
-
-    public ScheduleConfig(CronTrigger trigger, JobDataMap map, boolean persisted, boolean concurrentExecution) {
-        this.persisted = persisted;
-        this.concurrentExecution = concurrentExecution;
-        this.enabled = true;
-        this.cronSchedule = trigger.getCronExpression();
-        this.startTime = trigger.getStartTime();
-        this.endTime = trigger.getEndTime();
-        this.timeZone = trigger.getTimeZone();
-        this.invokeService = (String)map.get(ScheduledService.CONFIGURED_INVOKE_SERVICE);
-        this.invokeLogLevel = (String)map.get(ScheduledService.CONFIGURED_INVOKE_LOG_LEVEL);
-        this.invokeContext = map.get(ScheduledService.CONFIGURED_INVOKE_CONTEXT);
-        this.scheduleType = SchedulerService.SCHEDULE_TYPE_CRON;
-        int mp = trigger.getMisfireInstruction();
-        if (mp == CronTrigger.MISFIRE_INSTRUCTION_DO_NOTHING) {
-            this.misfirePolicy = SchedulerService.MISFIRE_POLICY_DO_NOTHING;
-        } else {
-            this.misfirePolicy = SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED;
-        }
-        dateUtil = timeZone != null
-                ? DateUtil.getDateUtil(DateTimeZone.forTimeZone(timeZone))
-                :  DateUtil.getDateUtil();
     }
 
     public JsonValue getConfig() {
@@ -182,9 +164,13 @@ public class ScheduleConfig {
     }
     
     public String getScheduleType() {
-        return scheduleType;
+        return triggerType.name();
     }
-    
+
+    public TriggerType getTriggerType() {
+        return triggerType;
+    }
+
     public Date getStartTime() {
         return startTime;
     }
@@ -225,30 +211,6 @@ public class ScheduleConfig {
         this.persisted = persisted;
     }
 
-    public void setMisfirePolicy(String misfirePolicy) {
-        this.misfirePolicy = misfirePolicy;
-    }
-
-    public void setScheduleType(String scheduleType) {
-        this.scheduleType = scheduleType;
-    }
-
-    public void setStartTime(Date startTime) {
-        this.startTime = startTime;
-    }
-
-    public void setEndTime(Date endTime) {
-        this.endTime = endTime;
-    }
-
-    public void setCronSchedule(String cronSchedule) {
-        this.cronSchedule = cronSchedule;
-    }
-
-    public void setTimeZone(TimeZone timeZone) {
-        this.timeZone = timeZone;
-    }
-
     public void setInvokeService(String invokeService) {
         this.invokeService = invokeService;
     }
@@ -257,10 +219,6 @@ public class ScheduleConfig {
         this.invokeContext = invokeContext;
     }
 
-    public void setInvokeLogLevel(String invokeLogLevel) {
-        this.invokeLogLevel = invokeLogLevel;
-    }
-    
     public void setConcurrentExecution(Boolean concurrentExecution) {
         this.concurrentExecution = concurrentExecution;
     }

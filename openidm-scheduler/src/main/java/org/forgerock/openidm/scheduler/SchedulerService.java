@@ -106,12 +106,13 @@ public class SchedulerService implements RequestHandler {
 
     // Valid configuration values
     static final String SCHEDULE_TYPE_CRON = "cron";
+    static final String SCHEDULE_TYPE_SIMPLE = "simple";
 
     // Misfire Policies
     static final String MISFIRE_POLICY_DO_NOTHING = "doNothing";
     static final String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
 
-    static final String GROUP_NAME = "scheduler-service-group";
+    public static final String GROUP_NAME = "scheduler-service-group";
 
     static final String CONFIG = "schedule.config";
 
