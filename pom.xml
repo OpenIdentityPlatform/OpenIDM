@@ -217,6 +217,8 @@
         <commons.forgerock-script.version>5.0.0-SNAPSHOT</commons.forgerock-script.version>
         <commons.forgerock-i18n.version>1.4.2</commons.forgerock-i18n.version>
 
+        <opendj.version>4.0.0-SNAPSHOT</opendj.version>
+
         <!-- Third party dependency versions -->
         <orientdb.version>1.7.10</orientdb.version>
         <orientdb.studio.version>1.7.10</orientdb.studio.version>
@@ -337,6 +339,7 @@
         <module>openidm-samples</module>
         <module>openidm-zip</module>
         <module>custom-scripted-connector-bundler</module>
+        <module>openidm-repo-opendj</module>
     </modules>
 
     <profiles>

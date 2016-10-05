@@ -118,6 +118,11 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-repo-opendj</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-repo-jdbc</artifactId>
             <version>${project.version}</version>
         </dependency>
@@ -513,6 +518,14 @@
             <artifactId>devops-gettingstarted</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
+
+        <!-- Embedded OpenDJ Repo -->
+        <dependency>
+            <groupId>org.forgerock.opendj</groupId>
+            <artifactId>opendj-server-legacy</artifactId>
+            <version>${opendj.version}</version>
             <type>zip</type>
         </dependency>
 

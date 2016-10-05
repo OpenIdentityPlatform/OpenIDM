@@ -1,0 +1,300 @@
+{
+  "embedded": true,
+  "security": {
+    "trustManager": "jvm",
+
+    "fileBasedTrustManagerType": "JKS",
+    "fileBasedTrustManagerFile": "/path/to/truststore",
+    "fileBasedTrustManagerPasswordFile": "/path/to/pinfile",
+
+    "keyManager": "jvm",
+
+    "fileBasedKeyManagerType": "JKS",
+    "fileBasedKeyManagerFile": "/path/to/keystore",
+    "fileBasedKeyManagerPasswordFile": "/path/to/pinfile",
+
+    "pkcs11KeyManagerPasswordFile": "/path/to/pinfile"
+  },
+  "ldapConnectionFactories": {
+    "bind": {
+      "connectionSecurity": "none",
+      "sslCertAlias": "client-cert",
+      "connectionPoolSize": 24,
+      "heartBeatIntervalSeconds": 30,
+      "heartBeatTimeoutMilliSeconds": 500,
+      "primaryLdapServers": [{ "hostname": "localhost", "port": 1389 }],
+      "secondaryLdapServers": []
+    },
+    "root": {
+      "inheritFrom": "bind",
+      "authentication": {
+        "simple": { "bindDn": "cn=directory manager", "bindPassword": "password" }
+      }
+    }
+  },
+  "queries": {
+    "query-all-ids": {
+      "_queryFilter": "true",
+      "_fields": "_id,_rev"
+    },
+    "credential-query": {
+      "_queryFilter": "/userName eq \"${username}\""
+    },
+    "credential-internaluser-query": {
+      "_queryFilter": "/_id eq \"${username}\""
+    },
+    "find-by-id": {
+      "_queryFilter": "/_id eq \"${id}\""
+    },
+    "get-by-field-value": {
+      "_queryFilter": "/${field} eq \"${value}\""
+    },
+    "for-userName":	{
+      "_queryFilter": "/userName eq \"${uid}\""
+    },
+    "get-users-of-direct-role": {
+      "_queryFilter": "/roles eq \"${role}\""
+    },
+    "query-all": {
+      "_queryFilter": "true"
+    },
+    "query-all-count": {
+      "_queryFilter": "true"
+    },
+    "get-managed-users": {
+      "_queryFilter": "true"
+    },
+    "get-managed-users-count": {
+      "_queryFilter": "true"
+    },
+    "get-managed-users-filtered": {
+      "_queryFilter": "/userName sw \"${userName}\" AND /mail sw \"${mail}\" AND /givenName sw \"${givenName}\" AND /sn sw \"${sn}\" AND /accountStatus sw \"${accountStatus}\""
+    },
+    "get-managed-users-filtered-count": {
+      "_queryFilter": "/userName sw \"${userName}\" AND /mail sw \"${mail}\" AND /givenName sw \"${givenName}\" AND /sn sw \"${sn}\" AND /accountStatus sw \"${accountStatus}\""
+    },
+    "links-for-firstId": {
+      "_queryFilter": "/linkType eq \"${linkType}\" AND /firstid = \"${firstId}\""
+    },
+    "links-for-secondId": {
+      "_queryFilter": "/linkType eq \"${linkType}\" AND /secondid = \"${secondId}\""
+    },
+    "links-for-linkType": {
+      "_queryFilter": "/linkType eq \"${linkType}\""
+    }
+  },
+  "rest2LdapOptions": {
+    "readOnUpdatePolicy": "controls",
+    "useSubtreeDelete": false,
+    "usePermissiveModify": true,
+    "useMvcc": true,
+    "mvccAttribute": "etag"
+  },
+  "resourceMapping": {
+    "explicitMapping": {
+      "managed/user": {
+        "resource": "repo/managed/user",
+        "propertiesToStringify" : [ "password", "effectiveAssignments" ]
+      },
+      "internal/user": {
+        "resource": "repo/internal/user",
+        "propertiesToStringify": [ "password", "roles" ]
+      }
+    },
+    "genericMapping": {
+      "config": {
+        "resource": "/repo/config"
+      }
+    }
+  },
+  "resources": {
+    "repo": {
+      "subResources": {
+        "managed/user": {
+          "type": "collection",
+          "dnTemplate": "ou=users,ou=managed,dc=openidm,dc=forgerock,dc=com",
+          "resource": "managed_user",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "internal/user": {
+          "type": "collection",
+          "dnTemplate": "ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com",
+          "resource": "internal_user",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "config": {
+          "type": "collection",
+          "dnTemplate": "ou=config,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        }
+      }
+    },
+    "link": {
+      "rest2ldapConfig": {
+        "type": "collection",
+        "dnTemplate": "ou=Links,dc=openidm,dc=forgerock,dc=com",
+        "objectClasses": [ "top", "openidmLink" ],
+        "properties": {
+          "_id": {
+            "type": "simple", "ldapAttribute": "objectid", "isRequired": true, "writability": "createOnly"
+          },
+          "_rev": {
+            "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
+          },
+          "linkType": {
+            "type": "simple", "ldapAttribute": "linktype"
+          },
+          "linkQualifier": {
+            "type": "simple", "ldapAttribute": "linkqualifier"
+          },
+          "firstId": {
+            "type": "simple", "ldapAttribute": "firstid"
+          },
+          "secondId": {
+            "type": "simple", "ldapAttribute": "secondid"
+          }
+        },
+        "namingStrategy": {
+          "dnAttribute": "objectid",
+          "strategy": "clientDNNaming"
+        }
+      }
+    },
+    "internal_user": {
+      "objectClasses": [ "top", "openidmInternalUser" ],
+      "properties": {
+        "_id": {
+          "type": "simple", "ldapAttribute": "uid", "isRequired": true, "writability": "createOnly"
+        },
+        "_rev": {
+          "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
+        },
+        "roles": {
+          "type": "simple", "ldapAttribute": "roles"
+        },
+        "password": {
+          "type": "simple", "ldapAttribute": "password"
+        }
+      }
+    },
+    "generic": {
+      "objectClasses": ["openidmGenericObject"],
+      "properties": {
+        "_id": {
+          "type": "simple", "ldapAttribute": "uid", "isRequired": true, "writability": "createOnly"
+        },
+        "_rev": {
+          "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
+        },
+        "fullobject": {
+          "type": "simple", "ldapAttribute": "fullobject"
+        }
+      }
+    },
+    "managed_user": {
+      "objectClasses": [ "top", "person", "organizationalPerson", "inetOrgPerson", "openidmManagedUser" ],
+      "properties": {
+        "_id": {
+          "type": "simple", "ldapAttribute": "uid", "isRequired": true, "writability": "createOnly"
+        },
+        "_rev": {
+          "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
+        },
+        "userName": {
+          "type": "simple", "ldapAttribute": "cn"
+        },
+        "password": {
+          "type": "simple", "ldapAttribute": "password"
+        },
+        "accountStatus": {
+          "type": "simple", "ldapAttribute": "accountStatus"
+        },
+        "roles": {
+          "type": "simple", "ldapAttribute": "roles", "isMultiValued": true
+        },
+        "effectiveRoles": {
+          "type": "simple", "ldapAttribute": "effectiveRoles", "isMultiValued": true
+        },
+        "effectiveAssignments": {
+          "type": "simple", "ldapAttribute": "effectiveAssignments"
+        },
+        "lastPasswordSet": {
+          "type": "simple", "ldapAttribute": "lastPasswordSet"
+        },
+        "postalCode": {
+          "type": "simple", "ldapAttribute": "postalCode"
+        },
+        "stateProvince": {
+          "type": "simple", "ldapAttribute": "st"
+        },
+        "passwordAttempts": {
+          "type": "simple", "ldapAttribute": "passwordAttempts"
+        },
+        "lastPasswordAttempt": {
+          "type": "simple", "ldapAttribute": "lastPasswordAttempt"
+        },
+        "postalAddress": {
+          "type": "simple", "ldapAttribute": "postalAddress"
+        },
+        "displayName": {
+          "type": "simple", "ldapAttribute": "displayName"
+        },
+        "description": {
+          "type": "simple", "ldapAttribute": "description"
+        },
+        "country": {
+          "type": "simple", "ldapAttribute": "country"
+        },
+        "address2": {
+          "type": "simple", "ldapAttribute": "address2"
+        },
+        "city": {
+          "type": "simple", "ldapAttribute": "l"
+        },
+        "givenName": {
+          "type": "simple", "ldapAttribute": "givenName"
+        },
+        "sn": {
+          "type": "simple", "ldapAttribute": "sn"
+        },
+        "telephoneNumber": {
+          "type": "simple", "ldapAttribute": "telephoneNumber"
+        },
+        "mail": {
+          "type": "simple", "ldapAttribute": "mail"
+        },
+        "siteImage": {
+          "type": "simple", "ldapAttribute": "jpegPhoto"
+        },
+        "passPhrase": {
+          "type": "simple", "ldapAttribute": "passPhrase"
+        },
+        "securityAnswer": {
+          "type": "simple", "ldapAttribute": "securityAnswer"
+        },
+        "securityQuestion": {
+          "type": "simple", "ldapAttribute": "securityQuestion"
+        },
+        "securityAnswerAttempts": {
+          "type": "simple", "ldapAttribute": "securityAnswerAttempts"
+        },
+        "lastSecurityAnswerAttempt": {
+          "type": "simple", "ldapAttribute": "lastSecurityAnswerAttempt"
+        },
+        "total": {
+          "type": "simple", "ldapAttribute": "total"
+        }
+      }
+    }
+  }
+}

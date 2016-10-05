@@ -49,7 +49,7 @@ public class TokenHandler {
      * @return the query with all tokens replace with their found values
      * @throws BadRequestException if token in the query is not in the passed parameters
      */
-    public String replaceTokensWithValues(String queryString, Map<String, Object> params) 
+    public String replaceTokensWithValues(String queryString, Map<String, ? extends Object> params)
             throws BadRequestException {
         java.util.regex.Matcher matcher = tokenPattern.matcher(queryString);
         StringBuffer buffer = new StringBuffer();

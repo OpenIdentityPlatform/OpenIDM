@@ -191,6 +191,13 @@
         </dependencySet>
         <dependencySet>
             <unpack>true</unpack>
+            <outputDirectory>/openidm/db/openidm-dj</outputDirectory>
+            <includes>
+                <include>org.forgerock.opendj:opendj-server-legacy:zip</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/ui/admin</outputDirectory>

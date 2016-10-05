@@ -1,0 +1,69 @@
+dn: cn=schema
+changetype: add
+objectClass: top
+objectClass: ldapSubentry
+objectClass: subschema
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.145 NAME 'accountStatus'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.146 NAME 'passPhrase'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.147 NAME 'securityAnswer'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.148 NAME 'securityQuestion'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.149 NAME 'securityAnswerAttempts'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.150 NAME 'lastSecurityAnswerAttempt'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.151 NAME 'total'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.152 NAME 'roles'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.153 NAME 'passwordAttempts'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.154 NAME 'lastPasswordAttempt'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.155 NAME 'lastPasswordSet'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.156 NAME 'country'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.157 NAME 'address2'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.158 NAME 'effectiveRoles'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.159 NAME 'effectiveAssignments'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.160 NAME 'password'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+objectClasses: ( 1.3.6.1.4.1.36733.2.3.2.22 NAME 'openidmManagedUser' SUP inetOrgPerson
+        MAY ( accountStatus $ password $ passPhrase $ securityAnswer $ pwdCheckQuality $ pwdMinLength $ pwdExpireWarning $ securityQuestion $
+         securityAnswerAttempts $ lastSecurityAnswerAttempt $ total $
+         roles $ effectiveRoles $ effectiveAssignments $ passwordAttempts $
+         lastPasswordAttempt $ lastPasswordSet $ country $ address2 )
+        X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.161 NAME 'objectid'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.162 NAME 'linktype'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.163 NAME 'linkqualifier'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.164 NAME 'firstid'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.165 NAME 'secondid'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+objectClasses: ( 1.3.6.1.4.1.36733.2.3.2.23 NAME 'openidmLink' SUP top STRUCTURAL
+        MUST ( objectid $ linktype $ linkqualifier $ firstid $ secondid )
+        X-ORIGIN 'OpenIDM OpenDJRepoService' )
+objectClasses: ( 1.3.6.1.4.1.36733.2.3.2.24 NAME 'openidmInternalUser' SUP top STRUCTURAL
+        MUST ( uid $ password $ roles )
+        X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.166 NAME 'fullobject'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+objectClasses: ( 1.3.6.1.4.1.36733.2.3.2.25 NAME 'openidmGenericObject' SUP top STRUCTURAL
+        MUST ( fullobject )
+        X-ORIGIN 'OpenIDM OpenDJRepoService' )
+attributeTypes: ( 1.3.6.1.4.1.36733.2.3.1.167 NAME 'objecttype'
+    SYNTAX 1.3.6.1.4.1.1466.115.121.1.15 X-ORIGIN 'OpenIDM OpenDJRepoService' )
+objectClasses: ( 1.3.6.1.4.1.36733.2.3.2.26 NAME 'openidmDefaultObject' SUP openidmGenericObject STRUCTURAL
+        MUST ( objecttype )
+        X-ORIGIN 'OpenIDM OpenDJRepoService' )

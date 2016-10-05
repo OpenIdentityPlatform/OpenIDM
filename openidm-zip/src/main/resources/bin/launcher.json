@@ -37,6 +37,7 @@
                 "includes":[
                     "**/openidm-repo-jdbc*.jar",
                     "**/openidm-repo-orientdb*.jar",
+                    "**/openidm-repo-opendj*.jar",
                     "**/org.apache.felix.scr-*.jar"
                 ],
                 "start-level":4,

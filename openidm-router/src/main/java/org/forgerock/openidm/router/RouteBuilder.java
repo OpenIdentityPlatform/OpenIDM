@@ -124,6 +124,11 @@ public final class RouteBuilder {
         return this;
     }
 
+    /**
+     * Add the current route and prepare to build the next one.
+     *
+     * @return A builder for the new route
+     */
     public RouteBuilder buildNext() {
         try {
             verify();
