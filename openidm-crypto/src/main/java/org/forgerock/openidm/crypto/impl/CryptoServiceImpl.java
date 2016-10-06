@@ -18,6 +18,7 @@
 package org.forgerock.openidm.crypto.impl;
 
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValueFunctions.identity;
 import static org.forgerock.openidm.core.IdentityServer.*;
 import static org.forgerock.security.keystore.KeyStoreType.PKCS11;
 
@@ -36,12 +37,11 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 
 import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.crypto.JsonCryptoException;
-import org.forgerock.json.crypto.JsonCryptoTransformer;
+import org.forgerock.json.crypto.JsonDecryptFunction;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
@@ -62,6 +62,7 @@ import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.security.keystore.KeyStoreBuilder;
 import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.util.Function;
 import org.forgerock.util.Utils;
 import org.osgi.framework.BundleContext;
 import org.slf4j.Logger;
@@ -73,7 +74,7 @@ import org.slf4j.LoggerFactory;
 public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, SharedKeyService {
 
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
-    private JsonTransformer decryptionTransformer = NullJsonTransformer.INSTANCE;
+    private Function<JsonValue, JsonValue, JsonValueException> decryptionFunction = identity();
     private UpdatableKeyStoreSelector keySelector;
 
     /**
@@ -84,14 +85,15 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
 
     /**
      * Constructs an implementation of the {@link CryptoService} with a given
-     * {@link UpdatableKeyStoreSelector} and a {@link JsonTransformer}.
+     * {@link UpdatableKeyStoreSelector} and decryption {@link Function}.
      *
      * @param keySelector The {@link UpdatableKeyStoreSelector}.
-     * @param decryptionTransformer A {@link JsonTransformer} to use for decryption.
+     * @param decryptionFunction A {@link Function}s to use for decryption.
      */
-    public CryptoServiceImpl(final UpdatableKeyStoreSelector keySelector, final JsonTransformer decryptionTransformer) {
+    public CryptoServiceImpl(final UpdatableKeyStoreSelector keySelector,
+            final Function<JsonValue, JsonValue, JsonValueException> decryptionFunction) {
         this.keySelector = keySelector;
-        this.decryptionTransformer = decryptionTransformer;
+        this.decryptionFunction = decryptionFunction;
     }
 
     /** Map of crypto secret key aliases and the algorithm they should use */
@@ -149,7 +151,7 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
                             .build();
                 }
                 keySelector = new UpdatableKeyStoreSelector(keyStore, new String(clearPassword));
-                decryptionTransformer = new JsonCryptoTransformer(new SimpleDecryptor(keySelector));
+                decryptionFunction = new JsonDecryptFunction(new SimpleDecryptor(keySelector));
                 Enumeration<String> aliases = keyStore.aliases();
                 while (aliases.hasMoreElements()) {
                     logger.debug("Available cryptography key: {}", aliases.nextElement());
@@ -209,7 +211,7 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
     }
 
     public void deactivate(@SuppressWarnings("unused") BundleContext context) {
-        decryptionTransformer = NullJsonTransformer.INSTANCE;
+        decryptionFunction = identity();
         keySelector = null;
         logger.info("CryptoService stopped.");
     }
@@ -226,8 +228,8 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
     }
 
     @Override
-    public JsonTransformer getDecryptionTransformer() {
-        return decryptionTransformer;
+    public Function<JsonValue, JsonValue, JsonValueException> getDecryptionFunction() {
+        return decryptionFunction;
     }
 
     @Override
@@ -242,15 +244,10 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
     }
 
     @Override
-    public JsonValue decrypt(JsonValue value) throws JsonException {
-        JsonValue result = null;
-        if (value != null) {
-            result = new JsonValue(value);
-            result.getTransformers().add(decryptionTransformer);
-            result.applyTransformers();
-            result = result.copy();
-        }
-        return result;
+    public JsonValue decrypt(JsonValue value) throws JsonValueException {
+        return value != null
+                ? decryptionFunction.apply(value)
+                : null;
     }
 
     @Override
