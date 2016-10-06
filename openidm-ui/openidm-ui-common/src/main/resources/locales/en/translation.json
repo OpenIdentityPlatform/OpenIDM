@@ -1009,6 +1009,7 @@
             "socialIdentityTitle" : "Social Identity Providers",
             "provider" : "Provider",
             "providers" : "Providers",
+            "enabled" : "Enabled",
             "icon" : "Sign-In Button HTML",
             "sectionDetails" : "Enable social identity providers for user authentication and registration.",
             "configureProvider" : "Configure provider for social provisioning",
