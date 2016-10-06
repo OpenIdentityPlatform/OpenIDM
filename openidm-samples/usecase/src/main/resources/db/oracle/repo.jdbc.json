@@ -40,7 +40,8 @@
         "explicitTables" : {
             "purge-by-recon-ids-to-keep" : "DELETE FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconid NOT IN (${list:reconIds})",
             "purge-by-recon-expired" : "DELETE FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp}",
-            "delete-mapping-links" : "DELETE FROM ${_dbSchema}.${_table} WHERE linktype = ${mapping}"
+            "delete-mapping-links" : "DELETE FROM ${_dbSchema}.${_table} WHERE linktype = ${mapping}",
+            "delete-target-ids-for-recon" : "DELETE FROM ${_dbSchema}.${_table} WHERE reconId = ${reconId}"
         }
     },
     "resourceMapping" : {
@@ -313,6 +314,15 @@
                     "_id" : "objectid",
                     "_rev" : "rev",
                     "keyPair" : "keypair"
+                }
+            },
+            "clusteredrecontargetids" : {
+                "table" : "clusteredrecontargetids",
+                "objectToColumn" : {
+                    "_id" : "objectid",
+                    "_rev" : "rev",
+                    "reconId" : "reconid",
+                    "targetId" : "targetid"
                 }
             }
         }

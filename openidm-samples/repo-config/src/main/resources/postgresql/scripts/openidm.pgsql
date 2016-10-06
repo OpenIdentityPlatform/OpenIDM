@@ -444,6 +444,20 @@ CREATE TABLE openidm.clusterobjectproperties (
 CREATE INDEX fk_clusterobjectproperties_clusterobjects ON openidm.clusterobjectproperties (clusterobjects_id);
 CREATE INDEX idx_clusterobjectproperties_prop ON openidm.clusterobjectproperties (propkey,propvalue);
 
+-- -----------------------------------------------------
+-- Table openidm.clusteredrecontargetids
+-- -----------------------------------------------------
+
+CREATE TABLE openidm.clusteredrecontargetids (
+  objectid VARCHAR(38) NOT NULL,
+  rev VARCHAR(38) NOT NULL,
+  reconid VARCHAR(255) NOT NULL,
+  targetid VARCHAR(255) NOT NULL,
+  PRIMARY KEY (objectid)
+);
+
+CREATE INDEX idx_clusteredrecontargetids_reconid ON openidm.clusteredrecontargetids (reconid);
+CREATE INDEX idx_clusteredrecontargetids_reconid_targetid ON openidm.clusteredrecontargetids (reconid, targetid);
 
 -- -----------------------------------------------------
 -- Table openidm.updateobjects

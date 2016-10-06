@@ -532,6 +532,23 @@ CREATE INDEX SOPENIDM.IDX_CLUSTEROBJECTPROPERTIES_PROPKEY ON SOPENIDM.CLUSTEROBJ
 CREATE INDEX SOPENIDM.IDX_CLUSTEROBJECTPROPERTIES_PROPVALUE ON SOPENIDM.CLUSTEROBJECTPROPERTIES (PROPVALUE ASC);
 
 -- -----------------------------------------------------
+-- Table openidm.clusteredrecontargetids
+-- -----------------------------------------------------
+
+CREATE TABLESPACE SOIDM27 MANAGED BY AUTOMATIC STORAGE;
+CREATE TABLE SOPENIDM.CLUSTEREDRECONTARGETIDS (
+    objectid                   VARCHAR(38)    NOT NULL,
+    rev                        VARCHAR(38)    NOT NULL,
+    reconid                    VARCHAR(255)   NOT NULL,
+    targetid                   VARCHAR(255)   NOT NULL,
+    PRIMARY KEY (OBJECTID)
+) IN DOPENIDM.SOIDM27;
+COMMENT ON TABLE SOPENIDM.CLUSTEREDRECONTARGETIDS IS 'OPENIDM - target ids reconciled during source recon';
+
+CREATE INDEX SOPENIDM.IDX_CLUSTEREDRECONTARGETIDS_RECONID ON SOPENIDM.CLUSTEREDRECONTARGETIDS (RECONID ASC);
+CREATE INDEX SOPENIDM.IDX_CLUSTEREDRECONTARGETIDS_RECONID_TARGETID ON SOPENIDM.CLUSTEREDRECONTARGETIDS (RECONID ASC, TARGETID ASC);
+
+-- -----------------------------------------------------
 -- Table `openidm`.`updateobjects`
 -- -----------------------------------------------------
 

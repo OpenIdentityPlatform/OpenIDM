@@ -6,5 +6,23 @@
     {
         "operation" : "remove",
         "field" : "/queries/genericTables/scan-tasks"
+    },
+    {
+       "operation" : "add",
+       "field" : "/resourceMapping/explicitMapping/clusteredrecontargetids",
+       “value”:  {
+           "table" : "clusteredrecontargetids",
+           "objectToColumn" : {
+               "_id" : "objectid",
+               "_rev" : "rev",
+               "reconId" : "reconid",
+               "targetId" : "targetid"
+           }
+        }
+    },
+    {
+        "operation" : "add",
+        "field" : "/commands/explicitTables/delete-target-ids-for-recon",
+        "value" : "DELETE FROM ${_dbSchema}.clusteredrecontargetids WHERE reconId = ${reconId}"
     }
 ]

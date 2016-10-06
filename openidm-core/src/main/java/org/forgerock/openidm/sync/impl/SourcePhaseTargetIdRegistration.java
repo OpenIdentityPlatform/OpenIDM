@@ -11,34 +11,20 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2016-2017 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.sync.impl;
 
-import org.forgerock.api.annotations.Description;
-import org.forgerock.api.annotations.EnumTitle;
-
 /**
- * Reconciliation state.
+ * Encapsulates the concerns of recording the target ids correlated to a source id during the source phase. This is
+ * needed to determine the set of target ids to-be-reconciled in the target phase. This interface is leveraged by the
+ * ReconPhase/ReconTask/Recon abstractions common to both the clustered, and non-clustered cases.
  */
-@Description("Recon state")
-public enum ReconState {
-
-    /** In-progress. */
-    @EnumTitle("In-progress")
-    ACTIVE,
-
-    /** Successfully canceled. */
-    @EnumTitle("Successfully canceled")
-    CANCELED,
-
-    /** Finished because of failure. */
-    @EnumTitle("Finished because of failure")
-    FAILED,
-
-    /** Completed successfully. */
-    @EnumTitle("Completed successfully")
-    SUCCESS
-
+public interface SourcePhaseTargetIdRegistration {
+    /**
+     * Registers the target identifier as having had reconciliation attempted
+     * @param targetId the target identifier
+     */
+    void targetIdReconciled(String targetId);
 }
