@@ -11,18 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceResponse;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Provides automatic role calculation based from the authentication configuration to provide support for common
@@ -31,8 +30,6 @@ import org.slf4j.LoggerFactory;
  * @since 3.0.0
  */
 class MappingRoleCalculator implements RoleCalculator {
-
-    private static final Logger logger = LoggerFactory.getLogger(MappingRoleCalculator.class);
 
     private final String groupMembership;
     private final Map<String, List<String>> roleMapping;
@@ -55,11 +52,11 @@ class MappingRoleCalculator implements RoleCalculator {
      * Performs the calculation of roles based on the provided configuration.
      *
      * @param principal The principal.
-     * @param securityContextMapper The message info instance.
      * @param resource the retrieved resource for the principal.
+     * @return the list of calculated roles
      */
-    public void calculateRoles(String principal, SecurityContextMapper securityContextMapper,
-            ResourceResponse resource) {
+    public List<String> calculateRoles(String principal, ResourceResponse resource) {
+        List<String> roles = new ArrayList<>();
 
         // Apply role mapping if available:
         if (resource != null) {
@@ -75,19 +72,13 @@ class MappingRoleCalculator implements RoleCalculator {
                     final String role = entry.getKey();
                     final List<String> groups = entry.getValue();
                     if (isMemberOfRoleGroups(groups, userGroups)) {
-                        securityContextMapper.addRole(role);
+                        roles.add(role);
                     }
                 }
             }
-
-            // Roles are now set.
-            // Note: roles can be further augmented with a script if more complex behavior is desired
-
-            logger.debug("Used pass-through details to update context for {} with userid : {}, roles : {}",
-                    securityContextMapper.getAuthenticationId(),
-                    securityContextMapper.getUserId(),
-                    securityContextMapper.getRoles());
         }
+
+        return roles;
     }
 
     private boolean isMemberOfRoleGroups(List<String> groups, List<String> groupMembership) {
@@ -106,7 +97,7 @@ class MappingRoleCalculator implements RoleCalculator {
      * group matches one of the groups that have been specified to map to a particular
      * OpenIDM role.
      */
-    static enum GroupComparison {
+    enum GroupComparison {
         /* case-sensitive equality */
         equals {
             public boolean compare(final String groupA, final String groupB) {

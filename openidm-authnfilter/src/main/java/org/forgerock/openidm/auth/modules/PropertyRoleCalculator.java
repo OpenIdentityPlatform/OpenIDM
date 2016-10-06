@@ -11,10 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -51,12 +54,11 @@ class PropertyRoleCalculator implements RoleCalculator {
      *
      *
      * @param principal The principal.
-     * @param securityContextMapper The message info instance.
      * @param resource the retrieved resource for the principal.
-     * @return A SecurityContextMapper instance containing the authentication context information.
+     * @return a list of calculated roles
      */
-    public void calculateRoles(String principal, SecurityContextMapper securityContextMapper,
-            ResourceResponse resource) {
+    public List<String> calculateRoles(String principal, ResourceResponse resource) {
+        List<String> roles = new ArrayList<>();
 
         // Set roles from retrieved object:
         if (resource != null) {
@@ -66,17 +68,17 @@ class PropertyRoleCalculator implements RoleCalculator {
             if (userRoles != null && !userDetail.get(userRoles).isNull()) {
                 if (userDetail.get(userRoles).isString()) {
                     for (String role : userDetail.get(userRoles).asString().split(",")) {
-                        securityContextMapper.addRole(role);
+                        roles.add(role);
                     }
-                } else  if (userDetail.get(userRoles).isList()) {
+                } else if (userDetail.get(userRoles).isList()) {
                     for (JsonValue role : userDetail.get(userRoles)) {
                         if (RelationshipUtil.isRelationship(role)) {
                             // Role is specified as a relationship Object
                             JsonPointer roleId = new JsonPointer(role.get(RelationshipUtil.REFERENCE_ID).asString());
-                            securityContextMapper.addRole(roleId.leaf());
+                            roles.add(roleId.leaf());
                         } else {
                             // Role is specified as a String
-                            securityContextMapper.addRole(role.asString());
+                            roles.add(role.asString());
                         }
                     }
                 } else {
@@ -84,16 +86,9 @@ class PropertyRoleCalculator implements RoleCalculator {
                             userRoles, userDetail.get(userRoles).getObject().getClass());
                 }
             }
-
-            // Roles are now set.
-            // Note: roles can be further augmented with a script if more complex behavior is desired
-
-            logger.debug("Used {} object property to update context for {} with userid : {}, roles : {}",
-                    userRoles != null ? (userRoles+" ") : "",
-                    securityContextMapper.getAuthenticationId(),
-                    securityContextMapper.getUserId(),
-                    securityContextMapper.getRoles());
         }
+
+        return roles;
     }
 
 }

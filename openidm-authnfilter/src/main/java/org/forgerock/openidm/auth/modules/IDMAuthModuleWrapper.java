@@ -42,10 +42,10 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
+import org.forgerock.caf.authentication.framework.AuditTrail;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.Requests;
@@ -59,6 +59,7 @@ import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.ClientContext;
 import org.forgerock.util.Function;
 import org.forgerock.util.encode.Base64;
+import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
@@ -110,7 +111,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
     private JsonValue properties = json(object());
     private String logClientIPHeader = null;
     private String queryOnResource;
-    private Function<QueryRequest, ResourceResponse, ResourceException> queryExecutor;
+    private Function<QueryRequest, ResourceResponse, NeverThrowsException> queryExecutor;
     private UserDetailQueryBuilder queryBuilder;
     private RoleCalculator roleCalculator;
 
@@ -124,12 +125,8 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
      */
     public IDMAuthModuleWrapper(AsyncServerAuthModule authModule,
             ConnectionFactory connectionFactory, CryptoService cryptoService, ScriptRegistry scriptRegistry) {
-        this.authModule = authModule;
-        this.connectionFactory = connectionFactory;
-        this.cryptoService = cryptoService;
-        this.scriptRegistry = scriptRegistry;
-        this.roleCalculatorFactory = new RoleCalculatorFactory();
-        this.augmentationScriptExecutor = new AugmentationScriptExecutor();
+        this(authModule, connectionFactory, cryptoService, scriptRegistry,
+                new RoleCalculatorFactory(), new AugmentationScriptExecutor());
     }
 
     /**
@@ -219,35 +216,33 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
 
                         // a function to perform the user detail query on the router
                         queryExecutor =
-                                new Function<QueryRequest, ResourceResponse, ResourceException>() {
+                                new Function<QueryRequest, ResourceResponse, NeverThrowsException>() {
                                     @Override
-                                    public ResourceResponse apply(QueryRequest request) throws ResourceException {
-                                        if (request == null) {
+                                    public ResourceResponse apply(QueryRequest request) {
+                                        final List<ResourceResponse> resources = new ArrayList<>();
+                                        try {
+                                            connectionFactory.getConnection().query(
+                                                    ContextUtil.createInternalContext(), request, resources);
+
+                                            if (resources.isEmpty()) {
+                                                return null;
+                                            } else if (resources.size() > 1) {
+                                                logger.warn("Access denied, user detail for retrieved was ambiguous.");
+                                                return null;
+                                            }
+                                            return resources.get(0);
+                                        } catch (ResourceException e) {
+                                            // Unable to query resource; return none
                                             return null;
                                         }
-                                        request.addField(""); // request all default fields
-                                        if (userRoles != null) {
-                                            // ensure we request the roles field if the property is specified
-                                            request.addField("", userRoles);
-                                        }
-                                        final List<ResourceResponse> resources = new ArrayList<>();
-                                        connectionFactory.getConnection().query(
-                                                ContextUtil.createInternalContext(), request, resources);
-
-                                        if (resources.isEmpty()) {
-                                            throw newResourceException(401,
-                                                    "Access denied, no user detail could be retrieved.");
-                                        } else if (resources.size() > 1) {
-                                            throw newResourceException(401,
-                                                    "Access denied, user detail retrieved was ambiguous.");
-                                        }
-                                        return resources.get(0);
                                     }
                                 };
 
                         queryBuilder = new UserDetailQueryBuilder(queryOnResource)
                                 .useQueryId(queryId)
-                                .withAuthenticationIdProperty(authenticationId);
+                                .withAuthenticationIdProperty(authenticationId)
+                                // ensure we request the roles field if the property is specified
+                                .withField(userRoles);
 
                         roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership,
                                 roleMapping, groupComparison);
@@ -321,43 +316,35 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                                     "Underlying Server Auth Module has not set the client subject's principal!");
                         }
 
-                        // user is authenticated; populate security context
+                        // user is authenticated; start populating security context
+
+                        // ... with authenticationId
+                        final SecurityContextMapper securityContextMapper =
+                                SecurityContextMapper.fromMessageInfo(messageInfo)
+                                        .setAuthenticationId(principalName);
+
+                        // ... with successful authenticating module name
+                        securityContextMapper.setModuleId(getModuleId());
+
+                        // ... with user details
 
                         try {
+                            // query the resource - could return null
                             final ResourceResponse resource = getAuthenticatedResource(principalName, messageInfo);
 
-                            final SecurityContextMapper securityContextMapper =
-                                    SecurityContextMapper.fromMessageInfo(messageInfo)
-                                            .setAuthenticationId(principalName);
-
                             // Calculate (and set) roles if not already set
-                            if (securityContextMapper.getRoles() == null
-                                    || securityContextMapper.getRoles().isEmpty()) {
-                                roleCalculator.calculateRoles(principalName, securityContextMapper, resource);
-                            }
+                            securityContextMapper.setRoles(roleCalculator.calculateRoles(principalName, resource));
 
                             // set "resource" (component) if not already set
-                            if (securityContextMapper.getResource() == null) {
-                                securityContextMapper.setResource(queryOnResource);
-                            }
+                            securityContextMapper.setResource(queryOnResource);
 
                             // set "user id" (authorization.id) if not already set
-                            if (securityContextMapper.getUserId() == null) {
-                                if (resource != null) {
-                                    // assign authorization id from resource if present
-                                    securityContextMapper.setUserId(
-                                            resource.getId() != null
-                                                    ? resource.getId()
-                                                    : resource.getContent().get(FIELD_CONTENT_ID).asString());
-                                } else {
-                                    // set to principal otherwise
-                                    securityContextMapper.setUserId(principalName);
-                                }
-                            }
-
-                            // store the successful authenticating module name if not already set
-                            if (securityContextMapper.getModuleId() == null) {
-                                securityContextMapper.setModuleId(getModuleId());
+                            if (resource != null) {
+                                // assign authorization id from resource if present
+                                securityContextMapper.setUserId(
+                                        resource.getId() != null
+                                                ? resource.getId()
+                                                : resource.getContent().get(FIELD_CONTENT_ID).asString());
                             }
 
                             // run the augmentation script, if configured (will no-op if none specified)
@@ -365,12 +352,13 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                                     securityContextMapper);
 
                         } catch (ResourceException e) {
-                            if (logger.isDebugEnabled()) {
-                                logger.debug("Failed role calculation for {} on {}.", principalName, queryOnResource,
-                                        e);
-                            }
+                            // store failure reason
+                            messageInfo.getRequestContextMap().put(
+                                    AuditTrail.AUDIT_FAILURE_REASON_KEY, e.toJsonValue().asMap());
+
+                            logger.debug("Failed role calculation for {} on {}.", principalName, queryOnResource, e);
                             if (e.isServerError()) {
-                                throw new AuthenticationException("Failed pass-through authentication of "
+                                throw new AuthenticationException("Failed authentication of "
                                         + principalName + " on " + queryOnResource + ":" + e.getMessage(), e);
                             }
                             // role calculation failed
@@ -382,6 +370,14 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                 });
     }
 
+    /**
+     * Query for the authentication resource.
+     *
+     * @param principalName the principal that was authenticated
+     * @param messageInfo
+     * @return the resource, null if configuration prohibits searching for resource
+     * @throws ResourceException if unable to query for the resource
+     */
     private ResourceResponse getAuthenticatedResource(String principalName, MessageInfoContext messageInfo)
             throws ResourceException {
         // see if the resource was stored in the MessageInfo by the Authenticator
@@ -394,8 +390,14 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
             }
         }
 
-        // attempt to read the user object; will return null if any of the pieces are null
-        return queryExecutor.apply(queryBuilder.build(principalName));
+        // build a request - will return null if any of the pieces are null
+        QueryRequest request = queryBuilder.build(principalName);
+        if (request == null) {
+            return null;
+        }
+
+        // attempt to read the user object
+        return queryExecutor.apply(request);
     }
 
     private void setClientIPAddress(MessageInfoContext messageInfo) {
@@ -465,9 +467,11 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
         private final String queryOnResource;
         private String queryId = null;
         private String authenticationId = null;
+        private List<String> fields = new ArrayList<>();
 
         private UserDetailQueryBuilder(final String queryOnResource) {
             this.queryOnResource = queryOnResource;
+            fields.add(""); // request all default fields
         }
 
         UserDetailQueryBuilder useQueryId(String queryId) {
@@ -480,11 +484,19 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
             return this;
         }
 
-        QueryRequest build(final String principal) throws BadRequestException {
+        UserDetailQueryBuilder withField(String field) {
+            if (field != null) {
+                fields.add(field);
+            }
+            return this;
+        }
+
+        QueryRequest build(final String principal) throws ResourceException {
             if (queryOnResource == null || authenticationId == null || principal == null) {
                 return null;
             }
             QueryRequest request = Requests.newQueryRequest(queryOnResource);
+            request.addField(fields.toArray(new String[fields.size()]));
             if (queryId != null) {
                 // if we're using a queryId, provide the additional parameter mapping the authenticationId property
                 // and its value (the principal)

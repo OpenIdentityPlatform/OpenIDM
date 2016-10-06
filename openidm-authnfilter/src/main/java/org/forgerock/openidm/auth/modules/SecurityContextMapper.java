@@ -108,7 +108,9 @@ class SecurityContextMapper {
     }
 
     SecurityContextMapper setUserId(String userId) {
-        authData.get(AUTHORIZATION).put(AUTHZID_ID, userId);
+        if (getUserId() == null) {
+            authData.get(AUTHORIZATION).put(AUTHZID_ID, userId);
+        }
         return this;
     }
 
@@ -117,7 +119,9 @@ class SecurityContextMapper {
     }
 
     SecurityContextMapper setResource(String resource) {
-        authData.get(AUTHORIZATION).put(AUTHZID_COMPONENT, resource);
+        if (getResource() == null) {
+            authData.get(AUTHORIZATION).put(AUTHZID_COMPONENT, resource);
+        }
         return this;
     }
 
@@ -126,7 +130,9 @@ class SecurityContextMapper {
     }
 
     SecurityContextMapper setRoles(List<String> roles) {
-        authData.get(AUTHORIZATION).put(AUTHZID_ROLES, new ArrayList<String>(roles));
+        if (getRoles().isEmpty()) {
+            authData.get(AUTHORIZATION).put(AUTHZID_ROLES, new ArrayList<>(roles));
+        }
         return this;
     }
 
@@ -152,7 +158,9 @@ class SecurityContextMapper {
     }
 
     SecurityContextMapper setModuleId(String moduleId) {
-        authData.get(AUTHORIZATION).put(MODULE_ID, moduleId);
+        if (getModuleId() == null) {
+            authData.get(AUTHORIZATION).put(MODULE_ID, moduleId);
+        }
         return this;
     }
 

@@ -11,10 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
+
+import java.util.List;
 
 import org.forgerock.json.resource.ResourceResponse;
 
@@ -30,9 +32,8 @@ interface RoleCalculator {
      * Performs the calculation of roles based on the provided configuration.
      *
      * @param principal The principal.
-     * @param securityContextMapper The message info instance.
      * @param resource the retrieved resource for the principal.
+     * @return list of calculated roles
      */
-    void calculateRoles(String principal, SecurityContextMapper securityContextMapper,
-            ResourceResponse resource);
+    List<String> calculateRoles(String principal, ResourceResponse resource);
 }
