@@ -130,6 +130,9 @@ define([
         assert.equal(source.type, "source", "source.type");
         assert.equal(source.resourceMapping,"bar", "source.resourceMapping");
     });
+    // QUnit.test("#dateTimeChangeHandler calls #updateSchedule with correct args", function(assert) {
+    //     expect(0);
+    // });
 
     QUnit.test("#formChangeHandler calls #updateSchedule with correct args", function(assert) {
         // expect(0);
@@ -137,6 +140,7 @@ define([
             abstractSchedulerView = new AbstractSchedulerView(),
             // bind formChangeHandler to instance so I can use it
             formChangeHandler = _.bind(abstractSchedulerView.formChangeHandler, abstractSchedulerView),
+            dateTimeChangeHandler = _.bind(abstractSchedulerView.dateTimeChangeHandler, abstractSchedulerView),
             updateScheduleSpy = sinon.stub(abstractSchedulerView, "updateSchedule", _.noop),
             setInvokeContextObjectSpy = sinon.spy(abstractSchedulerView, "setInvokeContextObject"),
             // create fake elements to trigger events on
@@ -155,12 +159,18 @@ define([
             invokeContextInput = $("<input>", {
                 "class": "schedule-form-element",
                 name: "mapping",
-                value: "mapping test value"});
+                value: "mapping test value"}),
+            timeInput = $("<input>", {
+                "class": "date-time-picker",
+                name: "timeInput",
+                value: "10/02/2016 12:00 AM"
+            });
 
         // set up event handlers
         genericInput.on("change", formChangeHandler);
         checkboxInput.on("change", formChangeHandler);
         invokeContextInput.on("change", formChangeHandler);
+        timeInput.on("change", dateTimeChangeHandler);
 
         // trigger generic input change event and spy the calls
         genericInput.trigger("change");
@@ -186,6 +196,17 @@ define([
         assert.deepEqual(invokeContextInputSpyArgs[1], {
             action: "reconcile", mapping: "mapping test value"
         });
+
+        // time input change event and spy the calls
+        timeInput.trigger("change");
+
+        // time input assertions
+        assert.equal(updateScheduleSpy.callCount, 4, "time input # of calls");
+        assert.deepEqual(_.values(updateScheduleSpy.getCall(3).args),
+            [
+                "timeInput",
+                "2016-10-02T00:00:00"
+            ], "time input args");
     });
 
     QUnit.test("#setInvokeContextObject calls #updateSchedule with correct args", function(assert) {
