@@ -47,9 +47,9 @@ import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.forgerock.json.JsonTransformer;
+
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.crypto.JsonCryptoTransformer;
+import org.forgerock.json.crypto.JsonDecryptFunction;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
@@ -416,7 +416,7 @@ public class ManagedObjectSetTest {
     private CryptoService createCryptoService() throws Exception {
         final KeyStore keyStore = createKeyStore();
         final UpdatableKeyStoreSelector keySelector = new UpdatableKeyStoreSelector(keyStore, KEYSTORE_PASSWORD);
-        return new CryptoServiceImpl(keySelector, new JsonCryptoTransformer(new SimpleDecryptor(keySelector)));
+        return new CryptoServiceImpl(keySelector, new JsonDecryptFunction(new SimpleDecryptor(keySelector)));
     }
 
     private KeyStore createKeyStore() throws Exception {

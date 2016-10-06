@@ -1,31 +1,25 @@
 /*
- * DO NOT REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock Inc. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.config.enhanced;
 
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValueFunctions.deepTransformBy;
+
 import java.util.Dictionary;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.apache.felix.scr.annotations.Component;
@@ -34,7 +28,6 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.core.IdentityServer;
@@ -43,6 +36,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.util.JsonUtil;
+import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -77,6 +71,8 @@ public class JSONEnhancedConfig implements EnhancedConfig {
      * Setup logging for the {@link JSONEnhancedConfig}.
      */
     private final static Logger logger = LoggerFactory.getLogger(JSONEnhancedConfig.class);
+
+    private static final PropertyTransformer propertyTransformer = new PropertyTransformer(false);
 
     public String getConfigurationFactoryPid(ComponentContext compContext) {
         Object o = compContext.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
@@ -125,7 +121,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
      */
     public JsonValue getConfiguration(Dictionary<String, Object> dict, String servicePid,
             boolean decrypt) throws InvalidException, InternalErrorException {
-        JsonValue jv = new JsonValue(new LinkedHashMap<String, Object>());
+        JsonValue jv = json(object());
 
         if (dict != null) {
             String jsonConfig = (String) dict.get(JSON_CONFIG_PROPERTY);
@@ -151,15 +147,12 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         logger.debug("Configuration for {}: {}", servicePid, jv);
 
         JsonValue decrypted = jv;
-        if (!jv.isNull()) {
-            boolean doEscape = false;
-            decrypted.getTransformers().add(new PropertyTransformer(doEscape));
-            decrypted.applyTransformers();
-            decrypted = decrypted.copy();
+        if (jv.isNotNull()) {
+            decrypted = decrypted.as(deepTransformBy(propertyTransformer));
         }
         // todo: different way to handle mock unit tests
-        if (decrypt && dict != null && !jv.isNull()) {
-            decrypted = decrypt(jv);
+        if (decrypt && dict != null && jv.isNotNull()) {
+            decrypted = decrypt(decrypted);
         }
 
         return decrypted;
@@ -173,9 +166,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         return CryptoServiceFactory.getInstance();
     }
 
-    private static class PropertyTransformer implements JsonTransformer {
-
-        // Disable the property escaping by default
+    private static class PropertyTransformer implements Function<JsonValue, JsonValue, JsonValueException> {
         private final boolean doEscape;
 
         public PropertyTransformer(boolean doEscape) {
@@ -183,11 +174,16 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         }
 
         @Override
-        public void transform(JsonValue value) throws JsonException {
-            if (null != value && value.isString()) {
-                value.setObject(PropertyUtil.substVars(value.asString(), IdentityServer
-                        .getInstance(), doEscape));
+        public JsonValue apply(JsonValue value) throws JsonValueException {
+            if (value == null) {
+                return null;
             }
+            if (value.isString()) {
+                return new JsonValue(
+                        PropertyUtil.substVars(value.asString(), IdentityServer.getInstance(), doEscape),
+                        value.getPointer());
+            }
+            return value;
         }
     }
 }

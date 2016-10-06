@@ -11,27 +11,32 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.workflow.activiti.impl;
 
+import static org.forgerock.json.JsonValueFunctions.deepTransformBy;
+
+import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.workflow.activiti.ActivitiConstants;
+
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
-import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.openidm.util.DateUtil;
+import org.forgerock.util.Function;
 import org.joda.time.DateTime;
 
 /**
  * Utility class for Activiti workflow integration
  */
 public class ActivitiUtil {
+    private static final DatePropertyTransformer datePropertyTransformer = new DatePropertyTransformer();
+
     /**
      * Fetch and remove process key from the request
      * @param request Request to be processed
@@ -72,13 +77,10 @@ public class ActivitiUtil {
      */
     public static Map<String, Object> getRequestBodyFromRequest(CreateRequest request) {
         if (!request.getContent().isNull()) {
-            JsonValue val = request.getContent();
-            val.getTransformers().add(new DatePropertyTransformer());
-            val.applyTransformers();
-            val = val.copy();
-            return new HashMap<String, Object>(val.expect(Map.class).asMap());
+            JsonValue val = request.getContent().as(deepTransformBy(datePropertyTransformer));
+            return new HashMap<>(val.expect(Map.class).asMap());
         } else {
-            return new HashMap<String, Object>(1);
+            return new HashMap<>(1);
         }
     }
     
@@ -92,17 +94,22 @@ public class ActivitiUtil {
         return request.getAdditionalParameters().get(paramName);
     }
     
-    private static class DatePropertyTransformer implements JsonTransformer {
+    private static class DatePropertyTransformer implements Function<JsonValue, JsonValue, JsonValueException> {
         @Override
-        public void transform(JsonValue value) throws JsonException {
-            if (null != value && value.isString()) {
+        public JsonValue apply(JsonValue value) throws JsonValueException {
+            if (value == null) {
+                return null;
+            }
+            if (value.isString()) {
                 DateTime d = DateUtil.getDateUtil().parseIfDate(value.asString());
-                if (d != null){
-                    value.setObject(d.toDate());
+                if (d != null) {
+                    return new JsonValue(d.toDate(), value.getPointer());
                 }
             }
+            return value;
         }
     }
+
     /**
      * Process the query parameters if they are workflow/task specific
      * (prefixed: var-...)

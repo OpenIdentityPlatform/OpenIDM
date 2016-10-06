@@ -15,11 +15,12 @@
  */
 package org.forgerock.openidm.crypto;
 
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.util.Function;
 
 /**
  * Provides encryption, decryption, and hashing services to OpenIDM components.
@@ -42,11 +43,11 @@ public interface CryptoService {
     JsonEncryptor getEncryptor(String cipher, String alias) throws JsonCryptoException;
 
     /**
-     * Returns a decryption transformer that can decrypt JSON values.
+     * Returns a decryption function that can decrypt JSON values.
      *
-     * @return a transformer that can decrypt JSON values.
+     * @return a function that can decrypt JSON values.
      */
-    JsonTransformer getDecryptionTransformer();
+    Function<JsonValue, JsonValue, JsonValueException> getDecryptionFunction();
 
     /**
      * Encrypts a JSON value.

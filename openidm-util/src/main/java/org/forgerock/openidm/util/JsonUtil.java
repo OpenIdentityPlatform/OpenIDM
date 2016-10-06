@@ -34,14 +34,9 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.ObjectWriter;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.JsonValueException;
 import org.forgerock.json.crypto.JsonCrypto;
 import org.forgerock.json.resource.SortKey;
-import org.forgerock.openidm.core.PropertyAccessor;
-import org.forgerock.openidm.core.PropertyUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -221,70 +216,6 @@ public final class JsonUtil {
         return jsonValue;
     }
 
-    public static JsonTransformer getPropertyJsonTransformer(final JsonValue properties,
-            boolean allowUnresolved) {
-        if (jsonIsNull(properties)) {
-            return null;
-        }
-        return new PropertyTransformer(properties, allowUnresolved);
-    }
-
-    public static class PropertyTransformer implements JsonTransformer {
-
-        private final PropertyAccessor properties;
-        private final boolean eager;
-
-        PropertyTransformer(final JsonValue properties, boolean allowUnresolved) {
-            this.eager = !allowUnresolved;
-            this.properties = new PropertyAccessor() {
-                @Override
-                @SuppressWarnings("unchecked")
-                public <T> T getProperty(String key, T defaultValue, Class<T> expected) {
-                    JsonPointer pointer = new JsonPointer(key.split("\\."));
-                    try {
-                        JsonValue newValue = properties.get(pointer);
-                        if (null != newValue) {
-                            return (T) newValue.required().expect(expected).getObject();
-                        }
-                    } catch (JsonValueException e) {
-                        logger.trace("Failed to substitute variable {}", key, e);
-                        /*
-                         * Expected if the value is null or the type does not
-                         * match
-                         */
-                    } catch (Exception e) {
-                        logger.debug("Failed to substitute variable with unexpected error {}", key, e);
-                    }
-                    if (eager && null == defaultValue) {
-                        StringBuilder sb =
-                                new StringBuilder("Failed to resolve mandatory property: ")
-                                        .append(key);
-                        if (null != expected && !Object.class.equals(expected)) {
-                            sb.append(" expecting ").append(expected.getSimpleName()).append(
-                                    " class");
-                        }
-                        throw new JsonValueException(null, sb.toString());
-                    }
-                    return defaultValue;
-                }
-            };
-        }
-
-        /**
-         * {@inheritDoc}
-         */
-        @Override
-        public void transform(JsonValue value) {
-            if (null != value && value.isString()) {
-                try {
-                    value.setObject(PropertyUtil.substVars(value.asString(), properties,
-                            PropertyUtil.Delimiter.DOLLAR, false));
-                } catch (JsonValueException e) {
-                    throw new JsonValueException(value, e.getMessage());
-                }
-            }
-        }
-    }
 
     /**
      * Indenter, part of formatting Jackson output in pretty print Makes the
