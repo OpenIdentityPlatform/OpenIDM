@@ -31,16 +31,15 @@ function(_, moment, momentTimezone, AbstractSchedulerView) {
                 "misfirePolicy": "fireAndProceed",
                 "invokeService": "sync",
                 "invokeLogLevel": "info",
-                // "timeZone": null,
-                // "startTime": null,
-                // "endTime": null,
+                "timeZone": null,
+                "startTime": null,
+                "endTime": null,
                 "concurrentExecution": false,
                 "invokeContext": {
                     "action": "reconcile"
                 }
             };
             this.schedule = _.cloneDeep(this.data.schedule);
-            // this.data.timeZone = this.getTimeZone(this.data.schedule, moment);
             _.bindAll(this);
 
             this.renderForm();

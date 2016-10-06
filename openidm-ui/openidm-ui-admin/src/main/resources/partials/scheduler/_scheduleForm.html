@@ -96,6 +96,18 @@
             </div>
         </div>
         <!-- persisted end-->
+        <!-- concurrentExecution -->
+        <div class="form-group schedule-form-element">
+            <label for="toggle-concurrentExecution" class="col-sm-3 control-label">{{t "templates.scheduler.concurrentExecution"}}</label>
+            <div class="col-sm-6">
+                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                    <label>
+                        <input id="toggle-concurrentExecution" name="concurrentExecution" type="checkbox" {{#if schedule.concurrentExecution}}checked{{/if}} value="true"><span></span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- concurrentExecution end -->
         <!-- misfirePolicy -->
         <div class="form-group schedule-form-element">
             <label for="select-misfirePolicy" class="col-sm-3 control-label">{{t "templates.scheduler.misfirePolicy"}}</label>
@@ -133,26 +145,32 @@
             </div>
         </div>
         <!-- invokeLogLevel end -->
-        <!-- concurrentExecution -->
-        <div class="form-group schedule-form-element">
-            <label for="toggle-concurrentExecution" class="col-sm-3 control-label">{{t "templates.scheduler.concurrentExecution"}}</label>
+        <!-- startTime -->
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="schedule-startTime">{{t "templates.scheduler.startTime"}}</label>
             <div class="col-sm-6">
-                <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
-                    <label>
-                        <input id="toggle-concurrentExecution" name="concurrentExecution" type="checkbox" {{#if schedule.concurrentExecution}}checked{{/if}} value="true"><span></span>
-                    </label>
-                </div>
+                <input id="scheduleStartTime" class="date-time-picker form-control" name="startTime" {{#if schedule.startTime}} value="{{schedule.startTime}}" {{/if}}/>
+                <div class="validation-message"></div>
+                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
             </div>
         </div>
-        <!-- concurrentExecution end -->
-
-        <!-- timeZone -->
-        <!-- <div class="form-group schedule-form-element">
-            <label for="select-timeZone" class="col-sm-3 control-label">{{t "templates.scheduler.timeZone"}}</label>
+        <!-- endTime -->
+        <div class="form-group">
+            <label class="col-sm-3 control-label" for="schedule-startTime">{{t "templates.scheduler.endTime"}}</label>
             <div class="col-sm-6">
-                <select id="select-timeZone" class="form-control" {{#unless noForm2js}}name="timeZone"{{/unless}}>
+                <input id="scheduleEndTime" class="date-time-picker form-control" name="endTime" {{#if schedule.endTime}} value="{{schedule.endTime}}" {{/if}}/>
+                <div class="validation-message"></div>
+                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
+            </div>
+        </div>
+        <!-- endTime end -->
+        <!-- timeZone -->
+        <div class="form-group schedule-form-element">
+            <label for="selectTimeZone" class="col-sm-3 control-label">{{t "templates.scheduler.timeZone"}}</label>
+            <div class="col-sm-6">
+                <select id="selectTimeZone" class="form-control schedule-form" name="timeZone">
                     {{#staticSelect timeZone}}
-                        {{#each timzoneOptions}}
+                        {{#each timeZoneOptions}}
                             <option value="{{this}}">{{this}}</option>
                         {{/each}}
                     {{/staticSelect}}
@@ -162,37 +180,9 @@
                 <div class="help-block">{{t helpKey}}</div>
                 {{/if}}
             </div>
-        </div> -->
+        </div>
 
         <!-- timeZone end -->
-
-        <!-- startTime -->
-        <!-- <div class="form-group schedule-form-element">
-            <label class="col-sm-3 control-label" for="schedule-startTime">{{t "templates.scheduler.startTime"}}</label>
-            <div class="col-sm-6">
-                <input id="schedule-startTime"
-                        class="form-control"
-                        type="time"
-                        name="startTime"
-                />
-                <div class="validation-message"></div>
-                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
-            </div>
-        </div> -->
-        <!-- endTime -->
-        <!-- <div class="form-group">
-            <label class="col-sm-3 control-label" for="schedule-endTime">{{t "templates.scheduler.endTime"}}</label>
-            <div class="col-sm-6">
-                <input id="schedule-endTime"
-                        class="form-control"
-                        type="time"
-                        name="endTime"
-                />
-                <div class="validation-message"></div>
-                <span class="form-control-feedback"><i class='fa validation-icon'></i></span>
-            </div>
-        </div> -->
-        <!-- endTime end -->
     </div>
 </div>
 <!-- advanced options well -->

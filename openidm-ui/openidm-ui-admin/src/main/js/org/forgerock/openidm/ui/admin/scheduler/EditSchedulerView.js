@@ -37,7 +37,6 @@ define(["lodash", "moment", "moment-timezone",
                 this.schedule = _.cloneDeep(schedule);
                 this.data.scheduleJSON = JSON.stringify(schedule, null, 4);
                 this.data.pageType = schedule.invokeService || "Script";
-                // this.data.timeZone = this.getTimeZone(this.data.schedule, moment);
 
                 this.renderForm(() => {
                     this.disable(".save-cancel-btn");

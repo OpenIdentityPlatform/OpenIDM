@@ -22,6 +22,7 @@ define([
     "moment",
     "moment-timezone",
     "cron",
+    "bootstrap-datetimepicker",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -43,6 +44,7 @@ define([
     moment,
     momentTimezone,
     cron,
+    Datetimepicker,
     AdminAbstractView,
     eventManager,
     ValidatorsManager,
@@ -70,7 +72,8 @@ define([
             "change .cron-editor-container": "cronChangeHandler",
             "change .script-editor-container": "iseChangeHandler",
             "click .cron-controls": "toggleCronElement",
-            "click .advanced-options-toggle": "toggleAdvancedLinkText"
+            "click .advanced-options-toggle": "toggleAdvancedLinkText",
+            "dp.change .date-time-picker": "dateTimeChangeHandler"
         },
         data: {
             misfirePolicyOptions: ["fireAndProceed", "doNothing"],
@@ -95,18 +98,18 @@ define([
          */
         renderForm(callback) {
             _.bindAll(this);
+            this.addTimeZoneFormData(this.data.schedule);
             this.parentRender(() => {
+                let watchedObj = _.cloneDeep(this.schedule);
                 this.undelegateEvents();
-
-                let watchedObj = _.cloneDeep(this.schedule),
-                    form = this.loadPartial("scheduler/_scheduleForm", this.data);
-
                 this.changeWatcher = ChangesPending.watchChanges({
                     element: ".changes-pending-container",
                     undo: true,
                     watchedObj,
                     watchedProperties: _.keys(watchedObj)
                 });
+
+                this.addDateTimePickers();
 
                 this.addInvokeContextInlineScriptEditor( () => {
                     this.addCronEditor();
@@ -122,17 +125,15 @@ define([
         },
 
         /**
-         * Loads the initial timeZone value for the current scheduel or uses
-         * `moment.js` to guess. The moment js dependency is injected directly here
-         * so it can be used in any view that extends `AbstractSchedulerView`.
+         * Load the initial timeZone value and timeZone options
+         * into the form data in preparation for handlebars compile
          * @param {object} schedule
-         * @param {dependency} MomentJS
-         * @return {string} timeZone
          */
-        // Time zone sent to the surver currently throws an error
-        // getTimeZone(schedule, moment) {
-        //     return schedule.timeZone || moment.tz.guess();
-        // },
+        addTimeZoneFormData(schedule) {
+            let currentTimezone = schedule.timeZone || moment.tz.guess();
+            this.data.timeZone = currentTimezone;
+            this.data.timeZoneOptions = moment.tz.names();
+        },
 
         /**
          * Initializes the inline script editor and adds it as `this.editor` on
@@ -158,6 +159,46 @@ define([
                     scriptData: this.data.schedule.invokeContext.script
                 };
             this.editor = InlineScriptEditor.generateScriptEditor(options);
+        },
+
+        /**
+         * Initializes bootstrap-datetimepicker and sets the default/ min date
+         * constraints on the pickers
+         */
+        addDateTimePickers() {
+            let schedule = this.data.schedule,
+                pickerOptions = {
+                    sideBySide: true,
+                    useCurrent: false,
+                    icons: {
+                        time: 'fa fa-clock-o',
+                        date: 'fa fa-calendar',
+                        up: 'fa fa-chevron-up',
+                        down: 'fa fa-chevron-down',
+                        previous: 'fa fa-chevron-left',
+                        next: 'fa fa-chevron-right',
+                        today: 'fa fa-crosshairs',
+                        clear: 'fa fa-trash',
+                        close: 'fa fa-remove'
+                    }
+                },
+                $endTimeInput = this.$el.find("#scheduleEndTime");
+
+            this.$el.find(".date-time-picker").each(function(index) {
+                let val = $(this).val();
+                if (val) {
+                    pickerOptions.defaultDate = moment(val);
+                } else {
+                    pickerOptions.minDate = moment().format();
+                }
+                $(this).val("");
+                $(this).datetimepicker(pickerOptions);
+            });
+
+            // if end time not specified, set min end time to start time
+            if (schedule.startTime && !schedule.endTime) {
+                $endTimeInput.data("DateTimePicker").minDate(moment(schedule.startTime));
+            }
         },
 
         /**
@@ -378,6 +419,23 @@ define([
             this.setInvokeContextObject(prop, value);
         },
 
+        /**
+         * Invoked on dp.change event (bootstrap-datetimepicker element), this method
+         * grabs the dateTime string, formats it into ISO8601 and calls `updateSchedule`
+         * @param {object} event -- triggering event
+         */
+        dateTimeChangeHandler(event) {
+            event.preventDefault();
+            // if start date was picked, end date should be min date updated
+            let $target = $(event.target),
+                localFormat = "YYYY-MM-DD[T]HH:mm:ss",
+                value = moment($target.val()).format(localFormat),
+                name = $target.attr("name");
+            if (name === "startTime") {
+                $("#scheduleEndTime").data("DateTimePicker").minDate(event.date);
+            }
+            this.updateSchedule(name, value);
+        },
         /**
          * Properly generates an `invokeContext` object based on the prop param
          * and pases to `updateSchedule`
