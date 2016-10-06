@@ -72,11 +72,13 @@ define([
             this.model.userRegistration = null;
 
             $.when(
-                SocialDelegate.providerList(),
+                ConfigDelegate.configQuery("_id sw \"identityProvider/\""),
                 SocialDelegate.availableProviders(),
                 ConfigDelegate.readEntityAlways("selfservice/registration"),
                 ConfigDelegate.readEntityAlways("authentication")
             ).then((currentProviders, availableProviders, userRegistration, authentication) => {
+                currentProviders = currentProviders[0].result;
+
                 availableProviders.providers = _.map(availableProviders.providers, (p) => {
                     p.enabled = false;
                     return p;
@@ -116,7 +118,7 @@ define([
                             break;
                     }
 
-                    _.each(currentProviders.providers, (currentProvider) => {
+                    _.each(currentProviders, (currentProvider) => {
                         if (provider.name === currentProvider.name) {
                             _.extend(this.model.providers[index], currentProvider);
 
@@ -126,7 +128,7 @@ define([
                 });
 
                 this.parentRender(() => {
-                    var messageResult = this.getMessageState(currentProviders.providers.length, this.model.userRegistration, this.model.AuthModuleEnabled);
+                    var messageResult = this.getMessageState(currentProviders.length, this.model.userRegistration, this.model.AuthModuleEnabled);
 
                     if(messageResult.login) {
                         this.$el.find("#socialNoAuthWarningMessage").show();

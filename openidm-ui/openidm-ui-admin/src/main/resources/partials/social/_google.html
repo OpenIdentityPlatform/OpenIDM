@@ -8,6 +8,17 @@
     2. {{t "templates.socialProviders.enterConfigure"}}
 </div>
 <form id="socialDialogForm" class="form-horizontal">
+    <div class="form-group">
+        <label for="enabled" class="col-sm-3 control-label">{{t "templates.socialProviders.enabled"}}</label>
+        <div class="col-sm-8">
+            <div class="checkbox checkbox-slider-primary checkbox-slider checkbox-slider--b checkbox-slider-md">
+                <label>
+                    <input id="enabled" class="toggleBoolean" name="enabled" type="checkbox" value="true" {{#if enabled}} checked {{/if}}>
+                    <span></span>
+                </label>
+            </div>
+        </div>
+    </div>
 
     {{> form/_basicInput value=client_id label="templates.socialProviders.clientId" property="client_id" noValidation="true"}}
 
