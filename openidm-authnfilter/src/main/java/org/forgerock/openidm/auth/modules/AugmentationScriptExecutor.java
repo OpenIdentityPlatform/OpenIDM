@@ -16,6 +16,10 @@
 
 package org.forgerock.openidm.auth.modules;
 
+import static org.forgerock.json.JsonValue.*;
+
+import javax.script.ScriptException;
+
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.json.JsonValue;
@@ -28,9 +32,6 @@ import org.forgerock.script.exception.ScriptThrownException;
 import org.forgerock.services.context.Context;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import javax.script.ScriptException;
-import java.util.HashMap;
 
 /**
  * Responsible for executing any augment security context and providing the required parameters to the scripts.
@@ -50,7 +51,7 @@ class AugmentationScriptExecutor {
      * @throws AuthenticationException If any problem occurs whilst executing the script.
      */
     void executeAugmentationScript(ScriptEntry augmentScript, MessageInfoContext messageInfo, JsonValue properties,
-            SecurityContextMapper securityContextMapper) throws AuthenticationException {
+            SecurityContextMapper securityContextMapper) throws ResourceException, AuthenticationException {
 
         if (augmentScript == null) {
             return;
@@ -69,9 +70,9 @@ class AugmentationScriptExecutor {
             script.put("context",  messageInfo);
             script.put("httpRequest",  messageInfo.getRequest());
             script.put("properties", properties);
-            JsonValue security = new JsonValue(new HashMap<String, Object>(2));
-            security.put(SecurityContextMapper.AUTHENTICATION_ID, securityContextMapper.getAuthenticationId());
-            security.put(SecurityContextMapper.AUTHORIZATION, securityContextMapper.getAuthorizationId());
+            JsonValue security = json(object(
+                    field(SecurityContextMapper.AUTHENTICATION_ID, securityContextMapper.getAuthenticationId()),
+                    field(SecurityContextMapper.AUTHORIZATION, securityContextMapper.getAuthorizationId())));
             script.put("security", security);
 
             // expect updated security context
@@ -86,13 +87,11 @@ class AugmentationScriptExecutor {
             }
         } catch (ScriptThrownException e) {
             final ResourceException re = e.toResourceException(ResourceException.INTERNAL_ERROR, e.getMessage());
-            logger.error("{} when attempting to execute script {}", re.toString(), augmentScript.getName(), re);
-            throw new AuthenticationException(re.getMessage(), re);
+            logger.debug("Augmentation script {} threw {} when augmenting security context for {}",
+                    augmentScript.getName(), securityContextMapper.getAuthenticationId(), re.toString(), re);
+            throw re;
         } catch (ScriptException e) {
-            logger.error("{} when attempting to execute script {}", e.toString(), augmentScript.getName(), e);
-            throw new AuthenticationException(e.getMessage(), e);
-        } catch (ResourceException e) {
-            logger.error("{} when attempting to create context", e.toString(), e);
+            logger.error("Failure executing augmentation script {}", augmentScript.getName(), e);
             throw new AuthenticationException(e.getMessage(), e);
         }
     }

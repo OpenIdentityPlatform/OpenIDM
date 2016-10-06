@@ -11,13 +11,15 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
 
 import org.forgerock.json.resource.ResourceResponse;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -27,19 +29,20 @@ import java.util.List;
 class DefaultRoleCalculator implements RoleCalculator {
     private final List<String> defaultRoles;
 
-    public DefaultRoleCalculator(List<String> defaultRoles) {
-        this.defaultRoles = defaultRoles;
+    DefaultRoleCalculator(List<String> defaultRoles) {
+        this.defaultRoles = defaultRoles != null
+                ? defaultRoles
+                : new ArrayList<String>();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public void calculateRoles(String principal, SecurityContextMapper securityContextMapper,
-            ResourceResponse resource) {
-        if (defaultRoles != null) {
-            securityContextMapper.setRoles(defaultRoles);
-        }
+    public List<String> calculateRoles(String principal, ResourceResponse resource) {
+        return resource != null
+                ? defaultRoles
+                : Collections.<String>emptyList();
     }
 
 }
