@@ -15,15 +15,16 @@
  */
 package org.forgerock.openidm.idp.impl;
 
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.*;
 
 import java.util.List;
 import java.util.Map;
 
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.idp.config.ProviderConfig;
+import org.forgerock.openidm.util.DateUtil;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -35,6 +36,11 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 public class ProviderConfigMapper {
 
     private static final ObjectMapper mapper = new ObjectMapper();
+    private static final String RAW_PROFILE = "rawProfile";
+    private static final String SUBJECT = "subject";
+    private static final String ENABLED = "enabled";
+    private static final String SCOPE = "scope";
+    private static final  String DATE_COLLECTED = "dateCollected";
 
     static {
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -94,6 +100,25 @@ public class ProviderConfigMapper {
      */
     public static ProviderConfig toProviderConfig(JsonValue value) {
         return toProviderConfig.apply(value);
+    }
+
+    /**
+     * Builds a {@link JsonValue} object that contains user identity provider data when
+     * given a raw identity profile and the associated provider that that particular
+     * identity profile resides on.
+     *
+     * @param providerConfig {@link ProviderConfig} configuration of the Identity Provider
+     * @param profile raw profile data retrieved from the Identity Provider
+     *
+     * @return {@link JsonValue} containing appropriate identity provider details
+     */
+    public final static JsonValue buildIdpObject(final ProviderConfig providerConfig, final JsonValue profile) {
+        return json(object(
+                field(SUBJECT, profile.get(providerConfig.getAuthenticationId()).asString()),
+                field(ENABLED, true),
+                field(SCOPE, providerConfig.getScope()),
+                field(DATE_COLLECTED, DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC).now()),
+                field(RAW_PROFILE, profile.getObject())));
     }
 
     private ProviderConfigMapper() {

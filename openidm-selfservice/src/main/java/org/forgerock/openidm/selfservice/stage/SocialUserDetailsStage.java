@@ -19,10 +19,17 @@ package org.forgerock.openidm.selfservice.stage;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.buildIdpObject;
 import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.newArray;
 import static org.forgerock.openidm.selfservice.util.RequirementsBuilder.oneOf;
 import static org.forgerock.selfservice.stages.CommonStateFields.EMAIL_FIELD;
 import static org.forgerock.selfservice.stages.CommonStateFields.USER_FIELD;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import javax.inject.Inject;
 
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
@@ -37,22 +44,12 @@ import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.selfservice.impl.PropertyMappingService;
 import org.forgerock.openidm.sync.PropertyMapping;
 import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.selfservice.util.RequirementsBuilder;
+
 import org.forgerock.selfservice.core.ProcessContext;
 import org.forgerock.selfservice.core.ProgressStage;
 import org.forgerock.selfservice.core.StageResponse;
 import org.forgerock.selfservice.core.annotations.SelfService;
-import org.forgerock.openidm.selfservice.util.RequirementsBuilder;
-
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
-
-import javax.inject.Inject;
-
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.slf4j.Logger;
@@ -195,16 +192,8 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         }
         final ProviderConfig providerConfig = getProviderConfig(providerName, config.getProviders());
         final JsonValue rawProfile = providerHttpClient.getProfile(code, redirectUri);
-
-        DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm'Z'");
-        df.setTimeZone(TimeZone.getTimeZone("UTC"));
-        context.putState(IDP_DATA_OBJECT, json(object(
-                field(providerName, object(
-                        field("subject", rawProfile.get(providerConfig.getAuthenticationId()).asString()),
-                        field("enabled", true),
-                        field("dateCollected", df.format(new Date())),
-                        field("rawProfile", rawProfile)
-                )))).getObject());
+        context.putState(IDP_DATA_OBJECT,
+                json(object(field(providerName, buildIdpObject(providerConfig, rawProfile).getObject()))));
 
         final JsonValue commonFormat = normalizeProfile(rawProfile, providerConfig);
         return mappingService.apply(commonFormat, context.getRequestContext());

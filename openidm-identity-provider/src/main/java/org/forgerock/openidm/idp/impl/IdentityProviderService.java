@@ -26,6 +26,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
+import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.buildIdpObject;
 import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toJsonValue;
 import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toProviderConfig;
 
@@ -108,10 +109,6 @@ public class IdentityProviderService implements SingletonResourceProvider {
 
     /** Constant unsupported exception for 501 response to unimplemented methods */
     private static final ResourceException NOT_SUPPORTED = new NotSupportedException("Operation is not implemented");
-
-    private static final String RAW_PROFILE = "rawProfile";
-    private static final String SUB = "subject";
-    private static final String ENABLED = "enabled";
 
     /** Transformation function to remove client secret */
     public static final Function<JsonValue, JsonValue> withoutClientSecret =
@@ -321,12 +318,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
                 .getProfile(
                         content.get(OAuthHttpClient.CODE).required().asString(),
                         content.get(OAuthHttpClient.REDIRECT_URI).required().asString());
-        return newActionResponse(
-                json(object(
-                        field(RAW_PROFILE, profile.getObject()),
-                        field(ENABLED, true),
-                        field(SUB, profile.get(providerConfig.getAuthenticationId()).asString()))))
-                .asPromise();
+        return newActionResponse(buildIdpObject(providerConfig, profile)).asPromise();
     }
 
     @Override
