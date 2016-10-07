@@ -1168,7 +1168,8 @@
                     "nativeType" : "JAVA_TYPE_GUARDEDSTRING",
                     "flags" : [
                         "NOT_RETURNED_BY_DEFAULT"
-                    ]
+                    ],
+                    "runAsUser" : true
                 },
                 "departmentNumber" : {
                     "type" : "array",
