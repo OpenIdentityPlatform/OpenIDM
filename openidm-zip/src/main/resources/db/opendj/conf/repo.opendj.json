@@ -43,44 +43,44 @@
     "credential-internaluser-query": {
       "_queryFilter": "/_id eq \"${username}\""
     },
-    "find-by-id": {
-      "_queryFilter": "/_id eq \"${id}\""
-    },
     "get-by-field-value": {
       "_queryFilter": "/${field} eq \"${value}\""
     },
     "for-userName":	{
       "_queryFilter": "/userName eq \"${uid}\""
     },
-    "get-users-of-direct-role": {
-      "_queryFilter": "/roles eq \"${role}\""
-    },
     "query-all": {
       "_queryFilter": "true"
     },
-    "query-all-count": {
-      "_queryFilter": "true"
-    },
-    "get-managed-users": {
-      "_queryFilter": "true"
-    },
-    "get-managed-users-count": {
-      "_queryFilter": "true"
-    },
-    "get-managed-users-filtered": {
-      "_queryFilter": "/userName sw \"${userName}\" AND /mail sw \"${mail}\" AND /givenName sw \"${givenName}\" AND /sn sw \"${sn}\" AND /accountStatus sw \"${accountStatus}\""
-    },
-    "get-managed-users-filtered-count": {
-      "_queryFilter": "/userName sw \"${userName}\" AND /mail sw \"${mail}\" AND /givenName sw \"${givenName}\" AND /sn sw \"${sn}\" AND /accountStatus sw \"${accountStatus}\""
-    },
     "links-for-firstId": {
-      "_queryFilter": "/linkType eq \"${linkType}\" AND /firstid = \"${firstId}\""
-    },
-    "links-for-secondId": {
-      "_queryFilter": "/linkType eq \"${linkType}\" AND /secondid = \"${secondId}\""
+      "_queryFilter": "/linkType eq \"${linkType}\" AND /firstId = \"${firstId}\""
     },
     "links-for-linkType": {
       "_queryFilter": "/linkType eq \"${linkType}\""
+    },
+    "scan-tasks": {
+      "_queryFilter": "${property} lt ${condition.before} and !(${taskState.completed} pr)"
+    },
+    "get-recons": {
+      "_queryFilter": "/entryType eq \"summary\"",
+      "_fields": "reconId,mapping,activitydate",
+      "_sortKeys": "-activitydate"
+    },
+    "get-notifications-for-user": {
+      "_queryFilter": "/receiverId eq \"${userId}\"",
+      "_sortKeys": "-createDate"
+    },
+    "query-cluster-failed-instances": {
+      "_queryFilter": "/timestamp le ${timestamp} and (/state eq \"1\" or /state eq \"2\")"
+    },
+    "query-cluster-instances": {
+      "_queryFilter": "true"
+    },
+    "query-cluster-events": {
+      "_queryFilter": "/instanceId eq \"${instanceId}\""
+    },
+    "find-relationships-for-resource": {
+      "_queryFilter": "/firstId eq \"${fullResourceId}\" and /firstPropertyName eq \"${resourceFieldName}\" and /secondId eq \"${fullResourceId}\" and /secondPropertyName eq \"${resourceFieldName}\""
     }
   },
   "rest2LdapOptions": {
