@@ -105,6 +105,8 @@ public class Activator implements BundleActivator {
                     return;
                 }
             }
+
+            context.registerService(EmbeddedDirectoryServer.class.getName(), embeddedServer, null);
         }
 
         logger.info("OpenDJ bundle started");

@@ -41,6 +41,8 @@ import org.forgerock.opendj.rest2ldap.AuthenticatedConnectionContext;
 import org.forgerock.opendj.rest2ldap.Resource;
 import org.forgerock.opendj.rest2ldap.Rest2Ldap;
 import org.forgerock.opendj.rest2ldap.Rest2LdapJsonConfigurator;
+import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
+import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
@@ -55,6 +57,7 @@ import org.forgerock.util.Options;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
 import org.forgerock.util.promise.Promise;
+import org.omg.CORBA.INTERNAL;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -89,6 +92,9 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
      * Used for parsing the configuration
      */
     private EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
+
+    @Reference
+    private EmbeddedDirectoryServer embeddedDirectoryServer;
 
     /**
      * Router registry used to register additional routes while we can't support /repo/*.
@@ -302,6 +308,19 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
         this.typeHandlers = typeHandlers;
     }
 
+    private Connection getLdapConnection() throws InternalServerErrorException {
+        try {
+            if (embeddedDirectoryServer != null) {
+                return embeddedDirectoryServer.getInternalConnection();
+            } else {
+                return ldapFactory.getConnection();
+            }
+        } catch (EmbeddedDirectoryServerException|LdapException e) {
+            logger.error("Failed to acquire connection", e);
+            throw new InternalServerErrorException("Failed to acquire connection", e);
+        }
+    }
+
     /**
      * Function wrapper that passes in a context containing a {@link AuthenticatedConnectionContext}
      * and closes the connection after the function promise is complete.
@@ -317,7 +336,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
         try {
             // must check context before acquiring a connection
             Reject.checkNotNull(context);
-            final Connection connection = ldapFactory.getConnection();
+            final Connection connection = getLdapConnection();
             final AuthenticatedConnectionContext authCtx =
                     new AuthenticatedConnectionContext(context, connection);
 
@@ -328,9 +347,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
                     return response;
                 }
             });
-        } catch (LdapException e) {
-            logger.error("Failed acquire LDAP connection", e);
-            return new InternalServerErrorException("Failed to acquire LDAP connection", e).asPromise();
+        } catch (InternalServerErrorException e) {
+            return e.asPromise();
         }
     }
 
