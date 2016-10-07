@@ -1,0 +1,30 @@
+{
+  "type" : "object",
+  "properties" : {
+    "subject" : {
+      "type" : "string",
+      "description" : "Identifier that is used to identity a user on an Identity Provider."
+    },
+    "enabled" : {
+      "type" : "boolean",
+      "description" : "Flag indicating if Identity Provider authentication is enabled for user."
+    },
+    "scope" : {
+      "type" : "array",
+      "items" : {
+        "type" : "string"
+      },
+      "uniqueItems" : true,
+      "description" : "Scopes that the user has accepted."
+    },
+    "dateCollected" : {
+      "type" : "string",
+      "format" : "date",
+      "description" : "The timestamp when a user has accepted the scopes and when their profile was retrieved from the Identity Provider."
+    },
+    "rawProfile" : {
+      "type" : "object",
+      "description" : "Raw profile that includes all attributes from an Identity Provider."
+    }
+  }
+}

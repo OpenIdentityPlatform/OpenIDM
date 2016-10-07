@@ -1,0 +1,22 @@
+{
+  "type" : "object",
+  "required" : [
+    "provider",
+    "code",
+    "redirect_uri"
+  ],
+  "properties" : {
+    "provider" : {
+      "type" : "string",
+      "description" : "Identity Provider name from which the profile must be retrieved."
+    },
+    "code" : {
+      "type" : "string",
+      "description" : "Authorization code from Identity Provider."
+    },
+    "redirect_uri" : {
+      "type" : "string",
+      "description" : "URI to which the IdentityProvider will redirect the response."
+    }
+  }
+}
