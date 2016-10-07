@@ -25,6 +25,10 @@ define([
         "resourceValidationError" : {
             msg: "config.messages.AdminMessages.resourceValidationError",
             type: "error"
+        },
+        "socialAuthenticationFailed" : {
+            msg: "config.messages.AdminMessages.socialAuthenticationFailed",
+            type: "error"
         }
     };
 
