@@ -184,7 +184,8 @@
                 "unclaimedTask" : "Task has been unclaimed.",
                 "startedProcess" : "Process has been started.",
                 "userValidationError": "Unable to update user. Validation Failed. Reason: __validationErrors__",
-                "resourceValidationError": "Unable to update resource. Validation Failed.<br/>Reason(s):<br/> __validationErrors__"
+                "resourceValidationError": "Unable to update resource. Validation Failed.<br/>Reason(s):<br/> __validationErrors__",
+                "socialAuthenticationFailed" : "Register with your __provider__ account first"
             },
             "ConnectorMessages" : {
                 "connectorSaved" : "Connector has been validated and saved.",

@@ -22,8 +22,17 @@ define([
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/CookieHelper",
-    "org/forgerock/openidm/ui/common/util/AMLoginUtils"
-], function (_, UserModel, eventManager, AbstractConfigurationAware, serviceInvoker, conf, cookieHelper, amLoginUtils) {
+    "org/forgerock/openidm/ui/common/util/AMLoginUtils",
+    "org/forgerock/openidm/ui/common/util/Constants"
+], function (_,
+             UserModel,
+             eventManager,
+             AbstractConfigurationAware,
+             serviceInvoker,
+             conf,
+             cookieHelper,
+             amLoginUtils,
+             Constants) {
     var obj = new AbstractConfigurationAware();
 
     obj.login = function(params, successCallback, errorCallback) {
@@ -41,10 +50,11 @@ define([
         } else if (_.has(params, "authToken") && _.has(params, "provider")) {
             return UserModel.tokenLogin(params.authToken, params.provider).then(successCallback, function (xhr) {
                 var reason = xhr.responseJSON.reason;
+
                 if (reason === "Unauthorized") {
-                    reason = "authenticationFailed";
-                }
-                if (errorCallback) {
+                    eventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, {"key" : "socialAuthenticationFailed", "provider" : params.provider});
+                    errorCallback();
+                } else {
                     errorCallback(reason);
                 }
             });
