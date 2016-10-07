@@ -15,6 +15,11 @@
  */
 package org.forgerock.openidm.idp.impl;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
@@ -34,6 +39,11 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.http.Client;
@@ -66,16 +76,21 @@ import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 
 /**
  * Service used to store configuration about the various
  * identity providers. This will be used to inject the configuration
  * into other areas such as the AuthenticationService.
  */
+@SingletonProvider(@Handler(
+        id = "identityProviderService:0",
+        title = "Identity Provider Service",
+        description = "Service that handles Identity Provider configuration",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = IdentityProviderService.IdentityProviderServiceSchemaWithNoSecret.class)))
 @Component(name = IdentityProviderService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service({ IdentityProviderService.class, SingletonResourceProvider.class })
 @Properties({
@@ -117,6 +132,29 @@ public class IdentityProviderService implements SingletonResourceProvider {
                     return value.getObject();
                 }
             };
+
+    /**
+     * Handles schema for provider configurations without returning
+     * the "client_secret" property. Needed for API Descriptors.
+     */
+    static class IdentityProviderServiceSchemaWithNoSecret {
+
+        @JsonIgnoreProperties("client_secret")
+        private class ProviderConfigWithoutSecret extends ProviderConfig {
+            // used to ignore client_secret in a provider configuration
+        }
+
+        @JsonProperty
+        private List<ProviderConfigWithoutSecret> providers;
+    }
+
+    /**
+     * Handles schema for {@link ProviderConfig} for API Descriptors.
+     */
+    static class IdentityProviderServiceSchema {
+        @JsonProperty
+        private List<ProviderConfig> providers;
+    }
 
     private enum Action { availableProviders, getProfile }
 
@@ -230,22 +268,9 @@ public class IdentityProviderService implements SingletonResourceProvider {
         try {
             switch (actionRequest.getActionAsEnum(Action.class)) {
             case availableProviders:
-                return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
+                return getAvailableProviders();
             case getProfile:
-                final ProviderConfig providerConfig =
-                        getIdentityProvider(actionRequest.getContent().get(OAuthHttpClient.PROVIDER).required().
-                                asString());
-                final JsonValue profile = new OAuthHttpClient(getIdentityProvider(actionRequest.getContent()
-                        .get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
-                        .getProfile(
-                                actionRequest.getContent().get(OAuthHttpClient.CODE).required().asString(),
-                                actionRequest.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString());
-                return newActionResponse(
-                            json(object(
-                                field(RAW_PROFILE, profile.getObject()),
-                                field(ENABLED, true),
-                                field(SUB, profile.get(providerConfig.getAuthenticationId()).asString()))))
-                        .asPromise();
+                return getProfile(actionRequest.getContent());
             default:
                 return new BadRequestException("Not a supported Action").asPromise();
             }
@@ -258,11 +283,67 @@ public class IdentityProviderService implements SingletonResourceProvider {
         }
     }
 
+    @org.forgerock.api.annotations.Action(operationDescription =
+    @Operation(
+            description = "Retrieves all Identity Provider Configurations that are supported.",
+            errors = {
+                    @ApiError(
+                            id = "badRequest",
+                            code = 400,
+                            description = "Indicates that the request could not be understood by "
+                                    + "the resource due to malformed syntax.")
+            }),
+            name = "availableProviders",
+            response = @Schema(fromType = IdentityProviderServiceSchema.class))
+    public Promise<ActionResponse, ResourceException> getAvailableProviders() {
+        return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
+    }
+
+    @org.forgerock.api.annotations.Action(operationDescription =
+    @Operation(
+            description = "Retrieves a user's profile from an Identity Provider.",
+            errors = {
+                    @ApiError(
+                            id = "badRequest",
+                            code = 400,
+                            description = "Indicates that the request could not be understood by "
+                                    + "the resource due to malformed syntax.")
+            }),
+            name = "getProfile",
+            request = @Schema(schemaResource = "getProfileRequest.json"),
+            response = @Schema(schemaResource = "getProfileResponse.json"))
+    public Promise<ActionResponse, ResourceException> getProfile(final JsonValue content)
+            throws HttpApplicationException, ResourceException {
+        final ProviderConfig providerConfig =
+                getIdentityProvider(content.get(OAuthHttpClient.PROVIDER).required().asString());
+        final JsonValue profile = new OAuthHttpClient(
+                getIdentityProvider(content.get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
+                .getProfile(
+                        content.get(OAuthHttpClient.CODE).required().asString(),
+                        content.get(OAuthHttpClient.REDIRECT_URI).required().asString());
+        return newActionResponse(
+                json(object(
+                        field(RAW_PROFILE, profile.getObject()),
+                        field(ENABLED, true),
+                        field(SUB, profile.get(providerConfig.getAuthenticationId()).asString()))))
+                .asPromise();
+    }
+
     @Override
     public Promise<ResourceResponse, ResourceException> patchInstance(Context context, PatchRequest patchRequest) {
         return NOT_SUPPORTED.asPromise();
     }
 
+    @org.forgerock.api.annotations.Read(operationDescription =
+    @Operation(
+            description = "Retrieves all Identity Provider configurations with client-secrets removed.",
+            errors = {
+                    @ApiError(
+                            id = "badRequest",
+                            code = 400,
+                            description = "Indicates that the request could not be understood by "
+                                    + "the resource due to malformed syntax.")
+            }))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest readRequest) {
         return newResourceResponse(null, null,
