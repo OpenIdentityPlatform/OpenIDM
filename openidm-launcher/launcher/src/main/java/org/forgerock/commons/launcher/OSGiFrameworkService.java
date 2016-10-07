@@ -11,11 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2012-2015 ForgeRock AS.
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.commons.launcher;
 
+import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValueFunctions.deepTransformBy;
 import static org.kohsuke.args4j.ExampleMode.ALL;
 import static org.kohsuke.args4j.ExampleMode.REQUIRED;
 
@@ -31,7 +33,6 @@ import java.net.URI;
 import java.net.URL;
 import java.net.URLDecoder;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.Enumeration;
@@ -44,9 +45,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import org.codehaus.plexus.util.DirectoryScanner;
-import org.forgerock.json.JsonException;
-import org.forgerock.json.JsonTransformer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.util.Function;
 import org.json.simple.parser.JSONParser;
 import org.kohsuke.args4j.CmdLineException;
 import org.kohsuke.args4j.CmdLineParser;
@@ -58,8 +59,6 @@ import org.osgi.framework.Constants;
 /**
  * An OSGiDaemonBean starts the Embedded OSGi
  * {@link org.osgi.framework.launch.Framework}.
- * 
- * @author Laszlo Hordos
  */
 public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
 
@@ -128,7 +127,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
      */
     private JsonValue launcherConfiguration = null;
 
-    private final JsonTransformer transformer;
+    private final Function<JsonValue, JsonValue, JsonValueException> transformer;
 
     private final PropertyAccessor propertyAccessor;
 
@@ -163,11 +162,17 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
             }
         };
 
-        transformer = new JsonTransformer() {
-            public void transform(JsonValue value) throws JsonException {
-                if (null != value && value.isString()) {
-                    value.setObject(ConfigurationUtil.substVars(value.asString(), propertyAccessor));
+        transformer = new Function<JsonValue, JsonValue, JsonValueException>() {
+            public JsonValue apply(JsonValue value) throws JsonValueException {
+                if (value == null) {
+                    return null;
                 }
+                if (value.isString()) {
+                    return new JsonValue(
+                            ConfigurationUtil.substVars(value.asString(), propertyAccessor),
+                            value.getPointer());
+                }
+                return value;
             }
         };
     }
@@ -365,8 +370,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                                     + Main.class.getResource("/").toString() + "/launcher.json");
                 }
             }
-            launcherConfiguration = new JsonValue((new JSONParser()).parse(input));
-            launcherConfiguration.getTransformers().add(transformer);
+            launcherConfiguration = json(new JSONParser().parse(input)).as(deepTransformBy(transformer));
         } catch (Exception e) {
             throw new RuntimeException(e.getMessage(), e);
         } finally {
@@ -474,8 +478,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
 
     public JsonValue getLauncherConfiguration() {
         if (null == launcherConfiguration) {
-            launcherConfiguration = new JsonValue(new HashMap<String, Object>());
-            launcherConfiguration.getTransformers().add(transformer);
+            launcherConfiguration = json(object());
         }
         return launcherConfiguration;
     }
@@ -618,7 +621,7 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                 configurationProperties.clear();
             }
             // Perform variable substitution on properties loaded from other sources.
-            systemProperties = (new JsonValue(props, null, Arrays.asList(transformer))).copy();
+            systemProperties = json(props).as(deepTransformBy(transformer));
         }
 
         // Perform variable substitution on all properties that have been loaded thus far, including those just loaded,
@@ -658,10 +661,9 @@ public class OSGiFrameworkService extends AbstractOSGiFrameworkService {
                     loadPropertyFile(projectDirectory, bootProperties.expect(String.class)
                             .defaultTo(BOOT_PROPERTIES_FILE_VALUE).asString());
             if (props == null)
-                return new HashMap<String, Object>(0);
+                return new HashMap<>(0);
             // Perform variable substitution on specified properties.
-            return (new JsonValue(props, null, Arrays.asList(transformer))).expect(Map.class)
-                    .copy().asMap();
+            return json(props).as(deepTransformBy(transformer)).asMap();
         }
     }
 
