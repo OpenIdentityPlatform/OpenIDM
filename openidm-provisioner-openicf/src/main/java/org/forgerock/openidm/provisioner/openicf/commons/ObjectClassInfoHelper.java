@@ -30,6 +30,8 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.guava.common.base.Predicate;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.crypto.JsonCryptoException;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -70,11 +72,14 @@ public class ObjectClassInfoHelper {
      */
     private final static Logger logger = LoggerFactory.getLogger(ObjectClassInfoHelper.class);
 
+    private static final String RUN_AS_USER = "runAsUser";
+    
     private final ObjectClass objectClass;
     private final String nameAttribute;
     private final Set<AttributeInfoHelper> attributes;
     private final Set<String> attributesReturnedByDefault;
     private final JsonValue properties;
+    private final Predicate<String> attributesToRunAsUser;
 
     /**
      * Creates a new {@link ObjectClassInfoHelper}.
@@ -91,6 +96,12 @@ public class ObjectClassInfoHelper {
         this.attributes = attributes;
         this.attributesReturnedByDefault = attributesReturnedByDefault;
         this.properties = properties;
+        this.attributesToRunAsUser = new Predicate<String>() {
+            @Override
+            public boolean apply(String attribute) {
+                return isRunAsAttr(attribute);
+            }  
+        };
     }
 
     /**
@@ -353,7 +364,7 @@ public class ObjectClassInfoHelper {
     	} else {
         	// If the patch operation is replace or increment, update the value
         	JsonValue beforeValue = before.get(field);
-        	if (beforeValue != null && !beforeValue.isNull()) {
+        	if (beforeValue != null && beforeValue.isNotNull()) {
         		patchedContent.put(field, before.get(field).getObject());
         	}
         	// Apply the patch operations to an object which contains only the attributes being patched
@@ -546,5 +557,25 @@ public class ObjectClassInfoHelper {
             }
         }
         throw new BadRequestException("Target does not support attribute " + attribute.getName());
+    }
+
+    /**
+     * Get the subset of attributes from the specified Set which require re-authentication
+     *
+     * @param attributes the attributes being updated
+     * @return Set of attribute names which require re-authentication
+     */
+    public Set<String> getRunAsAttrNames(Set<String> attributes) {
+        return FluentIterable.from(attributes).filter(attributesToRunAsUser).toSet();
+    }
+
+    /**
+     * Check if the specified attribute requires re-authentication
+     *
+     * @param attribute the attribute to check
+     * @return true if the attribute requires re-authentication
+     */    
+    public boolean isRunAsAttr(String attribute) {
+        return getProperties().get(attribute).isNotNull() && getProperties().get(attribute).get(RUN_AS_USER).defaultTo(false).asBoolean();        
     }
 }
