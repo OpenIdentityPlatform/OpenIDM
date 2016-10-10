@@ -1,4 +1,4 @@
-package org.forgerock.openidm.repo.opendj.impl;/*
+/*
  * The contents of this file are subject to the terms of the Common Development and
  * Distribution License (the License). You may not use this file except in compliance with the
  * License.
@@ -13,20 +13,26 @@ package org.forgerock.openidm.repo.opendj.impl;/*
  *
  * Copyright 2015-2016 ForgeRock AS.
  */
+package org.forgerock.openidm.repo.opendj.impl;
 
+import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.resource.Responses.newActionResponse;
+
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
-import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
+import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
@@ -44,6 +50,7 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.openidm.router.RouteEntry;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.forgerock.util.Function;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
@@ -57,8 +64,19 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 public abstract class AbstractDJTypeHandler implements TypeHandler {
     final static Logger logger = LoggerFactory.getLogger(AbstractDJTypeHandler.class);
 
+    private static final String ID = "_id";
+    private static final String FIELDS = "_fields";
+    private static final String SORT_KEYS = "_sortKeys";
+    private static final String QUERY_FILTER = "_queryFilter";
+    private static final String OPERATION = "operation";
+    private static final String DELETE_OPERATION = "DELETE";
+    private static final String ACTION_COMMAND = "command";
+
     /** Configured queries for this type */
     protected final Map<String, JsonValue> queries;
+
+    /** Configured commands for this type */
+    protected final Map<String, JsonValue> commands;
 
     protected static final ObjectMapper mapper = new ObjectMapper();
 
@@ -87,18 +105,49 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
      * @param routeEntry The entry on the IDM router for this handler
      * @param config Configuration specific to this type handler
      * @param queries Configured queries for this resource
+     * @param commands Configured commands for this resource
      */
-    AbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final RouteEntry routeEntry, final JsonValue config, final JsonValue queries) {
+    AbstractDJTypeHandler(final ResourcePath resourcePath, final RequestHandler repoHandler, final RouteEntry routeEntry, final JsonValue config, final JsonValue queries, final JsonValue commands) {
         this.routeEntry = routeEntry;
         this.handler = repoHandler;
         this.resourcePath = resourcePath;
 
         this.queries = new HashMap<>();
-        for (String queryId : queries.keys()) {
-            this.queries.put(queryId, queries.get(queryId));
+        for (final String queryId : queries.keys()) {
+            final JsonValue query = queries.get(queryId);
+            validateQuery(queryId, query);
+            this.queries.put(queryId, query);
+        }
+
+        this.commands = new HashMap<>();
+        if (commands.isNotNull()) {
+            for (final String commandId : commands.keys()) {
+                final JsonValue command = commands.get(commandId);
+                validateCommand(commandId, command);
+                this.commands.put(commandId, command);
+            }
         }
     }
 
+    private void validateQuery(final String queryId, final JsonValue query) {
+        if (isNullOrEmpty(query.get(QUERY_FILTER).asString())) {
+            throw new IllegalStateException("query missing '" + QUERY_FILTER + "' field: " + queryId);
+        }
+    }
+
+    private void validateCommand(final String commandId, final JsonValue command) {
+        final String operation = command.get(OPERATION).asString();
+        if (isNullOrEmpty(operation)) {
+            throw new IllegalStateException("command missing '" + OPERATION + "' field: " + commandId);
+        }
+        if (DELETE_OPERATION.equalsIgnoreCase(operation)) {
+            if (isNullOrEmpty(command.get(QUERY_FILTER).asString())) {
+                throw new IllegalStateException("command missing '" + QUERY_FILTER + "' field: " + commandId);
+            }
+        } else {
+            throw new IllegalStateException("command operation '" + operation + "' unsupported: " + commandId);
+        }
+    }
 
     /**
      * Transform a JsonValue prior to inputting it in to OpenDJ
@@ -150,7 +199,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
      * @return A new {@link QueryRequest} with a populated queryFilter or unchanged {@code request}
      */
     protected QueryRequest normalizeQueryRequest(final QueryRequest request) throws BadRequestException {
-        if (request.getQueryId() == null || request.getQueryId().trim().isEmpty()) {
+        if (isNullOrEmpty(request.getQueryId())) {
             return request;
         }
         final JsonValue queryConfig = queries.get(request.getQueryId());
@@ -161,7 +210,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
         queryRequest.setQueryId(null);
 
         // process sort keys
-        final JsonValue sortKeys = queryConfig.get("_sortKeys");
+        final JsonValue sortKeys = queryConfig.get(SORT_KEYS);
         if (sortKeys.isString()) {
             try {
                 queryRequest.addSortKey(sortKeys.asString().split(","));
@@ -174,10 +223,10 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
         }
 
         // process fields
-        final JsonValue fields = queryConfig.get("_fields");
+        final JsonValue fields = queryConfig.get(FIELDS);
         if (fields.isString()) {
             try {
-                queryRequest.addSortKey(fields.asString().split(","));
+                queryRequest.addField(fields.asString().split(","));
             } catch (final IllegalArgumentException e) {
                 throw new BadRequestException("The value '" + fields + "' for parameter '_fields' could not be"
                         + " parsed as a comma separated list of fields");
@@ -187,7 +236,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
         }
 
         // process queryFilter
-        final String tokenizedFilter = queryConfig.get("_queryFilter").asString();
+        final String tokenizedFilter = queryConfig.get(QUERY_FILTER).asString();
 
         final TokenHandler handler = new TokenHandler();
         final List<String> tokens = handler.extractTokens(tokenizedFilter);
@@ -222,12 +271,70 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
 
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(final Context context, final ActionRequest request) {
-        return handler.handleAction(context, prefixResourcePath(request)).then(new Function<ActionResponse, ActionResponse, ResourceException>() {
-            @Override
-            public ActionResponse apply(final ActionResponse value) throws ResourceException {
-                return Responses.newActionResponse(outputTransformer(value.getJsonContent()));
+        if (ACTION_COMMAND.equalsIgnoreCase(request.getAction())) {
+            final String commandId = request.getAdditionalParameters().get("commandId");
+            if (isNullOrEmpty(commandId)) {
+                return new BadRequestException("commandId parameter is required").asPromise();
             }
-        });
+            final JsonValue command = commands.get(commandId);
+            if (command == null) {
+                return new BadRequestException("commandId parameter unknown: " + commandId).asPromise();
+            }
+            final String operation = command.get(OPERATION).asString();
+            if (DELETE_OPERATION.equalsIgnoreCase(operation)) {
+                return handleDeleteCommand(command, request);
+            } else {
+                return new InternalServerErrorException("command operation '" + operation + "' unsupported: "
+                        + commandId).asPromise();
+            }
+        } else {
+            return handler.handleAction(context, prefixResourcePath(request)).then(
+                    new Function<ActionResponse, ActionResponse, ResourceException>() {
+                        @Override
+                        public ActionResponse apply(final ActionResponse value) throws ResourceException {
+                            return Responses.newActionResponse(outputTransformer(value.getJsonContent()));
+                        }
+                    });
+        }
+    }
+
+    /**
+     * Handles a delete-command, which deletes multiple records at once.
+     *
+     * @param command Command config
+     * @param request Action request
+     * @return Response containing number of records deleted, or error response
+     */
+    private Promise<ActionResponse, ResourceException> handleDeleteCommand(final JsonValue command, final ActionRequest request) {
+        // query for identifiers to delete
+        final QueryRequest queryRequest = Requests.newQueryRequest(request.getResourcePath());
+        queryRequest.addField(ID);
+        queryRequest.setQueryFilter(QueryFilters.parse(command.get(QUERY_FILTER).asString()));
+
+        final List<ResourceResponse> results = new ArrayList<>();
+        final QueryResourceHandler handler = new QueryResourceHandler() {
+            @Override
+            public boolean handleResource(final ResourceResponse resourceResponse) {
+                results.add(resourceResponse);
+                return true;
+            }
+        };
+        try {
+            handleQuery(new RootContext(), queryRequest, handler).getOrThrowUninterruptibly();
+
+            // delete each result by identifier
+            for (final ResourceResponse result : results) {
+                final DeleteRequest deleteRequest =
+                        Requests.newDeleteRequest(request.getResourcePath(), result.getId());
+                handleDelete(new RootContext(), deleteRequest).getOrThrow();
+            }
+            // return count of deleted records (See org.forgerock.openidm.repo.jdbc.impl.query.TableQueries.command())
+            return newActionResponse(json(results.size())).asPromise();
+        } catch (ResourceException e) {
+            return e.asPromise();
+        } catch (Exception e) {
+            return new InternalServerErrorException("DELETE command failed", e).asPromise();
+        }
     }
 
     @Override
@@ -264,11 +371,11 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
             Map<String, Object> obj = inputTransformer(createRequest.getContent()).asMap();
 
             // Set id to a new UUID if none is specified (_action=create)
-            if (Strings.isNullOrEmpty(createRequest.getNewResourceId())) {
+            if (isNullOrEmpty(createRequest.getNewResourceId())) {
                 createRequest.setNewResourceId(UUID.randomUUID().toString());
             }
 
-            obj.put("_id", createRequest.getNewResourceId());
+            obj.put(ID, createRequest.getNewResourceId());
 
             /*
              * XXX - all nulls are coming in as blank Strings. INVESTIGATE
@@ -280,7 +387,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
                 Map.Entry<String, Object> entry = iter.next();
                 Object val = entry.getValue();
 
-                if (val instanceof String && Strings.isNullOrEmpty((String) val)) {
+                if (val instanceof String && isNullOrEmpty((String) val)) {
                     iter.remove();
                 }
             }

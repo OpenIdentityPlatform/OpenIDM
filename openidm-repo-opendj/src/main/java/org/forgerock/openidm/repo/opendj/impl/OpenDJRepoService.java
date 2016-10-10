@@ -1,3 +1,18 @@
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2016 ForgeRock AS.
+ */
 package org.forgerock.openidm.repo.opendj.impl;
 
 import java.util.ArrayList;
@@ -230,7 +245,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
 
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
-                final TypeHandler typeHandler = new GenericDJTypeHandler(path, repoHandler, null, handlerConfig, queries);
+                final TypeHandler typeHandler = new GenericDJTypeHandler(path, repoHandler, null, handlerConfig,
+                        queries, config.get("commands"));
 
             /*
              * Since we cannot simply listen on /repo/* while we do not have all objects mapped/implemented
@@ -257,7 +273,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
                 final JsonValue handlerConfig = explicitMappings.get(type);
                 // The path to this resource on the rest2ldap router
                 final ResourcePath path = new ResourcePath(type.split("/"));
-                final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, null, handlerConfig, queries);
+                final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, null, handlerConfig,
+                        queries, config.get("commands"));
 
             /*
              * Since we cannot simply listen on /repo/* while we do not have all objects mapped/implemented

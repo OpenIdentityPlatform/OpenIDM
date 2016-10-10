@@ -83,6 +83,12 @@
       "_queryFilter": "/firstId eq \"${fullResourceId}\" and /firstPropertyName eq \"${resourceFieldName}\" and /secondId eq \"${fullResourceId}\" and /secondPropertyName eq \"${resourceFieldName}\""
     }
   },
+  "commands" : {
+    "delete-mapping-links" : {
+      "_queryFilter": "/linkType eq \"${mapping}\"",
+      "operation": "DELETE"
+    }
+  },
   "rest2LdapOptions": {
     "readOnUpdatePolicy": "controls",
     "useSubtreeDelete": false,
