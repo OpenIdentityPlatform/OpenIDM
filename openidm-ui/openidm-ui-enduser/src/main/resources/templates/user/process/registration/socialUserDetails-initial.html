@@ -12,19 +12,23 @@
 
     {{> process/_coreProfileDetails}}
 
-    <div class="form-group">
-        <label class="sr-only separator" for="input-password">
+    <div class="form-group float-label">
+        <label class="sr-only" for="input-password">
             <span>{{t 'common.user.password'}}</span>
         </label>
-        <input type="password" placeholder="{{t 'common.user.password'}}" id="input-password" name="user.password" class="form-control input-lg"
+        <input class="form-control input-lg" type="password" placeholder="{{t 'common.user.password'}}" id="input-password" name="user.password"
             data-validation-dependents="input-confirmPassword" data-validator-event="keyup" data-validator="required" />
     </div>
 
-    <div class="form-group">
-        <label class="sr-only separator" for="input-confirmPassword">
+    <div class="form-group float-label">
+        <label class="sr-only" for="input-confirmPassword">
             <span>{{t 'common.user.confirmPassword'}}</span>
         </label>
-        <input type="password" placeholder="{{t 'common.user.confirmPassword'}}" id="input-confirmPassword" class="form-control input-lg" data-validator="passwordConfirm" passwordField="input-password" data-validator-event="keyup" required />
+        <input class="form-control input-lg" type="password" placeholder="{{t 'common.user.confirmPassword'}}" id="input-confirmPassword" data-validator="passwordConfirm" passwordField="input-password" data-validator-event="keyup" required />
+    </div>
+
+    <div class="form-group form-group-checkbox">
+    {{> profile/_preferences}}
     </div>
 
     <input type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase" value="{{t 'common.form.save'}}" />
