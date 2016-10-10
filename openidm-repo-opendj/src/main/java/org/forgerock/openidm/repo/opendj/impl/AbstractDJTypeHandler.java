@@ -11,21 +11,15 @@ package org.forgerock.openidm.repo.opendj.impl;/*
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
-import java.io.IOException;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 
-import org.apache.commons.lang3.StringUtils;
 import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -33,7 +27,6 @@ import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryRequest;
@@ -56,7 +49,6 @@ import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
@@ -151,67 +143,68 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     }
 
     /**
-     * If the request has a queryId translate it to the appropriate queryFilter
-     * or queryExpression and place in request.
+     * If the request has a queryId translate it to an appropriate queryFilter and place in request, otherwise
+     * return request unchanged.
      *
-     * @param request
-     *
-     * @return A new {@link QueryRequest} with a populated queryFilter or queryExpression
+     * @param request Query request
+     * @return A new {@link QueryRequest} with a populated queryFilter or unchanged {@code request}
      */
-    protected QueryRequest populateQuery(final QueryRequest request) throws BadRequestException {
-        // We only care if there is a queryId
-        if (StringUtils.isBlank(request.getQueryId())) {
+    protected QueryRequest normalizeQueryRequest(final QueryRequest request) throws BadRequestException {
+        if (request.getQueryId() == null || request.getQueryId().trim().isEmpty()) {
             return request;
         }
-
-        final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
-
-        /*
-         * FIXME - we need more configurable queries
-         */
-
-        if (queries.containsKey(queryRequest.getQueryId())) {
-            final JsonValue queryConfig = queries.get(queryRequest.getQueryId());
-
-            /*
-             * Process fields
-             */
-
-            final JsonValue fields = queryConfig.get("_fields");
-
-            if (!fields.isNull()) {
-                // TODO - Can we do this in JsonValue without asString()?
-                queryRequest.addField(fields.asString().split(","));
-            }
-
-            /*
-             * Process queryFilter
-             */
-
-            final String tokenizedFilter = queryConfig.get("_queryFilter").asString();
-
-            final TokenHandler handler = new TokenHandler();
-            final List<String> tokens = handler.extractTokens(tokenizedFilter);
-            Map<String, String> replacements = new HashMap<>();
-
-            for (String token : tokens) {
-                final String param = queryRequest.getAdditionalParameter(token);
-
-                if (param != null) {
-                    replacements.put(token, param);
-                } else {
-                    throw new BadRequestException("Query expected additional parameter " + token);
-                }
-            }
-
-            final String detokenized = handler.replaceTokensWithValues(tokenizedFilter, replacements);
-
-            queryRequest.setQueryFilter(QueryFilters.parse(detokenized));
-
-            return queryRequest;
-        } else {
+        final JsonValue queryConfig = queries.get(request.getQueryId());
+        if (queryConfig == null) {
             throw new BadRequestException("Requested query " + request.getQueryId() + " does not exist");
         }
+        final QueryRequest queryRequest = Requests.copyOfQueryRequest(request);
+        queryRequest.setQueryId(null);
+
+        // process sort keys
+        final JsonValue sortKeys = queryConfig.get("_sortKeys");
+        if (sortKeys.isString()) {
+            try {
+                queryRequest.addSortKey(sortKeys.asString().split(","));
+            } catch (final IllegalArgumentException e) {
+                throw new BadRequestException("The value '" + sortKeys + "' for parameter '_sortKeys' could not be"
+                        + " parsed as a comma separated list of sort keys");
+            }
+        } else if (sortKeys.isList()) {
+            queryRequest.addSortKey(sortKeys.asList().toArray(new String[sortKeys.size()]));
+        }
+
+        // process fields
+        final JsonValue fields = queryConfig.get("_fields");
+        if (fields.isString()) {
+            try {
+                queryRequest.addSortKey(fields.asString().split(","));
+            } catch (final IllegalArgumentException e) {
+                throw new BadRequestException("The value '" + fields + "' for parameter '_fields' could not be"
+                        + " parsed as a comma separated list of fields");
+            }
+        } else if (fields.isList()) {
+            queryRequest.addField(fields.asList().toArray(new String[fields.size()]));
+        }
+
+        // process queryFilter
+        final String tokenizedFilter = queryConfig.get("_queryFilter").asString();
+
+        final TokenHandler handler = new TokenHandler();
+        final List<String> tokens = handler.extractTokens(tokenizedFilter);
+        final Map<String, String> replacements = new HashMap<>();
+
+        for (final String token : tokens) {
+            final String param = queryRequest.getAdditionalParameter(token);
+            if (param != null) {
+                replacements.put(token, param);
+            } else {
+                throw new BadRequestException("Query expected additional parameter " + token);
+            }
+        }
+
+        final String detokenized = handler.replaceTokensWithValues(tokenizedFilter, replacements);
+        queryRequest.setQueryFilter(QueryFilters.parse(detokenized));
+        return queryRequest;
     }
 
     final Function<ResourceResponse, ResourceResponse, ResourceException> transformOutput = new Function<ResourceResponse, ResourceResponse, ResourceException>() {
@@ -304,7 +297,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
     public Promise<QueryResponse, ResourceException> handleQuery(final Context context, final QueryRequest _request, final QueryResourceHandler _handler) {
         try {
             // check for a queryId and if so convert it to a queryFilter
-            final QueryRequest queryRequest = populateQuery(_request);
+            final QueryRequest queryRequest = normalizeQueryRequest(_request);
 
             final ResourceException[] exception = new ResourceException[]{};
 
