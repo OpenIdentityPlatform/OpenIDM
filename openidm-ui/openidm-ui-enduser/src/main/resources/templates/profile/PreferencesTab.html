@@ -4,23 +4,7 @@
     <div class="panel-body">
         <label class="control-label col-sm-3">{{t "templates.preferences.emailPref"}}</label>
         <div class="col-sm-7">
-
-            <div class="checkbox">
-                <label>
-                    <input name="preferences.updates" value="true" type="checkbox"{{#if preferences.updates}} checked{{/if}}>
-
-                    {{t "templates.preferences.updates"}}
-                </label>
-            </div>
-
-            <div class="checkbox">
-                <label>
-                    <input name="preferences.marketing" value="true" type="checkbox"{{#if preferences.marketing}} checked{{/if}}>
-
-                    {{t "templates.preferences.marketing"}}
-                </label>
-            </div>
-
+            {{> profile/_preferences}}
         </div>
     </div>
 
@@ -31,5 +15,3 @@
     </div>
 
 </form>
-
-

@@ -18,6 +18,7 @@ define(["jquery", "org/forgerock/commons/ui/user/profile/AbstractUserProfileTab"
 
     var PreferencesView = AbstractUserProfileTab.extend({
         template: "templates/profile/PreferencesTab.html",
+        partials: ["partials/profile/_preferences.html"],
 
         /**
          Expected by all dynamic user profile tabs - returns a map of details necessary to render the nav tab

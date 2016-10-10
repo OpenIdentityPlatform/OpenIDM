@@ -3,32 +3,32 @@
 
 {{#requirements.properties}}
 
-    <div class="form-group">
-        <label class="sr-only separator" for="input-userId">
+    <div class="form-group float-label {{#if user.default.userName}} float-label-with-focus {{/if}}">
+        <label class="{{#unless user.default.userName}} sr-only {{/unless}}" for="input-userId">
             <span>{{t 'common.user.username'}}</span>
         </label>
-        <input type="text" placeholder="{{t 'common.user.username'}}" id="input-userName" name="user.userName" value="{{user.default.userName}}" class="form-control input-lg" required />
+        <input class="form-control {{#unless user.default.userName}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.username'}}" id="input-userName" name="user.userName" value="{{user.default.userName}}" required />
     </div>
 
-    <div class="form-group">
-        <label class="sr-only separator" for="input-givenName">
+    <div class="form-group float-label {{#if user.default.givenName}} float-label-with-focus {{/if}}">
+        <label class="{{#unless user.default.givenName}} sr-only {{/unless}}" for="input-givenName">
             <span>{{t 'common.user.givenName'}}</span>
         </label>
-        <input type="text" placeholder="{{t 'common.user.givenName'}}" id="input-givenName" name="user.givenName" value="{{user.default.givenName}}" class="form-control input-lg" />
+        <input class="form-control {{#unless user.default.givenName}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.givenName'}}" id="input-givenName" name="user.givenName" value="{{user.default.givenName}}" />
     </div>
 
-    <div class="form-group">
-        <label class="sr-only separator" for="input-sn">
+    <div class="form-group float-label {{#if user.default.sn}} float-label-with-focus {{/if}}">
+        <label class="{{#unless user.default.sn}} sr-only {{/unless}}" for="input-sn">
             <span>{{t 'common.user.sn'}}</span>
         </label>
-        <input type="text" placeholder="{{t 'common.user.sn'}}" id="input-sn" name="user.sn" value="{{user.default.sn}}" class="form-control input-lg" />
+        <input class="form-control {{#unless user.default.sn}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.sn'}}" id="input-sn" name="user.sn" value="{{user.default.sn}}" />
     </div>
 
-    <div class="form-group">
-        <label class="sr-only separator" for="input-email">
+    <div class="form-group float-label {{#if user.default.mail}} float-label-with-focus float-label-with-readonly {{/if}}">
+        <label class="{{#unless user.default.mail}} sr-only {{/unless}}" for="input-email">
             <span>{{t 'common.user.email'}}</span>
         </label>
-        <input type="text" placeholder="{{t 'common.user.email'}}" id="input-email" name="user.mail" value="{{user.default.mail}}" {{#if user.default.mail}} readonly {{/if}} class="form-control input-lg" />
+        <input class="form-control {{#unless user.default.mail}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.email'}}" id="input-email" name="user.mail" value="{{user.default.mail}}" {{#if user.default.mail}} readonly {{/if}} />
     </div>
 
 {{/requirements.properties}}

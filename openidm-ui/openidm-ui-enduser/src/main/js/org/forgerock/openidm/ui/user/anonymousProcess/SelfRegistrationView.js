@@ -39,10 +39,13 @@ define([
             "partials/process/_coreProfileDetails.html",
             "partials/profile/_multiValueFormFields.html",
             "partials/profile/_emailEntry.html",
+            "partials/profile/_preferences.html",
             "partials/providers/_providerButton.html"
         ],
         events: _.extend({
-            "click [data-oauth=button]": "oauthHandler"
+            "click [data-oauth=button]": "oauthHandler",
+            "focus .float-label input": "addFloatLabelStyles",
+            "blur .float-label": "removeFloatLabelStyles"
         }, CommonSelfRegistrationView.events),
         oauthHandler: function (e) {
             e.preventDefault();
@@ -61,6 +64,21 @@ define([
             );
         },
 
+        addFloatLabelStyles: function(e) {
+            if (!$(e.target).attr("readonly")) {
+                $(e.target).removeClass("input-lg");
+                $(e.target).prev().removeClass("sr-only");
+                $(e.target).parent().addClass("float-label-with-focus");
+            }
+        },
+
+        removeFloatLabelStyles: function(e) {
+            if (!$(e.target).val()) {
+                $(e.target).addClass("input-lg");
+                $(e.target).prev().addClass("sr-only");
+                $(e.target).parent().removeClass("float-label-with-focus");
+            }
+        },
 
         attemptCustomTemplate: function(stateData, baseTemplateUrl, response, processStatePromise) {
             var templateUrl = baseTemplateUrl + this.processType
