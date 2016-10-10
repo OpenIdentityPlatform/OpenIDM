@@ -21,7 +21,7 @@ require.config({
             "ThemeManager": "org/forgerock/openidm/ui/common/util/ThemeManager",
             "UserProfileView": "org/forgerock/commons/ui/user/profile/UserProfileView",
             "LoginView": "org/forgerock/openidm/ui/common/login/LoginView",
-            "LoginDialog": "org/forgerock/commons/ui/common/LoginDialog",
+            "LoginDialog": "org/forgerock/openidm/ui/common/login/LoginDialog",
             "RegisterView": "org/forgerock/openidm/ui/user/anonymousProcess/SelfRegistrationView",
             "ForgotUsernameView": "org/forgerock/commons/ui/user/anonymousProcess/ForgotUsernameView",
             "PasswordResetView": "org/forgerock/openidm/ui/user/anonymousProcess/PasswordResetView",

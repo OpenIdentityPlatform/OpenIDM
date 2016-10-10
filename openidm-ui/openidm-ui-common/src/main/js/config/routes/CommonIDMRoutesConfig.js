@@ -27,6 +27,11 @@ define([
         "authenticationUnavailable" : {
             view: "org/forgerock/openidm/ui/common/login/AuthenticationUnavailable",
             url: "authenticationUnavailable/"
+        },
+        "openerHandler" : {
+            view: "org/forgerock/openidm/ui/common/login/OpenerHandler",
+            url: /^openerHandler\/(.*)$/,
+            pattern: "openerHandler/?"
         }
     };
 

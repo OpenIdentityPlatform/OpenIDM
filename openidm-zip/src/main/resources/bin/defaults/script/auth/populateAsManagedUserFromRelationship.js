@@ -63,6 +63,7 @@
     logger.debug("Augment context for: {}", security.authenticationId);
 
     var _ = require("lib/lodash"),
+        provider = security.authorization.component.replace("managed/", ""),
         managedUserRef = openidm.read(security.authorization.component + "/" + security.authorization.id, null, ["*","user"]).user;
 
     if (!managedUserRef) {
@@ -85,6 +86,7 @@
         "id": managedUser._id,
         "component": "managed/user",
         "moduleId" : security.authorization.moduleId,
+        "provider" : provider,
         "roles": managedUser.authzRoles ?
             _.uniq(
                 security.authorization.roles.concat(

@@ -383,6 +383,7 @@
                 "explanation2" : "Please confirm your current password to continue."
             },
             "LoginDialog" : {
+                "timedOut" : "Please log in again.",
                 "refreshOnLogin" : "Reload"
             },
             "LoginTemplate" : {
