@@ -190,6 +190,20 @@ define([
                 this.protectedAttributeList = sessionDetails.authorization.protectedAttributeList || [];
                 this.baseEntity = this.component + "/" + this.id;
                 this.uiroles = this.getUIRoles(sessionDetails.authorization.roles);
+                this.provider =  sessionDetails.authorization.provider;
+
+                if(sessionDetails.authorization.provider) {
+                    this.provider = sessionDetails.authorization.provider;
+                } else {
+                    this.provider = null;
+                }
+
+                if(sessionDetails.authorization.moduleId === "oAuth" || sessionDetails.authorization.moduleId === "OpenIdConnect") {
+                    this.userNamePasswordLogin = false;
+                } else {
+                    this.userNamePasswordLogin = true;
+                }
+
                 return this.fetch().then(_.bind(function () {
                     return this;
                 }, this));
@@ -211,6 +225,9 @@ define([
                     "redirect_uri": redirect_uri,
                     "code": code
                 })
+            }).then((resp) => {
+                this.set(resp);
+                return resp;
             });
         },
 
@@ -221,6 +238,9 @@ define([
                 $.param({
                     "provider": provider
                 })
+            }).then((resp) => {
+                this.set(resp);
+                return resp;
             });
         }
     });

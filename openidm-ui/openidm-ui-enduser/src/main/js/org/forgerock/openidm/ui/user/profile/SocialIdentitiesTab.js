@@ -26,7 +26,7 @@ define([
     "org/forgerock/commons/ui/common/util/OAuth",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
-    "org/forgerock/openidm/ui/common/UserModel"
+    "org/forgerock/openidm/ui/common/util/OAuthUtils"
 ], function($, _, bootstrap,
             BootstrapDialog,
             AbstractUserProfileTab,
@@ -36,8 +36,8 @@ define([
             OAuth,
             Router,
             SocialDelegate,
-            UserModel
-        ) {
+            OAuthUtils
+) {
     var SocialIdentitiesView = AbstractUserProfileTab.extend({
         template: "templates/profile/SocialIdentitiesTab.html",
         events: _.extend({
@@ -57,43 +57,32 @@ define([
         model: {},
 
         render: function(args, callback) {
-            let params = Router.convertCurrentUrlToJSON().params;
+            this.data.user = Configuration.loggedUser.toJSON();
 
-            if (!_.isEmpty(params) && _.has(params, "provider") && _.has(params, "code") && _.has(params, "redirect_uri")) {
+            SocialDelegate.providerList().then((response) => {
+                this.data.providers = response.providers;
 
-                opener.require("org/forgerock/openidm/ui/user/profile/SocialIdentitiesTab").oauthReturn(params);
-                window.close();
-                return;
+                _.each(this.data.providers, (provider, index) => {
+                    switch (provider.name) {
+                        case "google":
+                            provider.faIcon = "google";
+                            break;
+                        case "facebook":
+                            provider.faIcon = "facebook";
+                            break;
+                        case "linkedIn":
+                            provider.faIcon = "linkedin";
+                            break;
+                        default:
+                            provider.faIcon = "cloud";
+                            break;
+                    }
 
-            } else {
-
-                this.data.user = Configuration.loggedUser.toJSON();
-                SocialDelegate.providerList().then((response) => {
-                    this.data.providers = response.providers;
-
-                    _.each(this.data.providers, (provider, index) => {
-                        switch (provider.name) {
-                            case "google":
-                                provider.faIcon = "google";
-                                break;
-                            case "facebook":
-                                provider.faIcon = "facebook";
-                                break;
-                            case "linkedIn":
-                                provider.faIcon = "linkedin";
-                                break;
-                            default:
-                                provider.faIcon = "cloud";
-                                break;
-                        }
-
-                        this.activateProviders(provider, index);
-                    });
-
-                    this.parentRender(callback);
+                    this.activateProviders(provider, index);
                 });
 
-            }
+                this.parentRender(callback);
+            });
         },
 
         activateProviders: function(provider, index) {
@@ -134,7 +123,7 @@ define([
             if (!toggle.find("[type=checkbox]").prop("checked")) {
 
                 options = this.getOptions(toggle, true);
-                this.oauthPopup(options);
+                OAuthUtils.oauthPopup(options);
                 this.toggleSocialProvider(toggle);
 
             } else {
@@ -152,38 +141,17 @@ define([
             });
         },
 
-        getOptions: function(toggle, isBind) {
+        getOptions: function(toggle) {
             let options = {};
-            let urls = {};
-            let code = "";
-            let authToken = "";
             let providerName = this.getProviderName(toggle);
-            let redirect_uri = OAuth.getRedirectURI();
+            let state = "openerHandler/bind/&provider=" + providerName + "&redirect_uri=" + OAuth.getRedirectURI();
+            let url;
 
-            options.windowName = this.getProviderName(toggle);
-            urls = this.getUrls(this.getProviderObj(options.windowName));
-            options.path = urls.reqUrl + "&display=popup";
-            options.return = urls.resUrl;
+            options.windowName = providerName;
+            url = OAuthUtils.getUrl(this.getProviderObj(options.windowName), state);
+            options.path = url + "&display=popup";
 
             return options;
-        },
-
-        oauthPopup: function (options) {
-            let oauthWindow = null;
-            let oauthInterval = null;
-            let width = "";
-            let height = "";
-            let fragments = [];
-
-            width = screen.width * (2/3);
-            height = screen.height * (2/3);
-
-            options.windowName = options.windowName ||  'ConnectWithOAuth';
-            options.windowOptions = options.windowOptions || 'location=0,status=0,width=' + width + ',height=' + height;
-            options.callback = options.callback || function(){ window.location.reload(); };
-
-            oauthWindow = window.open(options.path, options.windowName, options.windowOptions);
-
         },
 
         restoreToggle: function(toggle) {
@@ -216,11 +184,9 @@ define([
                     }, this)
                 }]
             });
-
         },
 
         unbindProvider: function(toggle) {
-            let id = this.data.user._id;
             let providerName = this.getProviderName(toggle);
 
             Configuration.loggedUser.unbindProvider(providerName).then(() => {
@@ -228,24 +194,7 @@ define([
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "removeSocialProvider");
                 this.toggleSocialProvider(toggle);
             });
-        },
-
-        getUrls: function(provider) {
-            let scopes = provider.scope.join(" ");
-            let currentURL = Router.currentRoute;
-            let state = Router.getLink(currentURL,
-                [
-                    "&provider=" + provider.name +
-                    "&redirect_uri=" + OAuth.getRedirectURI()
-                ]);
-            let returnURL = Router.getCurrentUrlBasePart() + "/#" + state;
-
-            return {
-                reqUrl: OAuth.getRequestURL(provider.authorization_endpoint, provider.client_id, scopes, state),
-                resUrl: returnURL
-            };
         }
-
     });
 
     return new SocialIdentitiesView();
