@@ -1,26 +1,17 @@
-/**
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+/*
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
- *
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.config.persistence;
 
@@ -57,8 +48,6 @@ import org.slf4j.LoggerFactory;
 public class ConfigBootstrapHelper {
 
     // Properties to set bootstrapping behavior
-    public static final String OPENIDM_DATASOURCE_PREFIX = "openidm.datasource.";
-    public static final String OPENIDM_REPO_PREFIX = "openidm.repo.";
     public static final String OPENIDM_REPO_TYPE = "openidm.repo.type";
     
     // Properties to set configuration file handling behavior
@@ -67,10 +56,6 @@ public class ConfigBootstrapHelper {
     public static final String OPENIDM_FILEINSTALL_DIR = "openidm.fileinstall.dir";
     public static final String OPENIDM_FILEINSTALL_POLL = "openidm.fileinstall.poll";
     public static final String OPENIDM_FILEINSTALL_ENABLED = "openidm.fileinstall.enabled";
-    
-    public static final String OPENIDM_UI_FILEINSTALL_ENABLED = "openidm.ui.fileinstall.enabled";
-    public static final String OPENIDM_UI_FILEINSTALL_DIR = "openidm.ui.fileinstall.dir";
-    public static final String OPENIDM_UI_FILEINSTALL_POLL = "openidm.ui.fileinstall.poll";
 
     public static final String FELIX_FILEINSTALL_PID = "org.apache.felix.fileinstall";
     
@@ -92,40 +77,22 @@ public class ConfigBootstrapHelper {
      *
      * Currently only one bootstrap repository is selected.
      *
-     * Bootstrap information in system properties takes precedence over configuration files
-     *
-     * Configuration keys returned are lower case, whether they originate from system properties or
-     * configuration files.
+     * Configuration keys returned are lower case
      *
      * @param repoType the type of the bootstrap repository, equivalent to the last part of its PID
      * @param bundleContext the BundleContext
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
-    public static JsonValue getBootConfig(String propertyPrefix, String filePrefix, String repoType,
-            BundleContext bundleContext) {
+    private static JsonValue getBootConfig(String filePrefix, String repoType, BundleContext bundleContext) {
         JsonValue result = new JsonValue(new TreeMap<>(String.CASE_INSENSITIVE_ORDER));
         result.put(OPENIDM_REPO_TYPE, repoType);
 
-        // System properties take precedence over configuration files
-        String sysPropType = System.getProperty(OPENIDM_REPO_TYPE);
-        if (sysPropType != null && sysPropType.toLowerCase().equals(repoType)) {
-            for (Object entry : System.getProperties().keySet()) {
-                String key = (String) entry;
-                if (key.startsWith(propertyPrefix)) {
-                    result.put(key.substring(propertyPrefix.length()).toLowerCase(), System.getProperty(key));
-                }
-            }
-            logger.info("Bootstrapping with settings from system properties {}", result);
-            return result;
-        }
-
-        // If bootstrap info not found in system properties, check for configuration files
         String confDir = getConfigFileInstallDir();
         File unqualified = new File(confDir, filePrefix + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
         File qualified = new File(confDir, ServerConstants.SERVICE_RDN_PREFIX
                 + filePrefix + repoType.toLowerCase() + JSON_CONFIG_FILE_EXT);
 
-        File loadedFile = null;
+        final File loadedFile;
         try {
             final Dictionary<String, Object> rawConfig;
             if (unqualified.exists()) {
@@ -165,8 +132,6 @@ public class ConfigBootstrapHelper {
      *
      * Currently only one bootstrap repository is selected.
      * 
-     * Bootstrap information in system properties takes precedence over configuration files
-     * 
      * Configuration keys returned are lower case, whether they originate from system properties or
      * configuration files.
      * 
@@ -175,15 +140,13 @@ public class ConfigBootstrapHelper {
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
     public static JsonValue getRepoBootConfig(String repoType, BundleContext bundleContext) {
-        return getBootConfig(OPENIDM_REPO_PREFIX, REPO_FILE_PREFIX, repoType, bundleContext);
+        return getBootConfig(REPO_FILE_PREFIX, repoType, bundleContext);
     }
 
     /**
      * Get the configured bootstrap information for the datasource.
      *
      * Currently only one bootstrap datasource is selected.
-     *
-     * Bootstrap information in system properties takes precedence over configuration files
      *
      * Configuration keys returned are lower case, whether they originate from system properties or
      * configuration files.
@@ -193,7 +156,7 @@ public class ConfigBootstrapHelper {
      * @return The relevant bootstrap configuration if this repository should be bootstraped, null if not
      */
     public static JsonValue getDataSourceBootConfig(String repoType, BundleContext bundleContext) {
-        return getBootConfig(OPENIDM_DATASOURCE_PREFIX, DATASOURCE_FILE_PREFIX, repoType, bundleContext);
+        return getBootConfig(DATASOURCE_FILE_PREFIX, repoType, bundleContext);
     }
 
     // A list of repository configuration files 
