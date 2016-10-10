@@ -65,6 +65,7 @@
 
     security.authorization = {
         "id": managedUser.result[0]._id,
+        "moduleId" : security.authorization.moduleId,
         "component": "managed/user",
         "roles": managedUser.result[0].authzRoles ?
                      _.uniq(

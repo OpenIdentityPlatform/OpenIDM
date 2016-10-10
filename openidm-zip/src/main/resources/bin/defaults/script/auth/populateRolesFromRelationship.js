@@ -53,6 +53,7 @@
     security.authorization = {
         'id': security.authorization.id,
         'component': security.authorization.component,
+        'moduleId' : security.authorization.moduleId,
         'roles': _.chain(user[properties.propertyMapping.userRoles])
                     .filter(function (r) {
                         return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).startsWith("repo/internal/role");
