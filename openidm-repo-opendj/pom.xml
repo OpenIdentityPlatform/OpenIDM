@@ -49,11 +49,11 @@
             <artifactId>opendj-grizzly</artifactId>
             <version>${opendj.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.forgerock.opendj</groupId>
-            <artifactId>opendj-server-legacy</artifactId>
-            <version>${opendj.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.forgerock.opendj</groupId>-->
+            <!--<artifactId>opendj-server-legacy</artifactId>-->
+            <!--<version>${opendj.version}</version>-->
+        <!--</dependency>-->
     	
     	<!--<dependency>-->
       		<!--<groupId>org.glassfish.grizzly</groupId>-->
