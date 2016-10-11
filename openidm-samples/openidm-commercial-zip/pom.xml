@@ -26,12 +26,18 @@
             <artifactId>googleapps-connector</artifactId>
             <version>${openicf.googleconnector.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors</groupId>
+            <artifactId>marketo-connector</artifactId>
+            <version>${openicf.marketoconnector.version}</version>
+        </dependency>
     </dependencies>
     <properties>
         <!-- If we release this project, we need to include the Forgerock binary license -->
         <include.binary.license>${project.build.directory}</include.binary.license>
         <!-- Properties to include the SaaS connectors in the commercial build -->
         <google.provisioner>provisioner.openicf-google.json</google.provisioner>
+        <marketo.provisioner>provisioner.openicf-marketo.json</marketo.provisioner>
         <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
         <saas.connectors.conf>conf/**</saas.connectors.conf>
         <saas.connectors.script>script/**</saas.connectors.script>
