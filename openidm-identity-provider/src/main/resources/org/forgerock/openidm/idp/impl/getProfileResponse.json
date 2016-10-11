@@ -3,7 +3,7 @@
   "properties" : {
     "subject" : {
       "type" : "string",
-      "description" : "Identifier that is used to identity a user on an Identity Provider."
+      "description" : "Identifies a user on an Identity Provider."
     },
     "enabled" : {
       "type" : "boolean",
