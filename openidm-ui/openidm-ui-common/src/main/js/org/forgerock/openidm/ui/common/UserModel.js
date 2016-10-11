@@ -128,7 +128,9 @@ define([
             headers[Constants.HEADER_PARAM_AUTH_PROVIDER] = provider;
             headers[Constants.HEADER_PARAM_NO_SESSION] = false;
 
-            sessionStorage.setItem("authDetails", JSON.stringify({authToken,provider}));
+            if (provider === "OPENAM") {
+                sessionStorage.setItem("authDetails", JSON.stringify({authToken,provider}));
+            }
             return this.getProfile(headers);
         },
         /**
