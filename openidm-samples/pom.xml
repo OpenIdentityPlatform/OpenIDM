@@ -16,7 +16,7 @@
     <artifactId>openidm-commercial</artifactId>
     <version>5.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>OpenIDM commercial project</name>
+    <name>OpenIDM Commercial Project</name>
     <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution.
         Experience shows that the most important features of an identity management product are: high flexibility in
         Business Process handling and compliance with open standards and interfaces. A highly flexible user interface
@@ -87,6 +87,7 @@
     </properties>
 
     <modules>
+        <module>openidm-commercial-samples</module>
         <module>openidm-commercial-zip</module>
     </modules>
 
