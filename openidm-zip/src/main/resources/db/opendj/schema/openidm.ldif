@@ -1,5 +1,4 @@
 dn: cn=schema
-changetype: add
 objectClass: top
 objectClass: ldapSubentry
 objectClass: subschema

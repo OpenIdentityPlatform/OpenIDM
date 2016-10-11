@@ -1,5 +1,4 @@
 dn: dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: domain
 objectClass: top
 dc: openidm
@@ -9,7 +8,6 @@ dc: openidm
 # Links OU
 
 dn: ou=links,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: links
@@ -17,7 +15,6 @@ ou: links
 # Internal OU
 
 dn: ou=internal,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: internal
@@ -25,13 +22,11 @@ ou: internal
 # Internal Users OU
 
 dn: ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: users
 
 dn: uid=openidm-admin,ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: openidmInternalUser
 objectClass: top
 uid: openidm-admin
@@ -39,7 +34,6 @@ password: openidm-admin
 roles: [ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]
 
 dn: uid=anonymous,ou=Users,ou=Internal,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: openidmInternalUser
 objectClass: top
 uid: anonymous
@@ -48,8 +42,7 @@ roles: [ { "_ref" : "repo/internal/role/openidm-reg" } ]
 
 # Config OU
 
-dn: ou=config,dc=opendim,dc=forgerock,dc=com
-changetype: add
+dn: ou=config,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
 ou: config
@@ -57,7 +50,6 @@ ou: config
 # Security OU
 
 dn: ou=Security,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Security
@@ -65,7 +57,6 @@ ou: Security
 # Security Keys OU
 
 dn: ou=Keys,ou=Security,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Keys
@@ -75,13 +66,11 @@ ou: Keys
 ##
 
 dn: ou=Managed,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Managed
 
 dn: ou=Users,ou=Managed,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Users
@@ -91,31 +80,26 @@ ou: Users
 ##
 
 dn: ou=Audit,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Audit
 
 dn: ou=Activity,ou=Audit,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Activity
 
 dn: ou=Recon,ou=Audit,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Recon
 
 dn: ou=Sync,ou=Audit,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Sync
 
 dn: ou=Access,ou=Audit,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Access
@@ -125,13 +109,11 @@ ou: Access
 ##
 
 dn: ou=UI,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: UI
 
 dn: ou=Notifications,ou=UI,dc=openidm,dc=forgerock,dc=com
-changetype: add
 objectClass: organizationalUnit
 objectClass: top
 ou: Notifications
