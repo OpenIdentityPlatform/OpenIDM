@@ -41,8 +41,8 @@ import org.forgerock.opendj.rest2ldap.AuthenticatedConnectionContext;
 import org.forgerock.opendj.rest2ldap.Resource;
 import org.forgerock.opendj.rest2ldap.Rest2Ldap;
 import org.forgerock.opendj.rest2ldap.Rest2LdapJsonConfigurator;
-//import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
-//import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
+import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
+import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
@@ -93,8 +93,8 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
      */
     private EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
-//    @Reference
-//    private EmbeddedDirectoryServer embeddedDirectoryServer;
+    @Reference
+    private EmbeddedDirectoryServer embeddedDirectoryServer;
 
     /**
      * Router registry used to register additional routes while we can't support /repo/*.
@@ -310,12 +310,12 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
 
     private Connection getLdapConnection() throws InternalServerErrorException {
         try {
-//            if (embeddedDirectoryServer != null) {
-//                return embeddedDirectoryServer.getInternalConnection();
-//            } else {
+            if (embeddedDirectoryServer != null) {
+                return embeddedDirectoryServer.getInternalConnection();
+            } else {
                 return ldapFactory.getConnection();
-//            }
-        } catch (/*EmbeddedDirectoryServerException|*/LdapException e) {
+            }
+        } catch (EmbeddedDirectoryServerException|LdapException e) {
             logger.error("Failed to acquire connection", e);
             throw new InternalServerErrorException("Failed to acquire connection", e);
         }
