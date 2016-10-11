@@ -23,10 +23,8 @@
  */
 package org.forgerock.openidm.repo.opendj.impl;
 
-import com.forgerock.opendj.grizzly.GrizzlyTransportProvider;
 import org.forgerock.i18n.LocalizableMessage;
 import org.forgerock.json.JsonValue;
-import org.forgerock.opendj.ldap.ConnectionFactory;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServer;
 import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
@@ -82,15 +80,8 @@ public class Activator implements BundleActivator {
                             System.out,
                             System.err);
 
-            // if config exists server is setup
-            if (djConfig.toFile().exists()) {
-                try {
-                    embeddedServer.start();
-                } catch (EmbeddedDirectoryServerException e) {
-                    logger.error("Failed to start embedded OpenDJ instance", e);
-                    return;
-                }
-            } else {
+            // config ldif does not exist, server has not been setup
+            if (!djConfig.toFile().exists()) {
                 try {
                     logger.info("Performing initial setup of embedded OpenDJ instance");
                     embeddedServer.setup(
@@ -104,6 +95,13 @@ public class Activator implements BundleActivator {
                     logger.error("Failed to setup embedded OpenDJ instance", e);
                     return;
                 }
+            }
+
+            try {
+                embeddedServer.start();
+            } catch (EmbeddedDirectoryServerException e) {
+                logger.error("Failed to start embedded OpenDJ instance", e);
+                return;
             }
 
             context.registerService(EmbeddedDirectoryServer.class.getName(), embeddedServer, null);
