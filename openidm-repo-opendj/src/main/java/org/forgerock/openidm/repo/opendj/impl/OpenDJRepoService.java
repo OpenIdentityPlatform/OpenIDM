@@ -152,35 +152,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
             throw ex;
         }
 
-    	// Setup and activate an embedded OpenDJ server if configured
-        final JsonValue embeddedConfig = existingConfig.get("embeddedConfig");
-        if (embeddedConfig != null && !embeddedConfig.isNull()) {
-        	logger.info("Setting up embedded OpenDJ server");
-//        	if (EmbeddedOpenDJ.isInstalled()) {
-//                System.out.println("DB_SETUP_ALD");
-//            } else {
-//                try {
-//                    SetupProgress.setWriter(new OutputStreamWriter(System.out));
-//                    EmbeddedOpenDJ.setup(OpenDJConfig.getOdjRoot());
-//
-//                    // Determine if we are a secondary install
-//                    if (EmbeddedOpenDJ.isMultiNode()) {
-//                        EmbeddedOpenDJ.setupReplication(OpenDJConfig.getOpenDJSetupMap(),
-//                                ExistingServerConfig.getOpenDJSetupMap(OpenDJConfig.getExistingServerUrl(),
-//                                		embeddedConfig.get(Constants.USERNAME).asString(),
-//                                		embeddedConfig.get(Constants.PASSWORD).asString()));
-//                        EmbeddedOpenDJ.registerServer(OpenDJConfig.getHostUrl());
-//                    }
-//
-//                    EmbeddedOpenDJ.shutdownServer();
-//                } catch (Exception ex) {
-//                    System.err.println("DB_SETUP_FAIL" + ex.getMessage());
-//                    System.exit(Constants.EXIT_INSTALL_FAILED);
-//                }
-//            }
-        	
-        }
-        
         //  Initialize the repo service
         init(existingConfig);
 
