@@ -166,8 +166,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * Cryptographic service.
      */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected volatile CryptoService cryptoService = null;
+    @Reference
+    protected CryptoService cryptoService;
 
     /**
      * Enhanced configuration service.

@@ -17,10 +17,10 @@
 package org.forgerock.openidm.jetty;
 
 import static org.forgerock.openidm.core.IdentityServer.*;
-import static org.forgerock.openidm.crypto.util.JettyPropertyUtil.getPathProperty;
+import static org.forgerock.openidm.util.JettyPropertyUtil.getPathProperty;
 
 import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
+import org.forgerock.openidm.util.JettyPropertyUtil;
 
 /**
  * Provides the Jetty bundle (and in turn the jetty.xml) access to configuration supplied by OpenIDM,

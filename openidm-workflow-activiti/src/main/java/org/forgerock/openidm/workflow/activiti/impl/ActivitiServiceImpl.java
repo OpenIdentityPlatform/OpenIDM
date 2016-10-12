@@ -176,9 +176,8 @@ public class ActivitiServiceImpl implements RequestHandler {
     @Reference(target = "(" + ServerConstants.ROUTER_PREFIX + "=/managed)")
     private RouteService routeService;
 
-    @Reference(policy = ReferencePolicy.DYNAMIC,
-            bind = "bindCryptoService", unbind = "unbindCryptoService")
-    volatile CryptoService cryptoService;
+    @Reference
+    CryptoService cryptoService;
 
     @Reference(policy = ReferencePolicy.STATIC)
     IDMConnectionFactory connectionFactory;

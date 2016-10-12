@@ -64,7 +64,6 @@ public final class IdentityServer implements PropertyAccessor {
 
     public static final String CONFIG_CRYPTO_ALIAS = "openidm.config.crypto.alias";
     public static final String CONFIG_CRYPTO_ALIAS_SELF_SERVICE = "openidm.config.crypto.selfservice.sharedkey.alias";
-    public static final String INSTANCE_TYPE = "openidm.instance.type";
     public static final String PKCS11_CONFIG = "openidm.security.pkcs11.config";
     public static final String SSL_HOST_ALIASES = "openidm.ssl.host.aliases";
     public static final String HTTPS_KEYSTORE_CERT_ALIAS = "openidm.https.keystore.cert.alias";

@@ -1,35 +1,23 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.security.impl;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.math.BigInteger;
+import static org.forgerock.util.Reject.checkNotNull;
+
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.KeyStore;
@@ -38,29 +26,18 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
-import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.cert.X509v3CertificateBuilder;
-import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
-import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
 import org.bouncycastle.jce.PrincipalUtil;
 import org.bouncycastle.jce.X509Principal;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
-import org.bouncycastle.operator.ContentSigner;
-import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -69,18 +46,14 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.openidm.crypto.KeyRepresentation;
-import org.forgerock.openidm.util.ClusterUtil;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+import org.forgerock.openidm.crypto.KeyRepresentation;
+import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.security.KeyStoreHandler;
-import org.forgerock.openidm.security.KeyStoreManager;
-import org.forgerock.openidm.util.DateUtil;
-import org.forgerock.util.encode.Base64;
-import org.joda.time.DateTime;
+import org.forgerock.openidm.util.CertUtil;
+import org.forgerock.openidm.util.ClusterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -90,8 +63,6 @@ import org.slf4j.LoggerFactory;
 public class SecurityResourceProvider {
     
     private final static Logger logger = LoggerFactory.getLogger(SecurityResourceProvider.class);
-
-    public static final String BC = org.bouncycastle.jce.provider.BouncyCastleProvider.PROVIDER_NAME;
     
     public static final String ACTION_GENERATE_CERT = "generateCert";
     public static final String ACTION_GENERATE_CSR = "generateCSR";
@@ -104,19 +75,21 @@ public class SecurityResourceProvider {
     public static final String KEYS_CONTAINER = "security/keys";
 
     /**
-     * The Keystore handler which handles access to actual Keystore instance
+     * The Keystore service which handles access to actual Keystore instance.
      */
-    protected KeyStoreHandler store = null;
-    
+    protected KeyStoreService keyStoreService;
+
     /**
-     * The KeyStoreManager used for reloading the stores. 
+     * The keystore to act on.
      */
-    protected KeyStoreManager manager = null;
+    protected KeyStore keyStore;
 
     /**
      * The RepositoryService
      */
     protected RepositoryService repoService;
+
+    protected CryptoService cryptoService;
 
     /**
      * The resource name, "truststore" or "keystore".
@@ -132,67 +105,17 @@ public class SecurityResourceProvider {
     
     private String cryptoCipher;
 
-    public SecurityResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager,
-            RepositoryService repoService) {
-        this.store = store;
-        this.resourceName = resourceName;
-        this.manager = manager;
-        this.repoService = repoService;
+    public SecurityResourceProvider(String resourceName, KeyStore keyStore, KeyStoreService keyStoreService,
+            RepositoryService repoService, CryptoService cryptoService) {
+        this.keyStoreService = checkNotNull(keyStoreService);
+        this.keyStore = checkNotNull(keyStore);
+        this.resourceName = checkNotNull(resourceName);
+        this.repoService = checkNotNull(repoService);
         this.cryptoAlias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
         this.cryptoCipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
         this.instanceType = IdentityServer.getInstance().getProperty(
                 "openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
-    }
-
-    /**
-     * Returns an object from a PEM String representation
-     * 
-     * @param pem the PEM String representation
-     * @return the object
-     * @throws Exception
-     */
-    @SuppressWarnings("unchecked")
-    protected <T> T fromPem(String pem) throws Exception {
-        StringReader sr = new StringReader(pem);
-        PEMReader pw = new PEMReader(sr);
-        Object object = pw.readObject();
-        return (T) object;
-    }
-    
-    /**
-     * Reads a certificate from a supplied string representation, and a supplied type.
-     * 
-     * @param certString A String representation of a certificate
-     * @param type The type of certificate ("X509").
-     * @return The certificate
-     * @throws Exception
-     */
-    protected Certificate readCertificate(String certString, String type) throws Exception {
-        StringReader sr = new StringReader(certString);
-        PEMReader pw = new PEMReader(sr);
-        Object object = pw.readObject();
-        if (object instanceof X509Certificate) {
-            return (X509Certificate)object;
-        } else {
-            throw ResourceException.newResourceException(
-                    ResourceException.BAD_REQUEST, "Unsupported certificate format");
-        }
-    }
-    
-    /**
-     * Reads a certificate chain from a supplied string array representation, and a supplied type.
-     * 
-     * @param certStringChain an array of strings representing a certificate chain
-     * @param type the type of certificates ("X509")
-     * @return the certificate chain
-     * @throws Exception
-     */
-    protected Certificate[] readCertificateChain(List<String> certStringChain, String type) throws Exception {
-        Certificate [] certChain = new Certificate[certStringChain.size()];
-        for (int i=0; i<certChain.length; i++) {
-            certChain[i] = readCertificate(certStringChain.get(i), type);
-        }
-        return certChain;
+        this.cryptoService = checkNotNull(cryptoService);
     }
 
     /**
@@ -207,7 +130,7 @@ public class SecurityResourceProvider {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
         content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
         content.put("type", cert.getType());
-        content.put("cert", getCertString(cert));
+        content.put("cert", CertUtil.getCertString(cert));
         content.put("publicKey", KeyRepresentation.getKeyMap(cert.getPublicKey()).getObject());
         if (cert instanceof X509Certificate) {
             Map<String, Object> issuer = new HashMap<>();
@@ -236,121 +159,9 @@ public class SecurityResourceProvider {
     protected JsonValue returnCertificateRequest(String alias, PKCS10CertificationRequest csr) throws Exception {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
         content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
-        content.put("csr", getCertString(csr));
+        content.put("csr", CertUtil.getCertString(csr));
         content.put("publicKey", KeyRepresentation.getKeyMap(csr.getPublicKey()).getObject());
         return content;
-    }
-
-    /**
-     * Returns a PEM formatted string representation of an object
-     * 
-     * @param object the object to write
-     * @return a PEM formatted string representation of the object
-     * @throws Exception
-     */
-    protected String getCertString(Object object) throws Exception {
-        try (StringWriter sw = new StringWriter(); PEMWriter pemWriter = new PEMWriter(sw)) {
-            pemWriter.writeObject(object);
-            pemWriter.flush();
-            return sw.getBuffer().toString();
-        }
-    }
-
-    /**
-     * Generates a self signed certificate using the given properties.
-     *
-     * @param commonName the common name to use for the new certificate
-     * @param algorithm the algorithm to use
-     * @param keySize the keysize to use
-     * @param signatureAlgorithm the signature algorithm to use
-     * @param validFrom when the certificate is valid from
-     * @param validTo when the certificate is valid until
-     * @return The generated certificate
-     * @throws Exception
-     */
-    protected Pair<X509Certificate, PrivateKey> generateCertificate(String commonName, 
-            String algorithm, int keySize, String signatureAlgorithm, String validFrom,
-            String validTo) throws Exception {
-        return generateCertificate(commonName, "None", "None", "None", "None", "None",
-                algorithm, keySize, signatureAlgorithm, validFrom, validTo);
-    }
-
-        
-    /**
-     * Generates a self signed certificate using the given properties.
-     *
-     * @param commonName the subject's common name
-     * @param organization the subject's organization name
-     * @param organizationUnit the subject's organization unit name
-     * @param stateOrProvince the subject's state or province
-     * @param country the subject's country code
-     * @param locality the subject's locality
-     * @param algorithm the algorithm to use
-     * @param keySize the keysize to use
-     * @param signatureAlgorithm the signature algorithm to use
-     * @param validFrom when the certificate is valid from
-     * @param validTo when the certificate is valid until
-     * @return The generated certificate
-     * @throws Exception
-     */
-    protected Pair<X509Certificate, PrivateKey> generateCertificate(String commonName, 
-            String organization, String organizationUnit, String stateOrProvince, 
-            String country, String locality, String algorithm, int keySize,
-            String signatureAlgorithm, String validFrom, String validTo) throws Exception {
-        
-        KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm); // "RSA","BC"
-        keyPairGenerator.initialize(keySize);
-        KeyPair keyPair = keyPairGenerator.generateKeyPair();
-
-        // Generate self-signed certificate
-        X500NameBuilder builder = new X500NameBuilder(BCStyle.INSTANCE);
-        builder.addRDN(BCStyle.C, country);
-        builder.addRDN(BCStyle.ST, stateOrProvince);
-        builder.addRDN(BCStyle.L, locality);
-        builder.addRDN(BCStyle.OU, organizationUnit);
-        builder.addRDN(BCStyle.O, organization);
-        builder.addRDN(BCStyle.CN, commonName);
-
-        Date notBefore = null;
-        Date notAfter = null;
-        if (validFrom == null) {
-            notBefore = new Date(System.currentTimeMillis() - 1000L * 60 * 60 * 24 * 30);
-        } else {
-            DateTime notBeforeDateTime = DateUtil.getDateUtil().parseIfDate(validFrom);
-            if (notBeforeDateTime == null) {
-                throw new InternalServerErrorException("Invalid date format for 'validFrom' property");
-            } else {
-                notBefore = notBeforeDateTime.toDate();
-            }
-        }
-        if (validTo == null) {
-            Calendar date = Calendar.getInstance();
-            date.setTime(new Date());
-            date.add(Calendar.YEAR, 10);
-            notAfter = date.getTime();
-        } else {
-            DateTime notAfterDateTime = DateUtil.getDateUtil().parseIfDate(validTo);
-            if (notAfterDateTime == null) {
-                throw new InternalServerErrorException("Invalid date format for 'validTo' property");
-            } else {
-                notAfter = notAfterDateTime.toDate();
-            }
-        }
-
-        BigInteger serial = BigInteger.valueOf(System.currentTimeMillis());
-
-        X509v3CertificateBuilder v3CertGen = new JcaX509v3CertificateBuilder(builder.build(), serial, 
-                notBefore, notAfter, builder.build(), keyPair.getPublic());
-
-        ContentSigner sigGen =
-                new JcaContentSignerBuilder(signatureAlgorithm).setProvider(BC).build(keyPair.getPrivate());
-
-        X509Certificate cert =
-                new JcaX509CertificateConverter().setProvider(BC).getCertificate(v3CertGen.build(sigGen));
-        cert.checkValidity(new Date());
-        cert.verify(cert.getPublicKey());
-
-        return Pair.of(cert, keyPair.getPrivate());
     }
     
     /**
@@ -410,7 +221,7 @@ public class SecurityResourceProvider {
         try {
             JsonValue keyPairValue = new JsonValue(new HashMap<String, Object>());
             keyPairValue.put("value" , KeyRepresentation.toPem(keyPair));
-            JsonValue encrypted = getCryptoService().encrypt(keyPairValue, cryptoCipher, cryptoAlias);
+            JsonValue encrypted = cryptoService.encrypt(keyPairValue, cryptoCipher, cryptoAlias);
             JsonValue keyMap = new JsonValue(new HashMap<String, Object>());
             keyMap.put("keyPair", encrypted.getObject());
             storeInRepo(KEYS_CONTAINER, alias, keyMap);
@@ -418,17 +229,6 @@ public class SecurityResourceProvider {
             throw new InternalServerErrorException(e.getMessage(), e);
         }
         
-    }
-    
-    /**
-     * Reads an object from the repository
-     * @param id the object's id
-     * @return the object
-     * @throws ResourceException
-     */
-    protected JsonValue readFromRepo(String id) throws ResourceException {
-        JsonValue keyMap = new JsonValue(repoService.read(Requests.newReadRequest(id)).getContent());
-        return keyMap;
     }
     
     /**
@@ -466,8 +266,8 @@ public class SecurityResourceProvider {
         }
         try {
             JsonValue encrypted = keyResource.getContent().get("keyPair");
-            JsonValue keyPairValue = getCryptoService().decrypt(encrypted);
-            return fromPem(keyPairValue.get("value").asString());
+            JsonValue keyPairValue = cryptoService.decrypt(encrypted);
+            return CertUtil.fromPem(keyPairValue.get("value").asString());
         } catch (Exception e) {
             throw new InternalServerErrorException(e.getMessage(), e);
         }
@@ -499,74 +299,6 @@ public class SecurityResourceProvider {
         if (!verified) {
             throw new BadRequestException("Private key does not match signed certificate");
         }
-    }
-    
-    /**
-     * Saves the local store only if in a clustered environment.
-     * 
-     * @throws ResourceException
-     */
-    protected void saveStore() throws ResourceException {
-        if (!instanceType.equals(ClusterUtil.TYPE_STANDALONE)) {
-            saveStoreToRepo();
-        }
-    }
-    
-    /**
-     * Loads the store from the repository and stores it locally
-     * 
-     * @throws ResourceException
-     */
-    public void loadStoreFromRepo() throws ResourceException {
-        JsonValue keystoreValue = readFromRepo("security/" + resourceName);
-        String keystoreString = keystoreValue.get("storeString").asString();
-        byte [] keystoreBytes = Base64.decode(keystoreString.getBytes());
-        ByteArrayInputStream bais = new ByteArrayInputStream(keystoreBytes);
-        try {
-            KeyStore keystore = null;
-            try {
-                keystore = KeyStore.getInstance(store.getType().name());
-                keystore.load(bais, store.getPassword().toCharArray());
-            } finally {
-                bais.close();
-            }
-            store.setStore(keystore);
-        } catch (Exception e) {
-            // Note this may catch NPE from Base64.decode returning null if keyStoreString
-            // is null or not a base64-encoded string
-            throw new InternalServerErrorException("Error creating keystore from store bytes", e);
-        }
-    }
-    
-    /**
-     * Saves the local store to the repository
-     * 
-     * @throws ResourceException
-     */
-    public void saveStoreToRepo() throws ResourceException {
-        byte [] keystoreBytes = null;
-        File file = new File(store.getLocation());
-
-        try (FileInputStream fin = new FileInputStream(file)) {
-            keystoreBytes = new byte[(int) file.length()];
-            fin.read(keystoreBytes);
-        } catch (Exception e) {
-            throw new InternalServerErrorException(e.getMessage(), e);
-        }
-        
-        String keystoreString = Base64.encode(keystoreBytes);
-        JsonValue value = new JsonValue(new HashMap<String, Object>());
-        value.add("storeString", keystoreString);
-        storeInRepo("security", resourceName, value);
-    }
-    
-    /**
-     * Returns and instance of the CryptoService.
-     * 
-     * @return CryptoService instance.
-     */
-    private CryptoService getCryptoService() {
-        return CryptoServiceFactory.getInstance();
     }
     
     /**

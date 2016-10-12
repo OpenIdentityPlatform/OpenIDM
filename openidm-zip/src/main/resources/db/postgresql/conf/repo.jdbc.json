@@ -263,14 +263,6 @@
                     "roles" : "roles"
                 }
             },
-            "security" : {
-                "table" : "security",
-                "objectToColumn" : {
-                    "_id" : "objectid",
-                    "_rev" : "rev",
-                    "storeString" : "storestring"
-                }
-            },
             "security/keys" : {
                 "table" : "securitykeys",
                 "objectToColumn" : {

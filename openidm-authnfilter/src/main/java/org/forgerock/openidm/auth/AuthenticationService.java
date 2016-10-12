@@ -16,31 +16,25 @@
 
 package org.forgerock.openidm.auth;
 
+import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.array;
-
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.AUTHENTICATION_ID;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.PROPERTY_MAPPING;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ID;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.QUERY_ON_RESOURCE;
-import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.USER_CREDENTIAL;
+import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.*;
 import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClientSecret;
-import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 
-import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
@@ -51,7 +45,6 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
@@ -79,13 +72,18 @@ import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.openidm.crypto.SharedKeyService;
-import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.SingletonResourceProvider;
+import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.json.resource.http.HttpContext;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
+import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
@@ -93,15 +91,10 @@ import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.util.JettyPropertyUtil;
 import org.forgerock.script.ScriptRegistry;
-import org.forgerock.services.context.SecurityContext;
 import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.SingletonResourceProvider;
-import org.forgerock.json.resource.UpdateRequest;
-import org.forgerock.json.resource.http.HttpContext;
-import org.forgerock.openidm.config.enhanced.EnhancedConfig;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.Options;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
@@ -206,8 +199,8 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
 
     // ----- Declarative Service Implementation
 
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    volatile CryptoService cryptoService;
+    @Reference
+    CryptoService cryptoService;
 
     @Reference
     SharedKeyService sharedKeyService;

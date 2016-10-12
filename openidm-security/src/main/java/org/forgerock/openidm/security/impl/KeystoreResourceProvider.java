@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2013-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.security.impl;
@@ -38,10 +30,8 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.PKCS10CertificationRequest;
-import org.forgerock.json.JsonValueException;
-import org.forgerock.openidm.crypto.KeyRepresentation;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -55,9 +45,13 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.crypto.KeyRepresentation;
+import org.forgerock.openidm.keystore.KeyStoreManagementService;
+import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.security.KeyStoreHandler;
-import org.forgerock.openidm.security.KeyStoreManager;
+import org.forgerock.openidm.util.CertUtil;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -72,9 +66,14 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
      */
     private final static Logger logger = LoggerFactory.getLogger(KeystoreResourceProvider.class);
 
-    public KeystoreResourceProvider(String resourceName, KeyStoreHandler store, KeyStoreManager manager,
-            RepositoryService repoService) {
-        super(resourceName, store, manager, repoService);
+    private final char[] keyStorePassword;
+    private final KeyStoreManagementService keyStoreManager;
+
+    public KeystoreResourceProvider(String resourceName, KeyStoreService keyStoreService, RepositoryService repoService,
+            CryptoService cryptoService, KeyStoreManagementService keyStoreManager) {
+        super(resourceName, keyStoreService.getKeyStore(), keyStoreService, repoService, cryptoService);
+        this.keyStorePassword = keyStoreService.getKeyStoreDetails().getPassword().toCharArray();
+        this.keyStoreManager = keyStoreManager;
     }
 
     @Override
@@ -90,10 +89,10 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                 String signatureAlgorithm = request.getContent().get("signatureAlgorithm")
                         .defaultTo(DEFAULT_SIGNATURE_ALGORITHM).asString();
                 int keySize = request.getContent().get("keySize").defaultTo(DEFAULT_KEY_SIZE).asInteger();
-                JsonValue result = null;
+                JsonValue result;
                 if (ACTION_GENERATE_CERT.equalsIgnoreCase(request.getAction())) {
                     // Generate self-signed certificate
-                    if (store.getStore().containsAlias(alias)) {
+                    if (keyStore.containsAlias(alias)) {
                         return new ConflictException("The resource with ID '" + alias
                                 + "' could not be created because there is already another resource with the same ID")
                                 .asPromise();
@@ -104,19 +103,17 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                         String validTo = request.getContent().get("validTo").asString();
 
                         // Generate the cert
-                        Pair<X509Certificate, PrivateKey> pair = generateCertificate(domainName, algorithm,
+                        Pair<X509Certificate, PrivateKey> pair = CertUtil.generateCertificate(domainName, algorithm,
                                 keySize, signatureAlgorithm, validFrom, validTo);
                         Certificate cert = pair.getKey();
                         PrivateKey key = pair.getValue();
 
                         // Add it to the store and reload
                         logger.debug("Adding certificate entry under the alias {}", alias);
-                        store.getStore().setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}),
-                                new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
-                        store.store();
-                        manager.reload();
-                        // Save the store to the repo (if clustered)
-                        saveStore();
+                        keyStore.setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}),
+                                new KeyStore.PasswordProtection(keyStorePassword));
+                        keyStoreService.store();
+                        keyStoreManager.reloadSslContext();
 
                         result = returnCertificate(alias, cert);
                         if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
@@ -152,9 +149,9 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
     public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final ReadRequest request) {
         try {
             JsonValue content = new JsonValue(new LinkedHashMap<String, Object>(5));
-            content.put("type", store.getStore().getType());
-            content.put("provider", store.getStore().getProvider());
-            Enumeration<String> aliases = store.getStore().aliases();
+            content.put("type", keyStore.getType());
+            content.put("provider", keyStore.getProvider());
+            Enumeration<String> aliases = keyStore.aliases();
             List<String> aliasList = new ArrayList<>();
             while (aliases.hasMoreElements()) {
                 aliasList.add(aliases.nextElement());

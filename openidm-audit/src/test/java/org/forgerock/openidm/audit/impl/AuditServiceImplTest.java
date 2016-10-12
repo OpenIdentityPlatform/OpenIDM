@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2014-2015 ForgeRock AS.
+ * Copyright 2014-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.audit.impl;
@@ -36,6 +36,7 @@ import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.audit.events.AuditEventBuilder;
 import org.forgerock.audit.providers.DefaultKeyStoreHandlerProvider;
 import org.forgerock.audit.providers.KeyStoreHandlerProvider;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.http.util.Json;
@@ -64,6 +65,8 @@ import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.test.assertj.AssertJPromiseAssert;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.Test;
 
@@ -360,6 +363,7 @@ public class AuditServiceImplTest {
         final ScriptRegistry scriptRegistry = mock(ScriptRegistry.class);
         final ScriptEntry scriptEntry = mock(ScriptEntry.class);
         final Script script = mock(Script.class);
+        final CryptoService cryptoService = mock(CryptoService.class);
         final AuditServiceImpl auditService = new AuditServiceImpl() {
             @Override
             protected KeyStoreHandlerProvider createKeyStoreHandlerProvider() throws Exception {
@@ -369,6 +373,7 @@ public class AuditServiceImplTest {
 
         auditService.bindEnhancedConfig(jsonEnhancedConfig);
         auditService.bindScriptRegistry(scriptRegistry);
+        auditService.bindCryptoService(cryptoService);
 
         final JsonValue config = AuditTestUtils.getJson(getResource(configFile));
 
@@ -376,7 +381,13 @@ public class AuditServiceImplTest {
         when(scriptRegistry.takeScript(any(JsonValue.class))).thenReturn(scriptEntry);
         when(scriptEntry.getScript(any(Context.class))).thenReturn(script);
         when(script.eval()).thenReturn("Exception Formatted");
-
+        when(cryptoService.decryptIfNecessary(any(JsonValue.class))).thenAnswer(
+                new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        return invocation.getArguments()[0];
+                    }
+                });
         auditService.activate(mock(ComponentContext.class));
         return auditService;
     }

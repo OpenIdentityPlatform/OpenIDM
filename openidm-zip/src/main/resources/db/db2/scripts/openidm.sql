@@ -221,18 +221,6 @@ CREATE UNIQUE INDEX SOPENIDM.IDX_LINKS_FIRST ON SOPENIDM.LINKS (LINKTYPE ASC, LI
 CREATE UNIQUE INDEX SOPENIDM.IDX_LINKS_SECOND ON SOPENIDM.LINKS (LINKTYPE ASC, LINKQUALIFIER ASC, SECONDID ASC);
 
 -- -----------------------------------------------------
--- Table openidm.security
--- -----------------------------------------------------
-
-CREATE TABLESPACE SOIDM11 MANAGED BY AUTOMATIC STORAGE ;
-CREATE TABLE SOPENIDM.SECURITY (
-    objectid                   VARCHAR(38)     NOT NULL,
-    rev                        VARCHAR(38)     NOT NULL,
-    storestring                CLOB(2M)        NOT NULL
-) IN DOPENIDM.SOIDM11;
-COMMENT ON TABLE SOPENIDM.SECURITY IS 'OPENIDM - Security data';
-
--- -----------------------------------------------------
 -- Table openidm.securitykeys
 -- -----------------------------------------------------
 
