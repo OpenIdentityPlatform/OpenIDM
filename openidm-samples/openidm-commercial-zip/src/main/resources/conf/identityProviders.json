@@ -1,5 +1,5 @@
 {
-  "copyright" : "/* Copyright 2016 ForgeRock AS All Rights Reserved. */"
+  "copyright" : "/* Copyright 2016 ForgeRock AS All Rights Reserved. */",
   "providers" : [
     {
       "name" : "google",
