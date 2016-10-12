@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.info.impl;
 
+import static org.forgerock.json.resource.Router.uriTemplate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -22,8 +24,6 @@ import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-
-import static org.forgerock.json.resource.Router.uriTemplate;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -46,7 +46,6 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
 import org.forgerock.openidm.cluster.ClusterEventListener;
@@ -54,12 +53,13 @@ import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.info.HealthInfo;
-import org.forgerock.openidm.info.health.OsInfoResourceProvider;
 import org.forgerock.openidm.info.health.DatabaseInfoResourceProvider;
 import org.forgerock.openidm.info.health.MemoryInfoResourceProvider;
+import org.forgerock.openidm.info.health.OsInfoResourceProvider;
 import org.forgerock.openidm.info.health.ReconInfoResourceProvider;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -227,6 +227,7 @@ public class HealthService
         "org.forgerock.openidm.script",
         "org.forgerock.openidm.system",
         "org.forgerock.openidm.util",
+        "org.forgerock.openidm.keystore",
         
         // 3rd Party Bundles
         "org.ops4j.pax.web.pax-web-jetty-bundle"

@@ -29,6 +29,7 @@ import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.osgi.framework.BundleContext;
 import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
@@ -113,7 +114,9 @@ public class ConfigBootstrapHelper {
 
                 return null;
             }
-            JsonValue jsonCfg = new JSONEnhancedConfig().getConfiguration(rawConfig, bundleContext, repoType);
+            final JSONEnhancedConfig jsonEnhancedConfig = new JSONEnhancedConfig();
+            jsonEnhancedConfig.bindCryptoService(CryptoServiceFactory.getInstance());
+            JsonValue jsonCfg = jsonEnhancedConfig.getConfiguration(rawConfig, bundleContext, repoType);
             Map<String, Object> cfg = jsonCfg.asMap();
             for (Entry<String, Object> entry : cfg.entrySet()) {
                 result.put(entry.getKey(), entry.getValue());

@@ -16,7 +16,8 @@
 
 package org.forgerock.openidm.config.enhanced;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.deepTransformBy;
 
 import java.util.Dictionary;
@@ -26,15 +27,14 @@ import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
@@ -73,6 +73,16 @@ public class JSONEnhancedConfig implements EnhancedConfig {
     private final static Logger logger = LoggerFactory.getLogger(JSONEnhancedConfig.class);
 
     private static final PropertyTransformer propertyTransformer = new PropertyTransformer(false);
+
+    /** The {@link CryptoService}. */
+    @Reference
+    private CryptoService cryptoService;
+
+    public void bindCryptoService(final CryptoService cryptoService) {
+        // this is needed to change the scope of the bind method to public instead of protected so that this method
+        // can be called in tests.
+        this.cryptoService = cryptoService;
+    }
 
     public String getConfigurationFactoryPid(ComponentContext compContext) {
         Object o = compContext.getProperties().get(ServerConstants.CONFIG_FACTORY_PID);
@@ -152,18 +162,10 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         }
         // todo: different way to handle mock unit tests
         if (decrypt && dict != null && jv.isNotNull()) {
-            decrypted = decrypt(decrypted);
+            decrypted = cryptoService.decrypt(decrypted);
         }
 
         return decrypted;
-    }
-
-    private JsonValue decrypt(JsonValue value) throws JsonException, InternalErrorException {
-        return getCryptoService().decrypt(value); // makes a decrypted copy
-    }
-
-    private CryptoService getCryptoService() throws InternalErrorException {
-        return CryptoServiceFactory.getInstance();
     }
 
     private static class PropertyTransformer implements Function<JsonValue, JsonValue, JsonValueException> {

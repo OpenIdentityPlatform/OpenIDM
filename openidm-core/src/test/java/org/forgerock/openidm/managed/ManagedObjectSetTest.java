@@ -51,6 +51,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.crypto.JsonDecryptFunction;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
+import org.forgerock.json.crypto.simple.SimpleKeySelector;
+import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -64,7 +66,6 @@ import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.audit.util.NullActivityLogger;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
-import org.forgerock.openidm.crypto.impl.UpdatableKeyStoreSelector;
 import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
@@ -415,7 +416,7 @@ public class ManagedObjectSetTest {
 
     private CryptoService createCryptoService() throws Exception {
         final KeyStore keyStore = createKeyStore();
-        final UpdatableKeyStoreSelector keySelector = new UpdatableKeyStoreSelector(keyStore, KEYSTORE_PASSWORD);
+        final SimpleKeySelector keySelector = new SimpleKeyStoreSelector(keyStore, KEYSTORE_PASSWORD);
         return new CryptoServiceImpl(keySelector, new JsonDecryptFunction(new SimpleDecryptor(keySelector)));
     }
 

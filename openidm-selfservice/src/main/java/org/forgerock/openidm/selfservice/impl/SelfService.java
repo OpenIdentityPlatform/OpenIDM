@@ -132,8 +132,8 @@ public class SelfService implements IdentityProviderListener {
     private KbaConfiguration kbaConfiguration;
 
     /** CryptoService - not used directly, but added to make sure shared key gets created before use */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    private volatile CryptoService cryptoService;
+    @Reference
+    private CryptoService cryptoService;
 
     @Reference(policy = ReferencePolicy.DYNAMIC, cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private volatile IdentityProviderService identityProviderService;

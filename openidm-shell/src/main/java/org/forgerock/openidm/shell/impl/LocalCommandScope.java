@@ -1,30 +1,21 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.shell.impl;
 
-import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.FileInputStream;
@@ -33,14 +24,14 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.io.StringWriter;
 import java.math.BigInteger;
+import java.security.GeneralSecurityException;
 import java.security.KeyStore;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import javax.crypto.spec.SecretKeySpec;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.felix.service.command.CommandSession;
 import org.apache.felix.service.command.Descriptor;
 import org.apache.felix.service.command.Parameter;
@@ -52,6 +43,9 @@ import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
 import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
 import org.forgerock.openidm.shell.CustomCommandScope;
 import org.forgerock.openidm.util.FileUtil;
+
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Command scope for local operations.
@@ -242,9 +236,7 @@ public class LocalCommandScope extends CustomCommandScope {
             session.getConsole().println("-----BEGIN ENCRYPTED VALUE-----");
             session.getConsole().println(wr.toString());
             session.getConsole().println("------END ENCRYPTED VALUE------");
-        } catch (JsonCryptoException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final JsonCryptoException|IOException|GeneralSecurityException e) {
             e.printStackTrace();
         }
     }
@@ -287,9 +279,7 @@ public class LocalCommandScope extends CustomCommandScope {
             session.getConsole().println("-----BEGIN HASHED VALUE-----");
             session.getConsole().println(wr.toString());
             session.getConsole().println("------END HASHED VALUE------");
-        } catch (JsonCryptoException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
+        } catch (final JsonCryptoException|IOException|GeneralSecurityException e) {
             e.printStackTrace();
         }
     }

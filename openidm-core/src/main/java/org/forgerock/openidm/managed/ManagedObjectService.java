@@ -96,8 +96,8 @@ public class ManagedObjectService implements RequestHandler, Describable<ApiDesc
     private final static Logger logger = LoggerFactory.getLogger(ManagedObjectService.class);
 
     /** Cryptographic service. */
-    @Reference(policy = ReferencePolicy.DYNAMIC)
-    protected volatile CryptoService cryptoService;
+    @Reference
+    protected CryptoService cryptoService;
 
     /** Script Registry service. */
     @Reference(policy = ReferencePolicy.DYNAMIC)

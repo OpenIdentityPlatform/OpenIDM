@@ -168,19 +168,6 @@ CREATE TABLE openidm.links (
 CREATE UNIQUE INDEX idx_links_first ON openidm.links (linktype, linkqualifier, firstid);
 CREATE UNIQUE INDEX idx_links_second ON openidm.links (linktype, linkqualifier, secondid);
 
-
--- -----------------------------------------------------
--- Table openidm.security
--- -----------------------------------------------------
-
-CREATE TABLE openidm.security (
-  objectid VARCHAR(38) NOT NULL,
-  rev VARCHAR(38) NOT NULL,
-  storestring TEXT,
-  PRIMARY KEY (objectid)
-);
-
-
 -- -----------------------------------------------------
 -- Table openidm.securitykeys
 -- -----------------------------------------------------

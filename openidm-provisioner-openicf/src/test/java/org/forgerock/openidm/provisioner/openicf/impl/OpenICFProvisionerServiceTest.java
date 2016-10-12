@@ -20,6 +20,7 @@ import static org.assertj.core.api.Assertions.fail;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Router.uriTemplate;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -43,6 +44,7 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.forgerock.json.resource.Request;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.router.IDMConnectionFactoryWrapper;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
@@ -103,6 +105,8 @@ import org.identityconnectors.framework.common.objects.Name;
 import org.identityconnectors.framework.common.objects.SyncToken;
 import org.identityconnectors.framework.server.ConnectorServer;
 import org.identityconnectors.framework.server.impl.ConnectorServerImpl;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -268,7 +272,17 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
 
         provider = Pair.of(new ConnectorInfoProviderService(), context);
         provider.getLeft().connectorFrameworkFactory = new ConnectorFrameworkFactory();
-        provider.getLeft().bindEnhancedConfig(new JSONEnhancedConfig());
+        final CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decrypt(any(JsonValue.class))).thenAnswer(
+                new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        return invocation.getArguments()[0];
+                    }
+                });
+        final JSONEnhancedConfig jsonEnhancedConfig = new JSONEnhancedConfig();
+        jsonEnhancedConfig.bindCryptoService(cryptoService);
+        provider.getLeft().bindEnhancedConfig(jsonEnhancedConfig);
         provider.getLeft().activate(context);
 
         File[] configJsons = (new File(root, "/config/")).listFiles(new FilenameFilter() {
@@ -297,7 +311,7 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
             service.bindConnectorInfoProvider(provider.getLeft());
             service.bindRouterRegistry(this);
             service.bindSyncFailureHandlerFactory(this);
-            service.bindEnhancedConfig(new JSONEnhancedConfig());
+            service.bindEnhancedConfig(jsonEnhancedConfig);
             service.bindConnectionFactory(new IDMConnectionFactoryWrapper(Resources.newInternalConnectionFactory(router)));
 
             //set as NullActivityLogger to be the mock logger.

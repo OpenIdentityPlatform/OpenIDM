@@ -11,12 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.config.paxweb;
 
-import org.forgerock.openidm.crypto.util.JettyPropertyUtil;
+import org.forgerock.openidm.util.JettyPropertyUtil;
 
 /**
  * Configures pax web by setting the pax web properties.

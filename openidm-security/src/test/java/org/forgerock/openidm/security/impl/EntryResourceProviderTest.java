@@ -16,24 +16,26 @@
 package org.forgerock.openidm.security.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.util.Files.temporaryFolder;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.PatchOperation.add;
 import static org.forgerock.json.resource.Requests.*;
-import static org.forgerock.security.keystore.KeyStoreType.JCEKS;
-import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
+import static org.forgerock.openidm.core.IdentityServer.*;
+import static org.forgerock.openidm.core.IdentityServer.TRUSTSTORE_PASSWORD;
+import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_INSTALL_LOCATION;
+import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_PROJECT_LOCATION;
+import static org.forgerock.openidm.util.CertUtil.generateCertificate;
+import static org.mockito.Mockito.mock;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyStore;
-import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.util.LinkedList;
 import java.util.List;
@@ -58,12 +60,19 @@ import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.KeyRepresentation;
+import org.forgerock.openidm.crypto.factory.CryptoServiceFactory;
+import org.forgerock.openidm.crypto.impl.CryptoServiceImpl;
+import org.forgerock.openidm.keystore.KeyStoreManagementService;
+import org.forgerock.openidm.keystore.KeyStoreService;
+import org.forgerock.openidm.keystore.factory.KeyStoreServiceFactory;
+import org.forgerock.openidm.keystore.impl.KeyStoreServiceImpl;
 import org.forgerock.openidm.repo.RepositoryService;
-import org.forgerock.openidm.security.KeyStoreHandler;
-import org.forgerock.openidm.security.KeyStoreManager;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
+import org.forgerock.util.test.assertj.AssertJPromiseAssert;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -77,20 +86,23 @@ public class EntryResourceProviderTest {
     private static final String CLASS_NAME = EntryResourceProvider.class.getCanonicalName();
 
     @BeforeClass
-    public void setUp() {
+    public void setUp() throws Exception {
         Security.addProvider(new BouncyCastleProvider());
+        System.setProperty(LAUNCHER_PROJECT_LOCATION,
+                Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
+        System.setProperty(LAUNCHER_INSTALL_LOCATION,
+                Paths.get(getClass().getResource("/").toURI()).toFile().getAbsolutePath());
+        try {
+            IdentityServer.initInstance(null);
+        } catch (final IllegalStateException e) {
+            // tried to reinitialize ignore
+        }
     }
 
     @Test
     public void testCreatingEntry() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -107,13 +119,7 @@ public class EntryResourceProviderTest {
     @Test
     public void testReadEntry() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         Promise<ResourceResponse, ResourceException> promise =
                 entryResourceProvider.createInstance(
@@ -134,13 +140,7 @@ public class EntryResourceProviderTest {
     @Test
     public void testDeleteEntry() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         Promise<ResourceResponse, ResourceException> promise =
                 entryResourceProvider.createInstance(
@@ -161,13 +161,7 @@ public class EntryResourceProviderTest {
     @Test
     public void testUpdateEntry() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         Promise<ResourceResponse, ResourceException> promise =
                 entryResourceProvider.createInstance(
@@ -188,13 +182,7 @@ public class EntryResourceProviderTest {
     @Test
     public void testPatchEntry() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -202,19 +190,13 @@ public class EntryResourceProviderTest {
                         new RootContext(), ENTRY_ID, newPatchRequest(RESOURCE_CONTAINER, add("/test", "test")));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
     public void testActionCollection() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         final Promise<ActionResponse, ResourceException> promise =
@@ -222,19 +204,18 @@ public class EntryResourceProviderTest {
                         new RootContext(), newActionRequest(RESOURCE_CONTAINER, "actionId"));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
     public void testActionInstance() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
+        final KeyStoreService keyStoreService = KeyStoreServiceFactory.getInstance();
+        final KeyStoreManagementService keyStoreManagementService = mock(KeyStoreManagementService.class);
+        final CryptoService cryptoService = CryptoServiceFactory.getInstance();
         final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+                new TestEntryResourceProvider(RESOURCE_CONTAINER, keyStoreService, keyStoreManagementService,
+                        new TestRepositoryService(), cryptoService);
 
         // when
         final Promise<ActionResponse, ResourceException> promise =
@@ -242,19 +223,13 @@ public class EntryResourceProviderTest {
                         new RootContext(), ENTRY_ID, newActionRequest(RESOURCE_CONTAINER, "actionId"));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
     public void testQueryCollection() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         final Promise<QueryResponse, ResourceException> promise =
@@ -264,19 +239,13 @@ public class EntryResourceProviderTest {
                         new NullQueryResourceHandler());
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotSupportedException.class);
     }
 
     @Test
     public void attemptToCreateAliasThatAlreadyExists() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         Promise<ResourceResponse, ResourceException> promise =
@@ -293,19 +262,13 @@ public class EntryResourceProviderTest {
                         new RootContext(), newCreateRequest(RESOURCE_CONTAINER, ENTRY_ID, EMPTY_JSON_OBJECT));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(ConflictException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(ConflictException.class);
     }
 
     @Test
     public void attemptToCreateWithNoResourceId() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         Promise<ResourceResponse, ResourceException> promise =
@@ -313,19 +276,13 @@ public class EntryResourceProviderTest {
                         new RootContext(), newCreateRequest(RESOURCE_CONTAINER, EMPTY_JSON_OBJECT));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(BadRequestException.class);
     }
 
     @Test
     public void attemptToReadEntryThatDoesNotExist() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -333,19 +290,13 @@ public class EntryResourceProviderTest {
                         new RootContext(), ENTRY_ID, newReadRequest(RESOURCE_CONTAINER, ENTRY_ID));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
     }
 
     @Test
     public void attemptToDeleteEntryThatDoesNotExist() throws Exception {
         // given
-        final File keystoreFile = createTemporaryKeyStore();
-        final EntryResourceProvider entryResourceProvider =
-                new TestEntryResourceProvider(
-                        RESOURCE_CONTAINER,
-                        new FileBasedKeyStoreHandler(JCEKS, keystoreFile.getAbsolutePath(), KEY_STORE_PASSWORD),
-                        new TestKeyStoreManager(),
-                        new TestRepositoryService());
+        final EntryResourceProvider entryResourceProvider = createEntryResourceProvider();
 
         // when
         final Promise<ResourceResponse, ResourceException> promise =
@@ -353,26 +304,65 @@ public class EntryResourceProviderTest {
                         new RootContext(), ENTRY_ID, newDeleteRequest(RESOURCE_CONTAINER, ENTRY_ID));
 
         // then
-        assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
+        AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
     }
 
+    private void createKeyStores() throws Exception {
+        createKeyStore(IdentityServer.getFileForPath(IdentityServer.getInstance().getProperty(KEYSTORE_LOCATION)));
+        createTrustStore(IdentityServer.getFileForPath(IdentityServer.getInstance().getProperty(TRUSTSTORE_LOCATION)));
+    }
 
-    private File createTemporaryKeyStore()
-            throws CertificateException, NoSuchAlgorithmException, IOException, KeyStoreException {
-        final File keystoreFile = File.createTempFile(CLASS_NAME, null, temporaryFolder());
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void createKeyStore(final File keystoreFile) throws Exception {
         keystoreFile.deleteOnExit();
-        KeyStore ks = KeyStore.getInstance(JCEKS.name());
+        if (keystoreFile.exists()) {
+            keystoreFile.delete();
+        }
 
-        char[] password = KEY_STORE_PASSWORD.toCharArray();
-        ks.load(null, password);
-
-        FileOutputStream fos = new FileOutputStream(keystoreFile);
-        ks.store(fos, password);
-        fos.close();
-
-        return keystoreFile;
+        keystoreFile.getParentFile().mkdirs();
+        assertThat(keystoreFile.createNewFile()).isTrue().as("Unable to create keystore file");
+        try (final OutputStream outputStream = new FileOutputStream(keystoreFile)) {
+            final KeyStore keyStore =
+                    KeyStore.getInstance(IdentityServer.getInstance().getProperty(KEYSTORE_TYPE));
+            keyStore.load(null, IdentityServer.getInstance().getProperty(KEYSTORE_PASSWORD).toCharArray());
+            keyStore.store(
+                    outputStream,
+                    IdentityServer.getInstance().getProperty(KEYSTORE_PASSWORD).toCharArray()
+            );
+        }
     }
 
+    @SuppressWarnings("ResultOfMethodCallIgnored")
+    private void createTrustStore(final File keystoreFile) throws Exception {
+        keystoreFile.deleteOnExit();
+        if (keystoreFile.exists()) {
+            keystoreFile.delete();
+        }
+
+        keystoreFile.getParentFile().mkdirs();
+        assertThat(keystoreFile.createNewFile()).isTrue().as("Unable to create keystore file");
+        try (final OutputStream outputStream = new FileOutputStream(keystoreFile)) {
+            final KeyStore keyStore =
+                    KeyStore.getInstance(IdentityServer.getInstance().getProperty(TRUSTSTORE_TYPE));
+            keyStore.load(null, IdentityServer.getInstance().getProperty(TRUSTSTORE_PASSWORD).toCharArray());
+            keyStore.store(
+                    outputStream,
+                    IdentityServer.getInstance().getProperty(TRUSTSTORE_PASSWORD).toCharArray()
+            );
+        }
+    }
+
+    private EntryResourceProvider createEntryResourceProvider() throws Exception {
+        createKeyStores();
+        final KeyStoreServiceImpl keyStoreService = new KeyStoreServiceImpl();
+        keyStoreService.activate(null);
+        final KeyStoreManagementService keyStoreManagementService = mock(KeyStoreManagementService.class);
+        final CryptoServiceImpl cryptoService = new CryptoServiceImpl();
+        cryptoService.bindKeyStoreService(keyStoreService);
+        cryptoService.activate(null);
+        return new TestEntryResourceProvider(RESOURCE_CONTAINER, keyStoreService, keyStoreManagementService,
+                        new TestRepositoryService(), cryptoService);
+    }
 
     private final class NullQueryResourceHandler implements QueryResourceHandler {
 
@@ -385,20 +375,9 @@ public class EntryResourceProviderTest {
     private final class TestEntryResourceProvider extends EntryResourceProvider {
 
         public TestEntryResourceProvider(
-                String resourceName, KeyStoreHandler store, KeyStoreManager manager, RepositoryService repoService) {
-            super(resourceName, store, manager, repoService);
-        }
-
-        @Override
-        public void createDefaultEntry(String alias) throws Exception {
-            Pair<X509Certificate, PrivateKey> pair = generateCertificate("localhost",
-                    "OpenIDM Self-Signed Certificate", "None", "None", "None", "None",
-                    DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, DEFAULT_SIGNATURE_ALGORITHM, null, null);
-            Certificate cert = pair.getKey();
-            PrivateKey key = pair.getValue();
-            store.getStore().setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}),
-                    new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
-            store.store();
+                String resourceName, KeyStoreService keyStoreService, KeyStoreManagementService manager,
+                RepositoryService repoService, CryptoService cryptoService) {
+            super(resourceName, keyStoreService.getKeyStore(), keyStoreService, repoService, cryptoService, manager);
         }
 
         @Override
@@ -408,27 +387,20 @@ public class EntryResourceProviderTest {
                     DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, DEFAULT_SIGNATURE_ALGORITHM, null, null);
             Certificate cert = pair.getKey();
             PrivateKey key = pair.getValue();
-            store.getStore().setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}),
-                    new KeyStore.PasswordProtection(store.getPassword().toCharArray()));
-            store.store();
+            keyStoreService.getKeyStore().setEntry(alias, new KeyStore.PrivateKeyEntry(key, new Certificate[]{cert}),
+                    new KeyStore.PasswordProtection(keyStoreService.getKeyStoreDetails().getPassword().toCharArray()));
+            keyStoreService.store();
         }
 
         @Override
         protected JsonValue readEntry(String alias) throws Exception {
-            Key key = store.getStore().getKey(alias, store.getPassword().toCharArray());
+            Key key = keyStoreService.getKeyStore().getKey(alias,
+                    keyStoreService.getKeyStoreDetails().getPassword().toCharArray());
             if (key == null) {
                 throw new NotFoundException("Alias does not correspond to a key entry in " + resourceName);
             } else {
                 return KeyRepresentation.toJsonValue(alias, key);
             }
-        }
-    }
-
-    private final class TestKeyStoreManager implements KeyStoreManager {
-
-        @Override
-        public void reload() throws Exception {
-            // Do Nothing
         }
     }
 
@@ -499,4 +471,5 @@ public class EntryResourceProviderTest {
             }
         }
     }
+
 }

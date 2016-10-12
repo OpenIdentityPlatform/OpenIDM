@@ -11,12 +11,13 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2015 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.provisioner.openicf.impl;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -38,12 +39,15 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.openicf.framework.ConnectorFrameworkFactory;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.provisioner.openicf.ConnectorReference;
 import org.identityconnectors.common.logging.Log;
 import org.identityconnectors.common.logging.impl.NoOpLogger;
 import org.identityconnectors.framework.api.APIConfiguration;
 import org.identityconnectors.framework.api.ConnectorInfo;
 import org.identityconnectors.framework.api.ConnectorKey;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
 import org.testng.annotations.AfterTest;
@@ -92,7 +96,17 @@ public class ConnectorInfoProviderServiceTest {
         // stubbing
         when(context.getProperties()).thenReturn(properties);
         ConnectorInfoProviderService instance = new ConnectorInfoProviderService();
-        instance.bindEnhancedConfig(new JSONEnhancedConfig());
+        final CryptoService cryptoService = mock(CryptoService.class);
+        when(cryptoService.decrypt(any(JsonValue.class))).thenAnswer(
+                new Answer<Object>() {
+                    @Override
+                    public Object answer(InvocationOnMock invocation) throws Throwable {
+                        return invocation.getArguments()[0];
+                    }
+                });
+        final JSONEnhancedConfig jsonEnhancedConfig = new JSONEnhancedConfig();
+        jsonEnhancedConfig.bindCryptoService(cryptoService);
+        instance.bindEnhancedConfig(jsonEnhancedConfig);
         instance.bindConnectorFrameworkFactory(new ConnectorFrameworkFactory());
         instance.activate(context);
         testableConnectorInfoProvider = instance;

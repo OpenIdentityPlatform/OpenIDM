@@ -17,25 +17,19 @@
 // TODO: Expose as a set of resource actions.
 package org.forgerock.openidm.crypto.impl;
 
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.identity;
-import static org.forgerock.openidm.core.IdentityServer.*;
-import static org.forgerock.security.keystore.KeyStoreType.PKCS11;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.security.GeneralSecurityException;
 import java.security.Key;
-import java.security.KeyStore;
-import java.security.KeyStore.SecretKeyEntry;
-import java.util.Enumeration;
-import java.util.LinkedHashMap;
-import java.util.Map;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 
+import org.apache.felix.scr.annotations.Component;
+import org.apache.felix.scr.annotations.ConfigurationPolicy;
+import org.apache.felix.scr.annotations.Properties;
+import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonException;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -45,7 +39,8 @@ import org.forgerock.json.crypto.JsonDecryptFunction;
 import org.forgerock.json.crypto.JsonEncryptor;
 import org.forgerock.json.crypto.simple.SimpleDecryptor;
 import org.forgerock.json.crypto.simple.SimpleEncryptor;
-import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.json.crypto.simple.SimpleKeySelector;
+import org.forgerock.json.crypto.simple.SimpleKeyStoreSelector;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoConstants;
 import org.forgerock.openidm.crypto.CryptoService;
@@ -57,25 +52,35 @@ import org.forgerock.openidm.crypto.SaltedSHA256FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA384FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA512FieldStorageScheme;
 import org.forgerock.openidm.crypto.SharedKeyService;
-import org.forgerock.openidm.crypto.factory.CryptoUpdateService;
-import org.forgerock.openidm.util.ClusterUtil;
+import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.util.JsonUtil;
-import org.forgerock.security.keystore.KeyStoreBuilder;
-import org.forgerock.security.keystore.KeyStoreType;
 import org.forgerock.util.Function;
-import org.forgerock.util.Utils;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
  * Cryptography Service
  */
-public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, SharedKeyService {
+@Component(
+        name = "org.forgerock.openidm.crypto",
+        immediate = true,
+        policy = ConfigurationPolicy.OPTIONAL
+)
+@Properties({
+        @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM cryptography service"),
+        @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
+})
+@Service({ CryptoService.class, SharedKeyService.class })
+public class CryptoServiceImpl implements CryptoService, SharedKeyService {
 
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
     private Function<JsonValue, JsonValue, JsonValueException> decryptionFunction = identity();
-    private UpdatableKeyStoreSelector keySelector;
+    private SimpleKeySelector keySelector;
+
+    @Reference(target="(service.pid=org.forgerock.openidm.impl.keystore)")
+    private KeyStoreService keyStoreService;
 
     /**
      * Constructs an implementation of the {@link CryptoService}.
@@ -85,129 +90,34 @@ public class CryptoServiceImpl implements CryptoService, CryptoUpdateService, Sh
 
     /**
      * Constructs an implementation of the {@link CryptoService} with a given
-     * {@link UpdatableKeyStoreSelector} and decryption {@link Function}.
+     * {@link SimpleKeySelector} and decryption {@link Function}.
      *
-     * @param keySelector The {@link UpdatableKeyStoreSelector}.
+     * @param keySelector The {@link SimpleKeySelector}.
      * @param decryptionFunction A {@link Function}s to use for decryption.
      */
-    public CryptoServiceImpl(final UpdatableKeyStoreSelector keySelector,
+    public CryptoServiceImpl(final SimpleKeySelector keySelector,
             final Function<JsonValue, JsonValue, JsonValueException> decryptionFunction) {
         this.keySelector = keySelector;
         this.decryptionFunction = decryptionFunction;
     }
 
-    /** Map of crypto secret key aliases and the algorithm they should use */
-    private static final Map<String, String> configAliases = new LinkedHashMap<>(3);
-    static {
-        // each alias is stored under a specific property in boot.properties
-        configAliases.put(
-                IdentityServer.getInstance().getProperty(CONFIG_CRYPTO_ALIAS),
-                "AES");
-        configAliases.put(
-                IdentityServer.getInstance().getProperty(CONFIG_CRYPTO_ALIAS_SELF_SERVICE),
-                "AES");
-        configAliases.put(
-                // OPENIDM-6190 jwt-session signing key must be 256bit
-                IdentityServer.getInstance().getProperty(
-                        ServerConstants.JWTSESSION_SIGNING_KEY_ALIAS_PROPERTY,
-                        ServerConstants.DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS),
-                "HmacSHA256");
+    public void bindKeyStoreService(final KeyStoreService keyStoreService) {
+        // this method is necessary for CryptoServiceFactory to be able to bind the keystore service.
+        this.keyStoreService = keyStoreService;
     }
 
     public void activate(@SuppressWarnings("unused") BundleContext context) {
         logger.debug("Activating cryptography service");
         try {
-            int keyCount = 0;
-            final String password = IdentityServer.getInstance().getProperty(KEYSTORE_PASSWORD);
-            final String instanceType =
-                    IdentityServer.getInstance().getProperty(INSTANCE_TYPE, ClusterUtil.TYPE_STANDALONE);
-            final KeyStoreType type =
-                    Utils.asEnum(
-                            IdentityServer.getInstance().getProperty(KEYSTORE_TYPE, KeyStore.getDefaultType()),
-                            KeyStoreType.class);
-            final String provider = IdentityServer.getInstance().getProperty(KEYSTORE_PROVIDER);
-            final String location =
-                    IdentityServer.getFileForPath(
-                            IdentityServer.getInstance().getProperty(KEYSTORE_LOCATION),
-                            IdentityServer.getInstance().getInstallLocation()).getAbsolutePath();
-
-            final char[] clearPassword;
-            final KeyStore keyStore;
-
-            try {
-                clearPassword = Main.unfold(password);
-                if (PKCS11.equals(type)) {
-                    keyStore = new KeyStoreBuilder()
-                            .withKeyStoreType(type)
-                            .withPassword(clearPassword)
-                            .withProvider(provider)
-                            .build();
-                } else {
-                    keyStore = new KeyStoreBuilder()
-                            .withKeyStoreType(type)
-                            .withPassword(clearPassword)
-                            .withProvider(provider)
-                            .withKeyStoreFile(location)
-                            .build();
-                }
-                keySelector = new UpdatableKeyStoreSelector(keyStore, new String(clearPassword));
-                decryptionFunction = new JsonDecryptFunction(new SimpleDecryptor(keySelector));
-                Enumeration<String> aliases = keyStore.aliases();
-                while (aliases.hasMoreElements()) {
-                    logger.debug("Available cryptography key: {}", aliases.nextElement());
-                    keyCount++;
-                }
-            } catch (final FileNotFoundException e) {
-                throw new RuntimeException("Unable to open keystore with filename: " + location, e);
-            } catch (final GeneralSecurityException e) {
-                throw new RuntimeException("Unable to get clear text keystore password", e);
-            }
-
-            try {
-                if ((instanceType.equals(ClusterUtil.TYPE_STANDALONE)
-                        || instanceType.equals(ClusterUtil.TYPE_CLUSTERED_FIRST))
-                        && !PKCS11.equals(type)) {
-                    for (Map.Entry<String, String> alias : configAliases.entrySet()) {
-                        Key key = keyStore.getKey(alias.getKey(), clearPassword);
-                        if (key == null) {
-                            // Initialize the keys
-                            logger.debug("Initializing secret key entry {} in the keystore", alias);
-                            generateDefaultKey(keyStore, alias.getKey(), location, clearPassword, alias.getValue());
-                        }
-                    }
-                }
-            } catch (IOException | GeneralSecurityException e) {
-                throw new RuntimeException("Unable to initialize default keys in keystore", e);
-            }
-            logger.info("CryptoService is initialized with {} keys.", keyCount);
+            keySelector =
+                    new SimpleKeyStoreSelector(
+                            keyStoreService.getKeyStore(),
+                            keyStoreService.getKeyStoreDetails().getPassword());
+            decryptionFunction = new JsonDecryptFunction(new SimpleDecryptor(keySelector));
         } catch (final JsonValueException jve) {
             logger.error("Exception when loading CryptoService configuration", jve);
             throw jve;
         }
-    }
-
-    /**
-     * Generates a default secret key entry in the keystore.
-     * 
-     * @param ks the keystore
-     * @param alias the alias of the secret key
-     * @param location the keystore location
-     * @param password the keystore password
-     * @param algorithm the key generator algorithm
-     * @throws IOException
-     * @throws GeneralSecurityException
-     */
-    private void generateDefaultKey(KeyStore ks, String alias, String location, char[] password, String algorithm)
-            throws IOException, GeneralSecurityException {
-        SecretKey newKey = KeyGenerator.getInstance(algorithm).generateKey();
-        ks.setEntry(alias, new SecretKeyEntry(newKey), new KeyStore.PasswordProtection(password));
-        try (final OutputStream out = new FileOutputStream(location)) {
-            ks.store(out, password);
-        }
-    }
-    
-    public void updateKeySelector(KeyStore ks, String password) {
-        keySelector.update(ks, password);
     }
 
     public void deactivate(@SuppressWarnings("unused") BundleContext context) {
