@@ -16,7 +16,7 @@
 
 define([
     "jquery",
-    "underscore",
+    "lodash",
     "backbone",
     "backgrid",
     "form2js",
@@ -524,8 +524,8 @@ define([
         editSchedule: function(e) {
             e.preventDefault();
 
-            let scheduleName = $(e.currentTarget.closest("tr")).data("source");
-            let scheduleId = $(e.currentTarget.closest("tr")).data("id");
+            let scheduleName = $(e.currentTarget.closest("tr")).data("source"),
+                scheduleId = $(e.currentTarget.closest("tr")).data("id");
 
             liveSyncDialog.render({
                 "id": scheduleId,
@@ -599,8 +599,8 @@ define([
                             deleteSchedule: function(e) {
                                 e.preventDefault();
 
-                                let scheduleName = this.model.attributes.source;
-                                let scheduleId = this.model.id;
+                                let scheduleName = this.model.attributes.source,
+                                    scheduleId = this.model.id;
 
                                 _this.$el.find(".sources").append("<option value='" + scheduleName + "'>" +  _.startCase(_.last(scheduleName.split("/"))) + "</option>");
 
@@ -830,7 +830,7 @@ define([
                 mergedResult.configurationProperties = this.connectorTypeRef.getGenericConnector();
                 mergedResult.enabled = this.$el.find("#connectorEnabled").val();
             } else {
-                connectorData = form2js('connectorForm', '.', true);
+                connectorData = this.cleanseObject(form2js('connectorForm', '.', false));
 
                 delete connectorData.connectorType;
 
