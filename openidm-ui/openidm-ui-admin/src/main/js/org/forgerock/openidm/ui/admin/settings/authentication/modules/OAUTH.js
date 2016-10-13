@@ -61,6 +61,7 @@ define([
         render: function (args) {
             this.data = _.clone(args, true);
             this.data.userOrGroupValue = "userRoles";
+            this.data.config.properties.resolvers = this.data.config.properties.resolvers || [{}];
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);
             this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
