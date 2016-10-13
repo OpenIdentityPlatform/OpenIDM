@@ -3,7 +3,7 @@
    "connectorRef" :
       {
           "bundleName"    : "org.forgerock.openicf.connectors.databasetable-connector",
-          "bundleVersion" : "1.1.0.2",
+          "bundleVersion" : "[1.1.0.2,1.2.0.0)",
           "connectorName" : "org.identityconnectors.databasetable.DatabaseTableConnector"
       },
    "poolConfigOption" :
@@ -59,7 +59,7 @@
          "datasource" : "",
          "jndiProperties" : null
       },
-   "syncFailureHandler" : 
+   "syncFailureHandler" :
       {
          "maxRetries" : 5,
          "postRetryAction" : "logged-ignore"

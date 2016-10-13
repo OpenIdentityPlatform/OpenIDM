@@ -4,7 +4,7 @@
   "description" : "SSH connector for performing operations remotely via SSH",
   "connectorRef" : {
     "bundleName" : "org.forgerock.openicf.connectors.ssh-connector",
-    "bundleVersion" : "1.4.0.0",
+    "bundleVersion" : "[1.4.0.0,1.5.0.0)",
     "connectorName" : "org.forgerock.openicf.connectors.ssh.SSHConnector"
   },
   "poolConfigOption" : {

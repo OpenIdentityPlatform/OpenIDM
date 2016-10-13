@@ -2,7 +2,7 @@
     "name" : "ldap",
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.ldap-connector",
-        "bundleVersion" : "[1.4.0.0,2.0.0.0)",
+        "bundleVersion" : "[1.4.0.0,1.5.0.0)",
         "connectorName" : "org.identityconnectors.ldap.LdapConnector"
     },
     "configurationProperties" : {
@@ -50,7 +50,7 @@
             "uid"
         ],
         "groupMemberAttribute" : "uniqueMember",
-        "passwordHashAlgorithm" : null,
+        "passwordHashAlgorithm" : "SHA",
         "usePagedResultControl" : true,
         "blockSize" : 100,
         "uidAttribute" : "dn",
