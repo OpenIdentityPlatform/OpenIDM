@@ -264,7 +264,7 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
             Map<String, Object> obj = inputTransformer(createRequest.getContent()).asMap();
 
             // Set id to a new UUID if none is specified (_action=create)
-            if (Strings.isNullOrEmpty(createRequest.getNewResourceId().trim())) {
+            if (Strings.isNullOrEmpty(createRequest.getNewResourceId())) {
                 createRequest.setNewResourceId(UUID.randomUUID().toString());
             }
 
