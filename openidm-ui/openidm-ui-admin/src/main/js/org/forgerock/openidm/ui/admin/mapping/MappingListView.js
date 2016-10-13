@@ -180,6 +180,7 @@ define([
 
                         mappingGrid = new Backgrid.Grid({
                             className: "table backgrid",
+                            emptyText: "No mappings available.",
                             row: RenderRow,
                             columns: BackgridUtils.addSmallScreenCell([
                                 {
@@ -337,7 +338,7 @@ define([
                         }
                     });
 
-                    resource.displayName = $.t("templates.connector.managedObjectType");
+                    resource.displayName = $.t("templates.managed.managedObjectType");
 
                     if(managedCheck) {
                         resource.url = "#managed/edit/" +location.split("/")[1] +"/";
@@ -355,26 +356,39 @@ define([
         },
         deleteMapping: function(event) {
             var selectedEl = $(event.target).parents(".mapping-config-body"),
-                index = this.$el.find("#mappingConfigHolder .mapping-config-body").index(selectedEl);
+                alternateEl,
+                mappingIndex;
 
-            if(!selectedEl.length) {
+            if(selectedEl.length > 0) {
+                _.each(this.$el.find(".backgrid tbody tr"), function(row, index) {
+                    if($(row).attr("data-mapping-title") === selectedEl.attr("mapping")) {
+                        alternateEl = $(row);
+                        mappingIndex = index;
+                    }
+                });
+            } else {
                 selectedEl = $(event.currentTarget).parents("tr");
 
-                _.each(this.$el.find(".backgrid tbody tr"), function(row,idx) {
-                    if($(row).attr("data-mapping-title") === selectedEl.attr("data-mapping-title")) {
-                        index = idx;
+                _.each(this.$el.find(".mapping-config-body"), function(card, index) {
+                    if($(card).attr("mapping") === selectedEl.attr("data-mapping-title")) {
+                        alternateEl = $(card);
+                        mappingIndex = index;
                     }
                 });
             }
 
-            mappingUtils.confirmDeleteMapping(this.cleanConfig[index].name, this.cleanConfig, _.bind(function() {
+            mappingUtils.confirmDeleteMapping(this.cleanConfig[mappingIndex].name, this.cleanConfig, _.bind(function() {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "mappingDeleted");
 
-                if(this.cleanConfig.length === 0) {
-                    this.$el.find("#noMappingsDefined").show();
-                }
+                this.cleanConfig.splice(mappingIndex, 1);
 
                 selectedEl.remove();
+                alternateEl.remove();
+
+                if(this.$el.find(".backgrid tbody tr").length === 0) {
+                    this.$el.find("#noMappingCards").toggleClass("hidden", false);
+                    this.$el.find(".backgrid tbody").append("<tr class='empty'><td colspan='5'>" +$.t("templates.mapping.noMapping") +"</td></tr>");
+                }
             }, this));
         },
         showSyncStatus: function(isOnPageLoad){
