@@ -142,10 +142,10 @@ if (request.method !== "query") {
         taskId = tasks[i]._id;
         task = openidm.read("workflow/taskinstance/"+taskId);
 
-        if (!view[task.processDefinitionId+"|"+task.taskDefinitionKey]) {
-            view[task.processDefinitionId+"|"+task.taskDefinitionKey] = {name : task.name, tasks : []};
+        if (!view[task._id]) {
+            view[task._id] = {name : task.name, tasks : []};
         }
-        view[task.processDefinitionId+"|"+task.taskDefinitionKey].tasks.push(task);
+        view[task._id].tasks.push(task);
     }
 
     for (taskDefinition in view) {
