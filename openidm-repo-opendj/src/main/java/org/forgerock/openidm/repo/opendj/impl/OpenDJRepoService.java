@@ -238,7 +238,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
          */
 
         // Generic mappings
-        final JsonValue genericMappings = resourceMappings.get("genericMappings").expect(Map.class);
+        final JsonValue genericMappings = resourceMappings.get("genericMapping").expect(Map.class);
         if (genericMappings.isNotNull()) {
             for (String type : genericMappings.keys()) {
                 final JsonValue handlerConfig = genericMappings.get(type);

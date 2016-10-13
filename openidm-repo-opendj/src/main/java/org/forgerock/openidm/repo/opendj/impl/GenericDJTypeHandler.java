@@ -56,25 +56,11 @@ public class GenericDJTypeHandler extends AbstractDJTypeHandler {
 
     @Override
     protected JsonValue inputTransformer(JsonValue jsonValue) throws ResourceException {
-        try {
-            final String stringified = mapper.writeValueAsString(jsonValue.asMap());
-
-            return json(object(field("fullobject", stringified)));
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            throw new InternalServerErrorException("Failed to transform input json", e);
-        }
+        return json(object(field("fullobject", jsonValue.getObject())));
     }
 
     @Override
     protected JsonValue outputTransformer(JsonValue jsonValue) throws ResourceException {
-        final String fullObject = jsonValue.get("fullobject").asString();
-
-        final TypeReference<LinkedHashMap<String,Object>> objectTypeRef = new TypeReference<LinkedHashMap<String,Object>>() {};
-        try {
-            return json(mapper.readValue(fullObject, objectTypeRef));
-        } catch (IOException e) {
-            throw new InternalServerErrorException("Failed to convert fullobject property of generic object", e);
-        }
+        return jsonValue.get("fullobject");
     }
 }

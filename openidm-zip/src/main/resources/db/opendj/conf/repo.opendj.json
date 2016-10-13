@@ -98,10 +98,6 @@
   },
   "resourceMapping": {
     "explicitMapping": {
-      "managed/user": {
-        "resource": "repo/managed/user",
-        "propertiesToStringify" : [ "password", "effectiveAssignments" ]
-      },
       "internal/user": {
         "resource": "repo/internal/user",
         "propertiesToStringify": [ "password", "roles" ]
@@ -110,6 +106,9 @@
     "genericMapping": {
       "config": {
         "resource": "/repo/config"
+      },
+      "managed/user": {
+        "resource": "repo/managed/user"
       }
     }
   },
@@ -119,7 +118,7 @@
         "managed/user": {
           "type": "collection",
           "dnTemplate": "ou=users,ou=managed,dc=openidm,dc=forgerock,dc=com",
-          "resource": "managed_user",
+          "resource": "generic",
           "namingStrategy": {
             "dnAttribute": "uid",
             "type": "clientDnNaming"
@@ -203,7 +202,7 @@
           "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
         },
         "fullobject": {
-          "type": "simple", "ldapAttribute": "fullobject"
+          "type": "json", "ldapAttribute": "fullobject"
         }
       }
     },
