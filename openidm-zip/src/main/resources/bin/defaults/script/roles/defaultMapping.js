@@ -99,11 +99,14 @@ function getConfig(script) {
  */
 function execOnScript(scriptConfig) {
     var result = openidm.action("script", "eval", getConfig(scriptConfig), {});
-    for (key in target) { 
-        delete target[key]; 
-    }
-    for (key in result) { 
-        target[key] = result[key]; 
+    if (result && (typeof result === 'object')) {
+        // updated target object was returned by script, so replace fields
+        for (key in target) {
+            delete target[key];
+        }
+        for (key in result) {
+            target[key] = result[key];
+        }
     }
 }
 
@@ -226,6 +229,9 @@ if (effectiveAssignments != null) {
         // Check that this assignment is relevant to this mapping
         if ((assignment !== null) && (mappingName === assignment.mapping)) {
             var attributes = assignment.attributes;
+            if (attributes === null || (typeof attributes === 'undefined')) {
+                attributes = [];
+            }
             var onAssignment = assignment.onAssignment;
             var linkQualifiers = assignment.linkQualifiers;
 
