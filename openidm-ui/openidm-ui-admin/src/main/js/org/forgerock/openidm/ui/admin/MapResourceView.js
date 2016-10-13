@@ -372,7 +372,7 @@ define([
                     this.$el.find("#" + id + " .resource-small-icon").attr('class','resource-small-icon fa ' +details.schema.icon);
                 }
 
-                this.$el.find("#"+id +" .resource-type-name").html($.t("templates.connector.managedObjectType"));
+                this.$el.find("#"+id +" .resource-type-name").html($.t("templates.managed.managedObjectType"));
                 this.$el.find("#"+id +" .resource-given-name").html(details.name);
                 this.$el.find("#"+id +" .edit-objecttype").hide();
                 this.$el.find("#"+id +" .object-type-name").show();

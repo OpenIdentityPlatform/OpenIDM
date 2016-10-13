@@ -64,8 +64,13 @@
                 {{/each}}
 
                 {{else}}
-                <div class="no-connectors-message">
-                    <h4 class="col-sm-12">{{t "templates.mapping.noConnectors"}}</h4>
+                <div class="well no-resource">
+                    <div class="message-icon text-primary"><i class="fa fa-cubes"></i></div>
+                    <h3>{{t "templates.connector.noResourceTitle"}}</h3>
+                    <p>
+                        {{t "templates.connector.whatIsAConnector"}}
+                    </p>
+                    <a href="#connectors/add/"><button class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
                 </div>
                 {{/if}}
             </div>
@@ -105,8 +110,13 @@
                 {{/each}}
 
                 {{else}}
-                <div class="no-connectors-message">
-                    <h4 class="col-sm-12">{{t "templates.mapping.noConnectors"}}</h4>
+                <div class="well no-resource">
+                    <div class="message-icon text-primary"><i class="fa fa-th"></i></div>
+                    <h3>{{t "templates.managed.noResourceTitle"}}</h3>
+                    <p>
+                        {{t "templates.managed.whatIsAManagedObject"}}
+                    </p>
+                    <a href="#managed/add/"><button class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.managed.addManagedObject"}}</button></a>
                 </div>
                 {{/if}}
             </div>
