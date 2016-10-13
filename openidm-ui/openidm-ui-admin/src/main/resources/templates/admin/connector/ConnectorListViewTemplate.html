@@ -9,30 +9,34 @@
                 </div>
             </h1>
         </div>
-        <p class="section-help">{{t "templates.connector.whatIsAConnector"}}</p>
-        <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
-            <div class="btn-group pull-left left-group" role="group" aria-label="...">
-                <a href="#connectors/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
-            </div>
-            <div class="pull-right">
-                <div class="btn-group btn-icon" data-toggle="btns">
-                    <a class="btn toggle-view-btn fr-btn-secondary active" href="#connectorCardContainer" data-toggle="tab"><i class="fa fa-th"></i></a>
-                    <a class="btn toggle-view-btn fr-btn-secondary" href="#connectorGridContainer" data-toggle="tab"><i class="fa fa-list"></i></a>
+        {{#if currentConnectors}}
+            <p class="section-help">{{t "templates.connector.whatIsAConnector"}}</p>
+
+            <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
+                <div class="btn-group pull-left left-group" role="group" aria-label="...">
+                    <a href="#connectors/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
                 </div>
-                <div class="toolbar-search">
-                    <div class="form-group has-feedback has-feedback-left">
-                        <input type="text" class="form-control filter-input" aria-label="Connector Filter" placeholder="Filter...">
-                        <div class="form-control-feedback "><i class="fa fa-search"></i></div>
+                <div class="pull-right">
+                    <div class="btn-group btn-icon" data-toggle="btns">
+                        <a class="btn toggle-view-btn fr-btn-secondary active" href="#connectorCardContainer" data-toggle="tab"><i class="fa fa-th"></i></a>
+                        <a class="btn toggle-view-btn fr-btn-secondary" href="#connectorGridContainer" data-toggle="tab"><i class="fa fa-list"></i></a>
+                    </div>
+                    <div class="toolbar-search">
+                        <div class="form-group has-feedback has-feedback-left">
+                            <input type="text" class="form-control filter-input" aria-label="Connector Filter" placeholder="Filter...">
+                            <div class="form-control-feedback "><i class="fa fa-search"></i></div>
+                        </div>
                     </div>
                 </div>
+                <div class="clearfix"></div>
             </div>
-            <div class="clearfix"></div>
-        </div>
+        {{/if}}
     </div>
 </section>
 
 <section>
     <div class="container">
+        {{#if currentConnectors}}
         <div class="tab-content tab-content-transparent">
             <div id="connectorCardContainer" class="tab-pane active">
                 <div class="row">
@@ -108,5 +112,15 @@
                 </div>
             </div>
         </div>
+        {{else}}
+            <div class="well no-resource">
+                <div class="message-icon text-primary"><i class="fa fa-cubes"></i></div>
+                <h3>{{t "templates.connector.noResourceTitle"}}</h3>
+                <p>
+                    {{t "templates.connector.whatIsAConnector"}}
+                </p>
+                <a href="#connectors/add/"><button class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addConnector"}}</button></a>
+            </div>
+        {{/if}}
     </div>
 </section>

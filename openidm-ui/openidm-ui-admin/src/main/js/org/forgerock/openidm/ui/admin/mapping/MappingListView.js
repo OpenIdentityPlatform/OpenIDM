@@ -180,7 +180,7 @@ define([
 
                         mappingGrid = new Backgrid.Grid({
                             className: "table backgrid",
-                            emptyText: "No mappings available.",
+                            emptyText: $.t("templates.mapping.noResourceTitle"),
                             row: RenderRow,
                             columns: BackgridUtils.addSmallScreenCell([
                                 {
@@ -387,7 +387,7 @@ define([
 
                 if(this.$el.find(".backgrid tbody tr").length === 0) {
                     this.$el.find("#noMappingCards").toggleClass("hidden", false);
-                    this.$el.find(".backgrid tbody").append("<tr class='empty'><td colspan='5'>" +$.t("templates.mapping.noMapping") +"</td></tr>");
+                    this.$el.find(".backgrid tbody").append("<tr class='empty'><td colspan='5'>" +$.t("templates.mapping.noResourceTitle") +"</td></tr>");
                 }
             }, this));
         },

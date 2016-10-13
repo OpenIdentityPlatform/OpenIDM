@@ -96,7 +96,7 @@ define([
             this.model.managedObjectCollection = new ManagedObjects();
 
             _.each(this.data.currentManagedObjects, function(managedObject) {
-                managedObject.type = $.t("templates.connector.managedObjectType");
+                managedObject.type = $.t("templates.managed.managedObjectType");
                 this.model.managedObjectCollection.add(managedObject);
             }, this);
 
@@ -113,6 +113,7 @@ define([
             this.parentRender(_.bind(function(){
                 managedObjectGrid = new Backgrid.Grid({
                     className: "table backgrid",
+                    emptyText: $.t("templates.managed.noResourceTitle"),
                     row: RenderRow,
                     columns: BackgridUtils.addSmallScreenCell([
                         {
@@ -228,9 +229,13 @@ define([
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.currentManagedObjects}));
 
                 $.when.apply($, promises).then(
-                    function(){
+                    () => {
                         selectedItem.remove();
                         alternateItem.remove();
+
+                        if(this.$el.find(".backgrid tbody tr").length === 0) {
+                            this.$el.find(".backgrid tbody").append("<tr class='empty'><td colspan='3'>" +$.t("templates.managed.noResourceTitle") +"</td></tr>");
+                        }
 
                         eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
                         eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");

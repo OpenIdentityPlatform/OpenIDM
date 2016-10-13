@@ -105,6 +105,7 @@ define([
                 this.parentRender(_.bind(function(){
                     connectorGrid = new Backgrid.Grid({
                         className: "table backgrid",
+                        emptyText: $.t("templates.connector.noResourceTitle"),
                         row: RenderRow,
                         columns: BackgridUtils.addSmallScreenCell([
                             {
@@ -253,6 +254,10 @@ define([
                 this.data.currentConnectors.splice(connectorIndex, 1);
                 selectedItem.remove();
                 alternateItem.remove();
+
+                if(this.$el.find(".backgrid tbody tr").length === 0) {
+                    this.$el.find(".backgrid tbody").append("<tr class='empty'><td colspan='3'>" +$.t("templates.connector.noResourceTitle") +"</td></tr>");
+                }
             });
         },
 

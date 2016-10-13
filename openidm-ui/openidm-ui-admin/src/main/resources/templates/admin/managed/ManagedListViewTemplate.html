@@ -9,10 +9,11 @@
                 </div>
             </h1>
         </div>
-        <p class="section-help">{{t "templates.connector.whatIsAManagedObject"}}</p>
+        {{#if currentManagedObjects}}
+        <p class="section-help">{{t "templates.managed.whatIsAManagedObject"}}</p>
         <div class="toolbar page-toolbar" role="toolbar" aria-label="...">
             <div class="btn-group pull-left left-group" role="group" aria-label="...">
-                <a href="#managed/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.connector.addManagedObject"}}</button></a>
+                <a href="#managed/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.managed.addManagedObject"}}</button></a>
             </div>
             <div class="pull-right">
                 <div class="btn-group btn-icon" data-toggle="btns">
@@ -28,11 +29,13 @@
             </div>
             <div class="clearfix"></div>
         </div>
+        {{/if}}
     </div>
 </section>
 
 <section>
     <div class="container">
+        {{#if currentManagedObjects}}
         <div class="tab-content tab-content-transparent">
             <div id="managedCardContainer" class="tab-pane active">
                 <div class="row">
@@ -62,7 +65,7 @@
                                         <div class="content">
                                             <div class="main">
                                                 <h3 class="name">{{name}}</h3>
-                                                <p class="cardtype">{{t "templates.connector.managedObjectType"}}</p>
+                                                <p class="cardtype">{{t "templates.managed.managedObjectType"}}</p>
                                             </div>
                                         </div>
                                     </a>
@@ -79,7 +82,7 @@
                                         <i class="fa fa-plus"></i>
                                     </div>
                                     <div class="content">
-                                        {{t "templates.connector.addManagedObject"}}
+                                        {{t "templates.managed.addManagedObject"}}
                                     </div>
                                 </a>
                             </div>
@@ -93,5 +96,15 @@
                 </div>
             </div>
         </div>
+        {{else}}
+        <div class="well no-resource">
+            <div class="message-icon text-primary"><i class="fa fa-th"></i></div>
+            <h3>{{t "templates.managed.noResourceTitle"}}</h3>
+            <p>
+                {{t "templates.managed.whatIsAManagedObject"}}
+            </p>
+            <a href="#managed/add/"><button class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.managed.addManagedObject"}}</button></a>
+        </div>
+        {{/if}}
     </div>
 </section>
