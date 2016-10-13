@@ -14,6 +14,7 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
+import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.http.routing.UriRouterContext;
@@ -93,7 +94,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
      */
     private EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
 
-    @Reference
+    @Reference(cardinality = ReferenceCardinality.OPTIONAL_UNARY)
     private EmbeddedDirectoryServer embeddedDirectoryServer;
 
     /**
