@@ -18,21 +18,19 @@ package org.forgerock.openidm.auth;
 
 import static org.forgerock.caf.authentication.framework.AuthenticationFilter.AuthenticationModuleBuilder.configureModule;
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.jaspi.modules.session.jwt.JwtSessionModule.LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.*;
 import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClientSecret;
 
+import javax.inject.Provider;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.inject.Provider;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.felix.scr.annotations.Activate;
@@ -86,13 +84,14 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.idp.config.ProviderConfig;
-import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
+import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.JettyPropertyUtil;
 import org.forgerock.script.ScriptRegistry;
+import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.Options;
@@ -631,7 +630,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
 
     // ----- Implementation of SingletonResourceProvider interface
 
-    private enum Action { reauthenticate, getAuthToken}
+    enum Action {reauthenticate, getAuthToken, logout}
 
     /**
      * Action support, including reauthenticate action {@inheritDoc}
@@ -680,9 +679,14 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                             .getOrThrow();
                     // get auth token
                     return newActionResponse(json(object(field(OAuthHttpClient.AUTH_TOKEN, authToken)))).asPromise();
+                case logout:
+                    // adding the logout attribute will instruct CAF to clobber the JWT cookie's value.
+                    context.asContext(AttributesContext.class).getAttributes()
+                            .put(LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME, true);
+                    return newActionResponse(json(object(field("success", true)))).asPromise();
                 default:
-                    return new BadRequestException("Action " + request.getAction() + " on authentication service not supported")
-                            .asPromise();
+                    return new BadRequestException("Action " + request.getAction() +
+                            " on authentication service not supported").asPromise();
             }
         }  catch (ResourceException e) {
             return e.asPromise();

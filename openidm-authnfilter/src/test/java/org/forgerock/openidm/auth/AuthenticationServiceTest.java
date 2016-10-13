@@ -17,17 +17,26 @@ package org.forgerock.openidm.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.Requests.newActionRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.openidm.auth.AuthenticationService.Action;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+
+import javax.security.auth.message.MessageInfo;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-
+import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
@@ -35,15 +44,12 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
+import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.util.promise.Promise;
 import org.testng.annotations.AfterMethod;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 public class AuthenticationServiceTest {
 
@@ -225,5 +231,21 @@ public class AuthenticationServiceTest {
         // Assert that the authenticationJson in memory has been modified to only have the stand-alone
         // OPENID_CONNECT module declared separately and wasn't generated as part of the IdentityProviderService
         assertThat(authenticationJson.get(AUTH_MODULES).size()).isEqualTo(1);
+    }
+
+    /**
+     * Tests that the attribute that {@link JwtSessionModule#isLogoutRequest(MessageInfo)} expects is present in the
+     * attributesContext.
+     *
+     * @throws Exception
+     */
+    @Test
+    public void testLogoutAction() throws Exception {
+        AttributesContext context = new AttributesContext(new RootContext());
+        Promise<ActionResponse, ResourceException> promise =
+                authenticationService.actionInstance(context, newActionRequest("", Action.logout.name()));
+        assertThat(promise).succeeded();
+        assertThat(promise.get().getJsonContent().get("success").asBoolean()).isTrue();
+        assertThat(context.getAttributes()).containsEntry(JwtSessionModule.LOGOUT_SESSION_REQUEST_ATTRIBUTE_NAME, true);
     }
 }
