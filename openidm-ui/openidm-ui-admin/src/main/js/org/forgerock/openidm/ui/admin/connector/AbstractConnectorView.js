@@ -16,7 +16,7 @@
 
 define([
     "jquery",
-    "underscore",
+    "lodash",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
@@ -240,6 +240,25 @@ define([
             var mergedResult = this.getProvisioner();
 
             this.connectorTypeRef.submitOAuth(mergedResult, this.data.editState);
+        },
+
+        /*
+         * traverse an object of unknown depth and replace all empty string values with null
+         * and filter any arrays of falsy elements.
+         */
+        cleanseObject: function(obj) {
+            return _.transform(_.cloneDeep(obj) , (result, orig, key) => {
+                if (_.isObject(orig)) {
+                    if (_.isArray(orig)) {
+                        result[key] = orig.filter((i) => { return !!i; });
+                    } else {
+                        result[key] = this.cleanseObject(orig);
+                    }
+                } else {
+                    result[key] = orig;
+                    if (orig === "") { result[key] = null; }
+                }
+            });
         }
     });
 
