@@ -6,7 +6,7 @@
   "author" : "ForgeRock",
   "connectorRef" : {
     "bundleName" : "org.forgerock.openicf.connectors.kerberos-connector",
-    "bundleVersion" : "1.4.0.0",
+    "bundleVersion" : "[1.4.0.0,1.5.0.0)",
     "connectorName" : "org.forgerock.openicf.connectors.kerberos.KerberosConnector"
   },
   "poolConfigOption" : {

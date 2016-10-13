@@ -219,9 +219,8 @@ define([
                         return  data.connectorRef.connectorName  === connector.versions[0].connectorName;
                     });
 
-                    this.data.fullversion = this.versionRangeCheck(data.connectorRef.bundleVersion);
+                    [this.data.fullversion, this.data.currentMainVersion] = this.versionRangeCheck(data.connectorRef.bundleVersion);
                     data.connectorRef.bundleVersion = this.data.fullversion;
-                    this.data.currentMainVersion = this.findMainVersion(data.connectorRef.bundleVersion);
 
                     //Filter the connector types down to the current major version
                     this.data.versionDisplay[0].versions = _.filter(this.data.versionDisplay[0].versions, (version) => {
@@ -242,7 +241,7 @@ define([
                         version = version[0] +"." +version[1];
                     }
 
-                    if(version >= 1.4) {
+                    if (version >= 1.4) {
                         this.data.versionCheck = true;
                     } else {
                         this.data.versionCheck = false;
@@ -299,7 +298,7 @@ define([
                             //set validation for the connector form
                             validatorsManager.bindValidators(this.$el.find("#connectorForm"));
 
-                            //alert if a connector is currently set to a bundle version that doesn't exist
+                            //alert if a connector is currently set to a bundle version that is outside the bundleVersion range
                             if (this.data.rangeFound) {
                                 this.$el.find("#connectorWarningMessage .message").append('<div class="pending-changes connector-version">' +$.t("config.messages.ConnectorMessages.connectorVersionChange", {"range": this.data.oldVersion, "version": data.connectorRef.bundleVersion}) +'</div>');
                                 this.$el.find("#connectorWarningMessage").show();
@@ -769,7 +768,7 @@ define([
             }
         },
 
-        //This function is to find the newest version of a connector and select it if a user provides a range
+        //This function is to find the newest version of a connector and verify that it falls within a user provided range
         versionRangeCheck: function(version) {
             let cleanVersion = null,
                 tempVersion,
@@ -781,6 +780,7 @@ define([
             if(version.indexOf("(") !== -1 || version.indexOf(")") !== -1 || version.indexOf("[") !== -1 || version.indexOf("]") !== -1) {
                 if(this.data.versionDisplay[0].versions.length === 1) {
                     cleanVersion = this.data.versionDisplay[0].versions[0].bundleVersion;
+                    mainVersion = this.findMainVersion(cleanVersion);
                 } else {
                     _.each(this.data.versionDisplay[0].versions, (versions) => {
                         if (cleanVersion === null) {
@@ -803,15 +803,32 @@ define([
                         }
                     });
                 }
+                if (this.isRangeValid(cleanVersion, version)) {
+                    this.data.rangeFound = false;
+                    cleanVersion = version;
+                } else {
+                    this.data.rangeFound = true;
+                    this.data.oldVersion = version;
+                }
 
-                this.data.rangeFound = true;
-                this.data.oldVersion = version;
             } else {
                 this.data.rangeFound = false;
                 cleanVersion = version;
             }
 
-            return cleanVersion;
+            return [cleanVersion, mainVersion];
+        },
+
+        // make sure current connector version falls within bundleVersion range
+        isRangeValid(mainVersion, range) {
+            let startRange,
+                endRange;
+
+            [startRange, endRange] = range.split(",");
+            startRange = this.findMainVersion(startRange.slice(1));
+            endRange = this.findMainVersion(endRange.slice(0, -1));
+
+            return mainVersion >= startRange && mainVersion < endRange;
         },
 
         //Returns the current provisioner based on a merged copy of the connector defaults and what was set in the template by the user

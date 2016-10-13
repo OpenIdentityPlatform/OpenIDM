@@ -5,7 +5,7 @@
         "connectorHostRef": "#LOCAL",
         "connectorName": "org.forgerock.openicf.connectors.googleapps.GoogleAppsConnector",
         "bundleName": "org.forgerock.openicf.connectors.googleapps-connector",
-        "bundleVersion": "[1.4.0.0,2.0.0.0)"
+        "bundleVersion": "[1.4.0.0,1.5.0.0)"
     },
     "poolConfigOption": {
         "maxObjects": 10,
