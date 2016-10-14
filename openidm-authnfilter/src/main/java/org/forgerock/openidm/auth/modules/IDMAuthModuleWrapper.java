@@ -561,7 +561,7 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
                 if (AUTHORIZATION_HEADER_BASIC.equalsIgnoreCase(authValue[0]) && authValue[1] != null) {
                     final byte[] decoded = Base64.decode(authValue[1].getBytes());
                     if (decoded != null) {
-                        final String[] creds = new String(decoded).split(":");
+                        final String[] creds = new String(decoded).split(":", 2);
                         if (creds.length == 2) {
                             return new Credential(creds[0], creds[1]);
                         }
