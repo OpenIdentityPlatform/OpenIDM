@@ -88,6 +88,7 @@ import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.idp.config.ProviderConfig;
+import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
@@ -467,7 +468,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     }
 
     @Override
-    public void identityProviderConfigChanged() {
+    public void identityProviderConfigChanged() throws IdentityProviderServiceException {
         if (config == null) {
             logger.debug("No configuration for Authentication Service");
             return;
@@ -480,7 +481,8 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         try {
             authFilterWrapper.setFilter(configureAuthenticationFilter(amendedConfig));
         } catch (AuthenticationException e) {
-            logger.error("Error configuring authentication filter.", e);
+            logger.debug("Error in configuration for Authentication Service. Filter not set.", e);
+            throw new IdentityProviderServiceException(e.getMessage(), e);
         }
 
         // filter enabled module configs and get their properties;
@@ -500,7 +502,8 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
      * @param context The ComponentContext
      */
     @Activate
-    public void activate(final ComponentContext context) throws AuthenticationException {
+    public void activate(final ComponentContext context)
+            throws AuthenticationException, IdentityProviderServiceException {
         logger.info("Activating Authentication Service with configuration {}", context.getProperties());
         config = enhancedConfig.getConfigurationAsJson(context);
         identityProviderConfigChanged();

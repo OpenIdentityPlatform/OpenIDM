@@ -52,6 +52,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
@@ -145,6 +146,7 @@ public class SelfService implements IdentityProviderListener {
     private RequestHandler processService;
     private ServiceRegistration<RequestHandler> serviceRegistration = null;
     private ComponentContext context;
+    private ProgressStageProvider progressStageProvider;
 
     @Activate
     void activate(ComponentContext context) throws Exception {
@@ -164,6 +166,7 @@ public class SelfService implements IdentityProviderListener {
             properties = ComponentContextUtil.getModifiableProperties(context);
             properties.put(ServerConstants.ROUTER_PREFIX,
                     resourcePath(ROUTER_PREFIX).concat(resourcePath(factoryPid)).toString());
+            progressStageProvider = newProgressStageProvider(newHttpClient());
             identityProviderConfigChanged();
 
         } catch (Exception ex) {
@@ -372,30 +375,32 @@ public class SelfService implements IdentityProviderListener {
     }
 
     @Override
-    public void identityProviderConfigChanged() {
+    public void identityProviderConfigChanged()
+            throws IdentityProviderServiceException {
         LOGGER.debug("Configuring {} with changes from IdentityProviderConfig {}", PID,
                 identityProviderService != null
                         ? identityProviderService.getIdentityProviders()
                         : Collections.emptyList());
+        unregisterServiceRegistration();
         try {
-            unregisterServiceRegistration();
             amendConfig(config);
-            // create self-service request handler
-            processService = JsonAnonymousProcessServiceBuilder.newBuilder()
-                    .withClassLoader(this.getClass().getClassLoader())
-                    .withJsonConfig(config)
-                    .withStageConfigMapping(SocialUserDetailsConfig.NAME, SocialUserDetailsConfig.class)
-                    .withProgressStageProvider(newProgressStageProvider(newHttpClient()))
-                    .withTokenHandlerFactory(newTokenHandlerFactory())
-                    .withProcessStore(newProcessStore())
-                    .build();
-
-            // service registration - register the AnonymousProcessService directly as a RequestHandler
-            serviceRegistration = context.getBundleContext().registerService(
-                    RequestHandler.class, processService, properties);
-        } catch (Exception ex) {
-            LOGGER.warn("Configuration invalid, self-service not configured. ", ex);
+        } catch (ResourceException e) {
+            LOGGER.debug("Error in configuration for SelfService.", e);
+            throw new IdentityProviderServiceException(e.getMessage(), e);
         }
+        // create self-service request handler
+        processService = JsonAnonymousProcessServiceBuilder.newBuilder()
+                .withClassLoader(this.getClass().getClassLoader())
+                .withJsonConfig(config)
+                .withStageConfigMapping(SocialUserDetailsConfig.NAME, SocialUserDetailsConfig.class)
+                .withProgressStageProvider(progressStageProvider)
+                .withTokenHandlerFactory(newTokenHandlerFactory())
+                .withProcessStore(newProcessStore())
+                .build();
+
+        // service registration - register the AnonymousProcessService directly as a RequestHandler
+        serviceRegistration = context.getBundleContext().registerService(
+                RequestHandler.class, processService, properties);
     }
 
 

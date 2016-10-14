@@ -76,7 +76,7 @@ public class OAuthModuleTest {
         final Map<String, Object> config = new HashMap<>();
 
         //when
-        testModule.initialize(requestPolicy, responsePolicy, callback, config).getOrThrowUninterruptibly();
+        testModule.initialize(requestPolicy, responsePolicy, callback, config);
 
         //then - covered by caught exception
     }
@@ -92,7 +92,7 @@ public class OAuthModuleTest {
         given(mockConfigurator.configureService(any(OAuthResolverService.class), any(JsonValue.class))).willReturn(false);
 
         //when
-        testModule.initialize(requestPolicy, responsePolicy, callback, config).getOrThrowUninterruptibly();
+        testModule.initialize(requestPolicy, responsePolicy, callback, config);
 
         //then - covered by caught exception
     }

@@ -16,25 +16,24 @@
 package org.forgerock.openidm.idp.impl;
 
 /**
- * Should be implemented by any service that needs notifications when provider configurations
- * are changed.
+ * Exception used to signify IdentityProviderService configuration failure.
  */
-public interface IdentityProviderListener {
+public class IdentityProviderServiceException extends Exception {
+
+    private static final long serialVersionUID = 1L;
 
     /**
-     * Returns the name of the IdentityProviderListener.
-     * 
-     * @return name of the listener as a String
+     * Constructs a new exception with the specified detail message.
      */
-    String getListenerName();
+    public IdentityProviderServiceException(String message) {
+        super(message);
+    }
 
     /**
-     * When there is a configuration change on any ProviderConfig,
-     * services that have a references to the IdentityProviderService need
-     * to be notified that there have been changes.
-     *
-     * @throws IdentityProviderServiceException if there are errors in any auth module configuration
+     * Constructs a new exception with the specified detail message and cause.
      */
-    void identityProviderConfigChanged() throws IdentityProviderServiceException;
+    public IdentityProviderServiceException(String message, Throwable cause) {
+        super(message, cause);
+    }
+
 }
-
