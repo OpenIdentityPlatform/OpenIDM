@@ -68,9 +68,8 @@ public class IDMAuthModuleWrapperTest {
             connectionFactory = mock(ConnectionFactory.class);
 
             authModule = mock(AsyncServerAuthModule.class);
-            when(authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
-                    anyMapOf(String.class, Object.class)))
-                    .thenReturn(Promises.<Void, AuthenticationException>newResultPromise(null));
+            authModule.initialize(any(MessagePolicy.class), any(MessagePolicy.class), any(CallbackHandler.class),
+                    anyMapOf(String.class, Object.class));
             roleCalculatorFactory = mock(RoleCalculatorFactory.class);
             when(roleCalculatorFactory.create(anyList(), anyString(), anyString(), anyMap(), Matchers.<MappingRoleCalculator.GroupComparison>anyObject()))
                     .thenReturn(mock(RoleCalculator.class));

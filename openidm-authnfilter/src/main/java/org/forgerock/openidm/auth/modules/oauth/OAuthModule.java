@@ -105,8 +105,8 @@ public class OAuthModule implements AsyncServerAuthModule {
     }
 
     @Override
-    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
-            CallbackHandler callbackHandler, Map<String, Object> config) {
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler callbackHandler,
+            Map<String, Object> config) throws AuthenticationException {
 
         this.authTokenHeader = (String) config.get(HEADER_TOKEN);
         this.authResolverHeader = (String) config.get(HEADER_AUTH_RESOLVER);
@@ -115,12 +115,12 @@ public class OAuthModule implements AsyncServerAuthModule {
 
         if (authTokenHeader == null || authTokenHeader.isEmpty()) {
             LOG.debug("OAuthModule config is invalid. You must include the auth token header key parameter");
-            return newExceptionPromise(new AuthenticationException("OAuthModule configuration is invalid."));
+            throw new AuthenticationException("OAuthModule configuration is invalid.");
         }
 
         if (authResolverHeader == null || authResolverHeader.isEmpty()) {
             LOG.debug("OAuthModule config is invalid. You must include the auth provider header key parameter");
-            return newExceptionPromise(new AuthenticationException("OAuthModule configuration is invalid."));
+            throw new AuthenticationException("OAuthModule configuration is invalid.");
         }
 
         final JsonValue resolvers = json(config.get(RESOLVERS_KEY));
@@ -131,10 +131,8 @@ public class OAuthModule implements AsyncServerAuthModule {
         // error out here
         if (!serviceConfigurator.configureService(resolverService, resolvers)) {
             LOG.debug("OAuth config is invalid. You must configure at least one valid resolver.");
-            return newExceptionPromise(new AuthenticationException("OpenIdConnectModule configuration is invalid."));
+            throw new AuthenticationException("OpenIdConnectModule configuration is invalid.");
         }
-
-        return newResultPromise(null);
     }
 
     @Override

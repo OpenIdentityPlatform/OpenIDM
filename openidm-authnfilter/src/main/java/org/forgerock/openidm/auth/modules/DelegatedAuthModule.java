@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -102,19 +102,17 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
 
     /**
      * Initialises the Passthrough authentication module with the OSGi json configuration.
-     *
      * @param requestPolicy {@inheritDoc}
      * @param responsePolicy {@inheritDoc}
      * @param handler {@inheritDoc}
      * @param options {@inheritDoc}
      */
     @Override
-    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
-            CallbackHandler handler, Map<String, Object> options) {
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            Map<String, Object> options) throws AuthenticationException {
         this.options = new JsonValue(options);
         queryOnResource = new JsonValue(options).get(IDMAuthModuleWrapper.QUERY_ON_RESOURCE).required().asString();
         authenticator = authenticatorFactory.apply(this.options);
-        return newResultPromise(null);
     }
 
     /**

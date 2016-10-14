@@ -187,75 +187,69 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestMessagePolicy,
-            MessagePolicy responseMessagePolicy, CallbackHandler handler, Map<String, Object> options) {
+    public void initialize(MessagePolicy requestMessagePolicy,MessagePolicy responseMessagePolicy,
+            CallbackHandler handler, Map<String, Object> options) throws AuthenticationException {
 
         properties = new JsonValue(options);
-        return authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options)
-                .then(new Function<Void, Void, AuthenticationException>() {
+        authModule.initialize(requestMessagePolicy, responseMessagePolicy, handler, options);
+
+        logClientIPHeader = properties.get("clientIPHeader").asString();
+
+        queryOnResource = properties.get(QUERY_ON_RESOURCE).asString();
+
+        String queryId = properties.get(QUERY_ID).asString();
+        String authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
+
+        final String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
+        String groupMembership = properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString();
+        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES)
+                .defaultTo(Collections.emptyList())
+                .asList(String.class);
+        Map<String, List<String>> roleMapping = properties.get(GROUP_ROLE_MAPPING)
+                .defaultTo(Collections.emptyMap())
+                .asMapOfList(String.class);
+        MappingRoleCalculator.GroupComparison groupComparison = properties.get(GROUP_COMPARISON_METHOD)
+                .defaultTo(MappingRoleCalculator.GroupComparison.equals.name())
+                .as(enumConstant(MappingRoleCalculator.GroupComparison.class));
+
+        // a function to perform the user detail query on the router
+        queryExecutor =
+                new Function<QueryRequest, ResourceResponse, NeverThrowsException>() {
                     @Override
-                    public Void apply(Void aVoid) throws AuthenticationException {
-                        logClientIPHeader = properties.get("clientIPHeader").asString();
+                    public ResourceResponse apply(QueryRequest request) {
+                        final List<ResourceResponse> resources = new ArrayList<>();
+                        try {
+                            connectionFactory.getConnection().query(
+                                    ContextUtil.createInternalContext(), request, resources);
 
-                        queryOnResource = properties.get(QUERY_ON_RESOURCE).asString();
-
-                        String queryId = properties.get(QUERY_ID).asString();
-                        String authenticationId = properties.get(PROPERTY_MAPPING).get(AUTHENTICATION_ID).asString();
-
-                        final String userRoles = properties.get(PROPERTY_MAPPING).get(USER_ROLES).asString();
-                        String groupMembership = properties.get(PROPERTY_MAPPING).get(GROUP_MEMBERSHIP).asString();
-                        List<String> defaultRoles = properties.get(DEFAULT_USER_ROLES)
-                                .defaultTo(Collections.emptyList())
-                                .asList(String.class);
-                        Map<String, List<String>> roleMapping = properties.get(GROUP_ROLE_MAPPING)
-                                .defaultTo(Collections.emptyMap())
-                                .asMapOfList(String.class);
-                        MappingRoleCalculator.GroupComparison groupComparison = properties.get(GROUP_COMPARISON_METHOD)
-                                .defaultTo(MappingRoleCalculator.GroupComparison.equals.name())
-                                .as(enumConstant(MappingRoleCalculator.GroupComparison.class));
-
-                        // a function to perform the user detail query on the router
-                        queryExecutor =
-                                new Function<QueryRequest, ResourceResponse, NeverThrowsException>() {
-                                    @Override
-                                    public ResourceResponse apply(QueryRequest request) {
-                                        final List<ResourceResponse> resources = new ArrayList<>();
-                                        try {
-                                            connectionFactory.getConnection().query(
-                                                    ContextUtil.createInternalContext(), request, resources);
-
-                                            if (resources.isEmpty()) {
-                                                return null;
-                                            } else if (resources.size() > 1) {
-                                                logger.warn("Access denied, user detail for retrieved was ambiguous.");
-                                                return null;
-                                            }
-                                            return resources.get(0);
-                                        } catch (ResourceException e) {
-                                            // Unable to query resource; return none
-                                            return null;
-                                        }
-                                    }
-                                };
-
-                        queryBuilder = new UserDetailQueryBuilder(queryOnResource)
-                                .useQueryId(queryId)
-                                .withAuthenticationIdProperty(authenticationId)
-                                // ensure we request the roles field if the property is specified
-                                .withField(userRoles);
-
-                        roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership,
-                                roleMapping, groupComparison);
-
-                        JsonValue scriptConfig = properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
-                        if (!scriptConfig.isNull()) {
-                            augmentScript = getAugmentScript(scriptConfig);
-                            logger.debug("Registered script {}", augmentScript);
+                            if (resources.isEmpty()) {
+                                return null;
+                            } else if (resources.size() > 1) {
+                                logger.warn("Access denied, user detail for retrieved was ambiguous.");
+                                return null;
+                            }
+                            return resources.get(0);
+                        } catch (ResourceException e) {
+                            // Unable to query resource; return none
+                            return null;
                         }
-
-                        return null;
                     }
-                });
+                };
+
+        queryBuilder = new UserDetailQueryBuilder(queryOnResource)
+                .useQueryId(queryId)
+                .withAuthenticationIdProperty(authenticationId)
+                // ensure we request the roles field if the property is specified
+                .withField(userRoles);
+
+        roleCalculator = roleCalculatorFactory.create(defaultRoles, userRoles, groupMembership,
+                roleMapping, groupComparison);
+
+        JsonValue scriptConfig = properties.get(SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT);
+        if (!scriptConfig.isNull()) {
+            augmentScript = getAugmentScript(scriptConfig);
+            logger.debug("Registered script {}", augmentScript);
+        }
     }
 
     /**

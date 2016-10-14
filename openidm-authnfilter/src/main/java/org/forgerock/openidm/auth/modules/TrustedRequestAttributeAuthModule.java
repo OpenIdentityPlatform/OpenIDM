@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.auth.modules;
 
@@ -66,13 +66,10 @@ public class TrustedRequestAttributeAuthModule implements AsyncServerAuthModule 
      * @return {@inheritDoc}
      */
     @Override
-    public Promise<Void, AuthenticationException> initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy,
-            CallbackHandler handler, Map<String, Object> options) {
-
+    public void initialize(MessagePolicy requestPolicy, MessagePolicy responsePolicy, CallbackHandler handler,
+            Map<String, Object> options) throws AuthenticationException {
         JsonValue properties = json(options);
         authenticationIdAttribute = properties.get(AUTHENTICATION_ID).required().asString();
-
-        return newResultPromise(null);
     }
 
     /**

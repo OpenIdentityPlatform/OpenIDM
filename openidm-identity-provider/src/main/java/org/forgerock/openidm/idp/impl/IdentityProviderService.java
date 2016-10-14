@@ -167,7 +167,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
             policy = ReferencePolicy.DYNAMIC)
     private final Map<String, List<IdentityProviderConfig>> identityProviders = new ConcurrentHashMap<>();
 
-    protected void bindIdentityProviderConfig(final IdentityProviderConfig config) {
+    protected void bindIdentityProviderConfig(final IdentityProviderConfig config)
+            throws IdentityProviderServiceException {
         // for this to be true, we do not have any identityProviders of this type
         if (!identityProviders.containsKey(config.getIdentityProviderConfig().getType())) {
             // initialize new array list to store providers of this type
@@ -181,7 +182,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
         notifyListeners();
     }
 
-    protected void unbindIdentityProviderConfig(final IdentityProviderConfig config) {
+    protected void unbindIdentityProviderConfig(final IdentityProviderConfig config)
+            throws IdentityProviderServiceException {
         if (identityProviders.get(config.getIdentityProviderConfig().getType()) != null) {
             logger.debug("Removed the {} identity provider.", config.getIdentityProviderConfig().getName());
             identityProviders.get(config.getIdentityProviderConfig().getType()).remove(config);
@@ -375,7 +377,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
      * Notifies the registered listeners of configuration changes
      * on any identity provider configuration.
      */
-    public void notifyListeners() {
+    public void notifyListeners() throws IdentityProviderServiceException {
         for (IdentityProviderListener listener : identityProviderListeners.values()) {
             listener.identityProviderConfigChanged();
         }

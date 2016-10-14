@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.auth.modules;
@@ -28,6 +28,7 @@ import javax.security.auth.message.AuthStatus;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.api.MessageInfoContext;
 import org.forgerock.caf.authentication.framework.AuditTrail;
 import org.forgerock.http.protocol.Request;
@@ -51,7 +52,7 @@ public class DelegatedAuthModuleTest {
     private Authenticator authenticator;
 
     @BeforeMethod
-    public void setUp() throws ResourceException {
+    public void setUp() throws ResourceException, AuthenticationException {
         AuthenticatorFactory authenticatorFactory = mock(AuthenticatorFactory.class);
         authenticator = mock(Authenticator.class);
         when(authenticatorFactory.apply(any(JsonValue.class))).thenReturn(authenticator);
