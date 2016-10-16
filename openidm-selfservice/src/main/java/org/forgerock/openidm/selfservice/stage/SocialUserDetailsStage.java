@@ -159,20 +159,16 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
 
     private void processEmail(final ProcessContext context, final SocialUserDetailsConfig config, final JsonValue user)
             throws BadRequestException {
-        if (context.containsState(EMAIL_FIELD)) {
-            final JsonValue emailFieldContext = context.getState(EMAIL_FIELD);
-            final JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
-            if (emailFieldUser == null) {
-                user.put(new JsonPointer(config.getIdentityEmailField()), emailFieldContext.asString());
-            } else if (!emailFieldUser.asString().equalsIgnoreCase(emailFieldContext.asString())) {
-                throw new BadRequestException("Email address mismatch");
-            }
-        } else {
-            final JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
-            if (emailFieldUser != null) {
-                context.putState(EMAIL_FIELD, emailFieldUser.asString());
-            }
+        final JsonValue emailFieldUser = user.get(new JsonPointer(config.getIdentityEmailField()));
+        if (emailFieldUser == null) {
+            // don't set the mail field because it does not have a value
+            return;
         }
+        if (context.getState(USER_FIELD) != null
+                && emailFieldUser.asString().equals(context.getState(USER_FIELD).get(EMAIL_FIELD).asString())) {
+            context.putState("skipValidation", true);
+        }
+        context.putState(EMAIL_FIELD, emailFieldUser.asString());
     }
 
     private JsonValue ensureUserInContext(final ProcessContext context) {

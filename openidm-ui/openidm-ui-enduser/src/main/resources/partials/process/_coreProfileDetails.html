@@ -28,7 +28,7 @@
         <label class="{{#unless user.default.mail}} sr-only {{/unless}}" for="input-email">
             <span>{{t 'common.user.email'}}</span>
         </label>
-        <input class="form-control {{#unless user.default.mail}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.email'}}" id="input-email" name="user.mail" value="{{user.default.mail}}" {{#if user.default.mail}} readonly {{/if}} />
+        <input class="form-control {{#unless user.default.mail}} input-lg {{/unless}}" type="text" placeholder="{{t 'common.user.email'}}" id="input-email" name="user.mail" value="{{user.default.mail}}" />
     </div>
 
 {{/requirements.properties}}
