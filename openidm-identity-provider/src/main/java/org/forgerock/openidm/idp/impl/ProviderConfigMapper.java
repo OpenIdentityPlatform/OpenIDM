@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.forgerock.guava.common.base.Function;
+import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.idp.config.ProviderConfig;
@@ -120,6 +121,14 @@ public class ProviderConfigMapper {
                 field(DATE_COLLECTED, DateUtil.getDateUtil(ServerConstants.TIME_ZONE_UTC).now()),
                 field(RAW_PROFILE, profile.getObject())));
     }
+
+    /** A {@link Predicate} that returns whether the provider is enabled */
+    public static Predicate<ProviderConfig> providerEnabled = new Predicate<ProviderConfig>() {
+        @Override
+        public boolean apply(ProviderConfig providerConfig) {
+            return providerConfig.isEnabled();
+        }
+    };
 
     private ProviderConfigMapper() {
         // prevent construction
