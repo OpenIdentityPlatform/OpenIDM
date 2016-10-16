@@ -26,9 +26,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
-import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.buildIdpObject;
-import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toJsonValue;
-import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.toProviderConfig;
+import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.*;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -341,6 +339,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
         return newResourceResponse(null, null,
                 json(object(field(PROVIDERS,
                         FluentIterable.from(getIdentityProviders())
+                        .filter(providerEnabled)
                         .transform(toJsonValue)
                         .transform(withoutClientSecret)
                         .transform(toUnwrappedJsonValue)
