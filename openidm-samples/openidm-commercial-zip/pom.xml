@@ -37,6 +37,11 @@
             <version>${openicf.googleconnector.version}</version>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-cdm-sample</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>marketo-connector</artifactId>
             <version>${openicf.marketoconnector.version}</version>

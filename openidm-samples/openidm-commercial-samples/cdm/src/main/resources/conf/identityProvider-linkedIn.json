@@ -1,0 +1,120 @@
+{
+    "name" : "linkedIn",
+    "type" : "OAUTH",
+    "icon" : "<button class=\"btn btn-lg btn-default btn-block btn-social-provider btn-linkedin\"><img src=\"images/ln-logo.png\">{{action}} LinkedIn</button>",
+    "scope" : [
+        "r_basicprofile",
+        "r_emailaddress"
+    ],
+    "authenticationId" : "id",
+    "propertyMap" : [
+        {
+            "source" : "id",
+            "target" : "id"
+        },
+        {
+            "source" : "formattedName",
+            "target" : "displayName"
+        },
+        {
+            "source" : "firstName",
+            "target" : "givenName"
+        },
+        {
+            "source" : "lastName",
+            "target" : "familyName"
+        },
+        {
+            "source" : "emailAddress",
+            "target" : "email"
+        },
+        {
+            "source" : "emailAddress",
+            "target" : "username"
+        },
+        {
+            "source" : "location",
+            "target" : "locale",
+            "transform" : {
+                "type" : "text/javascript",
+                "source" : "source.country.code",
+                "file" : null
+            }
+        }
+    ],
+    "schema" : {
+        "id" : "http://jsonschema.net",
+        "viewable" : true,
+        "type" : "object",
+        "$schema" : "http://json-schema.org/draft-03/schema",
+        "properties" : {
+            "id" : {
+                "title" : "ID",
+                "viewable" : true,
+                "type" : "string",
+                "searchable" : false
+            },
+            "formattedName" : {
+                "title" : "Formatted Name",
+                "viewable" : true,
+                "type" : "string",
+                "searchable" : true
+            },
+            "firstName" : {
+                "title" : "First Name",
+                "viewable" : true,
+                "type" : "string",
+                "searchable" : true
+            },
+            "lastName" : {
+                "title" : "Last Name",
+                "viewable" : true,
+                "type" : "string",
+                "searchable" : true
+            },
+            "emailAddress" : {
+                "title" : "Email Address",
+                "viewable" : true,
+                "type" : "string",
+                "searchable" : true
+            },
+            "location" : {
+                "title" : "Location",
+                "viewable" : true,
+                "type" : "object",
+                "searchable" : true,
+                "properties" : {
+                    "country" : {
+                        "title" : "Country",
+                        "type" : "object",
+                        "properties" : {
+                            "code" : {
+                                "title" : "Locale Code",
+                                "type" : "string"
+                            }
+                        }
+                    },
+                    "name" : {
+                        "type" : "string",
+                        "title" : "Area Name"
+                    }
+                }
+            }
+        },
+        "order" : [
+            "id",
+            "formattedName",
+            "emailAddress",
+            "firstName",
+            "lastName",
+            "location"
+        ],
+        "required" : [ ]
+    },
+    "enabled" : false,
+    "client_id" : "",
+    "client_secret" : "",
+    "authorization_endpoint" : "https://www.linkedin.com/oauth/v2/authorization",
+    "token_endpoint" : "https://www.linkedin.com/oauth/v2/accessToken",
+    "userinfo_endpoint" : "https://api.linkedin.com/v1/people/~:(id,formatted-name,first-name,last-name,email-address,location)?format=json"
+}

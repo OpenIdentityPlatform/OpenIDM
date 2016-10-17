@@ -7,17 +7,12 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <artifactId>openidm-commercial</artifactId>
+        <artifactId>openidm-commercial-samples</artifactId>
         <groupId>org.forgerock.openidm</groupId>
         <version>5.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>openidm-commercial-samples</artifactId>
-    <name>OpenIDM Commerical Sample parent</name>
-    <packaging>pom</packaging>
-    <modules>
-        <module>google</module>
-        <module>salesforce</module>
-        <module>cdm</module>
-    </modules>
+    <artifactId>openidm-cdm-sample</artifactId>
+    <name>OpenIDM CDM sample</name>
+    <packaging>jar</packaging>
 </project>

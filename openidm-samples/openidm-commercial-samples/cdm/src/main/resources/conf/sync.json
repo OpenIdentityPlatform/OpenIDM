@@ -1,0 +1,95 @@
+{
+    "mappings" : [
+        {
+            "target" : "system/marketo/account",
+            "source" : "managed/user",
+            "name" : "managedUser_systemMarketoAccount",
+            "runTargetPhase" : true,
+            "properties" : [
+                {
+                    "target" : "firstName",
+                    "source" : "givenName"
+                },
+                {
+                    "target" : "lastName",
+                    "source" : "sn"
+                },
+                {
+                    "target" : "email",
+                    "source" : "mail"
+                },
+                {
+                    "target" : "linkedInId",
+                    "source" : "/idpData/linkedIn/subject"
+                },
+                {
+                    "target" : "facebookId",
+                    "source" : "/idpData/facebook/subject"
+                }
+            ],
+            "policies" : [
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "AMBIGUOUS"
+                },
+                {
+                    "action" : "DELETE",
+                    "situation" : "SOURCE_MISSING"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "MISSING"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "FOUND_ALREADY_LINKED"
+                },
+                {
+                    "action" : "DELETE",
+                    "situation" : "UNQUALIFIED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "UNASSIGNED"
+                },
+                {
+                    "action" : "EXCEPTION",
+                    "situation" : "LINK_ONLY"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "TARGET_IGNORED"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "SOURCE_IGNORED"
+                },
+                {
+                    "action" : "IGNORE",
+                    "situation" : "ALL_GONE"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "CONFIRMED"
+                },
+                {
+                    "action" : "UPDATE",
+                    "situation" : "FOUND"
+                },
+                {
+                    "action" : "CREATE",
+                    "situation" : "ABSENT"
+                }
+            ],
+            "validSource" : {
+                "type" : "text/javascript",
+                "globals" : {
+                    "preferences" : [
+                        "marketing"
+                    ]
+                },
+                "file" : "ui/preferenceCheck.js"
+            }
+        }
+    ]
+}

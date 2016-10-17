@@ -1,105 +1,166 @@
 {
-  "name" : "marketo",
-  "displayName" : "MarketoConnector",
-  "description" : "Connector used to sync users to Marketo leads",
-  "version" : "1.4.0.0",
-  "author" : "ForgeRock",
-  "connectorRef" : {
-    "bundleName" : "org.forgerock.openicf.connectors.marketo-connector",
-    "bundleVersion" : "1.4.0.0",
-    "connectorName" : "org.forgerock.openicf.connectors.marketo.MarketoConnector"
-  },
-  "poolConfigOption" : {
-    "maxObjects" : 1,
-    "maxIdle" : 1,
-    "maxWait" : 150000,
-    "minEvictableIdleTimeMillis" : 120000,
-    "minIdle" : 1
-  },
-  "operationTimeout" : {
-    "CREATE" : -1,
-    "TEST" : -1,
-    "AUTHENTICATE" : -1,
-    "SEARCH" : -1,
-    "UPDATE" : -1,
-    "DELETE" : -1,
-    "SYNC" : -1,
-    "SCHEMA" : -1,
-    "GET" : -1,
-    "VALIDATE" : -1,
-    "SCRIPT_ON_CONNECTOR" : -1,
-    "SCRIPT_ON_RESOURCE" : -1
-  },
-  "configurationProperties" : {
-    "instance" : "<INSTANCE_FQDN>",
-    "clientId" : "<CLIENT_ID>",
-    "clientSecret" : "<CLIENT_SECRET>",
-    "leadFields" : null,
-    "partitionName" : null,
-    "listName" : "<LEAD_LIST_NAME>",
-    "scriptRoots" : [
-      "jar:file:connectors/marketo-connector-1.4.0.0.jar!/script/marketo/"
-    ],
-    "classpath" : [ ],
-    "reloadScriptOnExecution" : false,
-    "createScriptFileName" : "CreateMarketo.groovy",
-    "deleteScriptFileName" : "DeleteMarketo.groovy",
-    "schemaScriptFileName" : "SchemaMarketo.groovy",
-    "searchScriptFileName" : "SearchMarketo.groovy",
-    "testScriptFileName" : "TestMarketo.groovy",
-    "updateScriptFileName" : "UpdateMarketo.groovy"
-  },
-  "systemActions" : [ ],
-  "syncFailureHandler" : {
-    "maxRetries" : 5,
-    "postRetryAction" : "logged-ignore"
-  },
-  "objectTypes" : {
-    "account" : {
-      "$schema" : "http://json-schema.org/draft-03/schema",
-      "id" : "__ACCOUNT__",
-      "type" : "object",
-      "nativeType" : "__ACCOUNT__",
-      "properties" : {
-        "firstName" : {
-          "type" : "string",
-          "nativeType" : "string",
-          "nativeName" : "firstName",
-          "required" : false
-        },
-        "lastName" : {
-          "type" : "string",
-          "nativeType" : "string",
-          "nativeName" : "lastName",
-          "required" : false
-        },
-        "email" : {
-          "type" : "string",
-          "nativeType" : "string",
-          "nativeName" : "__NAME__",
-          "required" : true
-        },
-        "createdAt" : {
-          "type" : "string",
-          "nativeType" : "string",
-          "nativeName" : "createdAt",
-          "required" : false,
-          "flags" : [
-            "NOT_CREATABLE",
-            "NOT_UPDATEABLE"
-          ]
-        },
-        "updatedAt" : {
-          "type" : "string",
-          "nativeType" : "string",
-          "nativeName" : "updatedAt",
-          "required" : false,
-          "flags" : [
-            "NOT_CREATABLE",
-            "NOT_UPDATEABLE"
-          ]
+    "name" : "marketo",
+    "displayName" : "MarketoConnector",
+    "description" : "Connector used to sync users to Marketo leads",
+    "version" : "[1.4.0.0,1.5.0.0)",
+    "author" : "ForgeRock",
+    "enabled" : false,
+    "connectorRef" : {
+        "bundleName" : "org.forgerock.openicf.connectors.marketo-connector",
+        "bundleVersion" : "1.4.1.0",
+        "connectorName" : "org.forgerock.openicf.connectors.marketo.MarketoConnector"
+    },
+    "poolConfigOption" : {
+        "maxObjects" : 1,
+        "maxIdle" : 1,
+        "maxWait" : 150000,
+        "minEvictableIdleTimeMillis" : 120000,
+        "minIdle" : 1
+    },
+    "operationTimeout" : {
+        "CREATE" : -1,
+        "TEST" : -1,
+        "AUTHENTICATE" : -1,
+        "SEARCH" : -1,
+        "UPDATE" : -1,
+        "DELETE" : -1,
+        "SYNC" : -1,
+        "SCHEMA" : -1,
+        "GET" : -1,
+        "VALIDATE" : -1,
+        "SCRIPT_ON_CONNECTOR" : -1,
+        "SCRIPT_ON_RESOURCE" : -1
+    },
+    "configurationProperties" : {
+        "instance" : "<INSTANCE_FQDN>",
+        "clientId" : "<CLIENT_ID>",
+        "clientSecret" : "<CLIENT_SECRET>",
+        "leadFields" : null,
+        "partitionName" : null,
+        "listName" : "<LEAD_LIST_NAME>",
+        "scriptRoots" : [
+            "jar:file:connectors/marketo-connector-1.4.1.0.jar!/script/marketo/"
+        ],
+        "classpath" : [ ],
+        "reloadScriptOnExecution" : false,
+        "createScriptFileName" : "CreateMarketo.groovy",
+        "deleteScriptFileName" : "DeleteMarketo.groovy",
+        "schemaScriptFileName" : "SchemaMarketo.groovy",
+        "searchScriptFileName" : "SearchMarketo.groovy",
+        "testScriptFileName" : "TestMarketo.groovy",
+        "updateScriptFileName" : "UpdateMarketo.groovy"
+    },
+    "systemActions" : [ ],
+    "syncFailureHandler" : {
+        "maxRetries" : 5,
+        "postRetryAction" : "logged-ignore"
+    },
+    "objectTypes" : {
+        "account" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "__ACCOUNT__",
+            "type" : "object",
+            "nativeType" : "__ACCOUNT__",
+            "properties" : {
+                "firstName" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "firstName",
+                    "required" : false
+                },
+                "lastName" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "lastName",
+                    "required" : false
+                },
+                "email" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "__NAME__",
+                    "required" : true
+                },
+                "gender" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "gender",
+                    "required" : false
+                },
+                "country" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "country",
+                    "required" : false
+                },
+                "city" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "city",
+                    "required" : false
+                },
+                "locale" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "locale",
+                    "required" : false
+                },
+                "timezone" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "timezone",
+                    "required" : false
+                },
+                "age-range" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "age-range",
+                    "required" : false
+                },
+                "twitterId" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "twitterId",
+                    "required" : false
+                },
+                "facebookId" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "facebookId",
+                    "required" : false
+                },
+                "linkedInId" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "linkedInId",
+                    "required" : false
+                },
+                "microsoftId" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "microsoftId",
+                    "required" : false
+                },
+                "createdAt" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "createdAt",
+                    "required" : false,
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },
+                "updatedAt" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "updatedAt",
+                    "required" : false,
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                }
+            }
         }
-      }
     }
-  }
 }
