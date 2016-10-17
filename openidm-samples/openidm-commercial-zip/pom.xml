@@ -18,6 +18,16 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-salesforce-sample</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-google-sample</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>openidm-salesforce</artifactId>
             <version>${provisioner.salesforcemodule.version}</version>
         </dependency>
@@ -39,8 +49,8 @@
         <google.provisioner>provisioner.openicf-google.json</google.provisioner>
         <marketo.provisioner>provisioner.openicf-marketo.json</marketo.provisioner>
         <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
-        <saas.connectors.conf>conf/**</saas.connectors.conf>
-        <saas.connectors.script>script/**</saas.connectors.script>
+        <sample.conf>conf/**</sample.conf>
+        <sample.script>script/**</sample.script>
     </properties>
     <build>
         <finalName>openidm-commercial-${project.version}</finalName>
