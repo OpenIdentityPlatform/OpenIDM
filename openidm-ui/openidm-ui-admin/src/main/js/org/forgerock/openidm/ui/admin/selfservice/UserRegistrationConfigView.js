@@ -137,7 +137,10 @@ define([
                 emailRequired: false
             }
         },
-
+        initDefaultConfig: function () {
+            this.model.saveConfig = {};
+            $.extend(true, this.model.saveConfig, this.model.configDefault);
+        },
         render: function(args, callback) {
             //List broken for subsection consumption by the UI
             this.data.storageLookup = [{
@@ -186,7 +189,8 @@ define([
             //Master config list for controlling various states such as what is editable and what is enabled by default when turned on
             this.model.configList = [{
                 type : "termsAndConditions",
-                toggledOn: true
+                enabledByDefault: false,
+                toggledOn: false
             }, {
                 type: "captcha",
                 enabledByDefault: false,
@@ -295,7 +299,7 @@ define([
                         "name": "selfRegistration"
                     })[0], "identityServiceUrl");
 
-                    $.extend(true, this.model.saveConfig, this.model.configDefault);
+                    this.initDefaultConfig();
 
                     this.data.advancedConfig.snapshotToken = this.model.configDefault.snapshotToken;
 
@@ -512,6 +516,7 @@ define([
                 this.model.uiConfig.configuration[this.model.uiConfigurationParameter] = false;
 
                 this.deleteConfig().then(_.bind(function() {
+                    this.initDefaultConfig();
                     EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, this.model.msgType +"Delete");
                 }, this));
             }
