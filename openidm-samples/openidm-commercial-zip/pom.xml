@@ -26,11 +26,13 @@
             <artifactId>googleapps-connector</artifactId>
             <version>${openicf.googleconnector.version}</version>
         </dependency>
+        <!-- TODO release marketoconnector in private-releases artifactory
         <dependency>
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>marketo-connector</artifactId>
             <version>${openicf.marketoconnector.version}</version>
         </dependency>
+        -->
     </dependencies>
     <properties>
         <!-- If we release this project, we need to include the Forgerock binary license -->

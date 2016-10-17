@@ -12,6 +12,18 @@
     <formats>
         <format>zip</format>
     </formats>
+
+    <dependencySets>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/bundle</outputDirectory>
+            <scope>runtime</scope>
+            <includes>
+                <include>org.forgerock.openidm:openidm-salesforce</include>
+            </includes>
+        </dependencySet>
+    </dependencySets>
+
     <fileSets>
         <!-- start by copying all of the public openidm zip contents -->
         <fileSet>
