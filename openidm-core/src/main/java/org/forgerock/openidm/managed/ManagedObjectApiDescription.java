@@ -23,6 +23,7 @@ import static org.forgerock.api.enums.PatchOperation.INCREMENT;
 import static org.forgerock.api.enums.PatchOperation.COPY;
 import static org.forgerock.api.enums.PatchOperation.MOVE;
 import static org.forgerock.api.enums.PatchOperation.TRANSFORM;
+import static org.forgerock.guava.common.base.Strings.isNullOrEmpty;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValue.field;
@@ -81,7 +82,6 @@ class ManagedObjectApiDescription {
     private static final String ACTIONS = "actions";
     private static final String APIDESCRIPTOR = "apiDescriptor";
     private static final String REQUESTSCHEMA = "requestSchema";
-    private static final String RESPONSESCHEMA = "responseSchema";
     private static final String PARAMETERS = "parameters";
 
     private ManagedObjectApiDescription() {
@@ -99,7 +99,12 @@ class ManagedObjectApiDescription {
             // create a copy of the JSON Schema, and parse it to create an API Descriptor
             final JsonValue config = objectSet.getConfig();
             final JsonValue schema = config.get("schema").isNull() || config.get("schema").get(Constants.TYPE).isNull()
-                    ? json(object(field(Constants.TYPE, Constants.TYPE_OBJECT))) : config.get("schema").copy();
+                    ? json(object(field(Constants.TYPE, Constants.TYPE_OBJECT)))
+                    : config.get("schema").copy();
+            final String resourceTitle = isNullOrEmpty(schema.get("title").asString())
+                    ? objectSet.getName()
+                    : schema.get("title").asString();
+
             SubResources itemsSubResources = null;
             if (!objectSet.getRelationshipProviders().isEmpty()) {
                 final JsonValue properties = schema.get(Constants.PROPERTIES);
@@ -120,9 +125,15 @@ class ManagedObjectApiDescription {
                         if (itemsType != null && SchemaField.TYPE_RELATIONSHIP.equals(itemsType.asString())) {
                             relationshipSchema.put(ITEMS_TYPE_POINTER, Constants.TYPE_OBJECT);
                         }
+
+                        // prefix sub-resource title with parent resource title
+                        final String subresourceTitle = resourceTitle + ": " +
+                                (isNullOrEmpty(relationshipSchema.get("title").asString())
+                                        ? pointer.leaf()
+                                        : relationshipSchema.get("title").asString());
                         itemsSubresourcesBuilder.put(pointer.leaf(), Resource.resource()
                                 .mvccSupported(true)
-                                .title(relationshipSchema.get("title").asString())
+                                .title(subresourceTitle)
                                 .description(relationshipSchema.get("description").asString())
                                 .resourceSchema(Schema.schema().schema(relationshipSchema).build())
                                 .create(Create.create()
@@ -160,15 +171,14 @@ class ManagedObjectApiDescription {
                 }
             }
 
-            final String title = schema.get("title").isNotNull() ? schema.get("title").asString() : objectSet.getName();
             final ApiDescription apiDescription = ApiDescription.apiDescription()
                     .id("temp")
                     .version("0")
                     .paths(Paths.paths()
                             .put("/", VersionedPath.versionedPath()
                                     .put(VersionedPath.UNVERSIONED, Resource.resource()
-                                            .title("Managed " + title)
-                                            .description("Endpoints for managing " + objectSet.getName() + " objects.")
+                                            .title(resourceTitle)
+                                            .description(schema.get("description").asString())
                                             .mvccSupported(true)
                                             .resourceSchema(Schema.schema()
                                                     .schema(schema)
@@ -273,8 +283,7 @@ class ManagedObjectApiDescription {
                             .name(parameterDef.get("name").asString())
                             .type(parameterDef.get(Constants.TYPE).asString())
                             .source(ParameterSource.ADDITIONAL)
-                            .required(parameterDef.get("required").isNull()
-                                    ? false : parameterDef.get("required").asBoolean())
+                            .required(parameterDef.get("required").defaultTo(false).asBoolean())
                             .build());
                 }
                 actionBuilder = actionBuilder.parameters(parameterList);
