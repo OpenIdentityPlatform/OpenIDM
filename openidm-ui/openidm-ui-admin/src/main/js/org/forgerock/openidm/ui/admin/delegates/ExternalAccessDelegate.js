@@ -56,7 +56,18 @@ define([
                 method,
                 body,
                 headers
-            })
+            }),
+            errorsHandlers:{
+                "badURL": {
+                    status: "404"
+                },
+                "badRequest": {
+                    status: "400"
+                },
+                "badGateway": {
+                    status: "502"
+                }
+            }
         });
     };
 

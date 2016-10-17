@@ -196,8 +196,6 @@
   }
 }
 
-#AuthenticationModuleDialogContainer #basicForm,
-#AuthenticationModuleDialogContainer #advancedForm,
 #auditEventHandlerConfig {
   h3 {
     font-size: 14px;
@@ -225,57 +223,6 @@
   }
 }
 
-#AuthenticationModuleDialogContainer {
-  margin-top: -15px;
-  &>h3{
-    font-size: 14px;
-  }
-
-  #noSocialProvidersAlert {
-    margin-top: 15px;
-    margin-bottom: 0;
-  }
-
-  #basicForm, #advancedForm {
-    padding-bottom: 5px;
-
-    #allowedAuthenticationIdPatterns>div>.well,
-    #propertyMapping.well,
-    #customProperties>div>.well,
-    #augmentSecurityContext.well {
-      background-color: white !important;
-      padding: 9px !important;
-
-      button {
-        i {
-          margin: 0 0 0 10px;
-        }
-      }
-    }
-  }
-
-  .advanced-toggle {
-    cursor: pointer;
-  }
-  #advancedForm {
-    display: none;
-
-    #customProperties {
-      margin-top: -35px;
-    }
-
-    &.form-horizontal .form-group {
-      margin-left: 0;
-      margin-right: 0;
-    }
-
-    #customProperties>div>.well {
-      margin-bottom: 0;
-    }
-
-  }
-}
-
 #AuditEventsDialog {
   #filterFieldsPane {
     .well {
@@ -291,7 +238,7 @@
   }
 }
 
-#settings {
+#settings{
   .tab-pane {
     border-left: 1px solid #ddd;
     border-right: 1px solid #ddd;
@@ -306,35 +253,5 @@
 
   .panel-collapse {
     margin-bottom: 0;
-  }
-
-
-
-  #AuthenticationContainer {
-
-    #authModuleGrid {
-      th {
-        display: none;
-      }
-
-      .dragToSort {
-        cursor: move !important;
-      }
-    }
-
-    .module-select{
-      width: 400px;
-    }
-    .authModuleDisabled {
-      color: #999;
-    }
-
-    .authModuleErrors {
-      color: #cd0a0a;
-    }
-
-    .noteHidden {
-      display: none;
-    }
   }
 }

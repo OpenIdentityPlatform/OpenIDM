@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 define([
@@ -28,7 +28,9 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/selfservice/SelfServiceStageDialogView",
     "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
-    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView"
+    "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
+    "org/forgerock/openidm/ui/common/util/oAuthUtils"
+
 ], function($, _,
             handlebars,
             form2js,
@@ -41,7 +43,9 @@ define([
             Constants,
             SelfServiceStageDialogView,
             SocialDelegate,
-            AttributesGridView) {
+            AttributesGridView,
+            OAuthUtils) {
+
     var UserRegistrationConfigView = AdminAbstractView.extend({
         template: "templates/admin/selfservice/UserRegistrationConfigTemplate.html",
         events: {
@@ -231,22 +235,7 @@ define([
                 this.model.resources = resources;
                 this.model.uiConfig = uiConfig;
 
-                _.each(availableProviders.providers, (provider) => {
-                    switch(provider.name) {
-                        case "google":
-                            provider.displayIcon = "google";
-                            break;
-                        case "facebook":
-                            provider.displayIcon = "facebook";
-                            break;
-                        case "linkedIn":
-                            provider.displayIcon = "linkedin";
-                            break;
-                        default:
-                            provider.displayIcon = "cloud";
-                            break;
-                    }
-                });
+                availableProviders.providers = OAuthUtils.setDisplayIcons(availableProviders.providers);
 
                 this.data.socialProviders = {
                     providerList : availableProviders.providers,

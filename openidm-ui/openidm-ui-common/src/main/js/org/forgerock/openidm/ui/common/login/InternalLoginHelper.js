@@ -15,6 +15,7 @@
  */
 
 define([
+    "jquery",
     "underscore",
     "org/forgerock/openidm/ui/common/UserModel",
     "org/forgerock/commons/ui/common/main/EventManager",
@@ -23,7 +24,7 @@ define([
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/openidm/ui/common/util/AMLoginUtils",
     "org/forgerock/openidm/ui/common/util/Constants"
-], function (_,
+], function ($, _,
              UserModel,
              eventManager,
              AbstractConfigurationAware,
@@ -59,18 +60,29 @@ define([
     };
 
     obj.logout = function (successCallback, errorCallback) {
+        var promise;
+
         if (conf.loggedUser) {
-            conf.loggedUser.logout().then(() => {
+            promise = conf.loggedUser.logout().then(() => {
                 delete conf.loggedUser;
-                successCallback();
             });
+        } else {
+            promise = $.Deferred().resolve();
         }
 
-        if(conf.globalData.openamAuthEnabled){
-            amLoginUtils.openamLogout(successCallback);
-            return false;
-        }
+        promise.then(() => {
+            if (conf.globalData.openamAuthEnabled){
+                amLoginUtils.openamLogout(successCallback);
+                return false;
+            }
 
+            if (conf.globalData.logoutUrl) {
+                window.location.href = conf.globalData.logoutUrl;
+                return false;
+            }
+
+            successCallback();
+        });
     };
 
     obj.getLoggedUser = function(successCallback, errorCallback) {

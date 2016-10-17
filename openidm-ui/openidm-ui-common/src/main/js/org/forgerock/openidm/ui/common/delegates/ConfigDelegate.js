@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 define([
@@ -46,6 +46,13 @@ define([
 
     obj.configQuery = function(queryFilter, successCallback, errorCallback) {
         return obj.serviceCall({ url:"?_queryFilter=" + encodeURIComponent(queryFilter), type: "GET", success: successCallback, error: errorCallback});
+    };
+
+    obj.patchEntity = function (queryParameters, patchDefinition, successCallback, errorCallback) {
+        return Object.getPrototypeOf(obj).patchEntity.call(obj, queryParameters, patchDefinition, successCallback, errorCallback)
+            .always(function () {
+                delete conf.delegateCache.config[queryParameters.id];
+            });
     };
 
     obj.readEntity = function (id, successCallback, errorCallback) {

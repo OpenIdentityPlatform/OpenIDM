@@ -1,0 +1,231 @@
+/**
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
+ *
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
+ *
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
+ *
+ * Copyright 2016 ForgeRock AS.
+ */
+#ProviderModuleDialog {
+  .alert-danger {
+    margin-bottom: 0;
+  }
+}
+
+#AuthenticationContainer {
+  .sessionResetAlert {
+    margin: 15px 0 0 0;
+  }
+
+  #sessionContainer {
+    .btn.disabled {
+      pointer-events: all;
+    }
+  }
+
+  .add-item-inline .form-group {
+    margin-bottom: 0;
+  }
+
+  .tab-pane {
+    border-left: 1px solid #ddd;
+    border-right: 1px solid #ddd;
+    border-bottom: 1px solid #ddd;
+  }
+
+  .panel-container {
+    .badge {
+      vertical-align: top;
+      min-width: 26px;
+      border-radius: 40px;
+      border: 1px solid #ddd;
+    }
+
+    .panel {
+      border: 1px solid #ddd;
+      border-radius: 0;
+      margin-top: -1px;
+
+      &.disabled {
+        h3 {
+          color: #777;
+        }
+        .circle {
+          background-color: #ccc;
+        }
+        .fa-pencil {
+          display: none;
+        }
+      }
+
+      &:first-of-type {
+        border-radius: 4px 4px 0 0;
+      }
+
+      &:last-of-type {
+        border-radius: 0 0 4px 4px;
+      }
+
+      .panel-body {
+        padding: 15px;
+
+        &.card {
+          height: auto;
+        }
+
+        .provider-radio-container {
+          line-height: 50px;
+          margin-right: 15px;
+        }
+
+        .btn-link {
+          padding: 0;
+
+          i.fa {
+            text-align: right;
+            vertical-align: text-top;
+          }
+        }
+
+        .image.circle {
+          width: 50px;
+          font-size: 22px;
+          height: 50px;
+          margin-right: 15px;
+
+          span {
+            line-height: 50px;
+            i, img {
+              vertical-align: text-top;
+            }
+          }
+        }
+
+        .media {
+          margin: 0;
+
+          .media-heading {
+            font-weight: 500;
+            font-size: 18px;
+            margin: 0 0 5px 0;
+            text-align: left;
+          }
+
+          .media-body {
+            a {
+              display: inline;
+            }
+          }
+        }
+
+      }
+    }
+  }
+
+  #authModuleGrid {
+    .dragToSort {
+      cursor: move !important;
+    }
+  }
+
+  .module-select{
+    width: 400px;
+  }
+  .authModuleDisabled {
+    color: #999;
+  }
+
+  .authModuleErrors {
+    color: #cd0a0a;
+  }
+
+  .noteHidden {
+    display: none;
+  }
+
+}
+
+#AuthenticationModuleDialogContainer {
+  margin-top: -15px;
+  &>h3{
+    font-size: 14px;
+  }
+
+  #noSocialProvidersAlert {
+    margin-top: 15px;
+    margin-bottom: 0;
+  }
+
+  #basicForm,
+  #advancedForm {
+    padding-bottom: 5px;
+
+    h3 {
+      font-size: 14px;
+      text-transform: capitalize;
+      i {
+        margin-right: 5px;
+        cursor: pointer;
+        & + span {
+          cursor: pointer;
+        }
+      }
+    }
+
+    .btn {
+      font-size: 13px;
+      border-radius: 5px;
+      margin-right: 5px;
+      i {
+        margin: 0;
+      }
+    }
+
+    .btn:last-child {
+      margin-right: 0;
+    }
+
+    #allowedAuthenticationIdPatterns>div>.well,
+    #propertyMapping.well,
+    #customProperties>div>.well,
+    #augmentSecurityContext.well {
+      background-color: white !important;
+      padding: 9px !important;
+
+      button {
+        i {
+          margin: 0 0 0 10px;
+        }
+      }
+    }
+  }
+
+  .advanced-toggle {
+    cursor: pointer;
+  }
+  #advancedForm {
+    display: none;
+
+    #customProperties {
+      margin-top: -35px;
+    }
+
+    &.form-horizontal .form-group {
+      margin-left: 0;
+      margin-right: 0;
+    }
+
+    #customProperties>div>.well {
+      margin-bottom: 0;
+    }
+
+  }
+
+}

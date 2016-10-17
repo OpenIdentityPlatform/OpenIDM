@@ -20,22 +20,26 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/LoginDialog",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/login/ProviderLoginDialog"
+    "org/forgerock/openidm/ui/common/login/ProviderLoginDialog",
+    "org/forgerock/openidm/ui/common/delegates/SocialDelegate"
 ], function( $, _,
              AbstractView,
              CommonsLoginDialog,
              Configuration,
-             ProviderLoginDialog) {
+             ProviderLoginDialog,
+             SocialDelegate) {
 
     var LoginDialog = AbstractView.extend({
         render: function (options) {
-            var userNameFlag = Configuration.loggedUser.userNamePasswordLogin;
+            SocialDelegate.loginProviders().then((configuredProviders) => {
+                var userNameFlag = Configuration.loggedUser.userNamePasswordLogin;
 
-            if(userNameFlag) {
-                CommonsLoginDialog.render(options);
-            } else {
-                ProviderLoginDialog.render(options, Configuration.loggedUser);
-            }
+                if (userNameFlag || configuredProviders.providers.length === 0) {
+                    CommonsLoginDialog.render(options);
+                } else {
+                    ProviderLoginDialog.render(options, Configuration.loggedUser,  configuredProviders);
+                }
+            });
         }
     });
     return new LoginDialog();

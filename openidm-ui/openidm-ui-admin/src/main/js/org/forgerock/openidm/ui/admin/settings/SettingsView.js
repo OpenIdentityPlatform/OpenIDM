@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 define([
@@ -19,7 +19,6 @@ define([
     "jquery",
     "handlebars",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/openidm/ui/admin/settings/authentication/AuthenticationView",
     "org/forgerock/openidm/ui/admin/settings/audit/AuditView",
     "org/forgerock/openidm/ui/admin/settings/SelfServiceView",
     "org/forgerock/openidm/ui/admin/settings/EmailConfigView",
@@ -33,7 +32,6 @@ define([
             $,
             Handlebars,
             AdminAbstractView,
-            AuthenticationView,
             AuditView,
             SelfServiceView,
             EmailConfigView,
@@ -50,7 +48,7 @@ define([
         },
 
         render: function(args, callback) {
-            this.data.tabName = args[0] || "authentication";
+            this.data.tabName = args[0] || "audit";
 
             this.data.maintenanceModeDelegate = new AbstractDelegate(Constants.host + "/openidm/maintenance");
 
@@ -74,7 +72,6 @@ define([
 
             this.parentRender(_.bind(function() {
                 if (!this.data.maintenanceMode) {
-                    AuthenticationView.render();
                     AuditView.render();
                     SelfServiceView.render();
                     EmailConfigView.render({}, _.noop);

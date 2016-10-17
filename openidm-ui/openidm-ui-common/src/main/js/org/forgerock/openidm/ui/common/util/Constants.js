@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2011-2016 ForgeRock AS.
+ * Copyright 2016 ForgeRock AS.
  */
 
 define([
@@ -27,6 +27,7 @@ define([
     commonConstants.HEADER_PARAM_REAUTH = "X-OpenIDM-Reauth-Password";
 
     commonConstants.DOC_URL = "https://forgerock.org/openidm/doc/bootstrap/";
+    commonConstants.AM_DOC_URL = "https://forgerock.org/openam/doc/bootstrap/";
 
     commonConstants.EVENT_POLICY_FAILURE = "EVENT_POLICY_FAILURE";
 

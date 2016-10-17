@@ -68,5 +68,30 @@ define([
         return OAuth.getRequestURL(provider.authorization_endpoint, provider.client_id, scopes, state);
     };
 
+    /**
+     * Iterates over
+     * @param name
+     */
+    obj.setDisplayIcons = function(providers) {
+        _.each(providers, function (provider) {
+            switch (provider.name) {
+                case "google":
+                    provider.displayIcon = "google";
+                    break;
+                case "facebook":
+                    provider.displayIcon = "facebook";
+                    break;
+                case "linkedIn":
+                    provider.displayIcon = "linkedin";
+                    break;
+                default:
+                    provider.displayIcon = "cloud";
+                    break;
+            }
+        });
+
+        return providers;
+    };
+
     return obj;
 });

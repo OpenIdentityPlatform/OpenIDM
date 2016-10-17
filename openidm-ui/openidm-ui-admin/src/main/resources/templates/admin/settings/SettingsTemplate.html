@@ -1,4 +1,4 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div id="settingsBody">
 
@@ -11,11 +11,6 @@
     <div id="settingsTabs" class="tab-menu">
         <div class="container">
             <ul class="nav nav-tabs">
-
-                <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "authentication"}}active{{/sw}}">
-                <a data-toggle="tab" data-route="authentication" href="#authenticationContainer">{{t "config.AppConfiguration.Navigation.links.authentication"}}</a>
-                </li>
-
                 <li class="{{#if maintenanceMode}}disabled{{/if}}{{#sw tabName "audit"}}active{{/sw}}">
                 <a data-toggle="tab" data-route="audit" href="#auditContainer">{{t "templates.audit.audit"}}</a>
                 </li>
@@ -37,7 +32,6 @@
 
     <div class="container">
         <div class="tab-content" id="settings">
-            <div id="authenticationContainer" class="tab-pane{{#sw tabName "authentication"}} active{{/sw}}" role="tabpanel"></div>
             <div id="auditContainer" class="tab-pane{{#sw tabName "audit"}} active{{/sw}}" role="tabpanel"></div>
             <div id="selfServiceContainer" class="tab-pane{{#sw tabName "selfService"}} active{{/sw}}" role="tabpanel"></div>
             <div id="emailContainer" class="tab-pane{{#sw tabName "email"}} active{{/sw}}" role="tabpanel"></div>
