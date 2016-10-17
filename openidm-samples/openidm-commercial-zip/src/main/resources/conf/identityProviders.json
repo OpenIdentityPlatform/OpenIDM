@@ -19,6 +19,7 @@
       "authenticationId" : "sub",
       "schema" : {
           "id" : "http://jsonschema.net",
+          "title" : "Google",
           "viewable" : true,
           "type" : "object",
           "$schema" : "http://json-schema.org/draft-03/schema",
@@ -128,6 +129,7 @@
       "authenticationId" : "id",
       "schema" : {
           "id" : "http://jsonschema.net",
+          "title" : "Facebook",
           "viewable" : true,
           "type" : "object",
           "$schema" : "http://json-schema.org/draft-03/schema",
@@ -226,6 +228,7 @@
       "authenticationId" : "id",
       "schema" : {
           "id" : "http://jsonschema.net",
+          "title" : "LinkedIn",
           "viewable" : true,
           "type" : "object",
           "$schema" : "http://json-schema.org/draft-03/schema",
