@@ -1,13 +1,21 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015-2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div>
     <form class="filter-form form-horizontal">
+        {{#if legend}}
+        <div class="expressionTree">
+            <fieldset>
+                <legend>{{legend}}</legend>
+                <div class="form-group">
+
+                    <div class="filter well well-lg {{#if hidden}} hidden {{/if}}">{{filterString}}</div>
+        {{else}}
         <div class="filter well">{{filterString}}</div>
 
         <div class="expressionTree">
             <fieldset>
                 <div class="row">
-
+        {{/if}}
                     <ul>
                         <li  index="" class="node">
 
@@ -46,20 +54,42 @@
                                 </div>
                             </div>
                             {{else}}
+                            {{#if legend}}
+                                <div class="op-body form-group">
+                                    <div class="col-md6">
+                                        <div class="form-inline">
+                                            <select class="op form-control">
+                                                {{#each options}}
+                                                <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                                                {{/each}}
+                                            </select>
+                                            {{#if isMultiValueType}}
 
-                            <div class="op-body">
-                                <select class="op form-control">
-                                    {{#each options}}
-                                    <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
-                                    {{/each}}
-                                </select>
-                            </div>
+                                            <button type="button" field_type="baseContext" title="" class="btn btn-default add-btn"><i class="fa fa-plus"></i></button>
 
-                            {{#if isMultiValueType}}
+                                            {{/if}}
+                                        </div>
 
-                            <button type="button" field_type="baseContext" title="" class="btn btn-default add-btn"><i class="fa fa-plus"></i></button>
+                                    </div>
+
+                                </div>
+                            {{else}}
+                                <div class="op-body">
+                                    <select class="op form-control">
+                                        {{#each options}}
+                                        <option value="{{value}}" {{#selected}}selected{{/selected}}>{{label}}</option>
+                                        {{/each}}
+                                    </select>
+                                </div>
+
+                                {{#if isMultiValueType}}
+
+                                <button type="button" field_type="baseContext" title="" class="btn btn-default add-btn"><i class="fa fa-plus"></i></button>
 
                             {{/if}}
+                            {{/if}}
+
+
                             {{/if}}
 
                             {{#if children.length}}
@@ -90,6 +120,28 @@
                     </ul>
 
                 </div>
+                {{#if legend}}
+                    <div class="full-entry-radios {{#if hidden}}hidden{{/if}}">
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="{{element}}FullEntryRadios" id="{{element}}FullEntryRadiosDefault" value="default" {{{setInitialRadioChecked fullEntry "default"}}}>
+                                {{t 'templates.correlation.fullEntryDefault'}}
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="{{element}}FullEntryRadios" id="{{element}}FullEntryRadiosTrue" value="true" {{{setInitialRadioChecked fullEntry "true"}}}>
+                                {{t 'templates.correlation.fullEntryTrue'}}
+                            </label>
+                        </div>
+                        <div class="radio">
+                            <label>
+                                <input type="radio" name="{{element}}FullEntryRadios" id="{{element}}FullEntryRadiosFalse" value="false" {{{setInitialRadioChecked fullEntry "false"}}}>
+                                {{t 'templates.correlation.fullEntryFalse'}}
+                            </label>
+                        </div>
+                    </div>
+                {{/if}}
             </fieldset>
         </div>
         {{#if showSubmitButton}}
