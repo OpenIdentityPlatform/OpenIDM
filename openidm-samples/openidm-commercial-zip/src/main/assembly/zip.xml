@@ -22,6 +22,13 @@
                 <include>org.forgerock.openidm:openidm-salesforce</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/connectors</outputDirectory>
+            <includes>
+                <include>org.forgerock.openicf.connectors:googleapps-connector</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
 
     <fileSets>
