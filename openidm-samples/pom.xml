@@ -42,7 +42,6 @@
         </site>
     </distributionManagement>
 
-    <!-- NOT ALLOWED: (see FAQ at http://maven.apache.org/guides/mini/guide-central-repository-upload.html ) -->
     <repositories>
         <repository>
             <id>forgerock-staging-repository</id>

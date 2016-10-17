@@ -27,6 +27,7 @@
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
                 <include>org.forgerock.openicf.connectors:googleapps-connector</include>
+                <include>org.forgerock.openicf.connectors:marketo-connector</include>
             </includes>
         </dependencySet>
     </dependencySets>
