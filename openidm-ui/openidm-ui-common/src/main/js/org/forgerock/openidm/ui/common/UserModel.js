@@ -20,10 +20,9 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/util/CookieHelper",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function ($, _, AbstractModel, Configuration, Constants, CookieHelper, EventManager, ServiceInvoker) {
+], function ($, _, AbstractModel, Configuration, Constants, EventManager, ServiceInvoker) {
     var UserModel = AbstractModel.extend({
         protectedAttributeList: [],
         sync: function (method, model, options) {
@@ -107,12 +106,14 @@ define([
             }
             return response;
         },
-        removeSessionCookie: function () {
-            CookieHelper.deleteCookie("session-jwt", "/", "");
+        invalidateSession: function () {
+            return ServiceInvoker.restCall({
+                "url": "/" + Constants.context + "/authentication?_action=logout",
+                "type" : "POST"
+            });
         },
         login: function (username, password) {
             var headers = {};
-            this.removeSessionCookie(); // resets the session cookie to discard old session that may still exist
             headers[Constants.HEADER_PARAM_USERNAME] = username;
             headers[Constants.HEADER_PARAM_PASSWORD] = password;
             headers[Constants.HEADER_PARAM_NO_SESSION] = false;
@@ -154,12 +155,16 @@ define([
             return updatedHeaders;
         },
         logout: function () {
-            this.removeSessionCookie();
             sessionStorage.removeItem("authDetails");
             ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
                 ServiceInvoker.configuration.defaultHeaders || {},
                 null
             );
+            if (this.id) {
+                return this.invalidateSession();
+            } else {
+                return $.Deferred().resolve();
+            }
         },
         getProfile: function (headers) {
             ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(

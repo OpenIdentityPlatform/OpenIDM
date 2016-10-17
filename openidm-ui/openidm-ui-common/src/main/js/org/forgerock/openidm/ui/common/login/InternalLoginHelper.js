@@ -60,16 +60,16 @@ define([
 
     obj.logout = function (successCallback, errorCallback) {
         if (conf.loggedUser) {
-            conf.loggedUser.logout();
-            delete conf.loggedUser;
+            conf.loggedUser.logout().then(() => {
+                delete conf.loggedUser;
+                successCallback();
+            });
         }
 
         if(conf.globalData.openamAuthEnabled){
             amLoginUtils.openamLogout(successCallback);
             return false;
         }
-
-        successCallback();
 
     };
 
