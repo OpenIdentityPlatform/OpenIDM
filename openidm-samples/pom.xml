@@ -47,14 +47,22 @@
         <repository>
             <id>forgerock-staging-repository</id>
             <name>ForgeRock Release Repository</name>
+            <url>http://maven.forgerock.org/repo/releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>forgerock-private-staging-repository</id>
+            <name>ForgeRock Private Release Repository</name>
             <url>http://maven.forgerock.org/repo/private-releases</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
         </repository>
         <repository>
-            <id>forgerock-snapshots-repository</id>
-            <name>ForgeRock Snapshot Repository</name>
+            <id>forgerock-private-snapshots-repository</id>
+            <name>ForgeRock Private Snapshot Repository</name>
             <url>http://maven.forgerock.org/repo/private-snapshots</url>
             <releases>
                 <enabled>false</enabled>
