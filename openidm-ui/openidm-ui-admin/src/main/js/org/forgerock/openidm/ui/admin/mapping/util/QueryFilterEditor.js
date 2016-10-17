@@ -74,10 +74,8 @@ define([
             getFilterString: function () {
                 return this.serialize(this.data.filter);
             },
-            render: function (args, callback) {
-                this.setElement(args.element);
-
-                this.data = {
+            createDataObject: function (argsData) {
+                let data = {
                     config: {
                         ops: [
                             "and",
@@ -98,6 +96,15 @@ define([
                     },
                     showSubmitButton: false
                 };
+                if (argsData) {
+                    data = _.merge({}, data, argsData);
+                }
+                return data;
+            },
+            render: function (args, callback) {
+                this.setElement(args.element);
+
+                this.data = this.createDataObject(args.data);
 
                 this.data.filterString = args.queryFilter;
                 if (this.data.filterString !== "") {
