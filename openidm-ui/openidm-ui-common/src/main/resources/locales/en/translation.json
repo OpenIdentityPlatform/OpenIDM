@@ -159,6 +159,9 @@
             "WorkflowMessages" : {
                 "cancelActiveProcess" : "Workflow Process canceled."
             },
+            "AuthMessages" : {
+                "amAuthWellKnownEndpointFailure": "Error accessing the Discovery Document from the Well-Known Endpoint"
+            },
             "AuditMessages" : {
                 "auditSaveSuccessful": "Audit configurations have been saved."
             },
@@ -1309,143 +1312,148 @@
             }
         },
         "auth": {
+            "sessionResetError": "Your current session may be invalid. <a href='#logout/'>Click here</a> to logout and re-authenticate.",
+            "providers": {
+                "title": "Providers",
+                "desc": "Select an authentication provider",
+                "wellKnownError": "Specify the endpoint with OpenAM's OpenID Provider configuration",
+                "providerDialogTitle": "Configure ForgeRock Identity Provider",
+                "am": "Configure Access Manager",
+                "uriHelp": "Configure the OpenAM OpenID Connect Client Agent with these redirection URIs. Visit the ",
+                "uriHelpLink": "OpenID Connect 1.0 Guide",
+                "uriHelp2": " for more information.",
+                "enterConfigure" : "Enter configuration details",
+                "wellKnownLabel": "Well-Known Endpoint",
+                "wellKnownHelp": "For more information visit the ",
+                "clientID": "Client ID",
+                "clientSecret": "Client Secret",
+                "localLabel": "Local",
+                "localDesc1": "Local authentication modules configured with",
+                "localDesc2": "social providers",
+                "amLabel": "ForgeRock Identity Provider",
+                "amDesc": "Use the ForgeRock platform to enable features such as multifactor authentication and single sign-on"
+            },
+            "session": {
+                "title": "Session",
+                "desc": "The Session Module sets token life and idle time limits on user sessions.",
+                "logoutURLTitle": "Logout URL",
+                "maxLifeTitle": "Max Token Life",
+                "idleTimeTitle": "Token Idle Time",
+                "minutes": "Minutes",
+                "seconds": "Seconds",
+                "sessionOnlyTitle": "Browser Session Only"
+            },
             "modules": {
+                "title": "Modules",
+                "gridLabel": "Module",
+                "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order specified.",
+                "missingTemplateError": "Missing Template for ",
+                "select": "Select a Module",
+                "addNew": "Add",
+                "edit": "Edit",
+                "new": "New",
+                "authFieldsetName": "Authentication Module",
+                "disabled": "Disabled",
+                "propertyMapping": "Property Mappings",
+                "authId": "Authentication ID",
+                "userCred": "User Credential",
+                "userOrGroup": "Method for Determining Roles",
+                "userRoles": "User Roles Property",
+                "groupMembership": "Group Membership",
+                "property": "Property",
+                "propertyName": "Property Name",
+                "propertyType": "Property Type",
+                "string": "String",
+                "simpleArray": "Simple Array",
+                "value": "Value",
+                "groupRoleMapping": "Group Role Mapping",
+                "role": "Role",
+                "roleName": "Role Name",
+                "groupMappings": "Group Mappings",
+                "group": "Group",
+                "allowedAuthIdPatterns": "Allowed Authentication ID Patterns",
+                "pattern": "Pattern",
+                "openamDeploymentUrlConfirmation" : "OpenAM Deployment URL is invalid. Would you like to continue?",
+                "basicProperties": "BASIC PROPERTIES",
+                "advancedProperties": "ADVANCED PROPERTIES",
+                "moduleEnabled": "Module Enabled",
+                "queryOnResource": "Query on Resource",
+                "queryId": "Use Query ID",
+                "defaultUserRole": "Default User Roles",
+                "servicePrincipal": "Kerberos Service Principal",
+                "keytabFileName": "Keytab File Name",
+                "kerberosRealm": "Kerberos Realm",
+                "kerberosServerName": "Kerberos Server Name",
+                "groupComparisonMethod": "Group Comparison Method",
+                "authenticationIdAttribute": "Authentication ID attribute for the User ID",
+                "authTokenHeader": "OAuth Token Header",
+                "authResolverHeader": "OAuth Resolver Header",
+                "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
+                "openamDeploymentUrl": "OpenAM Deployment URL",
+                "openamUseExclusively": "Require OpenAM Authentication",
+                "openamLoginUrl": "OpenAM Login URL",
+                "openamLoginLinkText": "OpenAM Login Link Text",
+                "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
+                "openamUserAttribute": "OpenAM User Attribute",
+                "truststoreType": "Truststore Type",
+                "truststorePath": "Truststore Path",
+                "truststorePassword": "Truststore Password",
+                "openIdConnectHeader": "OpenID Connect Header",
+                "noSocialProviderHeader": "Warning",
+                "noSocialProviderMessage": "Configure a social ID provider before adding this module.",
+                "noSocialProviderLink": "Link",
+                "static" : {
+                    "username" : "Static user name",
+                    "password" : "Static user password",
+                    "userRole" : "Static user role"
+                },
+                "augmentSecurityContext": "Augment Security Context",
+                "customProp": "Custom Properties",
                 "STATIC_USER": {
-                  "name": "Static User",
-                  "msg": "Anonymous authentication"
+                    "name": "Static User",
+                    "msg": "Anonymous authentication"
                 },
                 "CLIENT_CERT": {
-                  "name": "Client Cert",
-                  "msg": "Enables authentication with a certificate"
+                    "name": "Client Cert",
+                    "msg": "Enables authentication with a certificate"
                 },
                 "IWA": {
-                  "name": "IWA",
-                  "msg": "Passthrough authentication via LDAP connector to Active Directory"
+                    "name": "IWA",
+                    "msg": "Passthrough authentication via LDAP connector to Active Directory"
                 },
                 "MANAGED_USER": {
-                  "name": "Managed User",
-                  "msg": "Queries the OpenIDM repository for external users"
+                    "name": "Managed User",
+                    "msg": "Queries the OpenIDM repository for external users"
                 },
                 "OPENAM_SESSION": {
-                  "name": "OpenAM Session",
-                  "msg": "Uses OpenAM for authentication"
+                    "name": "OpenAM Session",
+                    "msg": "Uses OpenAM for authentication"
                 },
                 "INTERNAL_USER": {
-                  "name": "Internal User",
-                  "msg": "Queries the internal OpenIDM repository"
+                    "name": "Internal User",
+                    "msg": "Queries the internal OpenIDM repository"
                 },
                 "OPENID_CONNECT": {
-                  "name": "OpenID Connect",
-                  "msg": "Supports OpenID Connect 1.0"
+                    "name": "OpenID Connect",
+                    "msg": "Supports OpenID Connect 1.0"
                 },
                 "OAUTH": {
-                  "name": "OAuth 2.0",
-                  "msg": "Generic OAuth 2.0 access_token validation"
+                    "name": "OAuth 2.0",
+                    "msg": "Generic OAuth 2.0 access_token validation"
                 },
                 "SOCIAL_PROVIDERS": {
-                  "name": "Social Providers",
-                  "msg": "Enables authentication for all defined social providers"
+                    "name": "Social Providers",
+                    "msg": "Enables authentication for all defined social providers"
                 },
                 "PASSTHROUGH": {
-                  "name": "Passthrough",
-                  "msg": "Queries an external system for authentication"
+                    "name": "Passthrough",
+                    "msg": "Queries an external system for authentication"
                 },
                 "TRUSTED_ATTRIBUTE": {
-                  "name": "Trusted Attribute",
-                  "msg": "Uses a trusted request attribute to determine username. Designed to pair with an external auth filter."
+                    "name": "Trusted Attribute",
+                    "msg": "Uses a trusted request attribute to determine username. Designed to pair with an external auth filter."
                 }
-            },
-            "missingTemplateError": "Missing Template for ",
-            "disabled": "Disabled",
-            "edit": "Edit",
-            "new": "New",
-            "authFieldsetName": "Authentication Module",
-            "sessionInfo": "The Session Module sets token life and idle time limits on user sessions.",
-            "authInfo": "Configure desired Authentication Modules to verify identities. OpenIDM evaluates these modules in the order specified.",
-            "errorsmsg": "Please address the errors in the Authentication modules before saving.",
-            "addNew": "Add",
-            "errors": "Errors",
-            "defaultTitle": "Select an Authentication Module Type",
-            "authTitle": "Configure Authentication",
-            "sessionFieldsetName": "Session Module",
-            "sessionOnlyTitle": "Session Only",
-            "idleTimeTitle": "Token Idle Time",
-            "maxLifeTitle": "Max Token Life",
-            "minutes": "Minutes",
-            "seconds": "Seconds",
-            "type": "Type",
-            "moduleEnabled": "Module Enabled",
-            "queryOnResource": "Query on Resource",
-            "queryId": "Use Query ID",
-            "defaultUserRole": "Default User Roles",
-            "role": "Role",
-            "propertyMapping": "Property Mappings",
-            "static" : {
-                "message" : "Anonymous authentication",
-                "username" : "Static user name",
-                "password" : "Static user password",
-                "userRole" : "Static user role"
-            },
-            "authId": "Authentication ID",
-            "userCred": "User Credential",
-            "userOrGroup": "Method for Determining Roles",
-            "selectOption": "Select an option",
-            "userRoles": "User Roles Property",
-            "groupMembership": "Group Membership",
-            "customProp": "Custom Properties",
-            "property": "Property",
-            "propertyName": "Property Name",
-            "propertyType": "Property Type",
-            "string": "String",
-            "simpleArray": "Simple Array",
-            "value": "Value",
-            "groupRoleMapping": "Group Role Mapping",
-            "roleName": "Role Name",
-            "groupMappings": "Group Mappings",
-            "group": "Group",
-            "augmentSecurityContext": "Augment Security Context",
-            "basicProperties": "BASIC PROPERTIES",
-            "advancedProperties": "ADVANCED PROPERTIES",
-            "allowedAuthIdPatterns": "Allowed Authentication ID Patterns",
-            "pattern": "Pattern",
-            "servicePrincipal": "Kerberos Service Principal",
-            "keytabFileName": "Keytab File Name",
-            "kerberosRealm": "Kerberos Realm",
-            "kerberosServerName": "Kerberos Server Name",
-            "groupComparisonMethod": "Group Comparison Method",
-            "groupComparisonMethodMessage" : "Data store for group roles",
-            "truststorePassword": "Truststore Password",
-            "truststorePath": "Truststore Path",
-            "truststoreType": "Truststore Type",
-            "openamUserAttribute": "OpenAM User Attribute",
-            "openamSSOTokenCookieName": "OpenAM SSO Token Cookie Name",
-            "openamDeploymentUrl": "OpenAM Deployment URL",
-            "openamDeploymentUrlConfirmation" : "OpenAM Deployment URL is invalid. Would you like to continue?",
-            "openamLoginUrl": "OpenAM Login URL",
-            "openamLoginLinkText": "OpenAM Login Link Text",
-            "openamUseExclusively": "Require OpenAM Authentication",
-            "routeToOpenAMUserDataStore": "Route to OpenAM User Datastore",
-            "openamUserDatastoreMappingName": "OpenAM User Datastore Mapping Name",
-            "openIdConnectHeader": "OpenID Connect Header",
-            "authTokenHeader": "OAuth Token Header",
-            "authResolverHeader": "OAuth Resolver Header",
-            "resolvers": "Resolvers",
-            "resolver": "Resolver",
-            "name": "Name",
-            "icon": "Icon",
-            "clientId": "Client ID",
-            "clientSecret": "Client Secret",
-            "authorizationEndpoint": "Authorization Endpoint",
-            "tokenEndpoint": "Token Endpoint",
-            "userinfoEndpoint": "User Info Endpoint",
-            "wellKnown": "Well Known",
-            "managedUserLink": "Managed User Link",
-            "moduleType": "Module Type",
-            "select": "Select a Module",
-            "authenticationIdAttribute": "Authentication ID attribute for the User ID",
-            "noSocialProviderHeader": "Warning",
-            "noSocialProviderMessage": "Configure a social ID provider before adding this module.",
-            "noSocialProviderLink": "Link"
+            }
         },
         "selfService": {
             "title": "Self-Service UI",
@@ -2114,6 +2122,7 @@
     },
     "common" : {
         "form" : {
+            "info": "Info",
             "showAdvancedOptions": "Show advanced options",
             "hideAdvancedOptions": "Hide advanced options",
             "add" : "Add",

@@ -222,6 +222,10 @@ define([
             msg: "config.messages.UserMessages.userPasswordResetEmailFailure",
             type: "info"
         },
+        "amAuthWellKnownEndpointFailure": {
+            msg: "config.messages.AuthMessages.amAuthWellKnownEndpointFailure",
+            type: "error"
+        },
         "selfServiceUserRegistrationSave" : {
             msg: "config.messages.selfService.userRegistrationSave",
             type: "info"

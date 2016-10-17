@@ -22,7 +22,7 @@ define([
     "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/commons/ui/common/util/OAuth",
-    "org/forgerock/openidm/ui/common/util/OAuthUtils",
+    "org/forgerock/openidm/ui/common/util/oAuthUtils",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
@@ -49,53 +49,51 @@ define([
         model: {
 
         },
-        render: function (options, userDetails) {
+        render: function (options, userDetails, configuredProviders) {
             this.model.authenticatedCallback = options.authenticatedCallback;
 
             UIUtils.preloadPartial("partials/login/_loginButtons.html");
             UIUtils.preloadPartial("partials/providers/_providerButton.html");
 
-            SocialDelegate.loginProviders().then((configuredProviders) => {
-                let type = {
-                    "action" : $.t("templates.socialIdentities.signIn")
-                };
+            let type = {
+                "action" : $.t("templates.socialIdentities.signIn")
+            };
 
-                if(!_.isUndefined(userDetails.provider)) {
-                    this.model.currentProviders = _.filter(configuredProviders.providers, (obj) => {
-                        return obj.name === userDetails.provider;
-                    });
-                } else {
-                    this.model.currentProviders = configuredProviders.providers;
-                }
-
-                _.each(configuredProviders.providers, (provider) => {
-                    provider.scope = provider.scope.join(" ");
-
-                    provider.icon =  Handlebars.compile(provider.icon)(type);
+            if(!_.isUndefined(userDetails.provider) && !_.isNull(userDetails.provider)) {
+                this.model.currentProviders = _.filter(configuredProviders.providers, (obj) => {
+                    return obj.name === userDetails.provider;
                 });
+            } else {
+                this.model.currentProviders = configuredProviders.providers;
+            }
 
-                this.data.providers = configuredProviders.providers;
+            _.each(configuredProviders.providers, (provider) => {
+                provider.scope = provider.scope.join(" ");
 
-                var dialogBody = $('<div id="providerLoginDialog"></div>');
+                provider.icon =  Handlebars.compile(provider.icon)(type);
+            });
 
-                this.$el.find('#dialogs').append(dialogBody);
+            this.data.providers = configuredProviders.providers;
 
-                this.setElement(dialogBody);
+            var dialogBody = $('<div id="providerLoginDialog"></div>');
 
-                this.model.bootstrapDialog = BootstrapDialog.show({
-                    closable: false,
-                    title:  $.t("common.form.sessionExpired"),
-                    type: BootstrapDialog.TYPE_DEFAULT,
-                    message: dialogBody,
-                    onshown: _.bind(function () {
-                        UIUtils.renderTemplate(
-                            this.template,
-                            this.$el,
-                            _.extend({}, Configuration.globalData, this.data),
-                            _.noop,
-                            "replace");
-                    }, this)
-                });
+            this.$el.find('#dialogs').append(dialogBody);
+
+            this.setElement(dialogBody);
+
+            this.model.bootstrapDialog = BootstrapDialog.show({
+                closable: false,
+                title:  $.t("common.form.sessionExpired"),
+                type: BootstrapDialog.TYPE_DEFAULT,
+                message: dialogBody,
+                onshown: _.bind(function () {
+                    UIUtils.renderTemplate(
+                        this.template,
+                        this.$el,
+                        _.extend({}, Configuration.globalData, this.data),
+                        _.noop,
+                        "replace");
+                }, this)
             });
         },
 

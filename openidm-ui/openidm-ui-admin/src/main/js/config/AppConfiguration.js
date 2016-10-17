@@ -147,19 +147,25 @@ define([
                                         {
                                             "url": "#mapping/",
                                             "name": "config.AppConfiguration.Navigation.links.mapping",
-                                            "icon": "fa fa-arrows-h",
-                                            "inactive": false
-                                        },
-                                        {
-                                            "url": "#social/",
-                                            "name": "config.AppConfiguration.Navigation.links.socialProviders",
-                                            "icon": "fa fa-user",
+                                            "icon": "fa fa-map-marker",
                                             "inactive": false
                                         },
                                         {
                                             "url": "#scheduler/",
                                             "name": "config.AppConfiguration.Navigation.links.scheduler",
                                             "icon": "fa fa-calendar",
+                                            "inactive": false
+                                        },
+                                        {
+                                            "url": "#authentication/",
+                                            "name": "config.AppConfiguration.Navigation.links.authentication",
+                                            "icon": "fa fa-user",
+                                            "inactive": false
+                                        },
+                                        {
+                                            "url": "#social/",
+                                            "name": "config.AppConfiguration.Navigation.links.socialProviders",
+                                            "icon": "fa fa-users",
                                             "inactive": false
                                         },
                                         {

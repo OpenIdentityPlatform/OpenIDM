@@ -88,7 +88,7 @@ define([
             role: "ui-admin",
             url: /^settings\/(.*)$/,
             pattern: "settings/?/",
-            defaults: ["authentication"]
+            defaults: ["audit"]
         },
         "addMappingView" : {
             view: "org/forgerock/openidm/ui/admin/mapping/AddMappingView",

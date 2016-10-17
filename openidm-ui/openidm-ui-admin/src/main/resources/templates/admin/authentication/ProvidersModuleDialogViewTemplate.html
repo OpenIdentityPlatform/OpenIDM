@@ -1,0 +1,70 @@
+<!-- Copyright 2016 ForgeRock AS.
+	License terms: https://forgerock.org/cddlv1-0/ -->
+<p class="form-steps">
+    1. {{t "templates.auth.providers.am"}}
+</p>
+<form class="form-horizontal">
+    <div class="panel-description">
+        <p>{{t "templates.auth.providers.uriHelp"}}<strong><a href="{{AMDocHelpUrl}}oidc1-guide/index.html#configure-oauth2-client" target="_blank">{{t "templates.auth.providers.uriHelpLink"}}</a></strong>{{t "templates.auth.providers.uriHelp2"}}</p>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.socialProviders.endUserCallback"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" value="{{enduserCallback}}" disabled="true" type="text">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="col-sm-3 control-label">{{t "templates.socialProviders.adminCallback"}}</label>
+        <div class="col-sm-6">
+            <input class="form-control" value="{{adminCallback}}" disabled="true" type="text">
+        </div>
+    </div>
+</form>
+
+<div class="form-steps">
+    2. {{t "templates.auth.providers.enterConfigure"}}
+</div>
+
+<form class="form-horizontal">
+    <div class="form-group">
+        <label for="amURL" class="col-sm-3 control-label">{{t "templates.auth.providers.wellKnownLabel"}}</label>
+        <div class="col-sm-7">
+            <input type="text" class="form-control" id="amURL" name="amURL" data-validator-event="keyup blur" data-validator="required" value="{{currentConfig.properties.resolvers.0.well-known}}"/>
+            <span class="help-block">
+                {{t "templates.auth.providers.wellKnownHelp"}}
+                <a href="{{AMDocHelpUrl}}oidc1-guide/index.html#configure-openid-connect-discovery" target="_blank"> {{t "templates.auth.providers.uriHelpLink"}}</a>
+            </span>
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="amClientID" class="col-sm-3 control-label">{{t "templates.auth.providers.clientID"}}</label>
+        <div class="col-sm-7">
+            <input type="text" class="form-control" id="amClientID" name="amClientID" data-validator-event="keyup blur" data-validator="required" value="{{currentConfig.properties.resolvers.0.client_id}}"/>
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="amClientSecret" class="col-sm-3 control-label">{{t "templates.auth.providers.clientSecret"}}</label>
+        <div class="col-sm-7">
+            <input type="text" class="form-control" id="amClientSecret" name="amClientSecret" data-validator-event="keyup blur" {{#unless currentConfig.properties.resolvers.0.client_secret}}data-validator="required"{{/unless}} placeholder="{{pw_filler}}" value=""/>
+            <div class="validation-message"></div>
+            <span class="error form-control-feedback"><i class='fa validation-icon'></i></span>
+        </div>
+    </div>
+
+    {{> _alert
+        hidden=true
+        id="wellKnownURLError"
+        type="danger"
+        heading="common.form.error"
+        message="templates.auth.providers.wellKnownError"
+    }}
+</form>
+
+
+

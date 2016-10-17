@@ -1,0 +1,43 @@
+<h3>{{t "templates.auth.modules.basicProperties"}}</h3>
+<div class="well" id="basicForm">
+    <div id="basicFields" class="form-horizontal">
+        {{> form/_titaToggle
+        property="enabled"
+        label="templates.auth.modules.moduleEnabled"
+        enabled=config.enabled}}
+
+        {{> form/_basicSelect
+        property="properties.queryOnResource"
+        label="templates.auth.modules.queryOnResource"
+        options=resources
+        value=config.properties.queryOnResource}}
+
+        {{> form/_basicInput
+        value=config.properties.queryId
+        label="templates.auth.modules.queryId"
+        property="properties.queryId"
+        required="true"
+        noValidation="true"}}
+
+        {{> form/_tagSelectize
+        value=config.properties.defaultUserRoles
+        label="templates.auth.modules.defaultUserRole"
+        property="properties.defaultUserRoles"
+        options=defaultUserRoles}}
+    </div>
+
+    <div id="allowedAuthenticationIdPatterns"></div>
+
+    {{> authentication/_propertyMapping}}
+</div>
+
+<h3 class="advanced-toggle">
+    <i class="advancedShowHide fa fa-caret-right"></i>
+    {{t "templates.auth.modules.advancedProperties"}}
+</h3>
+
+<div class="form-horizontal well" id="advancedForm">
+    <div id="advancedFields" class="form-horizontal"></div>
+    {{> authentication/_augmentSecurityContext}}
+    {{> authentication/_customProperties}}
+</div>
