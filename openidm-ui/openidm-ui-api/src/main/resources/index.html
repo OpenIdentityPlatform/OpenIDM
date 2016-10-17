@@ -76,6 +76,7 @@
                 dom_id: "swagger-ui-div",
                 defaultModelRendering: 'schema',
                 supportedSubmitMethods: ['get', 'post', 'put', 'delete', 'patch'],
+                apisSorter: 'alpha',
                 onComplete: function (swaggerApi, swaggerUi) {
                     // ensure that correct host is set at runtime
                     window.swaggerUi.api.setHost(location.hostname + ':' + location.port);
