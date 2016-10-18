@@ -26,19 +26,12 @@ objectClass: organizationalUnit
 objectClass: top
 ou: users
 
-dn: uid=openidm-admin,ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
-objectClass: openidmInternalUser
-objectClass: top
-uid: openidm-admin
-password: openidm-admin
-roles: [ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]
+# Internal Roles
 
-dn: uid=anonymous,ou=Users,ou=Internal,dc=openidm,dc=forgerock,dc=com
-objectClass: openidmInternalUser
+dn: ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: organizationalUnit
 objectClass: top
-uid: anonymous
-password: anonymous
-roles: [ { "_ref" : "repo/internal/role/openidm-reg" } ]
+ou: users
 
 # Config OU
 
@@ -119,30 +112,40 @@ ou: Users
 # Audit
 ##
 
-dn: ou=Audit,dc=openidm,dc=forgerock,dc=com
+dn: ou=audit,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
 ou: Audit
 
-dn: ou=Activity,ou=Audit,dc=openidm,dc=forgerock,dc=com
+dn: ou=authentication,ou=audit,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: Activity
+ou: authentication
 
-dn: ou=Recon,ou=Audit,dc=openidm,dc=forgerock,dc=com
+dn: ou=config,ou=audit,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: Recon
+ou: config
 
-dn: ou=Sync,ou=Audit,dc=openidm,dc=forgerock,dc=com
+dn: ou=activity,ou=audit,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: Sync
+ou: activity
 
-dn: ou=Access,ou=Audit,dc=openidm,dc=forgerock,dc=com
+dn: ou=recon,ou=audit,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: Access
+ou: recon
+
+dn: ou=sync,ou=audit,dc=openidm,dc=forgerock,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: sync
+
+dn: ou=access,ou=audit,dc=openidm,dc=forgerock,dc=com
+objectClass: organizationalUnit
+objectClass: top
+ou: access
 
 ##
 # UI
@@ -157,3 +160,47 @@ dn: ou=Notifications,ou=UI,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
 ou: Notifications
+
+dn: uid=openidm-admin,ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: openidmInternalUser
+objectClass: top
+uid: openidm-admin
+password: openidm-admin
+roles: [ { "_ref" : "repo/internal/role/openidm-admin" }, { "_ref" : "repo/internal/role/openidm-authorized" } ]
+
+dn: uid=anonymous,ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: openidmInternalUser
+objectClass: top
+uid: anonymous
+password: anonymous
+roles: [ { "_ref" : "repo/internal/role/openidm-reg" } ]
+
+dn: cn=openidm-authorized,ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: openidmInternalRole
+objectClass: top
+cn: openidm-authorized
+description: Basic minimum user
+
+dn: cn=openidm-admin,ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: openidmInternalRole
+objectClass: top
+cn: openidm-admin
+description: Administrative access
+
+dn: cn=openidm-cert,ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: openidmInternalRole
+objectClass: top
+cn: openidm-cert
+description: Authenticated via certificate
+
+dn: cn=openidm-task-manager,ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: openidmInternalRole
+objectClass: top
+cn: openidm-task-manager
+description: Allowed to reassign workflow tasks
+
+dn: cn=openidm-reg,ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com
+objectClass: openidmInternalRole
+objectClass: top
+cn: openidm-reg
+description: Anonymous access

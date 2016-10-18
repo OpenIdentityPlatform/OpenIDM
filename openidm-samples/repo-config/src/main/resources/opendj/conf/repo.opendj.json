@@ -201,6 +201,15 @@
             "type": "clientDnNaming"
           }
         },
+        "internal/role": {
+          "type": "collection",
+          "dnTemplate": "ou=roles,ou=internal,dc=openidm,dc=forgerock,dc=com",
+          "resource": "internal_role",
+          "namingStrategy": {
+            "dnAttribute": "cn",
+            "type": "clientDnNaming"
+          }
+        },
         "config": {
           "type": "collection",
           "dnTemplate": "ou=config,dc=openidm,dc=forgerock,dc=com",
@@ -258,6 +267,20 @@
         },
         "password": {
           "type": "simple", "ldapAttribute": "password"
+        }
+      }
+    },
+    "internal_role": {
+      "objectClasses": [ "top", "openidmInternalRole" ],
+      "properties": {
+        "_id": {
+          "type": "simple", "ldapAttribute": "cn", "isRequired": true, "writability": "createOnly"
+        },
+        "_rev": {
+          "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
+        },
+        "description": {
+          "type": "simple", "ldapAttribute": "description"
         }
       }
     },
