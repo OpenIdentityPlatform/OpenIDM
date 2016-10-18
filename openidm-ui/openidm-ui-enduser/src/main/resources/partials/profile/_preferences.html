@@ -2,7 +2,7 @@
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div class="checkbox">
     <label>
-        <input name="preferences.updates" value="true" type="checkbox"{{#if preferences.updates}} checked{{/if}}>
+        <input name="{{prefix}}preferences.updates" value="true" type="checkbox"{{#if preferences.updates}} checked{{/if}}>
 
         {{t "templates.preferences.updates"}}
     </label>
@@ -10,7 +10,7 @@
 
 <div class="checkbox">
     <label>
-        <input name="preferences.marketing" value="true" type="checkbox"{{#if preferences.marketing}} checked{{/if}}>
+        <input name="{{prefix}}preferences.marketing" value="true" type="checkbox"{{#if preferences.marketing}} checked{{/if}}>
 
         {{t "templates.preferences.marketing"}}
     </label>
