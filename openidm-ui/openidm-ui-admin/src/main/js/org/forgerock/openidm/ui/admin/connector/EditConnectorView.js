@@ -361,7 +361,7 @@ define([
         advancedFormSubmit: function(event) {
             event.preventDefault();
 
-            let advancedData = form2js('advancedFields', '.', true),
+            let advancedData = this.cleanseObject(form2js('advancedFields', '.', false)),
 
                 mergedResults = this.advancedDetailsGenerate(this.connectorDetails, advancedData);
 
@@ -445,7 +445,7 @@ define([
 
         //Saves the sync tab
         syncFormSubmit: function() {
-            let syncData = form2js('syncForm', '.', true);
+            let syncData = this.cleanseObject(form2js('syncForm', '.', false));
 
             this.connectorDetails.syncFailureHandler.maxRetries = parseInt(syncData.syncFailureHandler.maxRetries, 10);
             this.connectorDetails.syncFailureHandler.postRetryAction = syncData.syncFailureHandler.postRetryAction;
@@ -858,7 +858,7 @@ define([
 
                 //Added logic to ensure array parts correctly add and delete what is set
                 _.each(arrayComponents, (component) => {
-                    tempArrayObject = form2js($(component).prop("id"), ".", true);
+                    tempArrayObject = this.cleanseObject(form2js($(component).prop("id"), ".", false));
 
                     _.each(tempArrayObject.configurationProperties, (item, key) => {
                         mergedResult.configurationProperties[key] = item;
