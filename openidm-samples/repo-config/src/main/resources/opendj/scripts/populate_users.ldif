@@ -62,6 +62,46 @@ objectClass: top
 ou: Keys
 
 ##
+# default generic object
+##
+dn: ou=generic,dc=openidm,dc=forgerock,dc=com
+objectclass: organizationalunit
+objectclass: top
+ou: generic
+
+##
+# scheduler
+##
+dn: ou=scheduler,dc=openidm,dc=forgerock,dc=com
+objectclass: organizationalunit
+objectclass: top
+ou: scheduler
+
+##
+# cluster
+##
+dn: ou=cluster,dc=openidm,dc=forgerock,dc=com
+objectclass: organizationalunit
+objectclass: top
+ou: cluster
+
+##
+# relationship
+##
+dn: ou=relationships,dc=openidm,dc=forgerock,dc=com
+objectclass: organizationalunit
+objectclass: top
+ou: relationship
+
+##
+# updates
+##
+dn: ou=updates,dc=openidm,dc=forgerock,dc=com
+objectclass: organizationalunit
+objectclass: top
+ou: updates
+
+##
 # Managed Object OUs
 ##
 

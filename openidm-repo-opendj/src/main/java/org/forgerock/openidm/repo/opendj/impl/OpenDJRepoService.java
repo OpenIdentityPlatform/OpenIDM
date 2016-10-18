@@ -63,6 +63,7 @@ import org.forgerock.opendj.server.embedded.EmbeddedDirectoryServerException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.repo.RepoBootService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.router.RouteBuilder;
 import org.forgerock.openidm.router.RouteEntry;
@@ -88,11 +89,13 @@ import javax.net.ssl.X509KeyManager;
  * Currently only servicing requests on managed/user
  */
 @Component(name = OpenDJRepoService.PID, immediate=true, policy=ConfigurationPolicy.REQUIRE, enabled=true)
-@Service (value = {/*RepositoryService.class, */ RequestHandler.class})
+@Service (value = {RepositoryService.class, RequestHandler.class})
 @Properties({
     @Property(name = "service.description", value = "Repository Service using OpenDJ"),
-    @Property(name = "service.vendor", value = ServerConstants.SERVER_VENDOR_NAME) })
-public class OpenDJRepoService implements RepositoryService, RequestHandler {
+    @Property(name = "service.vendor", value = ServerConstants.SERVER_VENDOR_NAME),
+    @Property(name = ServerConstants.ROUTER_PREFIX, value = "/repo/*"),
+    @Property(name = "db.type", value = "OpenDJ") })
+public class OpenDJRepoService implements RepositoryService, RequestHandler, RepoBootService {
 
     final static Logger logger = LoggerFactory.getLogger(OpenDJRepoService.class);
     
@@ -280,10 +283,10 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler {
                 final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, null, handlerConfig,
                         queries, config.get("commands"));
 
-            /*
-             * Since we cannot simply listen on /repo/* while we do not have all objects mapped/implemented
-             * We must register individual routes for each handler.
-             */
+                /*
+                 * Since we cannot simply listen on /repo/* while we do not have all objects mapped/implemented
+                 * We must register individual routes for each handler.
+                 */
 
                 final RouteEntry routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
                         .withModeStartsWith()

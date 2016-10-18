@@ -97,6 +97,9 @@
     "mvccAttribute": "etag"
   },
   "resourceMapping": {
+    "defaultMapping": {
+      "resource": "repo/default"
+    },
     "explicitMapping": {
       "internal/user": {
         "resource": "repo/internal/user",
@@ -117,15 +120,72 @@
       },
       "managed/user": {
         "resource": "repo/managed/user"
+      },
+      "scheduler": {
+        "resource": "repo/scheduler"
+      },
+      "cluster": {
+        "resource": "repo/cluster"
+      },
+      "relationship": {
+        "resource": "repo/relationship"
+      },
+      "updates": {
+        "resource": "repo/update"
       }
-    }
+    },
   },
   "resources": {
     "repo": {
       "subResources": {
+        "default": {
+          "type": "collection",
+          "dnTemplate": "ou=generic,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
         "managed/user": {
           "type": "collection",
           "dnTemplate": "ou=users,ou=managed,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "scheduler": {
+          "type": "collection",
+          "dnTemplate": "ou=scheduler,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "cluster": {
+          "type": "collection",
+          "dnTemplate": "ou=cluster,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "relationship": {
+          "type": "collection",
+          "dnTemplate": "ou=relationships,dc=openidm,dc=forgerock,dc=com",
+          "resource": "generic",
+          "namingStrategy": {
+            "dnAttribute": "uid",
+            "type": "clientDnNaming"
+          }
+        },
+        "updates": {
+          "type": "collection",
+          "dnTemplate": "ou=updates,dc=openidm,dc=forgerock,dc=com",
           "resource": "generic",
           "namingStrategy": {
             "dnAttribute": "uid",
@@ -209,6 +269,9 @@
         },
         "_rev": {
           "type": "simple", "ldapAttribute": "etag", "writability": "readOnly"
+        },
+        "objecttype": {
+          "type": "simple", "ldapAttribute": "objecttype", "writability": "createOnly"
         },
         "fullobject": {
           "type": "json", "ldapAttribute": "fullobject"
