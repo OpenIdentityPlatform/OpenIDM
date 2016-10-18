@@ -49,8 +49,8 @@
         <fileSet>
             <directory>${project.build.directory}/idm-staging/openidm</directory>
             <includes>
-                <include>${sample.conf}</include>
-                <include>${sample.script}</include>
+                <include>${default.conf}</include>
+                <include>${default.script}</include>
             </includes>
             <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
         </fileSet>
@@ -72,8 +72,8 @@
         <fileSet>
             <directory>${project.build.directory}/idm-staging/openidm</directory>
             <includes>
-                <include>${sample.conf}</include>
-                <include>${sample.script}</include>
+                <include>${default.conf}</include>
+                <include>${default.script}</include>
             </includes>
             <outputDirectory>/openidm/samples/google-connector</outputDirectory>
         </fileSet>

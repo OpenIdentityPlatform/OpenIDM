@@ -49,8 +49,8 @@
         <google.provisioner>provisioner.openicf-google.json</google.provisioner>
         <marketo.provisioner>provisioner.openicf-marketo.json</marketo.provisioner>
         <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
-        <sample.conf>conf/**</sample.conf>
-        <sample.script>script/**</sample.script>
+        <default.conf>conf/**</default.conf>
+        <default.script>script/**</default.script>
     </properties>
     <build>
         <finalName>openidm-commercial-${project.version}</finalName>
