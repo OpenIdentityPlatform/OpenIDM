@@ -22,8 +22,15 @@ define([
             ConnectorTypeAbstractView) {
 
     var MarketoView = ConnectorTypeAbstractView.extend({
-        connectorSaved: function(details) {
-            details.configurationProperties.scriptRoots = ["jar:file:connectors/marketo-connector-1.4.0.0.jar!/script/marketo/"];
+        connectorSaved: function(details, connectorDetails) {
+            if(_.isNull(details.configurationProperties.scriptRoots)){
+                details.configurationProperties.scriptRoots = ["jar:file:connectors/marketo-connector-" +details.connectorRef.bundleVersion +".jar!/script/marketo/"];
+            }
+
+            if(_.isNull(details.configurationProperties.clientSecret) && _.isObject(connectorDetails.configurationProperties.clientSecret)){
+                details.configurationProperties.clientSecret = connectorDetails.configurationProperties.clientSecret;
+            }
+
             details.configurationProperties.createScriptFileName = "CreateMarketo.groovy";
             details.configurationProperties.deleteScriptFileName = "DeleteMarketo.groovy";
             details.configurationProperties.schemaScriptFileName = "SchemaMarketo.groovy";

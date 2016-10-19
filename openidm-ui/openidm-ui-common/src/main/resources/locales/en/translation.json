@@ -1839,6 +1839,8 @@
                 "clientId" : "Consumer Key"
             },
             "marketo" : {
+                "listName" : "Connector-Managed List",
+                "listNameHelp" : "Name of the Marketo static list the connector will use to manage leads",
                 "instance" : "Instance",
                 "instanceHelp" : "The Marketo-assigned FQDN for your instance",
                 "clientIdHelp" : "Your OAuth2 client ID",
