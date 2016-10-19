@@ -2,10 +2,25 @@
     {
         "operation" : "add",
         "field" : "/commands/explicitTables/delete-mapping-links",
-        "value" : "DELETE FROM ${_dbSchema}.links WHERE linktype = ${mapping}"
+        "value" : "DELETE FROM ${_dbSchema}.${_table} WHERE linktype = ${mapping}"
     },
     {
         "operation" : "remove",
         "field" : "/resourceMapping/explicitMapping/security"
+    },
+    {
+        "operation" : "replace",
+        "field" : "/queries/explicitTables/get-recons",
+        "value" : "SELECT reconid, activitydate, mapping FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entrytype = 'summary' ORDER BY activitydate DESC"
+    },
+    {
+        "operation" : "replace",
+        "field" : "/commands/explicitTables/purge-by-recon-ids-to-keep",
+        "value" : "DELETE FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND reconid NOT IN (${list:reconIds})"
+    },
+    {
+        "operation" : "replace",
+        "field" : "/commands/explicitTables/purge-by-recon-expired",
+        "value" : "DELETE FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp}"
     }
 ]
