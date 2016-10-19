@@ -131,7 +131,7 @@ public class OAuthModule implements AsyncServerAuthModule {
         // error out here
         if (!serviceConfigurator.configureService(resolverService, resolvers)) {
             LOG.debug("OAuth config is invalid. You must configure at least one valid resolver.");
-            throw new AuthenticationException("OpenIdConnectModule configuration is invalid.");
+            throw new AuthenticationException("OAuthModule configuration is invalid.");
         }
     }
 

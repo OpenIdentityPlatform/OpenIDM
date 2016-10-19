@@ -8,7 +8,7 @@
 
         {{#each config.properties.resolvers}}
 
-        <input name="properties.resolvers[].name" value="OIDC" type="hidden" />
+        <input name="properties.resolvers[].name" value="OAUTH" type="hidden" />
 
         {{> form/_basicInput
         value=client_id
@@ -43,6 +43,13 @@
         label="templates.socialProviders.tokenEndpoint"
         property="properties.resolvers[].token_endpoint"
         default="https://openam.example.com/openam/oauth2/access_token"
+        noValidation="true"}}
+
+        {{> form/_basicInput
+        value=userInfo_endpoint
+        label="templates.socialProviders.userInfoEndpoint"
+        property="properties.resolvers[].userinfo_endpoint"
+        default="https://openam.example.com/openam/oauth2/userinfo"
         noValidation="true"}}
 
         {{> form/_basicInput
