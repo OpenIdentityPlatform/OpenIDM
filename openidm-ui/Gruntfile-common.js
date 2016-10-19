@@ -359,7 +359,7 @@ module.exports = function(grunt, options) {
 
     grunt.registerTask("deploy", [
         "sync:compose",
-        "newer:babel",
+        'babel:source',
         "less:dev",
         "sync:compiled",
         "sync:transpiled",
