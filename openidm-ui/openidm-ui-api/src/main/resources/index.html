@@ -17,7 +17,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>OpenIDM</title>
+    <title>API Explorer</title>
     <link href='css/typography.css' media='screen' rel='stylesheet' type='text/css'/>
     <link href='css/reset.css' media='screen' rel='stylesheet' type='text/css'/>
     <link href='css/screen.css' media='screen' rel='stylesheet' type='text/css'/>
@@ -57,11 +57,6 @@
             } else {
                 // default Swagger JSON URL
                 url = "/openidm/?_api";
-            }
-
-            var title = window.location.search.match(/title=([^&]+)/);
-            if (title && title.length > 1) {
-                document.title = decodeURIComponent(title[1]);
             }
 
             hljs.configure({

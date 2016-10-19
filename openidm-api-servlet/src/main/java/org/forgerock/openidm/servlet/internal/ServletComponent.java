@@ -95,7 +95,7 @@ public class ServletComponent implements EventHandler {
 
     private static final String API_ID = "frapi:openidm";
 
-    private static final String API_TITLE = "OpenIDM";
+    private static final String API_TITLE = "API Explorer";
 
     /** Setup logging for the {@link ServletComponent}. */
     private final static Logger logger = LoggerFactory.getLogger(ServletComponent.class);
