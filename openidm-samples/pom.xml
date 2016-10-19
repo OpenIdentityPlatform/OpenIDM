@@ -52,7 +52,7 @@
             </snapshots>
         </repository>
         <repository>
-            <id>forgerock-private-staging-repository</id>
+            <id>forgerock-private-releases</id>
             <name>ForgeRock Private Release Repository</name>
             <url>http://maven.forgerock.org/repo/private-releases</url>
             <snapshots>
@@ -60,7 +60,7 @@
             </snapshots>
         </repository>
         <repository>
-            <id>forgerock-private-snapshots-repository</id>
+            <id>forgerock-private-snapshots</id>
             <name>ForgeRock Private Snapshot Repository</name>
             <url>http://maven.forgerock.org/repo/private-snapshots</url>
             <releases>
