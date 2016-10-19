@@ -151,15 +151,17 @@ ou: access
 # UI
 ##
 
-dn: ou=UI,dc=openidm,dc=forgerock,dc=com
+dn: ou=ui,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: UI
+ou: ui
 
-dn: ou=Notifications,ou=UI,dc=openidm,dc=forgerock,dc=com
+dn: ou=notifications,ou=ui,dc=openidm,dc=forgerock,dc=com
 objectClass: organizationalUnit
 objectClass: top
-ou: Notifications
+ou: notifications
+
+# Populate objects
 
 dn: uid=openidm-admin,ou=users,ou=internal,dc=openidm,dc=forgerock,dc=com
 objectClass: openidmInternalUser

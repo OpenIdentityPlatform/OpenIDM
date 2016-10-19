@@ -105,6 +105,9 @@
         "resource": "repo/internal/user",
         "propertiesToStringify": [ "password", "roles" ]
       },
+      "internal/role": {
+        "resource": "repo/internal/role"
+      },
       "link": {
         "resource": "repo/link",
         "propertiesToStringify": [],
@@ -133,7 +136,7 @@
       "updates": {
         "resource": "repo/update"
       }
-    },
+    }
   },
   "resources": {
     "repo": {
@@ -208,6 +211,15 @@
           "namingStrategy": {
             "dnAttribute": "cn",
             "type": "clientDnNaming"
+          }
+        },
+        "link": {
+          "type": "collection",
+          "dnTemplate": "ou=links,dc=openidm,dc=forgerock,dc=com",
+          "resource": "link",
+          "namingStrategy": {
+            "dnAttribute": "objectid",
+            "type": "clientDNNaming"
           }
         },
         "config": {

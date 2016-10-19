@@ -20,17 +20,4 @@ import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.openidm.router.RouteEntry;
 
 public interface TypeHandler extends RequestHandler {
-    /**
-     * Get an optional RouteEntry associated with this type.
-     *
-     * @return A {@link RouteEntry} if configured or null.
-     */
-    RouteEntry getRouteEntry();
-
-    /**
-     * Set the {@link RouteEntry} associated with this handler.
-     *
-     * @param entry
-     */
-    void setRouteEntry(RouteEntry entry);
 }

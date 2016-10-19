@@ -163,7 +163,7 @@ public class HealthService
      * Bundles and bundle fragments required to be started or resolved respectively for the system to 
      * consider itself READY. Required bundles may be expressed as a regex, for example:
      * 
-     * "org.forgerock.openidm.repo-(orientdb|jdbc)"
+     * "org.forgerock.openidm.repo-(orientdb|jdbc|opendj)"
      */
     private List<String> requiredBundles = new ArrayList<String>();
 
@@ -220,7 +220,7 @@ public class HealthService
         "org.forgerock.openidm.provisioner-openicf",
         "org.forgerock.openidm.quartz-fragment",
         "org.forgerock.openidm.repo",
-        "org.forgerock.openidm.repo-(orientdb|jdbc)",
+        "org.forgerock.openidm.repo-(orientdb|jdbc|opendj)",
         "org.forgerock.openidm.router",
         "org.forgerock.openidm.scheduler",
         "org.forgerock.openidm.security",
@@ -247,7 +247,7 @@ public class HealthService
      * Services required to be registered for the system to consider itself READY. Required services 
      * may be expressed as a regex, for example:
      * 
-     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
+     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc|opendj)"
      */
     private List<String> requiredServices = new ArrayList<String>();
 
@@ -255,13 +255,13 @@ public class HealthService
      * An array default services required to be registered for the system to consider itself READY. 
      * Required services may be expressed as a regex, for example:
      * 
-     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc)"
+     * "org.forgerock.openidm.bootrepo.(orientdb|jdbc|opendj)"
      */
     private final String[] defaultRequiredServices = new String[] {
             "org.forgerock.openidm.api-servlet",
             "org.forgerock.openidm.audit",
             "org.forgerock.openidm.authentication",
-            "org.forgerock.openidm.bootrepo.(orientdb|jdbc)",
+            "org.forgerock.openidm.bootrepo.(orientdb|jdbc|opendj)",
             "org.forgerock.openidm.cluster",
             "org.forgerock.openidm.config.enhanced",
             "org.forgerock.openidm.config.manage",
@@ -272,7 +272,7 @@ public class HealthService
             "org.forgerock.openidm.policy",            
             "org.forgerock.openidm.provisioner",
             "org.forgerock.openidm.provisioner.openicf.connectorinfoprovider",
-            "org.forgerock.openidm.repo.(orientdb|jdbc)",
+            "org.forgerock.openidm.repo.(orientdb|jdbc|opendj)",
             "org.forgerock.openidm.router.internal",
             "org.forgerock.openidm.router.servlet",
             "org.forgerock.openidm.scheduler",

@@ -95,16 +95,6 @@ public abstract class AbstractDJTypeHandler implements TypeHandler {
 
     private final UniqueAttributeResolver uniqueAttributeResolver;
 
-    @Override
-    public RouteEntry getRouteEntry() {
-        return routeEntry;
-    }
-
-    @Override
-    public void setRouteEntry(final RouteEntry routeEntry) {
-        this.routeEntry = routeEntry;
-    }
-
     /**
      * Create a new DJ type handler.
      *

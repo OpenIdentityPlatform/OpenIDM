@@ -25,6 +25,7 @@ import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.repo.RepoBootService;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -32,6 +33,7 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Hashtable;
 
 import static org.forgerock.opendj.server.embedded.ConfigParameters.configParams;
 import static org.forgerock.opendj.server.embedded.ConnectionParameters.connectionParams;
@@ -150,6 +152,19 @@ public class Activator implements BundleActivator {
             context.registerService(EmbeddedDirectoryServer.class.getName(), embeddedServer, null);
         }
 
+        // Bootstrap repo
+        RepoBootService bootSvc = OpenDJRepoService.getRepoBootService(embeddedServer, repoConfig);
+
+        // Register bootstrap repo
+        Hashtable<String, String> prop = new Hashtable<String, String>();
+        prop.put(Constants.SERVICE_PID, "org.forgerock.openidm.bootrepo.opendj");
+        prop.put("openidm.router.prefix", "bootrepo");
+        prop.put("db.type", "OpenDJ");
+        prop.put("db.dirname", "opendj");
+
+        context.registerService(RepoBootService.class.getName(), bootSvc, prop);
+
+        logger.info("Registered bootstrap repository service");
         logger.info("OpenDJ bundle started");
     }
 

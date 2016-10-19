@@ -127,6 +127,14 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
     private ConnectionFactory ldapFactory;
 
+    static RepoBootService getRepoBootService(final EmbeddedDirectoryServer embeddedDirectoryServer, final JsonValue config) {
+        OpenDJRepoService bootSvc = new OpenDJRepoService();
+        bootSvc.embeddedDirectoryServer = embeddedDirectoryServer;
+        bootSvc.init(config);
+
+        return bootSvc;
+    }
+
     private TypeHandler getTypeHandler(final String uri) {
         final TypeHandler handler = typeHandlers.get(uri);
 
@@ -142,12 +150,12 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
     }
 
     /** Extract type from request and return the assocaited handler */
-    private TypeHandler getTypeHandler(final Context ctx) {
-        // chop /repo from uri
-        final String uri = ctx.asContext(UriRouterContext.class).getMatchedUri().substring(5);
-
-        return getTypeHandler(uri);
-    }
+//    private TypeHandler getTypeHandler(final Context ctx) {
+//        // chop /repo from uri
+//        final String uri = ctx.asContext(UriRouterContext.class).getMatchedUri().substring(5);
+//
+//        return getTypeHandler(uri);
+//    }
 
     /**
      * Map of pre-configured queryFilters in the form of key: queryId value: tokenized queryFilter.
@@ -181,14 +189,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
 
     @Deactivate
     void deactivate(final ComponentContext ctx) {
-        final Set<Map.Entry<String, TypeHandler>> entries = typeHandlers.entrySet();
-
-        for (Map.Entry<String, TypeHandler> entry : entries) {
-            if (entry.getValue() != null && entry.getValue().getRouteEntry() != null) {
-                entry.getValue().getRouteEntry().removeRoute();
-            }
-        }
-
         if (ldapFactory != null) {
             ldapFactory.close();
             ldapFactory = null;
@@ -255,19 +255,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 final TypeHandler typeHandler = new GenericDJTypeHandler(path, repoHandler, null, handlerConfig,
                         queries, config.get("commands"));
 
-            /*
-             * Since we cannot simply listen on /repo/* while we do not have all objects mapped/implemented
-             * We must register individual routes for each handler.
-             */
-
-                final RouteEntry routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
-                        .withModeStartsWith()
-                        .withTemplate("/repo/" + type)
-                        .withRequestHandler(this)
-                        .seal());
-
-                typeHandler.setRouteEntry(routeEntry);
-
                 // TODO - breakup queries
                 typeHandlers.put(type, typeHandler);
             }
@@ -282,19 +269,6 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
                 final ResourcePath path = new ResourcePath(type.split("/"));
                 final TypeHandler typeHandler = new ExplicitDJTypeHandler(path, repoHandler, null, handlerConfig,
                         queries, config.get("commands"));
-
-                /*
-                 * Since we cannot simply listen on /repo/* while we do not have all objects mapped/implemented
-                 * We must register individual routes for each handler.
-                 */
-
-                final RouteEntry routeEntry = routerRegistry.addRoute(RouteBuilder.newBuilder()
-                        .withModeStartsWith()
-                        .withTemplate("/repo/" + type)
-                        .withRequestHandler(this)
-                        .seal());
-
-                typeHandler.setRouteEntry(routeEntry);
 
                 // TODO - breakup queries
                 typeHandlers.put(type, typeHandler);
@@ -353,7 +327,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(context).handleCreate(context, request);
+                return getTypeHandler(request.getResourcePath()).handleCreate(context, request);
             }
         });
     }
@@ -363,7 +337,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(context).handleRead(context, request);
+                return getTypeHandler(request.getResourcePath()).handleRead(context, request);
             }
         });
     }
@@ -373,7 +347,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(context).handleUpdate(context, request);
+                return getTypeHandler(request.getResourcePath()).handleUpdate(context, request);
             }
         });
     }
@@ -383,7 +357,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(context).handlePatch(context, request);
+                return getTypeHandler(request.getResourcePath()).handlePatch(context, request);
             }
         });
     }
@@ -393,7 +367,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ActionResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ActionResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(context).handleAction(context, request);
+                return getTypeHandler(request.getResourcePath()).handleAction(context, request);
             }
         });
     }
@@ -403,7 +377,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<ResourceResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<ResourceResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(context).handleDelete(context, request);
+                return getTypeHandler(request.getResourcePath()).handleDelete(context, request);
             }
         });
     }
@@ -413,7 +387,7 @@ public class OpenDJRepoService implements RepositoryService, RequestHandler, Rep
         return withConnectionContext(context, new Function<Context, Promise<QueryResponse, ResourceException>, NeverThrowsException>() {
             @Override
             public Promise<QueryResponse, ResourceException> apply(final Context context) throws NeverThrowsException {
-                return getTypeHandler(context).handleQuery(context, queryRequest, queryResourceHandler);
+                return getTypeHandler(queryRequest.getResourcePath()).handleQuery(context, queryRequest, queryResourceHandler);
             }
         });
     }
