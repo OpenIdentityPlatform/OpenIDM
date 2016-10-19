@@ -170,6 +170,32 @@
                 <include>org.forgerock.openidm:openidm-cdm-sample</include>
             </includes>
         </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/samples/devops-postgres</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:devops-postgres:zip</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/openidm/samples/devops-gettingstarted</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:devops-gettingstarted:zip</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <unpack>true</unpack>
+            <fileMode>644</fileMode>
+            <directoryMode>755</directoryMode>
+            <outputDirectory>/</outputDirectory>
+            <includes>
+                <include>org.forgerock.openidm:devops-openidm:zip</include>
+            </includes>
+        </dependencySet>
     </dependencySets>
-
 </assembly>

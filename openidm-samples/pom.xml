@@ -89,7 +89,7 @@
     </issueManagement>
 
     <properties>
-        <openidm.version>5.0.0-SNAPSHOT</openidm.version>
+        <openidm.version>${project.version}</openidm.version>
 
         <salesforce.api.version>29</salesforce.api.version>
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.4-SNAPSHOT</provisioner.salesforcemodule.version>

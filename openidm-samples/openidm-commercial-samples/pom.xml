@@ -13,11 +13,14 @@
     </parent>
 
     <artifactId>openidm-commercial-samples</artifactId>
-    <name>OpenIDM Commerical Sample parent</name>
+    <name>OpenIDM Commercial Sample parent</name>
     <packaging>pom</packaging>
     <modules>
         <module>google</module>
         <module>salesforce</module>
         <module>cdm</module>
+        <module>devops-postgres</module>
+        <module>devops-openidm</module>
+        <module>devops-gettingstarted</module>
     </modules>
 </project>

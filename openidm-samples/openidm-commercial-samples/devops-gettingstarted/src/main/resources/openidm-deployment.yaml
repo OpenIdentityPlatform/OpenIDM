@@ -1,0 +1,48 @@
+# Copyright 2016 ForgeRock AS All rights reserved.
+apiVersion: v1
+kind: Service
+metadata:
+  name: openidm 
+  labels:
+    app: getting-started
+spec:
+  ports:
+    - port: 80
+      targetPort: 8080
+      nodePort: 30088
+  selector:
+    app: getting-started
+    tier: frontend
+  type: NodePort
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: openidm
+  labels:
+    app: getting-started
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: getting-started
+        tier: frontend
+    spec:
+      containers:
+      - image: forgerock/openidm:${project.version}
+        name: openidm
+        args: ["-p","samples/devops-gettingstarted"]
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: DB_HOST
+          value: postgres-openidm
+        - name: DB_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-pass
+              key: password.txt
+        ports:
+        - containerPort: 8080
+          name: openidm

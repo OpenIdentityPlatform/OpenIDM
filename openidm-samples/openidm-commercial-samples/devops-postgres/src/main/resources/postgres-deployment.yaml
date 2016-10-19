@@ -1,0 +1,89 @@
+# Copyright 2016 ForgeRock AS All rights reserved.
+apiVersion: v1
+kind: Service
+metadata:
+  name: postgres-openidm
+  labels:
+    app: postgres
+spec:
+  ports:
+    - port: 5432
+      name: dbport
+  selector:
+    app: openidm
+    tier: repo
+  clusterIP: None
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-pv
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/pv-postgres
+  persistentVolumeReclaimPolicy: Recycle
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: postgres-pv-claim
+  labels:
+    app: openidm
+    tier: repo
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: postgres-openidm
+  labels:
+    app: openidm
+    tier: repo
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: openidm
+        tier: repo
+    spec:
+      containers:
+      - image: forgerock/openidm-postgres:${project.version}
+        name: postgres
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: PGDATA
+          value: /var/lib/postgresql/data/pgdata
+        - name: POSTGRES_PASSWORD
+          value: openidm
+        - name: POSTGRES_USER
+          value: openidm
+          # $ kubectl create secret generic mysql-pass --from-file=password.txt
+          # make sure password.txt does not have a trailing newline
+        #- name: MYSQL_ROOT_PASSWORD
+        #  valueFrom:
+        #    secretKeyRef:
+        #      name: mysql-pass
+        #      key: password.txt
+        ports:
+        - containerPort: 5432
+          name: postgres
+        volumeMounts:
+        - name: pgdata
+          mountPath: /var/lib/postgresql/data/pgdata
+      volumes:
+      - name: pgdata
+        persistentVolumeClaim:
+          claimName: postgres-pv-claim
