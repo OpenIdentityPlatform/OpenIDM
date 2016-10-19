@@ -416,7 +416,7 @@ define([
 
             //Checks for connector specific save function to do any additional changes to data
             if(this.connectorTypeRef.connectorSaved) {
-                mergedResult = this.connectorTypeRef.connectorSaved(mergedResult);
+                mergedResult = this.connectorTypeRef.connectorSaved(mergedResult, this.connectorDetails);
             }
 
             mergedResult.configurationProperties.readSchema = false;
@@ -814,6 +814,7 @@ define([
             } else {
                 this.data.rangeFound = false;
                 cleanVersion = version;
+                mainVersion = this.findMainVersion(cleanVersion);
             }
 
             return [cleanVersion, mainVersion];
