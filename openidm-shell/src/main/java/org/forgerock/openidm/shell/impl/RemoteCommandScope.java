@@ -76,6 +76,9 @@ public class RemoteCommandScope extends CustomCommandScope {
             "Delay in milliseconds between config update retries if OpenIDM is not ready";
     private static final String RETRY_DELAY_METAVAR = "DELAY";
 
+    private static final String OPERATION_FAILED = "Operation failed: ";
+    private static final String REMOTE_OPERATION_FAILED = "Remote operation failed: ";
+
     private final ObjectMapper mapper = new ObjectMapper();
 
     /**
@@ -244,7 +247,7 @@ public class RemoteCommandScope extends CustomCommandScope {
             }
             updateCommand.execute(new RootContext());
         } catch (Exception e) {
-            session.getConsole().append("Operation failed: ").println(e.getMessage());
+            failAndExit(session, OPERATION_FAILED, e.getMessage());
         }
     }
 
@@ -432,9 +435,9 @@ public class RemoteCommandScope extends CustomCommandScope {
                 console.println(file.getAbsolutePath());
             }
         } catch (ResourceException e) {
-            session.getConsole().append("Remote operation failed: ").println(e.getMessage());
+            failAndExit(session, REMOTE_OPERATION_FAILED, e.getMessage());
         } catch (Exception e) {
-            session.getConsole().append("Operation failed: ").println(e.getMessage());
+            failAndExit(session, OPERATION_FAILED, e.getMessage());
         }
     }
 
@@ -563,9 +566,9 @@ public class RemoteCommandScope extends CustomCommandScope {
                 }
             }
         } catch (ResourceException e) {
-            session.getConsole().append("Remote operation failed: ").println(e.getMessage());
+            failAndExit(session, REMOTE_OPERATION_FAILED, e.getMessage());
         } catch (Exception e) {
-            session.getConsole().append("Operation failed: ").println(e.getMessage());
+            failAndExit(session, OPERATION_FAILED, e.getMessage());
         }
     }
 
@@ -695,9 +698,9 @@ public class RemoteCommandScope extends CustomCommandScope {
                     .println(finalConfig.getAbsolutePath());
 
         } catch (ResourceException e) {
-            session.getConsole().append("Remote operation failed: ").println(e.getMessage());
+            failAndExit(session, REMOTE_OPERATION_FAILED, e.getMessage());
         } catch (Exception e) {
-            session.getConsole().append("Operation failed: ").println(e.getMessage());
+            failAndExit(session, OPERATION_FAILED, e.getMessage());
         }
     }
 
@@ -710,5 +713,10 @@ public class RemoteCommandScope extends CustomCommandScope {
             out.println(" FAILED");
             out.append("\t[").append(reason).println("]");
         }
+    }
+
+    private void failAndExit(CommandSession session, String appendMessage, String exceptionMessage) {
+        session.getConsole().append(appendMessage).println(exceptionMessage);
+        System.exit(1);
     }
 }
