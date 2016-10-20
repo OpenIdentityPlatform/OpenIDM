@@ -22,6 +22,7 @@ define([
     "./org/forgerock/openidm/ui/common/delegates/SearchDelegateTest",
     "./org/forgerock/openidm/ui/common/UserModelTest",
     "./org/forgerock/openidm/ui/common/workflow/tasks/TaskDetailsViewTest",
+    "./org/forgerock/openidm/ui/common/resource/GenericEditResourceViewTest",
 
     //idm admin tests
     "./org/forgerock/openidm/ui/admin/MapResourceViewTest",
@@ -64,6 +65,7 @@ define([
     "./org/forgerock/openidm/ui/admin/managed/EditManagedViewTest",
     "./org/forgerock/openidm/ui/admin/managed/ManagedListViewTest",
     "./org/forgerock/openidm/ui/admin/mapping/AddMappingViewTest",
+    "./org/forgerock/openidm/ui/admin/managed/schema/util/SchemaUtilsTest",
     // "./org/forgerock/openidm/ui/admin/mapping/AdvancedViewTest",
     "./org/forgerock/openidm/ui/admin/mapping/AssociationViewTest",
     "./org/forgerock/openidm/ui/admin/mapping/BehaviorsViewTest",

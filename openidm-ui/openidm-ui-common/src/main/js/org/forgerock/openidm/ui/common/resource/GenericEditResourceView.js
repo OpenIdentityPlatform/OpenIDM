@@ -134,8 +134,10 @@ define([
                     this.data.backBtnText = $.t("templates.admin.ResourceEdit.backToList",{ objectTitle: this.data.objectTitle });
 
                     this.parentRender(function(){
-                        this.setupEditor(resource, schema);
 
+                        schema = this.handleArrayOfTypes(schema);
+
+                        this.setupEditor(resource, schema);
 
                         ValidatorsManager.bindValidators(
                             this.$el.find("#resource"),
@@ -642,6 +644,24 @@ define([
             };
 
             return getFields(schema.properties);
+        },
+        /**
+        * This function looks for instances of properties whose schema.type is an array
+        * then grabs the first value of the array that is not "null" and sets the type to
+        * that value so jsonEditor does not have to decide on types. The reason we are
+        * doing this is because we set empty values to null anyway so if a user wants
+        * to set a value to null all they will have to do is set the value to an empty string
+        * in the case of string types, no array values for array types, false for boolean type,
+        * or empty object for object types.
+        **/
+        handleArrayOfTypes: function (schema) {
+            _.each(schema.properties, (property) => {
+                if (_.isArray(property.type)) {
+                    property.type = _.pull(property.type, "null")[0];
+                }
+            });
+
+            return schema;
         }
     });
 

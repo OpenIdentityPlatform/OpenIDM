@@ -19,11 +19,13 @@ define([
     "underscore",
     "jsonEditor",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
-    "org/forgerock/openidm/ui/admin/managed/schema/dataTypes/RelationshipTypeView"
+    "org/forgerock/openidm/ui/admin/managed/schema/dataTypes/RelationshipTypeView",
+    "org/forgerock/openidm/ui/admin/managed/schema/util/SchemaUtils"
 ], function($, _,
     JSONEditor,
     AdminAbstractView,
-    RelationshipTypeView
+    RelationshipTypeView,
+    SchemaUtils
 ) {
     var SchemaEditorView = AdminAbstractView.extend({
         template: "templates/admin/managed/schema/SchemaEditorViewTemplate.html",
@@ -184,6 +186,9 @@ define([
             //replace all the relationshipType values
             managedSchema = this.replaceRelationshipTypeValues(managedSchema);
 
+            //check for nullable properties and add "null" to an array of types
+            managedSchema.properties = SchemaUtils.setNullableProperties(managedSchema.properties);
+
             return managedSchema;
         },
 
@@ -313,6 +318,13 @@ define([
                                         "type": "string",
                                         "propertyOrder": 9
                                     },
+                                    "nullable": {
+                                        "title": "Nullable",
+                                        "type": "boolean",
+                                        "required": true,
+                                        "default": false,
+                                        "propertyOrder": 10
+                                    },
                                     "policies": {
                                         "title": "Validation policies",
                                         "type": "array",
@@ -330,26 +342,26 @@ define([
                                             }
                                         },
                                         "default": [],
-                                        "propertyOrder": 10
+                                        "propertyOrder": 11
                                     },
                                     "required": {
                                         "title": "Required",
                                         "type": "boolean",
                                         "required": true,
                                         "default": false,
-                                        "propertyOrder": 11
+                                        "propertyOrder": 12
                                     },
                                     "returnByDefault": {
                                         "title": "Return by Default",
                                         "type": "boolean",
                                         "required": true,
                                         "default": false,
-                                        "propertyOrder": 12
+                                        "propertyOrder": 13
                                     },
                                     "type": {
                                         "title": "Type",
                                         "$ref": "#/definitions/oneOfTypes",
-                                        "propertyOrder": 13
+                                        "propertyOrder": 14
                                     }
                                 }
                             }
@@ -559,6 +571,9 @@ define([
                     properties: []
                 };
 
+                //handle nullable properties
+                managedSchema.properties = SchemaUtils.getNullableProperties(managedSchema.properties);
+
                 jsonSchema.properties = this.translateSubProperties(managedSchema.properties, managedSchema.order, managedSchema.required);
             }
 
@@ -749,7 +764,8 @@ define([
                     "policies": convertPolicyParams(property.policies),
                     "returnByDefault": property.returnByDefault,
                     "minLength": property.minLength,
-                    "pattern": property.pattern
+                    "pattern": property.pattern,
+                    "nullable": property.nullable
                 };
 
                 if (!node) {
