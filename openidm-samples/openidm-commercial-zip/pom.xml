@@ -116,8 +116,8 @@
         </dependency>
     </dependencies>
     <properties>
-        <!-- If we release this project, we need to include the Forgerock binary license -->
-        <include.binary.license>${project.build.directory}</include.binary.license>
+        <!-- If the binary-licensing profile is activated, we need the ForgeRock license there -->
+        <forgerock.license.output.dir>${project.build.directory}</forgerock.license.output.dir>
         <!-- Properties to include the SaaS connectors in the commercial build -->
         <google.provisioner>provisioner.openicf-google.json</google.provisioner>
         <marketo.provisioner>provisioner.openicf-marketo.json</marketo.provisioner>
