@@ -1,6 +1,6 @@
 {
     "driverClass" : "com.microsoft.sqlserver.jdbc.SQLServerDriver",
-    "jdbcUrl" : "jdbc:sqlserver://localhost:1433;instanceName=default;databaseName=openidm;applicationName=OpenIDM",
+    "jdbcUrl" : "jdbc:sqlserver://&{openidm.repo.host}:&{openidm.repo.port};instanceName=default;databaseName=openidm;applicationName=OpenIDM",
     "databaseName" : "openidm",
     "username" : "openidm",
     "password" : "openidm",

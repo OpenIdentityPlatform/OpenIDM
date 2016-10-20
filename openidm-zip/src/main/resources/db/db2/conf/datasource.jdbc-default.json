@@ -1,6 +1,6 @@
 {
     "driverClass" : "com.ibm.db2.jcc.DB2Driver",
-    "jdbcUrl" : "jdbc:db2://HOSTNAME:PORT/dopenidm:retrieveMessagesFromServerOnGetMessage=true;",
+    "jdbcUrl" : "jdbc:db2://&{openidm.repo.host}:&{openidm.repo.port}/dopenidm:retrieveMessagesFromServerOnGetMessage=true;",
     "databaseName" : "sopenidm",
     "username" : "openidm",
     "password" : "openidm",
