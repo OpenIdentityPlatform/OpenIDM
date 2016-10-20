@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2017 ForgeRock AS.
  */
 package org.forgerock.openidm.datasource.jdbc.impl;
 
@@ -25,6 +25,7 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.Properties;
 import javax.sql.DataSource;
 
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.config.enhanced.InvalidException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -87,12 +88,25 @@ class NonPoolingDataSourceFactory implements DataSourceFactory {
         
         @Override
         public Connection getConnection() throws SQLException {
-            return DriverManager.getConnection(config.getJdbcUrl(), properties);
+            try {
+                return DriverManager.getConnection(config.getJdbcUrl(), properties);
+            } catch (SQLException e) {
+                Properties cleanedProperties = new Properties();
+                cleanedProperties.putAll(properties);
+                cleanedProperties.remove("password");
+                throw new SQLException("Unable to get connection to " + config.getJdbcUrl()
+                        + " using properties " + new JsonValue(cleanedProperties).toString(), e);
+            }
         }
 
         @Override
         public Connection getConnection(String username, String password) throws SQLException {
-            return DriverManager.getConnection(config.getJdbcUrl(), username, password);
+            try {
+                return DriverManager.getConnection(config.getJdbcUrl(), username, password);
+            } catch (SQLException e) {
+                throw new SQLException("Unable to get connection to " + config.getJdbcUrl()
+                        + " using username " + username, e);
+            }
         }
 
         @Override
