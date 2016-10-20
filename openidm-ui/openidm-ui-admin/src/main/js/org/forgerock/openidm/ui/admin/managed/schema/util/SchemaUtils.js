@@ -37,6 +37,45 @@ define([
 
         return index;
     };
+    /*
+    * This function takes a schema properties object, looks for nullable properties,
+    * sets each property's type attribute to something like example => ["relationship", "null"]
+    * in the case where nullable === true, then removes the "nullable" attribute because it is
+    * not needed when it is saved in managed.json.
+    *
+    * @param {object} properties - schema properties object each possibly having the "nullable" attribute
+    * @returns {object} - adjusted schema properties object
+    */
+    obj.setNullableProperties = function(properties) {
+        //check for nullable properties and add "null" to an array of types
+        _.each(properties, (property) => {
+            if (property.nullable) {
+                property.type = [property.type, "null"];
+            }
+
+            delete property.nullable;
+        });
+
+        return properties;
+    };
+    /*
+    * This function takes a schema properties object, looks for properties which have the type attribute
+    * set to an array with "null" being one of the values in the array, then sets those properties to
+    * nullable = true and type = $(theFirstNotNullValueInTheTypeArray).
+    *
+    * @param {object} properties - schema properties object each possibly having the "nullable" attribute
+    * @returns {object} - adjusted schema properties object
+    */
+    obj.getNullableProperties = function(properties) {
+        _.each(properties, (property) => {
+            if (_.isArray(property.type) && _.indexOf(property.type,"null") > -1) {
+                property.nullable = true;
+                property.type = _.pull(property.type, "null")[0];
+            }
+        });
+
+        return properties;
+    };
 
     return obj;
 });
