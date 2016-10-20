@@ -9,6 +9,10 @@ This sample will demonstrate the CDM process to register and authenticate users 
 social identity providers - Google, Facebook, and LinkedIn. It also demonstrates the use of 
 Marketo connector in a CDM context. The CDM Sample is included only in the commercial release. 
   
+## Start the sample.
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/cdm
+
 ## Set Up CDM Registration and Authentication
 This sample includes a pre-configured set of Social ID Providers. With this sample, you'll 
 enable social identity providers for user authentication and registration as well as 
@@ -29,19 +33,20 @@ In this sample, all OpenIDM users, including those registered through a social I
 
 First register a Marketo account. Once you have that account, log in to Marketo. You will need to get Client ID, 
 Client Secret, and Domain data for Marketo. Please refer to the steps described in 
-http://developers.marketo.com/blog/quick-start-guide-for-marketo-rest-api/ to get such data. Replace the value 
-for "client id" with Client ID, and the value for "client secret" with Client Secret. The "instance" property 
-is fully qualified domain name (FQDN). For example, if the REST endpoint is https://000-ZZZ-000.mktorest.com/rest, 
-then its FQDN, which is also the value for "instance" should be 000-ZZZ-000.mktorest.com. 
+http://developers.marketo.com/blog/quick-start-guide-for-marketo-rest-api/ to get such data. Log into the OpenIDM UI 
+as the administrative user. Select Configure > Connectors > Marketo. Click "Edit". Enter the following information, and enable it: 
+Instance, Client ID, Client Secret, and Connector-Managed List. The "Instance" property is fully qualified domain name (FQDN). 
+For example, if the REST endpoint is https://000-ZZZ-000.mktorest.com/rest, then its FQDN, which is also the value for "Instance" 
+should be 000-ZZZ-000.mktorest.com. 
 
-Once that is done, create a group list for CDM. click the upper left icon, and then click "Lead Database". 
-Right click on "Group Lists", and hit "New List". Name the list, and save. You will have to also replace the value 
-<LEAD_LIST_NAME> of the property "listName" in "configurationProperties" in provisioner.openicf-marketo.json. 
+To get Connector-Managed List name, in Marketo, create a group list for CDM. click the upper left icon in Marketo, and then 
+click "Lead Database". Right click on "Group Lists", and hit "New List". Name the list, and save. Enter the list name in the 
+"Connector-Managed List" field in OpenIDM UI. 
 
-The Marketo connector synchronizes the Marketo database with OpenIDM managed users. Register via OpenIDM UI. Once the registration is complete, 
-you should see that the user is also added to the Lead List in Marketo. If you delete the user in managed/user, 
-that user will be deleted from the Lead List in Marketo as well. If you update user's profile, you should 
-see that change in Marketo too. 
+The Marketo connector synchronizes the Marketo database with OpenIDM managed users. Register via OpenIDM UI. 
+Once the registration is complete, you should see that the user is also added to the Lead List in Marketo. 
+If you delete the user in managed/user, that user will be deleted from the Lead List in Marketo as well. 
+If you update user's profile, you should see that change in Marketo too. 
 
 For socially registered users, you will also see the social provider ID fields show up in Lead Info page 
 after such users are synchronized. Add custom fields in Marketo as required to support 
