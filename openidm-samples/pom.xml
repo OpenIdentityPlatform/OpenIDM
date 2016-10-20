@@ -34,12 +34,18 @@
         <tag>HEAD</tag>
     </scm>
 
+    <!-- For deployment to private ForgeRock Maven repositories -->
     <distributionManagement>
-        <site>
-            <id>forgerock.org</id>
-            <name>ForgeRock Community Server</name>
-            <url>${siteDistributionURL}</url>
-        </site>
+        <repository>
+            <id>forgerock-private-releases</id>
+            <name>maven.forgerock.org-releases</name>
+            <url>http://maven.forgerock.org/repo/private-releases</url>
+        </repository>
+        <snapshotRepository>
+            <id>forgerock-private-snapshots</id>
+            <name>maven.forgerock.org-snapshots</name>
+            <url>http://maven.forgerock.org/repo/private-snapshots</url>
+        </snapshotRepository>
     </distributionManagement>
 
     <repositories>
