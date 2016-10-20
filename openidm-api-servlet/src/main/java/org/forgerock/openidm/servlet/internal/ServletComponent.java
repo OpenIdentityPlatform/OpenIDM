@@ -186,7 +186,7 @@ public class ServletComponent implements EventHandler {
 
                     @Override
                     public Handler start() throws HttpApplicationException {
-                        return Handlers.chainOf(handler, new OpenApiRequestFilter(), authFilter);
+                        return Handlers.chainOf(handler, authFilter, new OpenApiRequestFilter());
                     }
 
                     @Override
