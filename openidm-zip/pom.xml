@@ -233,6 +233,11 @@
             <artifactId>custom-scripted-connector-bundler</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>openidm-felix-webconsole</artifactId>
+            <version>${project.version}</version>
+        </dependency>
 
         <!-- Core OSGi -->
         <dependency>

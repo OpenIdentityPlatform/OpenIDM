@@ -96,7 +96,7 @@ while [ "$1" ]; do
     shift
 done
 if [ -z "$LOGGING_CONFIG" ]; then
-  if [ -r "$PROJECT_HOME"/conf/logging.properties ]; then
+  if [ -n "$PROJECT_HOME" -a -r "$PROJECT_HOME"/conf/logging.properties ]; then
     LOGGING_CONFIG="-Djava.util.logging.config.file=$PROJECT_HOME/conf/logging.properties"
   elif [ -r "$OPENIDM_HOME"/conf/logging.properties ]; then
     LOGGING_CONFIG="-Djava.util.logging.config.file=$OPENIDM_HOME/conf/logging.properties"
