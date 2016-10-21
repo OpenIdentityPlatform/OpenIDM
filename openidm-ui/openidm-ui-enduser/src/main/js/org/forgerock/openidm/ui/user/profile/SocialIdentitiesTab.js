@@ -217,12 +217,11 @@ define([
             let providerName = this.getProviderName(card);
 
             Configuration.loggedUser.unbindProvider(providerName).then((result) => {
-                this.data.user = result;
+                this.alignProvidersArray(result);
                 card.find("[type=checkbox]").prop("checked", false);
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "removeSocialProvider");
                 this.toggleSocialProvider(card);
             }, (err) => {
-                this.alignProvidersArray();
                 this.data.unbindText = $.t(err.responseJSON.message, { provider: _.startCase(providerName) });
                 UIUtils.renderTemplate(this.template, this.$el, this.data, $.noop(), "replace");
                 this.$el.find("#idpUnbindError").show();
@@ -231,9 +230,9 @@ define([
 
         },
 
-        alignProvidersArray: function() {
+        alignProvidersArray: function(result) {
             _.each(this.data.providers, (provider, index) => {
-                provider.enabled = this.data.user.idpData[provider.name].enabled;
+                provider.active = result.idpData[provider.name].enabled;
             });
         },
 
