@@ -10,7 +10,7 @@
 
         <p class="restart">{{t "templates.update.install.restartIn"}} <span>30</span> {{t "templates.update.install.seconds"}} <a href="#" class="restartNow text-primary">{{t "templates.update.install.restartNow"}}</a></p>
 
-        <a class="downloadBtn" href="data:application/octet-stream;charset=utf-16le;base64,{{responseB64}}">
+        <a class="downloadBtn" download="{{t "templates.update.review.updateReport"}}" href="data:application/json;charset=utf-8,{{responseJSON}}">
             <button type="submit" class="btn btn-lg btn-primary btn-block btn-uppercase">
                 <i class="fa fa-download"></i> {{t "templates.update.install.download"}}
             </button>
