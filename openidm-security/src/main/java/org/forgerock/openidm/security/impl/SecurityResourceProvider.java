@@ -35,9 +35,14 @@ import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.x500.RDN;
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x500.style.BCStyle;
-import org.bouncycastle.jce.PKCS10CertificationRequest;
+import org.bouncycastle.asn1.x509.SubjectPublicKeyInfo;
+import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
+import org.bouncycastle.pkcs.PKCS10CertificationRequest;
 import org.bouncycastle.jce.PrincipalUtil;
-import org.bouncycastle.jce.X509Principal;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.pkcs.PKCS10CertificationRequestBuilder;
+import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -152,7 +157,11 @@ public class SecurityResourceProvider {
         JsonValue content = new JsonValue(new LinkedHashMap<String, Object>());
         content.put(ResourceResponse.FIELD_CONTENT_ID, alias);
         content.put("csr", CertUtil.getCertString(csr));
-        content.put("publicKey", KeyRepresentation.getKeyMap(csr.getPublicKey()).getObject());
+
+        SubjectPublicKeyInfo pubKeyInfo = csr.getSubjectPublicKeyInfo();
+        JcaPEMKeyConverter converter = new JcaPEMKeyConverter();
+        PublicKey pubKey = converter.getPublicKey(pubKeyInfo);
+        content.put("publicKey", KeyRepresentation.getKeyMap(pubKey).getObject());
         return content;
     }
     
@@ -180,9 +189,7 @@ public class SecurityResourceProvider {
         sb.append(", C=").append(params.get("C").defaultTo("None").asString().replaceAll(",", "\\\\,"));
 
         // Create the principle subject name
-        X509Principal subjectName = new X509Principal(sb.toString());
-        
-        //store.getStore().
+        X500Name subjectName = new X500Name(sb.toString());
         
         // Generate the key pair
         KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(algorithm);  
@@ -192,8 +199,9 @@ public class SecurityResourceProvider {
         PrivateKey privateKey = keyPair.getPrivate();
         
         // Generate the certificate request
-        PKCS10CertificationRequest cr = new PKCS10CertificationRequest(signatureAlgorithm, subjectName, publicKey,
-                null, privateKey);
+        PKCS10CertificationRequestBuilder builder = new JcaPKCS10CertificationRequestBuilder(subjectName, publicKey);
+        JcaContentSignerBuilder contentSignerBuilder = new JcaContentSignerBuilder(signatureAlgorithm);
+        PKCS10CertificationRequest cr = builder.build(contentSignerBuilder.build(privateKey));
         
         // Store the private key to use when the signed cert is return and updated
         logger.debug("Storing private key with alias {}", alias);
@@ -259,7 +267,8 @@ public class SecurityResourceProvider {
         try {
             JsonValue encrypted = keyResource.getContent().get("keyPair");
             JsonValue keyPairValue = cryptoService.decrypt(encrypted);
-            return CertUtil.fromPem(keyPairValue.get("value").asString());
+            PEMKeyPair pemKeyPair = CertUtil.fromPem(keyPairValue.get("value").asString());
+            return (new JcaPEMKeyConverter()).getKeyPair(pemKeyPair);
         } catch (Exception e) {
             throw new InternalServerErrorException(e.getMessage(), e);
         }

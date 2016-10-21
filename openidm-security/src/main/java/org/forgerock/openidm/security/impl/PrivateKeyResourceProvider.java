@@ -16,13 +16,15 @@
 
 package org.forgerock.openidm.security.impl;
 
-import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
 import java.security.PrivateKey;
 import java.security.cert.Certificate;
 import java.util.List;
 
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.PEMKeyPair;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
@@ -57,7 +59,8 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
         if (privateKeyPem == null) {
             privateKey = getKeyPair(alias).getPrivate();
         } else {
-            privateKey = ((KeyPair) CertUtil.fromPem(privateKeyPem)).getPrivate();
+            PrivateKeyInfo keyInfo = ((PEMKeyPair) CertUtil.fromPem(privateKeyPem)).getPrivateKeyInfo();
+            privateKey = (new JcaPEMKeyConverter()).getPrivateKey(keyInfo);
         }
         if (privateKey == null) {
             throw new NotFoundException("No private key exists for the supplied signed certificate");

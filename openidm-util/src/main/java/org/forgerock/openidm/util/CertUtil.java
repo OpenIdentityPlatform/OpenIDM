@@ -30,11 +30,12 @@ import java.util.List;
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.asn1.x500.X500NameBuilder;
 import org.bouncycastle.asn1.x500.style.BCStyle;
+import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.openssl.PEMReader;
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 import org.forgerock.json.resource.InternalServerErrorException;
@@ -157,9 +158,9 @@ public class CertUtil {
      * @throws Exception
      */
     public static String getCertString(Object object) throws Exception {
-        try (StringWriter sw = new StringWriter(); PEMWriter pemWriter = new PEMWriter(sw)) {
-            pemWriter.writeObject(object);
-            pemWriter.flush();
+        try (StringWriter sw = new StringWriter(); JcaPEMWriter JcaPEMWriter = new JcaPEMWriter(sw)) {
+            JcaPEMWriter.writeObject(object);
+            JcaPEMWriter.flush();
             return sw.getBuffer().toString();
         }
     }
@@ -174,7 +175,7 @@ public class CertUtil {
     @SuppressWarnings("unchecked")
     public static <T> T fromPem(String pem) throws Exception {
         StringReader sr = new StringReader(pem);
-        PEMReader pw = new PEMReader(sr);
+        PEMParser pw = new PEMParser(sr);
         Object object = pw.readObject();
         return (T) object;
     }
@@ -188,10 +189,10 @@ public class CertUtil {
      */
     public static Certificate readCertificate(String certString) throws Exception {
         StringReader sr = new StringReader(certString);
-        PEMReader pw = new PEMReader(sr);
+        PEMParser pw = new PEMParser(sr);
         Object object = pw.readObject();
-        if (object instanceof X509Certificate) {
-            return (X509Certificate)object;
+        if (object instanceof X509CertificateHolder) {
+            return new JcaX509CertificateConverter().setProvider(BC).getCertificate((X509CertificateHolder) object);
         } else {
             throw ResourceException.newResourceException(
                     ResourceException.BAD_REQUEST, "Unsupported certificate format");

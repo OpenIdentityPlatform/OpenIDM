@@ -23,7 +23,7 @@ import java.security.PrivateKey;
 
 import javax.crypto.SecretKey;
 
-import org.bouncycastle.openssl.PEMWriter;
+import org.bouncycastle.openssl.jcajce.JcaPEMWriter;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.util.encode.Base64;
@@ -91,7 +91,7 @@ public class KeyRepresentation {
      */
     public static String toPem(Object object) throws Exception {
         StringWriter sw = new StringWriter();
-        PEMWriter pw = new PEMWriter(sw);
+        JcaPEMWriter pw = new JcaPEMWriter(sw);
         pw.writeObject(object);
         pw.flush();
         return sw.toString();
