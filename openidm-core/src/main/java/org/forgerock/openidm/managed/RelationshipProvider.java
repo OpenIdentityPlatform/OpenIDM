@@ -368,12 +368,14 @@ public abstract class RelationshipProvider {
      * Tests that all references in the relationship field are valid according to this provider's validator.
      *
      * @param context context of the request working with the relationship.
-     * @param oldValue old value of field to refer to during validation of the newValue
-     * @param newValue new value of field to validate
+     * @param oldValue old value of relationship field to refer to during validation of the newValue
+     * @param newValue new value of relationship field to validate
+     * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
+     *                          the referred-to object specified by the relationship already contains a reference to this referrer
      * @throws ResourceException BadRequestException if the relationship is found to be not valid, otherwise for other
      * issues.
      */
-    public abstract void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue)
+    public abstract void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId)
             throws ResourceException;
 
     /**
@@ -397,17 +399,8 @@ public abstract class RelationshipProvider {
                         .then(formatResponse(context, request));
             }
 
-            /*
-                Calls directly from ManagedObjectSet will return in the block above. If we get to this point, it is because
-                the RelationshipProvider is functioning as a CollectionResourceProvider, and servicing a create call directly
-                on a relationship endpoint. When this occurs, the MO specified in the _ref in the request needs to be
-                validated for existence, the presence of the reversePropertyName confirmed. The invocation needs
-                to be rejected if the reversePropertyName is not a collection, and presently set. The latter check will
-                have to rely on the state obtained from the MO corresponding to the _ref itself, as the SchemaField in this
-                class will specify the reversePropertyName, but not its type. Finally, the request will be rejected if the
-                MO specified in the _ref of the request has already been added to the relationship.
-             */
-            validateRelationshipEndpointOperand(request.getContent().get(REFERENCE_ID).asString(), context);
+            validateRelationshipOperand(request.getContent(), context);
+
             // Get the before value of the managed object
             final JsonValue beforeValue = getManagedObject(context).getContent();
 
@@ -432,41 +425,23 @@ public abstract class RelationshipProvider {
     }
 
     /**
-     * Called to validate the operand passed as the _ref to the relationship endpoint
-     * @param managedObjectRef
-     * @throws BadRequestException
+     * The relationship endpoint can be invoked with a request payload which specifies multiple relationships. It must
+     * be ensured that each of these relationships is distinct, and that each is valid (i.e. it references an existing object,
+     * and is not already assigned).
+     * @param createRequestContent the content of the invocation CreateRequest
+     * @param context the invocation context
+     * @throws BadRequestException if the invocation relationship state is invalid: either 1. duplicate relationships
+     * specified or 2. a relationship specifies a _ref to a non-existent object or 3. the relationship has already been
+     * assigned.
      */
-    private void validateRelationshipEndpointOperand(String managedObjectRef, Context context) throws BadRequestException {
-        if (schemaField.isValidationRequired() && schemaField.isReverseRelationship()) {
-            ResourceResponse response;
-            try {
-                response = getConnection().read(context,
-                        Requests.newReadRequest(managedObjectRef).addField(schemaField.getReversePropertyName()));
-            } catch (ResourceException e) {
-                throw new BadRequestException(format(
-                        "In relationship endpoint ''{0}'', could not read referenced managed object ''{1}''.",
-                        resourceContainer.toString() + "/" + schemaField.getName(), managedObjectRef));
+    private void validateRelationshipOperand(JsonValue createRequestContent, Context context) throws ResourceException {
+        if (createRequestContent.isCollection()) {
+            relationshipValidator.checkForDuplicateRelationships(createRequestContent);
+            for (JsonValue relationship : createRequestContent) {
+                relationshipValidator.validateRelationship(relationship, ResourcePath.valueOf(getManagedObjectPath(context)), context);
             }
-            final JsonValue relationshipField = response.getContent().get(schemaField.getReversePropertyName());
-            // Ensure that the relationship has not already been assigned.
-            if (relationshipField.isCollection()) {
-                final String relationshipHost = getManagedObjectPath(context);
-                for (JsonValue relationship : relationshipField) {
-                    if (relationshipHost.equals(relationship.get(REFERENCE_ID).getObject())) {
-                        throw new BadRequestException(format(
-                                "Managed object ''{0}'' has already been assigned to relationship ''{1}''.",
-                                managedObjectRef, relationshipHost));
-
-                    }
-                }
-            // Ensure that a singleton relationship is available for assignment
-            } else if (relationshipField.isNotNull()) {
-                throw new BadRequestException(format(
-                        "In relationship endpoint ''{0}'', field ''{1}'' of managed object ''{2}'' is neither null nor a collection, " +
-                                "and thus not available for assignment.",
-                        resourceContainer.toString() + "/" + schemaField.getName(), schemaField.getReversePropertyName(),
-                        managedObjectRef));
-            }
+        } else {
+            relationshipValidator.validateRelationship(createRequestContent, ResourcePath.valueOf(getManagedObjectPath(context)), context);
         }
     }
 

@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -309,15 +309,17 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param context context of the original request.
      * @param oldValue old value of field to validate
      * @param newValue new value of field to validate
+     * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
+     *                   the referred-to object specified by the relationship already contains a reference to this referrer
      * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
-     * @see RelationshipValidator#validateRelationship(JsonValue, Context)
+     * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context)
      */
-    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue)
+    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId)
             throws ResourceException {
         if (oldValue.isNull() && newValue.isNull()) {
             logger.debug("not validating relationship as old and new values are both null.");
         } else if (oldValue.isNull() || !oldValue.getObject().equals(newValue.getObject())) {
-            relationshipValidator.validateRelationship(newValue, context);
+            relationshipValidator.validateRelationship(newValue, referrerId, context);
         }
     }
 

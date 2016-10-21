@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -20,6 +20,7 @@ import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 
 /**
@@ -47,7 +48,7 @@ public class ForwardRelationshipValidator extends RelationshipValidator {
     }
 
     @Override
-    protected void validateSuccessfulReadResponse(JsonValue relationshipField, ResourceResponse response) {
+    protected void validateSuccessfulReadResponse(JsonValue relationshipField, ResourcePath referringObjectId, ResourceResponse response) {
         // nothing more to validate. It is valid if the read request passes.
     }
 }

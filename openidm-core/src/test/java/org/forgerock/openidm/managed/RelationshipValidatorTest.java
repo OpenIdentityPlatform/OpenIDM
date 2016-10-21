@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -22,6 +22,7 @@ import static org.forgerock.json.JsonValue.object;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.fail;
 
@@ -39,7 +40,13 @@ import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.testng.annotations.BeforeTest;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
+
+import java.util.AbstractMap;
+import java.util.Collections;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Tests {@link RelationshipValidator} and its implementations.
@@ -50,9 +57,11 @@ public class RelationshipValidatorTest {
             json(object(field("reversePropertyName", "im_populated")));
     public static final JsonValue TEST_RELATIONSHIP =
             json(object(field(RelationshipUtil.REFERENCE_ID, "managed/widgetPart/part1")));
+    private static final String RELATIONSHIP_ID = "the_id";
     private ManagedObjectSetService managedObjectSyncService;
     private ConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
+    private final Random random = new Random();
 
     @BeforeTest
     public void setup() throws Exception {
@@ -88,7 +97,7 @@ public class RelationshipValidatorTest {
         when(foundRelationshipResponse.getContent()).thenReturn(SINGLETON_POPULATED_VALUE);
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenReturn(foundRelationshipResponse);
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
             fail("Expected to get BadRequestException");
         } catch (ResourceException e) {
             assertTrue(e instanceof BadRequestException, "Expected to get BadRequestException");
@@ -97,7 +106,7 @@ public class RelationshipValidatorTest {
         // now test when the reverseProperty is an array - which should be a valid condition.
         when(foundRelationshipResponse.getContent()).thenReturn(json(object(field("reversePropertyName", array()))));
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
         } catch (ResourceException e) {
             fail("Expected no exception.");
         }
@@ -105,7 +114,7 @@ public class RelationshipValidatorTest {
         // now test when the reverseProperty isn't populated - which should be a valid condition.
         when(foundRelationshipResponse.getContent()).thenReturn(json(object(field("reversePropertyName", null))));
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
         } catch (ResourceException e) {
             fail("Expected no exception.");
         }
@@ -113,7 +122,7 @@ public class RelationshipValidatorTest {
         // test when the linked relationship isn't found that it returns as BadRequest.
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenThrow(new NotFoundException());
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID),new RootContext());
             fail("Expected to get BadRequestException");
         } catch (ResourceException e) {
             assertTrue(e instanceof BadRequestException, "Expected to get BadRequestException");
@@ -139,7 +148,7 @@ public class RelationshipValidatorTest {
         when(foundRelationshipResponse.getContent()).thenReturn(json(object(field("name","i_exist"))));
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenReturn(foundRelationshipResponse);
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
         } catch (ResourceException e) {
             fail("Expected no BadRequestException");
         }
@@ -147,10 +156,127 @@ public class RelationshipValidatorTest {
         // test when the linked relationship isn't found that it returns as BadRequest.
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenThrow(new NotFoundException());
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
             fail("Expected to get BadRequestException");
         } catch (ResourceException e) {
             assertTrue(e instanceof BadRequestException, "Expected to get BadRequestException");
         }
+    }
+
+    @DataProvider(name = "relationshipData")
+    public Object[][] createRelationshipData() {
+        return new Object[][] {
+                { "ref1", "grantType1", "temporalConstraint1", "ref2", "grantType2", "temporalConstraint2" },
+                { "ref1", "grantType1", "temporalConstraint1", "ref1", null, "temporalConstraint2" },
+                { "ref1", "grantType1", "temporalConstraint1", "ref1", "grantType1", null },
+                { "ref1", null, null, "ref2", null, null }
+        };
+    }
+
+    @Test(dataProvider = "relationshipData")
+    public void testDuplicateRelationshipSuccess(String ref1, String grantType1, String temporalConstraint1, String ref2, String grantType2, String temporalConstraint2) throws BadRequestException  {
+        final SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isReverseRelationship()).thenReturn(false);
+        when(schemaField.getName()).thenReturn("testField");
+        final JsonValue relationshipList = json(array(makeRelationship(ref1, grantType1, temporalConstraint1), makeRelationship(ref2, grantType2, temporalConstraint2)));
+        final CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService);
+        relationshipProvider.relationshipValidator.checkForDuplicateRelationships(relationshipList);
+    }
+
+    @DataProvider(name = "dulicateRelationshipData")
+    public Object[][] createDuplicateRelationshipData() {
+        return new Object[][] {
+                { "ref1", "grantType1", "temporalConstraint1", "ref1", "grantType1", "temporalConstraint1" },
+                { "ref1", null, null, "ref1", null, null },
+                { "ref1", "grantType1", null, "ref1", "grantType1", null },
+                { "ref1", null, "temporalConstraint1", "ref2", null, "temporalConstraint1" }
+        };
+    }
+
+
+    @Test(dataProvider = "duplicateRelationshipData", expectedExceptions = BadRequestException.class)
+    public void testDuplicateRelationshipFailure(String ref1, String grantType1, String temporalConstraint1, String ref2, String grantType2, String temporalConstraint2) throws BadRequestException  {
+        final SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isReverseRelationship()).thenReturn(false);
+        when(schemaField.getName()).thenReturn("testField");
+        final JsonValue relationshipList = json(array(makeRelationship(ref1, grantType1, temporalConstraint1), makeRelationship(ref2, grantType2, temporalConstraint2)));
+        final CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService);
+        relationshipProvider.relationshipValidator.checkForDuplicateRelationships(relationshipList);
+    }
+
+    @DataProvider(name = "distinctRefProperties")
+    public Object[][] createDistinctRefPropertyData() {
+        return new Object[][] {
+                { "grantType1", "temporalConstraint1", "grantType1", null },
+                { "grantType1", null, null, null },
+                { null, "temporalConstraint1", null, "temporalConstraint2" },
+                { "grantType1", "temporalConstraint1", "grantType2", "temporalConstraint1" },
+                { "grantType1", "temporalConstraint1", "grantType1", "temporalConstraint2" }
+        };
+    }
+
+    @Test(dataProvider = "distinctRefProperties")
+    public void testDistinctRefProperties(String grantType1, String temporalConstraint1, String grantType2, String temporalConstraint2) throws BadRequestException  {
+        SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isReverseRelationship()).thenReturn(false);
+        when(schemaField.getName()).thenReturn("testField");
+        final JsonValue firstRefProps = json(makeRefProperties(grantType1, temporalConstraint1));
+        final JsonValue secondRefProps = json(makeRefProperties(grantType2, temporalConstraint2));
+        CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService);
+        assertFalse(relationshipProvider.relationshipValidator.refPropStateEqual(firstRefProps, secondRefProps),
+                "ref props should be flagged as distinct");
+    }
+
+    @DataProvider(name = "duplicateRefProperties")
+    public Object[][] createDuplicateRefPropertyData() {
+        return new Object[][] {
+                { "grantType1", "temporalConstraint1", "grantType1", "temporalConstraint1" },
+                { "grantType1", null, "grantType1", null },
+                { null, "temporalConstraint1", null, "temporalConstraint1" },
+                { "grantType1", "temporalConstraint1", "grantType1", "temporalConstraint1" }
+        };
+    }
+
+    @Test(dataProvider = "duplicateRefProperties")
+    public void testDuplicateRefProperties(String grantType1, String temporalConstraint1, String grantType2,
+                                           String temporalConstraint2) throws BadRequestException  {
+        SchemaField schemaField = mock(SchemaField.class);
+        when(schemaField.isReverseRelationship()).thenReturn(false);
+        when(schemaField.getName()).thenReturn("testField");
+        final JsonValue firstRefProps = json(makeRefProperties(grantType1, temporalConstraint1));
+        final JsonValue secondRefProps = json(makeRefProperties(grantType2, temporalConstraint2));
+        CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService);
+        assertTrue(relationshipProvider.relationshipValidator.refPropStateEqual(firstRefProps, secondRefProps),
+                "ref props should be flagged as identical");
+    }
+
+    private Map<String, Object> makeRelationship(String referenceId, String grantType, String temporalConstraint) {
+        return json(object(
+                makeField(RelationshipUtil.REFERENCE_ID, referenceId),
+                makeField(RelationshipUtil.REFERENCE_PROPERTIES, makeRefProperties(grantType, temporalConstraint))
+        )).asMap();
+    }
+
+    private Map<String, Object> makeRefProperties(String grantType, String temporalConstraint) {
+        return json(object(
+                // simulate both a patch and a create (id present, or not)
+                random.nextInt(10) > 5 ? makeField("_id", "bobo") : makeField("_id", null),
+                makeField(RelationshipValidator.GRANT_TYPE, grantType),
+                makeField(RelationshipValidator.TEMPORAL_CONSTRAINTS, Collections.singleton(temporalConstraint))
+        )).asMap();
+    }
+
+    /*
+    A 'special' field constructor which can simply return null, as opposed to JsonValue#field, which always creates an entry.
+     */
+    private Map.Entry<String, Object> makeField(String key, Object value) {
+        if (value != null) {
+            return new AbstractMap.SimpleImmutableEntry<>(key, value);
+        }
+        return null;
     }
 }
