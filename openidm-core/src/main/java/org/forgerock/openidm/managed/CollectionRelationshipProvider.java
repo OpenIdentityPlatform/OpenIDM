@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.managed;
@@ -570,12 +570,14 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * relationshipField.
      *
      * @param context context of the original request.
-     * @param oldValue old value of field to validate
-     * @param newValue new value of field to validate
+     * @param oldValue old value of relationship field to validate
+     * @param newValue new value of relationship field to validate
+     * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
+     *                   the referred-to object specified by the relationship already contains a reference to this referrer
      * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
-     * @see RelationshipValidator#validateRelationship(JsonValue, Context)
+     * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context)
      */
-    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue)
+    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId)
             throws ResourceException {
         Set<String> oldReferences = new HashSet<>();
         if (oldValue.isNotNull()) {
@@ -587,8 +589,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             // If the relationship is found in the existing/old relationships, then we can skip validation.
             if (!oldReferences.contains(newItem.get(RelationshipUtil.REFERENCE_ID).asString())) {
                 logger.debug("validating new relationship {} for {}: ", newItem, propertyPtr);
-                relationshipValidator.validateRelationship(newItem, context);
+                relationshipValidator.validateRelationship(newItem, referrerId, context);
             }
         }
+        relationshipValidator.checkForDuplicateRelationships(newValue);
     }
 }

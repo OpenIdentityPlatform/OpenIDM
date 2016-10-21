@@ -565,7 +565,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         relationshipFields.removeAll(alreadyPersistedRelationshipFields);
 
         // Validate relationships before persisting
-        validateRelationshipFields(managedContext, decryptedOld, decryptedNew, relationshipFields);
+        validateRelationshipFields(managedContext, decryptedOld, decryptedNew, relationshipFields, managedId(resourceId));
 
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, request, decryptedNew);
@@ -777,7 +777,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Validate relationships before persisting
-            validateRelationshipFields(managedContext, json(object()), value, relationshipProviders.keySet());
+            validateRelationshipFields(managedContext, json(object()), value, relationshipProviders.keySet(), managedId(resourceId));
 
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(managedContext, request, value);
@@ -916,11 +916,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param oldValue previous state of the json.
      * @param newValue json object that will get its relationship fields validated.
      * @param toBeValidatedRelationshipFields the set of relationship fields which should be validated
+     * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
+     *                          the referred-to object specified by the relationship already contains a reference to this referrer
      * @throws ResourceException BadRequestException when the first invalid relationship reference is discovered,
      * otherwise for other issues.
      */
     private void validateRelationshipFields(Context context, JsonValue oldValue, JsonValue newValue,
-                Set<JsonPointer> toBeValidatedRelationshipFields) throws ResourceException {
+                Set<JsonPointer> toBeValidatedRelationshipFields, ResourcePath referrerId) throws ResourceException {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/managedObjectSet/validateRelationshipFields"), null, null);
         try {
             for (JsonPointer field : toBeValidatedRelationshipFields) {
@@ -928,7 +930,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 if ((schemaField != null) && schemaField.isValidationRequired()) {
                     relationshipProviders.get(field).validateRelationshipField(context,
                             oldValue.get(field) == null ? json(null) : oldValue.get(field),
-                            newValue.get(field) == null ? json(null) : newValue.get(field));
+                            newValue.get(field) == null ? json(null) : newValue.get(field),
+                            referrerId);
                 }
             }
         } finally {

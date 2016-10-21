@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.managed;
 
@@ -35,6 +35,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 public class CollectionRelationshipProviderTest {
+    private static final ResourcePath REFERRING_OBJECT_ID = new ResourcePath("managed/user/foo");
     private ManagedObjectSetService managedObjectSyncService;
     private ConnectionFactory connectionFactory;
     private ActivityLogger activityLogger;
@@ -134,12 +135,12 @@ public class CollectionRelationshipProviderTest {
                         object(field(RelationshipUtil.REFERENCE_ID, "managed/user/differentUser"))
                 )));
 
-        provider.validateRelationshipField(context, mgrWith1Report.get("reports"), mgrWith2Reports.get("reports"));
+        provider.validateRelationshipField(context, mgrWith1Report.get("reports"), mgrWith2Reports.get("reports"), REFERRING_OBJECT_ID);
 
         // testing the condition where a user already has a manager.
         try {
             differentUser.put("manager", object(field(RelationshipUtil.REFERENCE_ID, "managed/user/someOtherManager")));
-            provider.validateRelationshipField(context, manager.get("reports"), mgrWith2Reports.get("reports"));
+            provider.validateRelationshipField(context, manager.get("reports"), mgrWith2Reports.get("reports"), REFERRING_OBJECT_ID);
             fail("expected to fail if the user already has a manager");
         } catch (BadRequestException e) {
             // test passed.
