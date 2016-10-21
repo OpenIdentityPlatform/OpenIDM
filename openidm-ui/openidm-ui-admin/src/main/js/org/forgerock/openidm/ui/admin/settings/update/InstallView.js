@@ -35,7 +35,7 @@ define([
             "successful": false,
             "msg": "",
             "percent": 0,
-            "responseB64": ""
+            "responseJSON": ""
         },
         model: {},
 
@@ -51,7 +51,7 @@ define([
         render: function(configs, callback) {
             this.model = configs;
 
-            this.data = _.extend(this.data, _.pick(this.model, ["successful", "msg", "percent", "responseB64"]));
+            this.data = _.extend(this.data, _.pick(this.model, ["successful", "msg", "percent", "responseJSON"]));
 
             function finishRender() {
                 $("#menu, #footer, #settingsBody").hide();
@@ -78,7 +78,7 @@ define([
 
             function preRender() {
                 if (this.model.response) {
-                    this.data.responseB64 = window.btoa(JSON.stringify(this.model.response));
+                    this.data.responseJSON = JSON.stringify(this.model.response);
                 }
 
                 if (this.model.archiveModel && !this.model.runningID) {

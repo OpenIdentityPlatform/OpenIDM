@@ -1280,6 +1280,7 @@
                 "genericFail": "Failed to update."
             },
             "review": {
+                "updateReport": "update-report.txt",
                 "noFilesError": "There are no files to report on.",
                 "successHeader": "Installation complete.",
                 "successMsg": "You have successfully updated OpenIDM to version",

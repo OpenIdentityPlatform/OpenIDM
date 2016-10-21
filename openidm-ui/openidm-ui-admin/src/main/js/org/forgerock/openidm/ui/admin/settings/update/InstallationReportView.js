@@ -50,7 +50,7 @@ define([
         ],
         data: {
             "treeGrid": {},
-            "responseB64": "",
+            "responseJSON": "",
             "version": ""
         },
         model: {},
@@ -68,7 +68,7 @@ define([
             SpinnerManager.showSpinner();
 
             this.model = configs;
-            this.data = _.extend(this.data, _.pick(this.model, ["treeGrid", "responseB64", "version"]));
+            this.data = _.extend(this.data, _.pick(this.model, ["treeGrid", "responseJSON", "version"]));
             this.data.docHelpUrl = Constants.DOC_URL;
 
             if (configs.isHistoricalInstall) {
@@ -89,7 +89,7 @@ define([
                     this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(), ["filePath", "actionTaken"]);
 
                     if (this.model.response) {
-                        this.data.responseB64 = window.btoa(JSON.stringify(this.model.response));
+                        this.data.responseJSON = JSON.stringify(this.model.response);
                     }
 
                     this.parentRender(_.bind(function() {
