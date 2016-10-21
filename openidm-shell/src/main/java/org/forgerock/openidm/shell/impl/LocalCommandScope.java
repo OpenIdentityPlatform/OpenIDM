@@ -271,6 +271,9 @@ public class LocalCommandScope extends CustomCommandScope {
             CryptoServiceImpl cryptoSvc = (CryptoServiceImpl) CryptoServiceFactory.getInstance();
             cryptoSvc.activate(null);
 
+            // trim whitespace, because interactive-mode will add a newline at the end, which changes the hash
+            stringValue = stringValue.trim();
+
             JsonValue value = new JsonValue(isString ? stringValue : mapper.readValue(stringValue, Object.class));
             JsonValue secure = cryptoSvc.hash(value, algorithm);
 

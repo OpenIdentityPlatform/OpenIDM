@@ -22,6 +22,7 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.identity;
 
+import java.io.IOException;
 import java.security.Key;
 
 import org.apache.felix.scr.annotations.Component;
@@ -196,10 +197,23 @@ public class CryptoServiceImpl implements CryptoService, SharedKeyService {
         return JsonUtil.isEncrypted(value);
     }
 
+    String normalizeValueBeforeHash(final JsonValue value) {
+        if (value.isString()) {
+            // read string directly, so that it will not be in JSON-string quotes
+            return value.asString();
+        } else {
+            try {
+                return JsonUtil.writeValueAsString(value);
+            } catch (IOException e) {
+                throw new JsonException("Failed to convert JSON to string", e);
+            }
+        }
+    }
+
     @Override
     public JsonValue hash(JsonValue value, String algorithm) throws JsonException, JsonCryptoException {
         final FieldStorageScheme fieldStorageScheme = getFieldStorageScheme(algorithm);
-        final String plainTextField = value.asString();
+        final String plainTextField = normalizeValueBeforeHash(value);
         final String encodedField = fieldStorageScheme.hashField(plainTextField);
         return json(object(
                 field("$crypto", object(
