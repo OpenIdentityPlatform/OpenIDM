@@ -20,8 +20,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.forgerock.guava.common.base.Predicate;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.datasource.jdbc.impl.JDBCDataSourceService;
 import org.forgerock.openidm.metadata.MetaDataProvider;
 import org.forgerock.openidm.metadata.MetaDataProviderCallback;
@@ -42,15 +45,31 @@ public class ConfigMeta implements MetaDataProvider {
     }
 
     @Override
-    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias,
-            JsonValue config) {
+    public List<JsonPointer> getPropertiesToEncrypt(String pidOrFactory, String instanceAlias, JsonValue config) {
         if (propertiesToEncrypt.containsKey(pidOrFactory)) {
-            return propertiesToEncrypt.get(pidOrFactory);
+            return FluentIterable.from(propertiesToEncrypt.get(pidOrFactory))
+                    .filter(new HasNoPropertyFilter(config)).toList();
         }
         return null;
     }
 
     @Override
     public void setCallback(MetaDataProviderCallback callback) {
+    }
+
+    /**
+     * Filters out config property keys that have a config value that does NOT contain a property.
+     */
+    private static class HasNoPropertyFilter implements Predicate<JsonPointer> {
+        private final JsonValue config;
+
+        public HasNoPropertyFilter(JsonValue config) {
+            this.config = config;
+        }
+
+        @Override
+        public boolean apply(JsonPointer configKey) {
+            return !PropertyUtil.containsProperty(config.get(configKey).asString());
+        }
     }
 }

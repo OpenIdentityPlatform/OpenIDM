@@ -56,6 +56,14 @@ public class PropertyUtilTest {
     }
 
     @Test
+    public void testContainsAnyProperty() {
+        assertThat(containsProperty("bla bla &{foo} bla bla")).isTrue();
+        assertThat(containsProperty("bla bla ${foo} bla bla")).isTrue();
+        assertThat(containsProperty("bla bla foo bla bla")).isFalse();
+        assertThat(containsProperty(null)).isFalse();
+    }
+
+    @Test
     public void testSubstVars() {
         props.put("replacement", "replaced");
         assertThat(substVars("the ${replacement} string", propertyAccessor, Delimiter.DOLLAR, false))
