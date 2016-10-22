@@ -17,6 +17,7 @@
 package org.forgerock.openidm.core;
 
 import java.util.Stack;
+import java.util.regex.Pattern;
 
 public class PropertyUtil {
 
@@ -55,6 +56,16 @@ public class PropertyUtil {
     public static final String DELIM_START_DOLLAR = "${";
     public static final String DELIM_START_AMPERSAND = "&{";
     public static final char DELIM_STOP = '}';
+    /**
+     * Tests that the string contains an ampersand delimited property.
+     * For Example: "This has a &{property.key} in it", and "&{property.key}" => matches
+     */
+    private static final Pattern AMPERSAND_PATTERN = Pattern.compile("^.*\\&\\{.+\\}.*$");
+    /**
+     * Tests that the string contains a dollar delimited property.
+     * For Example: "This has a ${property.key} in it", and "${property.key}" => matches
+     */
+    private static final Pattern DOLLAR_PATTERN = Pattern.compile("^.*\\$\\{.+\\}.*$");
 
     /**
      * Tests if the passed in value contains the delimited property, ie &{property} or ${property}
@@ -65,6 +76,16 @@ public class PropertyUtil {
     public static boolean containsProperty(String value, String property) {
         return null != value && (value.contains(DELIM_START_AMPERSAND + property + DELIM_STOP)
                 || value.contains(DELIM_START_DOLLAR + property + DELIM_STOP));
+    }
+
+    /**
+     * Tests if the passed in value contains any delimited property.
+     *
+     * @param value the value to test.
+     * @return true if the passed value contains any delimited property.
+     */
+    public static boolean containsProperty(String value) {
+        return null != value && (AMPERSAND_PATTERN.matcher(value).matches() || DOLLAR_PATTERN.matcher(value).matches());
     }
 
     /**
