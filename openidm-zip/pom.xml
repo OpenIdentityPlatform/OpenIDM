@@ -53,11 +53,6 @@
     <properties>
         <!-- If the binary-licensing profile is activated, we need the ForgeRock license there -->
         <forgerock.license.output.dir>${project.build.directory}</forgerock.license.output.dir>
-        <!-- The SaaS connectors samples must be excluded from the community build -->
-        <exclude.google.samples>samples/google-connector/**</exclude.google.samples>
-        <exclude.salesforce.samples>samples/salesforce-connector/**</exclude.salesforce.samples>
-        <exclude.google.provisioner>samples/provisioners/provisioner.openicf-google.json</exclude.google.provisioner>
-        <exclude.salesforce.provisioner>samples/provisioners/provisioner.salesforce-salesforce.json</exclude.salesforce.provisioner>
     </properties>
     <dependencies>
         <dependency>
@@ -528,53 +523,6 @@
             <artifactId>javax.annotation-api</artifactId>
             <version>1.2</version>
         </dependency>
-        <!-- google connector dependencies -->
-        <dependency>
-            <groupId>com.google.guava</groupId>
-            <artifactId>guava</artifactId>
-            <version>18.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.apis</groupId>
-            <artifactId>google-api-services-licensing</artifactId>
-            <version>v1-rev34-1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.apis</groupId>
-            <artifactId>google-api-services-admin-directory</artifactId>
-            <version>directory_v1-rev41-1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.oauth-client</groupId>
-            <artifactId>google-oauth-client</artifactId>
-            <version>1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.oauth-client</groupId>
-            <artifactId>google-oauth-client-java6</artifactId>
-            <version>1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.api-client</groupId>
-            <artifactId>google-api-client</artifactId>
-            <version>1.19.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client</artifactId>
-            <version>1.19.0</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.apache.httpcomponents</groupId>
-                    <artifactId>httpclient</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-        <dependency>
-            <groupId>com.google.http-client</groupId>
-            <artifactId>google-http-client-jackson2</artifactId>
-            <version>1.19.0</version>
-        </dependency>
 
         <!-- jdbc drivers -->
         <dependency>
@@ -964,33 +912,6 @@
                     <scope>compile</scope>
                 </dependency>
             </dependencies>
-        </profile>
-        <profile>
-            <id>commercial-build</id>
-            <dependencies>
-                <dependency>
-                    <groupId>org.forgerock.openidm</groupId>
-                    <artifactId>openidm-salesforce</artifactId>
-                    <version>${provisioner.salesforcemodule.version}</version>
-                </dependency>
-                <dependency>
-                    <groupId>org.forgerock.openicf.connectors</groupId>
-                    <artifactId>googleapps-connector</artifactId>
-                    <version>${openicf.googleconnector.version}</version>
-                </dependency>
-            </dependencies>
-            <properties>
-                <!-- We reset these properties to include the SaaS connectors samples in the commercial build -->
-                <exclude.google.samples />
-                <exclude.salesforce.samples />
-                <exclude.google.provisioner />
-                <exclude.salesforce.provisioner />
-                <!-- Properties to include the SaaS connectors in the commercial build -->
-                <google.provisioner>provisioner.openicf-google.json</google.provisioner>
-                <salesforce.provisioner>provisioner.salesforce-salesforce.json</salesforce.provisioner>
-                <saas.connectors.conf>conf/**</saas.connectors.conf>
-                <saas.connectors.script>script/**</saas.connectors.script>
-            </properties>
         </profile>
     </profiles>
 </project>
