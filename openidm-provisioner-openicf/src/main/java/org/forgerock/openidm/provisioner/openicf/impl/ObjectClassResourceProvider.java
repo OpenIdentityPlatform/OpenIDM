@@ -674,8 +674,12 @@ class ObjectClassResourceProvider implements RequestHandler {
                             break;
                         case PatchOperation.OPERATION_REMOVE:
                             // Perform any remove operations
-                            uid = facade.removeAttributeValues(objectClassInfoHelper.getObjectClass(), uid,
-                                    AttributeUtil.filterUid(attrs), operationOptions);
+                            try {
+                                uid = facade.removeAttributeValues(objectClassInfoHelper.getObjectClass(), uid,
+                                        AttributeUtil.filterUid(attrs), operationOptions);
+                            } catch (ConnectorException e) {
+                                logger.debug("Error removing attribute values for object {}", uid, e);
+                            }
                             break;
                         case PatchOperation.OPERATION_REPLACE:
                         default:
