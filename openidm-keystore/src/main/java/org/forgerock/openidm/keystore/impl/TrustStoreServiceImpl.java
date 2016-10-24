@@ -65,6 +65,15 @@ public class TrustStoreServiceImpl extends AbstractKeyStoreService {
         System.setProperty("javax.net.ssl.trustStoreType", keyStoreDetails.getType().name());
     }
 
+    /**
+     * Binds the keystore to the truststore service. This method is needed to prevent compilation errors.
+     * @param keyStoreService the {@link KeyStoreService}
+     */
+    public void bindKeyStore(final KeyStoreService keyStoreService) {
+        // this is required to prevent method not found errors when compiling
+        this.keyStore = keyStoreService;
+    }
+
     @Activate
     public void activate(ComponentContext context) throws GeneralSecurityException {
         logger.debug("Activating trust store service");
