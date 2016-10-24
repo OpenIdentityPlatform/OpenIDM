@@ -453,9 +453,9 @@
             "ChangeUserPasswordDialogTemplate" : {
                 "securityDataChange" : "Security data change",
                 "enterNewPasswordToChange" : "Please enter a new password below.",
-                "outboundEmailConfigRequired": "Configure outbound email before resetting user passwords.",
+                "outboundEmailConfigRequired": "Outbound email must be configured to email password.",
                 "outboundEmailConfigRequiredLinkMessage": "Configure it here.",
-                "resetPassword": "Reset Password"
+                "resetPassword": "Email Random Password"
             },
             "UsersTemplate" : {
                 "remainingUsers" : "Remaining users"
