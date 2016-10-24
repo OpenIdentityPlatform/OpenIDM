@@ -116,13 +116,26 @@
                 <include>org.forgerock.openidm:openidm-salesforce</include>
             </includes>
         </dependencySet>
-        <!-- copy connector libs -->
+        <!-- copy connectors/connector libs -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/connectors</outputDirectory>
             <includes>
                 <include>org.forgerock.openicf.connectors:googleapps-connector</include>
                 <include>org.forgerock.openicf.connectors:marketo-connector</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/lib</outputDirectory>
+            <includes>
+                <include>com.google.oauth-client:google-oauth-client</include>
+                <include>com.google.oauth-client:google-oauth-java6</include>
+                <include>com.google.api-client:google-api-client</include>
+                <include>com.google.http-client:google-http-client</include>
+                <include>com.google.http-client:google-http-client-jackson2</include>
+                <include>com.google.apis:google-api-services-admin-directory</include>
+                <include>com.google.apis:google-api-services-licensing</include>
             </includes>
         </dependencySet>
         <!-- copy salesforce sample commercial artifact bits -->
