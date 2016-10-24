@@ -36,7 +36,7 @@ define([
 
     obj.login = function(params, successCallback, errorCallback) {
         if (_.has(params, "userName") && _.has(params, "password")) {
-            return UserModel.login(params.userName, params.password).then(successCallback, function (xhr) {
+            return (new UserModel()).login(params.userName, params.password).then(successCallback, function (xhr) {
                 var reason = xhr.responseJSON.reason;
                 if (reason === "Unauthorized") {
                     reason = "authenticationFailed";
@@ -46,7 +46,7 @@ define([
                 }
             });
         } else if (_.has(params, "authToken") && _.has(params, "provider")) {
-            return UserModel.tokenLogin(params.authToken, params.provider).then(successCallback, function (xhr) {
+            return (new UserModel()).tokenLogin(params.authToken, params.provider).then(successCallback, function (xhr) {
                 var reason = xhr.responseJSON.reason;
 
                 if (reason === "Unauthorized") {
@@ -86,7 +86,7 @@ define([
     };
 
     obj.getLoggedUser = function(successCallback, errorCallback) {
-        return UserModel.getProfile().then(successCallback, function(e) {
+        return (new UserModel()).getProfile().then(successCallback, function(e) {
             if(e.responseJSON && e.responseJSON.detail && e.responseJSON.detail.failureReasons && e.responseJSON.detail.failureReasons.length){
                 if(_.where(e.responseJSON.detail.failureReasons,{ isAlive: false }).length){
                     conf.globalData.authenticationUnavailable = true;
