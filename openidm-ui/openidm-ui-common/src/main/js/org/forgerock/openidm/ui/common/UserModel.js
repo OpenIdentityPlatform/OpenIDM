@@ -221,13 +221,14 @@ define([
             this.currentPassword = currentPassword;
         },
 
-        bindProvider: function (provider, code, redirect_uri) {
+        bindProvider: function (provider, code, nonce, redirect_uri) {
             return ServiceInvoker.restCall({
                 "type": "POST",
                 "url": this.url + "/" + this.id +"?_action=bind&" +
                 $.param({
                     "provider": provider,
                     "redirect_uri": redirect_uri,
+                    "nonce": nonce,
                     "code": code
                 })
             }).then((resp) => {

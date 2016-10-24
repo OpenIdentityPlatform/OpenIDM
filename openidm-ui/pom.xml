@@ -31,7 +31,7 @@
     </parent>
 
     <properties>
-        <forgerock-ui.version>15.2.2</forgerock-ui.version>
+        <forgerock-ui.version>15.2.3</forgerock-ui.version>
         <node.install.directory>${project.parent.basedir}</node.install.directory>
         <grunt.task>build:dev</grunt.task>
     </properties>

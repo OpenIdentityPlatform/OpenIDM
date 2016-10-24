@@ -152,7 +152,7 @@ define([
         oauthReturn: function(params) {
             let card = this.$el.find(`.card-body[data-name="${params.provider}"]`).parents(".card");
 
-            Configuration.loggedUser.bindProvider(params.provider, params.code, params.redirect_uri).then(() => {
+            Configuration.loggedUser.bindProvider(params.provider, params.code, OAuth.getCurrentNonce(), params.redirect_uri).then(() => {
                 card.find("[type=checkbox]").prop("checked", true);
                 EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "saveSocialProvider");
                 this.toggleSocialProvider(card);

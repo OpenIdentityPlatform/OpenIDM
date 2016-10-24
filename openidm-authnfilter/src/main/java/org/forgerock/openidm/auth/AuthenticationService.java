@@ -60,6 +60,7 @@ import org.forgerock.http.spi.Loader;
 import org.forgerock.jaspi.modules.session.jwt.JwtSessionModule;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -147,6 +148,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     /** The PID for this Component. */
     public static final String PID = "org.forgerock.openidm.authentication";
 
+    private static final JwtReconstruction jwtReconstruction = new JwtReconstruction();
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationService.class);
 
     /** Re-authentication password header. */
@@ -672,9 +674,12 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                     final String authToken =
                             new OAuthHttpClient(
                                     getIdentityProviderConfig(request.getContent()
-                                            .get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
+                                            .get(OAuthHttpClient.PROVIDER).required().asString()),
+                                    newHttpClient())
                             .getAuthToken(
+                                    jwtReconstruction,
                                     request.getContent().get(OAuthHttpClient.CODE).required().asString(),
+                                    request.getContent().get(OAuthHttpClient.NONCE).required().asString(),
                                     request.getContent().get(OAuthHttpClient.REDIRECT_URI).required().asString())
                             .getOrThrow();
                     // get auth token

@@ -3,6 +3,7 @@
   "required" : [
     "provider",
     "code",
+    "nonce",
     "redirect_uri"
   ],
   "properties" : {
@@ -13,6 +14,10 @@
     "code" : {
       "type" : "string",
       "description" : "Authorization code from Identity Provider."
+    },
+    "nonce" : {
+      "type" : "string",
+      "description" : "Random value saved by the client intended to compare with fetched claim."
     },
     "redirect_uri" : {
       "type" : "string",

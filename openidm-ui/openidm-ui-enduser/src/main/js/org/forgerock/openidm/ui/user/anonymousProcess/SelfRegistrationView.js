@@ -64,6 +64,19 @@ define([
             );
         },
 
+        /**
+         Intercept the request to the backend to inject the nonce taken from session storage,
+         when appropriate
+         */
+        submitDelegate: function (params, onSubmit) {
+            if (params.provider && params.code && params.redirect_uri) {
+                params = _.extend({
+                    nonce: OAuth.getCurrentNonce()
+                }, params);
+            }
+            CommonSelfRegistrationView.submitDelegate.call(this, params, onSubmit);
+        },
+
         addFloatLabelStyles: function(e) {
             if (!$(e.target).attr("readonly")) {
                 $(e.target).removeClass("input-lg");

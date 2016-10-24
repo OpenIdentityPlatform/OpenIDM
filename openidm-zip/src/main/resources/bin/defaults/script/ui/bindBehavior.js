@@ -18,8 +18,9 @@
     Implements an action request which will augment the currently-running user
     with a profile read from an identity provider.
 
-    Expects three "additionalParameters" provided as part of the request:
+    Expects four "additionalParameters" provided as part of the request:
         code : the authorization code obtained from the authorization endpoint (likely via a browser)
+        nonce : the random value saved by the client intended to compare with fetched claim
         redirect_uri: the return endpoint provided by the browser during the authorization request
         provider: the name of the identity provider which is being interacted with
 
@@ -39,6 +40,7 @@
         {
             redirect_uri: request.additionalParameters.redirect_uri,
             code: request.additionalParameters.code,
+            nonce: request.additionalParameters.nonce,
             provider: request.additionalParameters.provider
         }
     );
