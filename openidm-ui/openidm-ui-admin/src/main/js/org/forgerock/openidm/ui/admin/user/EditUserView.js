@@ -124,7 +124,7 @@ function ($, _,
                 " resetPasswordScriptAvailable=" + this.getResetPasswordScriptAvailable() +
                 " emailMessage='" + $.t("templates.admin.ChangeUserPasswordDialogTemplate.outboundEmailConfigRequired") + "'" +
                 " linkMessage='" + $.t("templates.admin.ChangeUserPasswordDialogTemplate.outboundEmailConfigRequiredLinkMessage") + "'" +
-                " error='" + $.t("common.form.error") + "'" +
+                " error='" + $.t("common.form.warning") + "'" +
                 "}}");
 
             tabHeader.attr("id", "tabHeader_password");
