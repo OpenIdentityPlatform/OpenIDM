@@ -98,7 +98,7 @@
 
     <profiles>
         <profile>
-            <id>commercial-build</id>
+            <id>production-build</id>
             <properties>
                 <grunt.task>build:prod</grunt.task>
             </properties>

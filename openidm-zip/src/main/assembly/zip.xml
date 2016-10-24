@@ -43,10 +43,6 @@
                 <exclude>**/*.command</exclude>
                 <exclude>**/*.bat</exclude>
                 <exclude>**/internal-common/**</exclude>
-                <exclude>${exclude.google.samples}</exclude>
-                <exclude>${exclude.salesforce.samples}</exclude>
-                <exclude>${exclude.google.provisioner}</exclude>
-                <exclude>${exclude.salesforce.provisioner}</exclude>
 
                 <!--
                     These particular workflow files are instead bundled as .bar files;
@@ -858,45 +854,6 @@
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase6</outputDirectory>
         </fileSet>
-        <!-- google connector-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>${google.provisioner}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/google-connector/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>${saas.connectors.conf}</include>
-                <include>${saas.connectors.script}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/google-connector</outputDirectory>
-        </fileSet>
-        <!-- salesforce connector-->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>${salesforce.provisioner}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/salesforce-connector/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>${saas.connectors.conf}</include>
-                <include>${saas.connectors.script}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf*ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
-        </fileSet>
         <!-- Setup roles samples  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/roles</directory>
@@ -1126,13 +1083,6 @@
                 <exclude>*:*:less</exclude>
                 <exclude>*:*:zip</exclude>
                 <exclude>*:*:pom</exclude>
-                <exclude>com.google.oauth-client:google-oauth-client</exclude>
-                <exclude>com.google.oauth-client:google-oauth-java6</exclude>
-                <exclude>com.google.api-client:google-api-client</exclude>
-                <exclude>com.google.http-client:google-http-client</exclude>
-                <exclude>com.google.http-client:google-http-client-jackson2</exclude>
-                <exclude>com.google.apis:google-api-services-admin-directory</exclude>
-                <exclude>com.google.apis:google-api-services-licensing</exclude>
                 <exclude>org.apache.olingo:*</exclude>
                 <exclude>com.fasterxml:aalto-xml</exclude>
                 <exclude>org.forgerock.openidm.tools:custom-scripted-connector-bundler:*</exclude>
@@ -1217,13 +1167,6 @@
             <useProjectArtifact>false</useProjectArtifact>
             <outputDirectory>/openidm/lib</outputDirectory>
             <includes>
-                <include>com.google.oauth-client:google-oauth-client</include>
-                <include>com.google.oauth-client:google-oauth-java6</include>
-                <include>com.google.api-client:google-api-client</include>
-                <include>com.google.http-client:google-http-client</include>
-                <include>com.google.http-client:google-http-client-jackson2</include>
-                <include>com.google.apis:google-api-services-admin-directory</include>
-                <include>com.google.apis:google-api-services-licensing</include>
                 <include>org.apache.olingo:*</include>
                 <include>com.fasterxml:aalto-xml</include>
                 <include>org.apache.tomcat:tomcat-jdbc</include>
