@@ -9,7 +9,8 @@ define([
     QUnit.module('UserModel Functions');
 
     QUnit.test("User Model reflects appropriate policy after subsequent login (OPENIDM-5154)", function () {
-        var headers = {};
+        var headers = {},
+            userModel = new UserModel();
 
         Configuration.globalData = {roles: {}};
         // stub the rest calls invoked by the UserModel to use these simple responses
@@ -28,13 +29,15 @@ define([
         });
 
         headers[Constants.HEADER_PARAM_USERNAME] = "openidm-admin";
-        UserModel.getProfile(headers).then(function () {
-            QUnit.equal(UserModel.getProtectedAttributes().length, 0, "No protected attributes for openidm-admin");
+
+        userModel.getProfile(headers).then(function () {
+            QUnit.equal(userModel.getProtectedAttributes().length, 0, "No protected attributes for openidm-admin");
         }).then(function () {
             headers[Constants.HEADER_PARAM_USERNAME] = "bjensen";
-            return UserModel.getProfile(headers);
+            userModel = new UserModel();
+            return userModel.getProfile(headers);
         }).then(function () {
-            QUnit.equal(UserModel.getProtectedAttributes()[0], "password", "Password is a protected attribute for bjensen");
+            QUnit.equal(userModel.getProtectedAttributes()[0], "password", "Password is a protected attribute for bjensen");
         }).then(function () {
             ServiceInvoker.restCall.restore();
         });

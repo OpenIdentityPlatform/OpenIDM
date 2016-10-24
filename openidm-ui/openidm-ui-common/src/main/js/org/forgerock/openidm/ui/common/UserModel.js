@@ -250,5 +250,5 @@ define([
         }
     });
 
-    return new UserModel();
+    return UserModel;
 });
