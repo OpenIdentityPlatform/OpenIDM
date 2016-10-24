@@ -144,7 +144,7 @@ function ($, _,
     };
 
     EditUserView.prototype.addResetPasswordButton = function () {
-        var el = $('<a href="#" class="btn btn-primary" id="resetPasswordBtn">' + $.t("templates.admin.ChangeUserPasswordDialogTemplate.resetPassword") + '</a>');
+        var el = $('<a href="#" class="btn btn-primary" id="resetPasswordBtn" style="display: none;">' + $.t("templates.admin.ChangeUserPasswordDialogTemplate.resetPassword") + '</a>');
 
         this.$el.find("#saveBtn").before(this.configureResetPasswordButton(el));
     };
