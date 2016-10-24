@@ -52,6 +52,7 @@ import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.spi.Loader;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -104,6 +105,8 @@ public class IdentityProviderService implements SingletonResourceProvider {
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(IdentityProviderService.class);
+
+    private static final JwtReconstruction jwtReconstruction = new JwtReconstruction();
 
     /** Constant unsupported exception for 501 response to unimplemented methods */
     private static final ResourceException NOT_SUPPORTED = new NotSupportedException("Operation is not implemented");
@@ -314,9 +317,12 @@ public class IdentityProviderService implements SingletonResourceProvider {
         final ProviderConfig providerConfig =
                 getIdentityProvider(content.get(OAuthHttpClient.PROVIDER).required().asString());
         final JsonValue profile = new OAuthHttpClient(
-                getIdentityProvider(content.get(OAuthHttpClient.PROVIDER).required().asString()), newHttpClient())
+                getIdentityProvider(content.get(OAuthHttpClient.PROVIDER).required().asString()),
+                newHttpClient())
                 .getProfile(
+                        jwtReconstruction,
                         content.get(OAuthHttpClient.CODE).required().asString(),
+                        content.get(OAuthHttpClient.NONCE).required().asString(),
                         content.get(OAuthHttpClient.REDIRECT_URI).required().asString());
         return newActionResponse(buildIdpObject(providerConfig, profile)).asPromise();
     }

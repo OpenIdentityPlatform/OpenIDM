@@ -35,6 +35,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.forgerock.http.Client;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.jose.common.JwtReconstruction;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
@@ -64,6 +65,8 @@ import org.slf4j.LoggerFactory;
 public final class SocialUserDetailsStage implements ProgressStage<SocialUserDetailsConfig> {
 
     private static final Logger logger = LoggerFactory.getLogger(SocialUserDetailsStage.class);
+
+    private static final JwtReconstruction jwtReconstruction = new JwtReconstruction();
 
     private static final String VALIDATE_USER_PROFILE_TAG = "validateUserProfile";
     private static final String IDP_DATA_OBJECT = "idpData";
@@ -103,6 +106,7 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
                 .addProperty("user", "object", "User Object", json(object()))
                 .addProperty("provider", "string", "OAuth IDP name")
                 .addProperty("code", "string", "OAuth Access code")
+                .addProperty("nonce", "string", "One-time use random value")
                 .addProperty("redirect_uri", "string", "OAuth redirect URI used to obtain the authorization code")
                 .addDefinition("providers", newArray(oneOf(providers.toArray(new JsonValue[0]))))
                 .build();
@@ -132,10 +136,11 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
 
         // This is the first pass through this stage.  Gather the user profile to offer up for registration.
         final JsonValue code = context.getInput().get("code");
+        final JsonValue nonce = context.getInput().get("nonce");
         final JsonValue redirectUri = context.getInput().get("redirect_uri");
         final JsonValue provider = context.getInput().get("provider");
-        if (provider.isNotNull() && code.isNotNull() && redirectUri.isNotNull()) {
-            final JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), redirectUri.asString(),
+        if (provider.isNotNull() && code.isNotNull() && nonce.isNotNull() && redirectUri.isNotNull()) {
+            final JsonValue userResponse = getSocialUser(provider.asString(), code.asString(), nonce.asString(), redirectUri.asString(),
                     config, context);
             if (userResponse == null) {
                 throw new BadRequestException("Unable to reach social provider or unknown provider given");
@@ -180,14 +185,14 @@ public final class SocialUserDetailsStage implements ProgressStage<SocialUserDet
         return user;
     }
 
-    private JsonValue getSocialUser(final String providerName, final String code, final String redirectUri,
+    private JsonValue getSocialUser(final String providerName, final String code, final String nonce, final String redirectUri,
             final SocialUserDetailsConfig config, final ProcessContext context) throws ResourceException {
         final OAuthHttpClient providerHttpClient = getHttpClient(providerName, config.getProviders());
         if (providerHttpClient == null) {
             return null;
         }
         final ProviderConfig providerConfig = getProviderConfig(providerName, config.getProviders());
-        final JsonValue rawProfile = providerHttpClient.getProfile(code, redirectUri);
+        final JsonValue rawProfile = providerHttpClient.getProfile(jwtReconstruction, code, nonce, redirectUri);
         context.putState(IDP_DATA_OBJECT,
                 json(object(field(providerName, buildIdpObject(providerConfig, rawProfile).getObject()))));
 

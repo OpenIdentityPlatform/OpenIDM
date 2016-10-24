@@ -19,11 +19,13 @@ define([
     "underscore",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/commons/ui/common/util/Constants"
+    "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/commons/ui/common/util/OAuth"
 ], function($, _,
     AbstractDelegate,
     Configuration,
-    Constants) {
+    Constants,
+    OAuth) {
 
     var obj = new AbstractDelegate(Constants.host + "/openidm/identityProviders");
 
@@ -85,7 +87,8 @@ define([
             "data": JSON.stringify({
                 provider: provider,
                 code: code,
-                redirect_uri: redirect_uri
+                redirect_uri: redirect_uri,
+                nonce: OAuth.getCurrentNonce()
             })
         });
     };

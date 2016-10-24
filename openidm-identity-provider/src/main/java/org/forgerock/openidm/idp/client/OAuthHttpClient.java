@@ -34,13 +34,21 @@ import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.forgerock.util.promise.NeverThrowsException;
+import org.forgerock.json.jose.common.JwtReconstruction;
+import org.forgerock.json.jose.exceptions.InvalidJwtException;
+import org.forgerock.json.jose.exceptions.JwtReconstructionException;
+import org.forgerock.json.jose.jws.SignedJwt;
+import org.forgerock.json.jose.jwt.JwtClaimsSet;
 
 import java.io.IOException;
 import java.net.URI;
+import java.util.Map;
 
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * OAuth Http Client used to perform the OAuth flow
@@ -50,6 +58,8 @@ public class OAuthHttpClient {
 
     /** Logger */
     private static final Logger logger = LoggerFactory.getLogger(OAuthHttpClient.class);
+
+    private static final ObjectMapper mapper = new ObjectMapper();
 
     /** Supported OAuth modules **/
     private static final String OAUTH = "OAUTH";
@@ -61,6 +71,7 @@ public class OAuthHttpClient {
     public static final String CODE = "code";
     public static final String AUTH_TOKEN = "auth_token";
     public static final String PROVIDER = "provider";
+    public static final String NONCE = "nonce";
 
     /** A {@link Function} that handles a {@link Response} from a Identity Provider */
     private static final Function<Response, JsonValue, ResourceException> handleResponse =
@@ -90,31 +101,84 @@ public class OAuthHttpClient {
     }
 
     /**
+     * Gets the claims associated with an id_token.
+     *
+     * @param id_token jwt string returned from idp
+     * @throws InternalServerErrorException
+     */
+    private JwtClaimsSet getClaims(JwtReconstruction jwtReconstruction, final String id_token)
+            throws InternalServerErrorException {
+        try {
+            return jwtReconstruction.reconstructJwt(id_token, SignedJwt.class).getClaimsSet();
+        } catch (NullPointerException | JwtReconstructionException e) {
+            throw new InternalServerErrorException(e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Ensures that the given nonce value matches the nonce claim.
+     *
+     * @param claims set of all claims for the id_token jwt
+     * @param nonce provided value to compare with
+     * @throws BadRequestException
+     */
+    private void checkNonce(final JwtClaimsSet claims, final String nonce)
+        throws BadRequestException {
+
+        final String nonceClaim = claims.getClaim(NONCE, String.class);
+        if (nonceClaim == null || !nonceClaim.equals(nonce)) {
+            throw new BadRequestException("Nonce provided does not match claim");
+        }
+    }
+
+    /**
      * Returns the user profile from the identity provider.
      *
      * @param code authorization code used to specify grant type
+     * @param nonce random value saved by the client intended to compare with fetched claim
      * @param redirectUri url that the idp will redirect to with response
      * @return
      * @throws ResourceException
      */
-    public JsonValue getProfile(final String code, final String redirectUri) throws ResourceException {
+    public JsonValue getProfile(
+            JwtReconstruction jwtReconstruction, final String code, final String nonce, final String redirectUri)
+            throws ResourceException {
         try {
             // Get the response from the token Endpoint
-            final String authToken = getAccessToken(
-                    sendPostRequest(
-                            URI.create(config.getTokenEndpoint()),
-                            "application/x-www-form-urlencoded",
-                            "grant_type=authorization_code"
-                                    + "&scope=" + Uris.formDecodeParameterNameOrValue(StringUtils.join(config.getScope(), " "))
-                                    + "&redirect_uri=" + Uris.formEncodeParameterNameOrValue(redirectUri)
-                                    + "&code=" + Uris.formDecodeParameterNameOrValue(code)
-                                    + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())
-                                    + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()))
-                            .getOrThrow());
-            // Get the user profile from the identity provider using the access token
-            return sendGetRequest(URI.create(config.getUserInfoEndpoint()), authToken)
+            JsonValue tokenEndpointResponse = sendPostRequest(
+                    URI.create(config.getTokenEndpoint()),
+                    "application/x-www-form-urlencoded",
+                    "grant_type=authorization_code"
+                            + "&scope=" + Uris.formDecodeParameterNameOrValue(StringUtils.join(config.getScope(), " "))
+                            + "&redirect_uri=" + Uris.formEncodeParameterNameOrValue(redirectUri)
+                            + "&code=" + Uris.formDecodeParameterNameOrValue(code)
+                            + "&client_id=" + Uris.formEncodeParameterNameOrValue(config.getClientId())
+                            + "&client_secret=" +  Uris.formDecodeParameterNameOrValue(config.getClientSecret()))
                     .getOrThrow();
-        } catch (InterruptedException e) {
+
+            JwtClaimsSet jwtClaimSet = null;
+            try {
+                jwtClaimSet = getClaims(jwtReconstruction, getJwtToken(tokenEndpointResponse));
+                checkNonce(jwtClaimSet, nonce);
+            } catch (NotFoundException nfe) {
+                // unable to get id_token; likely non-OIDC provider
+            }
+
+            if (config.getUserInfoEndpoint() != null) {
+                // Get the user profile from the identity provider using the access token
+                return sendGetRequest(
+                    URI.create(config.getUserInfoEndpoint()),
+                    getAccessToken(tokenEndpointResponse))
+                    .getOrThrow();
+            } else if (jwtClaimSet != null) {
+                // return the user profile from the claims included in the id_token
+                return new JsonValue(mapper.readValue(jwtClaimSet.build(), Map.class));
+            } else {
+                throw new InternalServerErrorException("No means available for getting profile data");
+            }
+        } catch (BadRequestException e) {
+            throw e;
+        } catch (InterruptedException | IOException e) {
             throw new InternalServerErrorException(e.getMessage(), e);
         }
     }
@@ -123,11 +187,13 @@ public class OAuthHttpClient {
      * Returns an auth token used for oauth flow.
      *
      * @param code authorization code used to specify grant type
+     * @param nonce random value saved by the client intended to compare with fetched claim
      * @param redirectUri url that the idp will redirect to with response
      * @return
      * @throws ResourceException
      */
-    public Promise<String, ResourceException> getAuthToken(final String code, final String redirectUri)
+    public Promise<String, ResourceException> getAuthToken(
+            final JwtReconstruction jwtReconstruction, final String code, final String nonce, final String redirectUri)
             throws ResourceException {
         return sendPostRequest(
                 URI.create(config.getTokenEndpoint()),
@@ -145,7 +211,9 @@ public class OAuthHttpClient {
                             case OAUTH:
                                 return getAccessToken(jsonValue);
                             case OPENID_CONNECT:
-                                return getJwtToken(jsonValue);
+                                final String idToken = getJwtToken(jsonValue);
+                                checkNonce(getClaims(jwtReconstruction, idToken), nonce);
+                                return idToken;
                             default:
                                 throw new InternalServerErrorException(
                                         "Authentication module of type " + config.getType() + " is not supported.");
