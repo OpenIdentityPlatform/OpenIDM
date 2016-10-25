@@ -8,5 +8,10 @@
         "operation" : "add",
         "field" : "/auditServiceConfig/availableAuditEventHandlers/-",
         "value" : "org.forgerock.audit.handlers.splunk.SplunkAuditEventHandler"
+   },
+   {
+        "operation" : "add",
+        "field" : "/auditServiceConfig/availableAuditEventHandlers/-",
+        "value" : "org.forgerock.audit.handlers.syslog.SyslogAuditEventHandler"
    }
 ]
