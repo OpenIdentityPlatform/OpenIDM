@@ -20,16 +20,12 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.PatchOperation.add;
 import static org.forgerock.json.resource.Requests.*;
-import static org.forgerock.openidm.core.IdentityServer.*;
-import static org.forgerock.openidm.core.IdentityServer.TRUSTSTORE_PASSWORD;
 import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_INSTALL_LOCATION;
 import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_PROJECT_LOCATION;
+import static org.forgerock.openidm.security.impl.SecurityTestUtils.createKeyStores;
 import static org.forgerock.openidm.util.CertUtil.generateCertificate;
 import static org.mockito.Mockito.mock;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
 import java.nio.file.Paths;
 import java.security.Key;
 import java.security.KeyStore;
@@ -37,8 +33,6 @@ import java.security.PrivateKey;
 import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
-import java.util.LinkedList;
-import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
@@ -46,20 +40,13 @@ import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConflictException;
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.json.resource.DeleteRequest;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.MemoryBackend;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
-import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.KeyRepresentation;
@@ -78,12 +65,10 @@ import org.testng.annotations.Test;
 
 public class EntryResourceProviderTest {
 
-    private static final String KEY_STORE_PASSWORD = "password";
     private static final String ENTRY_ID = "entry";
     private static final String RESOURCE_CONTAINER = "test";
     private static final String[] EXPECTED_KEYS = {"_id", "privateKey"};
     private static final JsonValue EMPTY_JSON_OBJECT = json(object());
-    private static final String CLASS_NAME = EntryResourceProvider.class.getCanonicalName();
 
     @BeforeClass
     public void setUp() throws Exception {
@@ -307,51 +292,6 @@ public class EntryResourceProviderTest {
         AssertJPromiseAssert.assertThat(promise).failedWithException().isInstanceOf(NotFoundException.class);
     }
 
-    private void createKeyStores() throws Exception {
-        createKeyStore(IdentityServer.getFileForPath(IdentityServer.getInstance().getProperty(KEYSTORE_LOCATION)));
-        createTrustStore(IdentityServer.getFileForPath(IdentityServer.getInstance().getProperty(TRUSTSTORE_LOCATION)));
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void createKeyStore(final File keystoreFile) throws Exception {
-        keystoreFile.deleteOnExit();
-        if (keystoreFile.exists()) {
-            keystoreFile.delete();
-        }
-
-        keystoreFile.getParentFile().mkdirs();
-        assertThat(keystoreFile.createNewFile()).isTrue().as("Unable to create keystore file");
-        try (final OutputStream outputStream = new FileOutputStream(keystoreFile)) {
-            final KeyStore keyStore =
-                    KeyStore.getInstance(IdentityServer.getInstance().getProperty(KEYSTORE_TYPE));
-            keyStore.load(null, IdentityServer.getInstance().getProperty(KEYSTORE_PASSWORD).toCharArray());
-            keyStore.store(
-                    outputStream,
-                    IdentityServer.getInstance().getProperty(KEYSTORE_PASSWORD).toCharArray()
-            );
-        }
-    }
-
-    @SuppressWarnings("ResultOfMethodCallIgnored")
-    private void createTrustStore(final File keystoreFile) throws Exception {
-        keystoreFile.deleteOnExit();
-        if (keystoreFile.exists()) {
-            keystoreFile.delete();
-        }
-
-        keystoreFile.getParentFile().mkdirs();
-        assertThat(keystoreFile.createNewFile()).isTrue().as("Unable to create keystore file");
-        try (final OutputStream outputStream = new FileOutputStream(keystoreFile)) {
-            final KeyStore keyStore =
-                    KeyStore.getInstance(IdentityServer.getInstance().getProperty(TRUSTSTORE_TYPE));
-            keyStore.load(null, IdentityServer.getInstance().getProperty(TRUSTSTORE_PASSWORD).toCharArray());
-            keyStore.store(
-                    outputStream,
-                    IdentityServer.getInstance().getProperty(TRUSTSTORE_PASSWORD).toCharArray()
-            );
-        }
-    }
-
     private EntryResourceProvider createEntryResourceProvider() throws Exception {
         createKeyStores();
         final KeyStoreServiceImpl keyStoreService = new KeyStoreServiceImpl();
@@ -374,7 +314,7 @@ public class EntryResourceProviderTest {
 
     private final class TestEntryResourceProvider extends EntryResourceProvider {
 
-        public TestEntryResourceProvider(
+        TestEntryResourceProvider(
                 String resourceName, KeyStoreService keyStoreService, KeyStoreManagementService manager,
                 RepositoryService repoService, CryptoService cryptoService) {
             super(resourceName, keyStoreService.getKeyStore(), keyStoreService, repoService, cryptoService, manager);
@@ -403,73 +343,4 @@ public class EntryResourceProviderTest {
             }
         }
     }
-
-    private final class TestRepositoryService implements RepositoryService {
-
-        private final MemoryBackend repo = new MemoryBackend();
-
-        @Override
-        public ResourceResponse create(CreateRequest request) throws ResourceException {
-            try {
-                final Promise<ResourceResponse, ResourceException> promise =
-                        repo.createInstance(new RootContext(), request);
-                return promise.getOrThrow();
-            } catch (InterruptedException e) {
-                throw new InternalServerErrorException("Unable to create object in repo", e);
-            }
-        }
-
-        @Override
-        public ResourceResponse read(ReadRequest request) throws ResourceException {
-            try {
-                final Promise<ResourceResponse, ResourceException> promise =
-                        repo.readInstance(new RootContext(), request.getResourcePath(), request);
-                return promise.getOrThrow();
-            } catch (InterruptedException e) {
-                throw new InternalServerErrorException("Unable to read object in repo", e);
-            }
-        }
-
-        @Override
-        public ResourceResponse update(UpdateRequest request) throws ResourceException {
-            try {
-                final Promise<ResourceResponse, ResourceException> promise =
-                        repo.updateInstance(new RootContext(), request.getResourcePath(), request);
-                return promise.getOrThrow();
-            } catch (InterruptedException e) {
-                throw new InternalServerErrorException("Unable to update object in repo", e);
-            }
-        }
-
-        @Override
-        public ResourceResponse delete(DeleteRequest request) throws ResourceException {
-            try {
-                final Promise<ResourceResponse, ResourceException> promise =
-                        repo.deleteInstance(new RootContext(), request.getResourcePath(), request);
-                return promise.getOrThrow();
-            } catch (InterruptedException e) {
-                throw new InternalServerErrorException("Unable to delete object in repo", e);
-            }
-        }
-
-        @Override
-        public List<ResourceResponse> query(QueryRequest request) throws ResourceException {
-            try {
-                final List<ResourceResponse> resources = new LinkedList<>();
-                final Promise<QueryResponse, ResourceException> promise =
-                        repo.queryCollection(new RootContext(), request, new QueryResourceHandler() {
-                            @Override
-                            public boolean handleResource(ResourceResponse resource) {
-                                resources.add(resource);
-                                return true;
-                            }
-                        });
-                promise.getOrThrow();
-                return resources;
-            } catch (InterruptedException e) {
-                throw new InternalServerErrorException("Unable to query objects in repo", e);
-            }
-        }
-    }
-
 }

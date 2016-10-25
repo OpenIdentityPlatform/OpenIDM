@@ -46,7 +46,6 @@ import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
@@ -116,18 +115,12 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
                         keyStoreManager.reloadSslContext();
 
                         result = returnCertificate(alias, cert);
-                        if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
-                            result.put("privateKey", KeyRepresentation.getKeyMap(key).getObject());
-                        }
                     }
                 } else {
                     // Generate CSR
                     Pair<PKCS10CertificationRequest, PrivateKey> csr = generateCSR(alias, algorithm,
                             signatureAlgorithm, keySize, request.getContent());
                     result = returnCertificateRequest(alias, csr.getKey());
-                    if (request.getContent().get("returnPrivateKey").defaultTo(false).asBoolean()) {
-                        result.put("privateKey", KeyRepresentation.getKeyMap(csr.getRight()).getObject());
-                    }
                 }
                 return Responses.newActionResponse(result).asPromise();
             } else {
