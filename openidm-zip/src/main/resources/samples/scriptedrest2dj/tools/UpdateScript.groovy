@@ -58,7 +58,7 @@ switch (objectClass) {
         }
 
         return connection.request(PUT, JSON) { req ->
-            uri.path = "/users/${uid.uidValue}"
+            uri.path = "/api/users/${uid.uidValue}"
             body = builder.toString()
             headers.'If-Match' =  "*"
 
@@ -73,7 +73,7 @@ switch (objectClass) {
                 members(updateAttributes.findList("members"))
             }
             return connection.request(PUT, JSON) { req ->
-                uri.path = "/groups/${uid.uidValue}"
+                uri.path = "/api/groups/${uid.uidValue}"
                 body = builder.toString()
                 headers.'If-Match' =  "*"
 

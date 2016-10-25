@@ -1,33 +1,25 @@
-    /**
-    * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
-    *
-    * Copyright (c) 2014 ForgeRock AS. All rights reserved.
-    *
-    * The contents of this file are subject to the terms
-    * of the Common Development and Distribution License
-    * (the License). You may not use this file except in
-    * compliance with the License.
-    *
-    * You can obtain a copy of the License at
-    * http://forgerock.org/license/CDDLv1.0.html
-    * See the License for the specific language governing
-    * permission and limitations under the License.
-    *
-    * When distributing Covered Code, include this CDDL
-    * Header Notice in each file and include the License file
-    * at http://forgerock.org/license/CDDLv1.0.html
-    * If applicable, add the following below the CDDL Header,
-    * with the fields enclosed by brackets [] replaced by
-    * your own identifying information:
-    * "Portions Copyrighted [year] [name of copyright owner]"
-    */
+    /*
+     * The contents of this file are subject to the terms of the Common Development and
+     * Distribution License (the License). You may not use this file except in compliance with the
+     * License.
+     *
+     * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+     * specific language governing permission and limitations under the License.
+     *
+     * When distributing Covered Software, include this CDDL Header Notice in each file and include
+     * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+     * Header, with the fields enclosed by brackets [] replaced by your own identifying
+     * information: "Portions copyright [year] [name of copyright owner]".
+     *
+     * Copyright 2014-2016 ForgeRock AS.
+     */
 
 sciptedrest2dj Sample - Scripted REST to OpenDJ
 ===============================================
 
 This sample demonstrates how to use Scripted REST to connect to OpenDJs REST API. This sample enables the basic create,
 read, update, and delete (CRUD) operations for groups and users. This sample requires a fresh install of OpenIDM and
-OpenDJ.
+OpenDJ directory server 3.5. It does not work with earlier versions of OpenDJ REST to LDAP.
 
 Setup OpenDJ
 ------------
@@ -67,11 +59,39 @@ Setup OpenDJ
         $ opendj/bin/ldapmodify --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
         --port 1389 --filename /path/to/openidm/samples/scriptedrest2dj/data/ldap.ldif
 
-7. Copy the http-config.json file located in the data folder to the opendj/config directory.
+7. Allow the IDM administrator user to read the changelog.
 
-        $ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json opendj/config
+        $ opendj/bin/dsconfig \
+          set-access-control-handler-prop \
+          --hostname localhost \
+          --port 4444 \
+          --bindDN "cn=Directory Manager" \
+          --bindPassword password \
+          --add global-aci:"(target=\"ldap:///cn=changelog\")(targetattr=\"*||+\") \
+          (version 3.0; acl \"IDM can access cn=changelog\"; \
+          allow (read,search,compare) \
+          userdn=\"ldap:///uid=idm,ou=Administrators,dc=example,dc=com\";)" \
+          --trustAll \
+          --no-prompt
 
-8. Restart OpenDJ.
+        $ opendj/bin/dsconfig \
+          set-access-control-handler-prop \
+          --hostname localhost \
+          --port 4444 \
+          --bindDN "cn=Directory Manager" \
+          --bindPassword password \
+          --add global-aci:"(targetcontrol=\"1.3.6.1.4.1.26027.1.5.4\") \
+          (version 3.0; acl \"IDM changelog control access\"; \
+          allow (read) \
+          userdn=\"ldap:///uid=idm,ou=Administrators,dc=example,dc=com\";)" \
+          --trustAll \
+          --no-prompt
+
+8. Replace the default OpenDJ REST to LDAP configuration with the configuration for this sample.
+
+        $ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json opendj/config/rest2ldap/endpoints/api/
+
+9. Restart OpenDJ.
 
         $ opendj/bin/stop-ds --restart
 
@@ -243,7 +263,19 @@ OpenIDM Instructions
           http://localhost:8080/openidm/system/scriptedrest/account/user
 
         {
-          "_id": "user"
+          "_id": "user",
+          "givenName": "User",
+          "telephoneNumber": "555-555-5555",
+          "emailAddress": null,
+          "created": "2014-09-24T17:31:42Z",
+          "familyName": "Smith",
+          "groups": [
+            {
+              "_id": "group1"
+            }
+          ],
+          "uid": "user",
+          "displayName": "User.Smith"
         }
 
 9. Delete the group.
@@ -255,7 +287,12 @@ OpenIDM Instructions
           http://localhost:8080/openidm/system/scriptedrest/group/group1
 
         {
-          "_id": "group1"
+          "_id": "group1",
+          "displayName": "group1",
+          "cn": "group1",
+          "members": null,
+          "lastModified": "2014-09-24T17:31:42Z",
+          "created": "2014-09-24T17:27:37Z"
         }
 
 Other Available Commands

@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014-2015 ForgeRock AS
+ * Copyright 2014-2016 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -44,6 +44,7 @@ def uid = uid as Uid
 def objectClassInfo = configuration.propertyBag[objectClass.objectClassValue];
 if (objectClassInfo != null) {
     DeleteRequest request = Requests.newDeleteRequest(objectClassInfo.resourceContainer, uid.uidValue)
+    request.setResourcePath("/api/" + request.getResourcePath())
     request.setRevision(uid.revision)
     connection.delete(new RootContext(), request)
 } else {

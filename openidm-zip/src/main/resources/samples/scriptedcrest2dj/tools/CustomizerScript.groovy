@@ -118,7 +118,7 @@ customize {
     beforeRequest { Context context, HttpClientContext clientContext, HttpUriRequest request ->
         clientContext.setCookieStore(propertyBag.get(HttpClientContext.COOKIE_STORE))
         def c = delegate as ScriptedCRESTConfiguration
-        if (AuthMethod.valueOf(c.defaultAuthMethod).equals(AuthMethod.BASIC_PREEMPTIVE)){
+        if (AuthMethod.valueOf(c.defaultAuthMethod).equals(AuthMethod.BASIC_PREEMPTIVE)) {
             def authCache = new BasicAuthCache();
             authCache.put(new HttpHost(c.serviceAddress?.host, c.serviceAddress?.port, c.serviceAddress?.scheme), new BasicScheme());
             clientContext.setAuthCache(authCache)

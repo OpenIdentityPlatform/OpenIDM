@@ -60,7 +60,7 @@ switch (operation) {
         Map<String, Object> objectClassInfo = configuration.propertyBag[objectClass.objectClassValue];
         if (objectClassInfo != null) {
 
-            QueryRequest request = Requests.newQueryRequest('/changelog')
+            QueryRequest request = Requests.newQueryRequest('/api/changelog')
 
             if (objectClass.equals(ObjectClass.ACCOUNT)) {
                 request.queryFilter = QueryFilter.and(QueryFilter.greaterThan('_id', token), QueryFilter.contains('targetDN', 'ou=people,dc=example,dc=com'))
@@ -108,6 +108,7 @@ switch (operation) {
                             }
 
                             ReadRequest readRequest = Requests.newReadRequest(objectClassInfo.resourceContainer, resourceId)
+                            readRequest.setResourcePath("/api/" + readRequest.getResourcePath())
                             try {
                                 def changedResource = connection.read(new RootContext(), readRequest)
 
@@ -175,7 +176,7 @@ switch (operation) {
         break;
     case OperationType.GET_LATEST_SYNC_TOKEN:
 
-        QueryRequest request = Requests.newQueryRequest('/changelog')
+        QueryRequest request = Requests.newQueryRequest('/api/changelog')
         request.queryFilter = QueryFilter.alwaysTrue()
         request.addField('_id')
         request.addSortKey(SortKey.descendingOrder('_id'))

@@ -1,303 +1,211 @@
 {
-    "servlet": {
-        "mappings": {
-            "/groups": {
-                "usePermissiveModify": true, 
-                "baseDN": "ou=groups,dc=example,dc=com", 
-                "additionalLDAPAttributes": [
-                    {
-                        "values": [
-                            "top", 
-                            "groupOfUniqueNames"
-                        ], 
-                        "type": "objectClass"
+    "version": "1.0",
+
+    "resourceTypes": {
+        "example-v1": {
+            "subResources": {
+                "users": {
+                    "type": "collection",
+                    "dnTemplate": "ou=people,dc=example,dc=com",
+                    "resource": "frapi:openidm:samples:user:1.0",
+                    "namingStrategy": {
+                        "type": "clientDnNaming",
+                        "dnAttribute": "uid"
                     }
-                ], 
-                "readOnUpdatePolicy": "controls", 
-                "etagAttribute": "etag", 
-                "useSubtreeDelete": false, 
-                "attributes": {
-                    "displayName": {
-                        "simple": {
-                            "isRequired": true, 
-                            "writability": "readOnly", 
-                            "ldapAttribute": "cn", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "_rev": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "etag", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "meta": {
-                        "object": {
-                            "lastModified": {
-                                "simple": {
-                                    "writability": "readOnly", 
-                                    "ldapAttribute": "modifyTimestamp", 
-                                    "isSingleValued": true
-                                }
-                            }, 
-                            "created": {
-                                "simple": {
-                                    "writability": "readOnly", 
-                                    "ldapAttribute": "createTimestamp", 
-                                    "isSingleValued": true
-                                }
-                            }
-                        }
-                    },
-                    "members": {
-                        "reference": {
-                            "mapper": {
-                                "object": {
-                                    "_id": {
-                                        "simple": {
-                                            "isRequired": true,
-                                            "ldapAttribute": "uid",
-                                            "isSingleValued": true
-                                        }
-                                    },
-                                    "displayName": {
-                                        "simple": {
-                                            "writability": "readOnlyDiscardWrites",
-                                            "ldapAttribute": "cn",
-                                            "isSingleValued": true
-                                        }
-                                    }
-                                }
-                            },
-                            "baseDN": "dc=example,dc=com",
-                            "ldapAttribute": "uniqueMember",
-                            "primaryKey": "uid"
-                        }
-                    },
-                    "_id": {
-                        "simple": {
-                            "isRequired": true, 
-                            "writability": "createOnly", 
-                            "ldapAttribute": "cn", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "schemas": {
-                        "constant": [
-                            "urn:scim:schemas:core:1.0"
-                        ]
+                },
+                "groups": {
+                    "type": "collection",
+                    "dnTemplate": "ou=groups,dc=example,dc=com",
+                    "resource": "frapi:openidm:samples:group:1.0",
+                    "namingStrategy": {
+                        "type": "clientDnNaming",
+                        "dnAttribute": "cn"
                     }
-                }, 
-                "namingStrategy": {
-                    "dnAttribute": "cn", 
-                    "strategy": "clientDNNaming"
+                },
+                "changelog": {
+                    "type": "collection",
+                    "dnTemplate": "cn=changelog",
+                    "resource": "frapi:openidm:samples:changelog:1.0",
+                    "namingStrategy": {
+                        "type": "clientDnNaming",
+                        "dnAttribute": "changeNumber"
+                    }
                 }
-            }, 
-            "/changelog": {
-                "readOnUpdatePolicy": "controls", 
-                "attributes": {
-                    "changeTime": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "changeTime", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "targetDN": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "targetDN", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "changeType": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "changeType", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "changeLogCookie": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "changeLogCookie", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "_id": {
-                        "simple": {
-                            "writability": "createOnly", 
-                            "ldapAttribute": "changeNumber", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "changes": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "changes", 
-                            "isSingleValued": true
+            }
+        },
+        "frapi:openidm:samples:object:1.0": {
+            "isAbstract": true,
+            "objectClasses": [ "top" ],
+            "resourceTypeProperty": "_schema",
+            "properties": {
+                "_schema": {
+                    "type": "resourceType"
+                },
+                "_rev": {
+                    "type": "simple",
+                    "ldapAttribute": "etag",
+                    "writability": "readOnly"
+                },
+                "_meta": {
+                    "type": "object",
+                    "properties": {
+                        "created": {
+                            "type": "simple",
+                            "ldapAttribute": "createTimestamp",
+                            "writability": "readOnly"
+                        },
+                        "lastModified": {
+                            "type": "simple",
+                            "ldapAttribute": "modifyTimestamp",
+                            "writability": "readOnly"
                         }
                     }
-                }, 
-                "baseDN": "cn=changelog", 
-                "namingStrategy": {
-                    "dnAttribute": "changeNumber", 
-                    "strategy": "clientDNNaming"
-                }, 
-                "additionalLDAPAttributes": [
-                    {
-                        "values": [
-                            "top", 
-                            "changeLogEntry"
-                        ], 
-                        "type": "objectClass"
+                }
+            }
+        },
+        "frapi:openidm:samples:changelog:1.0": {
+            "superType": "frapi:openidm:samples:object:1.0",
+            "objectClasses": [ "changeLogEntry" ],
+            "properties": {
+                "_id": {
+                    "type": "simple",
+                    "ldapAttribute": "changeNumber",
+                    "isRequired": true,
+                    "writability": "createOnly"
+                },
+                "changeTime": {
+                    "type": "simple",
+                    "writability": "readOnly"
+                },
+                "targetDN": {
+                    "type": "simple",
+                    "writability": "readOnly"
+                },
+                "changeType": {
+                    "type": "simple",
+                    "writability": "readOnly"
+                },
+                "changeLogCookie": {
+                    "type": "simple",
+                    "writability": "readOnly"
+                },
+                "changes": {
+                    "type": "simple",
+                    "writability": "readOnly"
+                }
+            }
+        },
+        "frapi:openidm:samples:user:1.0": {
+            "superType": "frapi:openidm:samples:object:1.0",
+            "objectClasses": [ "person", "organizationalPerson", "inetOrgPerson" ],
+            "supportedActions": [ "modifyPassword", "resetPassword" ],
+            "properties": {
+                "_id": {
+                    "type": "simple",
+                    "ldapAttribute": "uid",
+                    "isRequired": true,
+                    "writability": "createOnly"
+                },
+                "userName": {
+                    "type": "simple",
+                    "ldapAttribute": "mail"
+                },
+                "displayName": {
+                    "type": "simple",
+                    "ldapAttribute": "cn",
+                    "isRequired": true
+                },
+                "name": {
+                    "type": "object",
+                    "properties": {
+                        "givenName": {
+                            "type": "simple"
+                        },
+                        "familyName": {
+                            "type": "simple",
+                            "ldapAttribute": "sn",
+                            "isRequired": true
+                        }
                     }
-                ]
-            }, 
-            "/users": {
-                "usePermissiveModify": true, 
-                "baseDN": "ou=people,dc=example,dc=com", 
-                "additionalLDAPAttributes": [
-                    {
-                        "values": [
-                            "top", 
-                            "person", 
-                            "organizationalPerson", 
-                            "inetOrgPerson"
-                        ], 
-                        "type": "objectClass"
+                },
+                "password": {
+                    "type": "simple",
+                    "ldapAttribute": "userPassword",
+                    "writability": "createOnlyDiscardWrites"
+                },
+                "groups": {
+                    "type": "reference",
+                    "ldapAttribute": "isMemberOf",
+                    "baseDn": "ou=groups,dc=example,dc=com",
+                    "isMultiValued": true,
+                    "writability": "readOnly",
+                    "primaryKey": "cn",
+                    "mapper": {
+                        "type": "object",
+                        "properties": {
+                            "_id": {
+                                "type": "simple",
+                                "ldapAttribute": "cn"
+                            }
+                        }
                     }
-                ], 
-                "readOnUpdatePolicy": "controls", 
-                "etagAttribute": "etag", 
-                "useSubtreeDelete": false, 
-                "attributes": {
-                    "userName": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "mail", 
-                            "isSingleValued": true
+                },
+                "contactInformation": {
+                    "type": "object",
+                    "properties": {
+                        "telephoneNumber": {
+                            "type": "simple"
+                        },
+                        "emailAddress": {
+                            "type": "simple",
+                            "ldapAttribute": "mail"
                         }
-                    },
-                    "displayName": {
-                        "simple": {
-                            "isRequired": true, 
-                            "ldapAttribute": "cn", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "name": {
-                        "object": {
-                            "givenName": {
-                                "simple": {
-                                    "ldapAttribute": "givenName", 
-                                    "isSingleValued": true
-                                }
-                            }, 
-                            "familyName": {
-                                "simple": {
-                                    "isRequired": true, 
-                                    "ldapAttribute": "sn", 
-                                    "isSingleValued": true
-                                }
-                            }
-                        }
-                    }, 
-                    "_rev": {
-                        "simple": {
-                            "writability": "readOnly", 
-                            "ldapAttribute": "etag", 
-                            "isSingleValued": true
-                        }
-                    }, 
-                    "contactInformation": {
-                        "object": {
-                            "telephoneNumber": {
-                                "simple": {
-                                    "ldapAttribute": "telephoneNumber", 
-                                    "isSingleValued": true
-                                }
-                            }, 
-                            "emailAddress": {
-                                "simple": {
-                                    "ldapAttribute": "mail", 
-                                    "isSingleValued": true
-                                }
-                            }
-                        }
-                    },
-                    "meta": {
-                        "object": {
-                            "lastModified": {
-                                "simple": {
-                                    "writability": "readOnly", 
-                                    "ldapAttribute": "modifyTimestamp", 
-                                    "isSingleValued": true
-                                }
-                            }, 
-                            "created": {
-                                "simple": {
-                                    "writability": "readOnly", 
-                                    "ldapAttribute": "createTimestamp", 
-                                    "isSingleValued": true
-                                }
-                            }
-                        }
-                    }, 
-                    "groups": {
-                        "reference": {
-                            "writability": "readOnly", 
-                            "baseDN": "ou=groups,dc=example,dc=com", 
-                            "ldapAttribute": "isMemberOf", 
-                            "primaryKey": "cn", 
-                            "mapper": {
-                                "object": {
-                                    "_id": {
-                                        "simple": {
-                                            "ldapAttribute": "cn", 
-                                            "isSingleValued": true
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }, 
-                    "_id": {
-                        "simple": {
-                            "isRequired": true, 
-                            "writability": "createOnly", 
-                            "ldapAttribute": "uid", 
-                            "isSingleValued": true
-                        }
-                    },
-                    "password": {
-                        "simple": {
-                            "writability": "createOnlyDiscardWrites",
-                            "ldapAttribute": "userPassword",
-                            "isSingleValued": true
-                        }
-                    },
-                    "schemas": {
-                        "constant": [
-                            "urn:scim:schemas:core:1.0"
-                        ]
                     }
-                }, 
-                "namingStrategy": {
-                    "dnAttribute": "uid", 
-                    "strategy": "clientDNNaming"
+                }
+            }
+        },
+        "frapi:openidm:samples:group:1.0": {
+            "superType": "frapi:openidm:samples:object:1.0",
+            "objectClasses": [ "groupOfUniqueNames" ],
+            "properties": {
+                "_id": {
+                    "type": "simple",
+                    "ldapAttribute": "cn",
+                    "isRequired": true,
+                    "writability": "createOnly"
+                },
+                "displayName": {
+                    "type": "simple",
+                    "ldapAttribute": "cn",
+                    "isRequired": true,
+                    "writability": "readOnly"
+                },
+                "description": {
+                    "type": "simple"
+                },
+                "members": {
+                    "type": "reference",
+                    "ldapAttribute": "uniqueMember",
+                    "baseDn": "dc=example,dc=com",
+                    "primaryKey": "uid",
+                    "isMultiValued": true,
+                    "mapper": {
+                        "type": "object",
+                        "properties": {
+                            "_id": {
+                                "type": "simple",
+                                "ldapAttribute": "uid",
+                                "isRequired": true
+                            },
+                            "displayName": {
+                                "type": "simple",
+                                "ldapAttribute": "cn",
+                                "writability": "readOnlyDiscardWrites"
+                            }
+                        }
+                    }
                 }
             }
         }
-    }, 
-    "authenticationFilter": {
-        "altAuthenticationPasswordHeader": "X-OpenIDM-Password", 
-        "searchScope": "sub", 
-        "altAuthenticationUsernameHeader": "X-OpenIDM-Username", 
-        "supportHTTPBasicAuthentication": true, 
-        "supportAltAuthentication": true, 
-        "searchFilterTemplate": "(&(objectClass=inetOrgPerson)(uid=%s))", 
-        "searchBaseDN": "dc=example,dc=com"
     }
 }
