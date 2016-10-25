@@ -83,11 +83,6 @@
                 <groupId>org.apache.felix</groupId>
                 <artifactId>maven-bundle-plugin</artifactId>
                 <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <Main-Class>org.forgerock.openidm.util.CryptoUtil</Main-Class>
-                    </instructions>
-                </configuration>
             </plugin>
         </plugins>
     </build>

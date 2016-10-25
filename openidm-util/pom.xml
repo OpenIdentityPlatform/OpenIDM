@@ -193,6 +193,7 @@
                     <instructions>
                         <Bundle-Activator>org.forgerock.openidm.router.Activator</Bundle-Activator>
                         <Bundle-Category>utility</Bundle-Category>
+                        <Main-Class>org.forgerock.openidm.util.CryptoUtil</Main-Class>
                     </instructions>
                 </configuration>
             </plugin>
