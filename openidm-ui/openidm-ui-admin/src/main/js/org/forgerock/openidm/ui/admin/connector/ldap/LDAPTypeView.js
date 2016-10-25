@@ -324,7 +324,25 @@ define([
             }
         },
 
-        connectorSaved: function(details) {
+        connectorSaved: function(patch, connectorConfig) {
+            if(this.$el.find("#syncBaseContext").is(":checked")) {
+                patch.push(
+                    {
+                        "operation" : "remove",
+                        "field" : "/configurationProperties/baseContextsToSynchronize"
+                    },
+                    {
+                        "operation": "copy",
+                        "from": "/configurationProperties/baseContexts",
+                        "field": "/configurationProperties/baseContextsToSynchronize"
+                    }
+                );
+            }
+
+            return patch;
+        },
+
+        connectorCreate: function(details) {
             if(this.$el.find("#syncBaseContext").is(":checked")) {
                 details.configurationProperties.baseContextsToSynchronize = details.configurationProperties.baseContexts;
             }

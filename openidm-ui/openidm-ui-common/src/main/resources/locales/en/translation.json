@@ -212,7 +212,7 @@
                 "objectTypeSaved" : "Object Types saved.",
                 "advancedSaved" : "Advanced connector settings saved.",
                 "liveSyncSaved" : "Live Sync details saved.",
-                "connectorTestFailed" : "Your validation failed. See details below.",
+                "connectorTestFailed" : "Validation failed. Connector has been disabled. See details below.",
                 "connectorSaveFail" : "Failed to save connector. Please try again.",
                 "connectorTestPass" : "Validation passed.",
                 "deleteConnectorSuccess" : "Connector deleted.",

@@ -1,9 +1,11 @@
 define([
     "org/forgerock/openidm/ui/admin/connector/EditConnectorView",
     "lodash",
+    "sinon",
     "org/forgerock/openidm/ui/admin/connector/oauth/GoogleTypeView"
 ],
 function (EditConnectorView, _,
+          sinon,
           GoogleTypeView) {
     QUnit.module('Connectors');
 
@@ -71,4 +73,52 @@ function (EditConnectorView, _,
         QUnit.equal(whiteSpaceMerge.configurationProperties.clientSecret, "test", "ClientSecret white space trimmed");
         QUnit.equal(whiteSpaceMerge.configurationProperties.clientId, "test", "ClientId white space trimmed");
     });
+
+    QUnit.test("Generate correct connector patch", function () {
+        var connector = {
+            "test" : "stuff"
+        },
+        change = {
+            "test" : "new stuff"
+        },
+        patch = EditConnectorView.generateConnectorPatch(connector, change, null);
+
+        QUnit.equal(patch[0].value, "new stuff", "Correctly generated patch value");
+        QUnit.equal(patch[1].field, "/enabled", "Correctly disable connector for testing");
+    });
+
+    QUnit.test("Testing a connector with pass result", function () {
+        QUnit.stop();
+
+        var connectorPassStub = sinon.stub(EditConnectorView, "connectorPass", function(preTestResult, updatedForm){
+                QUnit.start();
+
+                QUnit.equal(preTestResult, true, "Promise correctly resolved and called pass function");
+
+                connectorPassStub.restore();
+            }),
+            testPromise = $.Deferred();
+
+        EditConnectorView.connectorTest(testPromise, true, true);
+
+        testPromise.resolve();
+    });
+
+    QUnit.test("Testing a connector with fail result", function () {
+        QUnit.stop();
+
+        var connectorFailstub = sinon.stub(EditConnectorView, "connectorFail", function(preTestResult, updatedForm, message){
+                QUnit.start();
+
+                QUnit.equal(preTestResult, false, "Promise correctly resolved and called fail function");
+
+                connectorFailstub.restore();
+            }),
+            testPromise = $.Deferred();
+
+        EditConnectorView.connectorTest(testPromise, false, false);
+
+        testPromise.reject();
+    });
+
 });

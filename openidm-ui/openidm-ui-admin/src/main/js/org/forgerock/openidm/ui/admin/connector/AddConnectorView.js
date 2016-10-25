@@ -149,8 +149,8 @@ define([
                 urlName = mergedResult.name;
 
             //Checks for connector specific save function to do any additional changes to data
-            if (this.connectorTypeRef.connectorSaved) {
-                mergedResult = this.connectorTypeRef.connectorSaved(mergedResult);
+            if (this.connectorTypeRef.connectorCreate) {
+                mergedResult = this.connectorTypeRef.connectorCreate(mergedResult);
             }
 
             ConnectorDelegate.deleteCurrentConnectorsCache();

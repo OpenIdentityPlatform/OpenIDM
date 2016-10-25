@@ -22,6 +22,7 @@ define([
     "form2js",
     "handlebars",
     "org/forgerock/openidm/ui/admin/connector/AbstractConnectorView",
+    "org/forgerock/commons/ui/common/util/ObjectUtil",
     "org/forgerock/openidm/ui/admin/util/BackgridUtils",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
@@ -44,6 +45,7 @@ define([
             form2js,
             Handlebars,
             AbstractConnectorView,
+            ObjectUtil,
             BackgridUtils,
             ConfigDelegate,
             ConnectorDelegate,
@@ -87,6 +89,9 @@ define([
             "partials/connector/_liveSyncGrid.html"
         ],
         data: {
+
+        },
+        model: {
 
         },
         objectTypeConfigs: {
@@ -199,7 +204,7 @@ define([
                     }
 
                     //Store in memory version of connector details. This is to ensure we can move around tabs and keep the correct data state.
-                    this.connectorDetails = data;
+                    this.model.connectorDetails = data;
 
                     //Build a version object
                     _.each(this.data.versionDisplay, function (group) {
@@ -262,7 +267,6 @@ define([
                         });
                     } else {
                         this.parentRender(() => {
-
                             //Sync settings
                             if (data.syncFailureHandler && _.has(data.syncFailureHandler, "maxRetries")) {
                                 switch (data.syncFailureHandler.maxRetries) {
@@ -328,6 +332,8 @@ define([
                                         this.connectorTypeRef.data.connectorDefaults.connectorRef.bundleVersion = data.connectorRef.bundleVersion;
                                         this.setSubmitFlow();
 
+                                        this.model.originalForm = this.cleanseObject(form2js('connectorForm', '.', false));
+
                                         if (callback) {
                                             callback();
                                         }
@@ -361,12 +367,11 @@ define([
         advancedFormSubmit: function(event) {
             event.preventDefault();
 
-            let advancedData = this.cleanseObject(form2js('advancedFields', '.', false)),
-
-                mergedResults = this.advancedDetailsGenerate(this.connectorDetails, advancedData);
+            var advancedData = this.cleanseObject(form2js('advancedForm', '.', false)),
+                mergedResults = this.advancedDetailsGenerate(this.getConnectorConfig(), advancedData);
 
             ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId,  mergedResults).then(() => {
-                this.connectorDetails = mergedResults;
+                this.setConnectorConfig(mergedResults);
 
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "advancedSaved");
 
@@ -412,51 +417,139 @@ define([
         connectorFormSubmit: function(event) {
             event.preventDefault();
 
-            let mergedResult = this.getProvisioner();
+            var updatedForm =  this.cleanseObject(form2js('connectorForm', '.', false)),
+                patch = this.generateConnectorPatch(this.model.originalForm, updatedForm, this.connectorTypeRef.connectorSaved);
 
-            //Checks for connector specific save function to do any additional changes to data
-            if(this.connectorTypeRef.connectorSaved) {
-                mergedResult = this.connectorTypeRef.connectorSaved(mergedResult, this.connectorDetails);
+            ConfigDelegate.patchEntity({"id": this.data.systemType + "/" + this.data.connectorId}, patch).then((preTestResult) => {
+                this.connectorTest(ConnectorDelegate.testConnector(preTestResult), preTestResult, updatedForm);
+            });
+        },
+
+        /**
+         *
+         * @param testPromise - A promise directed at the testing service in IDM
+         * @param preTestResult - The json object of the pre test connector config
+         * @param updatedForm - The current form2js object updated
+         *
+         * Tests the current connector configuration
+         */
+        connectorTest: function(testPromise, preTestResult, updatedForm) {
+            testPromise.then(() => {
+                this.connectorPass(preTestResult, updatedForm);
+            },
+            (failMessage) => {
+                this.connectorFail(preTestResult, updatedForm, failMessage);
+            });
+        },
+
+        /**
+         *
+         * @param preTestResult - The json object of the pre test connector config
+         * @param updatedForm - The current form2js object updated
+         *
+         * This function fires as a result of a test passing this will set the enable back to true (if originally enabled)
+         * and update the configuration
+         */
+        connectorPass: function(preTestResult, updatedForm) {
+            if(updatedForm.enabled) {
+                ConfigDelegate.patchEntity({"id": this.data.systemType + "/" + this.data.connectorId}, [{
+                    field : "/enabled",
+                    operation : "replace",
+                    value : true
+                }]).then((postTestResult) => {
+                    this.updateSuccessfulConfig(updatedForm, postTestResult);
+                });
+            } else {
+                this.updateSuccessfulConfig(updatedForm, preTestResult);
             }
 
-            mergedResult.configurationProperties.readSchema = false;
+            ConnectorDelegate.deleteCurrentConnectorsCache();
+        },
 
-            ConnectorDelegate.testConnector(mergedResult).then(() => {
+        /**
+         *
+         * @param preTestResult - The json object of the pre test connector config
+         * @param updatedForm - The current form2js object updated
+         * @param failMessage - This is the failure message the UI will use to display
+         *
+         *  This function fires as a result of a test failing this will keep the enabled state false
+         *  and display a proper error message in the UI
+         */
+        connectorFail: function(preTestResult, updatedForm, failMessage) {
+            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
 
-                ConnectorDelegate.deleteCurrentConnectorsCache();
+            this.model.originalForm = updatedForm;
+            this.setConnectorConfig(preTestResult);
 
-                ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, mergedResult).then(() => {
-                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
+            this.$el.find("#connectorEnabled").prop('checked', false);
 
-                    this.connectorDetails = mergedResult;
+            this.showError(failMessage);
 
-                    this.$el.find("#connectorWarningMessage .message .connector-version").remove();
-                    this.$el.find("#connectorWarningMessage .message .connector-pending").remove();
-                    this.warningMessageCheck();
-                    this.$el.find("#connectorErrorMessage").hide();
-                });
-            },
-            (result) => {
-                eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorTestFailed");
+            ConnectorDelegate.deleteCurrentConnectorsCache();
+        },
 
-                this.showError(result);
+        /**
+         *
+         * @param oldForm - The form2js of the form when originally loaded or saved
+         * @param currentForm - The current form2js form
+         * @returns {*} A patch object for the first connector patch
+         *
+         * Generates the connector patch object and makes a call to any custom logic per connector needs
+         */
+        generateConnectorPatch: function(oldForm, currentForm, connectorSpecificChanges) {
+            var patch;
+
+            patch = ObjectUtil.generatePatchSet(currentForm, oldForm);
+
+            patch.push({
+                field : "/enabled",
+                operation : "replace",
+                value : false
             });
+
+            if(connectorSpecificChanges) {
+                patch = connectorSpecificChanges.call(this, patch, this.getConnectorConfig());
+            }
+
+            return patch;
+        },
+
+        /**
+         *
+         * @param updatedForm - Newly gathered form2js object
+         * @param connectorConfig - Connector configuration object
+         *
+         * Called when the connector has been successfully updated resulting in a UI clean up and in memory configuration update
+         */
+        updateSuccessfulConfig: function(updatedForm, connectorConfig) {
+            eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
+
+            this.model.originalForm = updatedForm;
+            this.setConnectorConfig(connectorConfig);
+
+            this.$el.find("#connectorWarningMessage .message .connector-version").remove();
+            this.$el.find("#connectorWarningMessage .message .connector-pending").remove();
+            this.warningMessageCheck();
+            this.$el.find("#connectorErrorMessage").hide();
         },
 
         //Saves the sync tab
         syncFormSubmit: function() {
-            let syncData = this.cleanseObject(form2js('syncForm', '.', false));
+            let syncData = this.cleanseObject(form2js('syncForm', '.', false)),
+                connectorDetails = this.getConnectorConfig();
 
-            this.connectorDetails.syncFailureHandler.maxRetries = parseInt(syncData.syncFailureHandler.maxRetries, 10);
-            this.connectorDetails.syncFailureHandler.postRetryAction = syncData.syncFailureHandler.postRetryAction;
+            connectorDetails.syncFailureHandler.maxRetries = parseInt(syncData.syncFailureHandler.maxRetries, 10);
+            connectorDetails.syncFailureHandler.postRetryAction = syncData.syncFailureHandler.postRetryAction;
 
 
-            if (this.connectorDetails.syncFailureHandler.postRetryAction === "script") {
-                this.connectorDetails.syncFailureHandler.postRetryAction = {"script": this.postActionBlockScript.generateScript()};
+            if (connectorDetails.syncFailureHandler.postRetryAction === "script") {
+                connectorDetails.syncFailureHandler.postRetryAction = {"script": this.postActionBlockScript.generateScript()};
             }
 
-            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, this.connectorDetails).then(() => {
+            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, connectorDetails).then(() => {
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "liveSyncSaved");
+
+                this.setConnectorConfig(connectorDetails);
 
                 this.$el.find("#connectorWarningMessage .message .sync-pending").remove();
                 this.warningMessageCheck();
@@ -469,9 +562,9 @@ define([
                 this.userDefinedObjectTypes = this.data.objectTypes;
             }
 
-            this.connectorDetails.objectTypes = this.userDefinedObjectTypes;
+            this.model.connectorDetails.objectTypes = this.userDefinedObjectTypes;
 
-            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, this.connectorDetails).then(() => {
+            ConfigDelegate.updateEntity(this.data.systemType + "/" + this.data.connectorId, this.model.connectorDetails).then(() => {
                 this.previousObjectType = this.userDefinedObjectTypes;
                 eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeSaved");
 
@@ -645,7 +738,7 @@ define([
 
             this.$el.find("#schedules table tbody").empty();
 
-            SchedulerDelegate.getLiveSyncSchedulesByConnectorName(this.connectorDetails.name).then((schedules) => {
+            SchedulerDelegate.getLiveSyncSchedulesByConnectorName(this.model.connectorDetails.name).then((schedules) => {
 
                 if (schedules.length > 0) {
                     _.each(schedules, (schedule) => {
@@ -678,16 +771,16 @@ define([
         updateLiveSyncObjects: function() {
             let objectTypes = [];
 
-            if (this.connectorDetails.name) {
+            if (this.model.connectorDetails.name) {
                 this.$el.find(".nameFieldMessage").hide();
 
                 if (this.userDefinedObjectTypes && _.size(this.userDefinedObjectTypes) > 0) {
                     objectTypes = _.map(this.userDefinedObjectTypes, (object, key) => {
-                        return "system/" + this.connectorDetails.name + "/" + key;
+                        return "system/" + this.model.connectorDetails.name + "/" + key;
                     });
                 } else {
                     objectTypes = _.map(this.data.objectTypes, (object, key) => {
-                        return "system/" + this.connectorDetails.name + "/" + key;
+                        return "system/" + this.model.connectorDetails.name + "/" + key;
                     });
                 }
 
@@ -833,48 +926,11 @@ define([
         },
 
         //Returns the current provisioner based on a merged copy of the connector defaults and what was set in the template by the user
-        getProvisioner: function() {
-            let connectorData = {},
-                connDetails = this.connectorDetails,
-                mergedResult = {},
-                tempArrayObject,
-                arrayComponents = $(".connector-array-component");
-
-            if(this.connectorTypeRef.getGenericState()) {
-                delete connectorData.root;
-
-                $.extend(true, mergedResult, connDetails);
-
-                mergedResult.configurationProperties = this.connectorTypeRef.getGenericConnector();
-                mergedResult.enabled = this.$el.find("#connectorEnabled").val();
-            } else {
-                connectorData = this.cleanseObject(form2js('connectorForm', '.', false));
-
-                delete connectorData.connectorType;
-
-                connectorData.configurationProperties.readSchema = false;
-                connectorData.objectTypes = {};
-
-                $.extend(true, mergedResult, connDetails, connectorData);
-
-                //Added logic to ensure array parts correctly add and delete what is set
-                _.each(arrayComponents, (component) => {
-                    tempArrayObject = this.cleanseObject(form2js($(component).prop("id"), ".", false));
-
-                    _.each(tempArrayObject.configurationProperties, (item, key) => {
-                        mergedResult.configurationProperties[key] = item;
-
-                        //Need this check for when an array is saved with an empty string after containing data to properly remove it
-                        if(_.isArray(mergedResult.configurationProperties[key]) && mergedResult.configurationProperties[key].length === 1 && mergedResult.configurationProperties[key][0] === "") {
-                            delete mergedResult.configurationProperties[key];
-                        }
-                    });
-                });
-            }
-
-            mergedResult.objectTypes = this.userDefinedObjectTypes || this.data.objectTypes;
-
-            return mergedResult;
+        setConnectorConfig: function(config) {
+            this.model.connectorDetails = config;
+        },
+        getConnectorConfig: function() {
+            return _.cloneDeep(this.model.connectorDetails);
         },
 
         //Renders the object type table
@@ -916,7 +972,7 @@ define([
         editObjectType: function(event) {
             let objectTypeName = $(event.target).parents("tr").attr("data-objectType");
 
-            objectTypesDialog.render(this.userDefinedObjectTypes || this.data.objectTypes, objectTypeName, this.getProvisioner(), _.bind(this.renderObjectTypes, this));
+            objectTypesDialog.render(this.userDefinedObjectTypes || this.data.objectTypes, objectTypeName, this.getConnectorConfig(), _.bind(this.renderObjectTypes, this));
         },
 
         //When clicking the delete icon for an object type
@@ -946,7 +1002,7 @@ define([
 
         //When adding a new object type
         addObjectType: function() {
-            objectTypesDialog.render(this.userDefinedObjectTypes || this.data.objectTypes, null, this.getProvisioner(), _.bind(this.renderObjectTypes, this));
+            objectTypesDialog.render(this.userDefinedObjectTypes || this.data.objectTypes, null, this.getConnectorConfig(), _.bind(this.renderObjectTypes, this));
         },
 
         //Used when an object type template selector is available.
@@ -962,9 +1018,9 @@ define([
 
             UIUtils.jqConfirm($.t('templates.connector.objectTypes.changeConfiguration'), () => {
                 if(value === "fullConfig") {
-                    this.connectorDetails.configurationProperties.readSchema = true;
+                    this.model.connectorDetails.configurationProperties.readSchema = true;
 
-                    ConnectorDelegate.testConnector(this.connectorDetails).then(
+                    ConnectorDelegate.testConnector(this.model.connectorDetails).then(
                         (result) => {
                             eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "objectTypeLoaded");
 
