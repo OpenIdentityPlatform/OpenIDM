@@ -816,11 +816,9 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
             final OperationHelper helper = operationHelperBuilder.build(objectType, stage, cryptoService);
 
             if (helper.isOperationPermitted(SyncApiOp.class)) {
-                ConnectorFacade connector = getConnectorFacade();
+                ConnectorFacade connector = getConnectorFacade0(SyncApiOp.class);
                 SyncApiOp operation = (SyncApiOp) connector.getOperation(SyncApiOp.class);
-                if (null == operation) {
-                    throw new UnsupportedOperationException(SyncApiOp.class.getCanonicalName());
-                }
+                
                 if (null == token) {
                     token = operation.getLatestSyncToken(helper.getObjectClass());
                     logger.debug("New LatestSyncToken has been fetched. New token is: {}", token);
