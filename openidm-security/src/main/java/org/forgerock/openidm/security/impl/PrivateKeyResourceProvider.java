@@ -16,7 +16,6 @@
 
 package org.forgerock.openidm.security.impl;
 
-import java.security.Key;
 import java.security.KeyPair;
 import java.security.KeyStore;
 import java.security.KeyStore.PrivateKeyEntry;
@@ -26,12 +25,17 @@ import java.util.List;
 
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.CertUtil;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
 
 /**
  * A collection resource provider servicing requests on private key entries in a keystore
@@ -48,7 +52,6 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
 
     @Override
     protected void storeEntry(JsonValue value, String alias) throws Exception {
-        String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
         PrivateKey privateKey;
         String privateKeyPem = value.get("privateKey").asString();
         if (privateKeyPem == null) {
@@ -69,11 +72,12 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
 
     @Override
     protected JsonValue readEntry(String alias) throws Exception {
-        Key key = keyStore.getKey(alias, keyStorePassword);
-        if (key == null) {
-            throw new NotFoundException("Alias does not correspond to a key entry in " + resourceName);
-        } else {
-            return KeyRepresentation.toJsonValue(alias, key);
-        }
+        throw new NotSupportedException("Can't read the private key with alias: " + alias);
+    }
+
+    @Override
+    public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final String resourceId,
+            final ReadRequest request) {
+        return new NotSupportedException("Read operations are not supported").asPromise();
     }
 }

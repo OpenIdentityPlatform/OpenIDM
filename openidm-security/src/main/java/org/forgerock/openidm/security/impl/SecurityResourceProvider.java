@@ -53,7 +53,6 @@ import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.util.CertUtil;
-import org.forgerock.openidm.util.ClusterUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -96,11 +95,6 @@ public class SecurityResourceProvider {
      */
     protected String resourceName = null;
     
-    /**
-     * The instance type (standalone, clustered-first, clustered-additional)
-     */
-    private String instanceType;
-    
     private String cryptoAlias;
     
     private String cryptoCipher;
@@ -113,8 +107,6 @@ public class SecurityResourceProvider {
         this.repoService = checkNotNull(repoService);
         this.cryptoAlias = IdentityServer.getInstance().getProperty("openidm.config.crypto.alias");
         this.cryptoCipher = ServerConstants.SECURITY_CRYPTOGRAPHY_DEFAULT_CIPHER;
-        this.instanceType = IdentityServer.getInstance().getProperty(
-                "openidm.instance.type", ClusterUtil.TYPE_STANDALONE);
         this.cryptoService = checkNotNull(cryptoService);
     }
 
