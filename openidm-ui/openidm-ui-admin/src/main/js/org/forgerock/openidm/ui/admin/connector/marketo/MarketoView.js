@@ -22,13 +22,59 @@ define([
             ConnectorTypeAbstractView) {
 
     var MarketoView = ConnectorTypeAbstractView.extend({
-        connectorSaved: function(details, connectorDetails) {
+        connectorSaved: function(patch, connectorDetails) {
+            patch.push(
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/scriptRoots",
+                    "value": ["jar:file:connectors/marketo-connector-" +connectorDetails.connectorRef.bundleVersion +".jar!/script/marketo/"]
+                },
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/createScriptFileName",
+                    "value": "CreateMarketo.groovy"
+                },
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/deleteScriptFileName",
+                    "value": "DeleteMarketo.groovy"
+                },
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/schemaScriptFileName",
+                    "value": "SchemaMarketo.groovy"
+                },
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/searchScriptFileName",
+                    "value": "SearchMarketo.groovy"
+                },
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/testScriptFileName",
+                    "value": "TestMarketo.groovy"
+                },
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/updateScriptFileName",
+                    "value": "UpdateMarketo.groovy"
+                },
+                {
+                    "operation": "replace",
+                    "field": "/configurationProperties/reloadScriptOnExecution",
+                    "value": false
+                }
+            );
+
+            return patch;
+        },
+        connectorCreate : function(details) {
             if(_.isNull(details.configurationProperties.scriptRoots)){
                 details.configurationProperties.scriptRoots = ["jar:file:connectors/marketo-connector-" +details.connectorRef.bundleVersion +".jar!/script/marketo/"];
             }
 
-            if(_.isNull(details.configurationProperties.clientSecret) && _.isObject(connectorDetails.configurationProperties.clientSecret)){
-                details.configurationProperties.clientSecret = connectorDetails.configurationProperties.clientSecret;
+            if(_.isNull(details.configurationProperties.clientSecret) && _.isObject(details.configurationProperties.clientSecret)){
+                details.configurationProperties.clientSecret = details.configurationProperties.clientSecret;
             }
 
             details.configurationProperties.createScriptFileName = "CreateMarketo.groovy";
