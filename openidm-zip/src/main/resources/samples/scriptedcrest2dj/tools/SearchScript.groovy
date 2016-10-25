@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014-2015 ForgeRock AS
+ * Copyright 2014-2016 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -83,6 +83,8 @@ def objectClassInfo = configuration.propertyBag[objectClass.objectClassValue];
 if (objectClassInfo != null) {
 
     QueryRequest request = Requests.newQueryRequest(objectClassInfo.resourceContainer)
+    request.setResourcePath("/api/" + request.getResourcePath())
+
     if (null != filter) {
         request.queryFilter = filter.accept(CRESTFilterVisitor.VISITOR, [
                 translateName: { String name ->

@@ -27,7 +27,7 @@ sciptedcrest2dj Sample - Scripted CREST to OpenDJ
 
 This sample demonstrates how to use Scripted CREST to connect to OpenDJs REST API. This sample enables the basic create,
 read, update, and delete (CRUD) operations for groups and users. This sample requires a fresh install of OpenIDM and
-OpenDJ.
+OpenDJ directory server 3.5. It does not work with earlier versions of OpenDJ REST to LDAP.
 
 Scripted CREST is meant to be used with CREST based REST API. The main difference between a CREST based REST API and a
 generic REST API is CREST is a well known API for ForgeRock products and we can leverage the CREST resources in the
@@ -80,11 +80,39 @@ Setup OpenDJ
         $ opendj/bin/ldapmodify --bindDN "cn=Directory Manager" --bindPassword password --hostname localhost \
         --port 1389 --filename /path/to/openidm/samples/scriptedcrest2dj/data/ldap.ldif
 
-7.  Copy the http-config.json file located in the data folder to the opendj/config directory.
+7. Allow the IDM administrator user to read the changelog.
 
-        $ cp /path/to/openidm/samples/scriptedcrest2dj/data/http-config.json opendj/config
+        $ opendj/bin/dsconfig \
+         set-access-control-handler-prop \
+         --hostname opendj.example.com \
+         --port 4444 \
+         --bindDN "cn=Directory Manager" \
+         --bindPassword password \
+         --add global-aci:"(target=\"ldap:///cn=changelog\")(targetattr=\"*||+\")\
+        (version 3.0; acl \"IDM can access cn=changelog\"; \
+        allow (read,search,compare) \
+        userdn=\"ldap:///uid=idm,ou=Administrators,dc=example,dc=com\";)" \
+         --trustAll \
+         --no-prompt
 
-8.  Restart OpenDJ.
+        $ opendj/bin/dsconfig \
+         set-access-control-handler-prop \
+         --hostname opendj.example.com \
+         --port 4444 \
+         --bindDN "cn=Directory Manager" \
+         --bindPassword password \
+         --add global-aci:"(targetcontrol=\"1.3.6.1.4.1.26027.1.5.4\")\
+        (version 3.0; acl \"IDM changelog control access\"; \
+        allow (read) \
+        userdn=\"ldap:///uid=idm,ou=Administrators,dc=example,dc=com\";)" \
+         --trustAll \
+         --no-prompt
+
+8. Replace the default OpenDJ REST to LDAP configuration with the configuration for this sample.
+
+        $ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json opendj/config/rest2ldap/endpoints/api/
+
+9. Restart OpenDJ.
 
         $ opendj/bin/stop-ds --restart
 

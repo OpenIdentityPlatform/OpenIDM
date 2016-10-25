@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014-2015 ForgeRock AS
+ * Copyright 2014-2016 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -56,6 +56,7 @@ if (objectClassInfo != null) {
     def user = CRESTHelper.toJsonValue(id, attributeMap, objectClassInfo);
 
     CreateRequest request = Requests.newCreateRequest(objectClassInfo.resourceContainer, new JsonValue(user))
+    request.setResourcePath("/api/" + request.getResourcePath())
     request.addField("_id", "_rev")
     ResourceResponse resource = connection.create(new RootContext(), request)
     return new Uid(resource.getId(), resource.getRevision())

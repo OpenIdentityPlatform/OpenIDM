@@ -1,7 +1,7 @@
 /*
  * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
  *
- * Copyright 2014-2015 ForgeRock AS
+ * Copyright 2014-2016 ForgeRock AS
  *
  * The contents of this file are subject to the terms
  * of the Common Development and Distribution License
@@ -61,6 +61,7 @@ switch (operation) {
 
             if (true) {
                 ReadRequest request = Requests.newReadRequest(objectClassInfo.resourceContainer, uid.uidValue)
+                request.setResourcePath("/api/" + request.getResourcePath())
                 request.addField("/")
                 try {
                     ResourceResponse resource = connection.read(new RootContext(), request)
@@ -99,9 +100,18 @@ switch (operation) {
                         }
                     }
 
+                    resource.content.remove("_rev")
+                    resource.content.remove("_meta")
+                    Set<String> keys = new HashSet<String>();
+                    keys.addAll(resource.content.keys())
+                    keys.each {
+                        def info = objectClassInfo.attributes[it]
+                        if (null != info && !info.attributeInfo.isUpdateable()) {
+                            resource.content.remove(it)
+                        }
+                    }
+
                     UpdateRequest updateRequest = Requests.newUpdateRequest(request.resourcePath, resource.content)
-                    updateRequest.setRevision(resource.revision)
-                    updateRequest.addField("_id", "_rev")
                     def r = connection.update(new RootContext(), updateRequest)
                     return new Uid(r.getId(), r.getRevision())
                 } catch (NotFoundException e) {
@@ -109,8 +119,6 @@ switch (operation) {
                 }
             } else {
                 PatchRequest request = Requests.newPatchRequest(objectClassInfo.resourceContainer, uid.uidValue)
-                request.addField("_id", "_rev")
-
 
                 ResourceResponse resource = connection.patch(new RootContext(), request)
                 return new Uid(resource.getId(), resource.getRevision())
