@@ -496,24 +496,6 @@ public final class IdentityServer implements PropertyAccessor {
     }
 
     /**
-     * Retrieves the current running mode of Identity Server.
-     * <p/>
-     * Default running mode is the {@code Production}, that prohibit access to
-     * some insecure method. Development mode allow access to all method. To
-     * enable development mode set the
-     * {@link ServerConstants#PROPERTY_DEBUG_ENABLE} system property
-     * {@code true}.
-     *
-     * @return true if {@code Development} mode is on.
-     */
-    public static boolean isDevelopmentProfileEnabled() {
-        String debug =
-                IDENTITY_SERVER.get().getProperty(ServerConstants.PROPERTY_DEBUG_ENABLE, null,
-                        String.class);
-        return (null != debug) && Boolean.valueOf(debug);
-    }
-
-    /**
      * Loads boot properties file
      *
      * @return properties in boot properties file, keys in lower case
