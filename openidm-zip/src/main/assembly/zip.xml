@@ -854,6 +854,13 @@
             </includes>
             <outputDirectory>/openidm/samples/usecase/usecase6</outputDirectory>
         </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
+            <includes>
+                <include>provisioner.openicf*ldap.json</include>
+            </includes>
+            <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
+        </fileSet>
         <!-- Setup roles samples  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/roles</directory>
