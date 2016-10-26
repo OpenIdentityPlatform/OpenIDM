@@ -21,10 +21,10 @@ import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.config.manage.ConfigObjectService.asConfigQueryFilter;
+import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
@@ -40,27 +40,41 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 
-import org.forgerock.json.resource.CreateRequest;
-import org.forgerock.openidm.router.IDMConnectionFactory;
-import org.forgerock.services.TransactionId;
-import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PatchOperation;
+import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryFilters;
 import org.forgerock.json.resource.QueryResourceHandler;
+import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.Requests;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.Responses;
+import org.forgerock.openidm.cluster.ClusterEvent;
+import org.forgerock.openidm.cluster.ClusterEventListener;
+import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.crypto.ConfigCrypto;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.config.enhanced.JSONEnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.impl.ProviderListener;
+import org.forgerock.openidm.patch.PatchValueTransformer;
+import org.forgerock.openidm.patch.ScriptedPatchValueTransformer;
+import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
+import org.forgerock.services.TransactionId;
+import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.TransactionIdContext;
+import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -75,7 +89,7 @@ import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
 
 /**
- * Test class for {@link ConfigObjectService}
+ * Test class for {@link ConfigObjectService}.
  */
 public class ConfigObjectServiceTest {
 
@@ -86,8 +100,8 @@ public class ConfigObjectServiceTest {
     private ResourcePath rname;
     private String id;
     private Map<String,Object> config;
-    private ConfigurationAdmin configAdmin;
     private EnhancedConfig enhancedConfig;
+    private ClusterManagementService clusterManagementService;
 
     @SuppressWarnings("unchecked")
 	@BeforeTest
@@ -103,15 +117,14 @@ public class ConfigObjectServiceTest {
 
         // Mock up supporting objects and activate ConfigObjectService
         ComponentContext context = mock(ComponentContext.class);
+        final ConfigAuditEventLogger auditLogger = mock(ConfigAuditEventLogger.class);
         when(context.getProperties()).thenReturn(properties);
-        configObjectService = new ConfigObjectService();
-
-        configAdmin = new MockConfigurationAdmin();
+        configObjectService = new ConfigObjectService(auditLogger);
 
         // no accessible bindConfigurationAdmin() method
         Field field = ConfigObjectService.class.getDeclaredField("configAdmin");
         field.setAccessible(true);
-        field.set(configObjectService, configAdmin);
+        field.set(configObjectService, new MockConfigurationAdmin());
 
         BundleContext bundleContext = mock(BundleContext.class);
         when(bundleContext.getBundles()).thenReturn(new Bundle[0]);
@@ -126,9 +139,22 @@ public class ConfigObjectServiceTest {
         IDMConnectionFactory connectionFactory = mock(IDMConnectionFactory.class);
         when(connectionFactory.getConnection()).thenReturn(connection);
 
-        enhancedConfig = mock(EnhancedConfig.class);
+        enhancedConfig = new JSONEnhancedConfig();
+        clusterManagementService = mock(ClusterManagementService.class);
+
+        when(auditLogger.log(any(ConfigAuditState.class), any(Request.class), any(Context.class),
+                any(ConnectionFactory.class))).thenReturn(Responses.newResourceResponse("id", null, null).asPromise());
+
+        doNothing().when(clusterManagementService).register(anyString(), any(ClusterEventListener.class));
+        when(clusterManagementService.isEnabled()).thenReturn(true);
+        when(clusterManagementService.getInstanceId()).thenReturn("instanceId");
+        doNothing().when(clusterManagementService).sendEvent(any(ClusterEvent.class));
+
+        configObjectService.bindClusterManagementService(clusterManagementService);
         configObjectService.bindEnhancedConfig(enhancedConfig);
         configObjectService.bindConnectionFactory(connectionFactory);
+        configObjectService.bindScriptedPatchValueTransformerFactory(new NullScriptedPatchValueTransformerFactory());
+
 
         configObjectService.activate(context);
 
@@ -181,16 +207,19 @@ public class ConfigObjectServiceTest {
             configObjectService.getParsedId("");
             Assert.fail("Invalid id: ''");
         } catch (BadRequestException e) {
+            // do nothing
         }
         try {
             configObjectService.getParsedId("//");
             Assert.fail("Invalid id: '//'");
         } catch (IllegalArgumentException e) {
+            // do nothing
         }
         try {
             configObjectService.getParsedId("a/b/c");
             Assert.fail("Invalid id: 'a/b/c'");
         } catch (BadRequestException e) {
+            // do nothing
         }
 
         Assert.assertEquals(configObjectService.getParsedId("/a"), "a");
@@ -242,9 +271,6 @@ public class ConfigObjectServiceTest {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Test(priority=5)
     public void testCreateDupeOk() throws Exception {
-        when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false)))
-                .thenReturn(json(config));
-
         configObjectService.create(rname, id, json(config), true).getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
@@ -258,9 +284,6 @@ public class ConfigObjectServiceTest {
     public void testUpdate() throws Exception {
         config.put("property1", "newvalue1");
         config.put("property2", "newvalue2");
-
-        when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false)))
-                .thenReturn(json(config));
 
         configObjectService.update(rname, id, json(config)).getOrThrow();
 
@@ -285,9 +308,6 @@ public class ConfigObjectServiceTest {
     @SuppressWarnings("unchecked")
     @Test(priority=8)
     public void testDelete() throws Exception {
-        when(enhancedConfig.getConfiguration(any(Dictionary.class), any(String.class), eq(false))).thenReturn(
-                json(object(field(ResourceResponse.FIELD_CONTENT_REVISION, "revX"))));
-
         configObjectService.delete(rname, "0").getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
@@ -306,13 +326,31 @@ public class ConfigObjectServiceTest {
         configObjectService.update(rname, id, json(config)).getOrThrow();
     }
 
+    @Test
+    public void testPatchSendsClusterEvent() {
+        // given
+        final CreateRequest createRequest =
+                Requests.newCreateRequest("path", "configObject", json(object(field("configField", "value"))));
+        configObjectService.handleCreate(new RootContext(), createRequest);
+        final PatchRequest request =
+                Requests.newPatchRequest("path", "configObject", PatchOperation.replace("configField", "newValue"));
+
+        // when
+        final Promise<ResourceResponse, ResourceException> results =
+                configObjectService.handlePatch(new RootContext(), request);
+
+        // then
+        verify(clusterManagementService, times(2)).sendEvent(any(ClusterEvent.class));
+        assertThat(results).isNotNull().succeeded();
+    }
+
 
     /**
      * mock(ConfigurationAdmin.class) requires enough when() clauses to be functional to justify building this as an
      * explicit inner class for readability and debugging.
      */
     private class MockConfigurationAdmin implements ConfigurationAdmin {
-        Map<String,Configuration> configurations = new HashMap<String, Configuration>();
+        Map<String,Configuration> configurations = new HashMap<>();
 
         @Override
         public Configuration createFactoryConfiguration(String factoryPid) throws IOException {
@@ -340,7 +378,7 @@ public class ConfigObjectServiceTest {
 
         @Override
         public Configuration[] listConfigurations(String filter) throws IOException, InvalidSyntaxException {
-            List<Configuration> configs = new ArrayList<Configuration>();
+            List<Configuration> configs = new ArrayList<>();
 
             for (String key : configurations.keySet()) {
                 if (filter.contains(key)) {
@@ -406,6 +444,20 @@ public class ConfigObjectServiceTest {
         @Override
         public long getChangeCount() {
             return 0;
+        }
+    }
+
+    private class NullScriptedPatchValueTransformerFactory extends ScriptedPatchValueTransformerFactory {
+
+        @Override
+        public PatchValueTransformer getPatchValueTransformer(final Context context) {
+            return new ScriptedPatchValueTransformer() {
+                @Override
+                public JsonValue evalScript(JsonValue subject, JsonValue scriptConfig, JsonPointer field)
+                        throws ResourceException {
+                    return subject;
+                }
+            };
         }
     }
 }
