@@ -1182,10 +1182,6 @@ public class UpdateManagerImpl implements UpdateManager {
                     fileEntry.setBackupFile(backupFile.toString());
                 }
             }
-
-            if (fileEntry.getStockFile() == null && fileEntry.getBackupFile() == null) {
-                fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
-            }
             logUpdate(updateEntry.addFile(fileEntry.toJson()));
         }
 
