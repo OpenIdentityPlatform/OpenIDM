@@ -56,7 +56,7 @@ public class ConfigAuditEventLogger {
      *
      * @param connectionFactory factory used to make crest call to audit service.
      */
-    public final Promise<ResourceResponse, ResourceException> log(ConfigAuditState configAuditState, Request request,
+    public Promise<ResourceResponse, ResourceException> log(ConfigAuditState configAuditState, Request request,
             Context context, ConnectionFactory connectionFactory) {
         try {
             // Build the event utilizing the config builder.

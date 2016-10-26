@@ -27,6 +27,7 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -42,12 +43,6 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.resource.NotSupportedException;
-import org.forgerock.openidm.repo.QueryConstants;
-import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
-import org.forgerock.openidm.util.ContextUtil;
-import org.forgerock.services.context.Context;
-import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -58,6 +53,8 @@ import org.forgerock.json.resource.CreateRequest;
 import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.QueryRequest;
@@ -67,6 +64,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterEvent;
@@ -79,14 +77,18 @@ import org.forgerock.openidm.config.installer.JSONConfigInstaller;
 import org.forgerock.openidm.config.persistence.ConfigBootstrapHelper;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.metadata.WaitForMetaData;
+import org.forgerock.openidm.patch.JsonValuePatch;
+import org.forgerock.openidm.repo.QueryConstants;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
+import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
 import org.forgerock.util.promise.ResultHandler;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
-import org.forgerock.openidm.patch.JsonValuePatch;
 import org.osgi.framework.Constants;
 import org.osgi.framework.InvalidSyntaxException;
 import org.osgi.service.cm.Configuration;
@@ -96,7 +98,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Provides access to OSGi configuration
+ * Provides access to OSGi configuration.
  *
  */
 @Component(
@@ -112,22 +114,23 @@ import org.slf4j.LoggerFactory;
 @Service(value = { RequestHandler.class })
 public class ConfigObjectService implements RequestHandler, ClusterEventListener {
 
-    final static Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
-    final static ConfigAuditEventLogger auditLogger = new ConfigAuditEventLogger();
+    private static final Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
+    private final ConfigAuditEventLogger auditLogger;
 
-    final static QueryFilterVisitor<QueryFilter<JsonPointer>, Object, JsonPointer> VISITOR = new ConfigQueryFilterVisitor<Object>();
+    private static final QueryFilterVisitor<QueryFilter<JsonPointer>, Object, JsonPointer> VISITOR = new ConfigQueryFilterVisitor<Object>();
 
-    final static String CONFIG_KEY = "jsonconfig";
+    private static final String CONFIG_KEY = "jsonconfig";
 
-    final static String EVENT_LISTENER_ID = "config";
-    final static String EVENT_RESOURCE_PATH = "resourcePath";
-    final static String EVENT_RESOURCE_ID = "resourceId";
-    final static String EVENT_RESOURCE_OBJECT = "obj";
-    final static String EVENT_RESOURCE_ACTION = "action";
+    private static final String EVENT_LISTENER_ID = "config";
+    private static final String EVENT_RESOURCE_PATH = "resourcePath";
+    private static final String EVENT_RESOURCE_ID = "resourceId";
+    private static final String EVENT_RESOURCE_OBJECT = "obj";
+    private static final String EVENT_RESOURCE_ACTION = "action";
+    private static final String EVENT_PATCH_OPERATIONS = "patchOperations";
 
-    enum ConfigAction {
-        CREATE, UPDATE, DELETE;
-    }
+   private enum ConfigAction {
+        CREATE, UPDATE, DELETE, PATCH
+   }
 
     @Reference
     ConfigurationAdmin configAdmin;
@@ -156,7 +159,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         this.connectionFactory = connectionFactory;
     }
 
-    /** Scripted Patch Value Trasnformer Factory. */
+    /** Scripted Patch Value Transformer Factory. */
     @Reference(policy = ReferencePolicy.DYNAMIC)
     private volatile ScriptedPatchValueTransformerFactory scriptedPatchValueTransformerFactory;
 
@@ -169,6 +172,14 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     private ConfigCrypto configCrypto;
+
+    public ConfigObjectService() {
+        this(new ConfigAuditEventLogger());
+    }
+
+    public ConfigObjectService(final ConfigAuditEventLogger configAuditEventLogger) {
+        this.auditLogger = configAuditEventLogger;
+    }
 
     @Override
     public Promise<ResourceResponse, ResourceException>  handleRead(final Context context, final ReadRequest request) {
@@ -273,7 +284,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                             public Promise<ResourceResponse, ResourceException> apply(
                                     ConfigAuditState configAuditState) throws ResourceException {
 
-                                JsonValue after = configAuditState.getAfter();
+                                final JsonValue after = configAuditState.getAfter();
                                 // Create and send the ClusterEvent for the created configuration
                                 sendClusterEvent(ConfigAction.CREATE, request.getResourcePathObject(),
                                         request.getNewResourceId(), after);
@@ -387,10 +398,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                             public Promise<ResourceResponse, ResourceException> apply(
                                     ConfigAuditState configAuditState) throws ResourceException {
 
-                                JsonValue after = configAuditState.getAfter();
+                                final JsonValue after = configAuditState.getAfter();
 
                                 // Create and send the ClusterEvent for the updated configuration
-                                sendClusterEvent(ConfigAction.UPDATE, request.getResourcePathObject(), null, after);
+                                sendClusterEvent(ConfigAction.UPDATE, request.getResourcePathObject(), after);
 
                                 // Log audit event.
                                 auditLogger.log(configAuditState, request, context, connectionFactory);
@@ -495,7 +506,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                                     ConfigAuditState configAuditState) throws ResourceException {
 
                                 // Create and send the ClusterEvent for the deleted configuration
-                                sendClusterEvent(ConfigAction.DELETE, request.getResourcePathObject(), null, null);
+                                sendClusterEvent(ConfigAction.DELETE, request.getResourcePathObject());
                                 // Log audit event.
                                 auditLogger.log(configAuditState, request, context, connectionFactory);
 
@@ -559,12 +570,15 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     @Override
     public Promise<ResourceResponse, ResourceException> handlePatch(final Context context, final PatchRequest request) {
-        return patch(context, request)
+        return patch(context, request.getResourcePathObject(), request.getPatchOperations())
                 .thenAsync(
                         new AsyncFunction<ConfigAuditState, ResourceResponse, ResourceException>() {
                             @Override
                             public Promise<ResourceResponse, ResourceException> apply(
                                     ConfigAuditState configAuditState) throws ResourceException {
+                                sendClusterEvent(ConfigAction.PATCH, request.getResourcePathObject(),
+                                        request.getPatchOperations());
+
                                 // Log audit event.
                                 auditLogger.log(configAuditState, request, context, connectionFactory);
 
@@ -578,8 +592,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @SuppressWarnings("rawtypes")
-    public Promise<ConfigAuditState, ResourceException> patch(final Context context, final PatchRequest request) {
-        final ResourcePath resourcePath = request.getResourcePathObject();
+    public Promise<ConfigAuditState, ResourceException> patch(final Context context, final ResourcePath resourcePath,
+            final List<PatchOperation> patchOperation) {
         final ParsedId parsedId;
         try {
             parsedId = new ParsedId(resourcePath);
@@ -588,7 +602,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         }
 
         try {
-            Configuration config = findExistingConfiguration(parsedId);
+            final Configuration config = findExistingConfiguration(parsedId);
 
             Dictionary<String, Object> existingConfig = (config == null ? null : config.getProperties());
             if (existingConfig == null) {
@@ -597,9 +611,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         + ", can not patch the configuration.");
             }
 
-            final JsonValue before = enhancedConfig.getConfiguration(existingConfig, request.getResourcePath(), false);
+            final JsonValue before = enhancedConfig.getConfiguration(existingConfig, resourcePath.toString(), false);
             final JsonValue after = before.copy();
-            JsonValuePatch.apply(after, request.getPatchOperations(), scriptedPatchValueTransformerFactory.getPatchValueTransformer(context));
+            JsonValuePatch.apply(after, patchOperation, scriptedPatchValueTransformerFactory.getPatchValueTransformer(context));
 
             existingConfig = configCrypto.encrypt(
                     parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig, after);
@@ -724,7 +738,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @Deactivate
-    protected void deactivate(ComponentContext context) {
+    protected void deactivate(@SuppressWarnings("unused") ComponentContext context) {
         logger.debug("Deactivating configuration management service");
     }
 
@@ -740,11 +754,12 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     private boolean handleCustomEvent(ClusterEvent event) {
         try {
-            JsonValue details = event.getDetails();
-            ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
-            ResourcePath resourcePath = ResourcePath.valueOf(details.get(EVENT_RESOURCE_PATH).asString());
-            String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
-            JsonValue obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT);
+            final JsonValue details = event.getDetails();
+            final ConfigAction action = ConfigAction.valueOf(details.get(EVENT_RESOURCE_ACTION).asString());
+            final ResourcePath resourcePath = ResourcePath.valueOf(details.get(EVENT_RESOURCE_PATH).asString());
+            final String id = details.get(EVENT_RESOURCE_ID).isNull() ? null : details.get(EVENT_RESOURCE_ID).asString();
+            final JsonValue obj = details.get(EVENT_RESOURCE_OBJECT).isNull() ? null : details.get(EVENT_RESOURCE_OBJECT);
+            final List<PatchOperation> patchOperations = PatchOperation.valueOfList(details.get(EVENT_PATCH_OPERATIONS));
             switch (action) {
                 case CREATE:
                     create(resourcePath, id, obj, true);
@@ -755,6 +770,8 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                 case DELETE:
                     delete(resourcePath, null);
                     break;
+                case PATCH:
+                    patch(ContextUtil.createInternalContext(), resourcePath, patchOperations);
             }
             return true;
         } catch (Exception e) {
@@ -764,26 +781,93 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     /**
-     * Creates and sends a ClusterEvent representing a config operation for a specified resource
+     * Creates and sends a ClusterEvent representing a config operation for a specified resource.
      *
-     * @param action The action that was performed on the resource (create, update, or delete)
-     * @param name The resource name
-     * @param id The new resource id (used for create)
-     * @param obj The resource object (used for create and update)
+     * @param action the action that was performed on the resource (create, update, delete, or patch)
+     * @param name the resource name
+     * @param id the new resource id (used for create)
+     * @param obj the resource object (used for create and update)
+     * @param patchOperations the {@link List<PatchOperation> list of patch operations} (used for patch)
+     * @return a {@link ClusterEvent}
      */
-    private void sendClusterEvent(ConfigAction action, ResourcePath name, String id, JsonValue obj) {
+    private ClusterEvent createClusterEvent(final ConfigAction action, final ResourcePath name,
+            final String id, final JsonValue obj, final List<PatchOperation> patchOperations) {
         if (clusterManagementService != null && clusterManagementService.isEnabled()) {
-            JsonValue details = json(object(
+            final JsonValue details = json(object(
                     field(EVENT_RESOURCE_ACTION, action.toString()),
                     field(EVENT_RESOURCE_PATH, name.toString()),
                     field(EVENT_RESOURCE_ID, id),
-                    field(EVENT_RESOURCE_OBJECT, obj == null ? null : obj.getObject())));
-            ClusterEvent event = new ClusterEvent(
+                    field(EVENT_RESOURCE_OBJECT, obj == null ? null : obj.getObject()),
+                    field(EVENT_PATCH_OPERATIONS, serializePatchOperations(patchOperations).getObject())
+            ));
+            return new ClusterEvent(
                     ClusterEventType.CUSTOM,
                     clusterManagementService.getInstanceId(),
                     EVENT_LISTENER_ID,
                     details);
-            clusterManagementService.sendEvent(event);
+        }
+        return null;
+    }
+
+    /**
+     * Sends a ClusterEvent representing a config operation for a specified resource.
+     *
+     * @param action the action that was performed on the resource
+     * @param name the resource name
+     * @param id the new resource id
+     * @param obj the resource object
+     */
+    private void sendClusterEvent(final ConfigAction action, final ResourcePath name, final String id,
+            final JsonValue obj) {
+        if (clusterManagementService != null && clusterManagementService.isEnabled()) {
+            clusterManagementService.sendEvent(
+                    createClusterEvent(action, name, id, obj, Collections.<PatchOperation>emptyList())
+            );
+        }
+    }
+
+    /**
+     * Sends a ClusterEvent representing a config operation for a specified resource.
+     *
+     * @param action the action that was performed on the resource
+     * @param name the resource name
+     * @param obj the resource object
+     */
+    private void sendClusterEvent(final ConfigAction action, final ResourcePath name, final JsonValue obj) {
+        if (clusterManagementService != null && clusterManagementService.isEnabled()) {
+            clusterManagementService.sendEvent(
+                    createClusterEvent(action, name, null, obj, Collections.<PatchOperation>emptyList())
+            );
+        }
+    }
+
+    /**
+     * Sends a ClusterEvent representing a config operation for a specified resource.
+     *
+     * @param action the action that was performed on the resource
+     * @param name the resource name
+     * @param patchOperations the {@link List<PatchOperation> list of patch operations}
+     */
+    private void sendClusterEvent(final ConfigAction action, final ResourcePath name,
+            final List<PatchOperation> patchOperations) {
+        if (clusterManagementService != null && clusterManagementService.isEnabled()) {
+            clusterManagementService.sendEvent(
+                    createClusterEvent(action, name, null, null, patchOperations)
+            );
+        }
+    }
+
+    /**
+     * Sends a ClusterEvent representing a config operation for a specified resource.
+     *
+     * @param action the action that was performed on the resource
+     * @param name the resource name
+     */
+    private void sendClusterEvent(final ConfigAction action, final ResourcePath name) {
+        if (clusterManagementService != null && clusterManagementService.isEnabled()) {
+            clusterManagementService.sendEvent(
+                    createClusterEvent(action, name, null, null, Collections.<PatchOperation>emptyList())
+            );
         }
     }
 
@@ -797,6 +881,14 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     static QueryFilter<JsonPointer> asConfigQueryFilter(QueryFilter<JsonPointer> filter) {
         return filter.accept(VISITOR, null);
+    }
+
+    private JsonValue serializePatchOperations(final List<PatchOperation> patchOperations) {
+        final JsonValue ops = json(array());
+        for (final PatchOperation patchOperation : patchOperations) {
+            ops.add(patchOperation.toJsonValue().getObject());
+        }
+        return ops;
     }
 
     /**
@@ -856,7 +948,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
         @Override
         public QueryFilter<JsonPointer> visitNotFilter(P parameter, QueryFilter<JsonPointer> subFilter) {
-            return QueryFilter.not(subFilter.accept(new ConfigQueryFilterVisitor<Object>(), null));
+            return QueryFilter.not(subFilter.accept(new ConfigQueryFilterVisitor<>(), null));
         }
 
         @Override
@@ -882,7 +974,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
          * @return a list of visited filters
          */
         private List<QueryFilter<JsonPointer>> visitQueryFilters(List<QueryFilter<JsonPointer>> subFilters) {
-            List<QueryFilter<JsonPointer>> visitedFilters = new ArrayList<QueryFilter<JsonPointer>>();
+            final List<QueryFilter<JsonPointer>> visitedFilters = new ArrayList<>();
             for (QueryFilter<JsonPointer> filter : subFilters) {
                 visitedFilters.add(asConfigQueryFilter(filter));
             }
@@ -910,9 +1002,9 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * In order to use findExistingConfiguration() you must have a ParsedId.  This method provides that as
      * a package-private and avoids the "containing class" error.
      *
-     * @param name
-     * @param id
-     * @return
+     * @param name the resource path name
+     * @param id the resource id
+     * @return the {@link ParsedId}
      * @throws BadRequestException
      */
     ParsedId getParsedId(ResourcePath name, String id) throws BadRequestException {
@@ -925,10 +1017,10 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     class ParsedId {
 
         public String pid;
-        public String factoryPid;
-        public String instanceAlias;
+        String factoryPid;
+        String instanceAlias;
 
-        public ParsedId(ResourcePath resourcePath) throws BadRequestException {
+        ParsedId(ResourcePath resourcePath) throws BadRequestException {
             // OSGi pid with spaces is disallowed; replace any spaces we get to be kind
             ResourcePath stripped = resourcePath.toString().contains(" ")
                     ? ResourcePath.valueOf(resourcePath.toString().replaceAll(" ", "_"))
@@ -955,7 +1047,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             }
         }
 
-        public ParsedId(ResourcePath resourcePath, String id) throws BadRequestException {
+        ParsedId(ResourcePath resourcePath, String id) throws BadRequestException {
             if (resourcePath.isEmpty()) {
                 // single-instance config
                 pid = id;
@@ -969,7 +1061,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
         /**
          * @return is this ID represents a managed factory configuration, or false if it is a managed service configuraiton
          */
-        public boolean isFactoryConfig() {
+        boolean isFactoryConfig() {
             return (instanceAlias != null);
         }
 
@@ -980,7 +1072,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
          * @return the qualified pid if this ID represents a managed service configuration, or the managed factory PID
          *         if it represents a managed factory configuration
          */
-        public String getPidOrFactoryPid() {
+        String getPidOrFactoryPid() {
             return isFactoryConfig()
                     ? ConfigBootstrapHelper.qualifyPid(factoryPid)
                     : ConfigBootstrapHelper.qualifyPid(pid);
