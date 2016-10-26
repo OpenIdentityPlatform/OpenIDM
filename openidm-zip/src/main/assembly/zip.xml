@@ -43,7 +43,7 @@
                 <exclude>**/*.command</exclude>
                 <exclude>**/*.bat</exclude>
                 <exclude>**/internal-common/**</exclude>
-
+                <exclude>**/*.patch.*</exclude>
                 <!--
                     These particular workflow files are instead bundled as .bar files;
                     as raw files they are excluded. See zip-workflow-files in openidm-zip/pom.xml
