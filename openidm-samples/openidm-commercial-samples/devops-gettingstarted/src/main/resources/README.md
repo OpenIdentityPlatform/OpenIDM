@@ -5,7 +5,7 @@ Started' sample but with a [PostgreSQL](https://www.postgresql.org/)
 repository.
 
 Before you continue, install the Postgres and OpenIDM Docker images
-described in the DEVOPS-OPENIDM README. You won't be able to complete
+described in the README-docker-k8. You won't be able to complete
 this sample without them.
 
 ## Before you press the "Eject" button

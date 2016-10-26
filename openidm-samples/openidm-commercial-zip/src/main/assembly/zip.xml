@@ -205,7 +205,7 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory>/openidm</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:devops-openidm:zip</include>
             </includes>

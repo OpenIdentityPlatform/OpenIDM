@@ -152,18 +152,17 @@ manifests.
 #### Building the OpenIDM image
 
 The Dockerfile for the OpenIDM image is located at the base of the
-directory where you unzipped the OpenIDM zip file. The main reason for
-this is that, during the build process, Docker passes the current
-working directory as the place where resources for the new image will
-be found. What better place then than where our `openidm` directory is
-located ?
+OpenIDM directory where you unzipped the OpenIDM zip file. The main
+reason for this is that, during the build process, Docker passes the
+current working directory as the place where resources for the new image
+will be found. What better place then than where the content of OpenIDM
+is located ?
 
 So, in order to build the OpenIDM docker image :
 
 ```
 $ unzip openidm-${project.version}
-$ ls
-Dockerfile		docker-entrypoint.sh	openidm
+$ cd openidm
 $ docker build -t forgerock/openidm:${project.version} .
 [...]
 ```

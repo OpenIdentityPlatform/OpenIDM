@@ -47,7 +47,7 @@ EXPOSE 5050 8080 8443
 # and grab the OpenIDM post-commit build
 ENV GOSU_VERSION 1.9
 
-COPY openidm $OPENIDM_HOME
+COPY ./ $OPENIDM_HOME
 COPY docker-entrypoint.sh /usr/local/bin/
 
 RUN buildDeps=' \
