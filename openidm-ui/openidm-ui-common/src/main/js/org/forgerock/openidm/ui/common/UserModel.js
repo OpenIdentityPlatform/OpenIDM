@@ -155,13 +155,14 @@ define([
             return updatedHeaders;
         },
         logout: function () {
-            sessionStorage.removeItem("authDetails");
-            ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
-                ServiceInvoker.configuration.defaultHeaders || {},
-                null
-            );
             if (this.id) {
-                return this.invalidateSession();
+                return this.invalidateSession().then(() => {
+                    sessionStorage.removeItem("authDetails");
+                    ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
+                        ServiceInvoker.configuration.defaultHeaders || {},
+                        null
+                    );
+                });
             } else {
                 return $.Deferred().resolve();
             }
