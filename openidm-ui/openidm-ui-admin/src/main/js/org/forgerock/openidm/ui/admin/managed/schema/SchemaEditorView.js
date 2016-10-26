@@ -20,12 +20,14 @@ define([
     "jsonEditor",
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/openidm/ui/admin/managed/schema/dataTypes/RelationshipTypeView",
-    "org/forgerock/openidm/ui/admin/managed/schema/util/SchemaUtils"
+    "org/forgerock/openidm/ui/admin/managed/schema/util/SchemaUtils",
+    "org/forgerock/commons/ui/common/main/Router"
 ], function($, _,
     JSONEditor,
     AdminAbstractView,
     RelationshipTypeView,
-    SchemaUtils
+    SchemaUtils,
+    Router
 ) {
     var SchemaEditorView = AdminAbstractView.extend({
         template: "templates/admin/managed/schema/SchemaEditorViewTemplate.html",
@@ -41,6 +43,7 @@ define([
 
         render: function(args, callback) {
             this.parent = args[0];
+            this.originalRoute = Router.currentRoute.view;
 
             this.parentRender(() => {
                 this.loadSchema();
@@ -201,7 +204,8 @@ define([
         },
 
         loadSchema: function() {
-            var JSONEditorDefaults = {
+            var _this = this,
+                JSONEditorDefaults = {
                     disable_edit_json: true,
                     disable_array_delete_all: true,
                     disable_array_reorder: false,
@@ -533,17 +537,89 @@ define([
             // enumerations.  Before "type" would take a value and never set the title(dropdown)
             // Now the setValue val is an object containing a value and a title.
 
-            // This function needs to be restored for other instances of JSONEditor after load.
-
-            this.data.jsonEditorProto = _.clone(JSONEditor.defaults.editors.multiple.prototype);
+            // Grab a copy of JSONEditor.defaults.editors.multiple.prototype so this function
+            // can be restored for other instances of JSONEditor.
+            this.data.jsonEditorProto = _.cloneDeep(JSONEditor.defaults.editors.multiple.prototype);
 
             JSONEditor.defaults.editors.multiple.prototype.setValue = function(val,initial) {
-                if (_.isObject(val) && !_.isNull(val)) {
-                    this.switcher.value = val.display;
-                    this.type = _.indexOf(this.display_text, val.display);
-                    this.switchEditor(this.type);
-                    this.editors[this.type].setValue(val.val, initial);
-                    this.refreshValue();
+                //Check to make sure we are only overriding this function when we are on
+                //SchemaEditorView. If not set it back to it's original state.
+                if (_this.originalRoute === Router.currentRoute.view) {
+                    var arrayVal,
+                        doSwitch = (display, propValue) => {
+                            this.switcher.value = display;
+                            this.type = _.indexOf(this.display_text, display);
+                            this.switchEditor(this.type);
+                            this.editors[this.type].setValue(propValue, initial);
+                            this.refreshValue();
+                        };
+
+                    if (!_.isNull(val)) {
+                        if (_.isObject(val) && _.has(val,"display")) {
+                            //when the editor is first loaded with the default schema
+                            //it will use this code for all types
+                            doSwitch(val.display, val.val);
+                        } else if (!_.isObject(val)){
+                            //type is either a string,boolean,integer, or number value
+                            doSwitch(_this.toProperCase(val),val.toLowerCase(val));
+                        } else if (_.isArray(val)){
+                            //val is an array so this tells us the actual type is "Object"
+                            doSwitch("Object",val);
+                        } else if (_.isObject(val) && _.has(val, "resourceCollection")){
+                            //val is an object and has the resourceCollection property so we
+                            //know the type is "Relationship"
+                            doSwitch("Relationship",val);
+                        } else if (_.isObject(val)){
+                            //val is an object so we know the type is an Array
+                            arrayVal = {
+                                propertyName: null,
+                                required: false
+                            };
+
+                            //for some reason itemType is only "undefined" for string types
+                            //every other type works as expected
+                            if(val.itemType === "undefined") {
+                                //set itemType here to it's correct type
+                                val.itemType = "string";
+                            }
+
+                            if (_.isArray(val.itemType)) {
+                                //val.itemType is an array so we know this is an Array of objects
+                                arrayVal.itemType = {
+                                    display: "Object",
+                                    val: val.itemType
+                                };
+                            } else if (_.isObject(val.itemType) && _.has(val.itemType, "resourceCollection")) {
+                                // val.itemType is an array and val.itemType has the "resourceCollection" property
+                                // so we know this is an Array of Relationships
+                                arrayVal.itemType = {
+                                    display: "Relationship",
+                                    val: val.itemType
+                                };
+                            } else if (_.isObject(val.itemType)) {
+                                //val.itemType is an object so we know this is an Array of Arrays
+                                arrayVal.itemType = {
+                                    display: "Array",
+                                    val: val.itemType
+                                };
+                            } else {
+                                // if we make it here we know that this is an Array of either
+                                // booleans, strings, numbers, or integers
+                                arrayVal.itemType = {
+                                    display: _this.toProperCase(val.itemType),
+                                    val: val.itemType
+                                };
+                            }
+
+                            doSwitch("Array",arrayVal);
+                        }
+                    }
+                } else {
+                    // Set the setValue function back to it's original value then call it with the current args.
+                    // After this reset this override version of the setValue function will not be called again
+                    // until we are back on this view.
+                    JSONEditor.defaults.editors.multiple.prototype.setValue = _this.data.jsonEditorProto.setValue;
+                    JSONEditor.defaults.editors.multiple.prototype.setValue.call(this, val, initial);
                 }
             };
 
@@ -556,8 +632,6 @@ define([
             }, this));
 
             this.setDefaultData();
-
-            JSONEditor.defaults.editors.multiple.prototype.setValue = this.data.jsonEditorProto.setValue;
         },
 
         setDefaultData: function() {
