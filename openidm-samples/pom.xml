@@ -89,8 +89,6 @@
     </issueManagement>
 
     <properties>
-        <openidm.version>${project.version}</openidm.version>
-
         <salesforce.api.version>29</salesforce.api.version>
         <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.4-SNAPSHOT</provisioner.salesforcemodule.version>
         <openicf.googleconnector.version>1.4.1.0</openicf.googleconnector.version>

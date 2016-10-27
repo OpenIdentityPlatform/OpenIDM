@@ -14,7 +14,8 @@
     </formats>
 
     <fileSets>
-        <!-- start by copying all of the public openidm zip contents -->
+        <!-- Start by copying all of the public openidm zip contents.
+             The commercial samples are also in idm-staging by the dependency plugin(see pom.xml) -->
         <fileSet>
             <directory>${project.build.directory}/idm-staging/openidm</directory>
             <outputDirectory>/openidm</outputDirectory>
@@ -22,6 +23,13 @@
         <fileSet>
             <directory>${basedir}/src/main/resources/conf</directory>
             <outputDirectory>/openidm/conf</outputDirectory>
+        </fileSet>
+        <fileSet>
+            <directory>${basedir}/src/main/resources/conf</directory>
+            <outputDirectory>/openidm/samples/cdm/conf</outputDirectory>
+            <includes>
+                <include>identityProviders.json</include>
+            </includes>
         </fileSet>
         <!-- Include the Forgerock binary license file if exists -->
         <fileSet>
@@ -35,154 +43,10 @@
             <directory>${project.build.directory}/orientdb-community-${orientdb.studio.version}/www</directory>
             <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
         </fileSet>
-        <!-- add provisioner samples to provisioners directory -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>${google.provisioner}</include>
-                <include>${salesforce.provisioner}</include>
-                <include>${marketo.provisioner}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/provisioners</outputDirectory>
-        </fileSet>
-        <!-- start salesforce sample boilerplate -->
-        <fileSet>
-            <directory>${project.build.directory}/idm-staging/openidm</directory>
-            <includes>
-                <include>${default.conf}</include>
-                <include>${default.script}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>${salesforce.provisioner}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/salesforce-connector/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf*ldap.json</include>
-            </includes>
-            <outputDirectory>/openidm/ui/admin/default/templates/admin/connector/configs/ldap</outputDirectory>
-        </fileSet>
-        <!-- start google connector sample boilerplate -->
-        <fileSet>
-            <directory>${project.build.directory}/idm-staging/openidm</directory>
-            <includes>
-                <include>${default.conf}</include>
-                <include>${default.script}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/google-connector</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>${google.provisioner}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/google-connector/conf</outputDirectory>
-        </fileSet>
-        <!-- start cdm sample boilerplate -->
-        <fileSet>
-            <directory>${project.build.directory}/idm-staging/openidm</directory>
-            <includes>
-                <include>${default.conf}</include>
-                <include>${default.script}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/cdm</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/conf</directory>
-            <outputDirectory>/openidm/samples/cdm/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>${marketo.provisioner}</include>
-            </includes>
-            <outputDirectory>/openidm/samples/cdm/conf</outputDirectory>
-        </fileSet>
     </fileSets>
 
     <dependencySets>
-        <!-- copy salesforce bundle -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/bundle</outputDirectory>
-            <scope>runtime</scope>
-            <includes>
-                <include>org.forgerock.openidm:openidm-salesforce</include>
-            </includes>
-        </dependencySet>
-        <!-- copy connectors/connector libs -->
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/connectors</outputDirectory>
-            <includes>
-                <include>org.forgerock.openicf.connectors:googleapps-connector</include>
-                <include>org.forgerock.openicf.connectors:marketo-connector</include>
-            </includes>
-        </dependencySet>
-        <dependencySet>
-            <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/openidm/lib</outputDirectory>
-            <includes>
-                <include>com.google.oauth-client:google-oauth-client</include>
-                <include>com.google.oauth-client:google-oauth-java6</include>
-                <include>com.google.api-client:google-api-client</include>
-                <include>com.google.http-client:google-http-client</include>
-                <include>com.google.http-client:google-http-client-jackson2</include>
-                <include>com.google.apis:google-api-services-admin-directory</include>
-                <include>com.google.apis:google-api-services-licensing</include>
-            </includes>
-        </dependencySet>
-        <!-- copy salesforce sample commercial artifact bits -->
-        <dependencySet>
-            <unpack>true</unpack>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
-            <fileMode>644</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
-            <includes>
-                <include>org.forgerock.openidm:salesforce-sample</include>
-            </includes>
-        </dependencySet>
-        <!-- copy google sample commercial artifact bits -->
-        <dependencySet>
-            <unpack>true</unpack>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
-            <fileMode>644</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/samples/google-connector</outputDirectory>
-            <includes>
-                <include>org.forgerock.openidm:google-sample</include>
-            </includes>
-        </dependencySet>
-        <!-- copy ydm sample commercial artifact bits -->
-        <dependencySet>
-            <unpack>true</unpack>
-            <unpackOptions>
-                <excludes>
-                    <exclude>META-INF/**</exclude>
-                </excludes>
-            </unpackOptions>
-            <fileMode>644</fileMode>
-            <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/samples/cdm</outputDirectory>
-            <includes>
-                <include>org.forgerock.openidm:cdm-sample</include>
-            </includes>
-        </dependencySet>
+        <!-- add devops samples -->
         <dependencySet>
             <unpack>true</unpack>
             <fileMode>644</fileMode>
