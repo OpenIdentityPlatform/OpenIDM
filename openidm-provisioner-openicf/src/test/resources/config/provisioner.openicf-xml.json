@@ -133,6 +133,12 @@
                            "nativeName" : "__DESCRIPTION__",
                            "nativeType" : "string"
                         },
+                     "disabled" :
+                     {
+                        "type" : "boolean",
+                        "nativeName" : "disabled-custom",
+                        "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
+                     },
                      "has-sixth-sense" :
                         {
                            "type" : "boolean",

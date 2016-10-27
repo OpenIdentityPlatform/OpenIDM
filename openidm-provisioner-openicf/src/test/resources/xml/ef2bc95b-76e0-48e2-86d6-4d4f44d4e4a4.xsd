@@ -124,6 +124,13 @@
                         </xsd:appinfo>
                     </xsd:annotation>
                 </xsd:element>
+                <xsd:element name="disabled-custom" type="xsd:boolean" minOccurs="0">
+                    <xsd:annotation>
+                        <xsd:appinfo>
+                            <icf:javaclass>java.lang.Boolean</icf:javaclass>
+                        </xsd:appinfo>
+                    </xsd:annotation>
+                </xsd:element>
                 <xsd:element name="has-sixth-sense" type="xsd:boolean" minOccurs="0">
                 </xsd:element>
                 <xsd:element name="permanent-employee" type="xsd:boolean" minOccurs="0">

@@ -518,6 +518,24 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         }
     }
 
+    @Test
+    public void testPatchWithAttributeNativeNameDifferentThanOpenIDMAttributeName() throws ResourceException {
+        final String resourceName = setUpUserForPatch();
+        try {
+            PatchOperation operation = PatchOperation.add("disabled", true);
+            PatchRequest patchRequest = Requests.newPatchRequest(resourceName, operation);
+            JsonValue patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("disabled").asBoolean()).isEqualTo(Boolean.TRUE);
+
+            operation = PatchOperation.replace("disabled", false);
+            patchRequest = Requests.newPatchRequest(resourceName, operation);
+            patchResult = connection.patch(new RootContext(), patchRequest).getContent();
+            assertThat(patchResult.get("disabled").asBoolean()).isEqualTo(Boolean.FALSE);
+        } finally {
+            deleteUser(resourceName);
+        }
+    }
+
     @Test(expectedExceptions = InternalServerErrorException.class)
     public void testPatchAddOnSingleValuedAttributeWithMultiValue() throws ResourceException {
         final String resourceName = setUpUserForPatch();
