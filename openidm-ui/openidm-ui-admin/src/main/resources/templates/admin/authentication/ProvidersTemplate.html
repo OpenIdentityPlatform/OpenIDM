@@ -9,7 +9,7 @@
             <div class="panel provider-panel {{#unless localChecked}}disabled{{/unless}}">
                 <div class="panel-body card">
                     <div class="pull-left provider-radio-container">
-                        <div class="radio">
+                        <div class="radio radio-button">
                             <input class="providerSelection" type="radio" name="providerSelection" id="providerSelectionLocal" value="local" {{#if localChecked}}checked{{/if}}>
                             <label for="providerSelectionLocal"></label>
                         </div>
@@ -41,7 +41,7 @@
                     </div>
 
                     <div class="pull-left provider-radio-container">
-                        <div class="radio">
+                        <div class="radio radio-button">
                             <input class="providerSelection" type="radio" name="providerSelection" id="providerSelectionAM" value="am" {{#unless localChecked}}checked{{/unless}}>
                             <label for="providerSelectionAM"></label>
                         </div>
