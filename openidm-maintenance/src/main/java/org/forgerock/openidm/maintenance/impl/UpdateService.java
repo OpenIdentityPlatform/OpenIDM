@@ -18,6 +18,7 @@ package org.forgerock.openidm.maintenance.impl;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Map;
@@ -33,6 +34,7 @@ import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.maintenance.upgrade.UpdateException;
 import org.forgerock.openidm.maintenance.upgrade.UpdateManager;
@@ -124,6 +126,12 @@ public class UpdateService extends AbstractRequestHandler {
      */
     @Override
     public Promise<ActionResponse, ResourceException> handleAction(Context context, ActionRequest request) {
+        if (!Files.exists(Paths.get("./.checksums.csv"))) {
+            // Update not supported if there is no checksums file
+            return new NotFoundException("Update not supported, cannot fulfill " + request.getAction() + " request")
+                    .asPromise();
+        }
+
         switch (request.getActionAsEnum(Action.class)) {
             case available:
                 return handleListAvailable();
