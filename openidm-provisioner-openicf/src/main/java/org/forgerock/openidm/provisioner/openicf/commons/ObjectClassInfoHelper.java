@@ -377,10 +377,10 @@ public class ObjectClassInfoHelper {
 
         // Build up the map of patched Attributes
         for (AttributeInfoHelper attributeInfo : attributes) {
-            // Get the attribute's nativeName and check if it is on of the attributes to patch
-            String attributeName = attributeInfo.getAttributeInfo().getName();
+            String attributeName = attributeInfo.getName();
             if (fieldName.equals(attributeName)) {
             	result = attributeInfo.build(value, cryptoService);
+                break;
             }
         }
 
@@ -548,7 +548,6 @@ public class ObjectClassInfoHelper {
      * @throws BadRequestException if attribute is not supported
      */
     public boolean isMultiValued(final Attribute attribute) throws BadRequestException {
-        checkForInvalidAttribute(attribute.getName());
         for (final AttributeInfoHelper attributeInfo : attributes) {
             // Get the attribute's nativeName and check if it is one of the attributes available
             final String attributeName = attributeInfo.getAttributeInfo().getName();
