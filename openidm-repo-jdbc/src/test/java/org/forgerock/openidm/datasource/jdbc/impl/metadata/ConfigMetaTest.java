@@ -31,11 +31,11 @@ import org.testng.annotations.Test;
  */
 public class ConfigMetaTest {
 
-    @Test
-    public void testGetPropertiesToEncrypt() throws Exception {
-        ConfigMeta configMeta = new ConfigMeta();
+    private ConfigMeta configMeta = new ConfigMeta();
 
-        // First validate that a password field will NOT be encrypted if it DOES have a property in it.
+    // First validate that a password field will NOT be encrypted if it DOES have a property in it.
+    @Test
+    public void testShouldNotEncryptPassswordValueWithPropertySubstitution() throws Exception {
         List<JsonPointer> propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
                 json(
                         object(
@@ -43,17 +43,23 @@ public class ConfigMetaTest {
                         )
                 ));
         assertThat(propertiesToEncrypt).isEmpty();
+    }
 
-        // Second validate that it WILL get encrypted if the password does NOT have a property in it.
-        propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
+    // Second validate that it WILL get encrypted if the password does NOT have a property in it.
+    @Test
+    public void testShouldEncryptPassswordValueWithoutPropertySubstitution() throws Exception {
+        List<JsonPointer> propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
                 json(
                         object(
                                 field("password", "Passw0rd!")
                         )
                 ));
         assertThat(propertiesToEncrypt).hasSize(1).contains(new JsonPointer("password"), atIndex(0));
+    }
 
-        // Third validate that it WILL be treated as an encrypted field if the contents are already a crypto json blob.
+    // Third validate that it WILL be treated as an encrypted field if the contents are already a crypto json blob.
+    @Test
+    public void testShouldTreatAsEncryptedFieldWhenCryptoBlobIsPresent() throws Exception {
         String encryptedString = JsonUtil.writeValueAsString(
                 json(
                         object(
@@ -74,7 +80,7 @@ public class ConfigMetaTest {
                                 )
                         )
                 ));
-        propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
+        List<JsonPointer> propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
                 json(
                         object(
                                 field("password", encryptedString)
@@ -83,4 +89,14 @@ public class ConfigMetaTest {
         assertThat(propertiesToEncrypt).hasSize(1).contains(new JsonPointer("password"), atIndex(0));
     }
 
+    @Test
+    public void testQuietlyIgnoresMissingPasswordField() throws Exception {
+        List<JsonPointer> propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
+                json(
+                        object(
+                        )
+                ));
+
+        assertThat(propertiesToEncrypt).isEmpty();
+    }
 }
