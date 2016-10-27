@@ -15,19 +15,19 @@
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/dependency/openidm</directory>
-            <outputDirectory>/samples/cdm</outputDirectory>
+            <outputDirectory>samples/cdm</outputDirectory>
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>/samples/cdm</outputDirectory>
+            <outputDirectory>samples/cdm</outputDirectory>
             <filtered>true</filtered>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/connectors</outputDirectory>
+            <outputDirectory>connectors</outputDirectory>
             <includes>
                 <include>org.forgerock.openicf.connectors:marketo-connector</include>
             </includes>

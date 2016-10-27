@@ -15,19 +15,19 @@
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/dependency/openidm</directory>
-            <outputDirectory>/samples/salesforce-connector</outputDirectory>
+            <outputDirectory>samples/salesforce-connector</outputDirectory>
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>/samples/salesforce-connector</outputDirectory>
+            <outputDirectory>samples/salesforce-connector</outputDirectory>
             <filtered>true</filtered>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/bundle</outputDirectory>
+            <outputDirectory>bundle</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:openidm-salesforce</include>
             </includes>

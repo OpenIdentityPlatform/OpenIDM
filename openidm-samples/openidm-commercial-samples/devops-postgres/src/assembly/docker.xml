@@ -14,12 +14,12 @@
     <fileSets>
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/dependency/openidm/db/postgresql/</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
         </fileSet>
     </fileSets>
 </assembly>

@@ -100,7 +100,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openidm</groupId>
                                     <artifactId>googleapps-sample</artifactId>
-                                    <version>${openidm.version}</version>
+                                    <version>${project.version}</version>
                                     <classifier>samples</classifier>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
@@ -110,7 +110,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openidm</groupId>
                                     <artifactId>salesforce-sample</artifactId>
-                                    <version>${openidm.version}</version>
+                                    <version>${project.version}</version>
                                     <classifier>samples</classifier>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>
@@ -120,7 +120,7 @@
                                 <artifactItem>
                                     <groupId>org.forgerock.openidm</groupId>
                                     <artifactId>cdm-sample</artifactId>
-                                    <version>${openidm.version}</version>
+                                    <version>${project.version}</version>
                                     <classifier>samples</classifier>
                                     <type>zip</type>
                                     <overWrite>false</overWrite>

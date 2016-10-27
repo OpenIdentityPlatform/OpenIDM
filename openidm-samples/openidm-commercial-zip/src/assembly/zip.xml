@@ -18,15 +18,15 @@
              The commercial samples are also in idm-staging by the dependency plugin(see pom.xml) -->
         <fileSet>
             <directory>${project.build.directory}/idm-staging/openidm</directory>
-            <outputDirectory>/openidm</outputDirectory>
+            <outputDirectory>openidm</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources/conf</directory>
-            <outputDirectory>/openidm/conf</outputDirectory>
+            <outputDirectory>openidm/conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources/conf</directory>
-            <outputDirectory>/openidm/samples/cdm/conf</outputDirectory>
+            <outputDirectory>openidm/samples/cdm/conf</outputDirectory>
             <includes>
                 <include>identityProviders.json</include>
             </includes>
@@ -34,14 +34,14 @@
         <!-- Include the Forgerock binary license file if exists -->
         <fileSet>
             <directory>${project.build.directory}</directory>
-            <outputDirectory>/openidm/legal-notices</outputDirectory>
+            <outputDirectory>openidm/legal-notices</outputDirectory>
             <includes>
                 <include>Forgerock_License.txt</include>
             </includes>
         </fileSet>
         <fileSet>
             <directory>${project.build.directory}/orientdb-community-${orientdb.studio.version}/www</directory>
-            <outputDirectory>/openidm/db/util/orientdb/studio</outputDirectory>
+            <outputDirectory>openidm/db/util/orientdb/studio</outputDirectory>
         </fileSet>
     </fileSets>
 
@@ -51,7 +51,8 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/samples/devops-postgres</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>openidm/samples/devops-postgres</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:devops-postgres:zip</include>
             </includes>
@@ -60,7 +61,8 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm/samples/devops-gettingstarted</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>openidm/samples/devops-gettingstarted</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:devops-gettingstarted:zip</include>
             </includes>
@@ -69,7 +71,8 @@
             <unpack>true</unpack>
             <fileMode>644</fileMode>
             <directoryMode>755</directoryMode>
-            <outputDirectory>/openidm</outputDirectory>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>openidm</outputDirectory>
             <includes>
                 <include>org.forgerock.openidm:devops-openidm:zip</include>
             </includes>

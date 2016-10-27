@@ -15,26 +15,26 @@
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/dependency/openidm</directory>
-            <outputDirectory>/samples/google-connector</outputDirectory>
+            <outputDirectory>samples/google-connector</outputDirectory>
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>/samples/google-connector</outputDirectory>
+            <outputDirectory>samples/google-connector</outputDirectory>
             <filtered>true</filtered>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/connectors</outputDirectory>
+            <outputDirectory>connectors</outputDirectory>
             <includes>
                 <include>org.forgerock.openicf.connectors:googleapps-connector</include>
             </includes>
         </dependencySet>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>/lib</outputDirectory>
+            <outputDirectory>lib</outputDirectory>
             <includes>
                 <include>com.google.oauth-client:google-oauth-client</include>
                 <include>com.google.oauth-client:google-oauth-client-java6</include>

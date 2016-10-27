@@ -14,7 +14,7 @@
     <fileSets>
         <fileSet>
             <directory>${project.build.directory}/dependency/openidm/samples/getting-started</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
             <filtered>true</filtered>
         </fileSet>
         <fileSet>
@@ -22,11 +22,11 @@
             <includes>
                 <include>*.json</include>
             </includes>
-            <outputDirectory>/conf</outputDirectory>
+            <outputDirectory>conf</outputDirectory>
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>/</outputDirectory>
+            <outputDirectory></outputDirectory>
             <filtered>true</filtered>
         </fileSet>
     </fileSets>
