@@ -47,4 +47,39 @@ public class CredentialHelperTest {
         assertEquals(credential.username, username);
         assertEquals(credential.password, password);
     }
+
+    @Test
+    public void rfc5987SupportedByCustomAuthHeader() {
+        // given
+        final Request request = new Request();
+        request.getHeaders().put("X-OpenIDM-Username", "utf-8''username%C2%A3");
+        request.getHeaders().put("X-OpenIDM-Password", "utf-8''password%C2%A3");
+
+        // when
+        final Credential credential = IDMAuthModuleWrapper.HEADER_AUTH_CRED_HELPER.getCredential(request);
+
+        // then
+        assertEquals(credential.username, "username£");
+        assertEquals(credential.password, "password£");
+    }
+
+    /**
+     * If RFC 5987 parsing fails, we pass through the values unchanged, so that authentication can still be attempted.
+     */
+    @Test
+    public void rfc5987ParseFailuresPassedThroughUnchangedByCustomAuthHeader() {
+        // given
+        final String username = "utf-8''£";
+        final String password = "UTF-8'yy'£";
+        final Request request = new Request();
+        request.getHeaders().put("X-OpenIDM-Username", username);
+        request.getHeaders().put("X-OpenIDM-Password", password);
+
+        // when
+        final Credential credential = IDMAuthModuleWrapper.HEADER_AUTH_CRED_HELPER.getCredential(request);
+
+        // then
+        assertEquals(credential.username, username);
+        assertEquals(credential.password, password);
+    }
 }

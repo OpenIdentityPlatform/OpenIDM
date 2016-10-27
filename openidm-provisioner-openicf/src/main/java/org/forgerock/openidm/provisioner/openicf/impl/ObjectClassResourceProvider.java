@@ -22,6 +22,7 @@ import static org.forgerock.json.resource.Responses.*;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -72,6 +73,7 @@ import org.forgerock.openidm.provisioner.openicf.commons.OperationOptionInfoHelp
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.HeaderUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilterVisitor;
@@ -631,8 +633,14 @@ class ObjectClassResourceProvider implements RequestHandler {
 
         try {
             // get reauth user and password from HttpContext
-            reauthPassword = context.asContext(HttpContext.class).getHeaderAsString(REAUTH_PASSWORD_HEADER);
             reauthUser = content.get(getUsernameAttributes().get(0)).asString();
+
+            reauthPassword = context.asContext(HttpContext.class).getHeaderAsString(REAUTH_PASSWORD_HEADER);
+            reauthPassword = HeaderUtil.decodeRfc5987(reauthPassword);
+        } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+            if (reauthPassword != null) {
+                logger.debug("Malformed RFC 5987 value for {} with username: {}", REAUTH_PASSWORD_HEADER, reauthUser, e);
+            }
         } catch (Exception e) {
             // there will not always be a HttpContext and this is acceptable so catch exception to
             // prevent the exception from stopping the remaining update

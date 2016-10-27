@@ -164,7 +164,7 @@ public class DelegatedAuthModule implements AsyncServerAuthModule {
             SecurityContextMapper securityContextMapper) throws AuthenticationException {
 
         if (!credential.isComplete()) {
-            logger.debug("Failed authentication, missing or empty headers");
+            logger.debug("Failed authentication: missing, malformed, or empty headers");
             return false;
         }
 
