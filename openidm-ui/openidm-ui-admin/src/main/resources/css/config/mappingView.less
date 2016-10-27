@@ -280,12 +280,25 @@
 
     .panel.panel-default {
       border:0px;
+      margin-bottom: 0px;
     }
 
-    .panel-footer .btn-link {
-      padding: 0 15px 0;
-      margin-top: 0px;
-      height: 72px;
+    .panel-footer {
+      .sync-now,
+      .stop-sync {
+        border-right: none;
+      }
+
+      .btn-link {
+        padding: 0 15px 0;
+        margin-top: 0px;
+        height: 72px;
+        width: 33.3%;
+
+        span {
+          display: none;
+        }
+      }
     }
   }
 }
@@ -299,10 +312,6 @@
     .col-sm-6 {
       padding-left:0px;
       padding-right:0px;
-
-      .btn-link {
-        width:100%;
-      }
     }
   }
 }
@@ -339,7 +348,7 @@
   .panel-footer {
     border-top: 1px solid #ddd;
 
-    .connector-actions {
+    .mapping-actions {
       border-top: 1px solid #ddd;
     }
 
@@ -358,11 +367,6 @@
       height: 62px;
       display: block;
       float: left;
-      width: 50%;
-
-      &.delete-button {
-        border-right:0px;
-      }
     }
 
     .mapping-action .btn-link {
@@ -833,12 +837,7 @@
 }
 
 #mappingConfigHolder {
-  .connector-actions-buttons {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .connector-actions {
+  .mapping-actions {
     .fa {
       color:inherit;
     }
@@ -917,8 +916,19 @@
   Media Queries
 */
 @media (min-width: 993px) {
-  .addMapping {
+  .mappings-list {
+    .mapping {
+      .panel-footer {
+        .btn-link {
+          span {
+            display: inline;
+          }
+        }
+      }
+    }
+  }
 
+  .addMapping {
     #resourceMappingWrapper {
       min-height: 224px;
     }
@@ -978,6 +988,18 @@
 
     .help-link {
       width:50%;
+    }
+    .mapping {
+      .panel-footer {
+        .btn-link {
+          width: 21%;
+
+          &.stop-sync,
+          &.sync-now {
+            width: 37%;
+          }
+        }
+      }
     }
   }
 
@@ -1078,8 +1100,6 @@
       }
     }
 
-    .panel-heading .connector-actions>div,
-    .panel-footer .connector-actions>div,
     .panel-heading .mapping-action>div,
     .panel-footer .mapping-action>div {
       float: right;
@@ -1087,7 +1107,7 @@
 
     .panel-heading,
     .panel-footer {
-      .connector-actions {
+      .mapping-actions {
         text-align: right;
         float: none !important;
         border: none;
@@ -1097,11 +1117,6 @@
       .btn-link {
         border-left: 1px solid #ddd;
         border-right: none;
-        width: auto;
-      }
-
-      .mapping-action .btn-link {
-        width: auto;
       }
     }
   }
