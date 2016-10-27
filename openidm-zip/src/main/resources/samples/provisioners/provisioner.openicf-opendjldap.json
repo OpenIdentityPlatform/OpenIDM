@@ -71,7 +71,7 @@
         "host" : "localhost",
         "groupMemberAttribute" : "uniqueMember",
         "accountSearchFilter" : null,
-        "passwordHashAlgorithm" : "SHA",
+        "passwordHashAlgorithm" : null,
         "usePagedResultControl" : true,
         "blockSize" : 100,
         "uidAttribute" : "dn",
