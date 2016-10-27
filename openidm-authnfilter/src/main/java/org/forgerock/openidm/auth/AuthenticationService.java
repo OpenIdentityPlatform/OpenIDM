@@ -27,6 +27,7 @@ import static org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper.*;
 import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClientSecret;
 
 import javax.inject.Provider;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -90,6 +91,7 @@ import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
 import org.forgerock.openidm.idp.impl.ProviderConfigMapper;
 import org.forgerock.openidm.router.IDMConnectionFactory;
+import org.forgerock.openidm.util.HeaderUtil;
 import org.forgerock.openidm.util.JettyPropertyUtil;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.AttributesContext;
@@ -647,6 +649,12 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                         String authcid = context.asContext(SecurityContext.class).getAuthenticationId();
                         HttpContext httpContext = context.asContext(HttpContext.class);
                         String password = httpContext.getHeaderAsString(HEADER_REAUTH_PASSWORD);
+                        try {
+                            password = HeaderUtil.decodeRfc5987(password);
+                        } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+                            logger.debug("Malformed RFC 5987 value for {} with authcid: {}",
+                                    HEADER_REAUTH_PASSWORD, authcid, e);
+                        }
                         if (StringUtils.isBlank(authcid) || StringUtils.isBlank(password)) {
                             logger.debug("Reauthentication failed, missing or empty headers");
                             return new ForbiddenException("Reauthentication failed, missing or empty headers")

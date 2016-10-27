@@ -21,7 +21,6 @@ import static org.forgerock.caf.authentication.framework.AuthenticationFramework
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.JsonValueFunctions.enumConstant;
-import static org.forgerock.json.resource.ResourceException.newResourceException;
 import static org.forgerock.json.resource.ResourceResponse.*;
 import static org.forgerock.openidm.auth.modules.MappingRoleCalculator.GroupComparison;
 import static org.forgerock.openidm.servletregistration.ServletRegistration.SERVLET_FILTER_AUGMENT_SECURITY_CONTEXT;
@@ -31,6 +30,7 @@ import javax.security.auth.Subject;
 import javax.security.auth.callback.CallbackHandler;
 import javax.security.auth.message.AuthStatus;
 import javax.security.auth.message.MessagePolicy;
+import java.io.UnsupportedEncodingException;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -54,6 +54,7 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.util.ContextUtil;
+import org.forgerock.openidm.util.HeaderUtil;
 import org.forgerock.script.ScriptEntry;
 import org.forgerock.script.ScriptRegistry;
 import org.forgerock.services.context.ClientContext;
@@ -542,8 +543,21 @@ public class IDMAuthModuleWrapper implements AsyncServerAuthModule {
 
         @Override
         public Credential getCredential(Request request) {
-            return new Credential(request.getHeaders().getFirst(HEADER_USERNAME),
-                    request.getHeaders().getFirst(HEADER_PASSWORD));
+            String username = request.getHeaders().getFirst(HEADER_USERNAME);
+            String password = request.getHeaders().getFirst(HEADER_PASSWORD);
+            try {
+                username = HeaderUtil.decodeRfc5987(username);
+            } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+                logger.debug("Failed authentication, malformed RFC 5987 value for {} with username: {}",
+                        HEADER_USERNAME, username, e);
+            }
+            try {
+                password = HeaderUtil.decodeRfc5987(password);
+            } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+                logger.debug("Failed authentication, malformed RFC 5987 value for {} with username: {}",
+                        HEADER_PASSWORD, username, e);
+            }
+            return new Credential(username, password);
         }
     };
 
