@@ -18,12 +18,12 @@
     <dependencies>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-salesforce-sample</artifactId>
+            <artifactId>salesforce-sample</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-google-sample</artifactId>
+            <artifactId>googleapps-sample</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -38,7 +38,7 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
-            <artifactId>openidm-cdm-sample</artifactId>
+            <artifactId>cdm-sample</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
@@ -168,7 +168,7 @@
                 <configuration>
                     <appendAssemblyId>false</appendAssemblyId>
                     <descriptors>
-                        <descriptor>src/main/assembly/zip.xml</descriptor>
+                        <descriptor>src/assembly/zip.xml</descriptor>
                     </descriptors>
                 </configuration>
                 <executions>

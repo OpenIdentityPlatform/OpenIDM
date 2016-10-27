@@ -16,9 +16,9 @@
     <name>OpenIDM Commercial Sample parent</name>
     <packaging>pom</packaging>
     <modules>
-        <module>google</module>
-        <module>salesforce</module>
-        <module>cdm</module>
+        <module>googleapps-sample</module>
+        <module>salesforce-sample</module>
+        <module>cdm-sample</module>
         <module>devops-postgres</module>
         <module>devops-openidm</module>
         <module>devops-gettingstarted</module>

@@ -150,7 +150,7 @@
             <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/samples/salesforce-connector</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-salesforce-sample</include>
+                <include>org.forgerock.openidm:salesforce-sample</include>
             </includes>
         </dependencySet>
         <!-- copy google sample commercial artifact bits -->
@@ -165,10 +165,10 @@
             <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/samples/google-connector</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-google-sample</include>
+                <include>org.forgerock.openidm:google-sample</include>
             </includes>
         </dependencySet>
-        <!-- copy cdm sample commercial artifact bits -->
+        <!-- copy ydm sample commercial artifact bits -->
         <dependencySet>
             <unpack>true</unpack>
             <unpackOptions>
@@ -180,7 +180,7 @@
             <directoryMode>755</directoryMode>
             <outputDirectory>/openidm/samples/cdm</outputDirectory>
             <includes>
-                <include>org.forgerock.openidm:openidm-cdm-sample</include>
+                <include>org.forgerock.openidm:cdm-sample</include>
             </includes>
         </dependencySet>
         <dependencySet>

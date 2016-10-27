@@ -12,7 +12,7 @@
         <version>5.0.0-SNAPSHOT</version>
     </parent>
 
-    <artifactId>openidm-google-sample</artifactId>
-    <name>OpenIDM GoogleApps Connector sample</name>
+    <artifactId>salesforce-sample</artifactId>
+    <name>OpenIDM Salesforce Connector sample</name>
     <packaging>jar</packaging>
 </project>
