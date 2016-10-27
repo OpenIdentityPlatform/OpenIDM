@@ -50,7 +50,7 @@
             "uid"
         ],
         "groupMemberAttribute" : "uniqueMember",
-        "passwordHashAlgorithm" : "SHA",
+        "passwordHashAlgorithm" : null,
         "usePagedResultControl" : true,
         "blockSize" : 100,
         "uidAttribute" : "dn",
