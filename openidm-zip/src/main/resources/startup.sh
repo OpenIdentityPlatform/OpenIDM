@@ -90,8 +90,11 @@ while [ "$1" ]; do
             else
                 PROJECT_HOME="$OPENIDM_HOME/$2"
             fi
+            CLOPTS="$CLOPTS -p $PROJECT_HOME"
+            shift
+        else
+            CLOPTS="$CLOPTS $1"
         fi
-        CLOPTS="$CLOPTS $1"
     fi
     shift
 done
