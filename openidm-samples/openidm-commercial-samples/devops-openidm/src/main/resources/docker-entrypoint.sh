@@ -89,6 +89,8 @@ if [ "$1" = 'openidm' ]; then
     # Keep track of this pid
     echo $$ > "$OPENIDM_PID_FILE"
 
+    chown idmuser:openidm "$OPENIDM_HOME"/security/*
+
     # Need to replace the hard-coded user:group with variables
     exec gosu idmuser:openidm java "$LOGGING_CONFIG" $JAVA_OPTS $OPENIDM_OPTS \
         -Djava.endorsed.dirs="$JAVA_ENDORSED_DIRS" \

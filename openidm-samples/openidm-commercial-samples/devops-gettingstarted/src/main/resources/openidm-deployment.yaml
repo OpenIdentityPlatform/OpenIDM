@@ -46,3 +46,15 @@ spec:
         ports:
         - containerPort: 8080
           name: openidm
+        volumeMounts:
+        - name: security
+          mountPath: /opt/idmuser/openidm/security
+      volumes:
+      - name: security
+        secret:
+          secretName: secstores
+          items:
+          - key: keystore.jceks
+            path: keystore.jceks
+          - key: truststore
+            path: truststore

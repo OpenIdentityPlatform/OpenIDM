@@ -8,26 +8,64 @@ Before you continue, install the Postgres and OpenIDM Docker images
 described in the README-docker-k8. You won't be able to complete
 this sample without them.
 
-## Before you press the "Eject" button
+## Before you press the "Eject" button, Secrets & more...
 
 The `openidm` deployment is using the Kubernetes `secrets` feature. But
 we haven't currently described this in terms of manifests. So... before
-you start you need to create the following secret, based on the
- `password.txt` file provided in the sample directory :
+you start you need to create the following secrets, based on the
+`password.txt` file provided in the sample directory and the 2
+"default" key stores :
  
     $ more openidm/samples/devops-gettingstarted/password.txt
     openidm
-
+    
     $ kubectl create secret generic postgres-pass --from-file=openidm/samples/devops-gettingstarted/password.txt
     secret "postgres-pass" created
-    
+        
     $ kubectl get secrets
     NAME                  TYPE                                  DATA      AGE
     default-token-x4bb7   kubernetes.io/service-account-token   3         1h
     postgres-pass         Opaque                                1         23m
 
-Once the `postgres-pass` is created, you are good to go.
+    
 
+
+And finally the `secstores` secret :
+
+    $ ls samples/devops-gettingstarted/
+    README.md		keystore.jceks		script
+    conf			openidm-deployment.yaml	truststore
+    data			password.txt
+    
+    $ kubectl create secret generic secstores \
+        --from-file=samples/devops-gettingstarted/keystore.jceks \
+        --from-file=samples/devops-gettingstarted/truststore
+    secret "secstores" created
+    
+        
+    $ kubectl get secret secstores
+    NAME        TYPE      DATA      AGE
+    secstores   Opaque    2         22s
+        
+    $ kubectl describe secret secstores
+    Name:		secstores
+    Namespace:	default
+    Labels:		<none>
+    Annotations:	<none>
+        
+    Type:	Opaque
+        
+    Data
+    ====
+    keystore.jceks:	5686 bytes
+    truststore:	122942 bytes
+
+Once the `postgres-pass` and the `secstores` secrets are created, you 
+can proceed to the next steps.
+
+The `postgres-pass` will be passed as an environment variable via
+the Kubernetes container `env` directive ; while the key and trust
+stores will be mounted in the pod via `volumeMounts`.
 
 ## Deploying the PostgreSQL repository
 

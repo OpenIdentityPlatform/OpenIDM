@@ -15,21 +15,6 @@ spec:
   clusterIP: None
 ---
 apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: local-pv
-  labels:
-    type: local
-spec:
-  capacity:
-    storage: 5Gi
-  accessModes:
-    - ReadWriteOnce
-  hostPath:
-    path: /data/pv-postgres
-  persistentVolumeReclaimPolicy: Recycle
----
-apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: postgres-pv-claim
@@ -87,3 +72,18 @@ spec:
       - name: pgdata
         persistentVolumeClaim:
           claimName: postgres-pv-claim
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-pv
+  labels:
+    type: local
+spec:
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: /data/pv-postgres
+  persistentVolumeReclaimPolicy: Recycle
