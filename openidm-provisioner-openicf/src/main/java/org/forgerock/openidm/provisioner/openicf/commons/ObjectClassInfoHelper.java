@@ -136,6 +136,11 @@ public class ObjectClassInfoHelper {
                         || !ResourceResponse.FIELD_CONTENT_REVISION.equals(field.leaf())){
                     returnResource = true;
                 }
+
+                if (field.isEmpty()) {
+                    attrsToGet.addAll(attributesReturnedByDefault);
+                    continue;
+                }
                 
                 for (AttributeInfoHelper attribute : attributes) {
                     if (attribute.getName().equals(field.leaf()) && attribute.getAttributeInfo().isReadable()) {
