@@ -238,7 +238,7 @@
         <felix.metatype.version>1.1.2</felix.metatype.version>
         <felix.fileinstall.version>3.5.4</felix.fileinstall.version>
         <felix.log.version>1.0.1</felix.log.version>
-        <felix.scr.version>2.0.2</felix.scr.version>
+        <felix.scr.version>2.0.6</felix.scr.version>
         <felix.scr.annotations.version>1.10.0</felix.scr.annotations.version>
         <felix.shell.version>1.4.3</felix.shell.version>
         <felix.shell.tui.version>1.4.1</felix.shell.tui.version>
