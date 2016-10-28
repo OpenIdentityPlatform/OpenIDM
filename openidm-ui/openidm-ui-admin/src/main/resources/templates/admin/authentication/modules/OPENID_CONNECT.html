@@ -15,7 +15,7 @@
         default="https://openam.example.com/openam/oauth2/.well-known/openid-configuration"
         noValidation="true"}}
 
-        <input name="properties.resolvers[].name" value="OIDC" type="hidden" />
+        <input name="properties.resolvers[].name" value="{{name}}" type="hidden" />
 
         {{> form/_basicInput
         value=client_id
@@ -48,6 +48,12 @@
         value=token_endpoint
         label="templates.socialProviders.tokenEndpoint"
         property="properties.resolvers[].token_endpoint"
+        noValidation="true"}}
+
+        {{> form/_basicInput
+        value=end_session_endpoint
+        label="templates.socialProviders.endSessionEndpoint"
+        property="properties.resolvers[].end_session_endpoint"
         noValidation="true"}}
 
         <div class="form-group">

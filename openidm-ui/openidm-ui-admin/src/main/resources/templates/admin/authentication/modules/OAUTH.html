@@ -8,7 +8,7 @@
 
         {{#each config.properties.resolvers}}
 
-        <input name="properties.resolvers[].name" value="OAUTH" type="hidden" />
+        <input name="properties.resolvers[].name" value="{{name}}" type="hidden" />
 
         {{> form/_basicInput
         value=client_id
@@ -46,7 +46,7 @@
         noValidation="true"}}
 
         {{> form/_basicInput
-        value=userInfo_endpoint
+        value=userinfo_endpoint
         label="templates.socialProviders.userInfoEndpoint"
         property="properties.resolvers[].userinfo_endpoint"
         default="https://openam.example.com/openam/oauth2/userinfo"

@@ -60,6 +60,11 @@ define([
 
         render: function (args) {
             this.data = _.clone(args, true);
+            if (!_.has(this.data, "config.properties.resolvers") || !this.data.config.properties.resolvers.length) {
+                this.data.config.properties.resolvers = [{
+                    name: "OAUTH"
+                }];
+            }
             this.data.userOrGroupValue = "userRoles";
             this.data.config.properties.resolvers = this.data.config.properties.resolvers || [{}];
             this.data.userOrGroupOptions = _.clone(AuthenticationAbstractView.prototype.userOrGroupOptions, true);

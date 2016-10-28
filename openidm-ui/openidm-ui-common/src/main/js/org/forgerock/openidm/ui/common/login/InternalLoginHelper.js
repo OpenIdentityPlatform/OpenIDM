@@ -63,21 +63,22 @@ define([
         var promise;
 
         if (conf.loggedUser) {
-            promise = conf.loggedUser.logout().then(() => {
+            promise = conf.loggedUser.logout().then((logoutUrl) => {
                 delete conf.loggedUser;
+                return logoutUrl;
             });
         } else {
             promise = $.Deferred().resolve();
         }
 
-        promise.then(() => {
+        promise.then((logoutUrl) => {
             if (conf.globalData.openamAuthEnabled){
                 amLoginUtils.openamLogout(successCallback);
                 return false;
             }
 
-            if (conf.globalData.logoutUrl) {
-                window.location.href = conf.globalData.logoutUrl;
+            if (logoutUrl || conf.globalData.logoutUrl) {
+                window.location.href = logoutUrl || conf.globalData.logoutUrl;
                 return false;
             }
 

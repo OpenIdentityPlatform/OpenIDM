@@ -77,6 +77,7 @@ define([
             this.data = _.clone(args, true);
             if (!_.has(this.data, "config.properties.resolvers") || !this.data.config.properties.resolvers.length) {
                 this.data.config.properties.resolvers = [{
+                    name: "OIDC",
                     scope: ["openid"]
                 }];
             }

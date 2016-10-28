@@ -14,11 +14,15 @@
  * Copyright 2016 ForgeRock AS.
  */
  var base64 = Packages.org.forgerock.util.encode.Base64url,
-    id_token = (httpRequest.getHeaders().getFirst('authToken').toString() + ""),
+    id_token = (httpRequest.getHeaders().getFirst('authToken').toString()+""),
+    provider = (httpRequest.getHeaders().getFirst('provider').toString()+""),
+    resolverConfig = properties.resolvers.filter(function (r) {return r.name === provider;})[0],
+    referer = httpRequest.getHeaders().getFirst('Referer').toString(),
     parts = id_token.split('.'),
     claimsContent = parts[1],
     claims = JSON.parse(new java.lang.String(base64.decode(claimsContent))),
-    session_token = claims.sessionTokenId || id_token;
+    session_token = claims.sessionTokenId || id_token,
+    modifiedMap = {};
 
 //console.log(JSON.stringify(claims, null, 4))
 try {
@@ -53,4 +57,13 @@ if (security.authenticationId === "amadmin") {
     };
 }
 
+if (resolverConfig.end_session_endpoint) {
+    Object.keys(security.authorization).forEach(function (k) {
+        modifiedMap[k] = security.authorization[k];
+    });
+    modifiedMap.logoutUrl = resolverConfig.end_session_endpoint +
+        "?id_token_hint=" + id_token +
+        "&post_logout_redirect_uri=" + referer;
+    security.authorization = modifiedMap;
+}
 security;

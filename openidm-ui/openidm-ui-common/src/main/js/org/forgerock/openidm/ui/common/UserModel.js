@@ -162,6 +162,7 @@ define([
                         ServiceInvoker.configuration.defaultHeaders || {},
                         null
                     );
+                    return this.logoutUrl;
                 });
             } else {
                 return $.Deferred().resolve();
@@ -194,6 +195,7 @@ define([
                 this.url = "/" + Constants.context + "/" + sessionDetails.authorization.component;
                 this.component = sessionDetails.authorization.component;
                 this.protectedAttributeList = sessionDetails.authorization.protectedAttributeList || [];
+                this.logoutUrl = sessionDetails.authorization.logoutUrl;
                 this.baseEntity = this.component + "/" + this.id;
                 this.uiroles = this.getUIRoles(sessionDetails.authorization.roles);
                 this.provider =  sessionDetails.authorization.provider;
