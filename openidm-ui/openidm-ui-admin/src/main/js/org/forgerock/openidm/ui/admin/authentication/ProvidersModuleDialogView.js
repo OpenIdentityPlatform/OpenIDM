@@ -151,11 +151,10 @@ define([
                                     return false;
                                 }
 
-                                var saveConfig = self.getSaveConfig(),
-                                    logoutURL = self.getLogoutURL();
+                                var saveConfig = self.getSaveConfig();
 
                                 if (saveConfig) {
-                                    self.saveConfig(logoutURL, saveConfig);
+                                    self.saveConfig(saveConfig);
                                     self.data.interruptClose = true;
                                     dialogRef.close();
                                 }
@@ -172,14 +171,6 @@ define([
 
         setConfig: function(config) {
             this.data.currentConfig = config;
-        },
-
-        getLogoutURL: function() {
-            return this.logoutURL;
-        },
-
-        setLogoutURL: function(logoutURL) {
-            this.logoutURL = logoutURL;
         },
 
         getSaveConfig: function() {
@@ -225,23 +216,10 @@ define([
             return authData;
         },
 
-        saveConfig: function(logoutURL, AMAuthConfig) {
-            this.saveLogoutURL(logoutURL).then(() => {
-                var newAuth = this.getAuthModulesConfig(this.getAuthenticationData(), AMAuthConfig);
-                this.setProperties(["authModules", "sessionModule"], newAuth);
-                this.saveAuthentication();
-            });
-        },
-
-        /**
-         * This function takes a wellknown URL formatted something like "https://openam.example.com/openam/oauth2/.well-known/openid-configuration"
-         * and formats it for use as a logout URL like "https://openam.example.com/openam/UI/Logout"
-         *
-         * @param wellKnownURL {string}
-         * @returns {string} - Logout URL
-         */
-        formatLogoutURL: function(wellKnownURL) {
-            return wellKnownURL.replace(/oauth2\/.*/, 'UI/Logout');
+        saveConfig: function(AMAuthConfig) {
+            var newAuth = this.getAuthModulesConfig(this.getAuthenticationData(), AMAuthConfig);
+            this.setProperties(["authModules", "sessionModule"], newAuth);
+            this.saveAuthentication();
         },
 
         generateAuthFromWellKnownURL: function(suppressMsg) {
@@ -252,11 +230,10 @@ define([
                 (config) => {
                     let sessionValidationBaseEndpoint = wellKnownURL.replace('oauth2', 'json').replace('.well-known/openid-configuration', 'sessions/');
 
-                    this.setLogoutURL(this.formatLogoutURL(wellKnownURL));
-
                     _.set(currentConfig.properties.resolvers[0], "well-known", wellKnownURL);
                     _.set(currentConfig.properties.resolvers[0], "authorization_endpoint", config.authorization_endpoint);
                     _.set(currentConfig.properties.resolvers[0], "token_endpoint", config.token_endpoint);
+                    _.set(currentConfig.properties.resolvers[0], "end_session_endpoint", config.end_session_endpoint);
                     _.set(currentConfig.properties.augmentSecurityContext, "globals.sessionValidationBaseEndpoint", sessionValidationBaseEndpoint);
 
                     this.setConfig(currentConfig);

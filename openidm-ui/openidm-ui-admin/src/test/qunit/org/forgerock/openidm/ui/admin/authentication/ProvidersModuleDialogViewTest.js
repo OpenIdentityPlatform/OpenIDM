@@ -4,17 +4,6 @@ define([
 ], function (_, ProvidersModuleDialogView) {
     QUnit.module('ProvidersModuleDialogView Tests');
 
-    QUnit.test("Create a logout URL from wellknown URL", function (assert) {
-        var newurl = ProvidersModuleDialogView.formatLogoutURL("https://openam.example.com/openam/oauth2/.well-known/openid-configuration");
-        assert.equal(newurl, "https://openam.example.com/openam/UI/Logout", "Logout URL Created from valid well-known URL");
-
-        newurl = ProvidersModuleDialogView.formatLogoutURL("openam/oauth2/testtest");
-        assert.equal(newurl, "openam/UI/Logout", "Logout URL created from semi valid-well known URL");
-
-        newurl = ProvidersModuleDialogView.formatLogoutURL("testtest");
-        assert.equal(newurl, "testtest", "No string replacement is done in invalid well-known URLs");
-    });
-
     QUnit.test("Update Authentication Modules data for AM use", function (assert) {
         var authData = ProvidersModuleDialogView.getAuthModulesConfig({
             "authModules": [

@@ -1052,6 +1052,7 @@
             "appId" : "App ID",
             "appSecret" : "App Secret",
             "authorizationEndpoint" : "Authorization Endpoint",
+            "endSessionEndpoint" : "End Session Endpoint",
             "tokenEndpoint" : "Token Endpoint",
             "userInfoEndpoint" : "User Info Endpoint",
             "title" : "Social ID Provider",
