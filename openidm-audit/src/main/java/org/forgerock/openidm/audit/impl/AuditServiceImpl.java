@@ -690,7 +690,7 @@ public class AuditServiceImpl implements AuditService {
                         auditEventHandler,
                         (EventHandlerConfiguration) Class.forName(auditEventHandler + "Configuration").newInstance());
             } catch (ClassNotFoundException|InstantiationException|IllegalAccessException e) {
-                logger.warn("Unable to create dummy audit event handler for: {}", auditEventHandler);
+                logger.debug("Unable to create dummy audit event handler for: {}", auditEventHandler);
             }
         }
     }
