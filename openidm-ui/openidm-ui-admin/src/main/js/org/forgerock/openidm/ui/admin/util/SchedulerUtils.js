@@ -40,43 +40,56 @@ define([
      */
     obj.getScheduleTypeData = function (schedule) {
         var scheduleTypeData,
-            action = schedule.invokeContext.action,
-            script = schedule.invokeContext.script,
-            maxMetaLength = 45;
+            invokeContext = schedule.invokeContext,
+            action = invokeContext.action,
+            script = invokeContext.script,
+            maxMetaLength = 45,
+            metaData;
 
         if (action && action === "liveSync") {
+            metaData = invokeContext.source;
             scheduleTypeData = {
                 type : "liveSync",
                 display: $.t("templates.scheduler.liveSync"),
-                meta: schedule.invokeContext.source,
+                meta: metaData,
                 metaSource: "source"
             };
         } else if (action && action === "reconcile") {
+            metaData = invokeContext.mapping;
             scheduleTypeData = {
                 type : "recon",
                 display: $.t("templates.scheduler.reconciliation"),
-                meta: schedule.invokeContext.mapping,
+                meta: metaData,
                 metaSource: "mapping"
             };
         } else if (_.has(schedule.invokeContext,"task")) {
+            if (invokeContext.scan) {
+                metaData = invokeContext.scan.object;
+            }
             scheduleTypeData = {
                 type : "taskScanner",
                 display: $.t("templates.scheduler.taskScanner"),
-                meta: schedule.invokeContext.scan.object,
+                meta: metaData,
                 metaSource: "scan.object"
             };
         } else if (script && script.source && script.source.indexOf("roles/onSync-roles") > -1) {
+            if (script.globals && script.globals.object) {
+                metaData = script.globals.object.name;
+            }
             scheduleTypeData = {
                 type : "temporalConstraintsOnRole",
                 display: $.t("templates.scheduler.temporalConstraintsOnRole"),
-                meta: script.globals.object.name,
+                meta: metaData,
                 metaSource: "script.globals.object.name"
             };
         }  else if (script && script.source && script.source.indexOf("triggerSyncCheck") > -1) {
+            if (script.globals) {
+                metaData = script.globals.userId;
+            }
             scheduleTypeData = {
                 type : "temporalConstraintsOnGrant",
                 display: $.t("templates.scheduler.temporalConstraintsOnGrant"),
-                meta: script.globals.userId,
+                meta: metaData,
                 metaSource: "script.globals.userId"
             };
         } else if (script) {
@@ -93,10 +106,17 @@ define([
                 scheduleTypeData.metaSource = "script.file";
             }
         }
-        //make sure the meta data is truncated for display purposes
-        //script type meta could be a very long string
-        if (scheduleTypeData.meta.length > maxMetaLength) {
-            scheduleTypeData.meta = scheduleTypeData.meta.substring(0,maxMetaLength) + "...";
+
+        // if meta is empty or undefined we need to handle this situation
+        // so the UI does not stop working
+        if (scheduleTypeData.meta) {
+            //make sure the meta data is truncated for display purposes
+            //script type meta could be a very long string
+            if (scheduleTypeData.meta.length > maxMetaLength) {
+                scheduleTypeData.meta = scheduleTypeData.meta.substring(0,maxMetaLength) + "...";
+            }
+        } else {
+            scheduleTypeData.meta = schedule._id;
         }
 
         return scheduleTypeData;

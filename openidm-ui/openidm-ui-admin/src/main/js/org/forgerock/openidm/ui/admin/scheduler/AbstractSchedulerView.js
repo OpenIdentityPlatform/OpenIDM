@@ -274,6 +274,7 @@ define([
                     resourceMapping: this.schedule.invokeContext[type],
                     resourceMappingOptions: resourceMapping.options
                 };
+
             return data;
         },
 
@@ -296,6 +297,13 @@ define([
             if (!this.$el.find(sourceMappingSelect).find(".selectize-control").length) {
                 this.$el.find(sourceMappingSelect).find("select").selectize();
             }
+
+            // if there is no resourceMapping set and data.type is "mapping" we know this is a new schedule
+            // we need to set the default mapping to be equal first value in the options array
+            if (!data.resourceMapping && data.type === "mapping" && resourceMapping.options.length > 0) {
+                this.data.schedule.invokeContext.mapping = resourceMapping.options[0];
+            }
+
             return this.$el.find(sourceMappingSelect);
         },
 
