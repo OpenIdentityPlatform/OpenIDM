@@ -20,6 +20,21 @@ define([
                 metaSource: "source"
             }
         },
+        //liveSync with no source set
+        {
+            schedule:{
+                "_id": "liveSyncNoSource",
+                "invokeContext": {
+                    "action": "liveSync"
+                }
+            },
+            expectedResult: {
+                type : "liveSync",
+                display: "LiveSync",
+                meta: "liveSyncNoSource",
+                metaSource: "source"
+            }
+        },
         //recon
         {
             schedule:{
@@ -33,6 +48,21 @@ define([
                 type : "recon",
                 display: "Reconciliation",
                 meta: "managedUser_systemLdapAccounts",
+                metaSource: "mapping"
+            }
+        },
+        //recon with no mapping set
+        {
+            schedule:{
+                "_id": "reconWithNoMapping",
+                "invokeContext": {
+                    "action": "reconcile"
+                }
+            },
+            expectedResult: {
+                type : "recon",
+                display: "Reconciliation",
+                meta: "reconWithNoMapping",
                 metaSource: "mapping"
             }
         },
@@ -90,6 +120,22 @@ define([
                 meta: "system/ldap/account",
                 metaSource: "scan.object"
             }
+        },
+        //taskscanner with no scan.object
+        {
+            schedule:{
+                "_id": "taskscannerWithNoScanObject",
+                "invokeService": "org.forgerock.openidm.taskscanner",
+                "invokeContext": {
+                    "task" : true
+                }
+            },
+            expectedResult: {
+                type : "taskScanner",
+                display: "Task Scanner",
+                meta: "taskscannerWithNoScanObject",
+                metaSource: "scan.object"
+            }
         }
     ];
 
@@ -98,7 +144,7 @@ define([
         _.each(scheduleObjArray, function (obj) {
             var data = JSON.stringify(SchedulerUtils.getScheduleTypeData(obj.schedule)),
                 expected = JSON.stringify(obj.expectedResult);
-                
+
             assert.equal(data,expected);
         });
     });
