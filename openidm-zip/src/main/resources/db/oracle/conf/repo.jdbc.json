@@ -282,6 +282,7 @@
                     "response/statusCode" : "response_statuscode",
                     "response/elapsedTime" : "response_elapsedtime",
                     "response/elapsedTimeUnits" : "response_elapsedtimeunits",
+                    "response/detail" : {"column" : "response_detail", "type" : "JSON_MAP"},
                     "roles" : "roles"
                 }
             },

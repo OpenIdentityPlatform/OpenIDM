@@ -421,6 +421,7 @@ CREATE  TABLE [openidm].[auditaccess] (
   response_statuscode NVARCHAR(255) NULL ,
   response_elapsedtime NVARCHAR(255) NULL ,
   response_elapsedtimeunits NVARCHAR(255) NULL ,
+  response_detail NTEXT NULL ,
   roles NTEXT NULL ,
   PRIMARY KEY CLUSTERED (objectid)
 );

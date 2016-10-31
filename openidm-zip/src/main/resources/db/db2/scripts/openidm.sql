@@ -397,6 +397,7 @@ CREATE TABLE SOPENIDM.AUDITACCESS (
     response_statuscode VARCHAR(255) NULL ,
     response_elapsedtime VARCHAR(255) NULL ,
     response_elapsedtimeunits VARCHAR(255) NULL ,
+    response_detail CLOB(2M) NULL ,
     roles CLOB(2M) NULL ,
     PRIMARY KEY (OBJECTID)
 ) IN DOPENIDM.SOIDM10;

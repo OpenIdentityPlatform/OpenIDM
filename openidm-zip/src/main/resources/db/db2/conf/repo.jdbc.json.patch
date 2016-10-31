@@ -15,7 +15,12 @@
     },
     {
         "operation" : "move",
-        "from" : "/resourceMapping/explicitMapping/audit/config/objectToColumn/runas",
-        "path" : "/resourceMapping/explicitMapping/audit/config/objectToColumn/runAs"
+        "from" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/runas",
+        "path" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/runAs"
+    },
+    {
+        "operation" : "add",
+        "field" : "/resourceMapping/explicitMapping/audit%2Faccess/objectToColumn/response%2Fdetail",
+        "value" : {"column" : "response_detail", "type" : "JSON_MAP"}
     }
 ]

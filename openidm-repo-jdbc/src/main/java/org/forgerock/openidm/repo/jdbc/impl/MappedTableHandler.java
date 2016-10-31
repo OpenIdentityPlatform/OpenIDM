@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2011-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.repo.jdbc.impl;
@@ -44,8 +36,10 @@ import java.util.TreeSet;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
+import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PreconditionFailedException;
@@ -307,7 +301,7 @@ public class MappedTableHandler implements TableHandler {
         JsonValue objVal = new JsonValue(obj);
 
         logger.debug("Preparing statement {} with {}, {}, {}", createStatement, type, localId, rev);
-        populatePrepStatementColumns(createStatement, objVal, tokenReplacementPropPointers);
+        populatePrepStatementColumns(type, createStatement, objVal, tokenReplacementPropPointers);
 
         if (!batchCreate) {
             logger.debug("Executing: {}", createStatement);
@@ -324,15 +318,20 @@ public class MappedTableHandler implements TableHandler {
      * values in the appropriate order. For update the final objectid is not
      * part of the declarative mapping and needs to be populated separately.
      *
+     * @param type
+     *            qualifier of the object to create/update
      * @param prepStatement
      *            the update or create prepared statement
+     * @param objVal
+     *            fields to map to the {@code prepStatement}
      * @param tokenPointers
      *            the token replacement pointers pointing into the object set to
      *            extract the relevant values
      * @return the buildNext column position if further populating is desired
      */
-    int populatePrepStatementColumns(PreparedStatement prepStatement, JsonValue objVal,
+    int populatePrepStatementColumns(String type, PreparedStatement prepStatement, JsonValue objVal,
             List<JsonPointer> tokenPointers) throws IOException, SQLException {
+        final JsonValue unmappedObjFields = objVal.copy();
         int colPos = 1;
         for (JsonPointer propPointer : tokenPointers) {
             // TODO: support explicit column types/conversion specified in
@@ -344,6 +343,7 @@ public class MappedTableHandler implements TableHandler {
                 propValue = null;
             } else if (rawValue.isString() || rawValue.isNull()) {
                 propValue = rawValue.asString();
+                unmappedObjFields.remove(propPointer);
             } else {
                 if (logger.isTraceEnabled()) {
                     logger.trace(
@@ -351,10 +351,21 @@ public class MappedTableHandler implements TableHandler {
                             colPos, propPointer, rawValue.getClass(), rawValue);
                 }
                 propValue = mapper.writeValueAsString(rawValue.getObject());
+                unmappedObjFields.remove(propPointer);
             }
 
             prepStatement.setString(colPos, propValue);
             colPos++;
+        }
+        if (!unmappedObjFields.asMap().isEmpty()) {
+            // some tables don't map _rev (e.g., audit)
+            unmappedObjFields.remove("_rev");
+            final Set<String> unmappedObjKeys = JsonValueUtils.flatten(unmappedObjFields).keySet();
+            if (!unmappedObjKeys.isEmpty()) {
+                // found unmapped fields in create/update request
+                throw new BadRequestException("Unmapped fields " + unmappedObjKeys + " for type " + type
+                        + " and table " + dbSchemaName + "." + tableName);
+            }
         }
         return colPos;
     }
@@ -404,8 +415,7 @@ public class MappedTableHandler implements TableHandler {
             JsonValue objVal = new JsonValue(obj);
             logger.trace("Populating prepared statement {} for {} {} {}", updateStatement, fullId, newLocalId, newRev);
             int nextCol =
-                    populatePrepStatementColumns(updateStatement, objVal,
-                            tokenReplacementPropPointers);
+                    populatePrepStatementColumns(type, updateStatement, objVal, tokenReplacementPropPointers);
             updateStatement.setString(nextCol, localId);
             logger.debug("Update statement: {}", updateStatement);
             int updateCount = updateStatement.executeUpdate();
