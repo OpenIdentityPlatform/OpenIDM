@@ -112,6 +112,7 @@ CREATE TABLE auditaccess (
   response_statuscode VARCHAR2(255 CHAR) NULL ,
   response_elapsedtime VARCHAR2(255 CHAR) NULL ,
   response_elapsedtimeunits VARCHAR2(255 CHAR) NULL ,
+  response_detail CLOB NULL ,
   roles CLOB NULL
 );
 

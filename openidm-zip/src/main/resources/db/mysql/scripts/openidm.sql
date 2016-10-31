@@ -354,6 +354,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `response_statuscode` VARCHAR(255) NULL ,
   `response_elapsedtime` VARCHAR(255) NULL ,
   `response_elapsedtimeunits` VARCHAR(255) NULL ,
+  `response_detail` TEXT NULL ,
   `roles` TEXT NULL ,
   PRIMARY KEY (`objectid`),
   INDEX `idx_auditaccess_status` (`response_status` ASC))
