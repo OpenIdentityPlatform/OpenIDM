@@ -1,4 +1,4 @@
-<!-- Copyright 2015 ForgeRock AS.
+<!-- Copyright 2015 - 2016 ForgeRock AS.
 	License terms: https://forgerock.org/cddlv1-0/ -->
 <div class="container">
     <div class="mapping-body row clearfix">
@@ -70,30 +70,6 @@
 
         <div class="mapping-create-body col-md-12 text-center">
             <button id="createMapping" disabled="true" type="button" class="add-mapping btn btn-primary">{{t "templates.mapping.createMapping"}}</button>
-        </div>
-
-        <div style="display:none;">
-            <div id="saveMappingDialog">
-                <p>{{t "templates.mapping.saveMappingMessage"}}</p>
-
-                <form class="form-horizontal" role="form">
-                    <div class="form-group required">
-                        <label class="col-sm-3 control-label">{{t "templates.mapping.mappingName"}}</label>
-                        <div class="col-sm-8">
-                            <input class="mappingName form-control" type="text" name="mappingName" value="" required autofocus>
-                        </div>
-                    </div>
-
-                    <div class="form-group required">
-                        <label class="col-sm-3 control-label">{{t "templates.mapping.linkedMapping"}}</label>
-                        <div class="col-sm-8">
-                            <select disabled="true" class="mappingLinked form-control" name="mappingLinked" >
-                                <option value="none">{{t "templates.mapping.noLinkedMapping"}}</option>
-                            </select>
-                        </div>
-                    </div>
-                </form>
-            </div>
         </div>
     </div>
 </div>
