@@ -256,7 +256,7 @@ define([
                         function () {
                             var schema = {};
 
-                            if (_this.data.targetSchema) {
+                            if (_this.data.targetSchema && _this.data.targetSchema[_this.data.property.target].type !== "relationship") {
                                 schema = {
                                     type: _this.data.targetSchema[_this.data.property.target].type
                                 };
