@@ -625,7 +625,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 JsonPointer pathPointer = new JsonPointer((String) diffOp.get(JsonPatch.PATH_PTR.leaf()));
                 if (systemRelationships.contains(pathPointer) && !relationshipFields.contains(pathPointer)) {
                     relationshipFields.add(pathPointer);
-                    logger.info("In updateRelationshipFields, adding onUpdate-script-modified relationship to " +
+                    logger.debug("In updateRelationshipFields, adding onUpdate-script-modified relationship to " +
                             "processed relationship set: {}", pathPointer);
                     // if the relationshipFields did not include a relationship which we have added to the newObject,
                     // populate the oldObject with the repo-resident state corresponding to the relationship to insure
@@ -635,7 +635,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                             final JsonValue relationships = fetchRelationshipFields(context, resourceId,
                                     Collections.singletonList(pathPointer));
                             oldObject.asMap().putAll(relationships.asMap());
-                            logger.info("In updateRelationshipFields, adding relationships {} to managed object {}.",
+                            logger.debug("In updateRelationshipFields, adding relationships {} to managed object {}.",
                                     relationships.toString(), resourceId);
                         } catch (ExecutionException | InterruptedException e) {
                             throw new InternalServerErrorException(e.getMessage(), e);
