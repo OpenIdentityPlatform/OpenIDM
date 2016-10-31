@@ -29,8 +29,8 @@ define([
     "org/forgerock/openidm/ui/admin/selfservice/SelfServiceStageDialogView",
     "org/forgerock/openidm/ui/common/delegates/SocialDelegate",
     "org/forgerock/openidm/ui/admin/mapping/properties/AttributesGridView",
-    "org/forgerock/openidm/ui/common/util/oAuthUtils"
-
+    "org/forgerock/openidm/ui/common/util/oAuthUtils",
+    "bootstrap-tabdrop"
 ], function($, _,
             handlebars,
             form2js,
@@ -278,6 +278,8 @@ define([
 
                         this.model.surpressSave = false;
 
+                        this.$el.find(".nav-tabs").tabdrop();
+
                         if (callback) {
                             callback();
                         }
@@ -297,6 +299,8 @@ define([
                     this.parentRender(_.bind(function () {
                         this.disableForm();
                         this.showCaptchaWarning(false);
+
+                        this.$el.find(".nav-tabs").tabdrop();
 
                         if (callback) {
                             callback();
