@@ -38,7 +38,8 @@ define([
     "org/forgerock/openidm/ui/admin/util/Scheduler",
     "org/forgerock/openidm/ui/admin/delegates/SchedulerDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
-    "org/forgerock/commons/ui/common/main/ValidatorsManager"
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
+    "bootstrap-tabdrop"
 ], function($, _,
             Backbone,
             Backgrid,
@@ -318,6 +319,8 @@ define([
                                 } else {
                                     this.oAuthConnector = false;
                                 }
+
+                                this.$el.find(".nav-tabs").tabdrop();
 
                                 //Render the connector template / details
                                 this.connectorTypeRef.render({"connectorType": this.data.connectorTypeName + "_" + this.data.currentMainVersion,
