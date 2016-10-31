@@ -17,14 +17,23 @@
 define([
     "jquery",
     "underscore",
+    "handlebars",
     "org/forgerock/commons/ui/common/main/AbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "bootstrap-dialog"
 
-], function($, _, AbstractView, eventManager, constants, router, ConfigDelegate, BootstrapDialog) {
+], function($, _, handlebars,
+            AbstractView,
+            eventManager,
+            constants,
+            router,
+            ConfigDelegate,
+            ValidatorsManager,
+            BootstrapDialog) {
     var MapResourceView = AbstractView.extend({
         template: "templates/admin/MapResourceView.html",
         noBaseTemplate: true,
@@ -34,6 +43,9 @@ define([
             "click #createMapping" : "submitNewMapping",
             "click .mapping-swap" : "swapSourceTarget"
         },
+        partials: [
+            "partials/mapping/_mapResourceDialog.html"
+        ],
         sourceAdded: false,
         targetAdded: false,
         sourceDetails: null,
@@ -106,45 +118,47 @@ define([
         },
         submitNewMapping: function(event) {
             event.preventDefault();
+
+            var _this = this,
+                mappingName,
+                nameCheck,
+                counter = 0,
+                generateMappingInfo = this.createMappingName(this.targetDetails, this.sourceDetails, this.$el.find("#mappingTarget .resource-object-type-select").val(), this.$el.find("#mappingSource .resource-object-type-select").val()),
+                tempName = generateMappingInfo.generatedName,
+                cleanName = tempName,
+                currentData = {
+                    "mappingName" : "",
+                    "availableLinks" : ""
+                };
+
+            this.targetDetails.saveName = generateMappingInfo.target;
+            this.sourceDetails.saveName =  generateMappingInfo.source;
+
+            while(!mappingName) {
+                nameCheck = this.checkMappingName(tempName);
+
+                if(nameCheck) {
+                    mappingName = tempName;
+                } else {
+                    tempName = cleanName + counter;
+                    counter++;
+                }
+            }
+
+            currentData.mappingName = mappingName;
+            currentData.availableLinks = this.findLinkedMapping();
+
             BootstrapDialog.show({
                 title: $.t("templates.mapping.createMappingDialog"),
                 type: BootstrapDialog.TYPE_DEFAULT,
-                message: this.$el.find("#saveMappingDialog").clone().attr("id","saveMappingDialogClone"),
-                onshown : _.bind(function (dialogRef) {
-                    var mappingName = null,
-                        nameCheck,
-                        tempName = this.createMappingName(dialogRef.$modalBody.find("#saveMappingDialogClone .mappingName")),
-                        cleanName = tempName,
-                        counter = 0,
-                        availableLinks;
-
-                    while(!mappingName) {
-                        nameCheck = this.checkMappingName(tempName);
-
-                        if(nameCheck) {
-                            mappingName = tempName;
-                        } else {
-                            tempName = cleanName + counter;
-                            counter++;
-                        }
-                    }
-
-                    dialogRef.$modalBody.find("#saveMappingDialogClone .mappingName").val(mappingName);
-
-                    availableLinks = this.findLinkedMapping();
-
-                    dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked .mapping-linked-option").remove();
-
-                    if(availableLinks.length > 0) {
-                        dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").prop("disabled", false);
-
-                        _.each(availableLinks, function(link){
-                            dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").append("<option class='mapping-linked-option' value='" +link.name +"'>" +link.name  +"</option>");
-                        }, this);
-                    } else {
-                        dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").prop("disabled", true);
-                    }
-                }, this),
+                message:  $(handlebars.compile("{{> mapping/_mapResourceDialog}}")(currentData)),
+                onshown : function (dialogRef) {
+                    _this.setElement(dialogRef.$modalBody);
+                    ValidatorsManager.bindValidators(dialogRef.$modalBody.find("form"));
+                },
+                onhide: function() {
+                    _this.setElement($("#resourceMappingBody"));
+                },
                 buttons: [{
                     label: $.t("common.form.cancel"),
                     id:"mappingSaveCancel",
@@ -170,7 +184,7 @@ define([
             tempMapping = {
                 "target" : this.targetDetails.saveName,
                 "source" : this.sourceDetails.saveName,
-                "name" : dialogRef.$modalBody.find("#saveMappingDialogClone .mappingName").val(),
+                "name" : dialogRef.$modalBody.find("#saveMappingDialog .mappingName").val(),
                 "properties": [],
                 "policies" : [
                     {
@@ -228,8 +242,8 @@ define([
                 ]
             };
 
-            if (dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").val() !== "none") {
-                tempMapping.links = dialogRef.$modalBody.find("#saveMappingDialogClone .mappingLinked").val();
+            if (dialogRef.$modalBody.find("#saveMappingDialog .mappingLinked").val() !== "none") {
+                tempMapping.links = dialogRef.$modalBody.find("#saveMappingDialog .mappingLinked").val();
             }
 
             completeMapping.mappings.push(tempMapping);
@@ -275,35 +289,50 @@ define([
 
             return returnedLinks;
         },
-        createMappingName: function() {
+        /**
+         *
+         * @param targetDetails - Object of the mapping target information
+         * @param sourceDetails - Object of the mapping source information
+         * @param targetObjectType - Object type name for a target connector
+         * @param sourceObjectType - Object type name for a source connector
+         *
+         * Generates a mapping name based off of the mapping source and target items created
+         */
+        createMappingName: function(targetDetails, sourceDetails, targetObjectType, sourceObjectType) {
             var targetName = "",
                 sourceName = "",
+                mappingSource,
+                mappingTarget,
                 tempName,
                 tempObjectType;
 
-            tempName = this.properCase(this.targetDetails.name);
+            tempName = this.properCase(targetDetails.name);
 
-            if(this.targetDetails.resourceType === "connector") {
-                tempObjectType = this.$el.find("#mappingTarget .resource-object-type-select").val().charAt(0).toUpperCase() + this.$el.find("#mappingTarget .resource-object-type-select").val().substring(1);
+            if(targetDetails.resourceType === "connector") {
+                tempObjectType = targetObjectType.charAt(0).toUpperCase() +targetObjectType.substring(1);
                 targetName = "system" + tempName +tempObjectType;
-                this.targetDetails.saveName = "system/" + this.targetDetails.name +"/" +this.$el.find("#mappingTarget .resource-object-type-select").val();
+                mappingTarget = "system/" + targetDetails.name +"/" +targetObjectType;
             } else{
                 targetName = "managed" + tempName;
-                this.targetDetails.saveName = "managed/" + this.targetDetails.name;
+                mappingTarget = "managed/" + targetDetails.name;
             }
 
-            tempName = this.properCase(this.sourceDetails.name);
+            tempName = this.properCase(sourceDetails.name);
 
-            if(this.sourceDetails.resourceType === "connector") {
-                tempObjectType = this.$el.find("#mappingSource .resource-object-type-select").val().charAt(0).toUpperCase() + this.$el.find("#mappingSource .resource-object-type-select").val().substring(1);
+            if(sourceDetails.resourceType === "connector") {
+                tempObjectType = sourceObjectType.charAt(0).toUpperCase() + sourceObjectType.substring(1);
                 sourceName = "system" +tempName +tempObjectType;
-                this.sourceDetails.saveName = "system/" + this.sourceDetails.name +"/" +this.$el.find("#mappingSource .resource-object-type-select").val();
+                mappingSource = "system/" + sourceDetails.name +"/" +sourceObjectType;
             } else{
                 sourceName = "managed" + tempName;
-                this.sourceDetails.saveName = "managed/" + this.sourceDetails.name;
+                mappingSource = "managed/" + sourceDetails.name;
             }
 
-            return sourceName + "_" +targetName;
+            return {
+                source: mappingSource,
+                target: mappingTarget,
+                generatedName : sourceName + "_" +targetName
+            };
         },
         //Used to create a properly formatted name of the user selected resources. example managedSystem or sourceLdapAccount
         properCase: function(name) {
@@ -408,6 +437,27 @@ define([
             return !_.find(this.mappingList, function(mapping) {
                 return value === mapping.name;
             }, this);
+        },
+        validationSuccessful: function (event) {
+            AbstractView.prototype.validationSuccessful(event);
+            this.customValidate();
+        },
+
+        validationFailed: function (event, details) {
+            AbstractView.prototype.validationFailed(event, details);
+            this.customValidate();
+        },
+
+        customValidate: function() {
+            var formValid = ValidatorsManager.formValidated(this.$el.find("form"));
+
+            if (formValid) {
+                //Save button not in this.$el scope
+                $("#mappingSaveOkay").attr("disabled", false);
+            } else {
+                $("#mappingSaveOkay").attr("disabled", true);
+            }
+
         }
     });
 
