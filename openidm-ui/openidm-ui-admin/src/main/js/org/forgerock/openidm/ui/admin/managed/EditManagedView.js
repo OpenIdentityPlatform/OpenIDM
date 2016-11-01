@@ -26,6 +26,7 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+    "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
     "org/forgerock/openidm/ui/admin/util/ScriptList",
     "org/forgerock/commons/ui/common/util/ModuleLoader",
     "org/forgerock/commons/ui/common/util/UIUtils",
@@ -42,6 +43,7 @@ define([
             Constants,
             Router,
             ConfigDelegate,
+            RepoDelegate,
             ScriptList,
             ModuleLoader,
             UIUtils,
@@ -74,9 +76,7 @@ define([
         },
 
         render: function(args, callback) {
-            var managedPromise,
-                repoCheckPromise,
-                eventKeys,
+            var eventKeys,
                 propertiesEventList = ["onValidate", "onRetrieve", "onStore"];
 
             this.args = args;
@@ -96,11 +96,12 @@ define([
             this.propertyHooks = [];
             this.propertiesCounter = 0;
 
-            managedPromise = ConfigDelegate.readEntity("managed");
-            repoCheckPromise = ConfigDelegate.getConfigList();
-
-            $.when(managedPromise, repoCheckPromise).then(_.bind(function(managedObjects, configFiles){
+            $.when(
+                ConfigDelegate.readEntity("managed"),
+                RepoDelegate.findRepoConfig()
+            ).then(_.bind(function(managedObjects, repoConfig){
                 this.data.managedObjects = managedObjects;
+                this.data.repoConfig = repoConfig;
 
                 _.each(managedObjects.objects, _.bind(function(managedObject, iterator) {
                     if(managedObject.name === args[0]) {
@@ -143,9 +144,8 @@ define([
                     this.data.availableHashes = ["MD5","SHA-1","SHA-256","SHA-384","SHA-512"];
                 }
 
-                this.checkRepo(configFiles[0], _.bind(function(){
-                    this.managedRender(callback);
-                }, this));
+                this.managedRender(callback);
+
             }, this));
         },
 
@@ -360,21 +360,12 @@ define([
             var promises = [];
 
             UIUtils.confirmDialog($.t("templates.managed.managedDelete"), "danger", _.bind(function(){
-                _.each(this.data.managedObjects.objects, function(managedObject, index){
-                    if(managedObject.name === this.data.currentManagedObject.name) {
-                        this.data.managedObjects.objects.splice(index, 1);
-                    }
+                this.data.managedObjects.objects = _.reject(this.data.managedObjects.objects, function(managedObject){
+                    return managedObject.name === this.data.currentManagedObject.name;
                 }, this);
 
-                if(this.data.currentRepo === "repo.orientdb") {
-                    if(this.data.repoObject.dbStructure.orientdbClass["managed_" + this.data.currentManagedObject.name] !== undefined){
-                        delete this.data.repoObject.dbStructure.orientdbClass["managed_" + this.data.currentManagedObject.name];
-                    }
-
-                    promises.push(ConfigDelegate.updateEntity(this.data.currentRepo, this.data.repoObject));
-                }
-
                 promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.managedObjects.objects}));
+                promises.push(RepoDelegate.deleteManagedObject(this.data.repoConfig, this.data.currentManagedObject.name));
 
                 $.when.apply($, promises).then(
                     function(){
