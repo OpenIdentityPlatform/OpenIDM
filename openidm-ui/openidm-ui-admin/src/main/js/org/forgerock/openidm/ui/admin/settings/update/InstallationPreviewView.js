@@ -76,52 +76,47 @@ define([
          */
         render: function(configs, callback) {
 
-            this.model = configs;
+            this.model = configs.model || configs;
+            if (configs.data) {
+                this.data = _.extend(this.data, configs.data);
+            }
 
             // Manipulating the treegrid could take a few seconds given enough data, so we invoke the spinner manually.
             SpinnerManager.showSpinner();
 
-            // The delay is to ensure that the spinner is rendered before any resource heavy rendering
-            // beings, otherwise the spinner may not show at all.
-            _.delay(_.bind(function() {
-                // This partial is used before the parent render where it would normally be loaded.
-                UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(_.bind(function () {
+            // This partial is used before the parent render where it would normally be loaded.
+            UIUtils.preloadPartial("partials/settings/_updateStatePopover.html").then(() => {
 
-                    this.data = _.extend(this.data, _.pick(this.model, ["modifiedFilesExist", "all", "treeGrid"]));
-                    this.data.link = this.model.archiveModel.get("resource");
-                    this.data.version = this.model.archiveModel.get("toVersion");
+                this.data.link = this.model.archiveModel.get("resource");
+                this.data.version = this.model.archiveModel.get("toVersion");
 
-                    if (this.data.all && _.has(this.model, "allTreeGrid")) {
-                        this.data.treeGrid = this.model.allTreeGrid;
+                if (this.data.all && _.has(this.model, "allTreeGrid")) {
+                    this.data.treeGrid = this.model.allTreeGrid;
+                } else if (!this.data.all && _.has(this.model, "modifiedTreeGrid")) {
+                    this.data.treeGrid = this.model.modifiedTreeGrid;
+                } else {
+                    this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(this.data.all), ["filePath", "fileState"]);
 
-                    } else if (!this.data.all && _.has(this.model, "modifiedTreeGrid")) {
-                        this.data.treeGrid = this.model.modifiedTreeGrid;
-
+                    if (this.data.all) {
+                        this.model.allTreeGrid = this.data.treeGrid;
                     } else {
-                        this.data.treeGrid = TreeGridUtils.filepathToTreegrid("filePath", this.formatFiles(this.data.all), ["filePath", "fileState"]);
+                        this.model.modifiedTreeGrid = this.data.treeGrid;
+                    }
+                }
 
-                        if (this.data.all) {
-                            this.model.allTreeGrid = this.data.treeGrid;
-                        } else {
-                            this.model.modifiedTreeGrid = this.data.treeGrid;
-                        }
+                this.parentRender(() => {
+                    SpinnerManager.hideSpinner();
+
+                    if (this.data.repoUpdatesExist) {
+                        this.$el.find('#previewWrapper').hide();
+                        this.model.repoUpdates({"model": this.model, "data": this.data});
                     }
 
-                    this.parentRender(_.bind(function () {
-                        SpinnerManager.hideSpinner();
-
-                        if (this.data.repoUpdatesExist) {
-                            this.$el.find('#previewWrapper').hide();
-                            this.model.repoUpdates({"model": this.model, "data": this.data});
-                        }
-
-                        if (callback) {
-                            callback();
-                        }
-                    }, this));
-
-                }, this));
-            },this), 1);
+                    if (callback) {
+                        callback();
+                    }
+                });
+            });
         },
 
         showModifiedTreegrid: function(e) {
@@ -132,7 +127,7 @@ define([
             this.$el.find(".filter-file-list").toggleClass("active", false);
             $(e.currentTarget).toggleClass("active");
             this.data.all = false;
-            this.render(_.extend(this.data, this.model));
+            this.render({"data": this.data, "model": this.model});
         },
 
         showAllTreegrid: function(e) {
@@ -143,7 +138,7 @@ define([
             this.$el.find(".filter-file-list").toggleClass("active", false);
             $(e.currentTarget).toggleClass("active");
             this.data.all = true;
-            this.render(_.extend(this.data, this.model));
+            this.render({"data": this.data, "model": this.model});
         },
 
         installUpdate: function(e) {
@@ -151,42 +146,38 @@ define([
                 e.preventDefault();
             }
 
-            MaintenanceDelegate.getLicense(this.model.archiveModel.get("archive")).then(
-                _.bind(function(response) {
-                    if (response.license) {
+            MaintenanceDelegate.getLicense(this.model.archiveModel.get("archive")).then((response) => {
+                if (response.license) {
 
-                        var self = this;
-                        BootstrapDialog.show({
-                            title: $.t("templates.update.preview.licenseAgreement"),
-                            type: "type-default",
-                            message: response.license,
-                            cssClass: "scrollingLicenseAgreement",
-                            buttons: [
-                                {
-                                    label: $.t('common.form.cancel'),
-                                    action: _.bind(function (dialog) {
-                                        dialog.close();
-                                        this.model.cancel();
-                                    }, this)
-                                }, {
-                                    label: $.t("templates.update.preview.acceptLicense"),
-                                    cssClass: "btn-primary",
-                                    action: _.bind(function (dialog) {
-                                        dialog.close();
-                                        self.model.install(this.model.archiveModel);
-                                    }, this)
-                                }
-                            ]
-                        });
-                    } else {
-                        this.model.install(this.model.archiveModel);
-                    }
-                }, this),
-                _.bind(function() {
-                    this.model.error($.t("templates.update.preview.errorInitiatingUpdate"));
-                }, this)
-            );
-
+                    var self = this;
+                    BootstrapDialog.show({
+                        title: $.t("templates.update.preview.licenseAgreement"),
+                        type: "type-default",
+                        message: response.license,
+                        cssClass: "scrollingLicenseAgreement",
+                        buttons: [
+                            {
+                                label: $.t('common.form.cancel'),
+                                action: _.bind(function(dialog) {
+                                    dialog.close();
+                                    this.model.cancel();
+                                }, this)
+                            }, {
+                                label: $.t("templates.update.preview.acceptLicense"),
+                                cssClass: "btn-primary",
+                                action: _.bind(function(dialog) {
+                                    dialog.close();
+                                    self.model.install(this.model.archiveModel);
+                                }, this)
+                            }
+                        ]
+                    });
+                } else {
+                    this.model.install(this.model.archiveModel);
+                }
+            }, () => {
+                this.model.error($.t("templates.update.preview.errorInitiatingUpdate"));
+            });
         },
 
         cancelUpdate: function(e) {
@@ -203,12 +194,12 @@ define([
 
             // The delay is to ensure that the spinner is rendered before any resource heavy rendering
             // beings, otherwise the spinner may not show at all.
-            _.delay(_.bind(function() {
+            _.delay(() => {
                 this.$el.find(".node-container").hide();
                 this.$el.find(".treegrid-expander").toggleClass("fa-caret-right", true);
                 this.$el.find(".treegrid-expander").toggleClass("fa-caret-down", false);
                 SpinnerManager.hideSpinner();
-            }, this), 1);
+            }, 1);
         },
 
         expandTreegrid: function(e) {
@@ -217,12 +208,12 @@ define([
 
             // The delay is to ensure that the spinner is rendered before any resource heavy rendering
             // beings, otherwise the spinner may not show at all.
-            _.delay(_.bind(function() {
+            _.delay(() => {
                 this.$el.find(".node-container").show();
                 this.$el.find(".treegrid-expander").toggleClass("fa-caret-right", false);
                 this.$el.find(".treegrid-expander").toggleClass("fa-caret-down", true);
                 SpinnerManager.hideSpinner();
-            }, this), 1);
+            }, 1);
         },
 
         showHideNode: function(e) {
@@ -236,14 +227,14 @@ define([
                 files = _.clone(this.model.files, true);
 
             if (all) {
-                formattedFileList = _.map(files, function (file) {
+                formattedFileList = _.map(files, function(file) {
                     var temp = file.filePath.split("/");
                     file.fileState = Handlebars.compile("{{> settings/_updateStatePopover}}")({
                         "desc": $.t("templates.update.preview.fileStates." + file.fileState + ".desc"),
                         "name": $.t("templates.update.preview.fileStates." + file.fileState + ".previewName")
                     });
                     file.fileName = _.last(temp);
-                    file.partialFilePath = _.take(temp, temp.length-1).join("");
+                    file.partialFilePath = _.take(temp, temp.length - 1).join("");
                     return file;
                 });
 
@@ -258,14 +249,14 @@ define([
                     this.render(_.extend(this.data, this.model));
 
                 } else {
-                    formattedFileList = _.map(files, function (file) {
+                    formattedFileList = _.map(files, function(file) {
                         var temp = file.filePath.split("/");
                         file.fileState = Handlebars.compile("{{> settings/_updateStatePopover}}")({
                             "desc": $.t("templates.update.preview.fileStates." + file.fileState + ".desc"),
                             "name": $.t("templates.update.preview.fileStates." + file.fileState + ".previewName")
                         });
                         file.fileName = _.last(temp);
-                        file.partialFilePath = _.take(temp, temp.length-1).join("");
+                        file.partialFilePath = _.take(temp, temp.length - 1).join("");
                         return file;
                     });
                 }
@@ -279,7 +270,7 @@ define([
                         return false;
                     }
                 },
-                function(i) { return i.fileName.toLowerCase();}
+                function(i) { return i.fileName.toLowerCase(); }
             ]);
         }
     });
