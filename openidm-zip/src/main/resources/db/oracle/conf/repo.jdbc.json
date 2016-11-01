@@ -175,7 +175,7 @@
                     "transactionId" : "transactionid",
                     "userId" : "userid",
                     "trackingIds" : {"column" : "trackingids", "type" : "JSON_LIST"},
-                    "runas" : "runas",
+                    "runAs" : "runas",
                     "objectId" : "configobjectid",
                     "operation" : "operation",
                     "before" : "beforeObject",

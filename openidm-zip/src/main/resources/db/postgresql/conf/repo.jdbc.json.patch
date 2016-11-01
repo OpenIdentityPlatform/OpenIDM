@@ -22,5 +22,10 @@
         "operation" : "replace",
         "field" : "/commands/explicitTables/purge-by-recon-expired",
         "value" : "DELETE FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND activitydate < ${timestamp}"
+    },
+    {
+        "operation" : "move",
+        "from" : "/resourceMapping/explicitMapping/audit/config/objectToColumn/runas",
+        "path" : "/resourceMapping/explicitMapping/audit/config/objectToColumn/runAs"
     }
 ]
