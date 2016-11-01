@@ -165,13 +165,13 @@ log.info("Search: ObjectClass {0}, where {1}", objectClass, where);
 def resultCount = 0
 switch ( objectClass ) {
     case auditaccess:
-        def dataCollector = [ uid: "" ]
+        def dataCollector = [ id: "" ]
 
         def handleCollectedData = {
-            if (dataCollector.uid != "") {
+            if (dataCollector.id != "") {
                 handler {
-                    uid dataCollector.uid
-                    id dataCollector.id
+                    uid dataCollector.id
+                    id dataCollector.eventid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'eventname', dataCollector.eventname
@@ -223,13 +223,13 @@ switch ( objectClass ) {
         """
 
         sql.eachRow(statement, whereParams, { row ->
-            if (dataCollector.uid != row.objectid) {
+            if (dataCollector.eventid != row.objectid) {
                 // process each row of the resultset
                 handleCollectedData();
 
                 dataCollector = [
                     id : row.id as String,
-                    uid : row.objectid,
+                    eventid : row.objectid,
                     activitydate : row.activitydate,
                     transactionid : row.transactionid,
                     eventname : row.eventname,
@@ -267,13 +267,13 @@ switch ( objectClass ) {
         break
 
     case auditauthentication:
-        def dataCollector = [ uid: "" ]
+        def dataCollector = [ id: "" ]
 
         def handleCollectedData = {
-            if (dataCollector.uid != "") {
+            if (dataCollector.id != "") {
                 handler {
-                    uid dataCollector.uid
-                    id dataCollector.id
+                    uid dataCollector.id
+                    id dataCollector.eventid
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'userid', dataCollector.userid
@@ -294,13 +294,13 @@ switch ( objectClass ) {
         """
 
         sql.eachRow(statement, whereParams, { row ->
-            if (dataCollector.uid != row.objectid) {
+            if (dataCollector.eventid != row.objectid) {
                 // process each row of the resultset
                 handleCollectedData();
 
                 dataCollector = [
                     id : row.id as String,
-                    uid : row.objectid,
+                    eventid : row.objectid,
                     transactionid : row.transactionid,
                     activitydate : row.activitydate,
                     userid : row.userid,
@@ -323,13 +323,13 @@ switch ( objectClass ) {
         break
 
     case auditactivity:
-        def dataCollector = [ uid: "" ]
+        def dataCollector = [ id: "" ]
 
         def handleCollectedData = {
-            if (dataCollector.uid != "") {
+            if (dataCollector.id != "") {
                 handler {
-                    uid dataCollector.uid
-                    id dataCollector.id
+                    uid dataCollector.id
+                    id dataCollector.eventid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'eventname', dataCollector.eventname
@@ -355,13 +355,13 @@ switch ( objectClass ) {
         """
 
         sql.eachRow(statement, whereParams, { row ->
-            if (dataCollector.uid != row.objectid) {
+            if (dataCollector.eventid != row.objectid) {
                 // process each row of the resultset
                 handleCollectedData();
 
                 dataCollector = [
                     id : row.id as String,
-                    uid : row.objectid,
+                    eventid : row.objectid,
                     activitydate : row.activitydate,
                     transactionid : row.transactionid,
                     eventname : row.eventname,
@@ -390,13 +390,13 @@ switch ( objectClass ) {
         break
 
     case auditrecon:
-        def dataCollector = [ uid: "" ]
+        def dataCollector = [ id: "" ]
 
         def handleCollectedData = {
-            if (dataCollector.uid != "") {
+            if (dataCollector.id != "") {
                 handler {
-                    uid dataCollector.uid
-                    id dataCollector.id
+                    uid dataCollector.id
+                    id dataCollector.eventid
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'eventname', dataCollector.eventname
@@ -427,13 +427,13 @@ switch ( objectClass ) {
         """
 
         sql.eachRow(statement, whereParams, { row ->
-            if (dataCollector.uid != row.objectid) {
+            if (dataCollector.eventid != row.objectid) {
                 // process each row of the resultset
                 handleCollectedData();
 
                 dataCollector = [
                     id : row.id as String,
-                    uid : row.objectid,
+                    eventid : row.objectid,
                     transactionid : row.transactionid,
                     activitydate : row.activitydate,
                     eventname : row.eventname,
@@ -466,13 +466,13 @@ switch ( objectClass ) {
         break
 
     case auditsync:
-        def dataCollector = [ uid: "" ]
+        def dataCollector = [ id: "" ]
 
         def handleCollectedData = {
-            if (dataCollector.uid != "") {
+            if (dataCollector.id != "") {
                 handler {
-                    uid dataCollector.uid
-                    id dataCollector.id
+                    uid dataCollector.id
+                    id dataCollector.eventid
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'eventname', dataCollector.eventname
@@ -498,13 +498,13 @@ switch ( objectClass ) {
         """
 
         sql.eachRow(statement, whereParams, { row ->
-            if (dataCollector.uid != row.objectid) {
+            if (dataCollector.eventid != row.objectid) {
                 // process each row of the resultset
                 handleCollectedData();
 
                 dataCollector = [
                     id : row.id as String,
-                    uid : row.objectid,
+                    eventid : row.objectid,
                     transactionid : row.transactionid,
                     activitydate : row.activitydate,
                     eventname : row.eventname,
@@ -531,13 +531,13 @@ switch ( objectClass ) {
         break
 
     case auditconfig:
-        def dataCollector = [ uid: "" ]
+        def dataCollector = [ id: "" ]
 
         def handleCollectedData = {
-            if (dataCollector.uid != "") {
+            if (dataCollector.id != "") {
                 handler {
-                    uid dataCollector.uid
-                    id dataCollector.id
+                    uid dataCollector.id
+                    id dataCollector.eventid
                     attribute 'activitydate', dataCollector.activitydate
                     attribute 'transactionid', dataCollector.transactionid
                     attribute 'eventname', dataCollector.eventname
@@ -560,13 +560,13 @@ switch ( objectClass ) {
         """
 
         sql.eachRow(statement, whereParams, { row ->
-            if (dataCollector.uid != row.objectid) {
+            if (dataCollector.eventid != row.objectid) {
                 // process each row of the resultset
                 handleCollectedData();
 
                 dataCollector = [
                         id : row.id as String,
-                        uid : row.objectid,
+                        eventid : row.objectid,
                         activitydate : row.activitydate,
                         transactionid : row.transactionid,
                         eventname : row.eventname,

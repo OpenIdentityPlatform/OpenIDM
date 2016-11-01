@@ -122,7 +122,7 @@ switch ( objectClass ) {
                     id,
                     attributeMap.get("transactionid")?.getValue()?.get(0),
                     attributeMap.get("activitydate")?.getValue()?.get(0),
-                    attributeMap.get("userid")?.getValue().get(0),
+                    attributeMap.get("userid")?.getValue()?.get(0),
                     attributeMap.get("eventname")?.getValue()?.get(0),
                     attributeMap.get("result")?.getValue()?.get(0),
                     attributeMap.get("principal")?.getValue()?.get(0),
