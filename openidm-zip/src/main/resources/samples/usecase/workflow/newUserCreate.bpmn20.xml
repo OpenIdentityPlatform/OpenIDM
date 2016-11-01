@@ -183,7 +183,7 @@
                         body : 'The requested user ' + userName + ' was successfully created'
                     ]
                     openidm.action("external/email", 'sendEmail',  emailParams);
-                    emailParams._body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
+                    emailParams.body = 'Welcome! Your work days are from ' + startDate + ' to ' + endDate;
                     openidm.action("external/email", 'sendEmail', emailParams);
                 }
             </script>
