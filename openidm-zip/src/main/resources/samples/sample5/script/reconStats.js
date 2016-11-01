@@ -16,8 +16,8 @@
 // Author: Gael.Allioux@forgerock.com
 // Date: 11/30/2011
 
-// Modifications by Jake.Feasel@forgerock.com
-// Date: 4/8/2014
+// Modifications by Joy.Feng@forgerock.com
+// Date: 11/1/2016
 
 /*global global,source,target */
 
@@ -45,7 +45,7 @@ if (openidm.read("config/external.email")) {
 
     template = Handlebars.compile(readFile(identityServer.getProjectLocation() + "/script/reconStatTemplate.html"));
 
-    email._body = template({
+    email.body = template({
         "global": global,
         "source": source,
         "target": target
