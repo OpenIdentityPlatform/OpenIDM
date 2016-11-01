@@ -281,6 +281,9 @@
                 "delete" : "Social provider configuration deleted",
                 "cannotUnbind" : "Before disabling __provider__,",
                 "cannotUnbindLink" : "create a local password"
+            },
+            "update" : {
+                "notAvailable" : "Update is not available for the community build" 
             }
         },
         "AppConfiguration" : {
