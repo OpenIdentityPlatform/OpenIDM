@@ -32,7 +32,7 @@
         "username" : "root",
         "password" : "password",
         "driverClassName" : "com.mysql.jdbc.Driver",
-        "url" : "jdbc:mysql://localhost:3306/audit",
+        "url" : "jdbc:mysql://&{openidm.repo.host}:&{openidm.repo.port}/audit",
         "autoCommit" : true,
         "reloadScriptOnExecution" : false,
         "jdbcDriver" : "com.mysql.jdbc.Driver",
@@ -48,11 +48,11 @@
     "objectTypes" : {
         "access" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
+            "id" : "auditaccess",
             "type" : "object",
             "nativeType" : "auditaccess",
             "properties" : {
-                "_id" : {
+                "eventId" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
@@ -134,11 +134,11 @@
         },
         "activity" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
+            "id" : "auditactivity",
             "type" : "object",
             "nativeType" : "auditactivity",
             "properties" : {
-                "_id" : {
+                "eventId" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
@@ -244,11 +244,11 @@
         },
         "authentication" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
+            "id" : "auditauthentication",
             "type" : "object",
             "nativeType" : "auditauthentication",
             "properties" : {
-                "_id" : {
+                "eventId" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
@@ -321,11 +321,11 @@
         },
         "recon" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
+            "id" : "auditrecon",
             "type" : "object",
             "nativeType" : "auditrecon",
             "properties" : {
-                "_id" : {
+                "eventId" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
@@ -458,11 +458,11 @@
         },
         "sync" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
+            "id" : "auditsync",
             "type" : "object",
             "nativeType" : "auditsync",
             "properties" : {
-                "_id" : {
+                "eventId" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
@@ -565,11 +565,11 @@
         },
         "config" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
-            "id" : "objectid",
+            "id" : "auditconfig",
             "type" : "object",
             "nativeType" : "auditconfig",
             "properties" : {
-                "_id" : {
+                "eventId" : {
                     "type" : "string",
                     "required" : true,
                     "nativeName" : "__NAME__",
