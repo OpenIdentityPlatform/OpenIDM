@@ -27,5 +27,10 @@
         "operation" : "add",
         "field" : "/resourceMapping/explicitMapping/audit%2Faccess/objectToColumn/response%2Fdetail",
         "value" : {"column" : "response_detail", "type" : "JSON_MAP"}
+    },
+    {
+         "operation" : "replace",
+         "field" : "/queries/genericTables/query-all-count",
+         "value" : "SELECT COUNT(obj.objectid) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}"
     }
 ]
