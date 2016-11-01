@@ -39,8 +39,8 @@ try {
     }
 
     JsonValue lastSyncEffectiveAssignments = oldSource != null \
-        ? oldSource.get("lastSync").get("effectiveAssignments")
-        : sourceObject.get("lastSync").get("effectiveAssignments");
+        ? oldSource.get("lastSync").get(mappingName).get("effectiveAssignments")
+        : sourceObject.get("lastSync").get(mappingName).get("effectiveAssignments");
     JsonValue sourceObjectEffectiveAssignments = sourceObject.get("effectiveAssignments");
 
     if (cacheEffectiveAssignments(lastSyncEffectiveAssignments, sourceObjectEffectiveAssignments)) {
