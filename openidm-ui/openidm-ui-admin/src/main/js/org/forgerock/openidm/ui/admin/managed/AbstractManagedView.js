@@ -21,6 +21,7 @@ define([
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/admin/managed/schema/SchemaEditorView"
 ], function($, _,
@@ -28,42 +29,12 @@ define([
             ConfigDelegate,
             EventManager,
             Constants,
+            RepoDelegate,
             Router,
             SchemaEditorView) {
 
     var AbstractManagedView = AdminAbstractView.extend({
         data: {},
-
-        orientRepoChange: function(managedObject) {
-            var orientClasses = this.data.repoObject.dbStructure.orientdbClass;
-
-            if(_.isUndefined(orientClasses["managed_" +managedObject.name])) {
-                orientClasses["managed_" + managedObject.name] = {
-                    "index" : [
-                        {
-                            "propertyName" : "_openidm_id",
-                            "propertyType" : "string",
-                            "indexType" : "unique"
-                        }
-                    ]
-                };
-            }
-        },
-
-        checkRepo: function(configFiles, callback) {
-            this.data.currentRepo = _.find(configFiles.configurations, function(file){
-                return file.pid.search("repo.") !== -1;
-            }, this).pid;
-
-            if(this.data.currentRepo === "repo.orientdb") {
-                ConfigDelegate.readEntity(this.data.currentRepo).then(_.bind(function (repo) {
-                    this.data.repoObject = repo;
-                    callback();
-                }, this));
-            } else {
-                callback(callback);
-            }
-        },
 
         saveManagedObject: function(managedObject, saveObject, isNewManagedObject) {
             var promises = [];
@@ -80,9 +51,29 @@ define([
 
             promises.push(ConfigDelegate.updateEntity("managed", {"objects" : saveObject.objects}));
 
-            if(this.data.currentRepo === "repo.orientdb") {
-                this.orientRepoChange(managedObject);
-                promises.push(ConfigDelegate.updateEntity(this.data.currentRepo, this.data.repoObject));
+            switch (RepoDelegate.getRepoTypeFromConfig(this.data.repoConfig)) {
+                case "orientdb":
+                    this.data.repoConfig = RepoDelegate.addManagedObjectToOrientClasses(this.data.repoConfig, managedObject.name);
+                    promises.push(RepoDelegate.updateEntity(this.data.repoConfig._id, this.data.repoConfig));
+                    break;
+                case "jdbc":
+                    let resourceMapping = RepoDelegate.findGenericResourceMappingForRoute(this.data.repoConfig, "managed/"+managedObject.name);
+                    if (resourceMapping && resourceMapping.searchableDefault !== true) {
+                        let searchablePropertiesList = _(managedObject.schema.properties)
+                                                    .pairs()
+                                                    .map((prop) => {
+                                                        if (prop[1].searchable) {
+                                                            return prop[0];
+                                                        }
+                                                    })
+                                                    .filter()
+                                                    .value();
+                        // modifies this.data.repoConfig via object reference in resourceMapping
+                        RepoDelegate.syncSearchablePropertiesForGenericResource(resourceMapping, searchablePropertiesList);
+
+                        promises.push(RepoDelegate.updateEntity(this.data.repoConfig._id, this.data.repoConfig));
+                    }
+                    break;
             }
 
             $.when.apply($, promises).then(_.bind(function() {

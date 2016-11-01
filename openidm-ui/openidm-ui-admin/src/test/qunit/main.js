@@ -54,6 +54,7 @@ define([
     "./org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegateTest",
     "./org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegateTest",
     "./org/forgerock/openidm/ui/admin/delegates/ReconDelegateTest",
+    "./org/forgerock/openidm/ui/admin/delegates/RepoDelegateTest",
     "./org/forgerock/openidm/ui/admin/delegates/SchedulerDelegateTest",
     "./org/forgerock/openidm/ui/admin/delegates/ScriptDelegateTest",
     "./org/forgerock/openidm/ui/admin/delegates/SecurityDelegateTest",

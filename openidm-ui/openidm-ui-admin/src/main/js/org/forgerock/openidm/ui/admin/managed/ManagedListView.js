@@ -21,6 +21,7 @@ define([
     "org/forgerock/openidm/ui/admin/util/AdminAbstractView",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
     "org/forgerock/commons/ui/common/main/Router",
     "org/forgerock/openidm/ui/admin/delegates/ConnectorDelegate",
     "org/forgerock/openidm/ui/admin/util/ConnectorUtils",
@@ -32,6 +33,7 @@ define([
             AdminAbstractView,
             eventManager,
             constants,
+            RepoDelegate,
             router,
             ConnectorDelegate,
             connectorUtils,
@@ -51,17 +53,16 @@ define([
 
         },
         render: function(args, callback) {
-            var managedPromise,
-                repoCheckPromise,
-                tempIconClass;
+            var tempIconClass;
 
             this.data.docHelpUrl = constants.DOC_URL;
 
-            managedPromise = ConfigDelegate.readEntity("managed");
-            repoCheckPromise = ConfigDelegate.getConfigList();
-
-            $.when(managedPromise, repoCheckPromise).then(_.bind(function(managedObjects, configFiles){
+            $.when(
+                ConfigDelegate.readEntity("managed"),
+                RepoDelegate.findRepoConfig()
+            ).then(_.bind(function(managedObjects, repoConfig){
                 this.data.currentManagedObjects = _.sortBy(managedObjects.objects, 'name');
+                this.data.repoConfig = repoConfig;
 
                 _.each(this.data.currentManagedObjects, _.bind(function(managedObject){
                     tempIconClass = connectorUtils.getIcon("managedobject");
@@ -70,19 +71,7 @@ define([
                     managedObject.iconSrc = tempIconClass.src;
                 }, this));
 
-
-                this.data.currentRepo = _.find(configFiles[0].configurations, function(file){
-                    return file.pid.search("repo.") !== -1;
-                }, this).pid;
-
-                if(this.data.currentRepo === "repo.orientdb") {
-                    ConfigDelegate.readEntity(this.data.currentRepo).then(_.bind(function (repo) {
-                        this.data.repoObject = repo;
-                        this.resourceRender(callback);
-                    }, this));
-                } else {
-                    this.resourceRender(callback);
-                }
+                this.resourceRender(callback);
             }, this));
         },
 
@@ -212,37 +201,27 @@ define([
             }
 
             UIUtils.confirmDialog($.t("templates.managed.managedDelete"), "danger", _.bind(function(){
-                _.each(tempManaged, function(managedObject, index){
-                    if(managedObject.name === selectedItem.attr("data-managed-title")) {
-                        this.data.currentManagedObjects.splice(index, 1);
-                    }
+                tempManaged = _.reject(tempManaged, function(managedObject){
+                    return managedObject.name === this.data.currentManagedObject.name;
                 }, this);
 
-                if(this.data.currentRepo === "repo.orientdb") {
-                    if(this.data.repoObject.dbStructure.orientdbClass["managed_"+selectedItem.attr("data-managed-title")] !== undefined){
-                        delete this.data.repoObject.dbStructure.orientdbClass["managed_"+selectedItem.attr("data-managed-title")];
+                promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.currentManagedObjects}));
+                promises.push(RepoDelegate.deleteManagedObject(this.data.repoConfig, selectedItem.attr("data-managed-title")));
+
+                $.when.apply($, promises).then(() => {
+                    selectedItem.remove();
+                    alternateItem.remove();
+
+                    if (this.$el.find(".backgrid tbody tr").length === 0) {
+                        this.$el.find(".backgrid tbody").append("<tr class='empty'><td colspan='3'>" +$.t("templates.managed.noResourceTitle") +"</td></tr>");
                     }
 
-                    promises.push(ConfigDelegate.updateEntity(this.data.currentRepo, this.data.repoObject));
-                }
-
-                promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.currentManagedObjects}));
-
-                $.when.apply($, promises).then(
-                    () => {
-                        selectedItem.remove();
-                        alternateItem.remove();
-
-                        if(this.$el.find(".backgrid tbody tr").length === 0) {
-                            this.$el.find(".backgrid tbody").append("<tr class='empty'><td colspan='3'>" +$.t("templates.managed.noResourceTitle") +"</td></tr>");
-                        }
-
-                        eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
-                    },
-                    function(){
-                        eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
-                    });
+                    eventManager.sendEvent(constants.EVENT_UPDATE_NAVIGATION);
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedSuccess");
+                },
+                function() {
+                    eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "deleteManagedFail");
+                });
             },this));
         },
 
