@@ -27,7 +27,9 @@ define([
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/main/AbstractDelegate",
-    "bootstrap-tabdrop"
+    "bootstrap-tabdrop",
+    "org/forgerock/openidm/ui/admin/delegates/MaintenanceDelegate",
+    "org/forgerock/commons/ui/common/util/URIUtils"
 ], function(_,
             $,
             Handlebars,
@@ -39,7 +41,11 @@ define([
             Router,
             Constants,
             EventManager,
-            AbstractDelegate) {
+            AbstractDelegate,
+            bootstrapTabdrop,
+            MaintenanceDelegate,
+            URIUtils
+        ) {
 
     var SettingsView = AdminAbstractView.extend({
         template: "templates/admin/settings/SettingsTemplate.html",
@@ -77,13 +83,36 @@ define([
                     EmailConfigView.render({}, _.noop);
                 }
 
-                UpdateView.render({step: "version"}, _.bind(function() {
-                    this.$el.find(".nav-tabs").tabdrop();
-                }, this));
+                MaintenanceDelegate.availableUpdateVersions({suppressEvents: true}).then(
+                    () => {
+                        this.renderUpdate();
+                    },
+                    (data) => {
+                        if (data.status === 404) {
+                            // hide 'update' tab when availability request returns not found
+                            // and redirect to 'audit' tab.
+                            this.$el.find("#updateSettingsTab").addClass("hidden");
+                            if (URIUtils.getCurrentFragment().match("update")) {
+                                EventManager.sendEvent(Constants.EVENT_DISPLAY_MESSAGE_REQUEST, "updateNotAvailable");
+                                this.$el.find("[data-route='audit']").click();
+                            }
+                        } else {
+                            this.renderUpdate();
+                        }
+                    }
+                );
+
 
                 if (callback) {
                     callback();
                 }
+            }, this));
+        },
+
+        renderUpdate: function() {
+            this.$el.find("#updateSettingsTab").removeClass("hidden");
+            UpdateView.render({step: "version"}, _.bind(function() {
+                this.$el.find(".nav-tabs").tabdrop();
             }, this));
         },
 

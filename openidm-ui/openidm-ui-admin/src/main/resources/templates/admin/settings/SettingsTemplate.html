@@ -23,7 +23,7 @@
                 <a data-toggle="tab" data-route="email" href="#emailContainer">{{t "templates.emailConfig.title"}}</a>
                 </li>
 
-                <li {{#if maintenanceMode}}class="active"{{else}}{{#sw tabName "update"}}class="active"{{/sw}}{{/if}}>
+                <li id="updateSettingsTab" {{#if maintenanceMode}}class="active"{{else}}{{#sw tabName "update"}}class="active"{{/sw}}{{/if}}>
                 <a data-toggle="tab" data-route="update" href="#updateContainer">{{t "templates.update.title"}}</a>
                 </li>
             </ul>
