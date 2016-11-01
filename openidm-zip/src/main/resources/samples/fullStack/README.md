@@ -45,7 +45,10 @@ more authentication options, multi-factor authentication, powerful authenticatio
 
 ### Prerequisites
 
-1. An existing OpenAM 12 server running in an environment that OpenIDM can access via REST.
+1. An existing OpenAM 14 server running in an environment that OpenIDM can access via REST.  Refer to the following [OpenIDM Samples Guide chapter](https://backstage.forgerock.com/docs/openidm/5/samples-guide#chap-integrated-sample) for guidance on how to prepare OpenAM 14 with OpenID Connect.
+
+
+Chapter 11 of the OpenIDM Samples Guide outlines how to install and configure OpenAM for integration via OpenID Connect with OpenIDM. http://abondance-uk.internal.forgerock.com/public/openidm-docs/701/target/docbkx/bootstrap/samples-guide/#chap-integrated-sample
 
 2. An OpenDJ installation which OpenAM has been configured to use as the user store. This OpenDJ server needs to be directly accessible to OpenIDM via a standard LDAP port. If you wish to enable livesync monitoring, be sure that OpenDJ has been installed with the Topology Option "This server will be part of a replication topology" enabled.
 
@@ -55,34 +58,32 @@ For simplicity in this demo, it is assumed that you are using a single, root-lev
 
 ### Authentication Configuration
 
-Configuring authentication is simple in most cases. Edit samples/fullStack/conf/authentication.json and update the "openamDeploymentUrl" property of the "OPENAM_SESSION" auth module. It should look something like this:
+Configuring authentication is simple using the UI.
 
-        "authModules" : [
-            {
-                "name" : "OPENAM_SESSION",
-                "properties" : {
-                    "openamDeploymentUrl" : "https://amserver.example.com:8443/openam",
-                    "groupRoleMapping" : {
-                        "openidm-admin" : [
-                            "cn=idmAdmins,ou=Groups,dc=example,dc=com"
-                        ]
-                    },
+To run the sample, start OpenIDM with the configuration for the fullStack sample:
+$ cd /path/to/openidm
+$ ./startup.sh -p samples/fullStack
 
-Be sure to include "/openam" in the deployment url (or whatever servlet context you have configured OpenAM to run within).
+After starting up the fullStack sample navigate to the deployment URL's admin context. e.g. https://localhost:8443/admin
 
-Note the list under groupRoleMapping->"openidm-admin". You can optionally add group values to this list, and any user which is a member of one of those groups will be granted the associated role (in this case, "openidm-admin").
+After logging in click on the CONFIGURE navigation item, then click on the AUTHENTICATION submenu.
 
-If you are using SSL (as in the above HTTPS example) then you will need to make sure that the SSL certificate is trusted by OpenIDM. If your LDAP server's SSL certificate has not been provided by a well-known certificate authority, you may need to import this ssl certificate into OpenIDM's truststore. See the "[Accessing the Security Management Service](https://forgerock.org/openidm/doc/bootstrap/integrators-guide/index.html#security-management-service)" section of the Integrator's guide for more details.
+By default authentication is configured to use local authentication modules, for this sample we are going to make use of the ForgeRock Identity Provider.  To begin the configuration click on the radio button adjacent to the "ForgeRock Identity Provider" label.
 
-You must verify that the domain you will be using to access the OpenIDM UI is listed under "Configuration"->"System"->"Platform"->"Cookie Domains". For example, if you plan on accessing the UI like so:
+A dialog will open where you will provide configuration details.  The first section provides two OpenAM OpenID Connect Client Agent redirection URI's you will need to provide to your OpenAM instance.
 
-    https://idm.example.com/
-    
-Then you should ensure that ".example.com" is listed there. This is necessary for the OpenIDM UI to set the OpenAM SSO token cookie.
+For the second section you only need provide the Well-Known URL, Client ID and Client Secret. An example of the Well-Known Endpoint if provided.  The UI will use the Well-Known endpoint to fetch and generate relevant configuration details. Before you are allowed to save, this Well-Known endpoint will be validated.
+
+Click the save button once the form is completed.  This will disable all authentication modules with the exception of the STATIC USER and INTERNAL USER modules so that OpenIDM may be accessible via rest.
+
+No other changes will be necessary.  You will be prompted to logout and re-authenticate as your session may be invalid with these changes.  You will re-authenticate with OpenAM if configured properly.  Use the amadmin user in place of openidm-admin.
+
+Should you encounter issues logging in, you may have a bad configuration.  You can revert or manually update the authentication configuration by editing the samples/fullStack/conf/authentication.json file.
+
 
 ### Provisioning Configuration
 
-The provisioning portion of this sample is based primarily on sample2c. It includes a bi-directional mapping between OpenDJ (system/ldap/account) and managed/user. In this case, you need to update samples/fullStack/conf/provisioner-openicf.ldap.json:
+The provisioning portion of this sample is based primarily on sample2b. It includes a bi-directional mapping between OpenDJ (system/ldap/account) and managed/user. In this case, you need to update samples/fullStack/conf/provisioner-openicf.ldap.json:
 
     "configurationProperties" : {
         "host" : "opendj.example.com",
@@ -101,21 +102,11 @@ These will need the same values that you have entered into OpenAM for the defaul
 
 If you are using SSL, change the "ssl" property here to true; you will also need to make sure the port is the correct SSL port. Just as with OpenAM's SSL certificate, the SSL certificate used by OpenDJ needs to be trusted by OpenIDM. Follow the same process used to trust the OpenAM SSL certificate in order to trust the OpenDJ certificate.
 
-Once configured, run this command to import the users from OpenDJ into managed/user:
+Once configured, navigate to the CONFIGURE navigation item and click on the MAPPINGS submenu item.  Here on the Mappings page you will import the users from OpenDJ into managed/user. To do that simply click on the "Reconcile" button belonging to the mapping with a source of "System/Ldap/Account" and a target of "Managed User."  Now if you visit MANAGE and the submenu USER you should see entries matching the entries you have in your OpenDJ user store.
 
-    curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST "https://localhost:8443/openidm/recon?_action=recon&mapping=systemLdapAccounts_managedUser"
+At this point you may also wish to enable a scheduled liveSync, to ensure that OpenDJ and managed/user stay in sync with each other over time.
 
-At this point you may also wish to enable scheduled reconcilation and livesync, to ensure that OpenDJ and managed/user stay in sync with each other over time. Edit samples/fullStack/conf/schedule-recon.json and schedule-livesync.json, setting the "enabled" value within each to true. This will ensure that any changes to the user store which do not originate from OpenIDM will still be visible to OpenIDM.
-
-### Logging In
-
-Once you have followed the above steps, you can access the OpenIDM UI as normal (https://domain:port/). The UI has been modified slightly for this sample; instead of the regular login process, we use a proxy service to communicate with OpenAM's REST-based Authentication service. This proxy service is implemented as a custom endpoint - read more details in the source at bin//defaults/script/ui/openamProxy.js.
-
-If everything is setup properly, when the OpenIDM UI loads you will see one of two things happen: 
-
-1. If you do not already have a valid SSO cookie in your browser, you will be redirected to the configured OpenAMLoginUrl for authentication. By default this is a standard-looking "User Name:" and "Password:" form. Submit this form to advance through the AM authentication process, and ultimately (if successfully logged in) you will receive a valid SSO token and be redirected back to OpenIDM. At this point...
-
-2. If you have a valid SSO you will be logged into OpenIDM with the user associated with that session. You will be able to perform all of the normal end-user operations such as triggering workflow processes and updating your profile. Also, because you have an SSO token you will be authenticated to all other services OpenAM provides authentication for (including any on-premise or cloud application for which OpenAM is providing federated login).
+To schedule a LiveSync at a given time interval click on the CONFIGURE navigation, and the SCHEDULES submenu item. Click the "Add Schedules" button.  Enable the new schedule and provide the schedule with an interval, for this example set the schedule to fire every 30 seconds. Set the action to "trigger a liveSync", make sure the mapping selected is "system/ldap/account".  Click save.  Now every thirty seconds the OpenIDM will look for changes made to the remote system and copy them over to the managed store.  Implicit Sync is automatically enabled for the "managedUser_systemLdapAccounts" mapping, so changes made to managed will also be propagated to LDAP.
 
 ### Possible Further Extensibility Options
 Here are some ideas that you could implement with this new OpenIDM/OpenAM configuration:
@@ -125,7 +116,4 @@ The hybrid OpenAM/OpenIDM UI can be extended in a number of powerful ways. For e
 
 #### Single Sign On Dashboard
 Extending that idea further, another simple enhancement to this UI would be a list of links to all of those applications a user has access to by virtue of their SSO token. This would essentially provide the user with a "Single Sign On" dashboard, which could be used to easily access all of their applications.
-
-#### Integrated Services For Custom Applications
-Based on the presence of a shared SSO token, any application secured by OpenAM could reliably invoke OpenIDM REST services in an integrated and transparent way. For example, an intranet portal could make AJAX requests to OpenIDM to start a workflow process or execute a query. The fact that the request was being made to OpenIDM would be hidden from the user - the SSO token that they used to access the intranet would also be used by OpenIDM, and everything would just work seamlessly.
 

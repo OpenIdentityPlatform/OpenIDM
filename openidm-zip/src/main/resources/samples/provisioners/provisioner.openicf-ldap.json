@@ -39,7 +39,7 @@
         "useBlocks" : false,
         "maintainPosixGroupMembership" : false,
         "failover" : [ ],
-        "readSchema" : true,
+        "readSchema" : false,
         "accountObjectClasses" : [
             "top",
             "person",
@@ -164,6 +164,24 @@
                     "type" : "string",
                     "nativeName" : "ds-pwp-account-disabled",
                     "nativeType" : "boolean"
+                },
+                "aliasList" : {
+                    "type" : "array",
+                    "nativeType" : "string",
+                    "nativeName" : "iplanet-am-user-alias-list",
+                    "required" : false
+                },
+                "objectClass" : {
+                    "type" : "array",
+                    "nativeType" : "string",
+                    "nativeName" : "objectClass",
+                    "required" : false
+                },
+                "kbaInfo" : {
+                    "type" : "string",
+                    "nativeType" : "string",
+                    "nativeName" : "kbaInfo",
+                    "required" : false
                 }
             }
         },

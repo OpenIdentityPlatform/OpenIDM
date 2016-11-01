@@ -130,6 +130,37 @@
                         "type" : "text/javascript",
                         "source" : "!!object.telephoneNumber"
                     }
+                },
+                {
+                    "target" : "aliasList",
+                    "condition" : "/object/idpData pr",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "globals" : { },
+                        "source" : "Object\n .keys(source)\n .filter(function (provider) { return source[provider].enabled !== false; })\n .map(function (provider) { return provider + '-' + source[provider].subject; })"
+                    },
+                    "source" : "idpData"
+                },
+                {
+                    "target" : "objectClass",
+                    "default" : [
+                        "top",
+                        "inetuser",
+                        "person",
+                        "inetOrgPerson",
+                        "organizationalPerson",
+                        "iplanet-am-user-service",
+                        "kbaInfoContainer"
+                    ]
+                },
+                {
+                    "target" : "kbaInfo",
+                    "source" : "kbaInfo",
+                    "transform" : {
+                        "type" : "groovy",
+                        "globals" : { },
+                        "source" : "source ? (new groovy.json.JsonBuilder(source)).toString() : null"
+                    }
                 }
             ],
             "policies" : [
