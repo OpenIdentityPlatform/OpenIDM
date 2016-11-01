@@ -17,5 +17,10 @@
          "operation" : "replace",
          "field" : "/queries/genericTables/credential-query",
          "value" : "SELECT fullobject FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id AND objtype.objecttype = ${_resource} INNER JOIN ${_dbSchema}.${_propTable} usernameprop ON obj.id = usernameprop.${_mainTable}_id AND usernameprop.propkey='/userName' INNER JOIN ${_dbSchema}.${_propTable} statusprop ON obj.id = statusprop.${_mainTable}_id AND statusprop.propkey='/accountStatus' WHERE usernameprop.propvalue = ${username} AND statusprop.propvalue = 'active'"
+    },
+    {
+        "operation" : "move",
+        "from" : "/resourceMapping/explicitMapping/audit/config/objectToColumn/runas",
+        "path" : "/resourceMapping/explicitMapping/audit/config/objectToColumn/runAs"
     }
 ]
