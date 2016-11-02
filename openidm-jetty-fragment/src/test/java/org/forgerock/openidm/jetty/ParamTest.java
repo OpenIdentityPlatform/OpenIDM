@@ -27,6 +27,10 @@ import org.testng.annotations.Test;
 
 public class ParamTest {
 
+    private static final String KEYSTORE_FILE_LOCATION = "keystore/location";
+    private static final String TRUSTSTORE_FILE_LOCATION = "truststore/location";
+    private static final String CONF_JETTY_XML = "conf/jetty.xml";
+    private static final String NONE = "none";
     private final TestPropertyAccessor propertyAccessor = new TestPropertyAccessor(new Properties());
 
     @BeforeClass
@@ -47,7 +51,7 @@ public class ParamTest {
         // then
         assertThat(keyStoreLocation)
                 .isNotNull()
-                .isEqualTo(IdentityServer.getFileForInstallPath("some/location").getAbsolutePath());
+                .isEqualTo(IdentityServer.getFileForInstallPath(KEYSTORE_FILE_LOCATION).getAbsolutePath());
     }
 
     @Test
@@ -62,7 +66,7 @@ public class ParamTest {
         // then
         assertThat(trustStoreLocation)
                 .isNotNull()
-                .isEqualTo(IdentityServer.getFileForInstallPath("some/location").getAbsolutePath());
+                .isEqualTo(IdentityServer.getFileForInstallPath(TRUSTSTORE_FILE_LOCATION).getAbsolutePath());
     }
 
     @Test
@@ -77,7 +81,7 @@ public class ParamTest {
         // then
         assertThat(keyStoreLocation)
                 .isNotNull()
-                .isEqualTo(IdentityServer.getFileForInstallPath("conf/jetty.xml").getAbsolutePath());
+                .isEqualTo(IdentityServer.getFileForInstallPath(CONF_JETTY_XML).getAbsolutePath());
     }
 
     @Test
@@ -92,20 +96,36 @@ public class ParamTest {
         // then
         assertThat(trustStoreLocation)
                 .isNotNull()
-                .isEqualTo(IdentityServer.getFileForInstallPath("conf/jetty.xml").getAbsolutePath());
+                .isEqualTo(IdentityServer.getFileForInstallPath(CONF_JETTY_XML).getAbsolutePath());
+    }
+
+    @Test
+    public void testGetTrustStoreLocationWhenNotSet() {
+        // given
+        final Properties properties = createDefaultProperties();
+        properties.remove(TRUSTSTORE_LOCATION);
+        propertyAccessor.setProperties(properties);
+
+        // when
+        final String trustStoreLocation = Param.getTruststoreLocation();
+
+        // then
+        assertThat(trustStoreLocation)
+                .isNotNull()
+                .isEqualTo(IdentityServer.getFileForInstallPath(KEYSTORE_FILE_LOCATION).getAbsolutePath());
     }
 
     private Properties createPKCS11Properties() {
         final Properties properties = new Properties();
-        properties.put(KEYSTORE_LOCATION, "none");
-        properties.put(TRUSTSTORE_LOCATION, "none");
+        properties.put(KEYSTORE_LOCATION, NONE);
+        properties.put(TRUSTSTORE_LOCATION, NONE);
         return properties;
     }
 
     private Properties createDefaultProperties() {
         final Properties properties = new Properties();
-        properties.put(KEYSTORE_LOCATION, "some/location");
-        properties.put(TRUSTSTORE_LOCATION, "some/location");
+        properties.put(KEYSTORE_LOCATION, KEYSTORE_FILE_LOCATION);
+        properties.put(TRUSTSTORE_LOCATION, TRUSTSTORE_FILE_LOCATION);
         return properties;
     }
 
