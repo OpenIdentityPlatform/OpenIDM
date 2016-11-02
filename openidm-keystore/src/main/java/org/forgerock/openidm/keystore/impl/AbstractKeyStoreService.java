@@ -33,9 +33,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.keystore.KeyStoreDetails;
 import org.forgerock.openidm.keystore.KeyStoreService;
-import org.forgerock.openidm.util.CryptoUtil;
-import org.forgerock.security.keystore.KeyStoreType;
-import org.forgerock.util.Utils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -44,6 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 abstract class AbstractKeyStoreService implements KeyStoreService {
     private static final Logger logger = LoggerFactory.getLogger(AbstractKeyStoreService.class);
+    private static final String NONE = "none";
 
     /** The wrapped {@link KeyStore} object. */
     protected KeyStore store;
@@ -59,16 +57,10 @@ abstract class AbstractKeyStoreService implements KeyStoreService {
     /**
      * Constructs an {@link AbstractKeyStoreService} given the Identity Server properties to lookup the
      * {@link KeyStoreDetails}.
-     * @param passwordProperty the keystore password property.
-     * @param typeProperty the keystore type property.
-     * @param providerProperty the keystore provider property.
-     * @param locationProperty the keystore location property.
      * @throws GeneralSecurityException if unable to load and initialize the keystore.
      */
-    public AbstractKeyStoreService(final String passwordProperty, final String typeProperty,
-            final String providerProperty, final String locationProperty) throws GeneralSecurityException {
-        this.keyStoreDetails =
-                createKeyStoreDetails(passwordProperty, typeProperty, providerProperty, locationProperty);
+    public AbstractKeyStoreService() throws GeneralSecurityException {
+        this.keyStoreDetails = createKeyStoreDetails();
         this.keyStoreInitializer = new DefaultKeyStoreInitializer();
         Security.addProvider(new BouncyCastleProvider());
         if (PKCS11.equals(keyStoreDetails.getType())) {
@@ -125,29 +117,16 @@ abstract class AbstractKeyStoreService implements KeyStoreService {
 
     /**
      * Create the {@link KeyStoreDetails} for this KeyStoreService.
-     * @param passwordProperty the keystore password property.
-     * @param typeProperty the keystore type property.
-     * @param providerProperty the keystore provider property.
-     * @param locationProperty the keystore location property.
      * @return the {@link KeyStoreDetails}.
      * @throws GeneralSecurityException if unable to create the {@link KeyStoreDetails}.
      */
-    KeyStoreDetails createKeyStoreDetails(final String passwordProperty, final String typeProperty,
-            final String providerProperty, final String locationProperty) throws GeneralSecurityException {
-        final String password = IdentityServer.getInstance().getProperty(passwordProperty);
-        final KeyStoreType type =
-                Utils.asEnum(
-                        IdentityServer.getInstance().getProperty(typeProperty, KeyStore.getDefaultType()),
-                        KeyStoreType.class);
-        final String provider = IdentityServer.getInstance().getProperty(providerProperty);
-        String filename = IdentityServer.getInstance().getProperty(locationProperty);
-        if (!"none".equals(filename.toLowerCase())) {
-            // if filename is none don't get a absolute location for it
-            filename = IdentityServer.getFileForInstallPath(filename).getAbsolutePath();
-        }
+    abstract KeyStoreDetails createKeyStoreDetails() throws GeneralSecurityException;
 
-        final char[] clearPassword = CryptoUtil.unfold(password);
-
-        return new KeyStoreDetails(type, provider, filename, new String(clearPassword));
+    /**
+     * Checks if the {@link KeyStoreService} is using a file based config.
+     * @return true if the filename is not set to NONE; false otherwise.
+     */
+    boolean isUsingFile(final String filename) {
+        return !NONE.equals(filename.toLowerCase());
     }
 }

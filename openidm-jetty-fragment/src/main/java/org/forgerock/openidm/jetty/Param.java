@@ -104,7 +104,7 @@ public class Param {
     public static String getTruststoreLocation() {
         String path = getProperty(TRUSTSTORE_LOCATION);
         if (path == null) {
-            path = getKeystoreLocation();
+            return getKeystoreLocation();
         } else if (NONE.equalsIgnoreCase(path)) {
             return IdentityServer.getFileForInstallPath(JETTY_CONF_LOCATION).getAbsolutePath();
         }

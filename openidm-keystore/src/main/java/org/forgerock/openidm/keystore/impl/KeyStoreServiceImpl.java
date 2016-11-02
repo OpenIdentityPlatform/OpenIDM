@@ -21,6 +21,7 @@ import static org.forgerock.openidm.core.IdentityServer.KEYSTORE_PROVIDER;
 import static org.forgerock.openidm.core.IdentityServer.KEYSTORE_TYPE;
 
 import java.security.GeneralSecurityException;
+import java.security.KeyStore;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -29,7 +30,12 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.keystore.KeyStoreDetails;
+import org.forgerock.openidm.util.CryptoUtil;
+import org.forgerock.security.keystore.KeyStoreType;
+import org.forgerock.util.Utils;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -58,7 +64,6 @@ public class KeyStoreServiceImpl extends AbstractKeyStoreService {
      * @throws GeneralSecurityException if unable to construct a {@link KeyStoreServiceImpl}.
      */
     public KeyStoreServiceImpl() throws GeneralSecurityException {
-        super(KEYSTORE_PASSWORD, KEYSTORE_TYPE, KEYSTORE_PROVIDER, KEYSTORE_LOCATION);
         // Set System properties
         if (System.getProperty("javax.net.ssl.keyStore") == null) {
             System.setProperty("javax.net.ssl.keyStore", keyStoreDetails.getFilename());
@@ -87,5 +92,23 @@ public class KeyStoreServiceImpl extends AbstractKeyStoreService {
     public void deactivate(@SuppressWarnings("unused") ComponentContext context) {
         logger.debug("Deactivating key store service");
         store = null;
+    }
+
+    @Override
+    KeyStoreDetails createKeyStoreDetails() throws GeneralSecurityException {
+        final String password = IdentityServer.getInstance().getProperty(KEYSTORE_PASSWORD);
+        final KeyStoreType type =
+                Utils.asEnum(
+                        IdentityServer.getInstance().getProperty(KEYSTORE_TYPE, KeyStore.getDefaultType()),
+                        KeyStoreType.class);
+        final String provider = IdentityServer.getInstance().getProperty(KEYSTORE_PROVIDER);
+        String filename = IdentityServer.getInstance().getProperty(KEYSTORE_LOCATION);
+        if (isUsingFile(filename)) {
+            // get filename absolute location
+            filename = IdentityServer.getFileForInstallPath(filename).getAbsolutePath();
+        }
+
+        final char[] clearPassword = CryptoUtil.unfold(password);
+        return new KeyStoreDetails(type, provider, filename, new String(clearPassword));
     }
 }

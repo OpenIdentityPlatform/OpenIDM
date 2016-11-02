@@ -83,10 +83,14 @@ public class CryptoUtil {
 
     /**
      * Obfuscates a given string.
-     * @param s the string to obfuscate.
-     * @return an obfuscated string.
+     * @param s the string to obfuscate or {code null} pass-through.
+     * @return an obfuscated string or {code null}.
      */
-    public static String obfuscate(String s) {
+    public static String obfuscate(final String s) {
+        if (s == null) {
+            return null;
+        }
+
         StringBuilder buf = new StringBuilder();
         byte[] b = s.getBytes();
 
@@ -108,10 +112,14 @@ public class CryptoUtil {
 
     /**
      * Deobfuscates a given string.
-     * @param s the string to Deobfuscate.
-     * @return a Deobfuscated string.
+     * @param s the string to deobfuscate or {code null} pass-through.
+     * @return a deobfuscated string or {code null}.
      */
     public static String deobfuscate(String s) {
+        if (s == null) {
+            return null;
+        }
+
         if (s.startsWith(__OBFUSCATE))
             s = s.substring(__OBFUSCATE.length());
 
@@ -130,11 +138,15 @@ public class CryptoUtil {
 
     /**
      * Encrypts a given string.
-     * @param s the string to encrypt.
-     * @return an encrypted string.
+     * @param s the string to encrypt or {code null} pass-through.
+     * @return a encrypted string or {code null}.
      * @throws Exception if unable to encrypt the given string.
      */
-    public static String encrypt(String s) throws Exception {
+    public static String encrypt(final String s) throws Exception {
+        if (s == null) {
+            return null;
+        }
+
         StringBuilder buf = new StringBuilder(__CRYPT);
 
         // Instantiate the cipher
@@ -145,11 +157,15 @@ public class CryptoUtil {
 
     /**
      * Decrypts a given string.
-     * @param s the string to decrypts.
-     * @return an decrypted string.
-     * @throws Exception if unable to decrypt the given string.
+     * @param s the string to decrypt or {code null} pass-through.
+     * @return a decrypted string or {code null}.
+     * @throws GeneralSecurityException if unable to decrypt the given string.
      */
     public static String decrypt(String s) throws GeneralSecurityException {
+        if (s == null) {
+            return null;
+        }
+
         if (s.startsWith(__CRYPT))
             s = s.substring(__CRYPT.length());
 
@@ -160,25 +176,27 @@ public class CryptoUtil {
     }
 
     /**
-     * Decryptes, deobfuscates, or prints to the console a given string.
+     * Decrypts, deobfuscates, or prints to the console a given string.
      * @param s the string to decrypt, deobfuscate, or print.
      * @return the decrypted, deobfuscated, or printed string.
      * @throws GeneralSecurityException if unable to decrypt, deobfuscate, or print the given string.
      */
     public static char[] unfold(String s) throws GeneralSecurityException {
-        char[] passwordCopy = null;
-        if (null != s) {
-            if (s.startsWith(__CRYPT)) {
-                passwordCopy = decrypt(s).toCharArray();
-            } else if (s.startsWith(__OBFUSCATE)) {
-                passwordCopy = deobfuscate(s).toCharArray();
-            } else if (s.equalsIgnoreCase(__CONSOLE)) {
-                char[] passwordArray = System.console().readPassword("Please enter the password: ");
-                passwordCopy = Arrays.copyOf(passwordArray, passwordArray.length);
-                Arrays.fill(passwordArray, ' ');
-            } else {
-                passwordCopy = s.toCharArray();
-            }
+        if (s == null) {
+            return null;
+        }
+
+        char[] passwordCopy;
+        if (s.startsWith(__CRYPT)) {
+            passwordCopy = decrypt(s).toCharArray();
+        } else if (s.startsWith(__OBFUSCATE)) {
+            passwordCopy = deobfuscate(s).toCharArray();
+        } else if (s.equalsIgnoreCase(__CONSOLE)) {
+            char[] passwordArray = System.console().readPassword("Please enter the password: ");
+            passwordCopy = Arrays.copyOf(passwordArray, passwordArray.length);
+            Arrays.fill(passwordArray, ' ');
+        } else {
+            passwordCopy = s.toCharArray();
         }
         return passwordCopy;
     }
@@ -195,8 +213,8 @@ public class CryptoUtil {
 
     private static String byteArrayToHexString(byte[] bytes) {
         StringBuilder rc = new StringBuilder(bytes.length * 2);
-        for (int i = 0; i < bytes.length; i++) {
-            rc.append(HEX_TABLE[0xFF & bytes[i]]);
+        for (byte aByte : bytes) {
+            rc.append(HEX_TABLE[0xFF & aByte]);
         }
         return rc.toString();
     }
