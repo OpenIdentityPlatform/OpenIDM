@@ -37,7 +37,7 @@ log.info("Entering " + operation + " Script");
 if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
 
     return connection.request(GET) { req ->
-        uri.path = '/changelog'
+        uri.path = '/api/changelog'
         uri.query = [
                 _queryFilter: 'true',
                 _fields     : '_id',
@@ -64,7 +64,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
     switch (objectClass) {
         case ObjectClass.ACCOUNT:
             return connection.request(GET) { req ->
-                uri.path = '/changelog'
+                uri.path = '/api/changelog'
                 uri.query = [
                         _queryFilter: "_id gt \"${token}\" and targetDN co \"ou=people,dc=example,dc=com\"",
                         _fields     : '_id,changeType,targetDN'
@@ -142,7 +142,7 @@ if (OperationType.GET_LATEST_SYNC_TOKEN.equals(operation)) {
 
         case ObjectClass.GROUP:
             return connection.request(GET) { req ->
-                uri.path = '/changelog'
+                uri.path = '/api/changelog'
                 uri.query = [
                         _queryFilter: "_id gt \"${token}\" and targetDN co \"ou=groups,dc=example,dc=com\"",
                         _fields     : '_id,changeType,targetDN'

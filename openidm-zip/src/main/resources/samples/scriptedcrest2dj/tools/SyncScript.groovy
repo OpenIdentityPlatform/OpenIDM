@@ -73,7 +73,7 @@ switch (operation) {
             request.addField('_id', 'changeType', 'targetDN')
             request.addSortKey(SortKey.ascendingOrder('_id'))
 
-            def lastToken = "0"
+            def lastToken = token.toString()
             def exception = null;
 
             connection.query(new RootContext(), request, [
