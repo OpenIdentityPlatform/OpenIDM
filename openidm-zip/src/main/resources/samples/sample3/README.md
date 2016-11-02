@@ -32,8 +32,8 @@ connector that you will create with the connector bundler. It provides an
 example configuration and a handful of Groovy scripts that are used to
 communicate with an SQL server.
 
-This example requires a fresh installation of OpenIDM. It also requires that you 
-have Maven installed. 
+This example requires a fresh installation of OpenIDM. It also requires that you
+have Maven installed.
 
 For documentation pertaining to this example see:
 https://forgerock.org/openidm/doc/bootstrap/samples-guide/index.html#more-sample3
@@ -96,13 +96,13 @@ ScriptedSQL connector that will be used in the rest of this sample.
 
    $ mkdir path/to/openidm/samples/sample3/create-connector
    $ cd path/to/openidm/samples/sample3/create-connector
-   $ java -jar ../../../tools/custom-scripted-connector-bundler-4.0.0-SNAPSHOT.jar -c ../data/scriptedsql.json
+   $ java -jar ../../../tools/custom-scripted-connector-bundler-5.0.0-SNAPSHOT.jar -c ../data/scriptedsql.json
 
 2. Copy the provided sample scripts into the connector src directory; these will
    become part of the custom connector.
 
     $ cp ../tools/* src/main/resources/script/hrdb/
-    
+
    If you need to modify the scripts provided, now is the time to do so.
 
 3. Build the custom connector. (You should be in the sample3/create-connector
@@ -117,9 +117,9 @@ ScriptedSQL connector that will be used in the rest of this sample.
 5. Copy the connector that you created from the create-connector directory to
    the connectors directory of OpenIDM. If you are in the sample3 directory, run
    this command:
-   
+
    $ cp create-connector/target/hrdb-connector-1.4.1.0.jar ../../connectors/
-   
+
    At this point you have a connector that is ready to be used in OpenIDM. This
    connector has all the necessary files that will allow it to be displayed in
    the UI. It also has both the scripts and provisioner config that allow it to
@@ -129,11 +129,11 @@ ScriptedSQL connector that will be used in the rest of this sample.
    so that it can be used.
 
     $ jar -xvf ../../connectors/hrdb-connector-1.4.1.0.jar conf/provisioner.openicf-hrdb.json
-    
+
     The output should show that the file has been inflated:
-    
+
         inflated: conf/provisioner.openicf-hrdb.json
-        
+
 7. Replace the "systemActions" value inside the sample3/conf/provisioner.openicf-hrdb.json
    with the following value:
         [
@@ -152,18 +152,19 @@ ScriptedSQL connector that will be used in the rest of this sample.
 8. For the purposes of demonstrating this sample, copy the generated html
    template file associated with this connector. This file will be used to
    display the connector in the UI.
-    
+
    Inside the connector jar that you created, search for a file containing
    "1.4.html".
-    
+
         $ cd path/to/openidm
         $ jar -tvf connectors/hrdb-connector-1.4.1.0.jar | grep "1.4.html"
-    
-   Create a new extension directory for the connector template and extract 
-   the file that you found in the preceding step into that directory.
-        
-        $ mkdir -p ui/extension/templates/admin/connector
+
+   Create a new extension directory for the connector template, extract
+   the file that you found in the preceding step, and move it into that directory.
+
+        $ mkdir -p ui/admin/extension/templates/admin/connector
         $ jar -xvf connectors/hrdb-connector-1.4.1.0.jar ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
+        $ mv ui/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html ui/admin/extension/templates/admin/connector/org.forgerock.openicf.connectors.hrdb.HRDBConnector_1.4.html
 
 
 Starting up the sample
@@ -327,7 +328,7 @@ Run the Sample
     }
 
 5. Use the pagedResultsCookie from the result in step 10 for the next query to
-   retrieve the next result set. The value of the pagedResultsCookie must be 
+   retrieve the next result set. The value of the pagedResultsCookie must be
    URL-encoded.
 
     $ curl -k -u "openidm-admin:openidm-admin" --request GET 'https://localhost:8443/openidm/system/hrdb/account?_queryFilter=uid+sw+%22%22&_pageSize=2&_sortKeys=timestamp,id&_pagedResultsCookie=2014-09-11%2010%3A07%3A57.0%2C2'
