@@ -17,13 +17,15 @@ package org.forgerock.openidm.datasource.jdbc.impl.metadata;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.data.Index.atIndex;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 
 import java.util.List;
 
 import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.datasource.jdbc.impl.JDBCDataSourceService;
-import org.forgerock.openidm.util.JsonUtil;
 import org.testng.annotations.Test;
 
 /**
@@ -35,7 +37,7 @@ public class ConfigMetaTest {
 
     // First validate that a password field will NOT be encrypted if it DOES have a property in it.
     @Test
-    public void testShouldNotEncryptPassswordValueWithPropertySubstitution() throws Exception {
+    public void testShouldNotEncryptPasswordValueWithPropertySubstitution() throws Exception {
         List<JsonPointer> propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
                 json(
                         object(
@@ -47,7 +49,7 @@ public class ConfigMetaTest {
 
     // Second validate that it WILL get encrypted if the password does NOT have a property in it.
     @Test
-    public void testShouldEncryptPassswordValueWithoutPropertySubstitution() throws Exception {
+    public void testShouldEncryptPasswordValueWithoutPropertySubstitution() throws Exception {
         List<JsonPointer> propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
                 json(
                         object(
@@ -60,8 +62,7 @@ public class ConfigMetaTest {
     // Third validate that it WILL be treated as an encrypted field if the contents are already a crypto json blob.
     @Test
     public void testShouldTreatAsEncryptedFieldWhenCryptoBlobIsPresent() throws Exception {
-        String encryptedString = JsonUtil.writeValueAsString(
-                json(
+        JsonValue encryptedString = json(
                         object(
                                 field("$crypto",
                                         object(
@@ -79,7 +80,7 @@ public class ConfigMetaTest {
                                         )
                                 )
                         )
-                ));
+        );
         List<JsonPointer> propertiesToEncrypt = configMeta.getPropertiesToEncrypt(JDBCDataSourceService.PID, "",
                 json(
                         object(
