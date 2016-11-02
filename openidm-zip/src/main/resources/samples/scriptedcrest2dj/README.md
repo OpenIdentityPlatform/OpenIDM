@@ -110,7 +110,7 @@ Setup OpenDJ
 
 8. Replace the default OpenDJ REST to LDAP configuration with the configuration for this sample.
 
-        $ cp /path/to/openidm/samples/scriptedrest2dj/data/http-config.json opendj/config/rest2ldap/endpoints/api/
+        $ cp /path/to/openidm/samples/scriptedrest2dj/data/example-v1.json opendj/config/rest2ldap/endpoints/api/
 
 9. Restart OpenDJ.
 
