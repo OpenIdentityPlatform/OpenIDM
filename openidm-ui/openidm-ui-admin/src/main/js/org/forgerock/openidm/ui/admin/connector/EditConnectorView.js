@@ -936,6 +936,30 @@ define([
             return _.cloneDeep(this.model.connectorDetails);
         },
 
+        /**
+         * This function is required for OAuth connectors. This should be removed in the future when we have time to refactor the oAuth connectors to utilize patch.
+         *
+         * @returns Returns a connctor object resulting from the original connector object and the form2js results from the connector form
+         */
+        getProvisioner: function() {
+            var connectorData = {},
+                connDetails = this.connectorDetails,
+                mergedResult = {};
+
+            connectorData = this.cleanseObject(form2js('connectorForm', '.', false));
+
+            delete connectorData.connectorType;
+
+            connectorData.configurationProperties.readSchema = false;
+            connectorData.objectTypes = {};
+
+            $.extend(true, mergedResult, connDetails, connectorData);
+
+            mergedResult.objectTypes = this.userDefinedObjectTypes || this.data.objectTypes;
+
+            return mergedResult;
+        },
+
         //Renders the object type table
         renderObjectTypes: function(newObjectTypes) {
             this.userDefinedObjectTypes = newObjectTypes;
