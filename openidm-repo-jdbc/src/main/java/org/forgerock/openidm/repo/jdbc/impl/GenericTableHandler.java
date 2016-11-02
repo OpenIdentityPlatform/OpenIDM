@@ -583,10 +583,12 @@ public class GenericTableHandler implements TableHandler {
             writeValueProperties(fullId, dbId, localId, jv, connection);
         } finally {
             if (rs != null) {
-                // Ensure associated statement also is closed
-                Statement rsStatement = rs.getStatement();
+                if (!rs.isClosed()) {
+                    // Ensure associated statement also is closed
+                    Statement rsStatement = rs.getStatement();
+                    CleanupHelper.loggedClose(rsStatement);
+                }
                 CleanupHelper.loggedClose(rs);
-                CleanupHelper.loggedClose(rsStatement);
             }
             CleanupHelper.loggedClose(updateStatement);
             CleanupHelper.loggedClose(deletePropStatement);
