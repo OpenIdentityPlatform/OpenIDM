@@ -70,7 +70,7 @@ public class ConfigMeta implements MetaDataProvider {
         @Override
         public boolean apply(JsonPointer configKey) {
             final JsonValue value = config.get(configKey);
-            return value != null && !PropertyUtil.containsProperty(value.asString());
+            return value != null && !(value.isString() && PropertyUtil.containsProperty(value.asString()));
         }
     }
 }
