@@ -943,10 +943,10 @@ define([
          */
         getProvisioner: function() {
             var connectorData = {},
-                connDetails = this.connectorDetails,
+                connDetails = this.getConnectorConfig(),
                 mergedResult = {};
 
-            connectorData = this.cleanseObject(form2js('connectorForm', '.', false));
+            connectorData = form2js('connectorForm', '.', false);
 
             delete connectorData.connectorType;
 
