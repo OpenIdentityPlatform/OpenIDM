@@ -413,7 +413,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
             }
             APIConfiguration configuration = info.createDefaultAPIConfiguration();
             ConnectorUtil.configureDefaultAPIConfiguration(params, configuration, cryptoService);
-            return new JsonValue(createSystemConfiguration(ref, configuration, false));
+            return new JsonValue(createSystemConfiguration(ref, configuration));
         } catch (JsonValueException e) {
             throw new BadRequestException(e.getMessage(), e);
         } catch (IllegalArgumentException e) {
@@ -653,8 +653,8 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
     /**
      * {@inheritDoc}
      */
-    public JsonValue createSystemConfiguration(ConnectorReference connectorReference, APIConfiguration configuration,
-            boolean validate) throws ResourceException {
+    public JsonValue createSystemConfiguration(ConnectorReference connectorReference, APIConfiguration configuration)
+            throws ResourceException {
         ConnectorFacade facade = connectorFramework.get().newInstance(configuration);
         if (null != facade) {
             JsonValue jsonConfiguration = new JsonValue(new LinkedHashMap<String, Object>());
@@ -667,7 +667,7 @@ public class ConnectorInfoProviderService implements ConnectorInfoProvider, Meta
                 throw new InternalServerErrorException(e);
             }
 
-            if (validate && facade.getSupportedOperations().contains(TestApiOp.class)) {
+            if (facade.getSupportedOperations().contains(TestApiOp.class)) {
                 facade.test();
             }
             setSchema(facade, jsonConfiguration);
