@@ -182,7 +182,7 @@ public class ConnectorInfoProviderServiceTest {
         try {
             URL root = ConnectorInfoProviderServiceTest.class.getResource("/");
             mapper.writeValue(new File((new URL(root, "XMLConnector_configuration.json")).toURI()),
-                    testableConnectorInfoProvider.createSystemConfiguration(connectorReference, configuration, true));
+                    testableConnectorInfoProvider.createSystemConfiguration(connectorReference, configuration));
         } catch (Exception e) {
             e.printStackTrace();
         }
