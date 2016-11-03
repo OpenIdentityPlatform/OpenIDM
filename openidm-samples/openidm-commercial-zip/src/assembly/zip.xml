@@ -19,6 +19,9 @@
         <fileSet>
             <directory>${project.build.directory}/idm-staging/openidm</directory>
             <outputDirectory>openidm</outputDirectory>
+            <excludes>
+                <exclude>**/samples/**/*json.patch*</exclude>
+            </excludes>
         </fileSet>
         <fileSet>
             <directory>${basedir}/src/main/resources/conf</directory>
