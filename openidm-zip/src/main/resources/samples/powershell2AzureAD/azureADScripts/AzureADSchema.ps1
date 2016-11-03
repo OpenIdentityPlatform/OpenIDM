@@ -54,151 +54,178 @@ try
 {
 $AttributeInfoBuilder = [Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder]
 
- if ($Connector.Operation -eq "SCHEMA")
- {
+	if ($Connector.Operation -eq "SCHEMA")
+	{
+ 		###########################
+ 		# __ACCOUNT__ object class
+		###########################
 
- 	###########################
- 	# __ACCOUNT__ object class
-	###########################
-
-	$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
-	$ocib.ObjectType = "__ACCOUNT__"
+		$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
+		$ocib.ObjectType = "__ACCOUNT__"
 	
-	# Required Attributes
-	$Required = @("DisplayName","UserPrincipalName")
+		# Required Attributes
+		@("DisplayName","UserPrincipalName") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Required = $TRUE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
 	
-	foreach ($attr in $Required)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
-		$caib.Required = $TRUE
-		$caib.ValueType = [string];
-		$ocib.AddAttributeInfo($caib.Build())
-	}
+		# Standard attributes - single valued
+		#@("City","Country ","Department","Fax","FirstName","LastName","MobilePhone","TenantId",
+		#"Office","PhoneNumber","PostalCode","PreferredLanguage","State","StreetAddress","Title",
+		#"UsageLocation","LastPasswordChangeTimestamp","LiveId") | foreach
+		#{
+		#	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build($_,[string]))
+		#}
 	
-	# Standard attributes - single valued
-	$StandardSingle = @("City","Country ","Department","Fax","FirstName","LastName","MobilePhone","TenantId"
-	"Office","PhoneNumber","PostalCode","PreferredLanguage","State","StreetAddress","Title","UsageLocation","LastPasswordChangeTimestamp","LiveId")
-	
-	foreach ($attr in $StandardSingle)
-	{
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build($attr,[string]))
-	}
-	
-	# Standard attributes - multi valued
-	$StandardMulti = @("AlternateEmailAddresses", "AlternateMobilePhones", "Licenses")
-	
-	foreach ($attr in $StandardMulti)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
-		$caib.MultiValued = $TRUE
-		$caib.ValueType = [string];
-		$ocib.AddAttributeInfo($caib.Build())
-	}
+		# Standard attributes - multi valued
+		@("AlternateEmailAddresses", "AlternateMobilePhones", "Licenses") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.MultiValued = $TRUE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
 		
-	# Technical attributes
-	$Technical = @("EnabledFilter")
+		# Technical attributes
+		@("EnabledFilter") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Creatable = $FALSE
+			$caib.Updateable = $FALSE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
 	
-	foreach ($attr in $Technical)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
-		$caib.Creatable = $FALSE
-		$caib.Updateable = $FALSE
-		$caib.ValueType = [string];
-		$ocib.AddAttributeInfo($caib.Build())
-	}
-	
-	# A few custom attributes we want to add here
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("PasswordNeverExpires",[bool]))
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("ForceChangePassword",[bool]))
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("BlockCredential",[bool]))
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("StrongPasswordRequired",[bool]))
-	
- 	# A few operational attributes as well
-	$opAttrs = [Org.IdentityConnectors.Framework.Common.Objects.OperationalAttributeInfos]
-	#$ocib.AddAttributeInfo($opAttrs::ENABLE)
-	$ocib.AddAttributeInfo($opAttrs::PASSWORD)
-	#$ocib.AddAttributeInfo($opAttrs::LOCK_OUT)
-	#$ocib.AddAttributeInfo($opAttrs::PASSWORD_EXPIRED)
-	#$ocib.AddAttributeInfo($opAttrs::DISABLE_DATE)
-	#$ocib.AddAttributeInfo($opAttrs::ENABLE_DATE)
-	
-	$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
-	
-	
-	###########################
- 	# __GROUP__ object class
-	###########################
-	$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
-	$ocib.ObjectType = "__GROUP__"
-	
-	# Required Attributes
-	$Required = @("DisplayName")
-	
-	foreach ($attr in $Required)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
-		$caib.Required = $TRUE
-		$caib.ValueType = [string];
-		$ocib.AddAttributeInfo($caib.Build())
-	}
-	
-	# Standard attributes - single valued
-	$StandardSingle = @("CommonName","Description","EmailAddress","GroupType","ManagedBy")
-	
-	foreach ($attr in $StandardSingle)
-	{
-	$ocib.AddAttributeInfo($AttributeInfoBuilder::Build($attr,[string]))
-	}
-	
-	# Standard attributes - multi valued
-	$StandardMulti = @("Licenses")
-	
-	foreach ($attr in $StandardMulti)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
-		$caib.MultiValued = $TRUE
-		$caib.ValueType = [string];
-		$ocib.AddAttributeInfo($caib.Build())
-	}
+		# A few custom attributes we want to add here
+		$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("PasswordNeverExpires",[bool]))
+		$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("ForceChangePassword",[bool]))
+		$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("BlockCredential",[bool]))
+		$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("StrongPasswordRequired",[bool]))
 
-	# Technical attributes
-	$Technical = @("objectId","LastDirSyncTime")
+		# LicenseOptions attribute - single map
+		$ocib.AddAttributeInfo($AttributeInfoBuilder::Build("LicenseOptions",[System.Collections.Generic.Dictionary[String,Object]]))
 	
-	foreach ($attr in $Technical)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+ 		# A few operational attributes as well
+		$opAttrs = [Org.IdentityConnectors.Framework.Common.Objects.OperationalAttributeInfos]
+		$ocib.AddAttributeInfo($opAttrs::PASSWORD)
+	
+		# Build the object class info
+		$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
+	
+		###########################
+ 		# __GROUP__ object class
+		###########################
+		$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
+		$ocib.ObjectType = "__GROUP__"
+	
+		# Required Attributes
+		@("DisplayName") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Required = $TRUE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+	
+		# Standard attributes - single valued
+		@("CommonName","Description","EmailAddress","GroupType","ManagedBy") | foreach {
+			$ocib.AddAttributeInfo($AttributeInfoBuilder::Build($_,[string]))
+		}
+	
+		# Standard attributes - multi valued
+		@("Licenses") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.MultiValued = $TRUE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+
+		# Technical attributes
+		@("objectId","LastDirSyncTime") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Creatable = $FALSE
+			$caib.Updateable = $FALSE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+	
+		# Helper attribute to show the members
+		@("__MEMBERS__") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Creatable = $FALSE
+			$caib.MultiValued = $TRUE
+			$caib.ValueType = [System.Collections.Generic.Dictionary[String,Object]]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+	
+		$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
+
+		###########################
+ 		# License object class
+		###########################
+		$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
+		$ocib.ObjectType = "License"
+
+		# Standard attributes - single valued string
+		@("AccountName","AccountObjectId","AccountSkuId","SkuPartNumber","TargetClass") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Creatable = $FALSE
+			$caib.Updateable = $FALSE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+
+		# Standard attributes - single valued integer
+		@("ActiveUnits","ConsumedUnits","SuspendedUnits","WarningUnits") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Creatable = $FALSE
+			$caib.Updateable = $FALSE
+			$caib.ValueType = [int]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+
+		# Service status attribute - single map
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder("ServiceStatus")
 		$caib.Creatable = $FALSE
 		$caib.Updateable = $FALSE
-		$caib.ValueType = [string];
+		$caib.ValueType = [System.Collections.Generic.Dictionary[String,Object]]
 		$ocib.AddAttributeInfo($caib.Build())
-	}
-	
-	# Helper attribute to show the members
-	$TechnicalMultiRO = @("__MEMBERS__")
-	foreach ($attr in $TechnicalMultiRO)
-	{
-		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
+
+		$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
+
+		###########################
+ 		# Subscription object class
+		###########################
+		$ocib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ObjectClassInfoBuilder
+		$ocib.ObjectType = "Subscription"
+
+		# Standard attributes - single valued string
+		@("DateCreated","NextLifecycleDate","OcpSubscriptionId","SkuId","SkuPartNumber","Status") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Creatable = $FALSE
+			$caib.Updateable = $FALSE
+			$caib.ValueType = [string]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+
+		# Standard attributes - single valued integer
+		@("TotalLicenses") | foreach {
+			$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($_)
+			$caib.Creatable = $FALSE
+			$caib.Updateable = $FALSE
+			$caib.ValueType = [int]
+			$ocib.AddAttributeInfo($caib.Build())
+		}
+
+		# Service status attribute - single map
+		$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder("ServiceStatus")
 		$caib.Creatable = $FALSE
-		$caib.MultiValued = $TRUE
-		$caib.ValueType = [object];
+		$caib.Updateable = $FALSE
+		$caib.ValueType = [System.Collections.Generic.Dictionary[String,Object]]
 		$ocib.AddAttributeInfo($caib.Build())
+
+		$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
+
 	}
-	
-	#$TechnicalMulti = @("__ADD_MEMBERS__", "__REMOVE_MEMBERS__")
-	#foreach ($attr in $TechnicalMulti)
-	#{
-	#	$caib = New-Object Org.IdentityConnectors.Framework.Common.Objects.ConnectorAttributeInfoBuilder($attr);
-	#	$caib.Creatable = $FALSE
-	#	$caib.Updateable = $TRUE
-	#	$caib.MultiValued = $TRUE
-	#	$caib.ReturnedByDefault = $FALSE
-	#	$caib.Readable = $FALSE
-	#	$caib.ValueType = [string];
-	#	$ocib.AddAttributeInfo($caib.Build())
-	#}
-	
-	$Connector.SchemaBuilder.DefineObjectClass($ocib.Build())
- }
  }
 catch #Re-throw the original exception message within a connector exception
 {
