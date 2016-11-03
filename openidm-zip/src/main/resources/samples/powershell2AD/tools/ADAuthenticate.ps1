@@ -1,6 +1,6 @@
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+# Copyright (c) 2014-2016 ForgeRock AS. All Rights Reserved
 #
 # The contents of this file are subject to the terms
 # of the Common Development and Distribution License
@@ -38,7 +38,7 @@
 	- <prefix>.Operation: String correponding to the operation ("AUTHENTICATE" here)
 	- <prefix>.ObjectClass: the Object class object (__ACCOUNT__ / __GROUP__ / other)
 	- <prefix>.Username: Username String
-	- <prefix>.Password: Password String (clear text)
+	- <prefix>.Password: Password in GuardedString format
 	
 .RETURNS
 	Must return the user unique ID (__UID__).
@@ -62,8 +62,7 @@ try
 {
 if ($Connector.ObjectClass.Type -eq "__ACCOUNT__")
 {
-	$password = ConvertTo-SecureString -String $Connector.Password -AsPlainText -Force
-	$cred = New-object System.Management.Automation.PSCredential $Connector.Username, $password
+	$cred = New-object System.Management.Automation.PSCredential $Connector.Username, $Connector.Password.ToSecureString()
 	$res = Get-Aduser -Identity $Connector.Username -Credential $cred
 	Write-Verbose -verbose $res.Name
 	$Connector.Result.Uid = $res.ObjectGUID.ToString()

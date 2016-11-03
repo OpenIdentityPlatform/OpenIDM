@@ -1,6 +1,6 @@
 DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 
-Copyright (c) 2014 ForgeRock AS. All rights reserved.
+Copyright (c) 2014-2016 ForgeRock AS. All rights reserved.
 
 The contents of this file are subject to the terms
 of the Common Development and Distribution License
@@ -256,7 +256,7 @@ Returns for instance:
 		"sAMAccountName": "sample",
 		"userPrincipalName": "sample@example.com",
 		"passwordNeverExpires": true,
-		"__ENABLE__": true,
+		"enabled": true,
 		"__PASSWORD__": "Passw0rd",
 		"telephoneNumber": "0052-611-091"
 		}' \
