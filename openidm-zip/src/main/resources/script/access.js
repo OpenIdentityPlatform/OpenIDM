@@ -35,13 +35,6 @@
 var httpAccessConfig =
 {
     "configs" : [
-         // proxy back to configured OpenAM server endpoints
-        {
-            "pattern"    : "endpoint/openam/*",
-            "roles"      : "*",
-            "methods"    : "*",
-            "actions"    : "*"
-        },
         // Anyone can read from these endpoints
         {
            "pattern"    : "info/*",
