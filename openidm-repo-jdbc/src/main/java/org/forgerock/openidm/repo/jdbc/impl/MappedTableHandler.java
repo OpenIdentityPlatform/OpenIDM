@@ -26,15 +26,12 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.TreeSet;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.audit.util.JsonValueUtils;
 import org.forgerock.json.JsonPointer;
@@ -47,19 +44,20 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.repo.jdbc.Constants;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.forgerock.openidm.repo.util.StringSQLQueryFilterVisitor;
 import org.forgerock.openidm.repo.util.StringSQLRenderer;
 import org.forgerock.openidm.util.Accessor;
-import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.util.query.QueryFilter;
 import org.forgerock.util.query.QueryFilterVisitor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Handling of tables in a generic (not object specific) layout
@@ -73,13 +71,13 @@ public class MappedTableHandler implements TableHandler {
     String dbSchemaName;
 
     final LinkedHashMap<String, Object> rawMappingConfig;
-    final Mapping explicitMapping;
+    final ExplicitResultSetMapper explicitMapping;
     private final QueryFilterVisitor<StringSQLRenderer, Map<String, Object>, JsonPointer> queryFilterVisitor;
 
     // The json pointer (used as names) of the properties to replace the ?
     // tokens in the prepared statement,
     // in the order they need populating in create and update queries
-    List<JsonPointer> tokenReplacementPropPointers = new ArrayList<JsonPointer>();
+    List<JsonPointer> tokenReplacementPropPointers = new ArrayList<>();
 
     ObjectMapper mapper = new ObjectMapper();
     final TableQueries queries;
@@ -101,11 +99,11 @@ public class MappedTableHandler implements TableHandler {
         this.tableName = tableName;
         this.dbSchemaName = dbSchemaName;
         // Maintain a stable ordering
-        this.rawMappingConfig = new LinkedHashMap<String, Object>();
+        this.rawMappingConfig = new LinkedHashMap<>();
         this.rawMappingConfig.putAll(mapping);
 
         explicitMapping =
-                new Mapping(tableName, new JsonValue(rawMappingConfig), cryptoServiceAccessor);
+                new ExplicitResultSetMapper(tableName, new JsonValue(rawMappingConfig), cryptoServiceAccessor);
         logger.debug("Explicit mapping: {}", explicitMapping);
 
         if (sqlExceptionHandler == null) {
@@ -133,7 +131,7 @@ public class MappedTableHandler implements TableHandler {
                     }
                 };
 
-        queries = new TableQueries(this, tableName, null, dbSchemaName, 0, new ExplicitQueryResultMapper(explicitMapping));
+        queries = new TableQueries(this, tableName, null, dbSchemaName, 0, explicitMapping);
         queries.setConfiguredQueries(tableName, dbSchemaName, queriesConfig, commandsConfig, null);
 
         initializeQueries();
@@ -147,7 +145,7 @@ public class MappedTableHandler implements TableHandler {
         final StringBuffer updateAssign = new StringBuffer();
         boolean isFirst = true;
 
-        for (ColumnMapping colMapping : explicitMapping.columnMappings) {
+        for (ColumnMapping colMapping : explicitMapping.getColumnMappings()) {
             if (!isFirst) {
                 colNames.append(", ");
                 tokenNames.append(",");
@@ -181,9 +179,8 @@ public class MappedTableHandler implements TableHandler {
      */
     @Override
     public ResourceResponse read(String fullId, String type, String localId, Connection connection)
-            throws NotFoundException, SQLException, IOException, InternalServerErrorException {
-        JsonValue resultValue = null;
-        ResourceResponse result = null;
+            throws NotFoundException, SQLException, InternalServerErrorException {
+
         PreparedStatement readStatement = null;
         ResultSet rs = null;
         try {
@@ -196,10 +193,10 @@ public class MappedTableHandler implements TableHandler {
             rs = readStatement.executeQuery();
 
             if (rs.next()) {
-                resultValue = explicitMapping.mapToJsonValue(rs, Mapping.getColumnNames(rs));
-                JsonValue rev = resultValue.get("_rev");
+                JsonValue resultValue = explicitMapping.mapToJsonValue(rs, ExplicitResultSetMapper.getColumnNames(rs));
+                JsonValue rev = resultValue.get(Constants.OBJECT_REV);
                 logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, resultValue);
-                result = newResourceResponse(localId, rev.asString(), resultValue);
+                return newResourceResponse(localId, rev.asString(), resultValue);
             } else {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
@@ -207,18 +204,10 @@ public class MappedTableHandler implements TableHandler {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readStatement);
         }
-
-        return result;
     }
 
     /**
      * Reads an object with for update locking applied
-     *
-     * Note: statement associated with the returned resultset is not closed upon
-     * return. Aside from taking care to close the resultset it also is the
-     * responsibility of the caller to close the associated statement. Although
-     * the specification specifies that drivers/pools should close the statement
-     * automatically, not all do this reliably.
      *
      * @param fullId
      *            qualified id of component type and id
@@ -228,14 +217,14 @@ public class MappedTableHandler implements TableHandler {
      *            the id of the object within the component type
      * @param connection
      *            the connection to use
-     * @return the row for the requested object, selected FOR UPDATE
+     * @return the row as a map of column name/value pairs for the requested object, selected FOR UPDATE
      * @throws NotFoundException
      *             if the requested object was not found in the DB
      * @throws java.sql.SQLException
      *             for general DB issues
      */
-    ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
-            throws NotFoundException, SQLException {
+    Map<String, Object> readForUpdate(String fullId, String type, String localId, Connection connection)
+            throws NotFoundException, InternalServerErrorException, SQLException {
 
         PreparedStatement readForUpdateStatement = null;
         ResultSet rs = null;
@@ -247,18 +236,14 @@ public class MappedTableHandler implements TableHandler {
 
             logger.debug("Executing: {}", readForUpdateStatement);
             rs = readForUpdateStatement.executeQuery();
-            if (rs.next()) {
-                logger.debug("Read for update full id: {}", fullId);
-                return rs;
+            if (rs.isBeforeFirst()) {
+                return explicitMapping.mapToRawObject(rs).get(0);
             } else {
-                CleanupHelper.loggedClose(rs);
-                CleanupHelper.loggedClose(readForUpdateStatement);
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
-        } catch (SQLException ex) {
+        } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readForUpdateStatement);
-            throw ex;
         }
     }
 
@@ -295,8 +280,8 @@ public class MappedTableHandler implements TableHandler {
 
         logger.debug("Create with fullid {}", fullId);
         String rev = "0";
-        obj.put("_id", localId); // Save the id in the object
-        obj.put("_rev", rev); // Save the rev in the object, and return the
+        obj.put(Constants.OBJECT_ID, localId); // Save the id in the object
+        obj.put(Constants.OBJECT_REV, rev); // Save the rev in the object, and return the
                               // changed rev from the create.
         JsonValue objVal = new JsonValue(obj);
 
@@ -305,7 +290,7 @@ public class MappedTableHandler implements TableHandler {
 
         if (!batchCreate) {
             logger.debug("Executing: {}", createStatement);
-            int val = createStatement.executeUpdate();
+            createStatement.executeUpdate();
             logger.debug("Created object for id {} with rev {}", fullId, rev);
         } else {
             createStatement.addBatch();
@@ -359,8 +344,8 @@ public class MappedTableHandler implements TableHandler {
         }
         if (!unmappedObjFields.asMap().isEmpty()) {
             // some tables don't map _id and _rev (e.g., audit)
-            unmappedObjFields.remove("_id");
-            unmappedObjFields.remove("_rev");
+            unmappedObjFields.remove(Constants.OBJECT_ID);
+            unmappedObjFields.remove(Constants.OBJECT_REV);
             final Set<String> unmappedObjKeys = JsonValueUtils.flatten(unmappedObjFields).keySet();
             if (!unmappedObjKeys.isEmpty()) {
                 // found unmapped fields in create/update request
@@ -385,14 +370,13 @@ public class MappedTableHandler implements TableHandler {
         int revInt = Integer.parseInt(rev);
         ++revInt;
         String newRev = Integer.toString(revInt);
-        obj.put("_rev", newRev); // Save the rev in the object, and return the
+        obj.put(Constants.OBJECT_REV, newRev); // Save the rev in the object, and return the
                                  // changed rev from the create.
 
-        ResultSet rs = null;
         PreparedStatement updateStatement = null;
         try {
-            rs = readForUpdate(fullId, type, localId, connection);
-            String existingRev = explicitMapping.getRev(rs);
+            JsonValue result = new JsonValue(readForUpdate(fullId, type, localId, connection));
+            String existingRev = result.get(Constants.RAW_OBJECT_REV).asString();
             logger.debug("Update existing object {} rev: {} ", fullId, existingRev);
 
             if (!existingRev.equals(rev)) {
@@ -403,13 +387,13 @@ public class MappedTableHandler implements TableHandler {
             updateStatement = queries.getPreparedStatement(connection, updateQueryStr);
 
             // Support changing object identifier
-            String newLocalId = (String) obj.get("_id");
+            String newLocalId = (String) obj.get(Constants.OBJECT_ID);
             if (newLocalId != null && !localId.equals(newLocalId)) {
                 logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);
             } else {
                 newLocalId = localId; // If it hasn't changed, use the existing
                                       // ID
-                obj.put("_id", newLocalId); // Ensure the ID is saved in the
+                obj.put(Constants.OBJECT_ID, newLocalId); // Ensure the ID is saved in the
                                             // object
             }
 
@@ -427,14 +411,6 @@ public class MappedTableHandler implements TableHandler {
                                 + updateCount);
             }
         } finally {
-            if (rs != null) {
-                if (!rs.isClosed()) {
-                    // Ensure associated statement also is closed
-                    Statement rsStatement = rs.getStatement();
-                    CleanupHelper.loggedClose(rsStatement);
-                }
-                CleanupHelper.loggedClose(rs);
-            }
             CleanupHelper.loggedClose(updateStatement);
         }
     }
@@ -451,15 +427,15 @@ public class MappedTableHandler implements TableHandler {
         logger.debug("Delete with fullid {}", fullId);
 
         // First check if the revision matches and select it for UPDATE
-        ResultSet existing = null;
         PreparedStatement deleteStatement = null;
         try {
+            String existingRev;
             try {
-                existing = readForUpdate(fullId, type, localId, connection);
+                JsonValue result = new JsonValue(readForUpdate(fullId, type, localId, connection));
+                existingRev = result.get(Constants.RAW_OBJECT_REV).asString();
             } catch (NotFoundException ex) {
-                throw new NotFoundException("Object does not exist for delete on: " + fullId);
+                throw new NotFoundException("Object does not exist for delete on: " + fullId, ex);
             }
-            String existingRev = explicitMapping.getRev(existing);
             if (!"*".equals(rev) && !rev.equals(existingRev)) {
                 throw new PreconditionFailedException("Delete rejected as current Object revision "
                         + existingRev + " is different than " + "expected by caller " + rev
@@ -483,12 +459,6 @@ public class MappedTableHandler implements TableHandler {
                 logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
             }
         } finally {
-            if (existing != null) {
-                // Ensure associated statement also is closed
-                Statement existingStatement = existing.getStatement();
-                CleanupHelper.loggedClose(existing);
-                CleanupHelper.loggedClose(existingStatement);
-            }
             CleanupHelper.loggedClose(deleteStatement);
         }
     }
@@ -579,132 +549,3 @@ public class MappedTableHandler implements TableHandler {
         return " WHERE " + filter.accept(queryFilterVisitor, replacementTokens).toSQL();
     }
 }
-
-/**
- * Handle the conversion of query results to the object set model
- */
-class ExplicitQueryResultMapper implements QueryResultMapper {
-    final static Logger logger = LoggerFactory.getLogger(ExplicitQueryResultMapper.class);
-    Mapping explicitMapping;
-
-    public ExplicitQueryResultMapper(Mapping explicitMapping) {
-        this.explicitMapping = explicitMapping;
-    }
-
-    public List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type,
-            Map<String, Object> params, TableQueries tableQueries) throws SQLException,
-            InternalServerErrorException {
-
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        Set<String> names = Mapping.getColumnNames(rs);
-        while (rs.next()) {
-            JsonValue obj = explicitMapping.mapToJsonValue(rs, names);
-            result.add(obj.asMap());
-        }
-        return result;
-    }
-}
-
-/**
- * Parsed Config handling
- */
-class Mapping {
-
-    final static Logger logger = LoggerFactory.getLogger(Mapping.class);
-
-    final static JsonPointer pathToTotal = new JsonPointer("/total");
-
-    String tableName;
-    Accessor<CryptoService> cryptoServiceAccessor;
-    List<ColumnMapping> columnMappings = new ArrayList<ColumnMapping>();
-    ColumnMapping revMapping; // Quick access to mapping for MVCC revision
-    ObjectMapper mapper = new ObjectMapper();
-
-    public Mapping(String tableName, JsonValue mappingConfig, Accessor<CryptoService> cryptoServiceAccessor) {
-        this.cryptoServiceAccessor = cryptoServiceAccessor;
-        this.tableName = tableName;
-        for (Map.Entry<String, Object> entry : mappingConfig.asMap().entrySet()) {
-            String key = entry.getKey();
-            JsonValue value = mappingConfig.get(key);
-            ColumnMapping colMapping = new ColumnMapping(key, value);
-            columnMappings.add(colMapping);
-            if ("_rev".equals(colMapping.objectColName)) {
-                revMapping = colMapping;
-            }
-        }
-    }
-
-    public JsonValue mapToJsonValue(ResultSet rs, Set<String> columnNames) throws SQLException,
-    InternalServerErrorException {
-        JsonValue mappedResult = new JsonValue(new LinkedHashMap<String, Object>());
-
-        for (ColumnMapping entry : columnMappings) {
-            Object value = null;
-            if (columnNames.contains(entry.dbColName)) {
-                if (ColumnMapping.TYPE_STRING.equals(entry.dbColType)) {
-                    value = rs.getString(entry.dbColName);
-                    if (cryptoServiceAccessor == null || cryptoServiceAccessor.access() == null) {
-                        throw new InternalServerErrorException("CryptoService unavailable");
-                    }
-                    if (JsonUtil.isEncrypted((String) value)) {
-                        value = convertToJson(entry.dbColName, "encrypted", (String)value, Map.class).asMap();
-                    }
-                } else if (ColumnMapping.TYPE_JSON_MAP.equals(entry.dbColType)) {
-                    value = convertToJson(entry.dbColName, entry.dbColType, rs.getString(entry.dbColName), Map.class).asMap();
-                } else if (ColumnMapping.TYPE_JSON_LIST.equals(entry.dbColType)) {
-                    value = convertToJson(entry.dbColName, entry.dbColType, rs.getString(entry.dbColName), List.class).asList();
-                } else {
-                    throw new InternalServerErrorException("Unsupported DB column type " + entry.dbColType);
-                }
-                mappedResult.putPermissive(entry.objectColPointer, value);
-            }
-        }
-        if (columnNames.contains("total") && !columnMappings.contains("total")) {
-            mappedResult.putPermissive(pathToTotal, rs.getInt("total"));
-        }
-        logger.debug("Mapped rs {} to {}", rs, mappedResult);
-        return mappedResult;
-    }
-
-    private <T> JsonValue convertToJson(String name, String nameType, String value, Class<T> valueType) throws InternalServerErrorException {
-        if (value != null) {
-            try {
-                return new JsonValue(mapper.readValue(value, valueType));
-            } catch (IOException e) {
-                throw new InternalServerErrorException("Unable to map " + nameType + " value for " + name, e);
-            }
-        }
-        return new JsonValue(null);
-    }
-
-    public String getRev(ResultSet rs) throws SQLException {
-        return rs.getString(revMapping.dbColName);
-    }
-
-    public String toString() {
-        StringBuffer sb = new StringBuffer();
-        sb.append("Explicit table mapping for " + tableName + " :\n");
-        for (ColumnMapping entry : columnMappings) {
-            sb.append(entry.toString());
-        }
-        return sb.toString();
-    }
-
-    public static Set<String> getColumnNames(ResultSet rs) throws SQLException {
-        TreeSet<String> set = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-        for (int i = 1; i <= rs.getMetaData().getColumnCount(); i++) {
-            set.add(rs.getMetaData().getColumnName(i));
-        }
-        return set;
-    }
-
-    public String getDbColumnName(JsonPointer fieldName) {
-        for (ColumnMapping column : columnMappings) {
-            if (column.isJsonPointer(fieldName)) {
-                return column.dbColName;
-            }
-        }
-        throw new IllegalArgumentException("Unknown object field: " + fieldName.toString());
-    }
-}
-

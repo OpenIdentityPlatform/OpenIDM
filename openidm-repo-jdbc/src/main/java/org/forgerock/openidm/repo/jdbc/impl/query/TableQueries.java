@@ -28,7 +28,6 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -47,6 +46,7 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
 import org.forgerock.openidm.repo.jdbc.impl.CleanupHelper;
 import org.forgerock.openidm.repo.jdbc.impl.GenericTableHandler.QueryDefinition;
+import org.forgerock.openidm.repo.jdbc.impl.ResultSetMapper;
 import org.forgerock.openidm.repo.util.TokenHandler;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
@@ -77,7 +77,7 @@ public class TableQueries {
      * Helper class to wrap configured queries/commands.
      */
     class ConfiguredQueries {
-        private Map<String, QueryInfo> configured = new HashMap<String, QueryInfo>();
+        private final Map<String, QueryInfo> configured = new HashMap<String, QueryInfo>();
 
         void setConfiguredQueries(Map<String, String> replacements, JsonValue queriesConfig) {
             configured.clear();
@@ -147,16 +147,23 @@ public class TableQueries {
     /** Configured commands */
     final ConfiguredQueries commands = new ConfiguredQueries();
 
+    /** Main table */
     final String mainTableName;
+    
+    /** Properties table */
     final String propTableName;
+    
+    /** Database schema name */
     final String dbSchemaName;
 
     /** Max length of a property. Used for trimming incoming query values */
     final int maxPropLen;
 
-    final QueryResultMapper resultMapper;
+    /** The Result Mapper */
+    final ResultSetMapper resultMapper;
     
-    private TableHandler tableHandler;
+    /** The Table Handler */
+    private final TableHandler tableHandler;
 
     /**
      * Constructor.
@@ -169,7 +176,7 @@ public class TableQueries {
      * @param resultMapper
      */
     public TableQueries(TableHandler tableHandler, String mainTableName, String propTableName, String dbSchemaName, int maxPropLen,
-            QueryResultMapper resultMapper) {
+            ResultSetMapper resultMapper) {
         this.tableHandler = tableHandler;
         this.mainTableName = mainTableName;
         this.propTableName = propTableName;
@@ -337,7 +344,7 @@ public class TableQueries {
         ResultSet rs = null;
         try {
             rs = foundQuery.executeQuery();
-            result = resultMapper.mapQueryToObject(rs, queryId, type, params, this);
+            result = resultMapper.mapToObject(rs, queryId, type, params);
             measure.setResult(result);
         } catch (SQLException ex) {
             logger.debug("DB reported failure executing query " +
@@ -407,26 +414,6 @@ public class TableQueries {
     }
 
     /**
-     * Whether a result set contains a given column
-     *
-     * @param rsMetaData
-     *            result set meta data
-     * @param columnName
-     *            name of the column to look for
-     * @return true if it is present
-     * @throws SQLException
-     *             if meta data inspection failed
-     */
-    public boolean hasColumn(ResultSetMetaData rsMetaData, String columnName) throws SQLException {
-        for (int colPos = 1; colPos <= rsMetaData.getColumnCount(); colPos++) {
-            if (columnName.equalsIgnoreCase(rsMetaData.getColumnName(colPos))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
      * Resolves a query filter.
      *
      * @param con
@@ -437,11 +424,11 @@ public class TableQueries {
      */
     PreparedStatement parseQueryFilter(Connection con, QueryFilter<JsonPointer> filter, Map<String, Object> params)
             throws SQLException, ResourceException {
-        Map<String, Object> replacementTokens = new LinkedHashMap<String, Object>();
+        Map<String, Object> replacementTokens = new LinkedHashMap<>();
 
         String rawQuery = tableHandler.renderQueryFilter(filter, replacementTokens, params);
 
-        Map<String, String> replacements = new LinkedHashMap<String, String>();
+        Map<String, String> replacements = new LinkedHashMap<>();
         replacements.put("_mainTable", mainTableName);
         replacements.put("_propTable", propTableName);
         replacements.put("_dbSchema", dbSchemaName);
@@ -475,7 +462,7 @@ public class TableQueries {
     PreparedStatement resolveInlineQuery(Connection con, String queryExpression,
             Map<String, Object> params) throws SQLException, ResourceException {
         // No token replacement on expressions for now
-        List<String> tokenNames = new ArrayList<String>();
+        List<String> tokenNames = new ArrayList<>();
         QueryInfo info = new QueryInfo(queryExpression, tokenNames);
         return resolveQuery(info, con, params);
     }
@@ -510,7 +497,7 @@ public class TableQueries {
         List<String> tokenNames = info.getTokenNames();
 
         // replace ${list:variable} tokens with the correct number of bind variables
-        Map<String, Integer> listReplacements = new HashMap<String, Integer>();
+        Map<String, Integer> listReplacements = new HashMap<>();
         for (String tokenName : tokenNames) {
             String[] tokenParts = tokenName.split(":", 2);
             if (PREFIX_LIST.equals(tokenParts[0]) && params.containsKey(tokenParts[1])) {
@@ -548,26 +535,17 @@ public class TableQueries {
                 }
                 if (PREFIX_INT.equals(tokenParts[0])) {
                     // handle single integer value
-                    Integer int_value = null;
-                    if (objValue != null) {
-                        int_value = Integer.parseInt(objValue.toString());
-                    }
+                    Integer int_value = Integer.parseInt(objValue.toString());
                     statement.setInt(count, int_value);
                     count++;
                 } else if (PREFIX_LIST.equals(tokenParts[0])) {
                     // handle list of values - presently assumes Strings, TODO support integer lists
-                    if (objValue != null) {
-                        for (String list_value : objValue.toString().split(",")) {
-                            // if list value is surrounded by single quotes remove them
-                            if (list_value != null && list_value.startsWith("'") && list_value.endsWith("'")) {
-                                list_value = list_value.substring(1, list_value.length()-1);
-                            }
-                            statement.setString(count, trimValue(list_value));
-                            count++;
+                    for (String list_value : objValue.toString().split(",")) {
+                        // if list value is surrounded by single quotes remove them
+                        if (list_value != null && list_value.startsWith("'") && list_value.endsWith("'")) {
+                            list_value = list_value.substring(1, list_value.length()-1);
                         }
-                    }
-                    else {
-                        statement.setString(count, null);
+                        statement.setString(count, trimValue(list_value));
                         count++;
                     }
                 }
@@ -595,7 +573,7 @@ public class TableQueries {
      */
     public void setConfiguredQueries(
             JsonValue queriesConfig, JsonValue commandsConfig, Map<QueryDefinition, String> defaultQueryMap) {
-        Map<String, String> replacements = new HashMap<String, String>();
+        Map<String, String> replacements = new HashMap<>();
         replacements.put("_mainTable", mainTableName);
         replacements.put("_propTable", propTableName);
         replacements.put("_dbSchema", dbSchemaName);
@@ -624,7 +602,7 @@ public class TableQueries {
      */
     public void setConfiguredQueries(String tableName, String dbSchemaName,
             JsonValue queriesConfig, JsonValue commandsConfig, Map<QueryDefinition, String> defaultQueryMap) {
-        Map<String, String> replacements = new HashMap<String, String>();
+        Map<String, String> replacements = new HashMap<>();
         replacements.put("_table", tableName);
         replacements.put("_dbSchema", dbSchemaName);
 

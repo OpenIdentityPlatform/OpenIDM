@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright (c) 2012-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.repo.jdbc.impl;
@@ -32,15 +24,14 @@ import static org.forgerock.openidm.repo.util.Clauses.where;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.SortKey;
+import org.forgerock.openidm.repo.jdbc.Constants;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.util.Clause;
 import org.forgerock.util.query.QueryFilter;
@@ -54,7 +45,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
      * Max length of searchable properties for MSSQL.
      * Anything larger than 195 will overflow the max index size and error.
      */
-    private static final int SEARCHABLE_LENGTH = 195;
+    private static final int MSSQL_SEARCHABLE_LENGTH = 195;
 
     public MSSQLTableHandler(JsonValue tableConfig, String dbSchemaName, JsonValue queriesConfig, JsonValue commandsConfig,
             int maxBatchSize, SQLExceptionHandler sqlExceptionHandler) {
@@ -63,7 +54,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
 
     @Override
     int getSearchableLength() {
-        return SEARCHABLE_LENGTH;
+        return MSSQL_SEARCHABLE_LENGTH;
     }
 
     @Override
@@ -100,16 +91,15 @@ public class MSSQLTableHandler extends GenericTableHandler {
         int revInt = Integer.parseInt(rev);
         ++revInt;
         String newRev = Integer.toString(revInt);
-        obj.put("_rev", newRev); // Save the rev in the object, and return the changed rev from the create.
+        obj.put(Constants.OBJECT_REV, newRev); // Save the rev in the object, and return the changed rev from the create.
 
-        ResultSet rs = null;
         PreparedStatement updateStatement = null;
         PreparedStatement deletePropStatement = null;
         try {
-            rs = readForUpdate(fullId, type, localId, connection);
-            String existingRev = rs.getString("rev");
-            long dbId = rs.getLong("id");
-            long objectTypeDbId = rs.getLong("objecttypes_id");
+            JsonValue result = new JsonValue(readForUpdate(fullId, type, localId, connection));
+            String existingRev = result.get(Constants.RAW_OBJECT_REV).asString();
+            long dbId = result.get(Constants.RAW_ID).asLong();
+            long objectTypeDbId = result.get(Constants.RAW_OBJECTTYPES_ID).asLong();
             logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}",
                     fullId, existingRev, dbId, objectTypeDbId);
 
@@ -122,12 +112,12 @@ public class MSSQLTableHandler extends GenericTableHandler {
             updateStatement = getPreparedStatement(connection, QueryDefinition.UPDATEQUERYSTR);
             deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
             // Support changing object identifier
-            String newLocalId = (String) obj.get("_id");
+            String newLocalId = (String) obj.get(Constants.OBJECT_ID);
             if (newLocalId != null && !localId.equals(newLocalId)) {
                 logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);
             } else {
                 newLocalId = localId; // If it hasn't changed, use the existing ID
-                obj.put("_id", newLocalId); // Ensure the ID is saved in the object
+                obj.put(Constants.OBJECT_ID, newLocalId); // Ensure the ID is saved in the object
             }
             String objString = mapper.writeValueAsString(obj);
 
@@ -157,14 +147,6 @@ public class MSSQLTableHandler extends GenericTableHandler {
             logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
             writeValueProperties(fullId, dbId, localId, jv, connection);
         } finally {
-            if (rs != null) {
-                if (!rs.isClosed()) {
-                    // Ensure associated statement also is closed
-                    Statement rsStatement = rs.getStatement();
-                    CleanupHelper.loggedClose(rsStatement);
-                }
-                CleanupHelper.loggedClose(rs);
-            }
             CleanupHelper.loggedClose(updateStatement);
             CleanupHelper.loggedClose(deletePropStatement);
         }
@@ -207,7 +189,7 @@ public class MSSQLTableHandler extends GenericTableHandler {
 
                 .where(filter.accept(
                         // override numeric value clause generation to cast propvalue to a number
-                        new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH, builder) {
+                        new GenericSQLQueryFilterVisitor(MSSQL_SEARCHABLE_LENGTH, builder) {
                             @Override
                             Clause buildNumericValueClause(String propTable, String operand, String placeholder) {
                                 return where(propTable + ".proptype = 'java.lang.Integer'")
@@ -230,8 +212,5 @@ public class MSSQLTableHandler extends GenericTableHandler {
         }
 
         return builder.toSQL();
-    }
-    
-    
-    
+    }   
 }

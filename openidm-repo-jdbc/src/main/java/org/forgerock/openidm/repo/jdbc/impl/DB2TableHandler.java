@@ -1,52 +1,42 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011-2014 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
-
-import org.forgerock.json.JsonPointer;
-import org.forgerock.json.JsonValue;
 
 import static org.forgerock.openidm.repo.QueryConstants.PAGED_RESULTS_OFFSET;
 import static org.forgerock.openidm.repo.QueryConstants.PAGE_SIZE;
 import static org.forgerock.openidm.repo.QueryConstants.SORT_KEYS;
 import static org.forgerock.openidm.repo.util.Clauses.where;
 
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Map;
+
+import org.forgerock.json.JsonPointer;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.SortKey;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.util.Clause;
 import org.forgerock.util.query.QueryFilter;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-
-import java.util.List;
-import java.util.Map;
-import org.forgerock.json.resource.NotFoundException;
-
 /**
- * @version $Revision$ $Date$
+ * TableHandler appropriate for DB2-specific query syntax.
  */
 public class DB2TableHandler extends GenericTableHandler {
 
@@ -126,7 +116,7 @@ public class DB2TableHandler extends GenericTableHandler {
                         .and("objecttypes.objecttype = ${otype}"))
 
                 .where(filter.accept(
-                        new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH, builder) {
+                        new GenericSQLQueryFilterVisitor(DEFAULT_SEARCHABLE_LENGTH, builder) {
                             // override numeric value clause generation to cast propvalue to a number
                             @Override
                             Clause buildNumericValueClause(String propTable, String operand, String placeholder) {
@@ -170,7 +160,8 @@ public class DB2TableHandler extends GenericTableHandler {
      * @throws NotFoundException if the requested object was not found in the DB
      * @throws java.sql.SQLException for general DB issues
      */
-    public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
+    @Override
+    public Map<String, Object> readForUpdate(String fullId, String type, String localId, Connection connection)
             throws NotFoundException, SQLException {
         
         PreparedStatement readForUpdateStatement = null;
@@ -187,18 +178,14 @@ public class DB2TableHandler extends GenericTableHandler {
 
             logger.debug("Executing: {}", readForUpdateStatement);
             rs = readForUpdateStatement.executeQuery();
-            if (rs.next()) {
-                logger.debug("Read for update full id: {}", fullId);
-                return rs;
+            if (rs.isBeforeFirst()) {
+                return genericResultMapper.mapToRawObject(rs).get(0);
             } else {
-                CleanupHelper.loggedClose(rs);
-                CleanupHelper.loggedClose(readForUpdateStatement);
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
-        } catch (SQLException ex) {
+        } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readForUpdateStatement);
-            throw ex;
         }
     }
 }
