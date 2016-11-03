@@ -31,6 +31,7 @@ import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.NotFoundException;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
@@ -100,15 +101,7 @@ public class RelationshipValidatorTest {
             relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
             fail("Expected to get BadRequestException");
         } catch (ResourceException e) {
-            assertTrue(e instanceof BadRequestException, "Expected to get BadRequestException");
-        }
-
-        // now test when the reverseProperty is an array - which should be a valid condition.
-        when(foundRelationshipResponse.getContent()).thenReturn(json(object(field("reversePropertyName", array()))));
-        try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
-        } catch (ResourceException e) {
-            fail("Expected no exception.");
+            assertTrue(e instanceof PreconditionFailedException, "Expected to get PreconditionFailedException");
         }
 
         // now test when the reverseProperty isn't populated - which should be a valid condition.
@@ -174,7 +167,8 @@ public class RelationshipValidatorTest {
     }
 
     @Test(dataProvider = "relationshipData")
-    public void testDuplicateRelationshipSuccess(String ref1, String grantType1, String temporalConstraint1, String ref2, String grantType2, String temporalConstraint2) throws BadRequestException  {
+    public void testDuplicateRelationshipSuccess(String ref1, String grantType1, String temporalConstraint1, String ref2,
+                                                 String grantType2, String temporalConstraint2) throws DuplicateRelationshipException  {
         final SchemaField schemaField = mock(SchemaField.class);
         when(schemaField.isReverseRelationship()).thenReturn(false);
         when(schemaField.getName()).thenReturn("testField");
@@ -195,8 +189,9 @@ public class RelationshipValidatorTest {
     }
 
 
-    @Test(dataProvider = "duplicateRelationshipData", expectedExceptions = BadRequestException.class)
-    public void testDuplicateRelationshipFailure(String ref1, String grantType1, String temporalConstraint1, String ref2, String grantType2, String temporalConstraint2) throws BadRequestException  {
+    @Test(dataProvider = "duplicateRelationshipData", expectedExceptions = DuplicateRelationshipException.class)
+    public void testDuplicateRelationshipFailure(String ref1, String grantType1, String temporalConstraint1, String ref2,
+                                                 String grantType2, String temporalConstraint2) throws DuplicateRelationshipException  {
         final SchemaField schemaField = mock(SchemaField.class);
         when(schemaField.isReverseRelationship()).thenReturn(false);
         when(schemaField.getName()).thenReturn("testField");
@@ -266,7 +261,7 @@ public class RelationshipValidatorTest {
                 // simulate both a patch and a create (id present, or not)
                 random.nextInt(10) > 5 ? makeField("_id", "bobo") : makeField("_id", null),
                 makeField(RelationshipValidator.GRANT_TYPE, grantType),
-                makeField(RelationshipValidator.TEMPORAL_CONSTRAINTS, Collections.singleton(temporalConstraint))
+                makeField(RelationshipValidator.TEMPORAL_CONSTRAINTS, Collections.singletonList(temporalConstraint))
         )).asMap();
     }
 

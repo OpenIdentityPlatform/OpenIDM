@@ -21,9 +21,9 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.*;
 
 import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
+import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.audit.util.ActivityLogger;
@@ -142,7 +142,7 @@ public class CollectionRelationshipProviderTest {
             differentUser.put("manager", object(field(RelationshipUtil.REFERENCE_ID, "managed/user/someOtherManager")));
             provider.validateRelationshipField(context, manager.get("reports"), mgrWith2Reports.get("reports"), REFERRING_OBJECT_ID);
             fail("expected to fail if the user already has a manager");
-        } catch (BadRequestException e) {
+        } catch (DuplicateRelationshipException e) {
             // test passed.
         }
     }

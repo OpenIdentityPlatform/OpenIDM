@@ -579,19 +579,34 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      */
     public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId)
             throws ResourceException {
-        Set<String> oldReferences = new HashSet<>();
+        /*
+        This check was added to explicitly exclude requests which specify duplicate relationships. However, the newValue
+        will have the existing relationships, and the to-be-added relationship(s). In that sense, the check seems
+        to duplicate the checks made the the blocks below: in both cases, we check to see whether the new relationship
+        duplicates an existing relationship. However, the check in the blocks below would catch the case in which a
+        request did not specify the complete set of relationship fields, and thus the newValue does not have a complete
+        set of existing relationships. Checking the request-resident relationship state for duplication prior to
+        invoking relationshipValidator#validateRelationship allows the more expensive request to be performed only when
+        necessary.
+         */
+        relationshipValidator.checkForDuplicateRelationships(newValue);
+
+        /*
+        Note that not re-checking existing relationships is not just a performance optimization. If existing collection
+        relationships are re-checked, then the invocation will be rejected because the relationship currently exists.
+         */
+        Set<RelationshipEqualityHash> oldReferences = new HashSet<>();
         if (oldValue.isNotNull()) {
             for (JsonValue oldItem : oldValue) {
-                oldReferences.add(oldItem.get(RelationshipUtil.REFERENCE_ID).asString());
+                oldReferences.add(new RelationshipEqualityHash(oldItem));
             }
         }
         for (JsonValue newItem : newValue) {
-            // If the relationship is found in the existing/old relationships, then we can skip validation.
-            if (!oldReferences.contains(newItem.get(RelationshipUtil.REFERENCE_ID).asString())) {
+            // If the relationship is found in the existing/old relationships, then must skip validation.
+            if (!oldReferences.contains(new RelationshipEqualityHash(newItem))) {
                 logger.debug("validating new relationship {} for {}: ", newItem, propertyPtr);
                 relationshipValidator.validateRelationship(newItem, referrerId, context);
             }
         }
-        relationshipValidator.checkForDuplicateRelationships(newValue);
     }
 }

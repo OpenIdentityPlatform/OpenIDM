@@ -1,0 +1,7 @@
+[
+    {
+        "operation" : "add",
+        "field" : "/queries/find-relationship-edges",
+        "value" : "SELECT * FROM relationships WHERE (((firstId = ${vertex1Id} AND firstPropertyName = ${vertex1FieldName}) AND (secondId = ${vertex2Id} AND secondPropertyName = ${vertex2FieldName})) OR ((firstId = ${vertex2Id} AND firstPropertyName = ${vertex2FieldName}) AND (secondId = ${vertex1Id} AND secondPropertyName = ${vertex1FieldName})))"
+    }
+]

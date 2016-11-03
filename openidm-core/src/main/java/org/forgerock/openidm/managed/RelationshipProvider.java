@@ -673,35 +673,35 @@ public abstract class RelationshipProvider {
                 ReadRequest readRequest = Requests.newReadRequest(REPO_RESOURCE_PATH.child(relationshipId));
                 ResourceResponse oldResource = connectionFactory.getConnection().readAsync(context, readRequest)
                         .then(formatResponse(context, request)).getOrThrow();
-                
+
                 // If we haven't defined a revision, we need to get the current revision
                 if (revision == null) {
                     revision = oldResource.getRevision();
                 }
 
                 // Get the before value of the managed object
-                final JsonValue beforeValue = !fromManagedObjectSet 
+                final JsonValue beforeValue = !fromManagedObjectSet
                         ? getManagedObject(context).getContent()
                         : null;
-                
+
                 JsonValue newValue = oldResource.getContent().copy();
                 boolean modified = JsonValuePatch.apply(newValue, request.getPatchOperations());
                 if (!modified) {
                     logger.debug("Patching did not modify the relatioship {}", request.getResourcePath());
                     return newResultPromise(null);
                 }
-                
+
                 // Update (if changed) and format
-                promise = updateIfChanged(context, request, relationshipId, revision, 
-                        newResourceResponse(oldResource.getId(), oldResource.getRevision(), 
-                        convertToRepoObject(firstResourcePath(context, request), oldResource.getContent())), 
+                promise = updateIfChanged(context, request, relationshipId, revision,
+                        newResourceResponse(oldResource.getId(), oldResource.getRevision(),
+                        convertToRepoObject(firstResourcePath(context, request), oldResource.getContent())),
                         convertToRepoObject(firstResourcePath(context, request), newValue));
-                
+
                 // If the request is from ManagedObjectSet then return the promise
                 if (fromManagedObjectSet) {
                     return promise;
                 }
-                
+
                 // Get the before value of the managed object
                 final JsonValue afterValue = getManagedObject(context).getContent();
 
@@ -710,6 +710,13 @@ public abstract class RelationshipProvider {
 
                 retry = false;
                 logger.debug("Patch retationship successful!");
+            } catch (DuplicateRelationshipException e) {
+                /*
+                This PreconditionFailedException subclass is explicitly caught here to break out of the enclosing do-while(retry)
+                loop as the creation of an existing relationship in the patch is excluded from the retry semantics associated with
+                the _rev mismatch represented by a PreconditionFailedException.
+                 */
+                return e.asPromise();
             } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
                     logger.debug("Unable to update due to revision conflict. Retrying.");
