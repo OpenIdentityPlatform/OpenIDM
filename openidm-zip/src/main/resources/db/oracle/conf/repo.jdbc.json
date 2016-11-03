@@ -154,7 +154,7 @@
             "audit/authentication" : {
                 "table" : "auditauthentication",
                 "objectToColumn" : {
-                    "eventId" : "objectid",
+                    "_id" : "objectid",
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "userId" : "userid",
@@ -169,7 +169,7 @@
             "audit/config" : {
                 "table" : "auditconfig",
                 "objectToColumn" : {
-                    "eventId" : "objectid",
+                    "_id" : "objectid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
                     "transactionId" : "transactionid",
@@ -190,7 +190,7 @@
             "audit/activity" : {
                 "table" : "auditactivity",
                 "objectToColumn" : {
-                    "eventId" : "objectid",
+                    "_id" : "objectid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
                     "transactionId" : "transactionid",
@@ -211,7 +211,7 @@
             "audit/recon" : {
                 "table" : "auditrecon",
                 "objectToColumn" : {
-                    "eventId" : "objectid",
+                    "_id" : "objectid",
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
@@ -237,7 +237,7 @@
             "audit/sync" : {
                 "table" : "auditsync",
                 "objectToColumn" : {
-                    "eventId" : "objectid",
+                    "_id" : "objectid",
                     "transactionId" : "transactionid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
@@ -258,7 +258,7 @@
             "audit/access" : {
                 "table" : "auditaccess",
                 "objectToColumn" : {
-                    "eventId" : "objectid",
+                    "_id" : "objectid",
                     "timestamp" : "activitydate",
                     "eventName" : "eventname",
                     "transactionId" : "transactionid",
