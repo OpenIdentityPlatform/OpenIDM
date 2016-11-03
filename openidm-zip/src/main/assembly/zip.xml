@@ -119,13 +119,6 @@
             <outputDirectory>/openidm/samples/getting-started</outputDirectory>
         </fileSet>
         <fileSet>
-            <directory>${basedir}/src/main/resources/samples/provisioners</directory>
-            <includes>
-                <include>provisioner.openicf-csv.json</include>
-            </includes>
-            <outputDirectory>/openidm/samples/getting-started/conf</outputDirectory>
-        </fileSet>
-        <fileSet>
             <directory>${basedir}/src/main/resources</directory>
             <includes>
                 <include>conf/**</include>
