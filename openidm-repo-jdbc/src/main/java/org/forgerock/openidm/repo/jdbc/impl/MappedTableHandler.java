@@ -358,7 +358,8 @@ public class MappedTableHandler implements TableHandler {
             colPos++;
         }
         if (!unmappedObjFields.asMap().isEmpty()) {
-            // some tables don't map _rev (e.g., audit)
+            // some tables don't map _id and _rev (e.g., audit)
+            unmappedObjFields.remove("_id");
             unmappedObjFields.remove("_rev");
             final Set<String> unmappedObjKeys = JsonValueUtils.flatten(unmappedObjFields).keySet();
             if (!unmappedObjKeys.isEmpty()) {
