@@ -22,6 +22,7 @@ import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.services.context.Context;
 
 /**
  * This validates forward only relationships (ie not bi-directional or reverse)
@@ -48,7 +49,8 @@ public class ForwardRelationshipValidator extends RelationshipValidator {
     }
 
     @Override
-    protected void validateSuccessfulReadResponse(JsonValue relationshipField, ResourcePath referringObjectId, ResourceResponse response) {
+    protected void validateSuccessfulReadResponse(Context context, JsonValue relationshipField,
+              ResourcePath referringObjectId, ResourceResponse response) {
         // nothing more to validate. It is valid if the read request passes.
     }
 }

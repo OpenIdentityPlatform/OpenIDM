@@ -1118,7 +1118,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 if (revision == null) {
                     rev = oldValue.get("_rev").asString();
                 }
-                
+
                 // Create a Set containing all the patched relationship fields
                 Set<JsonPointer> patchedRelationshipFields = new HashSet<JsonPointer>();
                 for (PatchOperation operation : patchOperations) {
@@ -1133,13 +1133,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                         patchedRelationshipFields.add(field);
                     }
                 }
-                
+
                 // Merge the relationship fields with the fields specified in the request
                 final Set<JsonPointer> allFields = new HashSet<JsonPointer>(request.getFields());
                 allFields.addAll(patchedRelationshipFields);
-                
+
                 // Fetch the relationship fields
-                final JsonValue relationships = fetchRelationshipFields(context, resource.getId(), 
+                final JsonValue relationships = fetchRelationshipFields(context, resource.getId(),
                         new ArrayList<JsonPointer>(allFields));
 
                 // Populate the oldValue with the relationship fields
@@ -1166,7 +1166,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     }
                     // The action request to validate the policy of all the patched properties
                     ActionRequest policyAction = newActionRequest(
-                            ResourcePath.valueOf("policy").concat(managedId(resource.getId())).toString(), 
+                            ResourcePath.valueOf("policy").concat(managedId(resource.getId())).toString(),
                             "validateProperty").setContent(propertiesToValidate);
                     if (ContextUtil.isExternal(context)) {
                         // this parameter is used in conjunction with the test in policy.js to ensure that the 
@@ -1193,6 +1193,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 logger.debug("Patch successful!");
 
                 return prepareResponse(context, patchedResource, request.getFields());
+            } catch (DuplicateRelationshipException e) {
+                /*
+                This PreconditionFailedException subclass is explicitly caught here to break out of the enclosing do-while(retry)
+                loop as the creation of an existing relationship in the patch is excluded from the retry semantics associated with
+                the _rev mismatch represented by a PreconditionFailedException.
+                 */
+                throw e;
             } catch (PreconditionFailedException e) {
                 if (forceUpdate) {
                     logger.debug("Unable to update due to revision conflict. Retrying.");
