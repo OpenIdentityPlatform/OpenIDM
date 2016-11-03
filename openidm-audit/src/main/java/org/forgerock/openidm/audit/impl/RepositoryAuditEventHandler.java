@@ -16,9 +16,15 @@
 
 package org.forgerock.openidm.audit.impl;
 
+import static org.forgerock.json.resource.Requests.copyOfQueryRequest;
+import static org.forgerock.json.resource.Requests.newCreateRequest;
+import static org.forgerock.json.resource.Requests.newReadRequest;
+import static org.forgerock.util.promise.Promises.newResultPromise;
+
 import javax.inject.Inject;
 
 import org.forgerock.audit.Audit;
+import org.forgerock.audit.AuditingContext;
 import org.forgerock.audit.events.EventTopicsMetaData;
 import org.forgerock.audit.events.handlers.AuditEventHandlerBase;
 import org.forgerock.json.JsonValue;
@@ -27,36 +33,34 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
- * Audit event handler for Repository.  This is a decorator to the RouterAuditEventHandler where the resourcePath is
+ * Audit event handler for Repository.  This is implemented to use the router where the resourcePath is
  * hardcoded to be "repo/audit".
- *
- * @see RouterAuditEventHandler
  */
 public class RepositoryAuditEventHandler extends AuditEventHandlerBase {
-
-    private RouterAuditEventHandler routerAuditEventHandler;
+    /**
+     * Router target resource path.
+     */
+    private final ResourcePath resourcePath;
 
     /**
-     * Constructs the decorated RouterAuditEventHandler.
+     * The DependencyProvider to provide access to the ConnectionFactory.
      */
+    private final ConnectionFactory connectionFactory;
+
     @Inject
     public RepositoryAuditEventHandler(
             final RepositoryAuditEventHandlerConfiguration configuration,
             final EventTopicsMetaData eventTopicsMetaData,
             @Audit final ConnectionFactory connectionFactory) {
         super(configuration.getName(), eventTopicsMetaData, configuration.getTopics(), configuration.isEnabled());
-        RouterAuditEventHandlerConfiguration routerConfig = new RouterAuditEventHandlerConfiguration();
-        routerConfig.setResourcePath(configuration.getResourcePath());
-        routerConfig.setTopics(configuration.getTopics());
-        routerConfig.setName(configuration.getName());
-        routerConfig.setEnabled(configuration.isEnabled());
-        this.routerAuditEventHandler =
-                new RouterAuditEventHandler(routerConfig, eventTopicsMetaData, connectionFactory);
+        this.resourcePath = ResourcePath.valueOf(configuration.getResourcePath());
+        this.connectionFactory = connectionFactory;
     }
 
     @Override
@@ -66,24 +70,53 @@ public class RepositoryAuditEventHandler extends AuditEventHandlerBase {
 
     @Override
     public void shutdown() throws ResourceException {
-        routerAuditEventHandler.shutdown();
+        // do nothing
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> publishEvent(final Context context,
-            final String auditEventTopic, final JsonValue auditEventContent) {
-        return routerAuditEventHandler.publishEvent(context, auditEventTopic, auditEventContent);
+            final String auditEventTopic,
+            final JsonValue auditEventContent) {
+        try {
+            final String auditEventId = auditEventContent.get(ResourceResponse.FIELD_CONTENT_ID).asString();
+            return newResultPromise(connectionFactory.getConnection().create(new AuditingContext(context),
+                    newCreateRequest(
+                            resourcePath.concat(auditEventTopic),
+                            auditEventId,
+                            auditEventContent)));
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 
     @Override
     public Promise<ResourceResponse, ResourceException> readEvent(final Context context, final String auditEventTopic,
             final String auditEventId) {
-        return routerAuditEventHandler.readEvent(context, auditEventTopic, auditEventId);
+        try {
+            return newResultPromise(connectionFactory.getConnection().read(new AuditingContext(context),
+                    newReadRequest(resourcePath.concat(auditEventTopic), auditEventId)));
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 
     @Override
     public Promise<QueryResponse, ResourceException> queryEvents(final Context context, final String auditEventTopic,
             final QueryRequest queryRequest, final QueryResourceHandler queryResourceHandler) {
-        return routerAuditEventHandler.queryEvents(context, auditEventTopic, queryRequest, queryResourceHandler);
+        try {
+            final QueryRequest newRequest = copyOfQueryRequest(queryRequest);
+            newRequest.setResourcePath(resourcePath.concat(queryRequest.getResourcePathObject()));
+
+            return newResultPromise(
+                    connectionFactory.getConnection().query(new AuditingContext(context), newRequest,
+                            new QueryResourceHandler() {
+                                @Override
+                                public boolean handleResource(ResourceResponse resourceResponse) {
+                                    return queryResourceHandler.handleResource(resourceResponse);
+                                }
+                            }));
+        } catch (ResourceException e) {
+            return e.asPromise();
+        }
     }
 }

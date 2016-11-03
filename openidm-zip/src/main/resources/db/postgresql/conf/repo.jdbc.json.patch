@@ -32,35 +32,5 @@
         "operation" : "add",
         "field" : "/resourceMapping/explicitMapping/audit%2Faccess/objectToColumn/response%2Fdetail",
         "value" : {"column" : "response_detail", "type" : "JSON_MAP"}
-    },
-    {
-        "op" : "move",
-        "from" : "/resourceMapping/explicitMapping/audit%2Fauthentication/objectToColumn/_id"
-        "path" : "/resourceMapping/explicitMapping/audit%2Fauthentication/objectToColumn/eventId"
-    },
-    {
-        "op" : "move",
-        "from" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/_id"
-        "path" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/eventId"
-    },
-    {
-        "op" : "move",
-        "from" : "/resourceMapping/explicitMapping/audit%2Factivity/objectToColumn/_id"
-        "path" : "/resourceMapping/explicitMapping/audit%2Factivity/objectToColumn/eventId"
-    },
-    {
-        "op" : "move",
-        "from" : "/resourceMapping/explicitMapping/audit%2Frecon/objectToColumn/_id"
-        "path" : "/resourceMapping/explicitMapping/audit%2Frecon/objectToColumn/eventId"
-    },
-    {
-        "op" : "move",
-        "from" : "/resourceMapping/explicitMapping/audit%2Fsync/objectToColumn/_id"
-        "path" : "/resourceMapping/explicitMapping/audit%2Fsync/objectToColumn/eventId"
-    },
-    {
-        "op" : "move",
-        "from" : "/resourceMapping/explicitMapping/audit%2Faccess/objectToColumn/_id"
-        "path" : "/resourceMapping/explicitMapping/audit%2Faccess/objectToColumn/eventId"
     }
 ]
