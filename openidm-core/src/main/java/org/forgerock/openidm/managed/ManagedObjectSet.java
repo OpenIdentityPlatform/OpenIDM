@@ -590,7 +590,6 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                 .asMap());
 
         // Execute the postUpdate script if configured
-
         executePostUpdate(context, request, resourceId, decryptedOld, responseContent);
 
         performSyncAction(context, request, resourceId, SynchronizationService.SyncServiceAction.notifyUpdate,
@@ -598,7 +597,9 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
 
         ResourceResponse readResponse =
                 connectionFactory.getConnection().read(context, Requests.newReadRequest(repoId(resourceId)));
-        readResponse.getContent().asMap().putAll(strippedRelationshipFields.asMap());
+        for (final JsonPointer field : schema.getRelationshipFields()) {
+            readResponse.getContent().put(field, responseContent.get(field));
+        }
 
         return readResponse;
     }
