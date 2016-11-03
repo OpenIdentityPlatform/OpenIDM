@@ -83,13 +83,16 @@ while [ "$1" ]; do
         JPDA=$1
     else
         if [ "$1" = "-p" ] && [ "$2" ]; then
-            if [[ $2 == /* ]]; then
+            case $2 in /*)
                 PROJECT_HOME="$2"
-            elif [[ $2 == ..* ]]; then
+                ;;
+            ..*)
                 PROJECT_HOME=$(abspath $2 $OPENIDM_HOME)
-            else
+                ;;
+            *)
                 PROJECT_HOME="$OPENIDM_HOME/$2"
-            fi
+                ;;
+            esac;
             CLOPTS="$CLOPTS -p $PROJECT_HOME"
             shift
         else
