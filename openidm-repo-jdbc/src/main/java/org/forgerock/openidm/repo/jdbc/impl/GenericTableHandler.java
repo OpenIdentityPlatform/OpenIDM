@@ -1,25 +1,17 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright © 2011-2015 ForgeRock AS. All rights reserved.
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.repo.jdbc.impl;
 
@@ -33,20 +25,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
@@ -56,14 +42,17 @@ import org.forgerock.json.resource.PreconditionFailedException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.SortKey;
+import org.forgerock.openidm.repo.jdbc.Constants;
 import org.forgerock.openidm.repo.jdbc.ErrorType;
 import org.forgerock.openidm.repo.jdbc.SQLExceptionHandler;
 import org.forgerock.openidm.repo.jdbc.TableHandler;
-import org.forgerock.openidm.repo.jdbc.impl.query.QueryResultMapper;
 import org.forgerock.openidm.repo.jdbc.impl.query.TableQueries;
 import org.forgerock.util.query.QueryFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 /**
  * Handling of tables in a generic (not object specific) layout
@@ -76,7 +65,7 @@ public class GenericTableHandler implements TableHandler {
      * Maximum length of searchable properties.
      * This is used to trim values due to database index size limitations.
      */
-    protected static final int SEARCHABLE_LENGTH = 2000;
+    protected static final int DEFAULT_SEARCHABLE_LENGTH = 2000;
 
     SQLExceptionHandler sqlExceptionHandler;
 
@@ -92,6 +81,8 @@ public class GenericTableHandler implements TableHandler {
     final TypeReference<LinkedHashMap<String,Object>> typeRef = new TypeReference<LinkedHashMap<String,Object>>() {};
 
     final TableQueries queries;
+    
+    final GenericResultSetMapper genericResultMapper = new GenericResultSetMapper();
     
     Map<QueryDefinition, String> queryMap;
 
@@ -151,7 +142,7 @@ public class GenericTableHandler implements TableHandler {
             this.sqlExceptionHandler = sqlExceptionHandler;
         }
 
-        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, getSearchableLength(), new GenericQueryResultMapper());
+        queries = new TableQueries(this, mainTableName, propTableName, dbSchemaName, getSearchableLength(), genericResultMapper);
         queryMap = Collections.unmodifiableMap(initializeQueryMap());
         queries.setConfiguredQueries(queriesConfig, commandsConfig, queryMap);
 
@@ -173,11 +164,11 @@ public class GenericTableHandler implements TableHandler {
      * Get the length of the searchable index.
      */
     int getSearchableLength() {
-        return SEARCHABLE_LENGTH;
+        return DEFAULT_SEARCHABLE_LENGTH;
     }
 
     protected Map<QueryDefinition, String> initializeQueryMap() {
-        Map<QueryDefinition, String> result = new EnumMap<QueryDefinition, String>(QueryDefinition.class);
+        Map<QueryDefinition, String> result = new EnumMap<>(QueryDefinition.class);
 
         String typeTable = dbSchemaName == null ? "objecttypes" : dbSchemaName + ".objecttypes";
         String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
@@ -215,8 +206,6 @@ public class GenericTableHandler implements TableHandler {
     public ResourceResponse read(String fullId, String type, String localId, Connection connection)
             throws ResourceException, SQLException, IOException {
 
-        ResourceResponse result = null;
-        Map<String, Object> resultMap = null;
         PreparedStatement readStatement = null;
         ResultSet rs = null;
         try {
@@ -227,11 +216,9 @@ public class GenericTableHandler implements TableHandler {
 
             logger.debug("Executing: {}", readStatement);
             rs = readStatement.executeQuery();
-            if (rs.next()) {
-                String rev = rs.getString("rev");
-                String objString = rs.getString("fullobject");
-                resultMap = mapper.readValue(objString, typeRef);
-                resultMap.put("_rev", rev);
+            if (rs.isBeforeFirst()) {
+                Map<String, Object> resultMap = genericResultMapper.mapToObject(rs, fullId, type, null).get(0);
+                String rev = (String)resultMap.get("_rev");
                 logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, resultMap);
                 return newResourceResponse(localId, rev, new JsonValue(resultMap));
             } else {
@@ -259,7 +246,7 @@ public class GenericTableHandler implements TableHandler {
 
             logger.debug("Create with fullid {}", fullId);
             String rev = "0";
-            obj.put("_id", localId); // Save the id in the object
+            obj.put(Constants.OBJECT_ID, localId); // Save the id in the object
             obj.put("_rev", rev); // Save the rev in the object, and return the changed rev from the create.
             String objString = mapper.writeValueAsString(obj);
 
@@ -389,6 +376,7 @@ public class GenericTableHandler implements TableHandler {
     /**
      * @inheritDoc
      */
+    @Override
     public boolean isErrorType(SQLException ex, ErrorType errorType) {
         return sqlExceptionHandler.isErrorType(ex, errorType);
     }
@@ -396,6 +384,7 @@ public class GenericTableHandler implements TableHandler {
     /**
      * @inheritDoc
      */
+    @Override
     public boolean isRetryable(SQLException ex, Connection connection) {
         return sqlExceptionHandler.isRetryable(ex, connection);
     }
@@ -446,7 +435,7 @@ public class GenericTableHandler implements TableHandler {
             logger.debug("Executing: {}", readTypeStatement);
             rs = readTypeStatement.executeQuery();
             if (rs.next()) {
-                typeId = rs.getLong("id");
+                typeId = rs.getLong(Constants.RAW_ID);
                 logger.debug("Type: {}, id: {}", type, typeId);
             }
         } finally {
@@ -478,22 +467,21 @@ public class GenericTableHandler implements TableHandler {
     /**
      * Reads an object with for update locking applied
      *
-     * Note: statement associated with the returned resultset
-     * is not closed upon return.
-     * Aside from taking care to close the resultset it also is
-     * the responsibility of the caller to close the associated
-     * statement. Although the specification specifies that drivers/pools
-     * should close the statement automatically, not all do this reliably.
-     *
-     * @param fullId qualified id of component type and id
-     * @param type the component type
-     * @param localId the id of the object within the component type
-     * @param connection the connection to use
-     * @return the row for the requested object, selected FOR UPDATE
-     * @throws NotFoundException if the requested object was not found in the DB
-     * @throws java.sql.SQLException for general DB issues
+     * @param fullId
+     *            qualified id of component type and id
+     * @param type
+     *            the component type
+     * @param localId
+     *            the id of the object within the component type
+     * @param connection
+     *            the connection to use
+     * @return the row as a map of column name/value pairs for the requested object, selected FOR UPDATE
+     * @throws NotFoundException
+     *            if the requested object was not found in the DB
+     * @throws java.sql.SQLException
+     *            for general DB issues
      */
-    public ResultSet readForUpdate(String fullId, String type, String localId, Connection connection)
+    public Map<String, Object> readForUpdate(String fullId, String type, String localId, Connection connection)
             throws NotFoundException, SQLException {
 
         PreparedStatement readForUpdateStatement = null;
@@ -506,18 +494,14 @@ public class GenericTableHandler implements TableHandler {
 
             logger.debug("Executing: {}", readForUpdateStatement);
             rs = readForUpdateStatement.executeQuery();
-            if (rs.next()) {
-                logger.debug("Read for update full id: {}", fullId);
-                return rs;
+            if (rs.isBeforeFirst()) {
+                return genericResultMapper.mapToRawObject(rs).get(0);
             } else {
-                CleanupHelper.loggedClose(rs);
-                CleanupHelper.loggedClose(readForUpdateStatement);
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
-        } catch (SQLException ex) {
+        } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readForUpdateStatement);
-            throw ex;
         }
     }
 
@@ -534,14 +518,13 @@ public class GenericTableHandler implements TableHandler {
         String newRev = Integer.toString(revInt);
         obj.put("_rev", newRev); // Save the rev in the object, and return the changed rev from the create.
 
-        ResultSet rs = null;
         PreparedStatement updateStatement = null;
         PreparedStatement deletePropStatement = null;
         try {
-            rs = readForUpdate(fullId, type, localId, connection);
-            String existingRev = rs.getString("rev");
-            long dbId = rs.getLong("id");
-            long objectTypeDbId = rs.getLong("objecttypes_id");
+            JsonValue result = new JsonValue(readForUpdate(fullId, type, localId, connection));
+            String existingRev = result.get(Constants.RAW_OBJECT_REV).asString();
+            long dbId = result.get(Constants.RAW_ID).asLong();
+            long objectTypeDbId = result.get("objecttypes_id").asLong();
             logger.debug("Update existing object {} rev: {} db id: {}, object type db id: {}", fullId, existingRev, dbId, objectTypeDbId);
 
             if (!existingRev.equals(rev)) {
@@ -551,12 +534,12 @@ public class GenericTableHandler implements TableHandler {
             deletePropStatement = getPreparedStatement(connection, QueryDefinition.PROPDELETEQUERYSTR);
 
             // Support changing object identifier
-            String newLocalId = (String) obj.get("_id");
+            String newLocalId = (String) obj.get(Constants.OBJECT_ID);
             if (newLocalId != null && !localId.equals(newLocalId)) {
                 logger.debug("Object identifier is changing from " + localId + " to " + newLocalId);
             } else {
                 newLocalId = localId; // If it hasn't changed, use the existing ID
-                obj.put("_id", newLocalId); // Ensure the ID is saved in the object
+                obj.put(Constants.OBJECT_ID, newLocalId); // Ensure the ID is saved in the object
             }
             String objString = mapper.writeValueAsString(obj);
 
@@ -582,14 +565,6 @@ public class GenericTableHandler implements TableHandler {
             logger.trace("Deleted child rows: {} for: {}", deleteCount, fullId);
             writeValueProperties(fullId, dbId, localId, jv, connection);
         } finally {
-            if (rs != null) {
-                if (!rs.isClosed()) {
-                    // Ensure associated statement also is closed
-                    Statement rsStatement = rs.getStatement();
-                    CleanupHelper.loggedClose(rsStatement);
-                }
-                CleanupHelper.loggedClose(rs);
-            }
             CleanupHelper.loggedClose(updateStatement);
             CleanupHelper.loggedClose(deletePropStatement);
         }
@@ -603,16 +578,16 @@ public class GenericTableHandler implements TableHandler {
             throws PreconditionFailedException, InternalServerErrorException, NotFoundException, SQLException, IOException {
         logger.debug("Delete with fullid {}", fullId);
 
-        // First check if the revision matches and select it for UPDATE
-        ResultSet existing = null;
         PreparedStatement deleteStatement = null;
         try {
+            // First check if the revision matches and select it for UPDATE
+            String existingRev;
             try {
-                existing = readForUpdate(fullId, type, localId, connection);
+                JsonValue result = new JsonValue(readForUpdate(fullId, type, localId, connection));
+                existingRev = result.get(Constants.RAW_OBJECT_REV).asString();
             } catch (NotFoundException ex) {
-                throw new NotFoundException("Object does not exist for delete on: " + fullId);
-            }
-            String existingRev = existing.getString("rev");
+                throw new NotFoundException("Object does not exist for delete on: " + fullId, ex);
+            } 
             if (!"*".equals(rev) && !rev.equals(existingRev)) {
                 throw new PreconditionFailedException("Delete rejected as current Object revision " + existingRev + " is different than "
                         + "expected by caller " + rev + ", the object has changed since retrieval.");
@@ -636,12 +611,6 @@ public class GenericTableHandler implements TableHandler {
                 logger.debug("delete for id succeeded: {} revision: {}", localId, rev);
             }
         } finally {
-            if (existing != null) {
-                // Ensure associated statement also is closed
-                Statement existingStatement = existing.getStatement();
-                CleanupHelper.loggedClose(existing);
-                CleanupHelper.loggedClose(existingStatement);
-            }
             CleanupHelper.loggedClose(deleteStatement);
         }
     }
@@ -705,7 +674,7 @@ public class GenericTableHandler implements TableHandler {
                         .and("objecttypes.objecttype = ${otype}"))
 
                 // construct where clause by visiting filter
-                .where(filter.accept(new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH, builder), replacementTokens));
+                .where(filter.accept(new GenericSQLQueryFilterVisitor(DEFAULT_SEARCHABLE_LENGTH, builder), replacementTokens));
 
         // other half of OPENIDM-2773 fix
         replacementTokens.put("otype", params.get("_resource"));
@@ -741,64 +710,3 @@ public class GenericTableHandler implements TableHandler {
         }
     }
 }
-
-class GenericQueryResultMapper implements QueryResultMapper {
-    final static Logger logger = LoggerFactory.getLogger(GenericQueryResultMapper.class);
-
-    // Jackson parser
-    ObjectMapper mapper = new ObjectMapper();
-    // Type information for the Jackson parser
-    TypeReference<LinkedHashMap<String,Object>> typeRef = new TypeReference<LinkedHashMap<String,Object>>() {};
-
-    public List<Map<String, Object>> mapQueryToObject(ResultSet rs, String queryId, String type, Map<String, Object> params,  TableQueries tableQueries)
-            throws SQLException, IOException {
-        List<Map<String, Object>> result = new ArrayList<Map<String, Object>>();
-        ResultSetMetaData rsMetaData = rs.getMetaData();
-        boolean hasFullObject = tableQueries.hasColumn(rsMetaData, "fullobject");
-        boolean hasId = false;
-        boolean hasRev = false;
-        boolean hasPropKey = false;
-        boolean hasPropValue = false;
-        boolean hasTotal = false;
-        if (!hasFullObject) {
-            hasId = tableQueries.hasColumn(rsMetaData, "objectid");
-            hasRev = tableQueries.hasColumn(rsMetaData, "rev");
-            hasPropKey = tableQueries.hasColumn(rsMetaData, "propkey");
-            hasPropValue = tableQueries.hasColumn(rsMetaData, "propvalue");
-            hasTotal = tableQueries.hasColumn(rsMetaData, "total");
-        }
-        while (rs.next()) {
-            if (hasFullObject) {
-                String objString = rs.getString("fullobject");
-                Map<String, Object> obj = mapper.readValue(objString, typeRef);
-
-                // TODO: remove data logging
-                logger.trace("Query result for queryId: {} type: {} converted obj: {}", new Object[] {queryId, type, obj});
-
-                result.add(obj);
-            } else {
-                Map<String, Object> obj = new HashMap<String, Object>();
-                if (hasId) {
-                    obj.put("_id", rs.getString("objectid"));
-                }
-                if (hasRev) {
-                    obj.put("_rev", rs.getString("rev"));
-                }
-                if (hasTotal) {
-                    obj.put("total", rs.getInt("total"));
-                }
-                // Results from query on individual searchable property
-                if (hasPropKey && hasPropValue) {
-                    String propKey = rs.getString("propkey");
-                    Object propValue = rs.getObject("propvalue");
-                    JsonPointer pointer = new JsonPointer(propKey);
-                    JsonValue wrapped = new JsonValue(obj);
-                    wrapped.put(pointer, propValue);
-                }
-                result.add(obj);
-            }
-        }
-        return result;
-    }
-}
-

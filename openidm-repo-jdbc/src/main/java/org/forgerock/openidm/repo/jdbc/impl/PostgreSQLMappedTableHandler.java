@@ -41,7 +41,7 @@ public class PostgreSQLMappedTableHandler extends MappedTableHandler {
         final StringBuffer updateAssign = new StringBuffer();
         boolean isFirst = true;
 
-        for (ColumnMapping colMapping : explicitMapping.columnMappings) {
+        for (ColumnMapping colMapping : explicitMapping.getColumnMappings()) {
             if (!isFirst) {
                 colNames.append(", ");
                 tokenNames.append(",");

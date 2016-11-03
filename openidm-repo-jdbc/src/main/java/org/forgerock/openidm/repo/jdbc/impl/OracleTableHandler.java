@@ -159,7 +159,7 @@ public class OracleTableHandler extends GenericTableHandler {
                         .and("objecttypes.objecttype = ${otype}"))
 
                 .where(filter.accept(
-                        new GenericSQLQueryFilterVisitor(SEARCHABLE_LENGTH, builder) {
+                        new GenericSQLQueryFilterVisitor(DEFAULT_SEARCHABLE_LENGTH, builder) {
                             // override numeric value clause generation to cast propvalue to a number
                             @Override
                             Clause buildNumericValueClause(String propTable, String operand, String placeholder) {
