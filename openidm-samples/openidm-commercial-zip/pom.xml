@@ -164,13 +164,13 @@
               </configuration>
             </plugin>
 
-            <!-- Expand the zip in preparation for calculating checksums -->
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>truezip-maven-plugin</artifactId>
                 <version>1.2</version>
                 <executions>
                     <execution>
+                        <!-- Expand the zip in preparation for calculating checksums -->
                         <id>explode-archive</id>
                         <goals>
                             <goal>copy</goal>
@@ -180,6 +180,23 @@
                             <fileset>
                                 <directory>${project.build.directory}/openidm-commercial-${project.version}.zip</directory>
                                 <outputDirectory>${project.build.directory}/tmp</outputDirectory>
+                            </fileset>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <!-- Add the checksums file to the archive -->
+                        <id>add-checksums-to-archive</id>
+                        <goals>
+                            <goal>copy</goal>
+                        </goals>
+                        <phase>package</phase>
+                        <configuration>
+                            <fileset>
+                                <directory>${project.build.directory}</directory>
+                                <includes>
+                                    <include>.checksums.csv</include>
+                                </includes>
+                                <outputDirectory>${project.build.directory}/openidm-commercial-${project.version}.zip/openidm</outputDirectory>
                             </fileset>
                         </configuration>
                     </execution>
@@ -216,31 +233,6 @@
                     <csvSummary>true</csvSummary>
                     <csvSummaryFile>.checksums.csv</csvSummaryFile>
                 </configuration>
-            </plugin>
-
-            <!-- Add the checksums file to the archive -->
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>truezip-maven-plugin</artifactId>
-                <version>1.2</version>
-                <executions>
-                    <execution>
-                        <id>add-checksums-to-archive</id>
-                        <goals>
-                            <goal>copy</goal>
-                        </goals>
-                        <phase>package</phase>
-                        <configuration>
-                            <fileset>
-                                <directory>${project.build.directory}</directory>
-                                <includes>
-                                    <include>.checksums.csv</include>
-                                </includes>
-                                <outputDirectory>${project.build.directory}/openidm-commercial-${project.version}.zip/openidm</outputDirectory>
-                            </fileset>
-                        </configuration>
-                    </execution>
-                </executions>
             </plugin>
         </plugins>
     </build>
