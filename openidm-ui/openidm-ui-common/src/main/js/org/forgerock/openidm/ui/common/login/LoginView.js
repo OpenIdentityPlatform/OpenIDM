@@ -24,8 +24,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/LoginView",
     "org/forgerock/commons/ui/common/util/OAuth",
-    "org/forgerock/commons/ui/common/main/Router",
-    "org/forgerock/openidm/ui/common/util/AMLoginUtils"
+    "org/forgerock/commons/ui/common/main/Router"
 ], function($, _, Handlebars,
             SocialDelegate,
             Configuration,
@@ -33,8 +32,7 @@ define([
             EventManager,
             commonLoginView,
             OAuth,
-            Router,
-            amLoginUtils) {
+            Router) {
 
     var LoginView = function () {},
         obj;
@@ -75,8 +73,7 @@ define([
     });
 
     obj.render = function (args, callback) {
-        var amCallback = amLoginUtils.init(this,true),
-            oauthProviders = SocialDelegate.loginProviders(),
+        var oauthProviders = SocialDelegate.loginProviders(),
             params = Router.convertCurrentUrlToJSON().params;
 
         if (!_.isEmpty(params) &&
@@ -130,11 +127,6 @@ define([
                         if (callback) {
                             callback();
                         }
-
-                        if (amCallback) {
-                            amCallback();
-                        }
-
                     }, this));
                 }
 

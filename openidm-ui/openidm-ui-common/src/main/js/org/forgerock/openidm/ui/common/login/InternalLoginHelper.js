@@ -22,7 +22,6 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractConfigurationAware",
     "org/forgerock/commons/ui/common/main/ServiceInvoker",
     "org/forgerock/commons/ui/common/main/Configuration",
-    "org/forgerock/openidm/ui/common/util/AMLoginUtils",
     "org/forgerock/openidm/ui/common/util/Constants"
 ], function ($, _,
              UserModel,
@@ -30,7 +29,6 @@ define([
              AbstractConfigurationAware,
              serviceInvoker,
              conf,
-             amLoginUtils,
              Constants) {
     var obj = new AbstractConfigurationAware();
 
@@ -72,11 +70,6 @@ define([
         }
 
         promise.then((logoutUrl) => {
-            if (conf.globalData.openamAuthEnabled){
-                amLoginUtils.openamLogout(successCallback);
-                return false;
-            }
-
             if (logoutUrl || conf.globalData.logoutUrl) {
                 window.location.href = logoutUrl || conf.globalData.logoutUrl;
                 return false;

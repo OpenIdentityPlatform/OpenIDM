@@ -16,12 +16,8 @@
         value=config.properties.openamDeploymentUrl
         label="templates.auth.modules.openamDeploymentUrl"
         property="properties.openamDeploymentUrl"
-        noValidation="true"}}
-
-        {{> form/_titaToggle
-        label="templates.auth.modules.openamUseExclusively"
-        property="properties.openamUseExclusively"
-        enabled=config.properties.openamUseExclusively}}
+        noValidation="true"
+        default="https://openam.example.com/openam/"}}
     </div>
 </div>
 
@@ -32,19 +28,6 @@
 
 <div class="form-horizontal well" id="advancedForm">
     <div id="advancedFields" class="form-horizontal">
-            {{> form/_basicInput
-            value=config.properties.openamLoginUrl
-            label="templates.auth.modules.openamLoginUrl"
-            property="properties.openamLoginUrl"
-            default= "/XUI/#login/"
-            noValidation="true"}}
-
-            {{> form/_basicInput
-            value=config.properties.openamLoginLinkText
-            label="templates.auth.modules.openamLoginLinkText"
-            property="properties.openamLoginLinkText"
-            noValidation="true"}}
-
             {{> form/_tagSelectize
             value=config.properties.defaultUserRoles
             label="templates.auth.modules.defaultUserRole"
@@ -56,7 +39,8 @@
             value=config.properties.openamSSOTokenCookieName
             label="templates.auth.modules.openamSSOTokenCookieName"
             property="properties.openamSSOTokenCookieName"
-            noValidation="true"}}
+            noValidation="true"
+            default="iPlanetDirectoryPro"}}
 
             {{> form/_basicInput
             value=config.properties.openamUserAttribute
