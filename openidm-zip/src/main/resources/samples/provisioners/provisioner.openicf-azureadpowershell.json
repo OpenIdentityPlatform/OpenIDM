@@ -64,6 +64,112 @@
         "MaxInterpretersPoolSize" : 10
     },
     "objectTypes" : {
+        "subscription" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "Subscription",
+            "type" : "object",
+            "nativeType" : "Subscription",
+            "properties" : {
+                "DateCreated" : {
+                    "type" : "string",
+                    "nativeName" : "DateCreated",
+                    "nativeType" : "string"
+                },
+                "NextLifecycleDate" : {
+                    "type" : "string",
+                    "nativeName" : "NextLifecycleDate",
+                    "nativeType" : "string"
+                },
+                "OcpSubscriptionId" : {
+                    "type" : "string",
+                    "nativeName" : "OcpSubscriptionId",
+                    "nativeType" : "string"
+                },
+                "ServiceStatus" : {
+                    "type" : "object",
+                    "nativeName" : "ServiceStatus",
+                    "nativeType" : "object"
+                },
+                "SkuId" : {
+                    "type" : "string",
+                    "nativeName" : "SkuId",
+                    "nativeType" : "string"
+                },
+                "SkuPartNumber" : {
+                    "type" : "string",
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "Status" : {
+                    "type" : "string",
+                    "nativeName" : "Status",
+                    "nativeType" : "string"
+                },
+                "TotalLicenses" : {
+                    "type" : "integer",
+                    "nativeName" : "TotalLicenses",
+                    "nativeType" : "JAVA_TYPE_INT"
+                }
+	    }
+        },	
+        "license" : {
+            "$schema" : "http://json-schema.org/draft-03/schema",
+            "id" : "License",
+            "type" : "object",
+            "nativeType" : "License",
+            "properties" : {
+                "AccountName" : {
+                    "type" : "string",
+                    "nativeName" : "AccountName",
+                    "nativeType" : "string"
+                },
+                "AccountObjectId" : {
+                    "type" : "string",
+                    "nativeName" : "AccountObjectId",
+                    "nativeType" : "string"
+                },
+                "AccountSkuId" : {
+                    "type" : "string",
+                    "nativeName" : "__NAME__",
+                    "nativeType" : "string"
+                },
+                "ActiveUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "ActiveUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "ConsumedUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "ConsumedUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "SuspendedUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "SuspendedUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "WarningUnits" : {
+                    "type" : "integer",
+                    "nativeName" : "WarningUnits",
+                    "nativeType" : "JAVA_TYPE_INT"
+                },
+                "SkuPartNumber" : {
+                    "type" : "string",
+                    "nativeName" : "SkuPartNumber",
+                    "nativeType" : "string"
+                },
+                "ServiceStatus" : {
+                    "type" : "object",
+                    "nativeName" : "ServiceStatus",
+                    "nativeType" : "object"
+                },
+                "TargetClass" : {
+                    "type" : "string",
+                    "nativeName" : "TargetClass",
+                    "nativeType" : "string"
+                }
+	    }
+        },	
         "group" : {
             "$schema" : "http://json-schema.org/draft-03/schema",
             "id" : "__GROUP__",
@@ -129,8 +235,7 @@
                         "type" : "object",
                         "nativeType" : "object",
                         "flags" : [
-                            "NOT_CREATABLE",
-                            "NOT_UPDATEABLE"
+                            "NOT_CREATABLE"
                         ]
                     },
                     "nativeName" : "__MEMBERS__",
@@ -187,6 +292,15 @@
                     "nativeName" : "PasswordNeverExpires",
                     "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN"
                 },
+                "IsLicensed" : {
+                    "type" : "boolean",
+                    "nativeName" : "IsLicensed",
+                    "nativeType" : "JAVA_TYPE_PRIMITIVE_BOOLEAN",
+                    "flags" : [
+                        "NOT_CREATABLE",
+                        "NOT_UPDATEABLE"
+                    ]
+                },                
                 "FirstName" : {
                     "type" : "string",
                     "nativeName" : "FirstName",
@@ -304,6 +418,11 @@
                     },
                     "nativeName" : "Licenses",
                     "nativeType" : "string"
+                },
+                "LicenseOptions" : {
+                    "type" : "object",
+                    "nativeName" : "LicenseOptions",
+                    "nativeType" : "object"
                 }
             }
         }
