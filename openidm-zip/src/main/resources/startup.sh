@@ -22,7 +22,7 @@ abspath() {
         (cd "$1"; pwd)
     elif [ -f "$1" ]; then
         # file
-        if [[ $1 == */* ]]; then
+        if [ "$1" = */* ]; then
             echo "$(cd "${1%/*}"; pwd)/${1##*/}"
         else
             echo "$(pwd)/$1"
@@ -87,13 +87,12 @@ while [ "$1" ]; do
                 PROJECT_HOME="$2"
                 ;;
             ..*)
-                PROJECT_HOME=$(abspath $2 $OPENIDM_HOME)
+                PROJECT_HOME=$(abspath "$2" "$OPENIDM_HOME")
                 ;;
             *)
                 PROJECT_HOME="$OPENIDM_HOME/$2"
                 ;;
-            esac;
-            CLOPTS="$CLOPTS -p $PROJECT_HOME"
+            esac
             shift
         else
             CLOPTS="$CLOPTS $1"
@@ -147,7 +146,8 @@ START_IDM() {
         -classpath "$CLASSPATH" \
         -Dopenidm.system.server.root="$OPENIDM_HOME" \
         -Djava.awt.headless=true \
-        org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS)
+        org.forgerock.commons.launcher.Main -c "$OPENIDM_HOME"/bin/launcher.json $CLOPTS \
+        -p "$PROJECT_HOME")
 }
 
 while
@@ -156,5 +156,3 @@ while
 do
    continue;
 done
-
-# org.forgerock.commons.launcher.Main -c bin/launcher.json -w samples/sample1/cache -p samples/sample1 "$@"
