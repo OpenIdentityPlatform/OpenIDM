@@ -19,6 +19,11 @@
         noValidation="true"
         default="https://openam.example.com/openam/"}}
     </div>
+
+    {{> authentication/_propertyMapping
+    hideUserCredential=true
+    authenticationId="userName"
+    userRoles="authzRoles"}}
 </div>
 
 <h3 class="advanced-toggle">
@@ -80,7 +85,6 @@
             noValidation="true"}}
     </div>
 
-    {{> authentication/_propertyMapping}}
     {{> authentication/_customProperties}}
     {{> authentication/_augmentSecurityContext}}
 </div>
