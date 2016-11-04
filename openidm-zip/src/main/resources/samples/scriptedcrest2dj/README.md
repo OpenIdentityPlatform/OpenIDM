@@ -84,7 +84,7 @@ Setup OpenDJ
 
         $ opendj/bin/dsconfig \
          set-access-control-handler-prop \
-         --hostname opendj.example.com \
+         --hostname localhost \
          --port 4444 \
          --bindDN "cn=Directory Manager" \
          --bindPassword password \
@@ -97,7 +97,7 @@ Setup OpenDJ
 
         $ opendj/bin/dsconfig \
          set-access-control-handler-prop \
-         --hostname opendj.example.com \
+         --hostname localhost \
          --port 4444 \
          --bindDN "cn=Directory Manager" \
          --bindPassword password \
@@ -122,7 +122,29 @@ OpenIDM Instructions
 
         $ /path/to/openidm/startup.sh -p samples/scriptedcrest2dj
 
-2.  Create a Group.
+2. Check the connector configuration is correct by obtaining the status of the connector, over REST.
+        $ curl \
+             --header "X-OpenIDM-Username: openidm-admin" \
+             --header "X-OpenIDM-Password: openidm-admin" \
+             --request POST \
+             "http://localhost:8080/openidm/system/scriptedcrest?_action=test"
+            {
+              "ok": true,
+              "connectorRef": {
+                "bundleVersion": "[1.4.0.0,1.5.0.0)",
+                "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+                "connectorName": "org.forgerock.openicf.connectors.scriptedcrest.ScriptedCRESTConnector"
+              },
+              "objectTypes": [
+                "groups",
+                "users"
+              ],
+              "config": "config/provisioner.openicf/scriptedcrest",
+              "enabled": true,
+              "name": "scriptedcrest"
+            }
+
+3.  Create a Group in openDJ.
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
@@ -142,7 +164,7 @@ OpenIDM Instructions
           "_id": "group1"
         }
 
-3.  Create a User.
+4.  Create a User in openDJ.
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
@@ -181,77 +203,43 @@ OpenIDM Instructions
           "displayName": "User.Smith"
         }
 
-4.  Update user telephone number.
+5. Reconcile the openDJ user to managed/user
+
+        $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
+        "https://localhost:8443/openidm/recon?_action=recon&mapping=systemCrestLdapUser_managedUser"
+
+        {"_id":"a72d6c6f-c019-4598-a199-52d9dcca9dae","state":"ACTIVE"}
+
+6. Update managed/user telephone number which will sync to openDJ and make the change there.
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
           --header "X-OpenIDM-Password: openidm-admin" \
-          --header "If-Match: *" \
-          --request PUT \
-          --data '{
-          "name": {
-            "familyName": "Smith",
-            "givenName" : "User"
-          },
-          "contactInformation": {
-            "emailAddress" : "user@example.com",
-            "telephoneNumber" : "555-555-5555"
-          },
-          "password" : "TestPassw0rd",
-          "displayName" : "User.Smith",
-          "_id" : "user"
-          }' \
-          http://localhost:8080/openidm/system/scriptedcrest/users/user
-
-        {
-          "_rev": "00000000981a9f3f",
-          "contactInformation": {
-        "emailAddress": "user@example.com",
-        "telephoneNumber": "555-555-5555"
-          },
-          "meta": {
-            "created": "2014-10-08T03:56:13Z",
-            "lastModified": "2014-10-08T03:56:50Z"
-          },
-          "name": {
-            "givenName": "User",
-            "familyName": "Smith"
-          },
-          "_id": "user",
-          "userName": "user@example.com",
-          "displayName": "User.Smith"
-        }
-
-5.  Update group by adding a user.
-
-        $ curl --header "Content-Type: application/json" \
-          --header "X-OpenIDM-Username: openidm-admin" \
-          --header "X-OpenIDM-Password: openidm-admin" \
-          --header "If-Match: *" \
-          --request PUT \
-          --data '{
-          "_id" : "group1",
-          "members" : [{"_id" : "user"}]
-          }' \
-          http://localhost:8080/openidm/system/scriptedcrest/groups/group1
-
-        {
-          "_rev": "00000000c07c6d6a",
-          "meta": {
-            "created": "2014-10-08T03:55:46Z",
-            "lastModified": "2014-10-08T03:57:24Z"
-          },
-          "displayName": "group1",
-          "members": [
+          --request PATCH \
+          --data '[
             {
-              "displayName": "User.Smith",
-              "_id": "user"
+              "operation" : "replace",
+              "field" : "telephoneNumber",
+              "value" : "555-555-5555"
             }
-          ],
-          "_id": "group1"
+         ]' \
+          "http://localhost:8080/openidm/managed/user/user"
+
+        {
+            "userName":"user",
+            "mail":"user@example.com",
+            "displayName":"User.Smith",
+            "telephoneNumber":"555-555-5555",
+            "givenName":"User",
+            "sn":"Smith",
+            "_id":"user",
+            "_rev":"9",
+            "accountStatus":"active",
+            "effectiveRoles":[],
+            "effectiveAssignments":[]
         }
 
-6.  Read the user data.
+7.  Read the user data from openDJ.
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
@@ -283,7 +271,38 @@ OpenIDM Instructions
           "userName": "user@example.com"
         }
 
-7.  Read the group.
+8.  Update group in openDJ by adding a user.
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --header "If-Match: *" \
+          --request PUT \
+          --data '{
+          "_id" : "group1",
+          "members" : [{"_id" : "user"}]
+          }' \
+          http://localhost:8080/openidm/system/scriptedcrest/groups/group1
+
+        {
+          "_rev": "00000000c07c6d6a",
+          "meta": {
+            "created": "2014-10-08T03:55:46Z",
+            "lastModified": "2014-10-08T03:57:24Z"
+          },
+          "displayName": "group1",
+          "members": [
+            {
+              "displayName": "User.Smith",
+              "_id": "user"
+            }
+          ],
+          "_id": "group1"
+        }
+
+
+
+9.  Read the group from openDJ.
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
@@ -307,7 +326,38 @@ OpenIDM Instructions
           }
         }
 
-8.  Delete the user.
+10. Reconcile the openDJ group to managed/group
+
+        $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
+        "https://localhost:8443/openidm/recon?_action=recon&mapping=systemCrestLdapGroup_managedGroup"
+
+        {"_id":"5d887e40-250a-4da7-af48-d2c9bc6c0b00","state":"ACTIVE"}
+
+
+11. Read the managed/group to see that the openDJ group has been added to managed/group.
+
+        $ curl --header "Content-Type: application/json" \
+          --header "X-OpenIDM-Username: openidm-admin" \
+          --header "X-OpenIDM-Password: openidm-admin" \
+          --request GET \
+          "http://localhost:8080/openidm/managed/group/group1"
+
+          {
+            "_id": "group1",
+            "_rev": "1",
+            "members": [
+                {
+                    "displayName": "User.Smith",
+                    "_id": "user"
+                }
+            ],
+            "displayName": "group1"
+          }
+
+
+
+
+12.  Delete the user.
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
@@ -319,7 +369,7 @@ OpenIDM Instructions
           "_id": "user"
         }
 
-9.  Delete the group.
+13.  Delete the group.
 
         $ curl --header "Content-Type: application/json" \
           --header "X-OpenIDM-Username: openidm-admin" \
@@ -330,20 +380,6 @@ OpenIDM Instructions
         {
           "_id": "group1"
         }
-
-Other Available Commands
-------------------------
-This sample also supports running reconciliation on users and groups.
-
-    $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
-    "https://localhost:8443/openidm/recon?_action=recon&mapping=systemCrestLdapUser_managedUser"
-
-    {"_id":"a72d6c6f-c019-4598-a199-52d9dcca9dae","state":"ACTIVE"}
-
-    $ curl -k -H "Content-type: application/json" -u "openidm-admin:openidm-admin" -X POST \
-    "https://localhost:8443/openidm/recon?_action=recon&mapping=systemCrestLdapGroup_managedGroup"
-
-    {"_id":"5d887e40-250a-4da7-af48-d2c9bc6c0b00","state":"ACTIVE"}
 
 This shows the basic CRUD operations on users and groups using ScriptedCREST and the OpenDJ rest2ldap API. To read
 more documentation on the Groovy ScriptedCREST connector and for help with customization please see the
