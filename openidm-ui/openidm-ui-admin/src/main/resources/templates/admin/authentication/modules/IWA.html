@@ -58,7 +58,10 @@
 
     <div id="allowedAuthenticationIdPatterns"></div>
 
-    {{> authentication/_propertyMapping}}
+    {{> authentication/_propertyMapping
+    hideUserCredential=true
+    authenticationId="userName"
+    userRoles="authzRoles"}}
 </div>
 
 <h3 class="advanced-toggle">
