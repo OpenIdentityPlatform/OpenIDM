@@ -202,10 +202,10 @@ define([
 
             UIUtils.confirmDialog($.t("templates.managed.managedDelete"), "danger", _.bind(function(){
                 tempManaged = _.reject(tempManaged, function(managedObject){
-                    return managedObject.name === this.data.currentManagedObject.name;
+                    return managedObject.name === selectedItem.attr("data-managed-title");
                 }, this);
 
-                promises.push(ConfigDelegate.updateEntity("managed", {"objects" : this.data.currentManagedObjects}));
+                promises.push(ConfigDelegate.updateEntity("managed", {"objects" : tempManaged}));
                 promises.push(RepoDelegate.deleteManagedObject(this.data.repoConfig, selectedItem.attr("data-managed-title")));
 
                 $.when.apply($, promises).then(() => {
