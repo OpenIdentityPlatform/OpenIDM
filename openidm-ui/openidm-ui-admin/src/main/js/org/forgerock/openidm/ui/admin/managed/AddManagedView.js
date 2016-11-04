@@ -24,6 +24,7 @@ define([
     "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
+    "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
     "org/forgerock/commons/ui/common/main/Router"
 ], function($, _,
             form2js,
@@ -33,6 +34,7 @@ define([
             ConfigDelegate,
             EventManager,
             Constants,
+            RepoDelegate,
             Router) {
 
     var AddManagedView = AbstractManagedView.extend({
@@ -45,23 +47,22 @@ define([
         model: {},
 
         render: function(args, callback) {
-            var managedPromise = ConfigDelegate.readEntity("managed"),
-                repoCheckPromise = ConfigDelegate.getConfigList();
+            $.when(
+                ConfigDelegate.readEntity("managed"),
+                RepoDelegate.findRepoConfig()
+            ).then(_.bind(function(managedObjects, repoConfig) {
+                this.model.managedObjects = managedObjects;
+                this.data.repoConfig = repoConfig;
 
-            $.when(managedPromise, repoCheckPromise).then(_.bind(function(managedObjects, configFiles) {
-                this.checkRepo(configFiles[0], _.bind(function(){
-                    this.model.managedObjects = managedObjects;
+                this.parentRender(_.bind(function () {
+                    ValidatorsManager.bindValidators(this.$el.find("#addManagedObjectForm"));
+                    this.$el.find('#managedObjectIcon').iconpicker({
+                        hideOnSelect: true
+                    });
 
-                    this.parentRender(_.bind(function () {
-                        ValidatorsManager.bindValidators(this.$el.find("#addManagedObjectForm"));
-                        this.$el.find('#managedObjectIcon').iconpicker({
-                            hideOnSelect: true
-                        });
-
-                        if (callback) {
-                            callback();
-                        }
-                    }, this));
+                    if (callback) {
+                        callback();
+                    }
                 }, this));
             }, this));
         },
