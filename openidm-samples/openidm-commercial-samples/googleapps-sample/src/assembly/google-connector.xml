@@ -43,6 +43,7 @@
                 <include>com.google.http-client:google-http-client-jackson2</include>
                 <include>com.google.apis:google-api-services-admin-directory</include>
                 <include>com.google.apis:google-api-services-licensing</include>
+                <include>com.google.guava:guava</include>
             </includes>
         </dependencySet>
     </dependencySets>
