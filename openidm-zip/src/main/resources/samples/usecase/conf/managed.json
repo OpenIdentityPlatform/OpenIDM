@@ -253,7 +253,7 @@
                         "userEditable" : false,
                         "policies" : [
                             {
-                                "policyId" : "valid-date"
+                                "policyId" : "valid-utcdate"
                             }
                         ]
                     },
@@ -264,7 +264,7 @@
                         "userEditable" : false,
                         "policies" : [
                             {
-                                "policyId" : "valid-date"
+                                "policyId" : "valid-utcdate"
                             }
                         ]
                     },
