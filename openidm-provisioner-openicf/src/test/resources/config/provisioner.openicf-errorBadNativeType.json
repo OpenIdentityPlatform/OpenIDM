@@ -1,0 +1,28 @@
+{
+    "name": "errorBadNativeType",
+    "connectorRef": {
+        "bundleName": "org.forgerock.openicf.connectors.groovy-connector",
+        "bundleVersion": "1.4.2.1",
+        "connectorName": "org.forgerock.openicf.connectors.groovy.ScriptedConnector"
+    },
+    "objectTypes": {
+        "__TEST__": {
+            "$schema": "http://json-schema.org/draft-03/schema",
+            "id": "__TEST__",
+            "type": "object",
+            "nativeType": "__TEST__",
+            "properties": {
+                "shouldNotHaveNativeTypeAsArray": {
+                    "type": "array",
+                    "items": {
+                        "type": "boolean",
+                        "nativeType": "boolean"
+                    },
+                    "nativeName": "shouldNotHaveNativeTypeAsArray",
+                    "nativeType": "array"
+                }
+            }
+        }
+    },
+    "operationOptions" : { }
+}
