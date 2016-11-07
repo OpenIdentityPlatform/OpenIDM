@@ -61,7 +61,7 @@
     {
         "operation" : "move",
         "from" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/runas",
-        "path" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/runAs"
+        "field" : "/resourceMapping/explicitMapping/audit%2Fconfig/objectToColumn/runAs"
     },
     {
         "operation" : "add",
