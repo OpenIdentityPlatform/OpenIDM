@@ -1918,6 +1918,7 @@
             "noMappingAttributes" : "No Mapping Attributes",
             "whatIsMapping" : "Mappings define what and how to synchronize data between resources.",
             "noResourceTitle" : "No mappings configured.",
+            "noMapping" : "No mappings available.",
             "move": "Move",
             "attributesGrid" : "Attributes Grid",
             "backToMapping" : "Back to Mappings",
