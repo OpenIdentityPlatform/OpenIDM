@@ -51,12 +51,15 @@ public class DB2TableHandler extends GenericTableHandler {
         String mainTable = dbSchemaName == null ? mainTableName : dbSchemaName + "." + mainTableName;
         String propertyTable = dbSchemaName == null ? propTableName : dbSchemaName + "." + propTableName;
 
-        // Not allowed to use "FOR UPDATE" on multiple tables in DB2
+        /*
+         * DB2 does not allow 'FOR UPDATE' clause with multiple tables in FROM or a JOIN.
+         * Must use sub-select to get around this
+         */
         result.put(
                 QueryDefinition.READFORUPDATEQUERYSTR,
                 "SELECT obj.* FROM "
                         + mainTable
-                        + " obj WHERE obj.objecttypes_id = ? AND obj.objectid = ? FOR UPDATE");
+                        + " obj WHERE obj.objecttypes_id = (SELECT id FROM " + typeTable + " objtype WHERE objtype.objecttype = ?) AND obj.objectid = ? FOR UPDATE OF rev, fullobject");
 
         // Main object table DB2 Script
         result.put(QueryDefinition.DELETEQUERYSTR, "DELETE FROM " + mainTable + " obj WHERE EXISTS (SELECT 1 FROM " + typeTable + " objtype WHERE obj.objecttypes_id = objtype.id AND objtype.objecttype = ?) AND obj.objectid = ? AND obj.rev = ?");
@@ -142,50 +145,4 @@ public class DB2TableHandler extends GenericTableHandler {
         return builder.toSQL();
     }
     
-    /**
-     * Reads an object with for update locking applied
-     *
-     * Note: statement associated with the returned resultset
-     * is not closed upon return.
-     * Aside from taking care to close the resultset it also is
-     * the responsibility of the caller to close the associated
-     * statement. Although the specification specifies that drivers/pools
-     * should close the statement automatically, not all do this reliably.
-     *
-     * @param fullId qualified id of component type and id
-     * @param type the component type
-     * @param localId the id of the object within the component type
-     * @param connection the connection to use
-     * @return the row for the requested object, selected FOR UPDATE
-     * @throws NotFoundException if the requested object was not found in the DB
-     * @throws java.sql.SQLException for general DB issues
-     */
-    @Override
-    public Map<String, Object> readForUpdate(String fullId, String type, String localId, Connection connection)
-            throws NotFoundException, SQLException {
-
-        PreparedStatement readForUpdateStatement = null;
-        ResultSet rs = null;
-        try {
-            long typeId = readTypeId(type, connection);
-            if (typeId < 0) {
-                throw new NotFoundException("Object " + fullId + " not found. No id could be retrieved for type " + type);
-            }
-            readForUpdateStatement = getPreparedStatement(connection, QueryDefinition.READFORUPDATEQUERYSTR);
-            logger.trace("Populating prepared statement {} for {}", readForUpdateStatement, fullId);
-            readForUpdateStatement.setString(1, String.valueOf(typeId));
-            readForUpdateStatement.setString(2, localId);
-
-            logger.debug("Executing: {}", readForUpdateStatement);
-            rs = readForUpdateStatement.executeQuery();
-            List<Map<String, Object>> result = genericResultMapper.mapToRawObject(rs);
-            if (result.isEmpty()) {
-                throw new NotFoundException("Object " + fullId + " not found in " + type);
-            }
-            return result.get(0);
-        } finally {
-            CleanupHelper.loggedClose(rs);
-            CleanupHelper.loggedClose(readForUpdateStatement);
-        }
-    }
 }
