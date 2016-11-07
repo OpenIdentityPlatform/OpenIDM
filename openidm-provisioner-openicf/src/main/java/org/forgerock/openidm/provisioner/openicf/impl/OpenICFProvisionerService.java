@@ -643,18 +643,18 @@ public class OpenICFProvisionerService implements ProvisionerService, SingletonR
         jv.put("name", systemIdentifier.getName());
         jv.put("enabled", jsonConfiguration.get("enabled").defaultTo(Boolean.TRUE).asBoolean());
         jv.put("config", "config/provisioner.openicf/" + factoryPid);
-        jv.put("objectTypes", ConnectorUtil.getObjectTypes(jsonConfiguration).keySet());
-        ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
-        if (connectorReference != null) {
-            jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF, ConnectorUtil.getConnectorKey(
-                    connectorReference.getConnectorKey()));
-            ConnectorInfo connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
-            if (connectorInfo != null) {
-                jv.put("displayName", connectorInfo.getConnectorDisplayName());
-            }
-        }
-
         try {
+            ConnectorReference connectorReference = ConnectorUtil.getConnectorReference(jsonConfiguration);
+            if (connectorReference != null) {
+                jv.put(ConnectorUtil.OPENICF_CONNECTOR_REF, ConnectorUtil.getConnectorKey(
+                        connectorReference.getConnectorKey()));
+                ConnectorInfo connectorInfo = connectorInfoProvider.findConnectorInfo(connectorReference);
+                if (connectorInfo != null) {
+                    jv.put("displayName", connectorInfo.getConnectorDisplayName());
+                }
+            }
+            jv.put("objectTypes", ConnectorUtil.getObjectTypes(jsonConfiguration).keySet());
+
             ConnectorFacade connectorFacade = getConnectorFacade();
             if (connectorFacade == null) {
                 jv.put("error", "connector not available");

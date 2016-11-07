@@ -1138,6 +1138,17 @@ public class OpenICFProvisionerServiceTest implements RouterRegistry, SyncFailur
         router.removeRoute(r);
     }
 
+    @Test
+    public void testBadNativeTypeConfigError() throws Exception {
+        final ActionRequest actionRequest = Requests.newActionRequest("system/errorBadNativeType",
+                SystemObjectSetService.SystemAction.test.toString());
+
+        final ActionResponse response = connection.action(new RootContext(), actionRequest);
+        assertThat(response.getJsonContent().get("ok").asBoolean()).isFalse();
+        assertThat(response.getJsonContent().get("error").asString())
+                .isEqualTo("Attribute type 'interface java.util.List' is not supported.");
+    }
+
     @Override
     public SyncFailureHandler create(JsonValue config) throws Exception {
         return NullSyncFailureHandler.INSTANCE;
