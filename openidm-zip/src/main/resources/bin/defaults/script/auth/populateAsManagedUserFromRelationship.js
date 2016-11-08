@@ -64,16 +64,16 @@
 
     var _ = require("lib/lodash"),
         provider = security.authorization.component.replace("managed/", ""),
-        managedUserRef = openidm.read(security.authorization.component + "/" + security.authorization.id, null, ["*","user"]).user;
+        baseObject = openidm.read(security.authorization.component + "/" + security.authorization.id, null, ["*","user"]);
 
-    if (!managedUserRef) {
+    if (!baseObject || !baseObject.user) {
         throw {
             "code" : 401,
             "message" : "Access denied"
         };
     }
 
-    var managedUser = openidm.read(managedUserRef._ref, null, ["*", "authzRoles"]);
+    var managedUser = openidm.read(baseObject.user._ref, null, ["*", "authzRoles"]);
 
     if (managedUser.accountStatus !== "active") {
         throw {
