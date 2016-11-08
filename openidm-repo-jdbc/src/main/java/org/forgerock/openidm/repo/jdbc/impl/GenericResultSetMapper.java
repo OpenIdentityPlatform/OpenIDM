@@ -46,6 +46,16 @@ public class GenericResultSetMapper implements ResultSetMapper {
     TypeReference<LinkedHashMap<String, Object>> typeRef = new TypeReference<LinkedHashMap<String, Object>>() {
     };
     
+    /**
+     * Maps the ResultSet to a raw List of mapped rows.
+     * 
+     * The implementation of this method traverses the ResultSet and moves the
+     * cursor until it is positioned after the last row. This method should only
+     * be called once per ResultSet unless the ResultSet is scrollable.
+     * 
+     * @return the ResultSet as a List of mapped rows with column names converted
+     * to lowercase
+     */
     @Override
     public List<Map<String, Object>> mapToRawObject(ResultSet rs) throws SQLException {
         ResultSetMetaData md = rs.getMetaData();
@@ -54,14 +64,22 @@ public class GenericResultSetMapper implements ResultSetMapper {
         while (rs.next()){
             Map<String, Object> obj = new HashMap<>(columns);
             for(int i = 1; i <= columns; ++i){
-                obj.put(md.getColumnName(i), rs.getObject(i));
+                obj.put(md.getColumnName(i).toLowerCase(), rs.getObject(i));
             }
             result.add(obj);
         }
-        rs.beforeFirst();
         return result;
     }
     
+      /**
+     * Maps the ResultSet to a List of mapped rows representing the OpenIDM object.
+     * 
+     * The implementation of this method traverses the ResultSet and moves the
+     * cursor until it is positioned after the last row. This method should only
+     * be called once per ResultSet unless the ResultSet is scrollable.
+     * 
+     * @return the ResultSet as a List of mapped rows
+     */
     @Override
     public List<Map<String, Object>> mapToObject(ResultSet rs, String queryId, String type, Map<String, Object> params) throws SQLException, IOException {
         List<Map<String, Object>> result = new ArrayList<>();
@@ -108,7 +126,6 @@ public class GenericResultSetMapper implements ResultSetMapper {
                 result.add(obj);
             }
         }
-        rs.beforeFirst();
         return result;
     }
     

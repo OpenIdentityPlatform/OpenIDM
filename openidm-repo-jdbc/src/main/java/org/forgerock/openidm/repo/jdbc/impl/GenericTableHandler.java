@@ -216,15 +216,14 @@ public class GenericTableHandler implements TableHandler {
 
             logger.debug("Executing: {}", readStatement);
             rs = readStatement.executeQuery();
-            if (rs.isBeforeFirst()) {
-                Map<String, Object> resultMap = genericResultMapper.mapToObject(rs, fullId, type, null).get(0);
-                String rev = (String)resultMap.get("_rev");
-                logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, resultMap);
-                return newResourceResponse(localId, rev, new JsonValue(resultMap));
-            } else {
+            List<Map<String, Object>> result = genericResultMapper.mapToObject(rs, fullId, type, null);
+            if (result.isEmpty()) {
                 throw ResourceException.newResourceException(ResourceException.NOT_FOUND,
                         "Object " + fullId + " not found in " + type);
             }
+            String rev = (String)result.get(0).get("_rev");
+            logger.debug(" full id: {}, rev: {}, obj {}", fullId, rev, result.get(0));
+            return newResourceResponse(localId, rev, new JsonValue(result.get(0)));
         } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readStatement);
@@ -494,11 +493,11 @@ public class GenericTableHandler implements TableHandler {
 
             logger.debug("Executing: {}", readForUpdateStatement);
             rs = readForUpdateStatement.executeQuery();
-            if (rs.isBeforeFirst()) {
-                return genericResultMapper.mapToRawObject(rs).get(0);
-            } else {
+            List<Map<String, Object>> result = genericResultMapper.mapToRawObject(rs);
+            if (result.isEmpty()) {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
+            return result.get(0);
         } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readForUpdateStatement);

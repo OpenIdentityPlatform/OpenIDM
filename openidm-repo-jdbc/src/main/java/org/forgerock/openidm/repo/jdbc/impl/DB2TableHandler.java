@@ -163,7 +163,7 @@ public class DB2TableHandler extends GenericTableHandler {
     @Override
     public Map<String, Object> readForUpdate(String fullId, String type, String localId, Connection connection)
             throws NotFoundException, SQLException {
-        
+
         PreparedStatement readForUpdateStatement = null;
         ResultSet rs = null;
         try {
@@ -178,11 +178,11 @@ public class DB2TableHandler extends GenericTableHandler {
 
             logger.debug("Executing: {}", readForUpdateStatement);
             rs = readForUpdateStatement.executeQuery();
-            if (rs.isBeforeFirst()) {
-                return genericResultMapper.mapToRawObject(rs).get(0);
-            } else {
+            List<Map<String, Object>> result = genericResultMapper.mapToRawObject(rs);
+            if (result.isEmpty()) {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
+            return result.get(0);
         } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readForUpdateStatement);
