@@ -227,7 +227,7 @@ class ManagedObjectApiDescription {
             OpenApiTransformer.execute(apiDescription);
             return apiDescription;
         } catch (Exception e) {
-            logger.info("Failed to generate API Description for managed.json section: " + objectSet.getName(), e);
+            logger.info("Failed to generate API Description for managed.json section: " + objectSet.getName());
             return null;
         }
     }
