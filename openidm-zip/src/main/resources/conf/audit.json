@@ -30,6 +30,10 @@
             "config" : {
                 "name" : "json",
                 "logDirectory" : "&{launcher.working.location}/audit",
+                "buffering" : {
+                    "maxSize" : 100000,
+                    "writeInterval" : "100 millis"
+                },
                 "topics" : [
                     "access",
                     "activity",
