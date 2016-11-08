@@ -55,7 +55,10 @@
     "Host" : "",
     "Port" : null,
     "Login" : "",
-    "Password" : null
+    "Password" : null,
+    "CustomProperties" : [ ],
+    "MinInterpretersPoolSize" : 1,
+    "MaxInterpretersPoolSize" : 10
   },
   "objectTypes" : {
     "group" : {
