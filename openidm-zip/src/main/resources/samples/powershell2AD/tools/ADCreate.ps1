@@ -1,6 +1,6 @@
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+# Copyright (c) 2014-2016 ForgeRock AS. All Rights Reserved
 #
 # The contents of this file are subject to the terms
 # of the Common Development and Distribution License
@@ -194,8 +194,7 @@ function Create-NewUser ($attributes)
 	$password = $accessor.GetPassword()
 	If ($password -ne $null)
 	{
-		$dec = $secutil::Decrypt($password)
-		$password = ConvertTo-SecureString -String $dec -AsPlainText -Force
+		$password = $password.ToSecureString()
 	}
 
 	# [-AllowReversiblePasswordEncryption <System.Nullable[bool]>] 
@@ -231,6 +230,10 @@ function Create-NewUser ($attributes)
 	{
 		$aduser.Enabled = $bool
 		$r = $dic.Remove("enabled")
+		if ($aduser.Enabled -and ($password -eq $null))
+		{
+			throw new Org.IdentityConnectors.Framework.Common.Exceptions.InvalidAttributeValueException("Password must be set if enabled = true")
+		}
 	}
 
 	# [-PasswordNeverExpires <System.Nullable[bool]>] 
@@ -296,32 +299,55 @@ function Create-NewUser ($attributes)
 		}
 	}
 	
-	if ($hasOther)
+	if ($aduser.Enabled)
 	{
-		$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
-							-Name $rdn `
-							-Instance $aduser `
-							-Path $path `
-							-OtherAttributes $otherAttrs `
-							-PassThru
+		if ($hasOther)
+		{
+			$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
+								-Name $rdn `
+								-Instance $aduser `
+								-Path $path `
+								-OtherAttributes $otherAttrs `
+								-AccountPassword $password `
+								-PassThru
+		}
+		else
+		{
+			$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
+								-Name $rdn `
+								-Instance $aduser `
+								-Path $path `
+								-AccountPassword $password `
+								-PassThru
+		}
 	}
 	else
 	{
-		$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
-							-Name $rdn `
-							-Instance $aduser `
-							-Path $path `
-							-PassThru
+		if ($hasOther)
+		{
+			$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
+								-Name $rdn `
+								-Instance $aduser `
+								-Path $path `
+								-OtherAttributes $otherAttrs `
+								-PassThru
+		}
+		else
+		{
+			$aduser = New-ADUser -SamAccountName $accessor.FindString("sAMAccountName") `
+								-Name $rdn `
+								-Instance $aduser `
+								-Path $path `
+								-PassThru
+		}
+		If ($password -ne $null)
+		{
+			Set-ADAccountPassword $aduser.ObjectGUID.ToString() -Reset -NewPassword $password
+			Write-Verbose -verbose "Password updated"
+		}
 	}
 	
 	Write-Verbose -verbose "User $rdn created in $path"
-	
-	If ($password -ne $null)
-	{
-		Set-ADAccountPassword $aduser.ObjectGUID.ToString() -Reset -NewPassword $password
-		Write-Verbose -verbose "Password updated"
-	}
-	
 	$aduser.ObjectGUID.ToString()
 }
 
