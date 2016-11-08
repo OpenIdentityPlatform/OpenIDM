@@ -231,10 +231,10 @@ public class ConfigObjectServiceTest {
         Assert.assertEquals(configObjectService.getParsedId("b/"), "b");
         Assert.assertFalse(configObjectService.isFactoryConfig("b/"));
 
-        Assert.assertEquals(configObjectService.getParsedId("c/d"), "c-d");
+        Assert.assertEquals(configObjectService.getParsedId("c/d"), "c/d");
         assertTrue(configObjectService.isFactoryConfig("c/d"));
 
-        Assert.assertEquals(configObjectService.getParsedId("e/d/"), "e-d");
+        Assert.assertEquals(configObjectService.getParsedId("e/d/"), "e/d");
         assertTrue(configObjectService.isFactoryConfig("e/d/"));
 
         Assert.assertEquals(configObjectService.getParsedId(" f "), "_f_");
