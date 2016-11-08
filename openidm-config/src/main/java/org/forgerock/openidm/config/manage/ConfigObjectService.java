@@ -1080,7 +1080,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
         public String toString() {
             return isFactoryConfig()
-                    ? (factoryPid + "-" + instanceAlias)
+                    ? (factoryPid + "/" + instanceAlias)
                     : pid;
         }
     }
