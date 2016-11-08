@@ -236,11 +236,11 @@ public class MappedTableHandler implements TableHandler {
 
             logger.debug("Executing: {}", readForUpdateStatement);
             rs = readForUpdateStatement.executeQuery();
-            if (rs.isBeforeFirst()) {
-                return explicitMapping.mapToRawObject(rs).get(0);
-            } else {
+            List<Map<String, Object>> result = explicitMapping.mapToRawObject(rs);
+            if (result.isEmpty()) {
                 throw new NotFoundException("Object " + fullId + " not found in " + type);
             }
+            return result.get(0);
         } finally {
             CleanupHelper.loggedClose(rs);
             CleanupHelper.loggedClose(readForUpdateStatement);
