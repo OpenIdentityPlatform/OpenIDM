@@ -6,7 +6,7 @@
     "enabled" : false,
     "connectorRef" : {
         "bundleName" : "org.forgerock.openicf.connectors.marketo-connector",
-        "bundleVersion" : "[1.4.2.0,1.5.0.0)",
+        "bundleVersion" : "1.4.2.0",
         "connectorName" : "org.forgerock.openicf.connectors.marketo.MarketoConnector"
     },
     "poolConfigOption" : {
