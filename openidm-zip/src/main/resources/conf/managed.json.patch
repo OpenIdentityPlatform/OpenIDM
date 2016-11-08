@@ -5,7 +5,7 @@
         "value" : {
             "script" : {
                 "type" : "text/javascript",
-                "source" : "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.remove(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items'); content = managedPatchHelper.add(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items', '{\"type\":\"object\"}'); content;"
+                "source" : "var managedPatchHelper = require('managedPatchHelper'); content = managedPatchHelper.remove(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items'); content = managedPatchHelper.add(content, 'user', 'schema.properties.lastSync.properties.effectiveAssignments.items', {\"type\":\"object\"}); content;"
             }
         }
     },
