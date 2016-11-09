@@ -1510,6 +1510,7 @@
             "connectorTitle" : "Connectors",
             "activeState" : "Active",
             "errorState" : "Error",
+            "disabledState" : "Disabled",
             "baseTitle" : "Base Connector Details",
             "resources" : "Resources",
             "resourcesHelpNoConnectorsTitle" : "To allow OpenIDM to manage external data, set up a connector.",
