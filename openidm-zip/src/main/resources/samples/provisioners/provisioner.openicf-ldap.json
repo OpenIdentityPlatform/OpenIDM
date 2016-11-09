@@ -163,7 +163,7 @@
                 "disabled" : {
                     "type" : "string",
                     "nativeName" : "ds-pwp-account-disabled",
-                    "nativeType" : "boolean"
+                    "nativeType" : "string"
                 },
                 "aliasList" : {
                     "type" : "array",
