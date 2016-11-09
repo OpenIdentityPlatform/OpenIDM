@@ -156,8 +156,20 @@ define([
                     if (_.has(this.data.handler, "config")) {
                         schema = this.data.handler.config;
 
-                        //override the endOfLineSymbols in the csv handler
+                        //override the endOfLineSymbols in the csv handler and set the default delimiterChar
                         if (schema.properties && schema.properties.formatting && schema.properties.formatting.properties && schema.properties.formatting.properties.endOfLineSymbols) {
+                            if (_.has(schema, "properties.formatting.properties.delimiterChar") &&
+                                (
+                                    !_.has(this.data.eventHandler.config, "formatting.delimiterChar") ||
+                                    !this.data.eventHandler.config.formatting.delimiterChar
+                                 )
+                            ) {
+                                this.data.eventHandler.config = this.data.eventHandler.config || {};
+                                this.data.eventHandler.config.formatting = this.data.eventHandler.config.formatting || {};
+                                this.data.eventHandler.config.formatting.delimiterChar = ",";
+                            }
+
+
                             schema.properties.formatting.properties.endOfLineSymbols.enum = [
                                 String.fromCharCode(10),
                                 String.fromCharCode(13),
