@@ -213,6 +213,36 @@ $ minikube ip
 
 So, for my instance, OpenIDM was available at : http://192.168.64.12:30088/
 
+## Scaling it up and down
+
+Now that we have 1 instance of OpenIDM running, we can use the built-in
+feature of Kubernetes to scale the number of pods :
+
+```$ kubectl scale --replicas=3 deployment/openidm
+deployment "openidm" scaled
+
+$ kubectl get pods -l "tier=frontend"
+NAME                       READY     STATUS    RESTARTS   AGE
+openidm-1259037605-57pim   1/1       Running   0          28m
+openidm-1259037605-jour3   1/1       Running   0          7m
+openidm-1259037605-o2zii   1/1       Running   0          7m
+```
+
+If you access the Admin console and use the "Cluster Node Status"
+widget, you will see all 3 nodes that were registered with the cluster
+service.
+
+To scale down, simply specify the number of replicas you want :
+
+```$ kubectl scale --replicas=1 deployment/openidm
+deployment "openidm" scaled
+
+$ kubectl get pods -l "tier=frontend"
+NAME                       READY     STATUS    RESTARTS   AGE
+openidm-1259037605-57pim   1/1       Running   0          31m
+```
+
+
 ## Taking it down...
 
 To get rid of each deployment simply delete via kubectl using the
