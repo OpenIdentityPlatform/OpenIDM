@@ -52,16 +52,12 @@ spec:
         - name: PGDATA
           value: /var/lib/postgresql/data/pgdata
         - name: POSTGRES_PASSWORD
-          value: openidm
+          valueFrom:
+            secretKeyRef:
+              name: postgres-pass
+              key: password.txt
         - name: POSTGRES_USER
           value: openidm
-          # $ kubectl create secret generic mysql-pass --from-file=password.txt
-          # make sure password.txt does not have a trailing newline
-        #- name: MYSQL_ROOT_PASSWORD
-        #  valueFrom:
-        #    secretKeyRef:
-        #      name: mysql-pass
-        #      key: password.txt
         ports:
         - containerPort: 5432
           name: postgres
