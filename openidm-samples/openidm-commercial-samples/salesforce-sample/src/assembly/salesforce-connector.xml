@@ -13,15 +13,19 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/openidm</directory>
-            <outputDirectory>samples/salesforce-connector</outputDirectory>
-            <filtered>true</filtered>
-        </fileSet>
+        <!-- order here is important - include google sample files first -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <outputDirectory>samples/salesforce-connector</outputDirectory>
             <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>${project.build.directory}/dependency/openidm</directory>
+            <outputDirectory>samples/salesforce-connector</outputDirectory>
+            <filtered>true</filtered>
+            <excludes>
+                <exclude>**/*.patch</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
     <dependencySets>

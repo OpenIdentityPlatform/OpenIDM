@@ -13,15 +13,20 @@
     </formats>
     <includeBaseDirectory>false</includeBaseDirectory>
     <fileSets>
-        <fileSet>
-            <directory>${project.build.directory}/dependency/openidm</directory>
-            <outputDirectory>samples/cdm</outputDirectory>
-            <filtered>true</filtered>
-        </fileSet>
+        <!-- order here is important : this first set is from the cdm sample itself -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
             <outputDirectory>samples/cdm</outputDirectory>
             <filtered>true</filtered>
+        </fileSet>
+        <!-- this set is the default project which apparently does not overwrite things in the first set -->
+        <fileSet>
+            <directory>${project.build.directory}/dependency/openidm</directory>
+            <outputDirectory>samples/cdm</outputDirectory>
+            <filtered>true</filtered>
+            <excludes>
+                <exclude>**/*.patch</exclude>
+            </excludes>
         </fileSet>
     </fileSets>
     <dependencySets>
