@@ -269,10 +269,6 @@ define([
         "deleteSocialProvider" : {
             msg: "config.messages.socialProviders.delete",
             type: "error"
-        },
-        "updateNotAvailable" : {
-            msg: "config.messages.update.notAvailable",
-            type: "error"
         }
     };
 

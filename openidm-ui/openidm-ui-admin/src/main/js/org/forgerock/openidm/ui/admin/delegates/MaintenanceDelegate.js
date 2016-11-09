@@ -44,15 +44,11 @@ define([
         });
     };
 
-    obj.availableUpdateVersions = function (options) {
-        var callOptions = {
+    obj.availableUpdateVersions = function () {
+        return obj.serviceCall({
             url: "/update?_action=available",
             type: "POST"
-        };
-        if (options.suppressEvents) {
-            callOptions.suppressEvents = true;
-        }
-        return obj.serviceCall(callOptions);
+        });
     };
 
     obj.getLicense = function (archive) {
