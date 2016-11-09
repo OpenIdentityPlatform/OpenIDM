@@ -80,9 +80,9 @@
                                     <span class="text-success"><i class="fa fa-check"></i> {{t "templates.connector.activeState"}}</span>
                                     {{else}}
                                     {{#if enabled}}
-                                    <span data-title="{{error}}" class="text-danger resource-unavailable"><i class="fa fa-check"></i> {{t "templates.connector.errorState"}}</span>
+                                    <span data-title="{{error}}" class="text-danger resource-unavailable"><i class="fa fa-exclamation-circle"></i> {{t "templates.connector.errorState"}}</span>
                                     {{else}}
-                                    <span data-title="{{error}}" class="text-warning resource-disabled"><i class="fa fa-check"></i> {{t "templates.auth.disabled"}}</span>
+                                    <span data-title="{{error}}" class="text-warning resource-disabled"><i class="fa fa-ban"></i> {{t "templates.connector.disabledState"}}</span>
                                     {{/if}}
                                     {{/if}}
                                 </div>
