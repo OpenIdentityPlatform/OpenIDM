@@ -26,8 +26,21 @@
         </fileSet>
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
+            <excludes>
+                <exclude>keystore.jceks</exclude>
+                <exclude>truststore</exclude>
+            </excludes>
             <outputDirectory></outputDirectory>
             <filtered>true</filtered>
+        </fileSet>
+        <fileSet>
+            <directory>${project.basedir}/src/main/resources</directory>
+            <includes>
+                <include>keystore.jceks</include>
+                <include>truststore</include>
+            </includes>
+            <outputDirectory></outputDirectory>
+            <filtered>false</filtered>
         </fileSet>
     </fileSets>
 </assembly>
