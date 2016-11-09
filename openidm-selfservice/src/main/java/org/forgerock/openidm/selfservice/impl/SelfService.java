@@ -17,6 +17,7 @@ package org.forgerock.openidm.selfservice.impl;
 
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
+import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.providerEnabled;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -36,6 +37,7 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.guava.common.collect.FluentIterable;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.async.AsyncHttpClientProvider;
@@ -182,9 +184,12 @@ public class SelfService implements IdentityProviderListener {
                     && SocialUserDetailsConfig.NAME.equals(stageConfig.get("name").asString())) {
                 // add oauth provider config
                 identityProviderService.registerIdentityProviderListener(this);
-                stageConfig.put(IdentityProviderService.PROVIDERS, ProviderConfigMapper.toJsonValue(
-                        identityProviderService.getIdentityProviders())
-                        .asList());
+                stageConfig.put(IdentityProviderService.PROVIDERS,
+                        ProviderConfigMapper.toJsonValue(
+                            FluentIterable.from(identityProviderService.getIdentityProviders())
+                                .filter(providerEnabled)
+                                .toList())
+                            .asList());
             }
         }
 
