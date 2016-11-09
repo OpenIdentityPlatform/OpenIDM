@@ -561,6 +561,14 @@ define([
                             doSwitch(val.display, val.val);
                         } else if (!_.isObject(val)){
                             //type is either a string,boolean,integer, or number value
+
+                            //for some reason val is only "undefined" for string types
+                            //every other type works as expected
+                            if(val === "undefined") {
+                                //set itemType here to it's correct type
+                                val = "string";
+                            }
+
                             doSwitch(_this.toProperCase(val),val.toLowerCase(val));
                         } else if (_.isArray(val)){
                             //val is an array so this tells us the actual type is "Object"
