@@ -649,7 +649,7 @@ class ObjectClassResourceProvider implements RequestHandler {
         if (reauthUser == null | reauthPassword == null) {
             return null;
         }
-        return new Pair(reauthUser, new GuardedString(reauthPassword.toCharArray()));
+        return new Pair<>(reauthUser, new GuardedString(reauthPassword.toCharArray()));
     }
 
     private List<String> getUsernameAttributes() {
@@ -733,7 +733,7 @@ class ObjectClassResourceProvider implements RequestHandler {
         return facade.getObject(objectClassInfoHelper.getObjectClass(), uid, operationOptions);
     }
 
-    OperationOptionsBuilder getOperationOptionsBuilder(String userName, GuardedString password, Class c) throws IOException {
+    OperationOptionsBuilder getOperationOptionsBuilder(String userName, GuardedString password, Class<?> c) throws IOException {
         OperationOptionsBuilder operationOptionsBuilder = operations.get(c).build(jsonConfiguration, objectClassInfoHelper);
         if (userName != null && password != null) {
             if (StringUtils.isNotBlank(userName)) {
