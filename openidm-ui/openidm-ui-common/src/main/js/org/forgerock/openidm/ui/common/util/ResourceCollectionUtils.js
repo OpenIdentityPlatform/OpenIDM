@@ -171,7 +171,7 @@ define([
                 prop = obj.convertRelationshipTypes(prop.properties);
             }
 
-            if (prop.type === "array") {
+            if (prop.type === "array" && prop.items) {
                 if(prop.items.type === "relationship" && _.has(properties,key)) {
                     prop.items.type = "string";
                     prop.items.typeRelationship = true;
