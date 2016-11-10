@@ -289,7 +289,7 @@
             "security/keys" : {
                 "table" : "securitykeys",
                 "objectToColumn" : {
-                    "objectId" : "objectid",
+                    "_id" : "objectid",
                     "_rev" : "rev",
                     "keyPair" : "keypair"
                 }
