@@ -43,6 +43,7 @@ public final class RequirementsBuilder {
     private final Map<String, Object> definitions;
     private final BuilderType builderType;
 
+    @SuppressWarnings("fallthrough")
     private RequirementsBuilder(BuilderType type, String description) {
         requiredProperties = new ArrayList<>();
         properties = new HashMap<>();

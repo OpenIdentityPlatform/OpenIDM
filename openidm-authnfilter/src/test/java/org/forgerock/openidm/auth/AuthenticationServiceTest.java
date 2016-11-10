@@ -167,10 +167,10 @@ public class AuthenticationServiceTest {
     public void testNoProviderConfigsToInject() throws Exception {
         // This should only have one auth module declared, the auth module that was explicitly defined,
         // the explicitOIDCModule.json holds a config for an explicitly declared authentication module
-        final Map<String, Object> explicitAuthModule =
-                OBJECT_MAPPER.readValue(getClass().getResource("/config/explicitOIDCModule.json"), Map.class);
+        final JsonValue explicitAuthModule =
+                json(OBJECT_MAPPER.readValue(getClass().getResource("/config/explicitOIDCModule.json"), Map.class));
         final JsonValue authenticationJsonNoMod =
-                json(object(field("serverAuthContext", object(field("authModules", array(explicitAuthModule))))));
+                json(object(field("serverAuthContext", object(field("authModules", array(explicitAuthModule.getObject()))))));
 
         // Mock of IdentityProviderService
         final IdentityProviderService identityProviderService = mock(IdentityProviderService.class);
