@@ -882,14 +882,14 @@ public class UpdateManagerImpl implements UpdateManager {
     /**
      * Actions taken during the update of a file
      */
-    private enum UpdateAction {
+    enum UpdateAction {
         REPLACED,
         PRESERVED,
         APPLIED,
         REMOVED
     }
 
-    private class UpdateThread extends Thread {
+    class UpdateThread extends Thread {
         // OPENIDM-6182
         private final List<Path> nonJsonConf = Arrays.asList(
                 Paths.get("conf/boot/boot.properties"),
@@ -1008,17 +1008,17 @@ public class UpdateManagerImpl implements UpdateManager {
                         case CONF:
                             // TODO: Support config deletion
 
-                            if (!projectDir.equals(installDir) &&
-                                    projectDir.startsWith(installDir) &&
-                                    path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
+                            if (!projectDir.equals(installDir)
+                                    && isLocalProject(projectDir, installDir)
+                                    && path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
                                 // Running in a project directory and this conf file targets that conf directory.
                                 // Ignore it if it already exists else create it.
                                 if (!configExists(path.getFileName())) {
                                     createNewConfig(path);
                                 }
-                            } else if (!projectDir.equals(installDir) &&
-                                    !projectDir.startsWith(installDir) &&
-                                    path.startsWith(CONF_PATH)) {
+                            } else if (!projectDir.equals(installDir)
+                                    && !isLocalProject(projectDir, installDir)
+                                    && path.startsWith(CONF_PATH)) {
                                 // Running in a project directory outside of the installation directory
                                 // and this conf file targets a config in the root conf
                                 // Create this config if it does not exist (might be required for proper functionality);
@@ -1108,6 +1108,10 @@ public class UpdateManagerImpl implements UpdateManager {
             }
         }
 
+        private boolean isLocalProject(String projectDir, String installDir) {
+            return projectDir.startsWith(installDir);
+        }
+
         void replaceBundle(BundleHandler bundleHandler, Path path) throws IOException, UpdateException {
             Path newPath = Paths.get(tempDirectory.toString(), "openidm", path.toString());
             String symbolicName = null;
@@ -1181,6 +1185,10 @@ public class UpdateManagerImpl implements UpdateManager {
                 if (backupFile != null) {
                     fileEntry.setBackupFile(backupFile.toString());
                 }
+            }
+
+            if (fileEntry.getStockFile() == null && fileEntry.getBackupFile() == null) {
+                fileEntry.setActionTaken(UpdateAction.REPLACED.toString());
             }
             logUpdate(updateEntry.addFile(fileEntry.toJson()));
         }
@@ -1420,7 +1428,7 @@ public class UpdateManagerImpl implements UpdateManager {
      * @return The name of the directory in db/ for the current repo or null if none exists
      * @throws UpdateException If the repo bundle cannot be found
      */
-    private String getDbDirName() throws UpdateException {
+    String getDbDirName() throws UpdateException {
         final ServiceReference<RepoBootService> repoReference = repoServiceTracker.getServiceReference();
 
         if (repoReference == null) {

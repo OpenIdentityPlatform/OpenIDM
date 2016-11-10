@@ -20,6 +20,7 @@ import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.test.assertj.AssertJJsonValueAssert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
@@ -32,6 +33,7 @@ import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.forgerock.json.JsonValue;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,6 +68,9 @@ public class UpdateManagerImplTest {
     // Create a "concrete", mock UpdateManagerImpl - good for many tests
     private UpdateManagerImpl newUpdateManager() {
         return new UpdateManagerImpl() {
+            {
+                bindUpdateLogService(mock(UpdateLogService.class));
+            }
             File[] getUpdateFiles() {
                 return new File[]{ archiveFile };
             }
@@ -77,6 +82,10 @@ public class UpdateManagerImplTest {
             }
             Path extractFileToDirectory(File zipFile, Path fileToExtract) throws UpdateException {
                 return mock(Path.class);
+            }
+            // This is to avoid ServiceTracker issues in test
+            String getDbDirName() {
+                return "mysql";
             }
         };
     }
@@ -106,7 +115,13 @@ public class UpdateManagerImplTest {
                 { "security/keystore.jceks", UpdateManagerImpl.FileType.IGNORE },
                 { "security/realm.properties", UpdateManagerImpl.FileType.IGNORE },
                 { "security/truststore", UpdateManagerImpl.FileType.IGNORE },
-                { "bundle/HelloWorld-2.0.jar", UpdateManagerImpl.FileType.BUNDLE }
+                { "bundle/HelloWorld-2.0.jar", UpdateManagerImpl.FileType.BUNDLE },
+                { "conf/jetty.xml",  UpdateManagerImpl.FileType.STATIC },
+                { "update.json",  UpdateManagerImpl.FileType.CONF },
+                { "db/mysql/conf/repo.jdbc.json.patch",  UpdateManagerImpl.FileType.PATCH },
+                { "db/mysql/conf/repo.jdbc.json",  UpdateManagerImpl.FileType.CONF },
+                { "boot.properties", UpdateManagerImpl.FileType.STATIC }  ,
+                { "conf/jetty.json",  UpdateManagerImpl.FileType.CONF }
                 // @formatter:on
         };
     }
@@ -115,7 +130,7 @@ public class UpdateManagerImplTest {
     public void testDetermineFileType(final String fileName, final UpdateManagerImpl.FileType expectedFileType)
             throws Exception {
         UpdateManagerImpl updateManager = newUpdateManager();
-        Assertions.assertThat(updateManager.getFileType(filesToBeIgnored, Paths.get(fileName), null))
+        Assertions.assertThat(updateManager.getFileType(filesToBeIgnored, Paths.get(fileName), Paths.get("db", "mysql", "conf")))
                 .isEqualTo(expectedFileType);
     }
 
@@ -295,5 +310,42 @@ public class UpdateManagerImplTest {
         } catch (InvalidArchiveUpdateException e) {
             org.assertj.core.api.Assertions.assertThat(shouldMatch).isFalse();
         }
+    }
+
+    @DataProvider
+    public Object[][] actionsTaken() {
+        return new Object[][] {
+                // @formatter:off
+                { "conf/config.properties",         FileState.UNCHANGED, UpdateManagerImpl.UpdateAction.REPLACED },
+                { "conf/jetty.xml",                 FileState.UNCHANGED, UpdateManagerImpl.UpdateAction.REPLACED },
+                { "update.json",                    FileState.UNCHANGED, UpdateManagerImpl.UpdateAction.REPLACED },
+                { "db/mysql/conf/repo.jdbc.json",   FileState.UNCHANGED, UpdateManagerImpl.UpdateAction.REPLACED },
+                { "boot.properties",                FileState.UNCHANGED, UpdateManagerImpl.UpdateAction.REPLACED },
+                { "bin/launcher.json",              FileState.UNCHANGED, UpdateManagerImpl.UpdateAction.REPLACED },
+                { "conf/config.properties",         FileState.DIFFERS, UpdateManagerImpl.UpdateAction.PRESERVED },
+                { "conf/jetty.xml",                 FileState.DIFFERS, UpdateManagerImpl.UpdateAction.PRESERVED },
+                { "update.json",                    FileState.DIFFERS, UpdateManagerImpl.UpdateAction.PRESERVED },
+                { "db/mysql/conf/repo.jdbc.json",   FileState.DIFFERS, UpdateManagerImpl.UpdateAction.PRESERVED },
+                { "boot.properties",                FileState.DIFFERS, UpdateManagerImpl.UpdateAction.PRESERVED },
+                { "bin/launcher.json",              FileState.DIFFERS, UpdateManagerImpl.UpdateAction.REPLACED }
+                // @formatter:on
+        };
+    }
+
+    @Test(dataProvider = "actionsTaken")
+    public void testUpdateStaticFile(final String filePath, final FileState fileState,
+            final UpdateManagerImpl.UpdateAction actionTaken) throws Exception {
+        final FileStateChecker fileStateChecker = mock(FileStateChecker.class);
+        when(fileStateChecker.getCurrentFileState(any(Path.class))).thenReturn(fileState);
+        final UpdateLogEntry updateEntry = new UpdateLogEntry();
+        final UpdateManagerImpl updateManager = newUpdateManager();
+        final Path installDir = IdentityServer.getInstance().getInstallLocation().toPath();
+
+        UpdateManagerImpl.UpdateThread updateThread = updateManager.
+                new UpdateThread(updateEntry, mock(Path.class), mock(Archive.class), fileStateChecker,
+                installDir, mock(JsonValue.class), mock(Path.class));
+        updateThread.updateStaticFile(Paths.get(filePath));
+
+        assertThat(updateEntry.getFiles().get(0)).stringAt("actionTaken").isEqualTo(actionTaken.name());
     }
 }
