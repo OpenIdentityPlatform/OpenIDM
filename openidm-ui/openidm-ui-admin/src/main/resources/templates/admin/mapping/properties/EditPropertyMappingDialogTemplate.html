@@ -49,10 +49,9 @@
                     </div>
                     <div class="col-sm-6">
                         <label for="currentSourceDisplay">{{t "templates.mapping.propertyEdit.currentSourceValue"}}: </label>
-                        <span class="text-muted"><i>{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}</i></span>
-                        {{#if sampleSourceTooltip}}
-                        <i class="fa fa-eye details-tooltip"><pre style="display:none;" class="tooltip-details">{{sampleSourceTooltip}}</pre></i>
-                        {{/if}}
+                        <span class="source-name text-muted"><i>{{#if property.source}}{{property.source}}{{else}}Complete User Object{{/if}}</i></span>
+
+                        <i {{#if showSampleTooltip}}style="display:none;"{{/if}} class="fa fa-eye details-tooltip"><pre style="display:none;" class="tooltip-details">{{sampleSourceTooltip}}</pre></i>
                     </div>
                     <div class="col-sm-12">
                         <div id="transformationScriptHolder"></div>

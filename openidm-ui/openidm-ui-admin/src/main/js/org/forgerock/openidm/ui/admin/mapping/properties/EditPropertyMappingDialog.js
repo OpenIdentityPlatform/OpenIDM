@@ -223,12 +223,18 @@ define([
             this.data.resourcePropertiesList = _.chain(this.data.availableSourceProps).sortBy().value();
 
             this.data.currentProperties = currentProperties = params.mappingProperties || this.getCurrentMapping().properties;
-            this.data.property = currentProperties[this.property - 1];
+            this.data.property = _.cloneDeep(currentProperties[this.property - 1]);
 
-            if (conf.globalData.sampleSource && _.isUndefined(this.data.property.source)) {
+            if (conf.globalData.sampleSource) {
                 this.data.sampleSourceTooltip = JSON.stringify(conf.globalData.sampleSource, null, 2);
             } else {
                 this.data.sampleSourceTooltip = null;
+            }
+
+            if(_.isUndefined(this.data.property.source) || this.data.property.source.length === 0) {
+                this.data.showSampleTooltip = false;
+            } else {
+                this.data.showSampleTooltip = true;
             }
 
             this.data.currentMappingDetails = this.getCurrentMapping();
@@ -256,7 +262,7 @@ define([
                         function () {
                             var schema = {};
 
-                            if (_this.data.targetSchema && _this.data.targetSchema[_this.data.property.target].type !== "relationship") {
+                            if (_this.data.targetSchema && _this.data.targetSchema[_this.data.property.target] && _this.data.targetSchema[_this.data.property.target].type !== "relationship") {
                                 schema = {
                                     type: _this.data.targetSchema[_this.data.property.target].type
                                 };
@@ -271,6 +277,21 @@ define([
 
                             if(_this.data.property.source) {
                                 _this.$el.find("#sourcePropertySelect")[0].selectize.setValue(_this.data.property.source);
+
+                                _this.$el.find("#sourcePropertySelect").on("change", function() {
+                                    let sourceProperty =  _this.$el.find("#sourcePropertySelect")[0].selectize.getValue();
+
+                                    if(sourceProperty.length > 0) {
+                                        _this.currentDialog.find(".source-name").html(sourceProperty);
+                                        _this.currentDialog.find(".fa-eye").hide();
+                                    } else {
+                                        _this.currentDialog.find(".source-name").html("Complete User Object");
+
+                                        if(_this.data.sampleSourceTooltip) {
+                                            _this.currentDialog.find(".fa-eye").show();
+                                        }
+                                    }
+                                });
                             }
 
                             _this.currentDialog.find(".nav-tabs").tabdrop();
