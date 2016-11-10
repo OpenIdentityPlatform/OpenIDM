@@ -64,21 +64,24 @@
             noValidation="true"}}
 
             {{> form/_basicInput
-            value="&{openidm.truststore.type}"
+            value=config.properties.truststoreType
+            default="&{openidm.truststore.type}"
             label="templates.auth.modules.truststoreType"
             property="properties.truststoreType"
             hidden="true"
             noValidation="true"}}
 
             {{> form/_basicInput
-            value="&{openidm.truststore.location}"
+            value=config.properties.truststorePath
+            default="&{openidm.truststore.location}"
             label="templates.auth.modules.truststorePath"
             property="properties.truststorePath"
             hidden="true"
             noValidation="true"}}
 
             {{> form/_basicInput
-            value="&{openidm.truststore.password}"
+            value=config.properties.truststorePassword
+            default="&{openidm.truststore.password}"
             label="templates.auth.modules.truststorePassword"
             property="properties.truststorePassword"
             hidden="true"
