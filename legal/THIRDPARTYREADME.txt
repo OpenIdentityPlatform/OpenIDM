@@ -305,7 +305,7 @@ Copyright: Copyright 2006 The Apache Software Foundation.
             - software copyright (c) 1999, Sun Microsystems., http://www.sun.com.
             - software copyright (c) 2000 World Wide Web Consortium, http://www.w3.org
 
-Version: groovy-all-2.2.2.jar
+Version: groovy-all-2.4.7.jar
 Copyright: Copyright 2003-2014 The respective authors and developers
 
 Version: jackson-core-asl-1.9.8
