@@ -244,13 +244,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditrecon` (
   `reconid` VARCHAR(56) NULL ,
   PRIMARY KEY (`objectid`) ,
   INDEX `idx_auditrecon_reconid` (`reconid` ASC),
-  INDEX `idx_auditrecon_targetobjectid` (`targetobjectid`(28) ASC),
-  INDEX `idx_auditrecon_sourceobjectid` (`sourceobjectid`(28) ASC),
-  INDEX `idx_auditrecon_activitydate` (`activitydate` ASC),
-  INDEX `idx_auditrecon_mapping` (`mapping`(255) ASC),
-  INDEX `idx_auditrecon_entrytype` (`entrytype` ASC),
-  INDEX `idx_auditrecon_situation` (`situation` ASC),
-  INDEX `idx_auditrecon_status` (`status` ASC) )
+  INDEX `idx_auditrecon_entrytype` (`entrytype` ASC)
+)
 ENGINE = InnoDB;
 
 
@@ -296,8 +291,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditconfig` (
   `afterObject` MEDIUMTEXT NULL ,
   `changedfields` MEDIUMTEXT NULL ,
   `rev` VARCHAR(255) NULL,
-  PRIMARY KEY (`objectid`) ,
-  INDEX `idx_auditconfig_transactionid` (`transactionid` ASC)
+  PRIMARY KEY (`objectid`)
 )
   ENGINE = InnoDB;
 
@@ -321,8 +315,7 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditactivity` (
   `passwordchanged` VARCHAR(5) NULL ,
   `message` TEXT NULL,
   `status` VARCHAR(20) ,
-  PRIMARY KEY (`objectid`) ,
-  INDEX `idx_auditactivity_transactionid` (`transactionid` ASC)
+  PRIMARY KEY (`objectid`)
 )
 ENGINE = InnoDB;
 
@@ -356,8 +349,8 @@ CREATE  TABLE IF NOT EXISTS `openidm`.`auditaccess` (
   `response_elapsedtimeunits` VARCHAR(255) NULL ,
   `response_detail` TEXT NULL ,
   `roles` TEXT NULL ,
-  PRIMARY KEY (`objectid`),
-  INDEX `idx_auditaccess_status` (`response_status` ASC))
+  PRIMARY KEY (`objectid`)
+)
 ENGINE = InnoDB;
 
 

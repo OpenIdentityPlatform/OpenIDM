@@ -283,13 +283,7 @@ CREATE TABLE SOPENIDM.AUDITRECON (
 COMMENT ON TABLE SOPENIDM.AUDITRECON IS 'OPENIDM - Reconciliation Audit Log';
 
 CREATE INDEX sopenidm.idx_auditrecon_reconid ON sopenidm.auditrecon (reconid ASC);
---CREATE INDEX sopenidm.idx_auditrecon_targetobjectid ON sopenidm.auditrecon (targetobjectid(28) ASC);
---CREATE INDEX sopenidm.idx_auditrecon_sourceobjectid ON sopenidm.auditrecon (sourceobjectid(28) ASC);
-CREATE INDEX sopenidm.idx_auditrecon_activitydate ON sopenidm.auditrecon (activitydate ASC);
---CREATE INDEX sopenidm.idx_auditrecon_mapping ON sopenidm.auditrecon (mapping(255) ASC);
 CREATE INDEX sopenidm.idx_auditrecon_entrytype ON sopenidm.auditrecon (entrytype ASC);
-CREATE INDEX sopenidm.idx_auditrecon_situation ON sopenidm.auditrecon (situation ASC);
-CREATE INDEX sopenidm.idx_auditrecon_status ON sopenidm.auditrecon (status ASC);
 
 -- -----------------------------------------------------
 -- Table openidm.auditsync
@@ -337,7 +331,6 @@ CREATE  TABLE sopenidm.auditconfig (
   rev VARCHAR(255) NULL,
   PRIMARY KEY (objectid)
 ) IN DOPENIDM.SOIDM21;
-CREATE INDEX sopenidm.idx_auditconfig_transactionid ON sopenidm.auditconfig (transactionid ASC);
 
 
 -- -----------------------------------------------------
@@ -402,8 +395,6 @@ CREATE TABLE SOPENIDM.AUDITACCESS (
     PRIMARY KEY (OBJECTID)
 ) IN DOPENIDM.SOIDM10;
 COMMENT ON TABLE SOPENIDM.AUDITACCESS IS 'OPENIDM - Audit Access';
-CREATE INDEX SOPENIDM.idx_auditaccess_response_status ON SOPENIDM.AUDITACCESS (response_status ASC);
---CREATE INDEX SOPENIDM.idx_auditaccess_principal ON SOPENIDM.AUDITACCESS (principal(28) ASC);
 
 -- -----------------------------------------------------
 -- Table openidm.internaluser

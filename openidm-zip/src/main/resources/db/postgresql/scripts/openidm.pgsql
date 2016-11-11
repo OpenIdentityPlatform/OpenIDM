@@ -251,8 +251,6 @@ CREATE TABLE openidm.auditconfig (
   PRIMARY KEY (objectid)
 );
 
-CREATE INDEX idx_auditconfig_transactionid ON openidm.auditconfig (transactionid);
-
 -- -----------------------------------------------------
 -- Table openidm.auditactivity
 -- -----------------------------------------------------
@@ -276,9 +274,6 @@ CREATE TABLE openidm.auditactivity (
   status VARCHAR(20),
   PRIMARY KEY (objectid)
 );
-
-CREATE INDEX idx_auditactivity_transactionid ON openidm.auditactivity (transactionid);
-
 
 -- -----------------------------------------------------
 -- Table openidm.auditrecon
@@ -309,6 +304,8 @@ CREATE TABLE openidm.auditrecon (
   PRIMARY KEY (objectid)
 );
 
+CREATE INDEX idx_auditrecon_reconid ON openidm.auditrecon (reconid);
+CREATE INDEX idx_auditrecon_entrytype ON openidm.auditrecon (entrytype);
 
 -- -----------------------------------------------------
 -- Table openidm.auditsync

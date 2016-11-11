@@ -195,12 +195,6 @@ ADD CONSTRAINT pk_auditconfig PRIMARY KEY
 )
 ENABLE
 ;
-PROMPT Creating Index idx_auditconfig_transactionid on auditconfig ...
-CREATE INDEX idx_auditconfig_transactionid ON auditconfig
-(
-  transactionid
-)
-;
 
 
 
@@ -240,12 +234,6 @@ ADD CONSTRAINT pk_auditactivity PRIMARY KEY
   objectid
 )
 ENABLE
-;
-PROMPT Creating Index idx_auditactivity_transid on auditactivity ...
-CREATE INDEX idx_auditactivity_transid ON auditactivity
-(
-  transactionid
-)
 ;
 
 -- DROP TABLE auditrecon CASCADE CONSTRAINTS;
@@ -289,6 +277,20 @@ ADD CONSTRAINT PRIMARY_1 PRIMARY KEY
   objectid
 )
 ENABLE
+;
+
+PROMPT Creating Index idx_auditrecon_reconid on auditrecon ...
+CREATE INDEX idx_auditrecon_reconid ON auditrecon
+(
+  reconid
+)
+;
+
+PROMPT Creating Index idx_auditrecon_entrytype on auditrecon ...
+CREATE INDEX idx_auditrecon_entrytype ON auditrecon
+(
+  entrytype
+)
 ;
 
 -- DROP TABLE auditsync CASCADE CONSTRAINTS;
