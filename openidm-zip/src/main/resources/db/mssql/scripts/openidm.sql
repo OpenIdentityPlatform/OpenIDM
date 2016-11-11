@@ -303,6 +303,8 @@ CREATE  TABLE  [openidm].[auditrecon]
   reconid NVARCHAR(56) NULL ,
   PRIMARY KEY CLUSTERED (objectid)
 );
+CREATE INDEX idx_auditrecon_reconid ON [openidm].[auditrecon] (reconid ASC);
+CREATE INDEX idx_auditrecon_entrytype ON [openidm].[auditrecon] (entrytype ASC);
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditrecon, 'COLUMN', activitydate;
 END
 
@@ -357,7 +359,6 @@ IF NOT EXISTS (SELECT name FROM sysobjects where name='auditconfig' and xtype='U
       rev NVARCHAR(255) NULL,
       PRIMARY KEY CLUSTERED (objectid),
     );
-    CREATE INDEX idx_auditconfig_transactionid ON [openidm].[auditconfig] (transactionid ASC);
     EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditconfig, 'COLUMN', activitydate;
   END
 
@@ -387,7 +388,6 @@ CREATE  TABLE [openidm].[auditactivity]
   status NVARCHAR(20),
   PRIMARY KEY CLUSTERED (objectid),
 );
-CREATE INDEX idx_auditactivity_transactionid ON [openidm].[auditactivity] (transactionid ASC);
 EXEC sp_addextendedproperty 'MS_Description', 'Date format: 2011-09-09T14:58:17.654+02:00', 'SCHEMA', openidm, 'TABLE', auditactivity, 'COLUMN', activitydate;
 END
 
