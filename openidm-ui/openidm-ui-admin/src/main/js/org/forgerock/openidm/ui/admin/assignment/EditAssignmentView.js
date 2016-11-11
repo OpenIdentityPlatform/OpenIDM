@@ -356,7 +356,7 @@ define([
         saveAssignmentDetails: function(event) {
             event.preventDefault();
 
-            var formVal = form2js(this.$el.find('#assignmentDetailsForm')[0], '.', true);
+            var formVal = _.extend({}, this.data.resource, form2js(this.$el.find('#assignmentDetailsForm')[0], '.', true));
 
             this.$el.find("#assignmentHeaderName").html(formVal.name);
 
