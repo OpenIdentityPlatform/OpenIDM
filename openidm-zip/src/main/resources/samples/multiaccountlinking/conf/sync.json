@@ -154,63 +154,6 @@
           "situation" : "ABSENT"
         }
       ]
-    },
-    {
-      "name" : "systemLdapGroups_managedGroup",
-      "source" : "system/ldap/group",
-      "target" : "managed/group",
-      "properties" : [
-        {
-          "source" : "dn",
-          "target" : "dn"
-        },
-        {
-          "source" : "description",
-          "target" : "description"
-        },
-        {
-          "source" : "uniqueMember",
-          "target" : "uniqueMember"
-        },
-        {
-          "source" : "cn",
-          "target" : "name"
-        }
-      ],
-      "policies" : [
-        {
-          "situation" : "CONFIRMED",
-          "action" : "UPDATE"
-        },
-        {
-          "situation" : "FOUND",
-          "action" : "UPDATE"
-        },
-        {
-          "situation" : "ABSENT",
-          "action" : "CREATE"
-        },
-        {
-          "situation" : "AMBIGUOUS",
-          "action" : "EXCEPTION"
-        },
-        {
-          "situation" : "MISSING",
-          "action" : "UNLINK"
-        },
-        {
-          "situation" : "SOURCE_MISSING",
-          "action" : "EXCEPTION"
-        },
-        {
-          "situation" : "UNQUALIFIED",
-          "action" : "IGNORE"
-        },
-        {
-          "situation" : "UNASSIGNED",
-          "action" : "IGNORE"
-        }
-      ]
     }
   ]
 }
