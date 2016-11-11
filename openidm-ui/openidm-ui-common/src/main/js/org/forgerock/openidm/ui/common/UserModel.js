@@ -107,10 +107,17 @@ define([
             return response;
         },
         invalidateSession: function () {
-            return ServiceInvoker.restCall({
+            var promise = new $.Deferred();
+            ServiceInvoker.restCall({
                 "url": "/" + Constants.context + "/authentication?_action=logout",
-                "type" : "POST"
-            });
+                "type" : "POST",
+                "errorsHandlers": {
+                    "unauthorized": {
+                        status: "401"
+                    }
+                }
+            }).always(() => promise.resolve());
+            return promise;
         },
         login: function (username, password) {
             var headers = {};
