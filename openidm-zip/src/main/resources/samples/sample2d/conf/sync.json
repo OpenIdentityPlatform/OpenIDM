@@ -186,6 +186,10 @@
                 },
                 {
                     "source" : "description",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.length <= 1 ? source[0] : source"
+                    },
                     "target" : "description"
                 },
                 {
@@ -194,6 +198,10 @@
                 },
                 {
                     "source" : "cn",
+                    "transform" : {
+                        "type" : "text/javascript",
+                        "source" : "source.length <= 1 ? source[0] : source"
+                    },
                     "target" : "name"
                 }
             ],

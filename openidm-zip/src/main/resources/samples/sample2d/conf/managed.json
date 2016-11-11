@@ -888,12 +888,44 @@
             "schema" : {
                 "$schema" : "http://forgerock.org/json-schema#",
                 "type" : "object",
-                "title" : "",
+                "title" : "Group",
                 "description" : "",
                 "icon" : "fa-asterisk",
-                "properties" : { },
-                "required" : [ ],
-                "order" : [ ]
+                "properties" : {
+                    "dn" : {
+                        "type" : "string",
+                        "searchable" : "true",
+                        "viewable" : "true"
+                    },
+                    "description" : {
+                        "type" : ["string","null"],
+                        "searchable" : "false",
+                        "viewable" : "true"
+                    },
+                    "name" : {
+                        "type" : "string",
+                        "searchable" : "true",
+                        "viewable" : "true"
+                    },
+                    "uniqueMember" : {
+                        "type" : "array",
+                        "searchable" : "false",
+                        "viewable" : "true",
+                        "items" : {
+                            "type" : "string"
+                        }
+                    }
+                },
+                "required" : [
+                    "dn",
+                    "name"
+                ],
+                "order" : [
+                    "dn",
+                    "name",
+                    "description",
+                    "uniqueMember"
+                ]
             },
             "iconClass" : "icon-database",
             "iconSrc" : "img/icon-managedobject.png",
