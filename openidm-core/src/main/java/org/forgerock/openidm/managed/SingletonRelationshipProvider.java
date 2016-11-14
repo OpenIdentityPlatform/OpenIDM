@@ -311,15 +311,18 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @param newValue new value of field to validate
      * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
      *                   the referred-to object specified by the relationship already contains a reference to this referrer
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
      * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
-     * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context)
+     * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context, boolean)
      */
-    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId)
+    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId,
+                                          boolean performDuplicateAssignmentCheck)
             throws ResourceException {
         if (oldValue.isNull() && newValue.isNull()) {
             logger.debug("not validating relationship as old and new values are both null.");
         } else if (oldValue.isNull() || !oldValue.getObject().equals(newValue.getObject())) {
-            relationshipValidator.validateRelationship(newValue, referrerId, context);
+            relationshipValidator.validateRelationship(newValue, referrerId, context, performDuplicateAssignmentCheck);
         }
     }
 

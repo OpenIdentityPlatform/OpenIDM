@@ -107,14 +107,18 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
      *                         if the request is adding a new user to a role (role is the resource/managed-object),
      *                         the relationshipField will define the _ref to the user, and the resourceResponse
      *                         will contain the role's member state.
-     * @throws BadRequestException when the relationship is invalid
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
+     * @throws DuplicateRelationshipException if the relationship is invalid
      */
-    protected void validateSuccessfulReadResponse(Context context, JsonValue relationshipField, ResourcePath referrerId, ResourceResponse resourceResponse)
-            throws ResourceException {
-        if (relationshipIsArray) {
-            validateCollectionRelationshipReadResponse(context, relationshipField, referrerId);
-        } else {
-            validateSingletonRelationshipReadResponse(resourceResponse);
+    protected void validateSuccessfulReadResponse(Context context, JsonValue relationshipField, ResourcePath referrerId,
+              ResourceResponse resourceResponse, boolean performDuplicateAssignmentCheck) throws ResourceException {
+        if (performDuplicateAssignmentCheck) {
+            if (relationshipIsArray) {
+                validateCollectionRelationshipReadResponse(context, relationshipField, referrerId);
+            } else {
+                validateSingletonRelationshipReadResponse(resourceResponse);
+            }
         }
     }
 

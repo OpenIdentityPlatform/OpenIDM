@@ -79,10 +79,12 @@ abstract class RelationshipValidator {
      * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
      *                          the referred-to object specified by the relationship already contains a reference to this referrer
      * @param response The contents will hold the response from the read call made on the relationship field.
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
      * @throws BadRequestException if the response is invalid based on the implementation of the validator.
      */
-    abstract void validateSuccessfulReadResponse(Context context, JsonValue relationshipField, ResourcePath referrerId, ResourceResponse response)
-            throws ResourceException;
+    abstract void validateSuccessfulReadResponse(Context context, JsonValue relationshipField, ResourcePath referrerId, ResourceResponse response,
+            boolean performDuplicateAssignmentCheck) throws ResourceException;
 
     /**
      * Validates that the relationshipField will not create an invalid condition.
@@ -93,9 +95,12 @@ abstract class RelationshipValidator {
      * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
      *                          the referred-to object specified by the relationship already contains a reference to this referrer
      * @param context context of the request working with the relationship.
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
      * @throws ResourceException BadRequestException when the relationship is invalid, otherwise for other issues.
      */
-    final void validateRelationship(final JsonValue relationshipField, ResourcePath referrerId, Context context)
+    final void validateRelationship(final JsonValue relationshipField, ResourcePath referrerId, Context context,
+                                    boolean performDuplicateAssignmentCheck)
             throws ResourceException {
         if (relationshipField.isNull()) {
             // if the new object has the relationshipField removed, we do not need to validate the null
@@ -109,7 +114,7 @@ abstract class RelationshipValidator {
         }
         try {
             validateSuccessfulReadResponse(context, relationshipField, referrerId, relationshipProvider.getConnection()
-                    .read(context, newValidateRequest(relationshipField)));
+                    .read(context, newValidateRequest(relationshipField)), performDuplicateAssignmentCheck);
         } catch (NotFoundException e) {
             String message = format("The referenced relationship ''{0}'' on ''{1}'', does not exist",
                     relationshipField.get(REFERENCE_ID).asString(), relationshipField.getPointer());
@@ -140,7 +145,7 @@ abstract class RelationshipValidator {
      * @throws DuplicateRelationshipException if there is a duplicate reference detected
      */
     @VisibleForTesting
-    void checkForDuplicateRelationships(JsonValue relationships) throws DuplicateRelationshipException {
+    void checkForDuplicateRelationshipsInInvocationState(JsonValue relationships) throws DuplicateRelationshipException {
         if (relationships.isCollection()) {
             final Set<RelationshipEqualityHash> relationshipSet = new HashSet<>(relationships.size());
             for (JsonValue relationship : relationships) {

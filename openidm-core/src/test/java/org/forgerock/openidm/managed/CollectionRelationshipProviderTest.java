@@ -135,12 +135,12 @@ public class CollectionRelationshipProviderTest {
                         object(field(RelationshipUtil.REFERENCE_ID, "managed/user/differentUser"))
                 )));
 
-        provider.validateRelationshipField(context, mgrWith1Report.get("reports"), mgrWith2Reports.get("reports"), REFERRING_OBJECT_ID);
+        provider.validateRelationshipField(context, mgrWith1Report.get("reports"), mgrWith2Reports.get("reports"), REFERRING_OBJECT_ID, true);
 
         // testing the condition where a user already has a manager.
         try {
             differentUser.put("manager", object(field(RelationshipUtil.REFERENCE_ID, "managed/user/someOtherManager")));
-            provider.validateRelationshipField(context, manager.get("reports"), mgrWith2Reports.get("reports"), REFERRING_OBJECT_ID);
+            provider.validateRelationshipField(context, manager.get("reports"), mgrWith2Reports.get("reports"), REFERRING_OBJECT_ID, true);
             fail("expected to fail if the user already has a manager");
         } catch (DuplicateRelationshipException e) {
             // test passed.

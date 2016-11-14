@@ -50,7 +50,7 @@ public class ForwardRelationshipValidator extends RelationshipValidator {
 
     @Override
     protected void validateSuccessfulReadResponse(Context context, JsonValue relationshipField,
-              ResourcePath referringObjectId, ResourceResponse response) {
+              ResourcePath referringObjectId, ResourceResponse response, boolean performDuplicateAssignmentCheck) {
         // nothing more to validate. It is valid if the read request passes.
     }
 }
