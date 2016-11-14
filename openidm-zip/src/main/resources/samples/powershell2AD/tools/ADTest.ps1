@@ -62,7 +62,7 @@ try
  }
  else
  {
- 	throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("TestScript can not handle operation: $($Connector.Operation)")
+ 	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("TestScript can not handle operation: $($Connector.Operation)")
  }
 }
 catch #Rethrow the original exception

@@ -73,7 +73,7 @@ if ($Connector.Operation -eq "RESOLVE_USERNAME")
 }
 else
 {
-	throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("ResolveUsernameScript can not handle operation: $($Connector.Operation)")
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("ResolveUsernameScript can not handle operation: $($Connector.Operation)")
 }
 }
 catch #Re-throw the original exception

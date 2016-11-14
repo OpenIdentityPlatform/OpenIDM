@@ -133,7 +133,7 @@ elseif ($Connector.Operation -eq "SYNC")
 }
 else
 {
-	throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("SyncScript can not handle operation: $($Connector.Operation)")
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("SyncScript can not handle operation: $($Connector.Operation)")
 }
 }
 catch #Rethrow the original exception
