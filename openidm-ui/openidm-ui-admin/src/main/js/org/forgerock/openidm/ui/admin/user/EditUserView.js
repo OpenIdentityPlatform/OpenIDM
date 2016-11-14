@@ -56,9 +56,8 @@ function ($, _,
     EditUserView.prototype.render = function (args, callback) {
         GenericEditResourceView.render.call(this, args, _.bind(function () {
             if (_.has(this.data.schema.properties, "password") && !this.$el.find("#password").length) {
-                this.addPasswordTab();
-            }
-            if (callback) {
+                this.addPasswordTab().then(callback);
+            } else if (callback) {
                 callback();
             }
         }, this));
@@ -113,7 +112,7 @@ function ($, _,
         var emailRead = ConfigDelegate.readEntityAlways("external.email"),
             managedRead =  ConfigDelegate.readEntity("managed");
 
-        $.when(emailRead, managedRead).then(_.bind(function(emailConfig, managedObjects) {
+        return $.when(emailRead, managedRead).then(_.bind(function(emailConfig, managedObjects) {
 
             this.setEmailServiceAvailable(!_.isUndefined(emailConfig) && _.has(emailConfig, "host"));
             this.setResetPasswordScriptAvailable(_.get(_.find(managedObjects.objects, {"name": "user"}), "actions.resetPassword") !== undefined);
