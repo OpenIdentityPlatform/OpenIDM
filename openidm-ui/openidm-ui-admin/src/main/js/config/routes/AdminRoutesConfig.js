@@ -170,8 +170,7 @@ define([
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
             role: "ui-admin",
             url: /^resource\/(managed)\/(.+)\/edit\/(.+)$/,
-            pattern: "resource/?/?/edit/?",
-            forceUpdate: true
+            pattern: "resource/?/?/edit/?"
         },
         "adminNewManagedObjectView" : {
             view: "org/forgerock/openidm/ui/common/resource/EditResourceView",
