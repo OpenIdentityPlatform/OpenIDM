@@ -56,7 +56,7 @@
     "Port" : null,
     "Login" : "",
     "Password" : null,
-    "CustomProperties" : [ ],
+    "CustomProperties" : ["baseContext = CN=Users,DC=example,DC=com" ],
     "MinInterpretersPoolSize" : 1,
     "MaxInterpretersPoolSize" : 10
   },
