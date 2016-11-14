@@ -34,6 +34,7 @@ import org.apache.felix.scr.annotations.ConfigurationPolicy;
 import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
+import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.http.Client;
@@ -46,10 +47,8 @@ import org.forgerock.http.protocol.Header;
 import org.forgerock.http.protocol.Request;
 import org.forgerock.http.protocol.Response;
 import org.forgerock.http.spi.Loader;
-import org.forgerock.json.JsonValueException;
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
@@ -57,12 +56,15 @@ import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.NotSupportedException;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Responses;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
+import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.keystore.KeyStoreManagementService;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
 import org.forgerock.util.Options;
 import org.forgerock.util.annotations.VisibleForTesting;
@@ -163,6 +165,12 @@ public class RestService implements SingletonResourceProvider {
 
     @VisibleForTesting
     Client client;
+
+    /**
+     * Not directly used but needed to ensure the keys and certs are generated and the ssl context is reloaded.
+     */
+    @Reference
+    KeyStoreManagementService keyStoreManagementService;
 
     @Activate
     void activate(ComponentContext compContext) throws Exception {
