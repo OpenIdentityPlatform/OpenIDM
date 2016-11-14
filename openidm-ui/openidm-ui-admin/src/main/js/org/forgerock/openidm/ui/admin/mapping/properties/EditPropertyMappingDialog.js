@@ -231,7 +231,7 @@ define([
                 this.data.sampleSourceTooltip = null;
             }
 
-            if(_.isUndefined(this.data.property.source) || this.data.property.source.length === 0) {
+            if((_.isUndefined(this.data.property.source) || this.data.property.source.length === 0) && this.data.sampleSourceTooltip !== null) {
                 this.data.showSampleTooltip = false;
             } else {
                 this.data.showSampleTooltip = true;
