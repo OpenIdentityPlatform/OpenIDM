@@ -62,6 +62,7 @@ import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Request;
+import org.forgerock.json.resource.RequestType;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
@@ -565,7 +566,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         relationshipFields.removeAll(alreadyPersistedRelationshipFields);
 
         // Validate relationships before persisting
-        validateRelationshipFields(managedContext, decryptedOld, decryptedNew, relationshipFields, managedId(resourceId));
+        validateRelationshipFields(managedContext, decryptedOld, decryptedNew, relationshipFields, managedId(resourceId),
+                requestRequiresDuplicateAssignmentCheck(request));
 
         // Populate the virtual properties (so they are updated for sync-ing)
         populateVirtualProperties(context, request, decryptedNew);
@@ -602,6 +604,18 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         }
 
         return readResponse;
+    }
+
+    /**
+     * For create and update requests, the duplicate assignment checks performed by the RelationshipProvider/RelationshipValidators should
+     * not be performed, as existing relationship state should simply be replaced by the new relationship state. Thus, the
+     * invocation state should be checked for duplicate assignments, but these assignments should not be compared to existing
+     * repository state.
+     * @param request the client's request
+     * @return true if the duplicate assignment check should be performed - false otherwise
+     */
+    private boolean requestRequiresDuplicateAssignmentCheck(Request request) {
+        return !RequestType.UPDATE.equals(request.getRequestType()) && !RequestType.CREATE.equals(request.getRequestType());
     }
 
     /**
@@ -778,7 +792,8 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     prepareScriptBindings(managedContext, request, resourceId, new JsonValue(null), content));
 
             // Validate relationships before persisting
-            validateRelationshipFields(managedContext, json(object()), value, relationshipProviders.keySet(), managedId(resourceId));
+            validateRelationshipFields(managedContext, json(object()), value, relationshipProviders.keySet(), managedId(resourceId),
+                    requestRequiresDuplicateAssignmentCheck(request));
 
             // Populate the virtual properties (so they are available for sync-ing)
             populateVirtualProperties(managedContext, request, value);
@@ -919,11 +934,13 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
      * @param toBeValidatedRelationshipFields the set of relationship fields which should be validated
      * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
      *                          the referred-to object specified by the relationship already contains a reference to this referrer
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
      * @throws ResourceException BadRequestException when the first invalid relationship reference is discovered,
      * otherwise for other issues.
      */
     private void validateRelationshipFields(Context context, JsonValue oldValue, JsonValue newValue,
-                Set<JsonPointer> toBeValidatedRelationshipFields, ResourcePath referrerId) throws ResourceException {
+                Set<JsonPointer> toBeValidatedRelationshipFields, ResourcePath referrerId, boolean performDuplicateAssignmentCheck) throws ResourceException {
         EventEntry measure = Publisher.start(Name.get("openidm/internal/managedObjectSet/validateRelationshipFields"), null, null);
         try {
             for (JsonPointer field : toBeValidatedRelationshipFields) {
@@ -932,7 +949,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                     relationshipProviders.get(field).validateRelationshipField(context,
                             oldValue.get(field) == null ? json(null) : oldValue.get(field),
                             newValue.get(field) == null ? json(null) : newValue.get(field),
-                            referrerId);
+                            referrerId, performDuplicateAssignmentCheck);
                 }
             }
         } finally {

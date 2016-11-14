@@ -15,7 +15,6 @@
  */
 package org.forgerock.openidm.managed;
 
-import static java.text.MessageFormat.format;
 import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.Requests.newUpdateRequest;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
@@ -30,7 +29,6 @@ import static org.forgerock.util.promise.Promises.newResultPromise;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -372,11 +370,13 @@ public abstract class RelationshipProvider {
      * @param newValue new value of relationship field to validate
      * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
      *                          the referred-to object specified by the relationship already contains a reference to this referrer
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
      * @throws ResourceException BadRequestException if the relationship is found to be not valid, otherwise for other
      * issues.
      */
-    public abstract void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId)
-            throws ResourceException;
+    public abstract void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId,
+            boolean performDuplicateAssignmentCheck) throws ResourceException;
 
     /**
      * Creates a relationship object.
@@ -436,12 +436,14 @@ public abstract class RelationshipProvider {
      */
     private void validateRelationshipOperand(JsonValue createRequestContent, Context context) throws ResourceException {
         if (createRequestContent.isCollection()) {
-            relationshipValidator.checkForDuplicateRelationships(createRequestContent);
+            relationshipValidator.checkForDuplicateRelationshipsInInvocationState(createRequestContent);
             for (JsonValue relationship : createRequestContent) {
-                relationshipValidator.validateRelationship(relationship, ResourcePath.valueOf(getManagedObjectPath(context)), context);
+                relationshipValidator.validateRelationship(relationship, ResourcePath.valueOf(getManagedObjectPath(context)),
+                        context, true);
             }
         } else {
-            relationshipValidator.validateRelationship(createRequestContent, ResourcePath.valueOf(getManagedObjectPath(context)), context);
+            relationshipValidator.validateRelationship(createRequestContent, ResourcePath.valueOf(getManagedObjectPath(context)),
+                    context, true);
         }
     }
 

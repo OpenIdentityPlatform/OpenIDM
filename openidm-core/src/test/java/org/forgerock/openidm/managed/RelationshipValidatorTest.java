@@ -98,7 +98,7 @@ public class RelationshipValidatorTest {
         when(foundRelationshipResponse.getContent()).thenReturn(SINGLETON_POPULATED_VALUE);
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenReturn(foundRelationshipResponse);
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext(), true);
             fail("Expected to get BadRequestException");
         } catch (ResourceException e) {
             assertTrue(e instanceof PreconditionFailedException, "Expected to get PreconditionFailedException");
@@ -107,7 +107,7 @@ public class RelationshipValidatorTest {
         // now test when the reverseProperty isn't populated - which should be a valid condition.
         when(foundRelationshipResponse.getContent()).thenReturn(json(object(field("reversePropertyName", null))));
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext(), true);
         } catch (ResourceException e) {
             fail("Expected no exception.");
         }
@@ -115,7 +115,7 @@ public class RelationshipValidatorTest {
         // test when the linked relationship isn't found that it returns as BadRequest.
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenThrow(new NotFoundException());
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID),new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID),new RootContext(), true);
             fail("Expected to get BadRequestException");
         } catch (ResourceException e) {
             assertTrue(e instanceof BadRequestException, "Expected to get BadRequestException");
@@ -141,7 +141,7 @@ public class RelationshipValidatorTest {
         when(foundRelationshipResponse.getContent()).thenReturn(json(object(field("name","i_exist"))));
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenReturn(foundRelationshipResponse);
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext(), true);
         } catch (ResourceException e) {
             fail("Expected no BadRequestException");
         }
@@ -149,7 +149,7 @@ public class RelationshipValidatorTest {
         // test when the linked relationship isn't found that it returns as BadRequest.
         when(connection.read(any(Context.class), any(ReadRequest.class))).thenThrow(new NotFoundException());
         try {
-            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext());
+            relationshipProvider.relationshipValidator.validateRelationship(TEST_RELATIONSHIP, ResourcePath.valueOf(RELATIONSHIP_ID), new RootContext(), true);
             fail("Expected to get BadRequestException");
         } catch (ResourceException e) {
             assertTrue(e instanceof BadRequestException, "Expected to get BadRequestException");
@@ -175,7 +175,7 @@ public class RelationshipValidatorTest {
         final JsonValue relationshipList = json(array(makeRelationship(ref1, grantType1, temporalConstraint1), makeRelationship(ref2, grantType2, temporalConstraint2)));
         final CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
                 new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService);
-        relationshipProvider.relationshipValidator.checkForDuplicateRelationships(relationshipList);
+        relationshipProvider.relationshipValidator.checkForDuplicateRelationshipsInInvocationState(relationshipList);
     }
 
     @DataProvider(name = "dulicateRelationshipData")
@@ -198,7 +198,7 @@ public class RelationshipValidatorTest {
         final JsonValue relationshipList = json(array(makeRelationship(ref1, grantType1, temporalConstraint1), makeRelationship(ref2, grantType2, temporalConstraint2)));
         final CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
                 new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService);
-        relationshipProvider.relationshipValidator.checkForDuplicateRelationships(relationshipList);
+        relationshipProvider.relationshipValidator.checkForDuplicateRelationshipsInInvocationState(relationshipList);
     }
 
     @DataProvider(name = "distinctRefProperties")

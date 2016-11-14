@@ -58,7 +58,6 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
-import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.Function;
@@ -574,11 +573,13 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      * @param newValue new value of relationship field to validate
      * @param referrerId the id of the object 'hosting' the relationships, aka the referrer; used to check whether
      *                   the referred-to object specified by the relationship already contains a reference to this referrer
+     * @param performDuplicateAssignmentCheck set to true if invocation state should be compared to repository state to determine if
+     *                                        existing relationships are specified in the invocation
      * @throws BadRequestException when the relationship isn't valid, ResourceException otherwise.
-     * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context)
+     * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context, boolean)
      */
-    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId)
-            throws ResourceException {
+    public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId,
+              boolean performDuplicateAssignmentCheck) throws ResourceException {
         /*
         This check was added to explicitly exclude requests which specify duplicate relationships. However, the newValue
         will have the existing relationships, and the to-be-added relationship(s). In that sense, the check seems
@@ -589,7 +590,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
         invoking relationshipValidator#validateRelationship allows the more expensive request to be performed only when
         necessary.
          */
-        relationshipValidator.checkForDuplicateRelationships(newValue);
+        relationshipValidator.checkForDuplicateRelationshipsInInvocationState(newValue);
 
         /*
         Note that not re-checking existing relationships is not just a performance optimization. If existing collection
@@ -605,7 +606,7 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
             // If the relationship is found in the existing/old relationships, then must skip validation.
             if (!oldReferences.contains(new RelationshipEqualityHash(newItem))) {
                 logger.debug("validating new relationship {} for {}: ", newItem, propertyPtr);
-                relationshipValidator.validateRelationship(newItem, referrerId, context);
+                relationshipValidator.validateRelationship(newItem, referrerId, context, performDuplicateAssignmentCheck);
             }
         }
     }
