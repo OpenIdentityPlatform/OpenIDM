@@ -58,7 +58,7 @@ public class SyncMappingsTest {
     @Test
     public void testGetMapping() throws Exception {
         EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
-        when(enhancedConfig.getConfiguration(any(ComponentContext.class))).thenReturn(getConfig().asMap());
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(getConfig());
 
         SyncMappings mappings = new SyncMappings();
         mappings.bindEnhancedConfig(enhancedConfig);
@@ -74,7 +74,7 @@ public class SyncMappingsTest {
     @Test(expectedExceptions = SynchronizationException.class)
     public void testGetMappingNotPresent() throws Exception {
         EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
-        when(enhancedConfig.getConfiguration(any(ComponentContext.class))).thenReturn(getConfig().asMap());
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(getConfig());
 
         SyncMappings mappings = new SyncMappings();
         mappings.bindEnhancedConfig(enhancedConfig);
@@ -96,7 +96,7 @@ public class SyncMappingsTest {
     @Test
     public void testIterator() throws Exception {
         EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
-        when(enhancedConfig.getConfiguration(any(ComponentContext.class))).thenReturn(getConfig().asMap());
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(getConfig());
 
         SyncMappings mappings = new SyncMappings();
         mappings.bindEnhancedConfig(enhancedConfig);

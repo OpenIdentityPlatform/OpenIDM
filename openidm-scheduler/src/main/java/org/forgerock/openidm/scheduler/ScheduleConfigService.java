@@ -11,13 +11,12 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.scheduler;
 
 import java.text.ParseException;
-import java.util.Map;
 
 import org.apache.felix.scr.annotations.Activate;
 import org.apache.felix.scr.annotations.Component;
@@ -104,12 +103,12 @@ public class ScheduleConfigService {
 
         // Optional property SERVICE_FACTORY_PID set by JSONConfigInstaller
         configFactoryPID = (String) compContext.getProperties().get("config.factory-pid");
-        Map<String, Object> config = enhancedConfig.getConfiguration(compContext);
+        JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
         logger.debug("Scheduler service activating with configuration {}", config);
-        if (config == null) {
+        if (config.size() == 0) {
             return null;
         }
-        return new ScheduleConfig(new JsonValue(config));
+        return new ScheduleConfig(config);
     }
 
     public Boolean getSchedulePersisted() {

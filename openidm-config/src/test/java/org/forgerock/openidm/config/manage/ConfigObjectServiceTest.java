@@ -15,10 +15,12 @@
  */
 package org.forgerock.openidm.config.manage;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
+import static org.forgerock.json.resource.Requests.*;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.config.manage.ConfigObjectService.asConfigQueryFilter;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
@@ -28,6 +30,7 @@ import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertNotNull;
 import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.*;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -71,6 +74,7 @@ import org.forgerock.openidm.patch.ScriptedPatchValueTransformer;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
 import org.forgerock.services.TransactionId;
+import org.forgerock.services.context.ClientContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.RootContext;
 import org.forgerock.services.context.TransactionIdContext;
@@ -83,7 +87,6 @@ import org.osgi.service.cm.Configuration;
 import org.osgi.service.cm.ConfigurationAdmin;
 import org.osgi.service.component.ComponentConstants;
 import org.osgi.service.component.ComponentContext;
-import org.testng.Assert;
 import org.testng.annotations.AfterTest;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.Test;
@@ -193,11 +196,12 @@ public class ConfigObjectServiceTest {
         QueryFilter<JsonPointer> filter5 = QueryFilters.parse(queryString5);
         
         // Assertions
-        Assert.assertEquals(asConfigQueryFilter(filter1).toString(), "/jsonconfig/field1 eq \"value1\"");
-        Assert.assertEquals(asConfigQueryFilter(filter2).toString(), "(/jsonconfig/field1 eq \"value1\" and /service__pid eq \"value2\")");
-        Assert.assertEquals(asConfigQueryFilter(filter3).toString(), "/jsonconfig/field1 pr");
-        Assert.assertEquals(asConfigQueryFilter(filter4).toString(), "/jsonconfig/field1 lt 1");
-        Assert.assertEquals(asConfigQueryFilter(filter5).toString(), "true");
+        assertEquals(asConfigQueryFilter(filter1).toString(), "/jsonconfig/field1 eq \"value1\"");
+        assertEquals(asConfigQueryFilter(filter2).toString(),
+                "(/jsonconfig/field1 eq \"value1\" and /service__pid eq \"value2\")");
+        assertEquals(asConfigQueryFilter(filter3).toString(), "/jsonconfig/field1 pr");
+        assertEquals(asConfigQueryFilter(filter4).toString(), "/jsonconfig/field1 lt 1");
+        assertEquals(asConfigQueryFilter(filter5).toString(), "true");
     }
     
     @Test(priority=2)
@@ -205,40 +209,40 @@ public class ConfigObjectServiceTest {
         
         try {
             configObjectService.getParsedId("");
-            Assert.fail("Invalid id: ''");
+            fail("Invalid id: ''");
         } catch (BadRequestException e) {
             // do nothing
         }
         try {
             configObjectService.getParsedId("//");
-            Assert.fail("Invalid id: '//'");
+            fail("Invalid id: '//'");
         } catch (IllegalArgumentException e) {
             // do nothing
         }
         try {
             configObjectService.getParsedId("a/b/c");
-            Assert.fail("Invalid id: 'a/b/c'");
+            fail("Invalid id: 'a/b/c'");
         } catch (BadRequestException e) {
             // do nothing
         }
 
-        Assert.assertEquals(configObjectService.getParsedId("/a"), "a");
-        Assert.assertFalse(configObjectService.isFactoryConfig("/a"));
+        assertEquals(configObjectService.getParsedId("/a"), "a");
+        assertFalse(configObjectService.isFactoryConfig("/a"));
 
-        Assert.assertEquals(configObjectService.getParsedId("a"), "a");
-        Assert.assertFalse(configObjectService.isFactoryConfig("a"));
+        assertEquals(configObjectService.getParsedId("a"), "a");
+        assertFalse(configObjectService.isFactoryConfig("a"));
 
-        Assert.assertEquals(configObjectService.getParsedId("b/"), "b");
-        Assert.assertFalse(configObjectService.isFactoryConfig("b/"));
+        assertEquals(configObjectService.getParsedId("b/"), "b");
+        assertFalse(configObjectService.isFactoryConfig("b/"));
 
-        Assert.assertEquals(configObjectService.getParsedId("c/d"), "c/d");
+        assertEquals(configObjectService.getParsedId("c/d"), "c/d");
         assertTrue(configObjectService.isFactoryConfig("c/d"));
 
-        Assert.assertEquals(configObjectService.getParsedId("e/d/"), "e/d");
+        assertEquals(configObjectService.getParsedId("e/d/"), "e/d");
         assertTrue(configObjectService.isFactoryConfig("e/d/"));
 
-        Assert.assertEquals(configObjectService.getParsedId(" f "), "_f_");
-        Assert.assertFalse(configObjectService.isFactoryConfig(" f "));
+        assertEquals(configObjectService.getParsedId(" f "), "_f_");
+        assertFalse(configObjectService.isFactoryConfig(" f "));
 
     }
 
@@ -259,7 +263,7 @@ public class ConfigObjectServiceTest {
         EnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         JsonValue value = enhancedConfig.getConfiguration(properties, rname.toString(), false);
         assertTrue(value.keys().contains("property1"));
-        Assert.assertEquals(value.get("property1").asString(), "value1");
+        assertEquals(value.get("property1").asString(), "value1");
     }
 
     @Test(priority=4, expectedExceptions = PreconditionFailedException.class)
@@ -285,7 +289,8 @@ public class ConfigObjectServiceTest {
         config.put("property1", "newvalue1");
         config.put("property2", "newvalue2");
 
-        configObjectService.update(rname, id, json(config)).getOrThrow();
+        configObjectService.handleUpdate(new TransactionIdContext(new RootContext(), new TransactionId()),
+                newUpdateRequest(rname, id, json(config))).getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
         Configuration config = configObjectService.findExistingConfiguration(parsedId);
@@ -296,7 +301,7 @@ public class ConfigObjectServiceTest {
         JSONEnhancedConfig enhancedConfig = new JSONEnhancedConfig();
         JsonValue value = enhancedConfig.getConfiguration(properties, rname.toString(), false);
         assertTrue(value.keys().contains("property1"));
-        Assert.assertEquals(value.get("property1").asString(), "newvalue1");
+        assertEquals(value.get("property1").asString(), "newvalue1");
     }
 
     @Test(priority=7)
@@ -308,7 +313,8 @@ public class ConfigObjectServiceTest {
     @SuppressWarnings("unchecked")
     @Test(priority=8)
     public void testDelete() throws Exception {
-        configObjectService.delete(rname, "0").getOrThrow();
+        configObjectService.handleDelete(new TransactionIdContext(new RootContext(), new TransactionId()),
+                newDeleteRequest(rname, "0")).getOrThrow();
 
         ConfigObjectService.ParsedId parsedId = configObjectService.getParsedId(rname, id);
         Configuration config = configObjectService.findExistingConfiguration(parsedId);
@@ -323,7 +329,25 @@ public class ConfigObjectServiceTest {
         config.put("property1", "newnewvalue1");
         config.put("property2", "newnewvalue2");
 
-        configObjectService.update(rname, id, json(config)).getOrThrow();
+        configObjectService.handleUpdate(new TransactionIdContext(new RootContext(), new TransactionId()),
+                newUpdateRequest(rname, id, json(config))).getOrThrow();
+    }
+
+    @Test(priority = 10)
+    public void testRead() throws Exception {
+        // Given
+        config.put("property1", "evaluatedProperty");
+        config.put("prop", "&{property1}");
+        configObjectService.create(rname, id, json(config), true);
+
+        // When
+        ResourceResponse response = configObjectService.handleRead(
+                ClientContext.buildExternalClientContext(
+                        new TransactionIdContext(new RootContext(), new TransactionId())).build(),
+                newReadRequest(rname, id)).getOrThrow();
+
+        // Then
+        assertThat(response.getContent().get("prop").asString()).isEqualTo("&{property1}");
     }
 
     @Test

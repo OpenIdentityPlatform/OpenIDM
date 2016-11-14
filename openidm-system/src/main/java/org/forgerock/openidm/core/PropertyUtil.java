@@ -16,8 +16,14 @@
 
 package org.forgerock.openidm.core;
 
+import static org.forgerock.json.JsonValueFunctions.deepTransformBy;
+
 import java.util.Stack;
 import java.util.regex.Pattern;
+
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.JsonValueException;
+import org.forgerock.util.Function;
 
 public class PropertyUtil {
 
@@ -66,6 +72,27 @@ public class PropertyUtil {
      * For Example: "This has a ${property.key} in it", and "${property.key}" => matches
      */
     private static final Pattern DOLLAR_PATTERN = Pattern.compile("^.*\\$\\{.+\\}.*$");
+
+    /**
+     * Function that deeply traverses the json replacing any referenced properties with their Identity value.
+     * @see #substVars(String, PropertyAccessor, boolean)
+     */
+    public static Function<JsonValue, JsonValue, JsonValueException> propertiesEvaluated =
+            deepTransformBy(
+                    new Function<JsonValue, JsonValue, JsonValueException>() {
+                        @Override
+                        public JsonValue apply(JsonValue value) throws JsonValueException {
+                            if (value == null) {
+                                return null;
+                            }
+                            if (value.isString()) {
+                                return new JsonValue(
+                                        PropertyUtil.substVars(value.asString(), IdentityServer.getInstance(), false),
+                                        value.getPointer());
+                            }
+                            return value;
+                        }
+                    });
 
     /**
      * Tests if the passed in value contains the delimited property, ie &{property} or ${property}
