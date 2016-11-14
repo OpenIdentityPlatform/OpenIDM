@@ -1,6 +1,6 @@
 # DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
 #
-# Copyright (c) 2014 ForgeRock AS. All Rights Reserved
+# Copyright (c) 2014-2016 ForgeRock AS. All Rights Reserved
 #
 # The contents of this file are subject to the terms
 # of the Common Development and Distribution License
@@ -114,7 +114,7 @@ if ($Connector.Operation -eq "GET_LATEST_SYNC_TOKEN")
 }
 elseif ($Connector.Operation -eq "SYNC")
 {
-	$searchBase = 'CN=Users,DC=example,DC=com'
+	$searchBase = $Connector.Configuration.PropertyBag.baseContext
 	$attrsToGet = "*"
 	$filter = "uSNChanged -gt {0}" -f $Connector.Token
 	
