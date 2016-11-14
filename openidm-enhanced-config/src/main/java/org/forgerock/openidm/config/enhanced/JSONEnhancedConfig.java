@@ -18,7 +18,6 @@ package org.forgerock.openidm.config.enhanced;
 
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
-import static org.forgerock.json.JsonValueFunctions.deepTransformBy;
 
 import java.util.Dictionary;
 import java.util.Map;
@@ -31,12 +30,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
-import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.PropertyUtil;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.util.JsonUtil;
-import org.forgerock.util.Function;
 import org.forgerock.util.Reject;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -72,8 +69,6 @@ public class JSONEnhancedConfig implements EnhancedConfig {
      */
     private final static Logger logger = LoggerFactory.getLogger(JSONEnhancedConfig.class);
 
-    private static final PropertyTransformer propertyTransformer = new PropertyTransformer(false);
-
     /** The {@link CryptoService}. */
     @Reference
     private CryptoService cryptoService;
@@ -92,19 +87,7 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         return null;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    public Map<String, Object> getConfiguration(ComponentContext compContext)
-            throws InvalidException, InternalErrorException {
-
-        JsonValue confValue = getConfigurationAsJson(compContext);
-        return confValue.asMap();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public JsonValue getConfigurationAsJson(ComponentContext compContext)
             throws InvalidException, InternalErrorException {
         Reject.ifNull(compContext);
@@ -115,22 +98,24 @@ public class JSONEnhancedConfig implements EnhancedConfig {
         return getConfiguration(dict, compContext.getBundleContext(), servicePid);
     }
 
-    /**
-     * {@inheritDoc}
-     */
+    @Override
     public JsonValue getConfiguration(Dictionary<String, Object> dict, BundleContext context,
             String servicePid) throws InvalidException, InternalErrorException {
         return getConfiguration(dict, servicePid, true);
     }
 
-    /**
-     * {@see getConfiguration(Dictionary, BundleContext, String)}
-     *
-     * @param decrypt
-     *            true if any encrypted values should be decrypted in the result
-     */
+    @Override
     public JsonValue getConfiguration(Dictionary<String, Object> dict, String servicePid,
             boolean decrypt) throws InvalidException, InternalErrorException {
+        JsonValue config = getRawConfiguration(dict, servicePid).as(PropertyUtil.propertiesEvaluated);
+        if (decrypt) {
+            config = cryptoService.decrypt(config);
+        }
+        return config;
+    }
+
+    @Override
+    public JsonValue getRawConfiguration(Dictionary<String, Object> dict, String servicePid) throws InvalidException {
         JsonValue jv = json(object());
 
         if (dict != null) {
@@ -155,37 +140,6 @@ public class JSONEnhancedConfig implements EnhancedConfig {
             }
         }
         logger.debug("Configuration for {}: {}", servicePid, jv);
-
-        JsonValue decrypted = jv;
-        if (jv.isNotNull()) {
-            decrypted = decrypted.as(deepTransformBy(propertyTransformer));
-        }
-        // todo: different way to handle mock unit tests
-        if (decrypt && dict != null && jv.isNotNull()) {
-            decrypted = cryptoService.decrypt(decrypted);
-        }
-
-        return decrypted;
-    }
-
-    private static class PropertyTransformer implements Function<JsonValue, JsonValue, JsonValueException> {
-        private final boolean doEscape;
-
-        public PropertyTransformer(boolean doEscape) {
-            this.doEscape = doEscape;
-        }
-
-        @Override
-        public JsonValue apply(JsonValue value) throws JsonValueException {
-            if (value == null) {
-                return null;
-            }
-            if (value.isString()) {
-                return new JsonValue(
-                        PropertyUtil.substVars(value.asString(), IdentityServer.getInstance(), doEscape),
-                        value.getPointer());
-            }
-            return value;
-        }
+        return jv;
     }
 }

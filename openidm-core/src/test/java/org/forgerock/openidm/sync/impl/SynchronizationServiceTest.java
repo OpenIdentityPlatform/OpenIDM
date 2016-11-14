@@ -107,7 +107,7 @@ public class SynchronizationServiceTest {
         final Connection connection = mock(Connection.class);
         final EnhancedConfig enhancedConfig = mock(EnhancedConfig.class);
 
-        when(enhancedConfig.getConfiguration(any(ComponentContext.class))).thenReturn(syncConfig.asMap());
+        when(enhancedConfig.getConfigurationAsJson(any(ComponentContext.class))).thenReturn(syncConfig);
         when(connectionFactory.getConnection()).thenReturn(connection);
         when(connectionFactory.getExternalConnection()).thenReturn(connection);
 

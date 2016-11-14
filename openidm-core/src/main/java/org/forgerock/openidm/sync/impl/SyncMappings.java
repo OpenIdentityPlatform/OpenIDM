@@ -78,7 +78,7 @@ public class SyncMappings implements Mappings {
     @Activate
     @Modified
     protected void activate(ComponentContext context) {
-        JsonValue config = new JsonValue(enhancedConfig.getConfiguration(context));
+        JsonValue config = enhancedConfig.getConfigurationAsJson(context);
         try {
             mappings = initMappings(config);
         } catch (JsonValueException jve) {

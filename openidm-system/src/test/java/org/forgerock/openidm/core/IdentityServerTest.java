@@ -16,11 +16,17 @@
 package org.forgerock.openidm.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.forgerock.json.JsonValue.array;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.openidm.core.PropertyUtil.propertiesEvaluated;
 
 import java.io.File;
 import java.net.URLDecoder;
 import java.util.Properties;
 
+import org.forgerock.json.JsonValue;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 
@@ -89,6 +95,23 @@ public class IdentityServerTest {
         testProperties.clear();
         assertThat(identityServer.getProperty(TEST_PROPERTY_KEY_NOT_IN_BOOT, "DEFAULT")).isEqualTo("DEFAULT");
     }
+
+    @Test
+    public void testPropertyTransformer() {
+        testProperties.put("prop1", "value1");
+
+        JsonValue value =
+                json(
+                        object(
+                                field("prop2", "This is property 1 value '&{prop1}'."),
+                                field("testArray", array("Array 1 value '&{prop1}'."))
+                        ));
+        assertThat(value.as(propertiesEvaluated).get("prop2").asString())
+                .isEqualTo("This is property 1 value 'value1'.");
+        assertThat(value.as(propertiesEvaluated).get("testArray").get(0).asString())
+                .isEqualTo("Array 1 value 'value1'.");
+    }
+
 
     private static class TestPropertyAccessor implements PropertyAccessor {
         @Override

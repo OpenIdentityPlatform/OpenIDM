@@ -215,7 +215,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      *    BadRequestException if the passed identifier is invalid
      */
     @SuppressWarnings("rawtypes")
-    public Promise<ConfigAuditState, ResourceException> read(ResourcePath resourcePath) {
+    private Promise<ConfigAuditState, ResourceException> read(ResourcePath resourcePath) {
         logger.debug("Invoking read {}", resourcePath.toString());
         JsonValue result;
 
@@ -258,7 +258,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                             .asPromise();
                 }
                 Dictionary<String, Object> props = config.getProperties();
-                result =  enhancedConfig.getConfiguration(props, resourcePath.toString(), false);
+                result =  enhancedConfig.getRawConfiguration(props, resourcePath.toString());
                 result.put("_id", resourcePath.toString());
                 logger.debug("Read configuration for service {}", resourcePath);
             }
@@ -359,7 +359,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             config.update(dict);
             logger.debug("Created new configuration for {} with {}", parsedId.toString(), dict);
 
-            JsonValue after = enhancedConfig.getConfiguration(config.getProperties(), resourcePath.toString(), false);
+            JsonValue after = enhancedConfig.getRawConfiguration(config.getProperties(), resourcePath.toString());
 
             String revision = (null == after)
                     ? null
@@ -432,7 +432,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      *  BadRequestException:         if the passed identifier is invalid
      */
     @SuppressWarnings("rawtypes")
-    public Promise<ConfigAuditState, ResourceException> update(ResourcePath resourcePath, String rev,
+    private Promise<ConfigAuditState, ResourceException> update(ResourcePath resourcePath, String rev,
                                                                JsonValue obj) {
         logger.debug("Invoking update configuration {} {}", resourcePath.toString(), rev);
         if (resourcePath.isEmpty()) {
@@ -462,11 +462,11 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             obj.remove(ResourceResponse.FIELD_CONTENT_ID);
             obj.remove(ResourceResponse.FIELD_CONTENT_REVISION);
 
-            JsonValue before = enhancedConfig.getConfiguration(config.getProperties(), resourcePath.toString(), false);
+            JsonValue before = enhancedConfig.getRawConfiguration(config.getProperties(), resourcePath.toString());
             existingConfig = configCrypto.encrypt(parsedId.getPidOrFactoryPid(), parsedId.instanceAlias, existingConfig,
                     obj);
             config.update(existingConfig);
-            JsonValue after = enhancedConfig.getConfiguration(config.getProperties(), resourcePath.toString(), false);
+            JsonValue after = enhancedConfig.getRawConfiguration(config.getProperties(), resourcePath.toString());
 
             logger.debug("Updated existing configuration for {} with {}", resourcePath.toString(), existingConfig);
             return newResultPromise(
@@ -530,7 +530,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
      * PreconditionFailedException: if version did not match the existing object in the set.
      */
     @SuppressWarnings("rawtypes")
-    public Promise<ConfigAuditState, ResourceException> delete(ResourcePath resourcePath,
+    private Promise<ConfigAuditState, ResourceException> delete(ResourcePath resourcePath,
                                                                String rev) {
         logger.debug("Invoking delete configuration {} {}", resourcePath.toString(), rev);
         if (resourcePath.isEmpty()) {
@@ -546,7 +546,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             }
 
             Dictionary<String, Object> existingConfig = config.getProperties();
-            JsonValue value = enhancedConfig.getConfiguration(existingConfig, resourcePath.toString(), false);
+            JsonValue value = enhancedConfig.getRawConfiguration(existingConfig, resourcePath.toString());
 
             if (existingConfig == null) {
                 return new NotFoundException(
@@ -592,7 +592,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     }
 
     @SuppressWarnings("rawtypes")
-    public Promise<ConfigAuditState, ResourceException> patch(final Context context, final ResourcePath resourcePath,
+    private Promise<ConfigAuditState, ResourceException> patch(final Context context, final ResourcePath resourcePath,
             final List<PatchOperation> patchOperation) {
         final ParsedId parsedId;
         try {
@@ -611,7 +611,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                         + ", can not patch the configuration.");
             }
 
-            final JsonValue before = enhancedConfig.getConfiguration(existingConfig, resourcePath.toString(), false);
+            final JsonValue before = enhancedConfig.getRawConfiguration(existingConfig, resourcePath.toString());
             final JsonValue after = before.copy();
             JsonValuePatch.apply(after, patchOperation, scriptedPatchValueTransformerFactory.getPatchValueTransformer(context));
 
