@@ -310,6 +310,7 @@ public class RepoJobStore implements JobStore, ClusterEventListener {
     @Override
     public void shutdown() {
         synchronized(lock) {
+            cleanUpInstance();
             shutdown = true;
             logger.debug("Job Scheduler Stopped");
         }
