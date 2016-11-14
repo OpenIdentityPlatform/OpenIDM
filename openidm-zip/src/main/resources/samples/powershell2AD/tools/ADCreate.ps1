@@ -232,7 +232,7 @@ function Create-NewUser ($attributes)
 		$r = $dic.Remove("enabled")
 		if ($aduser.Enabled -and ($password -eq $null))
 		{
-			throw new Org.IdentityConnectors.Framework.Common.Exceptions.InvalidAttributeValueException("Password must be set if enabled = true")
+			throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.InvalidAttributeValueException("Password must be set if enabled = true")
 		}
 	}
 
@@ -370,7 +370,7 @@ if ($Connector.Operation -eq "CREATE")
 }
 else
 {
-	throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("CreateScript can not handle operation: $($Connector.Operation)")
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("CreateScript can not handle operation: $($Connector.Operation)")
 }
 }
 catch #Re-throw the original exception

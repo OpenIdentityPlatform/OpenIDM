@@ -314,7 +314,7 @@ if ($Connector.Operation -eq "UPDATE")
 }
 else
 {
-	throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("CreateScript can not handle operation: $($Connector.Operation)")
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("CreateScript can not handle operation: $($Connector.Operation)")
 }
 }
 catch #Re-throw the original exception

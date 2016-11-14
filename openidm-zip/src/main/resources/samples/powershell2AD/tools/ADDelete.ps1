@@ -69,7 +69,7 @@ if ($Connector.Operation -eq "DELETE")
 }
 else
 {
-	throw new Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("DeleteScript can not handle operation: $($Connector.Operation)")
+	throw New-Object Org.IdentityConnectors.Framework.Common.Exceptions.ConnectorException("DeleteScript can not handle operation: $($Connector.Operation)")
 }
 }
 catch #Re-throw the original exception
