@@ -562,6 +562,7 @@ class ObjectMapping {
             SyncOperation op = null;
             ReconAuditEventLogger event = null;
             Status status = Status.SUCCESS;
+            SynchronizationException caughtSynchronizationException = null;
             try {
                 if (params.get("target").isNull()) {
                     SourceSyncOperation sop = new SourceSyncOperation(this, context);
@@ -614,6 +615,7 @@ class ObjectMapping {
             } catch (SynchronizationException se) {
                 if (op != null && op.action != ReconAction.EXCEPTION) {
                     // exception was not intentional
+                    caughtSynchronizationException = se;
                     status = Status.FAILURE;
                     if (reconId != null) {
                         LOGGER.warn("Unexpected failure during source reconciliation {}", reconId, se);
@@ -641,6 +643,9 @@ class ObjectMapping {
                 }
                 event.setStatus(status);
                 logEntry(event, null);
+            }
+            if (caughtSynchronizationException != null) {
+                throw caughtSynchronizationException;
             }
         } finally {
             if (reconId != null) {

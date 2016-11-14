@@ -353,8 +353,7 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
                     logger.debug("Synchronization action=performAction, params={}", _params);
                     ObjectMapping objectMapping = mappings.getMapping(_params.get("mapping").required().asString());
                     objectMapping.performAction(_params);
-                    //result.put("status", performAction(_params));
-                    return newActionResponse(json(object())).asPromise();
+                    return newActionResponse(json(object(field("status", "OK")))).asPromise();
                 case getLinkedResources:
                     return getLinkedResources(context, resourcePath(request.getAdditionalParameter(ACTION_PARAM_RESOURCE_NAME)));
                 default:
