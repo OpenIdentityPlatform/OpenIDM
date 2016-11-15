@@ -122,8 +122,7 @@ define([
                                                     "cell": "string",
                                                     "sortable": true,
                                                     "editable": false,
-                                                    "sortType": "toggle",
-                                                    "minimumSearchChars": 2
+                                                    "sortType": "toggle"
                                                 }
                                             );
                                         } else {
@@ -138,8 +137,7 @@ define([
                                                     "cell": BackgridUtils.escapedStringCell(colName),
                                                     "sortable": true,
                                                     "editable": false,
-                                                    "sortType": "toggle",
-                                                    "minimumSearchChars": 2
+                                                    "sortType": "toggle"
                                                 }
                                             );
                                         }
@@ -183,8 +181,7 @@ define([
                                                 "cell": "string",
                                                 "sortable": true,
                                                 "editable": false,
-                                                "sortType": "toggle",
-                                                "minimumSearchChars": 2
+                                                "sortType": "toggle"
                                             }
                                         );
                                     }
