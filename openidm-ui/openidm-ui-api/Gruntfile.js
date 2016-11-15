@@ -20,7 +20,7 @@ module.exports = function (grunt) {
                 files: [{
                     expand: true,
                     cwd: 'node_modules/swagger-ui/dist/',
-                    src: ['swagger-ui.js', 'css/*', 'fonts/*', 'images/*', 'lang/*', 'lib/*'],
+                    src: ['swagger-ui.js', 'swagger-ui.min.js','css/*', 'fonts/*', 'images/*', 'lang/*', 'lib/*'],
                     dest: 'target/www/'
                 }]
             },
