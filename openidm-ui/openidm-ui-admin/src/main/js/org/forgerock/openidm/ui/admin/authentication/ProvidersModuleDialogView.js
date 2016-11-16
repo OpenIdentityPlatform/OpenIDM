@@ -17,6 +17,7 @@
 define([
     "jquery",
     "underscore",
+    "org/forgerock/openidm/ui/admin/util/AdminUtils",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/commons/ui/common/main/ValidatorsManager",
     "org/forgerock/commons/ui/common/main/Configuration",
@@ -28,6 +29,7 @@ define([
     "org/forgerock/openidm/ui/admin/delegates/ExternalAccessDelegate"
 
 ], function($, _,
+            AdminUtils,
             UIUtils,
             ValidatorsManager,
             Configuration,
@@ -62,7 +64,7 @@ define([
                         "authorization_endpoint": "",
                         "token_endpoint": ""
                     }],
-                    "queryOnResource": "managed/user",
+                    "queryOnResource": "system/ldap/account",
                     "defaultUserRoles": ["openidm-authorized"],
                     "openIdConnectHeader": "authToken",
                     "propertyMapping": {
@@ -101,12 +103,16 @@ define([
                 this.setConfig(this.model.config);
             }
 
-
             this.data.adminCallback = window.location.protocol+"//"+window.location.host + "/admin/oauthReturn.html";
             this.data.enduserCallback =  window.location.protocol+"//"+window.location.host + "/oauthReturn.html";
 
-            this.parentRender(_.bind(function() {
-
+            AdminUtils.getAvailableResourceEndpoints().then((resources) => {
+                this.data.resources = resources;
+            }).then(() => {
+                var promise = new $.Deferred();
+                this.parentRender(() => promise.resolve());
+                return promise;
+            }).then(() => {
                 this.model.currentDialog = $('<div id="ProviderModuleDialog"></div>');
                 this.setElement(this.model.currentDialog);
                 $('#dialogs').append(this.model.currentDialog);
@@ -162,7 +168,7 @@ define([
                         }
                     ]
                 });
-            }, this));
+            });
         },
 
         getConfig: function() {
@@ -176,13 +182,15 @@ define([
         getSaveConfig: function() {
             var currentConfig = this.getConfig(),
                 id = this.$el.find("#amClientID").val(),
-                secret = this.$el.find("#amClientSecret").val();
+                secret = this.$el.find("#amClientSecret").val(),
+                queryOnResource = this.$el.find("[name='properties.queryOnResource']").val();
 
             if (secret.length > 0) {
                 _.set(currentConfig.properties.resolvers[0], "client_secret", secret);
             }
 
             _.set(currentConfig.properties.resolvers[0], "client_id", id);
+            _.set(currentConfig.properties, "queryOnResource", queryOnResource);
             _.set(currentConfig, "enabled", true);
 
             return currentConfig;
