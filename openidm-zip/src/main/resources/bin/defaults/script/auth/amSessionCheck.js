@@ -13,7 +13,7 @@
  *
  * Copyright 2016 ForgeRock AS.
  */
- var base64 = Packages.org.forgerock.util.encode.Base64url,
+var base64 = Packages.org.forgerock.util.encode.Base64url,
     id_token = (httpRequest.getHeaders().getFirst('authToken').toString()+""),
     provider = (httpRequest.getHeaders().getFirst('provider').toString()+""),
     resolverConfig = properties.resolvers.filter(function (r) {return r.name === provider;})[0],
@@ -55,6 +55,41 @@ if (security.authenticationId === "amadmin") {
         "roles" : ["openidm-admin", "openidm-authorized"],
         "moduleId" : security.authorization.moduleId
     };
+} else if (security.authorization.component !== "managed/user") {
+    var _ = require('lib/lodash'),
+       managedUser = openidm.query("managed/user", { '_queryFilter' : '/userName eq "' + security.authenticationId  + '"' }, ["*","authzRoles"]);
+
+    if (managedUser.result.length === 0) {
+        throw {
+            "code" : 401,
+            "message" : "Access denied, managed/user entry is not found"
+        };
+    }
+
+    if (managedUser.result[0].accountStatus !== "active") {
+        throw {
+            "code" : 401,
+            "message" : "Access denied, user inactive"
+        };
+    }
+
+    security.authorization = {
+        "id": managedUser.result[0]._id,
+        "moduleId" : security.authorization.moduleId,
+        "component": "managed/user",
+        "roles": managedUser.result[0].authzRoles ?
+                     _.uniq(
+                         security.authorization.roles.concat(
+                             _.map(managedUser.result[0].authzRoles, function (r) {
+                                 // appending empty string gets the value from java into a format more familiar to JS
+                                 return org.forgerock.json.resource.ResourcePath.valueOf(r._ref).leaf() + "";
+                             })
+                        )
+                    ) :
+                     security.authorization.roles
+    };
+
+    security.authorization = require('auth/customAuthz').setProtectedAttributes(security).authorization;
 }
 
 if (resolverConfig.end_session_endpoint) {

@@ -57,6 +57,12 @@
         </div>
     </div>
 
+    {{> form/_basicSelect
+    property="properties.queryOnResource"
+    label="templates.auth.modules.routeToOpenAMUserDataStore"
+    options=resources
+    value=currentConfig.properties.queryOnResource}}
+
     {{> _alert
         hidden=true
         id="wellKnownURLError"
@@ -65,6 +71,3 @@
         message="templates.auth.providers.wellKnownError"
     }}
 </form>
-
-
-
