@@ -890,7 +890,6 @@
                 "type" : "object",
                 "title" : "Group",
                 "description" : "",
-                "icon" : "fa-asterisk",
                 "properties" : {
                     "dn" : {
                         "type" : "string",
