@@ -83,6 +83,7 @@ class ManagedObjectApiDescription {
     private static final String APIDESCRIPTOR = "apiDescriptor";
     private static final String REQUESTSCHEMA = "requestSchema";
     private static final String PARAMETERS = "parameters";
+    private static final String IS_RELATIONSHIP = "isRelationship";
 
     private ManagedObjectApiDescription() {
         // empty
@@ -119,11 +120,13 @@ class ManagedObjectApiDescription {
                     if (SchemaField.TYPE_RELATIONSHIP.equals(relationshipSchema.get(Constants.TYPE).asString())) {
                         // this is a singleton, so update schema
                         relationshipSchema.put(Constants.TYPE, Constants.TYPE_OBJECT);
+                        relationshipSchema.put(IS_RELATIONSHIP, true);
                     } else {
                         // this is a collection, so update schema AND define sub-resource
                         final JsonValue itemsType = relationshipSchema.get(ITEMS_TYPE_POINTER);
                         if (itemsType != null && SchemaField.TYPE_RELATIONSHIP.equals(itemsType.asString())) {
                             relationshipSchema.put(ITEMS_TYPE_POINTER, Constants.TYPE_OBJECT);
+                            relationshipSchema.put(IS_RELATIONSHIP, true);
                         }
 
                         // prefix sub-resource title with parent resource title

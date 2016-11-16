@@ -179,7 +179,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                                     }
                                 });
                     } else { // no id, replace current instance
-                        if (!clearExisting) {
+                        if (clearExisting) {
                             clear(context, resourceId);
                         }
 
@@ -196,7 +196,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
                     return e.asPromise();
                 }
             } else {
-                if (!clearExisting) {
+                if (clearExisting) {
                     clear(context, resourceId);
                 }
 
@@ -317,8 +317,7 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      * @see RelationshipValidator#validateRelationship(JsonValue, ResourcePath, Context, boolean)
      */
     public void validateRelationshipField(Context context, JsonValue oldValue, JsonValue newValue, ResourcePath referrerId,
-                                          boolean performDuplicateAssignmentCheck)
-            throws ResourceException {
+            boolean performDuplicateAssignmentCheck) throws ResourceException {
         if (oldValue.isNull() && newValue.isNull()) {
             logger.debug("not validating relationship as old and new values are both null.");
         } else if (oldValue.isNull() || !oldValue.getObject().equals(newValue.getObject())) {

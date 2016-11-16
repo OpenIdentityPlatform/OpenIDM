@@ -588,7 +588,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
         responseContent.asMap().putAll(strippedRelationshipFields.asMap());
 
         // Persists all relationship fields that are present in the new value and updates their values.
-        responseContent.asMap().putAll(persistRelationships(false, managedContext, resourceId, oldValue, responseContent, relationshipFields)
+        responseContent.asMap().putAll(persistRelationships(true, managedContext, resourceId, oldValue, responseContent, relationshipFields)
                 .asMap());
 
         // Execute the postUpdate script if configured
@@ -662,13 +662,15 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
     }
 
     /**
-     * Persist all relationship fields contained in the JsonValue map to their accompanying
+     * Persist all relationship fields contained in the JsonValue map to their corresponding
      * {@link #relationshipProviders}
      *
-     * @param clearExisting If existing (those not present in the object) should be cleared
+     * @param clearExisting If existing relationships not present in the json parameter should be removed from the repository -
+     *                      will be false for create requests, and true for update and patch requests.
      * @param context The current context
      * @param resourceId The id of the resource these relationships are associated with
-     * @param oldValue A JsonValue map of the old value
+     * @param oldValue A JsonValue map of the old value - will be JsonValue(null) in a create request, and the repo-resident
+     *                 relationship state for a patch and update request.
      * @param json A JsonValue map that contains relationship fields and value(s) to be persisted
      * @param relationshipFields a set of relationship fields to persist
      * @return A {@link JsonValue} map containing each relationship field and its persisted value(s)
@@ -691,8 +693,14 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
                                 ? json(null)
                                 : null;
                 }
-                // Relationships not present in the request will be null
-                // Relationships present in the request but set to null will be JsonValue(null)
+                /*
+                Relationships not present in the request will be null if the value was not present in the oldObject, or JsonValue(null) if
+                the value was present in the oldObject.
+                Relationships present in the request will be set to their request state.
+
+                Note that relationships set to JsonValue(null) will have their repo resident state cleared if clearExisting
+                is true, which is the case for PATCH and UPDATE requests.
+                */
                 if (relationshipValue != null) {
                     RelationshipProvider provider = relationshipProviders.get(relationshipField);
                     persisted.add(provider.setRelationshipValueForResource(clearExisting, context, resourceId,
@@ -817,7 +825,7 @@ class ManagedObjectSet implements CollectionResourceProvider, ScriptListener, Ma
             content.asMap().putAll(strippedRelationshipFields.asMap());
 
             // Persists all relationship fields and place their persisted values in content
-            content.asMap().putAll(persistRelationships(true, managedContext, resourceId, json(null), content,
+            content.asMap().putAll(persistRelationships(false, managedContext, resourceId, json(null), content,
                     relationshipProviders.keySet()).asMap());
 
             // Execute the postCreate script if configured

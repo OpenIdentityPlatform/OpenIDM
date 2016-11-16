@@ -68,9 +68,10 @@ abstract class RelationshipValidator {
      * will assist with further validation.
      *
      * @param relationshipField the field to validate.
+     * @param context the original invocation Context. Needed to query the repo.
      * @return the request needed to test validity.
      */
-    abstract ReadRequest newValidateRequest(JsonValue relationshipField);
+    abstract ReadRequest newValidateRequest(JsonValue relationshipField, Context context);
 
     /**
      * Implement to test the response provided from the read of the relationship.
@@ -114,10 +115,10 @@ abstract class RelationshipValidator {
         }
         try {
             validateSuccessfulReadResponse(context, relationshipField, referrerId, relationshipProvider.getConnection()
-                    .read(context, newValidateRequest(relationshipField)), performDuplicateAssignmentCheck);
+                    .read(context, newValidateRequest(relationshipField, context)), performDuplicateAssignmentCheck);
         } catch (NotFoundException e) {
-            String message = format("The referenced relationship ''{0}'' on ''{1}'', does not exist",
-                    relationshipField.get(REFERENCE_ID).asString(), relationshipField.getPointer());
+            String message = format("The referenced relationship ''{0}'', does not exist",
+                    relationshipField.get(REFERENCE_ID).asString());
             logger.debug(message);
             throw new BadRequestException(message, e);
         }

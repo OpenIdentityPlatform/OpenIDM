@@ -41,10 +41,11 @@ public class ForwardRelationshipValidator extends RelationshipValidator {
     /**
      * Returns the readrequest that will retrieve the relationship field using the _ref id.
      *
-     * @param relationshipField the field to validate/retrieve.
+     * @param relationshipField the field to validate/retrieve
+     * @param context the original invocation Context. Needed to query the repo.
      * @return the constructed read request.
      */
-    protected ReadRequest newValidateRequest(JsonValue relationshipField) {
+    protected ReadRequest newValidateRequest(JsonValue relationshipField, Context context) {
         return Requests.newReadRequest(relationshipField.get(REFERENCE_ID).asString());
     }
 
