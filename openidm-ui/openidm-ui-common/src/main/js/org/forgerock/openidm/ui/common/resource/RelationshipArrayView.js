@@ -257,24 +257,26 @@ define([
                 url = this.getURL(),
                 pager_id = grid_id + '-paginator',
                 RelationshipCollection = AbstractCollection.extend({
-                    url: url,
-                    state: BackgridUtils.getState("_id"),
-                    queryParams: BackgridUtils.getQueryParams({
-                        _queryFilter: 'true',
-                        _fields: ''
-                    }),
-                    model: AbstractModel.extend({
-                        /*
-                            By default AbstractModel sets the idAttribute to "_id".
-                            In this grid the "_id" property is not actually the _id
-                            of the relationship it is the _id of the resource being
-                            displayed. There could be duplicates of this _id if a
-                            relationship is created multiple times on the same resource.
-                            Overriding the "idAttribute" by setting it to use "_refProperties._id"
-                            allows the "duplicates" to be displayed/edited/removed.
-                        */
-                        idAttribute: "_refProperties._id"
-                    })
+                    initialize: function(models, options) {
+                        this.url = url;
+                        this.model = AbstractModel.extend({
+                            /*
+                                By default AbstractModel sets the idAttribute to "_id".
+                                In this grid the "_id" property is not actually the _id
+                                of the relationship it is the _id of the resource being
+                                displayed. There could be duplicates of this _id if a
+                                relationship is created multiple times on the same resource.
+                                Overriding the "idAttribute" by setting it to use "_refProperties._id"
+                                allows the "duplicates" to be displayed/edited/removed.
+                            */
+                            idAttribute: "_refProperties._id"
+                        });
+                        this.state = _.extend({}, this.state, BackgridUtils.getState("_id"));
+                        this.queryParams = _.extend({}, this.queryParams, BackgridUtils.getQueryParams({
+                            _queryFilter: 'true',
+                            _fields: ''
+                        }));
+                    }
                 }),
                 relationshipGrid,
                 paginator;
