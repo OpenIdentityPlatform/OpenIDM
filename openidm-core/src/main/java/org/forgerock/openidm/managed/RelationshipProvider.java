@@ -339,7 +339,7 @@ public abstract class RelationshipProvider {
      * Set the supplied {@link JsonValue} as the current state of this relationship. This will support updating any 
      * existing relationship (_id is present) and remove any relationship not present in the value from the repository.
      *
-     * @param clearExisting If existing (non-present) relationships should be cleared
+     * @param clearExisting If existing relationships not present in the value parameter should be removed from the repository
      * @param context The context of this request
      * @param resourceId Id of the resource relation fields in value are to be memebers of
      * @param value A {@link JsonValue} map of relationship fields and their values

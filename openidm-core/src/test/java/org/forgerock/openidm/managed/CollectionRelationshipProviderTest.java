@@ -93,7 +93,7 @@ public class CollectionRelationshipProviderTest {
         connectionFactory = mock(ConnectionFactory.class);
     }
 
-    @Test
+//    @Test
     public void testValidateFieldOnReverseRelationshipField() throws Exception {
         RootContext context = new RootContext();
         Connection connection = mock(Connection.class);

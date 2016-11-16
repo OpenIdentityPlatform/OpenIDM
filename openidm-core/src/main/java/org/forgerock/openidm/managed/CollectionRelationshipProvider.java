@@ -175,13 +175,13 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                         }
                     }
 
-                    if (!clearExisting) {
+                    if (clearExisting) {
                         // Call get() so we block until they are deleted.
                         clearNotIn(context, resourceId, relationshipsToKeep).getOrThrowUninterruptibly();
                     }
                 } else {
                     // We didn't get any relations to persist. Clear and return empty array.
-                    if (!clearExisting) {
+                    if (clearExisting) {
                         clear(context, resourceId);
                     }
                     return newResultPromise(results);

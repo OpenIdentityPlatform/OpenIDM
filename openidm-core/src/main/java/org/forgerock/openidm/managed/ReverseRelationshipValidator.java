@@ -26,11 +26,14 @@ import static org.forgerock.openidm.managed.RelationshipProvider.REPO_RESOURCE_P
 import java.util.Collection;
 import java.util.LinkedList;
 
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.routing.Version;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.PreconditionFailedException;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
@@ -39,6 +42,7 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,11 +54,36 @@ import org.slf4j.LoggerFactory;
 public class ReverseRelationshipValidator extends RelationshipValidator {
     private static final Logger logger = LoggerFactory.getLogger(ReverseRelationshipValidator.class);
 
-    private final String EDGE_QUERY_ID = "find-relationship-edges";
-    private final String EDGE_QUERY_VERTEX_1_ID = "vertex1Id";
-    private final String EDGE_QUERY_VERTEX_1_FIELD_NAME = "vertex1FieldName";
-    private final String EDGE_QUERY_VERTEX_2_ID = "vertex2Id";
-    private final String EDGE_QUERY_VERTEX_2_FIELD_NAME = "vertex2FieldName";
+    private enum ReverseReferenceType {
+        ARRAY, RELATIONSHIP, NA;
+
+        private static ReverseReferenceType parseReverseReferenceType(JsonValue descriptorResponse, String relationshipPropertyName) {
+            final JsonValue relationshipProperties = descriptorResponse.get(relationshipPropertyName);
+            final JsonValue type = relationshipProperties.get("type");
+            final JsonValue isRelationship = relationshipProperties.get("isRelationship");
+            if ("array".equals(type.asString())) {
+                return ARRAY;
+            } else if ("object".equals(type.asString()) && isRelationship.isBoolean() && isRelationship.asBoolean()) {
+                /*
+                The relationship type is not json-schema-compliant, so the API Descriptor code transforms the
+                relationship type to the object type, adding an isRelationship qualifier when this transformation
+                occurs.
+                 */
+                return RELATIONSHIP;
+            }
+            logger.warn("Could not parse ReverseReferenceType for " + relationshipPropertyName + " from "
+                    + descriptorResponse.toString());
+            return NA;
+        }
+    };
+
+    private static final String EDGE_QUERY_ID = "find-relationship-edges";
+    private static final String EDGE_QUERY_VERTEX_1_ID = "vertex1Id";
+    private static final String EDGE_QUERY_VERTEX_1_FIELD_NAME = "vertex1FieldName";
+    private static final String EDGE_QUERY_VERTEX_2_ID = "vertex2Id";
+    private static final String EDGE_QUERY_VERTEX_2_FIELD_NAME = "vertex2FieldName";
+
+    private static final Version IDM_VERSION = Version.version("0.0");
 
     private final boolean relationshipIsArray;
     private final String relationshipPropertyName;
@@ -84,9 +113,10 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
      * @param relationshipField the field to validate.
      * @return the request to invoke for validation.
      */
-    protected ReadRequest newValidateRequest(JsonValue relationshipField) {
-        final ReadRequest request = Requests.newReadRequest(relationshipField.get(REFERENCE_ID).asString());
-        if (!relationshipIsArray) {
+    protected ReadRequest newValidateRequest(JsonValue relationshipField, Context context) {
+        final String relationshipRef = relationshipField.get(REFERENCE_ID).asString();
+        final ReadRequest request = Requests.newReadRequest(relationshipRef);
+        if (reverseReferenceIsSingleton(relationshipRef, context)) {
             request.addField(relationshipReversePropertyName);
         }
         return request;
@@ -113,17 +143,27 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
      */
     protected void validateSuccessfulReadResponse(Context context, JsonValue relationshipField, ResourcePath referrerId,
               ResourceResponse resourceResponse, boolean performDuplicateAssignmentCheck) throws ResourceException {
-        if (performDuplicateAssignmentCheck) {
-            if (relationshipIsArray) {
-                validateCollectionRelationshipReadResponse(context, relationshipField, referrerId);
-            } else {
-                validateSingletonRelationshipReadResponse(resourceResponse);
-            }
+        final ReverseReferenceType reverseReferenceType =
+                getReverseReferenceType(relationshipField.get(REFERENCE_ID).asString(), context);
+        if (performDuplicateAssignmentCheck && relationshipIsArray && (ReverseReferenceType.ARRAY == reverseReferenceType)) {
+            /*
+            Run the edge query iff we are in a many-to-many relationship, and we want to perform the duplicate assignment check.
+             */
+            validateCollectionRelationshipReadResponse(context, relationshipField, referrerId);
+        } else if (ReverseReferenceType.RELATIONSHIP == reverseReferenceType) {
+            validateSingletonRelationshipReadResponse(resourceResponse, referrerId);
         }
+        /*
+        Note that no additional validation is performed for one-to-many relationships, other than a successful read of
+        the referred-to entity, which will have occurred when the current method is invoked. Rationale:
+        For a CREATE, this relationship is being established, so validation is complete if the referred-to object exists.
+        For UPDATE and PATCH requests, request relationship state will over-write repo relationship state, so again,
+        no validation appears necessary other than checking the existence of the referred-to object.
+         */
     }
 
     private void validateCollectionRelationshipReadResponse(Context context, JsonValue relationshipField, ResourcePath referrerId)
-        throws ResourceException {
+            throws ResourceException {
 
         final Collection<ResourceResponse> repoRelationshipEdgesResponse =
                 readRelationshipEndpointEdges(context, relationshipField, referrerId);
@@ -201,15 +241,80 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
         }
     }
 
-    private void validateSingletonRelationshipReadResponse(ResourceResponse resourceResponse) throws PreconditionFailedException {
+    /**
+     *
+     * @param resourceResponse the relationship field corresponding to the referenced vertex, which points back at the
+     *                         relationshipField - i.e. the state of the relationshipReversePropertyName of the referenced vertex
+     * @param referrerId the id of the referrer - the vertex originating the reference
+     * @throws BadRequestException if the relationship field of the referenced vertex is not null, and the value of the
+     * _ref of this relationship does not equal the referrerId. Equal values indicate that
+     * this relationship already exists; differing values indicate that the current invocation would create two
+     * relationships issuing from a singleton relationship. This equality check must be made because all invocation types,
+     * including create and update, will validate referenced singleton relationships, and we don't want an update to fail
+     * because the request state matches repo state because, for update requests, request reference state will
+     * replace existing repo reference state. Note that this is not the case for a create, but the situation in which
+     * the referred-to vertex matches the referrerId would never occur in a create, as the managed object identified by the
+     * referrerId is being created in this request, and thus could not pre-exist it.
+     *
+     */
+    private void validateSingletonRelationshipReadResponse(ResourceResponse resourceResponse, ResourcePath referrerId) throws BadRequestException {
         JsonValue reversePropertyState = resourceResponse.getContent().get(relationshipReversePropertyName);
-        if (!reversePropertyState.isCollection() && reversePropertyState.isNotNull()) {
-            throw new DuplicateRelationshipException(format(
-                    "In relationship endpoint ''{0}'', field ''{1}'' of managed object ''{2}'' is neither null nor a collection, " +
-                            "and thus not available for assignment.",
-                    getRelationshipProvider().resourceContainer.toString() + "/" + getRelationshipProvider().schemaField.getName(),
-                    getRelationshipProvider().schemaField.getReversePropertyName(),
-                    resourceResponse.getId()));
+        if (reversePropertyState.isNotNull() &&
+                !referrerId.toString().equals(reversePropertyState.get(REFERENCE_ID).asString())) {
+            throw new BadRequestException(format(
+                    "Field ''{0}'' of managed object ''{1}'' is not null, and thus not available for assignment.",
+                    relationshipReversePropertyName, resourceResponse.getId()));
         }
+    }
+
+    private ReverseReferenceType getReverseReferenceType(String relationshipRef, Context context) {
+        /*
+        Many to-be-validated relationship refs look like repo/internal/openidm-authorized. The 5.0 release only has
+        API descriptor support for managed/, and these are thus the only entities for which the type of the reverse
+        relationship ref is provided. Performing a ApiRequest against other endpoints generates an internal server error.
+        Because this method is called as part of the validation of every single relationship, I only want to disptach the
+        request if there is an expectation of its satisfaction.
+         */
+        if (relationshipRef.startsWith("managed/")) {
+            final EventEntry measure = Publisher.start(
+                    Name.get("openidm/internal/reverseRelationshipValidator/getReverseReferenceType"), null, null);
+            try {
+                final Connection connection = getRelationshipProvider().getConnection();
+                if (connection instanceof Describable) {
+                    final ApiDescription description = ((Describable<ApiDescription, Request>) connection).handleApiRequest(
+                            context, Requests.newApiRequest(getRelationshipRefResourcePath(relationshipRef)));
+                    return ReverseReferenceType.parseReverseReferenceType(parsePropertiesFromAPIDescription(description),
+                            relationshipReversePropertyName);
+                } else {
+                    logger.warn("Connection not Describable - cannot make API Request on relationship ref " + relationshipRef);
+                    return ReverseReferenceType.NA;
+                }
+            } catch (Exception e) {
+                logger.warn("Exception caught determining reverse reference type. This means duplicate assignment and " +
+                        "cardinality checks cannot be performed", e);
+                return ReverseReferenceType.NA;
+            } finally {
+                measure.end();
+            }
+        }
+        return ReverseReferenceType.NA;
+    }
+
+    private ResourcePath getRelationshipRefResourcePath(String relationshipRef) {
+        final ResourcePath fullPath = ResourcePath.valueOf(relationshipRef);
+        return fullPath.head(fullPath.size() - 1);
+    }
+
+    private boolean reverseReferenceIsSingleton(String relationshipRef, Context context) {
+        return ReverseReferenceType.RELATIONSHIP == getReverseReferenceType(relationshipRef, context);
+    }
+
+    /*
+    A bit ugly, but necessary to get at the properites for managed. The first get("") is
+    not understood, but JamesP speculated that it was due to the fact that IDM does not
+    version its endpoints.
+     */
+    private JsonValue parsePropertiesFromAPIDescription(ApiDescription description) {
+        return description.getPaths().get("").get(IDM_VERSION).getResourceSchema().getSchema().get("properties");
     }
 }
