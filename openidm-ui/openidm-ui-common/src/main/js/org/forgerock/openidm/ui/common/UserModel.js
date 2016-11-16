@@ -125,7 +125,7 @@ define([
             headers[Constants.HEADER_PARAM_PASSWORD] = password;
             headers[Constants.HEADER_PARAM_NO_SESSION] = false;
 
-            return this.getProfile(headers);
+            return this.logout().then(() => this.getProfile(headers));
         },
         tokenLogin: function (authToken, provider) {
             var headers = {};
@@ -136,10 +136,12 @@ define([
             headers[Constants.HEADER_PARAM_AUTH_PROVIDER] = provider;
             headers[Constants.HEADER_PARAM_NO_SESSION] = false;
 
-            if (provider === "OPENAM") {
-                sessionStorage.setItem("authDetails", JSON.stringify({authToken,provider}));
-            }
-            return this.getProfile(headers);
+            return this.logout().then(() => {
+                if (provider === "OPENAM") {
+                    sessionStorage.setItem("authDetails", JSON.stringify({authToken,provider}));
+                }
+                return this.getProfile(headers);
+            });
         },
         /**
          * Updates a header map to include AUTH TOKEN and PROVIDER values from a separate map
@@ -162,18 +164,14 @@ define([
             return updatedHeaders;
         },
         logout: function () {
-            if (this.id) {
-                return this.invalidateSession().then(() => {
-                    sessionStorage.removeItem("authDetails");
-                    ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
-                        ServiceInvoker.configuration.defaultHeaders || {},
-                        null
-                    );
-                    return this.logoutUrl;
-                });
-            } else {
-                return $.Deferred().resolve();
-            }
+            return this.invalidateSession().then(() => {
+                sessionStorage.removeItem("authDetails");
+                ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
+                    ServiceInvoker.configuration.defaultHeaders || {},
+                    null
+                );
+                return this.logoutUrl;
+            });
         },
         getProfile: function (headers) {
             ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
