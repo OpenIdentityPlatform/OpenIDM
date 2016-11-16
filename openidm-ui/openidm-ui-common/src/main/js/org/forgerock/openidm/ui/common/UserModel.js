@@ -20,10 +20,13 @@ define([
     "org/forgerock/commons/ui/common/main/AbstractModel",
     "org/forgerock/commons/ui/common/main/Configuration",
     "org/forgerock/commons/ui/common/util/Constants",
-    "org/forgerock/commons/ui/common/main/EventManager",
-    "org/forgerock/commons/ui/common/main/ServiceInvoker"
-], function ($, _, AbstractModel, Configuration, Constants, EventManager, ServiceInvoker) {
-    var UserModel = AbstractModel.extend({
+    "org/forgerock/commons/ui/common/main/EventManager"
+], function ($, _, AbstractModel, Configuration, Constants, EventManager) {
+    var sessionStorageTarget = (opener || window).sessionStorage,
+        ServiceInvokerTarget = (opener || window).require("org/forgerock/commons/ui/common/main/ServiceInvoker"),
+        UserModel;
+
+    UserModel = AbstractModel.extend({
         protectedAttributeList: [],
         sync: function (method, model, options) {
             var headers = {};
@@ -108,7 +111,7 @@ define([
         },
         invalidateSession: function () {
             var promise = new $.Deferred();
-            ServiceInvoker.restCall({
+            ServiceInvokerTarget.restCall({
                 "url": "/" + Constants.context + "/authentication?_action=logout",
                 "type" : "POST",
                 "errorsHandlers": {
@@ -138,7 +141,7 @@ define([
 
             return this.logout().then(() => {
                 if (provider === "OPENAM") {
-                    sessionStorage.setItem("authDetails", JSON.stringify({authToken,provider}));
+                    sessionStorageTarget.setItem("authDetails", JSON.stringify({authToken,provider}));
                 }
                 return this.getProfile(headers);
             });
@@ -153,10 +156,10 @@ define([
         setAuthTokenHeaders: (currentHeaders, authDetails) => {
             let updatedHeaders = _.cloneDeep(currentHeaders);
             if (authDetails) {
-                updatedHeaders = _.extend({
+                updatedHeaders = _.extend(updatedHeaders, {
                     [Constants.HEADER_PARAM_AUTH_TOKEN] : authDetails.authToken,
                     [Constants.HEADER_PARAM_AUTH_PROVIDER] : authDetails.provider
-                }, updatedHeaders);
+                });
             } else {
                 delete updatedHeaders[Constants.HEADER_PARAM_AUTH_TOKEN];
                 delete updatedHeaders[Constants.HEADER_PARAM_AUTH_PROVIDER];
@@ -165,21 +168,21 @@ define([
         },
         logout: function () {
             return this.invalidateSession().then(() => {
-                sessionStorage.removeItem("authDetails");
-                ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
-                    ServiceInvoker.configuration.defaultHeaders || {},
+                sessionStorageTarget.removeItem("authDetails");
+                ServiceInvokerTarget.configuration.defaultHeaders = this.setAuthTokenHeaders(
+                    ServiceInvokerTarget.configuration.defaultHeaders || {},
                     null
                 );
                 return this.logoutUrl;
             });
         },
         getProfile: function (headers) {
-            ServiceInvoker.configuration.defaultHeaders = this.setAuthTokenHeaders(
-                ServiceInvoker.configuration.defaultHeaders || {},
-                JSON.parse(sessionStorage.getItem("authDetails"))
+            ServiceInvokerTarget.configuration.defaultHeaders = this.setAuthTokenHeaders(
+                ServiceInvokerTarget.configuration.defaultHeaders || {},
+                JSON.parse(sessionStorageTarget.getItem("authDetails"))
             );
 
-            return ServiceInvoker.restCall({
+            return ServiceInvokerTarget.restCall({
                 "url": "/" + Constants.context + "/info/login",
                 "type" : "GET",
                 "headers": headers || {},
@@ -230,7 +233,7 @@ define([
         },
 
         bindProvider: function (provider, code, nonce, redirect_uri) {
-            return ServiceInvoker.restCall({
+            return ServiceInvokerTarget.restCall({
                 "type": "POST",
                 "url": this.url + "/" + this.id +"?_action=bind&" +
                 $.param({
@@ -246,7 +249,7 @@ define([
         },
 
         unbindProvider: function (provider) {
-            return ServiceInvoker.restCall({
+            return ServiceInvokerTarget.restCall({
                 "type": "POST",
                 "url": this.url + "/" + this.id + "?_action=unbind&" +
                 $.param({
