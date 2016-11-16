@@ -114,6 +114,7 @@
                 <exclude>data/Example.ldif</exclude>
                 <exclude>data/xmlConnectorData.xml</exclude>
                 <exclude>data/resource-schema-extension.xsd</exclude>
+                <exclude>data/resource-schema-1.xsd</exclude>
                 <exclude>conf/*patch*</exclude>
             </excludes>
             <outputDirectory>/openidm/samples/getting-started</outputDirectory>
