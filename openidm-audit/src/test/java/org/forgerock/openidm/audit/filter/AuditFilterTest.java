@@ -95,7 +95,7 @@ public class AuditFilterTest {
 
         try {
             AuditFilter filter = new AuditFilter();
-            filter.bindConnectionFactory(connectionFactory);
+            filter.connectionFactory = connectionFactory;
             filter.logAuditAccessEntry(context, request,
                     new AsyncFunction<Void, Response, ResourceException>() {
                         @Override
@@ -119,7 +119,7 @@ public class AuditFilterTest {
         when(connectionFactory.getConnection()).thenThrow(new BadRequestException());
 
         AuditFilter filter = new AuditFilter();
-        filter.bindConnectionFactory(connectionFactory);
+        filter.connectionFactory = connectionFactory;
         filter.logAuditAccessEntry(context, request,
                 new AsyncFunction<Void, Response, ResourceException>() {
                     @Override
@@ -150,7 +150,7 @@ public class AuditFilterTest {
         when(request.getRequestType()).thenReturn(RequestType.READ);
 
         AuditFilter filter = new AuditFilter();
-        filter.bindConnectionFactory(connectionFactory);
+        filter.connectionFactory = connectionFactory;
         filter.logAuditAccessEntry(context, request,
                 new AsyncFunction<Void, Response, ResourceException>() {
                     @Override
