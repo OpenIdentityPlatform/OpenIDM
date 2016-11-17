@@ -127,7 +127,7 @@ class ManagedObjectApiDescription {
                         }
 
                         // prefix sub-resource title with parent resource title
-                        final String subresourceTitle = resourceTitle + ": " +
+                        final String subresourceTitle = resourceTitle + " - " +
                                 (isNullOrEmpty(relationshipSchema.get("title").asString())
                                         ? pointer.leaf()
                                         : relationshipSchema.get("title").asString());
