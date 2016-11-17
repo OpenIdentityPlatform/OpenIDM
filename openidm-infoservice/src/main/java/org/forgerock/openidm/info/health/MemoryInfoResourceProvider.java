@@ -11,9 +11,8 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
-
 package org.forgerock.openidm.info.health;
 
 import static org.forgerock.json.JsonValue.field;
@@ -21,6 +20,13 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
+import org.forgerock.openidm.info.health.api.MemoryInfoResource;
+import org.forgerock.openidm.info.health.api.OsInfoResource;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
@@ -34,7 +40,15 @@ import java.lang.management.MemoryMXBean;
 /**
  * Gets Memory usage data from the {@link java.lang.management.MemoryMXBean MemoryMXBean}.
  */
+@SingletonProvider(@Handler(
+        id = "memoryInfoResourceProvider:0",
+        title = "Health - JVM Memory",
+        description = "Memory statistics for the local Java Virtual Machine.",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = MemoryInfoResource.class)))
 public class MemoryInfoResourceProvider extends AbstractInfoResourceProvider {
+
+    @Read(operationDescription = @Operation(description = "Responds with JVM Memory Information."))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         final MemoryMXBean memoryMXBean = ManagementFactory.getMemoryMXBean();

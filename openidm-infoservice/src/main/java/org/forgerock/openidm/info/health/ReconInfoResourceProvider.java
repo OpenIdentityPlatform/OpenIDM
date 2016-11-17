@@ -11,9 +11,8 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
-
 package org.forgerock.openidm.info.health;
 
 import static org.forgerock.json.JsonValue.field;
@@ -21,8 +20,15 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.openidm.info.health.api.OsInfoResource;
+import org.forgerock.openidm.info.health.api.ReconInfoResource;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.resource.InternalServerErrorException;
 import org.forgerock.json.resource.ResourceException;
@@ -38,10 +44,17 @@ import java.lang.management.ManagementFactory;
 /**
  * Gets Recon Health Info.
  */
+@SingletonProvider(@Handler(
+        id = "reconInfoResourceProvider:0",
+        title = "Health - Thread pool statistics for the Reconciliation process",
+        description = "Returns the thread pool statistics of the Reconciliation process.",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = ReconInfoResource.class)))
 public class ReconInfoResourceProvider extends AbstractInfoResourceProvider {
 
-    final static Logger logger = LoggerFactory.getLogger(ReconInfoResourceProvider.class);
+    private final static Logger logger = LoggerFactory.getLogger(ReconInfoResourceProvider.class);
 
+    @Read(operationDescription = @Operation(description = "Read recon thread pool statistics."))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         try {

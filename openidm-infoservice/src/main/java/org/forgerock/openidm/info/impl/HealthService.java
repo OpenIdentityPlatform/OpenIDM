@@ -32,6 +32,8 @@ import org.apache.felix.scr.annotations.Deactivate;
 import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -42,6 +44,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
@@ -60,6 +63,7 @@ import org.forgerock.openidm.info.health.ReconInfoResourceProvider;
 import org.forgerock.openidm.osgi.ServiceTrackerListener;
 import org.forgerock.openidm.osgi.ServiceTrackerNotifier;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -88,7 +92,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/health/*")})
 @Service(value = { HealthInfo.class, RequestHandler.class })
 public class HealthService
-        implements HealthInfo, ClusterEventListener,
+        implements HealthInfo, ClusterEventListener, Describable<ApiDescription, Request>,
                 ServiceTrackerListener<ClusterManagementService, ClusterManagementService>, RequestHandler {
 
     public static final String PID = "org.forgerock.openidm.health";
@@ -804,4 +808,23 @@ public class HealthService
         return router.handleUpdate(context, request);
     }
 
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> apiProducer) {
+        return router.api(apiProducer);
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return router.handleApiRequest(context,request);
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        router.addDescriptorListener(listener);
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        router.removeDescriptorListener(listener);
+    }
 }
