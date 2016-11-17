@@ -36,6 +36,11 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.guava.common.net.MediaType;
 import org.forgerock.http.Client;
 import org.forgerock.http.HttpApplicationException;
@@ -63,6 +68,8 @@ import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.external.rest.api.CallActionRequest;
+import org.forgerock.openidm.external.rest.api.CallActionResponse;
 import org.forgerock.openidm.external.ExternalException;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.services.context.Context;
@@ -79,6 +86,11 @@ import org.slf4j.LoggerFactory;
 /**
  * Service that acts as a HTTP client proxy to external REST services.
  */
+@SingletonProvider(@Handler(
+        id = "restService:0",
+        title = "External REST",
+        description = "Service that acts as a HTTP client proxy to external REST services.",
+        mvccSupported = false))
 @Component(name = RestService.PID, immediate = true, policy = ConfigurationPolicy.IGNORE)
 @Service
 @Properties({
@@ -243,6 +255,21 @@ public class RestService implements SingletonResourceProvider {
      * @param actionRequest Action request
      * @return Action response
      */
+    @org.forgerock.api.annotations.Action(operationDescription =
+    @Operation(
+            description = "Connects to external REST endpoint. If the response is application/json, "
+                    + "then it will be passed through unchanged, otherwise it will be wrapped in a JSON response. "
+                    + "HTTP error status code headers, from an external endpoint, will also be passed "
+                    + "through in the response.",
+            errors = {
+                    @ApiError(
+                            id = "badRequest",
+                            code = 400,
+                            description = "Request could not be understood by the resource due to malformed syntax.")
+            }),
+            name = "call",
+            request = @Schema(fromType = CallActionRequest.class),
+            response = @Schema(fromType = CallActionResponse.class))
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(
             final Context context, final ActionRequest actionRequest) {
