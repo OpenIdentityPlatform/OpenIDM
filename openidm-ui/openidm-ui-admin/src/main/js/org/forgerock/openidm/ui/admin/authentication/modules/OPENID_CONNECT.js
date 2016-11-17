@@ -45,8 +45,12 @@ define([
                     // Tests will fail with es6 template strings, so until grunt is updated to run babel prior to qunit we cannot make use of them.
                     // this.$el.find(`[name='properties.resolvers[].${k}']`).val(config[k]);
                     this.$el.find("[name='properties.resolvers[]."+k+"']").val(config[k]);
-
                 });
+
+                $("#submitAuth").prop("disabled", false);
+            },
+            () => {
+                $("#submitAuth").prop("disabled", true);
             });
         },
 
@@ -86,7 +90,16 @@ define([
             this.data.customProperties = this.getCustomPropertiesList(this.knownProperties, this.data.config.properties || {});
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
 
+            ExternalAccessDelegate.externalRestRequest(this.$el.find("input[name='properties.resolvers[].well-known']").val()).then((config) => {
+                this.renderTemplate();
+            },
+            () => {
+                this.renderTemplate();
+                $("#submitAuth").prop("disabled", true);
+            });
+        },
 
+        renderTemplate: function() {
             this.parentRender(() => {
                 this.postRenderComponents({
                     "customProperties": this.data.customProperties,
