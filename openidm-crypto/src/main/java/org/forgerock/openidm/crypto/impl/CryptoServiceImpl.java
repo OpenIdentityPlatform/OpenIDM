@@ -46,13 +46,11 @@ import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoConstants;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.crypto.FieldStorageScheme;
-import org.forgerock.openidm.crypto.KeyRepresentation;
 import org.forgerock.openidm.crypto.SaltedMD5FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA1FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA256FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA384FieldStorageScheme;
 import org.forgerock.openidm.crypto.SaltedSHA512FieldStorageScheme;
-import org.forgerock.openidm.crypto.SharedKeyService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.util.Function;
@@ -69,18 +67,18 @@ import org.slf4j.LoggerFactory;
         immediate = true,
         policy = ConfigurationPolicy.OPTIONAL
 )
+@Service
 @Properties({
         @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM cryptography service"),
         @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME)
 })
-@Service({ CryptoService.class, SharedKeyService.class })
-public class CryptoServiceImpl implements CryptoService, SharedKeyService {
+public class CryptoServiceImpl implements CryptoService {
 
     private final static Logger logger = LoggerFactory.getLogger(CryptoServiceImpl.class);
     private Function<JsonValue, JsonValue, JsonValueException> decryptionFunction = identity();
     private SimpleKeySelector keySelector;
 
-    @Reference(target="(service.pid=org.forgerock.openidm.impl.keystore)")
+    @Reference(target="(service.pid=org.forgerock.openidm.keystore)")
     private KeyStoreService keyStoreService;
 
     /**
@@ -269,12 +267,6 @@ public class CryptoServiceImpl implements CryptoService, SharedKeyService {
             return fieldStorageScheme.fieldMatches(plainTextValue, cryptoValue.get("data").asString());
         }
         return false;
-    }
-
-    @Override
-    public JsonValue getSharedKey(String alias) throws Exception {
-        Key key = keySelector.select(alias);
-        return KeyRepresentation.toJsonValue(alias, key);
     }
 
 }

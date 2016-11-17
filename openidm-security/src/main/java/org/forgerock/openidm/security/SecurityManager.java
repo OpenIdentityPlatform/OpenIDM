@@ -85,10 +85,10 @@ public class SecurityManager implements RequestHandler {
     @Reference
     private CryptoService cryptoService;
 
-    @Reference(target="(service.pid=org.forgerock.openidm.impl.keystore)")
+    @Reference(target="(service.pid=org.forgerock.openidm.keystore)")
     private KeyStoreService keyStore;
 
-    @Reference(target="(service.pid=org.forgerock.openidm.impl.truststore)")
+    @Reference(target="(service.pid=org.forgerock.openidm.truststore)")
     private KeyStoreService trustStore;
 
     @Reference

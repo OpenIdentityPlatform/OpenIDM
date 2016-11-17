@@ -28,6 +28,7 @@ import static org.forgerock.openidm.idp.impl.IdentityProviderService.withoutClie
 
 import javax.inject.Provider;
 import java.io.UnsupportedEncodingException;
+import java.security.Key;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -83,7 +84,7 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
-import org.forgerock.openidm.crypto.SharedKeyService;
+import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
@@ -98,6 +99,7 @@ import org.forgerock.services.context.AttributesContext;
 import org.forgerock.services.context.Context;
 import org.forgerock.services.context.SecurityContext;
 import org.forgerock.util.Options;
+import org.forgerock.util.encode.Base64;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -179,9 +181,6 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
 
     private static final String SOCIAL_PROVIDERS = "SOCIAL_PROVIDERS";
     private static final String MANAGED = "managed";
-
-    /** the encoded key location in the return value from {@link SharedKeyService#getSharedKey(String)} */
-    private static final JsonPointer ENCODED_SECRET_PTR = new JsonPointer("/secret/encoded");
 
     /**
      * Configuration as it is represented in the authentication.json file.
@@ -549,13 +548,11 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
         if (sessionConfig.get(AUTH_MODULE_PROPERTIES_KEY).get(JwtSessionModule.HMAC_SIGNING_KEY).isNull()) {
             try {
                 // amend session config to include the hmac key stored in the keystore
-                String signingKey = sharedKeyService.getSharedKey(
+                final Key key = sharedKeyService.getSharedKey(
                         IdentityServer.getInstance().getProperty(
                                 ServerConstants.JWTSESSION_SIGNING_KEY_ALIAS_PROPERTY,
-                                ServerConstants.DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS))
-                        .get(ENCODED_SECRET_PTR)
-                        .required()
-                        .asString();
+                                ServerConstants.DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS));
+                final String signingKey = Base64.encode(key.getEncoded());
                 sessionConfig.get(AUTH_MODULE_PROPERTIES_KEY).put(JwtSessionModule.HMAC_SIGNING_KEY, signingKey);
             } catch (Exception e) {
                 throw new AuthenticationException("Cannot read hmac signing key", e);

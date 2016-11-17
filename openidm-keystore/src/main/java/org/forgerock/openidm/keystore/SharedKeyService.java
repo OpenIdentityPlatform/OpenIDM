@@ -13,9 +13,12 @@
  *
  * Copyright 2016 ForgeRock AS
  */
-package org.forgerock.openidm.crypto;
+package org.forgerock.openidm.keystore;
 
-import org.forgerock.json.JsonValue;
+import java.security.Key;
+import java.security.KeyPair;
+
+import org.forgerock.json.crypto.JsonCryptoException;
 
 /**
  * A service interface for obtaining shared keys directly from the Keystore.
@@ -23,9 +26,19 @@ import org.forgerock.json.JsonValue;
 public interface SharedKeyService {
     /**
      * Retrieve the shared key stored in the keystore by <em>alias</em>.
+     *
      * @param alias the key alias
-     * @return a JsonValue map of the key details.
+     * @return the Key
      * @throws Exception
      */
-    JsonValue getSharedKey(String alias) throws Exception;
+    Key getSharedKey(String alias) throws Exception;
+
+    /**
+     * Retrieve the KeyPair from the keystore byt the denoted <em>alias</em>.
+     *
+     * @param alias the keypair alias
+     * @return the KeyPair
+     * @throws JsonCryptoException
+     */
+    KeyPair getKeyPair(String alias) throws JsonCryptoException;
 }

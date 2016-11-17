@@ -55,9 +55,9 @@ import org.slf4j.LoggerFactory;
  * Implements a service which contains access to the openidm keystore.
  */
 public class KeyStoreServiceImpl extends AbstractKeyStoreService {
+    static final String PID = "org.forgerock.openidm.keystore";
 
     private static final Logger logger = LoggerFactory.getLogger(KeyStoreServiceImpl.class);
-    static final String PID = "org.forgerock.openidm.impl.keystore";
 
     /**
      * Constructs a {@link KeyStoreServiceImpl} and sets the keystore java system properties.

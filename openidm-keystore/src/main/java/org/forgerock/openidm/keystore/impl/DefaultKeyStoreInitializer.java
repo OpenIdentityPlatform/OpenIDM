@@ -17,6 +17,7 @@ package org.forgerock.openidm.keystore.impl;
 
 import static org.forgerock.openidm.core.IdentityServer.CONFIG_CRYPTO_ALIAS;
 import static org.forgerock.openidm.core.IdentityServer.CONFIG_CRYPTO_ALIAS_SELF_SERVICE;
+import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_CERT_ALIAS;
 import static org.forgerock.security.keystore.KeyStoreType.PKCS11;
 
 import java.io.FileNotFoundException;
@@ -96,6 +97,27 @@ class DefaultKeyStoreInitializer implements KeyStoreInitializer {
                 }
             }
         }
+
+        // self-service certificate handling to facilitate JwtTokenHandler keypair
+        try {
+            final Certificate selfserviceCert = keyStore.getCertificate(SELF_SERVICE_CERT_ALIAS);
+            if (selfserviceCert == null) {
+                // initialize self-service certificate
+                final Pair<X509Certificate, PrivateKey> pair = CertUtil.generateCertificate(SELF_SERVICE_CERT_ALIAS,
+                        "OpenIDM Self Service Certificate", "None", "None", "None", "None",
+                        DEFAULT_ALGORITHM, DEFAULT_KEY_SIZE, DEFAULT_SIGNATURE_ALGORITHM, null, null);
+                final Certificate cert = pair.getKey();
+                final PrivateKey key = pair.getValue();
+                keyStore.setCertificateEntry(SELF_SERVICE_CERT_ALIAS, cert);
+                keyStore.setKeyEntry(SELF_SERVICE_CERT_ALIAS, key, keyStoreDetails.getPassword().toCharArray(),
+                        new Certificate[] { cert });
+                writeKeyStore(keyStore, keyStoreDetails.getFilename(), keyStoreDetails.getPassword().toCharArray());
+            }
+        } catch (Exception e) {
+            logger.error("Unable to create self-service certificate", e);
+            throw new GeneralSecurityException(e.getMessage(), e);
+        }
+
         return keyStore;
     }
 
@@ -151,6 +173,19 @@ class DefaultKeyStoreInitializer implements KeyStoreInitializer {
             final String algorithm) throws IOException, GeneralSecurityException {
         SecretKey newKey = KeyGenerator.getInstance(algorithm).generateKey();
         ks.setEntry(alias, new KeyStore.SecretKeyEntry(newKey), new KeyStore.PasswordProtection(password));
+        writeKeyStore(ks, location, password);
+    }
+
+    /**
+     * Write [file-based] keystore to filesystem.
+     * @param ks the keystore
+     * @param location the keystore location
+     * @param password the keystore password
+     * @throws IOException if unable to open the keystore location
+     * @throws GeneralSecurityException if unable to write keystore
+     */
+    private void writeKeyStore(final KeyStore ks, final String location, final char[] password)
+            throws IOException, GeneralSecurityException {
         try (final OutputStream out = new FileOutputStream(location)) {
             ks.store(out, password);
         }
