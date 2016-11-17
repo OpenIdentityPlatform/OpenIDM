@@ -220,7 +220,7 @@ public final class ServerConstants {
     public static final String ROUTER_PREFIX = "openidm.router.prefix";
 
     /**
-     * The "external" router/ConnectionFactory serivce PID.
+     * The "external" router/ConnectionFactory service PID.
      */
     public static final String EXTERNAL_ROUTER_SERVICE_PID = "org.forgerock.openidm.router.servlet";
 
