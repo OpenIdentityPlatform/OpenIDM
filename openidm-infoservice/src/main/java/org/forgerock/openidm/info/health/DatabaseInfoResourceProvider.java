@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.info.health;
@@ -21,40 +21,62 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
-import org.forgerock.services.context.Context;
-import org.forgerock.json.JsonValue;
-import org.forgerock.json.resource.InternalServerErrorException;
-import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.ResourceException;
-import org.forgerock.json.resource.ResourceResponse;
-import org.forgerock.openidm.core.IdentityServer;
-import org.forgerock.util.promise.Promise;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
 import java.lang.management.ManagementFactory;
 import java.util.HashMap;
 import java.util.Set;
 
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
+import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourceResponse;
+import org.forgerock.json.resource.ServiceUnavailableException;
+import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.openidm.info.health.api.BoneCPDatabaseInfoResource;
+import org.forgerock.services.context.Context;
+import org.forgerock.util.promise.Promise;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Gets BoneCP usage statistics from the {@link com.jolbox.bonecp.StatisticsMBean StatisticsMBean}.
  */
+@SingletonProvider(@Handler(
+        id = "databaseInfoResourceProvider:0",
+        title = "Health - Database connection pool statistics",
+        description = "Provides database connection pool statistics if enabled. Presently only supports statistics " +
+                "gathering if using BoneCP.",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = BoneCPDatabaseInfoResource.class)))
 public class DatabaseInfoResourceProvider extends AbstractInfoResourceProvider {
 
     private static final Logger logger = LoggerFactory.getLogger(DatabaseInfoResourceProvider.class);
 
-    /**
-     * {@inheritDoc}
-     */
+    @Read(operationDescription =
+    @Operation(
+            description = "Read BoneCP DB connection pool statistics.",
+            errors = {
+                    @ApiError(
+                            id="notSupported",
+                            code=ResourceException.UNAVAILABLE,
+                            description = "If BoneCP is not configured as the data source connection pool."
+                    )
+            }))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
 
         Boolean enabled = Boolean.parseBoolean(
                 IdentityServer.getInstance().getProperty("openidm.bonecp.statistics.enabled", "false"));
         if (!enabled) {
-            return new InternalServerErrorException("BoneCP statistics mbean not enabled").asPromise();
+            return new ServiceUnavailableException("BoneCP statistics mbean not enabled").asPromise();
         }
         try {
             final ObjectName objectName = new ObjectName("com.jolbox.bonecp:type=BoneCP-*");

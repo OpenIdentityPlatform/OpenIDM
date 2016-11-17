@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2015 ForgeRock AS.
+ * Copyright 2015-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.info.health;
@@ -21,6 +21,12 @@ import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
+import org.forgerock.openidm.info.health.api.OsInfoResource;
 import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ReadRequest;
@@ -35,10 +41,15 @@ import java.lang.management.OperatingSystemMXBean;
 /**
  * Gets Operating System data from the {@link java.lang.management.OperatingSystemMXBean OperatingSystemMXBean}.
  */
+@SingletonProvider(@Handler(
+        id = "osInfoResourceProvider:0",
+        title = "Health - CPU and Operating System information",
+        description = "Returns read-only data from the OperatingSystemMXBean",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = OsInfoResource.class)))
 public class OsInfoResourceProvider extends AbstractInfoResourceProvider {
-    /**
-     * {@inheritDoc}
-     */
+
+    @Read(operationDescription = @Operation(description = "Read Operating System Information"))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         final OperatingSystemMXBean operatingSystemMXBean = ManagementFactory.getOperatingSystemMXBean();
