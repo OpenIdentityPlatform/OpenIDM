@@ -17,11 +17,12 @@ package org.forgerock.openidm.selfservice.impl;
 
 import static org.forgerock.http.handler.HttpClientHandler.OPTION_LOADER;
 import static org.forgerock.json.resource.ResourcePath.resourcePath;
+import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_CERT_ALIAS;
 import static org.forgerock.openidm.idp.impl.ProviderConfigMapper.providerEnabled;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.security.KeyPairGenerator;
+import java.security.Key;
 import java.util.Collections;
 import java.util.Dictionary;
 import java.util.HashMap;
@@ -43,7 +44,6 @@ import org.forgerock.http.HttpApplicationException;
 import org.forgerock.http.apache.async.AsyncHttpClientProvider;
 import org.forgerock.http.handler.HttpClientHandler;
 import org.forgerock.http.spi.Loader;
-import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.jose.jws.SigningManager;
 import org.forgerock.json.jose.jws.handlers.SigningHandler;
@@ -53,7 +53,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.crypto.SharedKeyService;
+import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.idp.impl.IdentityProviderListener;
 import org.forgerock.openidm.idp.impl.IdentityProviderService;
 import org.forgerock.openidm.idp.impl.IdentityProviderServiceException;
@@ -72,6 +72,7 @@ import org.forgerock.selfservice.json.JsonAnonymousProcessServiceBuilder;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandler;
 import org.forgerock.selfservice.stages.tokenhandlers.JwtTokenHandlerConfig;
 import org.forgerock.util.Options;
+import org.forgerock.util.encode.Base64;
 import org.osgi.framework.ServiceRegistration;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -100,9 +101,6 @@ public class SelfService implements IdentityProviderListener {
     /** the shared key alias */
     private static final String SHARED_KEY_ALIAS =
             IdentityServer.getInstance().getProperty(SHARED_KEY_PROPERTY, DEFAULT_SHARED_KEY_ALIAS);
-
-    /** the JsonPointer location in the read-response for the encoded shared secret key */
-    private static final JsonPointer ENCODED_SECRET_PTR = new JsonPointer("/secret/encoded");
 
     /** the registered parent router-path for self-service flows */
     static final String ROUTER_PREFIX = "selfservice";
@@ -273,20 +271,14 @@ public class SelfService implements IdentityProviderListener {
     private JwtTokenHandler createJwtTokenHandler(final JwtTokenHandlerConfig jwtTokenHandlerConfig) {
         try {
             // pull the shared key in from the keystore
-            final String sharedKey = sharedKeyService.getSharedKey(SHARED_KEY_ALIAS)
-                    .get(ENCODED_SECRET_PTR)
-                    .required()
-                    .asString();
+            final Key key = sharedKeyService.getSharedKey(SHARED_KEY_ALIAS);
+            final String sharedKey = Base64.encode(key.getEncoded());
             final SigningHandler signingHandler = new SigningManager().newHmacSigningHandler(sharedKey.getBytes());
-
-            final KeyPairGenerator keyPairGen =
-                    KeyPairGenerator.getInstance(jwtTokenHandlerConfig.getKeyPairAlgorithm());
-            keyPairGen.initialize(jwtTokenHandlerConfig.getKeyPairSize());
 
             return new JwtTokenHandler(
                     jwtTokenHandlerConfig.getJweAlgorithm(),
                     jwtTokenHandlerConfig.getEncryptionMethod(),
-                    keyPairGen.generateKeyPair(),
+                    sharedKeyService.getKeyPair(SELF_SERVICE_CERT_ALIAS),
                     jwtTokenHandlerConfig.getJwsAlgorithm(),
                     signingHandler,
                     jwtTokenHandlerConfig.getTokenLifeTimeInSeconds());

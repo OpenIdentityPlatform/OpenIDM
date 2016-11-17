@@ -245,6 +245,9 @@ public final class ServerConstants {
     /** the default jwtsession hmac signing key alias */
     public static final String DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS = "openidm-jwtsessionhmac-key";
 
+    /** the self-service certificate used to provide the public/private key-pair for the JwtTokenHandler */
+    public static final String SELF_SERVICE_CERT_ALIAS = "selfservice";
+
     /**
      * Query input value for the QUERY_ID input key.
      *

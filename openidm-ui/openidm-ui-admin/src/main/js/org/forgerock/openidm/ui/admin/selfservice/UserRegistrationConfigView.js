@@ -126,8 +126,6 @@ define([
                 ],
                 "snapshotToken" : {
                     "type" : "jwt",
-                    "keyPairAlgorithm" : "RSA",
-                    "keyPairSize" : 1024,
                     "jweAlgorithm" : "RSAES_PKCS1_V1_5",
                     "encryptionMethod" : "A128CBC_HS256",
                     "jwsAlgorithm" : "HS256",

@@ -20,6 +20,7 @@ import static org.forgerock.openidm.core.IdentityServer.*;
 import static org.forgerock.openidm.core.ServerConstants.JWTSESSION_SIGNING_KEY_ALIAS_PROPERTY;
 import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_INSTALL_LOCATION;
 import static org.forgerock.openidm.core.ServerConstants.LAUNCHER_PROJECT_LOCATION;
+import static org.forgerock.openidm.core.ServerConstants.SELF_SERVICE_CERT_ALIAS;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -68,13 +69,14 @@ public class DefaultKeyStoreInitializerTest {
         assertThat(keyStore).isNotNull();
         assertThat(Collections.list(keyStore.aliases()))
                 .asList()
-                .hasSize(3)
+                .hasSize(4)
                 .contains(
                         IdentityServer.getInstance().getProperty(CONFIG_CRYPTO_ALIAS),
                         IdentityServer.getInstance().getProperty(CONFIG_CRYPTO_ALIAS_SELF_SERVICE),
                         IdentityServer.getInstance().getProperty(
                                 JWTSESSION_SIGNING_KEY_ALIAS_PROPERTY,
-                                ServerConstants.DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS)
+                                ServerConstants.DEFAULT_JWTSESSION_SIGNING_KEY_ALIAS),
+                        SELF_SERVICE_CERT_ALIAS
                 );
 
     }
@@ -97,7 +99,7 @@ public class DefaultKeyStoreInitializerTest {
         assertThat(trustStore).isNotNull();
         assertThat(Collections.list(trustStore.aliases()))
                 .asList()
-                .hasSize(4)
+                .hasSize(5)
                 .contains(alias);
         assertThat(Collections.list(keyStore.aliases())).asList().contains(alias);
 

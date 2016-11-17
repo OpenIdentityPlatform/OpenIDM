@@ -57,7 +57,7 @@ import org.slf4j.LoggerFactory;
 public class TrustStoreServiceImpl extends AbstractKeyStoreService {
 
     private static final Logger logger = LoggerFactory.getLogger(TrustStoreServiceImpl.class);
-    static final String PID = "org.forgerock.openidm.impl.truststore";
+    static final String PID = "org.forgerock.openidm.truststore";
 
     @Reference(target="(service.pid=" + KeyStoreServiceImpl.PID + ")")
     private KeyStoreService keyStore;
