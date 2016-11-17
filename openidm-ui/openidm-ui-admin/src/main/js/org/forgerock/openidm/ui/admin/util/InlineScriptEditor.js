@@ -41,7 +41,7 @@ define([
             noBaseTemplate: true,
             events: {
                 "change input[type='radio']" : "localScriptChange",
-                "change .event-select" : "changeRenderMode",
+                "change .script-type" : "changeRenderMode",
                 "click .add-passed-variables" : "addEmptyPassedVariable",
                 "click .passed-variables-holder .btn-delete-attribute" : "deletePassedVariable",
                 "blur .passed-variables-holder input" : "passedVariableBlur",
@@ -142,7 +142,14 @@ define([
                             workflowParams = this.data.scriptData.globals.params;
                         }
 
-                        this.$el.find(".event-select").val(this.data.scriptData.type);
+                        //This will now catch if a user passes in an empty object, null, or empty string for the script data select
+                        if(_.isUndefined(this.data.scriptData.type)) {
+                            this.$el.find(".script-type").val("text/javascript");
+                        } else {
+                            this.$el.find(".script-type").val(this.data.scriptData.type);
+                        }
+                    } else {
+                        this.$el.find(".script-type").val("text/javascript");
                     }
 
                     if (this.model.hasWorkflow) {
@@ -219,7 +226,7 @@ define([
                     }
 
                     if (this.model.onChange) {
-                        this.$el.on("change", "input:radio, .scriptFilePath, .event-select, .passed-variables-holder :input", _.bind(function () {
+                        this.$el.on("change", "input:radio, .scriptFilePath, .script-type, .passed-variables-holder :input", _.bind(function () {
                             this.model.onChange();
                         }, this));
                     }
