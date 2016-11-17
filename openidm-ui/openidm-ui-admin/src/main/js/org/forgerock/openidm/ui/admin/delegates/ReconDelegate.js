@@ -181,7 +181,7 @@ define([
         } else {
             this.serviceCall({
                 "type": "GET",
-                "serviceUrl": "/openidm/repo/audit/recon",
+                "serviceUrl": "/openidm/audit/recon",
                 "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
             }).then(function(qry){
                 if(qry.result.length){
@@ -205,7 +205,7 @@ define([
         var queryFilter = 'reconId eq "' + reconId + '" and ' + objectIdType + ' eq "' + objectId + '"';
         return obj.serviceCall({
             "type": "GET",
-            "serviceUrl": "/openidm/repo/audit/recon",
+            "serviceUrl": "/openidm/audit/recon",
             "url":  "?_queryFilter=" + encodeURIComponent(queryFilter)
         });
     };
