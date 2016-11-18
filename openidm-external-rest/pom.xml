@@ -90,6 +90,12 @@
             <scope>test</scope>
         </dependency>
         <dependency>
+            <groupId>org.forgerock.commons</groupId>
+            <artifactId>json-resource</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
             <groupId>org.forgerock.commons.guava</groupId>
             <artifactId>forgerock-guava-collect</artifactId>
             <scope>test</scope>

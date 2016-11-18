@@ -58,6 +58,7 @@ import org.forgerock.json.resource.Response;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.external.ExternalException;
 import org.forgerock.openidm.filter.PassthroughFilter;
 import org.forgerock.openidm.filter.MutableFilterDecorator;
 import org.forgerock.openidm.filter.ServiceUnavailableFilter;
@@ -420,6 +421,11 @@ public class ServletConnectionFactory implements ConnectionFactory, RouterFilter
                         logger.trace("Resource exception: {} {}: \"{}\"",
                                 exception.getCode(), exception.getReason(), exception.getMessage(), exception);
                     } else if (code >= 500 && code <= 599) { // log server-side errors
+                        // OPENIDM-7001 Don't log exceptions from external sources to console
+                        if (exception instanceof ExternalException) {
+                            return;
+                        }
+
                         logger.warn("Resource exception: {} {}: \"{}\"",
                                 exception.getCode(), exception.getReason(), exception.getMessage(), exception);
                     }
