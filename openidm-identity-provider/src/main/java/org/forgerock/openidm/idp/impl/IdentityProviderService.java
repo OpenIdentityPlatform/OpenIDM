@@ -68,6 +68,8 @@ import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.idp.config.ProviderConfig;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
+import org.forgerock.openidm.idp.impl.api.IdentityProviderServiceResource;
+import org.forgerock.openidm.idp.impl.api.IdentityProviderServiceResourceWithNoSecret;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Options;
 import org.forgerock.util.promise.Promise;
@@ -75,10 +77,6 @@ import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-
 
 /**
  * Service used to store configuration about the various
@@ -90,7 +88,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
         title = "Identity Provider Service",
         description = "Service that handles Identity Provider configuration",
         mvccSupported = false,
-        resourceSchema = @Schema(fromType = IdentityProviderService.IdentityProviderServiceSchemaWithNoSecret.class)))
+        resourceSchema = @Schema(fromType = IdentityProviderServiceResourceWithNoSecret.class)))
 @Component(name = IdentityProviderService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service({ IdentityProviderService.class, SingletonResourceProvider.class })
 @Properties({
@@ -130,29 +128,6 @@ public class IdentityProviderService implements SingletonResourceProvider {
                     return value.getObject();
                 }
             };
-
-    /**
-     * Handles schema for provider configurations without returning
-     * the "client_secret" property. Needed for API Descriptors.
-     */
-    static class IdentityProviderServiceSchemaWithNoSecret {
-
-        @JsonIgnoreProperties("client_secret")
-        private class ProviderConfigWithoutSecret extends ProviderConfig {
-            // used to ignore client_secret in a provider configuration
-        }
-
-        @JsonProperty
-        private List<ProviderConfigWithoutSecret> providers;
-    }
-
-    /**
-     * Handles schema for {@link ProviderConfig} for API Descriptors.
-     */
-    static class IdentityProviderServiceSchema {
-        @JsonProperty
-        private List<ProviderConfig> providers;
-    }
 
     private enum Action { availableProviders, getProfile }
 
@@ -294,7 +269,7 @@ public class IdentityProviderService implements SingletonResourceProvider {
                                     + "the resource due to malformed syntax.")
             }),
             name = "availableProviders",
-            response = @Schema(fromType = IdentityProviderServiceSchema.class))
+            response = @Schema(fromType = IdentityProviderServiceResource.class))
     public Promise<ActionResponse, ResourceException> getAvailableProviders() {
         return newActionResponse(json(object(field(PROVIDERS, providerConfigs)))).asPromise();
     }

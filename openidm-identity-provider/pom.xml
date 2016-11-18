@@ -132,6 +132,7 @@
                     <instructions>
                         <Export-Package>
                             org.forgerock.openidm.idp.impl;
+                            org.forgerock.openidm.idp.impl.api;
                             org.forgerock.openidm.idp.config;
                             org.forgerock.openidm.idp.client;
                         </Export-Package>

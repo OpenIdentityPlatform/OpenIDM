@@ -19,50 +19,131 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
+import javax.validation.constraints.NotNull;
+
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.api.annotations.Description;
 import org.forgerock.json.JsonValue;
 
 /**
  * Configuration for a single property mapping
  */
+@Description("Mapping from one property name to another")
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class SingleMapping {
-    @JsonProperty
+
     private String source;
-
-    @JsonProperty
     private String target;
-
-    @JsonProperty
     private String condition;
-
-    @JsonProperty("default")
-    private String dflt;
+    private String defaultValue;
 
     @JsonProperty
     private Transform transform;
 
+    /**
+     * Gets source property-name.
+     *
+     * @return Source property-name
+     */
+    @NotNull
+    @Description("Source property-name")
     public String getSource() {
         return source;
     }
 
+    /**
+     * Sets source property-name.
+     *
+     * @param source Source property-name
+     */
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    /**
+     * Gets target property-name.
+     *
+     * @return Target property-name
+     */
+    @NotNull
+    @Description("Target property-name")
     public String getTarget() {
         return target;
     }
 
+    /**
+     * Sets target property-name.
+     *
+     * @param target Target property-name
+     */
+    public void setTarget(String target) {
+        this.target = target;
+    }
+
+    /**
+     * Gets query-filter that must evaluate to {@code true} for mapping to occur.
+     *
+     * @return Query-filter that must evaluate to {@code true} for mapping to occur
+     */
+    @Description("Query-filter that must evaluate to 'true' for mapping to occur")
     public String getCondition() {
         return condition;
     }
 
-    public String getDefault() {
-        return dflt;
+    /**
+     * Sets query-filter that must evaluate to {@code true} for mapping to occur.
+     *
+     * @param condition Query-filter that must evaluate to {@code true} for mapping to occur
+     */
+    public void setCondition(String condition) {
+        this.condition = condition;
     }
 
+    /**
+     * Sets default target value to use when there is no source value.
+     *
+     * @return Default target value to use when there is no source value
+     */
+    @JsonProperty("default")
+    @Description("Default target value to use when there is no source value")
+    public String getDefaultValue() {
+        return defaultValue;
+    }
+
+    /**
+     * Gets default target value to use when there is no source value.
+     *
+     * @param defaultValue Default target value to use when there is no source value
+     */
+    public void setDefaultValue(String defaultValue) {
+        this.defaultValue = defaultValue;
+    }
+
+    /**
+     * Sets script that transforms source value before mapping to target.
+     *
+     * @return Script that transforms source value before mapping to target
+     */
+    @Description("Script that transforms source value before mapping to target")
     public Transform getTransform() {
         return transform;
     }
 
+    /**
+     * Gets script that transforms source value before mapping to target.
+     *
+     * @param transform Script that transforms source value before mapping to target
+     */
+    public void setTransform(Transform transform) {
+        this.transform = transform;
+    }
+
+    /**
+     * Serializes this object as a {@link JsonValue}.
+     *
+     * @return {@link JsonValue} representation
+     */
     public JsonValue asJsonValue() {
         JsonValue retval = json(object(
                 field("target", getTarget()),
@@ -74,8 +155,8 @@ public class SingleMapping {
         if (getTransform() != null) {
             retval.add("transform", getTransform().asJsonValue());
         }
-        if (getDefault() != null) {
-            retval.add("default", getDefault());
+        if (getDefaultValue() != null) {
+            retval.add("default", getDefaultValue());
         }
         return retval;
     }

@@ -20,22 +20,81 @@ import static org.forgerock.json.JsonValue.field;
 import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import org.forgerock.api.annotations.Description;
 import org.forgerock.json.JsonValue;
 
 /**
  * Configuration for a single transform in an identity provider mapping
  */
+@Description("Property transformation")
 public class Transform {
-    @JsonProperty
+
     private String type;
-
-    @JsonProperty
     private String source;
-
-    @JsonProperty
     private String file;
 
+    /**
+     * Gets script type (e.g., text/javascript, groovy).
+     *
+     * @return Script type (e.g., text/javascript, groovy)
+     */
+    @Description("Script type (e.g., text/javascript, groovy)")
+    public String getType() {
+        return type;
+    }
+
+    /**
+     * Sets script type (e.g., text/javascript, groovy).
+     *
+     * @param type Script type (e.g., text/javascript, groovy)
+     */
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    /**
+     * Gets inlined script.
+     *
+     * @return Inlined script
+     */
+    @Description("Inlined script")
+    public String getSource() {
+        return source;
+    }
+
+    /**
+     * Sets inlined script.
+     *
+     * @param source Inlined script
+     */
+    public void setSource(String source) {
+        this.source = source;
+    }
+
+    /**
+     * Gets path to file containing the script.
+     *
+     * @return Path to file containing the script
+     */
+    @Description("Path to file containing the script")
+    public String getFile() {
+        return file;
+    }
+
+    /**
+     * Sets path to file containing the script.
+     *
+     * @param file Path to file containing the script
+     */
+    public void setFile(String file) {
+        this.file = file;
+    }
+
+    /**
+     * Serializes this object as a {@link JsonValue}.
+     *
+     * @return {@link JsonValue} representation
+     */
     public JsonValue asJsonValue() {
         JsonValue retval = json(object(
                 field("type", type)

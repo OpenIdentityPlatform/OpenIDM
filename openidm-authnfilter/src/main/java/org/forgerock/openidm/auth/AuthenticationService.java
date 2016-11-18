@@ -45,6 +45,13 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.annotations.Actions;
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.caf.authentication.api.AsyncServerAuthModule;
 import org.forgerock.caf.authentication.api.AuthenticationException;
 import org.forgerock.caf.authentication.framework.AuthenticationFilter;
@@ -78,12 +85,17 @@ import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.json.resource.http.HttpContext;
+import org.forgerock.openidm.auth.api.GetAuthTokenActionRequest;
+import org.forgerock.openidm.auth.api.GetAuthTokenActionResponse;
+import org.forgerock.openidm.auth.api.LogoutActionResponse;
+import org.forgerock.openidm.auth.api.ReauthenticateActionResponse;
 import org.forgerock.openidm.auth.modules.IDMAuthModule;
 import org.forgerock.openidm.auth.modules.IDMAuthModuleWrapper;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.crypto.CryptoService;
+import org.forgerock.openidm.idp.impl.api.IdentityProviderServiceResourceWithNoSecret;
 import org.forgerock.openidm.keystore.SharedKeyService;
 import org.forgerock.openidm.idp.client.OAuthHttpClient;
 import org.forgerock.openidm.idp.config.ProviderConfig;
@@ -140,6 +152,12 @@ import org.slf4j.LoggerFactory;
  *     </code>
  * </pre>
  */
+@SingletonProvider(@Handler(
+        id = "authenticationService:0",
+        title = "Authentication",
+        description = "Utilities related to authentication.",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = IdentityProviderServiceResourceWithNoSecret.class)))
 @Component(name = AuthenticationService.PID, immediate = true, policy = ConfigurationPolicy.REQUIRE)
 @Service
 @Properties({
@@ -636,6 +654,53 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     /**
      * Action support, including reauthenticate action {@inheritDoc}
      */
+    @Actions({
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description ="Returns an auth-token used for OpenID Connect or OAuth flow.",
+                            errors = {
+                                    @ApiError(
+                                            id = "badRequest",
+                                            code = 400,
+                                            description = "Bad request"),
+                                    @ApiError(
+                                            id = "idpNotFound",
+                                            code = 404,
+                                            description = "Identity provider not found"),
+                                    @ApiError(
+                                            id = "tokenNotFound",
+                                            code = 404,
+                                            description = "Unable to retrieve token"),
+                                    @ApiError(
+                                            id = "internalError",
+                                            code = 500,
+                                            description = "Unexpected condition"),
+                            }),
+                    name = "getAuthToken",
+                    request = @Schema(fromType = GetAuthTokenActionRequest.class),
+                    response = @Schema(fromType = GetAuthTokenActionResponse.class)
+            ),
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(description = "Invalidates the current JWT cookie's value."),
+                    name = "logout",
+                    response = @Schema(fromType = LogoutActionResponse.class)
+            ),
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description = "Reauthenticates a session using the provided \"X-OpenIDM-Reauth-Password\""
+                                    + " header. RFC 5987 encoding can optionally be used with UTF-8 or ISO-8859-1."
+                                    + " Note that the API Explorer cannot currently input this header field,"
+                                    + " but that it does work if provided using traditional REST clients.",
+                            errors = {
+                                    @ApiError(
+                                            id = "forbidden",
+                                            code = 403,
+                                            description = "Reauthentication failure")
+                            }),
+                    name = "reauthenticate",
+                    response = @Schema(fromType = ReauthenticateActionResponse.class)
+            )
+    })
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {
@@ -743,6 +808,7 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
     /**
      * {@inheritDoc}
      */
+    @Read(operationDescription = @Operation(description = "Lists enabled OpenID Connect and OAuth modules."))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(Context context, ReadRequest request) {
         if (amendedConfig == null) {
