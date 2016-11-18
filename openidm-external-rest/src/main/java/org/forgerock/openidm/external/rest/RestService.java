@@ -63,6 +63,7 @@ import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.external.ExternalException;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.Function;
@@ -320,7 +321,8 @@ public class RestService implements SingletonResourceProvider {
                     public ActionResponse apply(final Response response) throws ResourceException {
                         try {
                             if (!response.getStatus().isSuccessful()) {
-                                throw newResourceException(response.getStatus().getCode(), "HTTP request failed");
+                                throw new ExternalException(
+                                        newResourceException(response.getStatus().getCode(), "HTTP request failed"));
                             }
 
                             final Header contentTypeHeader = response.getHeaders().get(ContentTypeHeader.NAME);

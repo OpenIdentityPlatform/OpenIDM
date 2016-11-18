@@ -16,22 +16,24 @@
 
 package org.forgerock.openidm.external.rest;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.forgerock.http.protocol.Status.NOT_FOUND;
 import static org.forgerock.http.protocol.Status.OK;
 import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.resource.test.assertj.AssertJResourceExceptionAssert.assertThat;
 import static org.forgerock.openidm.external.rest.RestService.*;
 import static org.forgerock.util.promise.Promises.newResultPromise;
 import static org.forgerock.util.test.assertj.AssertJPromiseAssert.assertThat;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.fail;
 
 import java.io.InputStream;
 import java.util.Map;
 import java.util.Scanner;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.assertj.core.api.Assertions;
 import org.forgerock.guava.common.collect.ImmutableMap;
 import org.forgerock.guava.common.io.ByteStreams;
 import org.forgerock.http.Client;
@@ -43,8 +45,6 @@ import org.forgerock.http.protocol.Status;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
-import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.NeverThrowsException;
@@ -133,15 +133,15 @@ public class RestServiceTest {
     public Object[][] testCallActionData() throws Exception {
         return new Object[][]{
                 // missing request payload
-                {null, OK, JSON_CONTENT_TYPE_HEADER, null, null, BadRequestException.class},
+                {null, OK, JSON_CONTENT_TYPE_HEADER, null, null, ResourceException.BAD_REQUEST },
                 // missing required URL-field
-                {PARAMS_NONE, OK, JSON_CONTENT_TYPE_HEADER, null, null, BadRequestException.class},
+                {PARAMS_NONE, OK, JSON_CONTENT_TYPE_HEADER, null, null, ResourceException.BAD_REQUEST },
                 // malformed URL-field
-                {PARAMS_MALFORMED_URL, OK, JSON_CONTENT_TYPE_HEADER, null, null, BadRequestException.class},
+                {PARAMS_MALFORMED_URL, OK, JSON_CONTENT_TYPE_HEADER, null, null, ResourceException.BAD_REQUEST },
                 // missing required method-field
-                {PARAMS_MISSING_METHOD, OK, JSON_CONTENT_TYPE_HEADER, null, null, BadRequestException.class},
+                {PARAMS_MISSING_METHOD, OK, JSON_CONTENT_TYPE_HEADER, null, null, ResourceException.BAD_REQUEST },
                 // 404 response
-                {PARAMS_METHOD, NOT_FOUND, null, null, null, NotFoundException.class},
+                {PARAMS_METHOD, NOT_FOUND, null, null, null, ResourceException.NOT_FOUND },
                 // non-JSON, text response (html)
                 {PARAMS_METHOD, OK, HTML_CONTENT_TYPE_HEADER, resourceAsString("/test.html"),
                         resourceAsJsonValue("/test.html.json"), null},
@@ -173,14 +173,14 @@ public class RestServiceTest {
                 {PARAMS_BEARER_AUTH, OK, JSON_CONTENT_TYPE_HEADER, resourceAsJsonValue("/test.json"),
                         resourceAsJsonValue("/test.json"), null},
                 // unsupported authentication type
-                {PARAMS_UNSUPPORTED_AUTH, OK, JSON_CONTENT_TYPE_HEADER, null, null, BadRequestException.class},
+                {PARAMS_UNSUPPORTED_AUTH, OK, JSON_CONTENT_TYPE_HEADER, null, null, ResourceException.BAD_REQUEST },
         };
     }
 
     @Test(dataProvider = "testCallActionData")
     public void testCallAction(final ClientRequestParams clientRequestParams, final Status clientResStatus,
             final Map<String, Object> clientResHeaders, final Object clientResBody, final JsonValue expectedJsonContent,
-            final Class<? extends Throwable> expectedException) throws Exception {
+            final Integer expectedCode) throws Exception {
         // given
         final ActionRequest actionRequest = createActionRequest(clientRequestParams);
         final Promise<Response, NeverThrowsException> responsePromise =
@@ -194,26 +194,33 @@ public class RestServiceTest {
                 restService.actionInstance(mock(Context.class), actionRequest);
 
         // then
-        if (expectedException != null) {
-            assertThat(result).failedWithException().isInstanceOf(expectedException);
+        if (expectedCode != null) {
+            assertThat(result).failedWithException();
+            try {
+                result.getOrThrow();
+                fail();
+            } catch (ResourceException e) {
+                assertThat(e).withCode(expectedCode);
+            }
             return;
         }
 
         // verify that JSON response has expected top-level fields
         final JsonValue actualJsonContent = result.get().getJsonContent();
-        Assertions.assertThat(actualJsonContent.keys()).containsOnlyElementsOf(expectedJsonContent.keys());
+        assertThat(actualJsonContent.keys()).containsOnlyElementsOf(expectedJsonContent.keys());
 
         // non-JSON responses are converted into a JSON object with "headers" and "body" fields
         if (expectedJsonContent.isDefined(ARG_HEADERS)) {
             final JsonValue expectedHeaders = expectedJsonContent.get(ARG_HEADERS);
             final JsonValue actualHeaders = actualJsonContent.get(ARG_HEADERS);
             for (final String headerName : expectedJsonContent.get(ARG_HEADERS).keys()) {
-                Assertions.assertThat(actualHeaders.get(headerName).asList(String.class))
+                assertThat(actualHeaders.get(headerName).asList(String.class))
                         .containsAll(expectedHeaders.get(headerName).asList(String.class));
             }
         }
+
         if (expectedJsonContent.isDefined(ARG_BODY)) {
-            Assertions.assertThat(actualJsonContent.get(ARG_BODY).asString())
+            assertThat(actualJsonContent.get(ARG_BODY).asString())
                     .isEqualTo(expectedJsonContent.get(ARG_BODY).asString());
         }
     }
