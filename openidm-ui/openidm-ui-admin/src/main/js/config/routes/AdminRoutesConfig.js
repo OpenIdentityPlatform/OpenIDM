@@ -242,6 +242,5 @@ define([
         }
     };
 
-    commonRoutes["default"].role = "ui-admin";
     return obj;
 });

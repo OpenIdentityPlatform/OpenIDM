@@ -435,6 +435,12 @@
             "ChangesPendingTemplate": {
                 "undo": "Undo Changes",
                 "changesPending": "Changes Pending"
+            },
+            "unauthorized" : {
+                "title": "Unauthorized",
+                "description": "Access denied.",
+                "logoutLink": "Login Again",
+                "goBackLink": "Go Back"
             }
         },
         "admin" : {

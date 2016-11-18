@@ -96,6 +96,11 @@ define([
                             });
                         }
                     });
+                }, function () {
+                    EventManager.sendEvent(Constants.EVENT_CHANGE_VIEW, {
+                        route: Router.configuration.routes.login,
+                        args: ["&preventAutoLogin=true"]
+                    });
                 });
 
         } else {

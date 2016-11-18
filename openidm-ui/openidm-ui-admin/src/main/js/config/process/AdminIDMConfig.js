@@ -26,35 +26,40 @@ define([
             override: true,
             dependencies: [
                 "org/forgerock/openidm/ui/common/delegates/ConfigDelegate",
+                "org/forgerock/commons/ui/common/main/Configuration",
+                "org/forgerock/commons/ui/common/main/Router",
                 "config/routes/AdminRoutesConfig"
             ],
-            processDescription: function(event, ConfigDelegate, AdminRoutesConfig) {
+            processDescription: function(event, ConfigDelegate, Configuration, Router, AdminRoutesConfig) {
                 var landingPage,
                     dashboardIndex;
+                if (Configuration.loggedUser) {
+                    ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig) {
+                        // If a default dashboard is configured set that to the landing page
+                        if (_.has(dashboardConfig, "adminDashboards") && dashboardConfig.adminDashboards.length > 0) {
 
-                ConfigDelegate.readEntity("ui/dashboard").then(_.bind(function(dashboardConfig) {
-                    // If a default dashboard is configured set that to the landing page
-                    if (_.has(dashboardConfig, "adminDashboards") && dashboardConfig.adminDashboards.length > 0) {
+                            dashboardIndex = _.findIndex(dashboardConfig.adminDashboards, {"isDefault": true});
 
-                        dashboardIndex = _.findIndex(dashboardConfig.adminDashboards, {"isDefault": true});
+                            if (dashboardIndex === -1) {
+                                dashboardIndex = 0;
+                            }
 
-                        if (dashboardIndex === -1) {
-                            dashboardIndex = 0;
+                            landingPage = {
+                                view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
+                                role: "ui-admin",
+                                url: "dashboard/" + dashboardIndex
+                            };
+
+                            // If there are no dashboards set the landing page to the new dashboard view
+                        } else {
+                            landingPage = AdminRoutesConfig.newDashboardView;
                         }
 
-                        landingPage = {
-                            view: "org/forgerock/openidm/ui/admin/dashboard/Dashboard",
-                            role: "ui-admin",
-                            url: "dashboard/" + dashboardIndex
-                        };
-
-                        // If there are no dashboards set the landing page to the new dashboard view
-                    } else {
-                        landingPage = AdminRoutesConfig.newDashboardView;
-                    }
-
-                    EventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: landingPage});
-                }));
+                        EventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: landingPage});
+                    }));
+                } else {
+                    EventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: Router.configuration.routes.login });
+                }
             }
         },
         {
@@ -269,7 +274,7 @@ define([
 
                     return Navigation.reload();
 
-                }).then(function () {
+                }).always(function () {
                     if (completedCallback) {
                         completedCallback();
                     }
