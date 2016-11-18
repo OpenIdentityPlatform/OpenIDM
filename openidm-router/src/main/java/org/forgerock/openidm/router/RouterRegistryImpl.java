@@ -1,36 +1,34 @@
 /*
- * DO NOT ALTER OR REMOVE COPYRIGHT NOTICES OR THIS HEADER.
+ * The contents of this file are subject to the terms of the Common Development and
+ * Distribution License (the License). You may not use this file except in compliance with the
+ * License.
  *
- * Copyright 2013-2015 ForgeRock AS. All Rights Reserved
+ * You can obtain a copy of the License at legal/CDDLv1.0.txt. See the License for the
+ * specific language governing permission and limitations under the License.
  *
- * The contents of this file are subject to the terms
- * of the Common Development and Distribution License
- * (the License). You may not use this file except in
- * compliance with the License.
+ * When distributing Covered Software, include this CDDL Header Notice in each file and include
+ * the License file at legal/CDDLv1.0.txt. If applicable, add the following below the CDDL
+ * Header, with the fields enclosed by brackets [] replaced by your own identifying
+ * information: "Portions copyright [year] [name of copyright owner]".
  *
- * You can obtain a copy of the License at
- * http://forgerock.org/license/CDDLv1.0.html
- * See the License for the specific language governing
- * permission and limitations under the License.
- *
- * When distributing Covered Code, include this CDDL
- * Header Notice in each file and include the License file
- * at http://forgerock.org/license/CDDLv1.0.html
- * If applicable, add the following below the CDDL Header,
- * with the fields enclosed by brackets [] replaced by
- * your own identifying information:
- * "Portions Copyrighted [year] [name of copyright owner]"
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.router;
 
-import org.forgerock.json.resource.Request;
-import org.forgerock.services.routing.RouteMatcher;
+import java.util.Dictionary;
+import java.util.concurrent.CopyOnWriteArraySet;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
+
 import org.forgerock.json.resource.CollectionResourceProvider;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crest.DescribableRouter;
+import org.forgerock.services.routing.RouteMatcher;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.Constants;
@@ -43,11 +41,6 @@ import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.util.Dictionary;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
 
 public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         ServiceTrackerCustomizer<Object, RouteEntryImpl> {
@@ -206,11 +199,11 @@ public class RouterRegistryImpl implements ServiceFactory<RouterRegistry>,
         if (internalRouter.get() == null
                 || (routerTracker != null && routerTracker.getTrackingCount() > routerCount)) {
             if (routerTracker == null) {
-                internalRouter.set(new Router());
+                internalRouter.set(new DescribableRouter());
             } else {
                 ServiceReference<Router>[] refs = routerTracker.getServiceReferences();
                 if (refs == null || refs.length == 0) {
-                    internalRouter.set(new Router());
+                    internalRouter.set(new DescribableRouter());
                 } else {
                     for (int i = 0; i < refs.length; i++) {
                         Router service = routerTracker.getService(refs[i]);
