@@ -29,6 +29,12 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.Paths;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.Schema;
+import org.forgerock.api.models.SubResources;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.CreateRequest;
@@ -38,12 +44,14 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.Router;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crest.DescribableRouter;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
@@ -53,6 +61,7 @@ import org.forgerock.openidm.security.impl.EntryResourceProvider;
 import org.forgerock.openidm.security.impl.KeystoreResourceProvider;
 import org.forgerock.openidm.security.impl.PrivateKeyResourceProvider;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -64,13 +73,13 @@ import org.slf4j.LoggerFactory;
  * keystore and truststore files.
  */
 @Component(name = SecurityManager.PID, policy = ConfigurationPolicy.IGNORE, metatype = true, 
-        description = "OpenIDM Security Management Service", immediate = true)
+        description = "OpenIDM Security Management Service.", immediate = true)
 @Service
 @Properties({
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Security Management Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/security/*") })
-public class SecurityManager implements RequestHandler {
+public class SecurityManager implements RequestHandler, Describable<ApiDescription, Request> {
 
     static final String PID = "org.forgerock.openidm.security";
 
@@ -94,7 +103,7 @@ public class SecurityManager implements RequestHandler {
     @Reference
     private KeyStoreManagementService keyStoreManager;
 
-    private final Router router = new Router();
+    private final Router router = new DescribableRouter();
         
     public SecurityManager() {
         Security.addProvider(new BouncyCastleProvider());
@@ -169,5 +178,25 @@ public class SecurityManager implements RequestHandler {
     public Promise<ResourceResponse, ResourceException> handleUpdate(final Context context,
             final UpdateRequest request) {
         return router.handleUpdate(context, request);
+    }
+
+    @Override
+    public ApiDescription api(ApiProducer<ApiDescription> producer) {
+        return router.api(producer);
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        return router.handleApiRequest(context, request);
+    }
+
+    @Override
+    public void addDescriptorListener(Listener listener) {
+        router.addDescriptorListener(listener);
+    }
+
+    @Override
+    public void removeDescriptorListener(Listener listener) {
+        router.removeDescriptorListener(listener);
     }
 }

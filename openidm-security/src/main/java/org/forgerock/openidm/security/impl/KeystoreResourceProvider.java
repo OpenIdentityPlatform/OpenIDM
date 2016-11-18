@@ -30,6 +30,13 @@ import java.util.List;
 
 import org.apache.commons.lang3.tuple.Pair;
 import org.bouncycastle.pkcs.PKCS10CertificationRequest;
+import org.forgerock.api.annotations.Action;
+import org.forgerock.api.annotations.Actions;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
@@ -49,6 +56,11 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.security.impl.api.CertificateResource;
+import org.forgerock.openidm.security.impl.api.GenerateCertRequestAction;
+import org.forgerock.openidm.security.impl.api.GenerateCsrRequestAction;
+import org.forgerock.openidm.security.impl.api.GenerateCsrResponseAction;
+import org.forgerock.openidm.security.impl.api.KeyStoreResource;
 import org.forgerock.openidm.util.CertUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
@@ -58,6 +70,14 @@ import org.slf4j.LoggerFactory;
 /**
  * Services requests on a specific keystore.
  */
+@SingletonProvider(value = @Handler(
+        id = "keystoreResourceProvider:0",
+        title = "Keystore and Truststore Resource Provider",
+        description = "Allows generation of certificates, generating certificate signing requests, and reading the " +
+                "alias in the keystore or truststore.",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = KeyStoreResource.class)
+))
 public class KeystoreResourceProvider extends SecurityResourceProvider implements SingletonResourceProvider {
 
     /**
@@ -75,6 +95,16 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
         this.keyStoreManager = keyStoreManager;
     }
 
+    @Actions({
+            @Action(name = ACTION_GENERATE_CERT,
+                    operationDescription = @Operation(description = "Generate Certificate"),
+                    request = @Schema(fromType = GenerateCertRequestAction.class),
+                    response = @Schema(fromType = CertificateResource.class)),
+            @Action(name = ACTION_GENERATE_CSR,
+                    operationDescription = @Operation(description = "Generate CSR"),
+                    request = @Schema(fromType = GenerateCsrRequestAction.class),
+                    response = @Schema(fromType = GenerateCsrResponseAction.class))
+    })
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {
@@ -138,6 +168,7 @@ public class KeystoreResourceProvider extends SecurityResourceProvider implement
         return new NotSupportedException("Patch operations are not supported").asPromise();
     }
 
+    @Read(operationDescription = @Operation(description = "Read Keystore or Truststore"))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final ReadRequest request) {
         try {

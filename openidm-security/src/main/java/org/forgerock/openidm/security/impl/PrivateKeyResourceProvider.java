@@ -25,6 +25,9 @@ import java.util.List;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.PEMKeyPair;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.forgerock.api.annotations.CollectionProvider;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Schema;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.NotSupportedException;
@@ -35,6 +38,7 @@ import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.security.impl.api.PrivateKeyResource;
 import org.forgerock.openidm.util.CertUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
@@ -42,6 +46,13 @@ import org.forgerock.util.promise.Promise;
 /**
  * A collection resource provider servicing requests on private key entries in a keystore
  */
+@CollectionProvider(details = @Handler(
+        id = "privateKeyResourceProvider:0",
+        title = "Keystore - Private Key Resource Provider",
+        description = "Handles CRUDPAQ operations on private keys in the keystore or truststore.",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = PrivateKeyResource.class)
+))
 public class PrivateKeyResourceProvider extends EntryResourceProvider {
 
     private final char[] keyStorePassword;
@@ -78,7 +89,9 @@ public class PrivateKeyResourceProvider extends EntryResourceProvider {
         throw new NotSupportedException("Can't read the private key with alias: " + alias);
     }
 
-    @Override
+    /**
+     * Overrides the default behavior to throw NotSupportedException as reads on private keys are not supported.
+     */
     public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final String resourceId,
             final ReadRequest request) {
         return new NotSupportedException("Read operations are not supported").asPromise();

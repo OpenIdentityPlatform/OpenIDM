@@ -22,6 +22,14 @@ import static org.forgerock.json.resource.Responses.newResourceResponse;
 
 import java.security.KeyStore;
 
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Create;
+import org.forgerock.api.annotations.Delete;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Parameter;
+import org.forgerock.api.annotations.Read;
+import org.forgerock.api.annotations.Update;
+import org.forgerock.api.enums.CreateMode;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -49,7 +57,7 @@ import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 
 /**
- * A generic collection resource provider servicing requests on entries in a keystore
+ * A generic collection resource provider servicing requests on entries in a keystore.
  */
 public abstract class EntryResourceProvider extends SecurityResourceProvider implements CollectionResourceProvider {
 
@@ -61,6 +69,13 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         this.keyStoreManager = keyStoreManager;
     }
 
+    @Create(operationDescription = @Operation(description = "Creates a entry in the keystore",
+            parameters = @Parameter(name = "id", type = "string", description = "Alias to the key or certificate"),
+            errors = {
+                    @ApiError(code = 409, description = "The alias of the entry already exists"),
+                    @ApiError(code = 400, description = "No id was supplied to the create request")
+            }
+    ), modes = CreateMode.ID_FROM_CLIENT)
     @Override
     public Promise<ResourceResponse, ResourceException> createInstance(final Context context,
             final CreateRequest request) {
@@ -84,6 +99,10 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         }
     }
 
+    @Read(operationDescription = @Operation(description = "Reads an entry from the keystore or truststore",
+            parameters = @Parameter(name = "id", type = "string", description = "Alias to the key or certificate"),
+            errors = @ApiError(code = 404, description = "The alias of the entry to delete does not exist")
+    ))
     @Override
     public Promise<ResourceResponse, ResourceException> readInstance(final Context context, final String resourceId,
             final ReadRequest request) {
@@ -99,6 +118,9 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         }
     }
 
+    @Update(operationDescription = @Operation(
+            description = "Updates an entry in the keystore or truststore",
+            parameters = @Parameter(name = "id", type = "string", description = "Alias to the key or certificate")))
     @Override
     public Promise<ResourceResponse, ResourceException> updateInstance(final Context context, final String resourceId,
             final UpdateRequest request) {
@@ -111,6 +133,11 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
         }
     }
 
+    @Delete(operationDescription = @Operation(
+            description = "Deletes an entry in the keystore or truststore",
+            parameters = @Parameter(name = "id", type = "string", description = "Alias to the key or certificate"),
+            errors = @ApiError(code = 404, description = "The alias of the key to delete does not exist")
+    ))
     @Override
     public Promise<ResourceResponse, ResourceException> deleteInstance(final Context context, final String resourceId,
             final DeleteRequest request) {
@@ -127,7 +154,7 @@ public abstract class EntryResourceProvider extends SecurityResourceProvider imp
             return new InternalServerErrorException(e).asPromise();
         }
     }
-    
+
     @Override
     public Promise<ActionResponse, ResourceException> actionCollection(Context context, ActionRequest request) {
         return new NotSupportedException("Action operations are not supported").asPromise();

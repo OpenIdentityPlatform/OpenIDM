@@ -18,16 +18,27 @@ package org.forgerock.openidm.security.impl;
 
 import java.security.cert.Certificate;
 
+import org.forgerock.api.annotations.CollectionProvider;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Schema;
 import org.forgerock.json.JsonValue;
 import org.forgerock.openidm.crypto.CryptoService;
 import org.forgerock.openidm.keystore.KeyStoreManagementService;
 import org.forgerock.openidm.keystore.KeyStoreService;
 import org.forgerock.openidm.repo.RepositoryService;
+import org.forgerock.openidm.security.impl.api.CertificateResource;
 import org.forgerock.openidm.util.CertUtil;
 
 /**
  * A collection resource provider servicing requests on certificate entries in a keystore
  */
+@CollectionProvider(details = @Handler(
+        id = "certificateResourceProvider:0",
+        title = "Keystore and Truststore - Certificate Resource Provider",
+        description = "Handles CRUDPAQ operations on certificates in the keystore or truststore.",
+        mvccSupported = false,
+        resourceSchema = @Schema(fromType = CertificateResource.class)
+))
 public class CertificateResourceProvider extends EntryResourceProvider {
 
     public CertificateResourceProvider(String resourceName, KeyStoreService keyStoreService,
@@ -37,7 +48,6 @@ public class CertificateResourceProvider extends EntryResourceProvider {
 
     @Override
     protected void storeEntry(JsonValue value, String alias) throws Exception {
-        String type = value.get("type").defaultTo(DEFAULT_CERTIFICATE_TYPE).asString();
         String certString = value.get("cert").required().asString();
         Certificate cert = CertUtil.readCertificate(certString);
         keyStore.setCertificateEntry(alias, cert);
