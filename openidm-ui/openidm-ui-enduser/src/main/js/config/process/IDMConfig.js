@@ -25,10 +25,15 @@ define([
             description: "",
             override: true,
             dependencies: [
+                "org/forgerock/commons/ui/common/main/Configuration",
                 "org/forgerock/commons/ui/common/main/Router"
             ],
-            processDescription: function(event, router) {
-                eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
+            processDescription: function(event, Configuration, router) {
+                if (Configuration.loggedUser) {
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.landingPage });
+                } else {
+                    eventManager.sendEvent(constants.EVENT_CHANGE_VIEW, {route: router.configuration.routes.login });
+                }
             }
         },
         {
