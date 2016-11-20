@@ -95,18 +95,20 @@
   Object Type Window
 */
 
-.objecttype-window .modal-body{
-  height:500px;
-  overflow: scroll;
-  overflow-x:hidden;
+.objecttype-window {
+  .modal-body{
+    height:500px;
+    overflow: scroll;
+    overflow-x:hidden;
+  }
+
+  .list-group-item {
+    overflow:hidden;
+  }
 }
 
 #objectType h3 {
   margin-top:0px;
-}
-
-.objecttype-window .list-group-item {
-  overflow:hidden;
 }
 
 #objectTypesList {
@@ -118,7 +120,7 @@
   margin-bottom:15px;
 }
 
-@media (min-width: 992px) {
+@media (min-width: 1200px) {
   .objecttype-window  .modal-dialog{
     width:1200px;
   }

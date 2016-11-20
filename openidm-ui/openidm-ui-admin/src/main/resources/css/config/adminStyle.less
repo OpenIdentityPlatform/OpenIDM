@@ -145,11 +145,6 @@ h3.block-header {
   display: none;
 }
 
-.back-bar {
-  padding: 15px 0;
-  border-bottom: 1px solid #eee;
-}
-
 .clean-btn:hover {
   color: #000;
 }
@@ -684,20 +679,25 @@ Dialog Catch
   Back bar
 */
 
-.back-bar a:before {
-  content: "\f104";
-  font-family: FontAwesome;
-  margin-right: 5px;
-  display: inline-block;
-}
+.back-bar {
+  padding: 15px 0;
+  border-bottom: 1px solid #eee;
 
-.back-bar a {
-  color: #777;
-}
+  a {
+    color: #777;
 
-.back-bar a:hover {
-  text-decoration:underline;
-  color:#777;
+    &:before {
+      content: "\f104";
+      font-family: FontAwesome;
+      margin-right: 5px;
+      display: inline-block;
+    }
+
+    &:hover {
+      text-decoration:underline;
+      color:#777;
+    }
+  }
 }
 
 /*
