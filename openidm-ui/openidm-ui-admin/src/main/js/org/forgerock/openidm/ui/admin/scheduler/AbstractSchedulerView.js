@@ -227,11 +227,14 @@ define([
         },
 
         /**
-         * Shows the inline script editor
+         * Shows the inline script editor and sets focus.
          * @return {Object} DomElement -- The dom element that was just shown
          */
         showInlineScriptEditor() {
-            return this.show(".invoke-context-ise-container");
+            let editorElement = this.show(".invoke-context-ise-container");
+            this.editor.cmBox.refresh();
+
+            return editorElement;
         },
 
         /**

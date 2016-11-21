@@ -31,8 +31,8 @@
         {{/if}}
     </div>
 </section>
-<div class="tab-menu">
-    <div class="container">
+<div class="container">
+    <div class="tab-menu">
         <ul class="nav nav-tabs" role="tablist">
             <li class="dropdown pull-right tabdrop hide">
                 <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -41,36 +41,37 @@
                 </a>
                 <ul class="dropdown-menu"></ul>
             </li>
-            <li role="presentation" class="active">
+            <li class="active">
                 <a href="#scheduleDetailsTab" aria-controls="attributes" role="tab" data-toggle="tab">
                     <span class="glyph-title hidden-xs">{{t "templates.connector.detailsTab"}}</span>
                 </a>
             </li>
         </ul>
     </div>
-</div>
-<div class="container schedule-container">
-    <div class="tab-content">
+    <div class="tab-content schedule-container">
         <div role="tabpanel" class="tab-pane active" id="scheduleDetailsTab">
-            <form class="form-horizontal" role="form" id="scheduleForm">
-                <!-- inputs prevent browser autocompletion of form fields -->
-                <input type="text" class="hidden">
-                <input type="password" class="hidden">
-                <div class="panel no-margin-bottom panel-connector panel-default panel-content panel-collapse-group">
-                    <div id="scheduleDetails" class="panel-body">
-                        {{> scheduler/_scheduleForm}}
-                        <div class="changes-pending-container"></div>
-                    </div>
-
+            <div class="tab-pane-body">
+                <div class="panel-collapse-group">
+                    <form class="form-horizontal" role="form" id="scheduleForm">
+                        <!-- inputs prevent browser autocompletion of form fields -->
+                        <input type="text" class="hidden">
+                        <input type="password" class="hidden">
+                        <div class="panel panel-default panel-collapse">
+                            <div id="scheduleDetails" class="panel-body">
+                                {{> scheduler/_scheduleForm}}
+                                <div class="changes-pending-container"></div>
+                            </div>
+                            <div class="panel-footer clearfix">
+                                <div class="pull-right save-cancel-btn-panel" disabled>
+                                    <a href="#scheduler/"><button class="btn save-cancel-btn btn-default btn-cancel" type="button">{{t 'common.form.cancel'}}</button></a>
+                                    <button  id="submitSchedule" name="submitSchedule" class="btn save-cancel-btn btn-primary btn-save" type="button">{{t "common.form.save"}}</button>
+                                    <div class="clearfix"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-                <div class="panel-footer clearfix">
-                    <div class="pull-right save-cancel-btn-panel" disabled>
-                        <a href="#scheduler/"><button class="btn save-cancel-btn btn-default btn-cancel" type="button">{{t 'common.form.cancel'}}</button></a>
-                        <button  id="submitSchedule" name="submitSchedule" class="btn save-cancel-btn btn-primary btn-save" type="button">{{t "common.form.save"}}</button>
-                        <div class="clearfix"></div>
-                    </div>
-                </div>
-            </form>
+            </div>
         </div>
     </div>
 </div>

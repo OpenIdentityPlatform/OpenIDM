@@ -5,15 +5,15 @@
         <div class="page-header">
             <h1>{{t "templates.scheduler.schedules"}}</h1>
         </div>
-        <div class="toolbar page-toolbar" role="toolbar">
+        <div class="toolbar page-toolbar" role="toolbar" id="schedulesToolbar">
             <div class="btn-group pull-left left-group" role="group">
                 <a href="#scheduler/add/"><button type="button" class="btn btn-primary"><i class="fa fa-plus"></i>{{t "templates.scheduler.addSchedule"}}</button></a>
             </div>
-            <div class="pull-right">
+            <div class="pull-right type-filter">
                 <div class="toolbar-search">
-                    <div class="form-group">
-                        <div class="margin-top-5 pull-left">{{t "templates.scheduler.filterByType"}} :</div>
-                        <div class="pull-right">
+                    <form class="form-inline">
+                        <div class="form-group pull-right">
+                            <label class="" for="typeFilter">{{t "templates.scheduler.filterByType"}}</label>
                             <select class="form-control" id="typeFilter">
                                 <option value="userDefined">{{t "templates.scheduler.allUserDefinedSchedules"}}</option>
                                 <option value="runningNow">{{t "templates.scheduler.runningNow"}}</option>
@@ -26,37 +26,39 @@
                                 <option value="inMemory">{{t "templates.scheduler.inMemory"}}</option>
                             </select>
                         </div>
-                    </div>
+                    </form>
+
                 </div>
             </div>
             <div class="pull-right subFilters" id="resourceSubfilter" style="display:none">
                 <div class="toolbar-search">
-                    <div class="form-group">
-                        <div class="margin-top-5 pull-left">{{t "templates.scheduler.filterByResource"}} :</div>
-                        <div class="pull-right">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label class="">{{t "templates.scheduler.filterByResource"}}</label>
                             <select class="form-control">
-                                <option value="">{{t "templates.scheduler.showAll"}}</option>
+                                <option value="all">{{t "templates.scheduler.showAll"}}</option>
                                 {{#each availableEnpoints}}
                                 <option value="{{@this}}">{{@this}}</option>
                                 {{/each}}
                             </select>
                         </div>
-                    </div>
+                    </form>
                 </div>
             </div>
             <div class="pull-right subFilters" id="connectorTypeSubfilter" style="display:none">
                 <div class="toolbar-search">
-                    <div class="form-group">
-                        <div class="margin-top-5 pull-left">{{t "templates.scheduler.filterByConnectorType"}} :</div>
-                        <div class="pull-right">
+                    <form class="form-inline">
+                        <div class="form-group">
+                            <label class="">{{t "templates.scheduler.filterByConnectorType"}}</label>
                             <select class="form-control">
-                                <option value="">{{t "templates.scheduler.showAll"}}</option>
+                                <option value="all">{{t "templates.scheduler.showAll"}}</option>
                                 {{#each availableConnectorTypes}}
                                 <option value="{{type}}">{{display}}</option>
                                 {{/each}}
                             </select>
                         </div>
-                    </div>
+                    </form>
+
                 </div>
             </div>
             <div class="clearfix"></div>

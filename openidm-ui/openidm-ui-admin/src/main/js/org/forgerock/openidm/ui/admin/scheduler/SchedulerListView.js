@@ -67,6 +67,7 @@ define([
                 this.data.availableEnpoints = availableEnpoints;
                 this.parentRender(() => {
                     this.buildGrid().then(() => {
+                        this.$el.find("select").selectize();
                         if (callback) {
                             callback();
                         }
@@ -263,11 +264,18 @@ define([
          * @returns - object
          */
         getFilters: function () {
-            return {
+
+            var obj = {
                 typeFilter: this.$el.find("#typeFilter").val(),
                 resourceSubfilter: this.$el.find("#resourceSubfilter select").val(),
                 connectorTypeSubfilter: this.$el.find("#connectorTypeSubfilter select").val()
             };
+            ["resourceSubfilter", "connectorTypeSubfilter"].forEach(function(subfilter) {
+                if (obj[subfilter] === "all") {
+                    obj[subfilter] = "";
+                }
+            });
+            return obj;
         },
         /**
          * Creates a queryFilter string to be used when querying for the list of schedules
