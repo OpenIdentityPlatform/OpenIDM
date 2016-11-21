@@ -88,7 +88,7 @@
                 onFailure: function (data) {
                     if (typeof data === 'string' && data.indexOf('401') !== -1) {
                         // 401: Unauthorized, so redirect to login
-                        window.location.replace('/');
+                        window.top.location.replace('/');
                     }
                 }
             });
