@@ -99,7 +99,7 @@ define([
                 "postRender": _.bind(function() {
                     _this.$el.find("#addPropertySelect").selectize({
                         persist: false,
-                        create: false,
+                        create: true,
                         onChange: _.bind(function(value) {
                             if(value.length > 0) {
                                 this.model.dialog.$modalFooter.find("#scriptDialogUpdate").prop("disabled", false).focus();
@@ -142,7 +142,7 @@ define([
                     }
                 },
                     {
-                        label: $.t("common.form.update"),
+                        label: $.t("common.form.add"),
                         id:"scriptDialogUpdate",
                         cssClass: 'btn-primary',
                         hotkey: 13,
