@@ -52,11 +52,11 @@ define([
         events: {
             "click #RenameDashboard": "renameDashboard",
             "click #DuplicateDashboard": "duplicateDashboard",
-            "click #DefaultDashboard": "defaultDashboard",
-            "click #DeleteDashboard": "deleteDashboard",
-            "click .add-widget": "addWidget",
+            "click #DefaultDashboard": "defaultDashboardEvent",
+            "click #DeleteDashboard": "deleteDashboardEvent",
+            "click .add-widget": "addWidgetEvent",
             "click .open-add-widget-dialog": "openAddWidgetDialog",
-            "click .widget-delete" : "deleteWidget" //This event relies on child views creating the correct HTML menu item
+            "click .widget-delete" : "deleteWidgetEvent" //This event relies on child views creating the correct HTML menu item
         },
         partials : [
             "partials/dashboard/_DuplicateDashboard.html",
@@ -167,22 +167,28 @@ define([
             }, this));
         },
 
-        addWidget: function (e) {
+        addWidgetEvent: function (e) {
             if (e) {
                 e.preventDefault();
             }
             this.setElement("#content");
 
-            this.data.dashboard.widgets.push({
-                "type" : $(e.currentTarget).attr("data-widget-id"),
-                "size" : DashboardWidgetLoader.getWidgetList()[$(e.currentTarget).attr("data-widget-id")].defaultSize
-            });
+            this.data.dashboard.widgets = this.addWidget($(e.currentTarget).attr("data-widget-id"), DashboardWidgetLoader.getWidgetList()[$(e.currentTarget).attr("data-widget-id")].defaultSize,  this.data.dashboard.widgets);
 
             this.saveChanges("dashboardWidgetAdded", false, _.bind(function() {
                 this.render();
                 this.dialog.close();
                 this.openAddWidgetDialog();
             }, this));
+        },
+
+        addWidget: function(type, size, list) {
+            list.push({
+                "type" : type,
+                "size" : size
+            });
+
+            return list;
         },
 
         openAddWidgetDialog: function (e) {
@@ -311,30 +317,61 @@ define([
             });
         },
 
-        defaultDashboard: function(e) {
+        defaultDashboardEvent: function(e) {
             e.preventDefault();
 
-            _.each(this.model.allDashboards, function(dashboard) {
-                dashboard.isDefault = false;
-            }, this);
-
-            this.data.dashboard.isDefault = true;
+            this.data.dashboard = this.defaultDashboard(this.model.allDashboards, this.data.dashboard);
 
             this.saveChanges("dashboardDefaulted", this.model.dashboardIndex);
         },
 
-        deleteDashboard: function(e) {
+        /**
+         *
+         * @param allDashboards - Array of all the current dashboards
+         * @param currentDashboard - Current dashboard object
+         * @returns {*} - Returns an updated copy of the dashboard object as the new default dashboard
+         */
+        defaultDashboard: function(allDashboards, currentDashboard) {
+            _.each(allDashboards, function(dashboard) {
+                dashboard.isDefault = false;
+            }, this);
+
+            currentDashboard.isDefault = true;
+
+            return currentDashboard;
+        },
+
+        deleteDashboardEvent: function(e) {
             e.preventDefault();
 
-            this.model.allDashboards.splice(this.model.dashboardIndex, 1);
+            var deleteDetails =  this.deleteDashboard(this.model.allDashboards, this.model.dashboardIndex);
 
-            var landingIndex = _.findIndex(this.model.allDashboards, {"isDefault": true});
+            this.model.allDashboards = deleteDetails.list;
 
-            if (landingIndex === -1 && this.model.allDashboards.length > 0) {
-                landingIndex = 0;
+            if (deleteDetails.index === -1 && this.model.allDashboards.length > 0) {
+                deleteDetails.index = 0;
             }
 
-            this.saveChanges("dashboardDeleted", landingIndex);
+            this.saveChanges("dashboardDeleted", deleteDetails.index);
+        },
+
+        /**
+         *
+         * @param dashboardList - Array of dashboards
+         * @param index - Index of dashboard to be removed
+         * @returns {{list: *, index: *}|*} - Returns object containing the new dashboard list and current index of the default dashboard
+         */
+        deleteDashboard: function(dashboardList, index) {
+            var deleteDetails;
+
+            dashboardList.splice(index, 1);
+
+            deleteDetails = {
+                "list" : dashboardList,
+                "index" : _.findIndex(this.model.allDashboards, {"isDefault": true})
+            };
+
+            return deleteDetails;
         },
 
         saveChanges: function(message, landingIndex, callback) {
@@ -365,20 +402,32 @@ define([
             }, this));
         },
 
-        deleteWidget: function(event) {
+        deleteWidgetEvent: function(event) {
             event.preventDefault();
 
             var currentConf = this.model.uiConf,
                 currentWidget = $(event.target).parents(".widget-holder"),
                 widgetLocation = this.$el.find(".widget-holder").index(currentWidget);
 
-            currentConf.adminDashboards[this.model.dashboardIndex].widgets.splice(widgetLocation, 1);
+            currentConf.adminDashboards[this.model.dashboardIndex].widgets = this.deleteWidget(currentConf.adminDashboards[this.model.dashboardIndex].widgets, widgetLocation);
 
             UIUtils.confirmDialog($.t("dashboard.widgetDelete"), "danger", _.bind(function(){
                 ConfigDelegate.updateEntity("ui/dashboard", currentConf).then(_.bind(function() {
                     this.render();
                 }, this));
             }, this));
+        },
+
+        /**
+         *
+         * @param widgets - Array of dashboard widgets
+         * @param widgetIndex - The index of the removed widget
+         * @returns Returns Array of widgets with the deleted widget removed
+         */
+        deleteWidget: function(widgets, widgetIndex) {
+            widgets.splice(widgetIndex, 1);
+
+            return widgets;
         }
     });
 
