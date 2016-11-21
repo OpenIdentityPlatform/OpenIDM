@@ -1,0 +1,42 @@
+[
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/0/name",
+        "value" : "Add Connector"
+   },
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/1/name",
+        "value" : "Create Mapping"
+   },
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/2/name",
+        "value" : "Manage Roles"
+   },
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/3/name",
+        "value" : "Add Device"
+   },
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/4/name",
+        "value" : "Configure Registration"
+   },
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/5/name",
+        "value" : "Configure Password Reset"
+   },
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/6/name",
+        "value" : "Manage Users"
+   },
+   {
+        "operation" : "replace",
+        "field" : "/adminDashboards/0/widgets/0/cards/7/name",
+        "value" : "Configure System Preferences"
+   }
+]
