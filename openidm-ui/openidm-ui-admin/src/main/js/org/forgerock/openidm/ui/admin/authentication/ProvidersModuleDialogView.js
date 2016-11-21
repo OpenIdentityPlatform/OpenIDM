@@ -45,7 +45,8 @@ define([
         element: "#dialogs",
         noBaseTemplate: true,
         events: {
-            "change #amURL": "generateAuthFromWellKnownURL"
+            "change #amURL": "generateAuthFromWellKnownURL",
+            "click .btn-copy": "copyToClipboard"
         },
         partials: [
             "partials/_alert.html"
@@ -103,8 +104,7 @@ define([
                 this.setConfig(this.model.config);
             }
 
-            this.data.adminCallback = window.location.protocol+"//"+window.location.host + "/admin/oauthReturn.html";
-            this.data.enduserCallback =  window.location.protocol+"//"+window.location.host + "/oauthReturn.html";
+            this.data.uri =  window.location.protocol+"//"+window.location.host + "/";
 
             AdminUtils.getAvailableResourceEndpoints().then((resources) => {
                 this.data.resources = resources;
@@ -169,6 +169,13 @@ define([
                     ]
                 });
             });
+        },
+
+        copyToClipboard: function(e) {
+            // Select the content
+            $(e.currentTarget).closest(".input-group").find("input").select();
+            // Copy to the clipboard
+            document.execCommand('copy');
         },
 
         getConfig: function() {
