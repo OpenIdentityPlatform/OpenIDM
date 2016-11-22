@@ -406,6 +406,9 @@ define([
                     if(recon.state === "CANCELED") {
                         text = $.t("templates.mapping.lastSyncCanceled");
                         type = "DANGER";
+                    } else if(recon.state === "FAILED") {
+                        text = $.t("templates.mapping.lastSyncFailed");
+                        type = "DANGER";
                     } else if(recon.state === "ACTIVE") {
                         text = $.t("templates.mapping.inProgress") + ": ";
 
