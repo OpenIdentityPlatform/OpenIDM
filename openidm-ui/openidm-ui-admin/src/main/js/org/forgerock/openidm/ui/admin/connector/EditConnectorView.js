@@ -421,7 +421,7 @@ define([
             event.preventDefault();
 
             var updatedForm =  this.cleanseObject(form2js('connectorForm', '.', false)),
-                patch = this.generateConnectorPatch(this.model.originalForm, updatedForm, this.connectorTypeRef.connectorSaved);
+                patch = this.generateConnectorPatch(this.model.originalForm, updatedForm, this.connectorTypeRef.connectorSaved, this.connectorTypeRef);
 
             ConfigDelegate.patchEntity({"id": this.data.systemType + "/" + this.data.connectorId}, patch).then((preTestResult) => {
                 this.connectorTest(ConnectorDelegate.testConnector(preTestResult), preTestResult, updatedForm);
@@ -499,7 +499,7 @@ define([
          *
          * Generates the connector patch object and makes a call to any custom logic per connector needs
          */
-        generateConnectorPatch: function(oldForm, currentForm, connectorSpecificChanges) {
+        generateConnectorPatch: function(oldForm, currentForm, connectorSpecificChangesEvent, connector) {
             var patch;
 
             patch = ObjectUtil.generatePatchSet(currentForm, oldForm);
@@ -510,8 +510,8 @@ define([
                 value : false
             });
 
-            if(connectorSpecificChanges) {
-                patch = connectorSpecificChanges.call(this, patch, this.getConnectorConfig());
+            if(connectorSpecificChangesEvent) {
+                patch = connectorSpecificChangesEvent.call(this, patch, this.getConnectorConfig(), connector);
             }
 
             return patch;

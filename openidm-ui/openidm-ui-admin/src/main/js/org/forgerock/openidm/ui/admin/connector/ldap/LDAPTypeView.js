@@ -253,27 +253,7 @@ define([
                 type: BootstrapDialog.TYPE_DEFAULT,
                 message: this.$el.find("#certContainer").clone().attr("id","certificateContainerClone"),
                 onshown : function (dialogRef) {
-                    var saveBtn = dialogRef.$modalFooter.find("#sslSaveButton"),
-                        textarea = dialogRef.$modalDialog.find("textarea"),
-                        updateBtnStatus = function () {
-                            if (textarea.attr("data-validation-status") === "ok") {
-                                saveBtn.prop("disabled", false);
-                                dialogRef.$modalDialog.find("textarea").toggleClass("field-error", false);
-
-                            } else {
-                                saveBtn.prop("disabled", true);
-                                dialogRef.$modalDialog.find("textarea").toggleClass("field-error", true);
-                            }
-                        };
-
-                    $("#certificateContainerClone").show();
-
-                    validatorsManager.bindValidators(dialogRef.$modalDialog);
-                    validatorsManager.validateAllFields(dialogRef.$modalDialog);
-
-                    textarea.on("keyup change", updateBtnStatus);
-
-                    updateBtnStatus();
+                    dialogRef.$modalDialog.find("#certificateContainerClone").show();
                 },
                 buttons: [{
                     label: $.t('common.form.cancel'),
@@ -290,7 +270,7 @@ define([
                                 certField;
 
                             if (!saveBtn.prop("disabled")) {
-                                certField = _this.$el.find("#certContainer").find('[name=certificate]');
+                                certField = _this.$el.find("#certContainer").find('.certificate');
 
                                 certField.text($('#certificateContainerClone').find('textarea').val());
                                 certField.val(certField.text()); // seems to be necessary for IE
@@ -305,27 +285,7 @@ define([
             });
         },
 
-        connectorValidate: function(callback, details) {
-            if(this.$el.find("#syncBaseContext").is(":checked")) {
-                details.configurationProperties.baseContextsToSynchronize = details.configurationProperties.baseContexts;
-            }
-
-            if (this.$el.find("#certificate").val().length) {
-                securityDelegate.uploadCert("truststore", "openidm_" +details.name, this.$el.find("#certificate").val()).then(function () {
-                    if(callback) {
-                        callback(details);
-                    }
-                });
-            } else {
-                securityDelegate.deleteCert("truststore", "openidm_" +details.name).always(function () {
-                    if(callback) {
-                        callback(details);
-                    }
-                });
-            }
-        },
-
-        connectorSaved: function(patch, connectorConfig) {
+        connectorSaved: function(patch, connectorConfig, connector) {
             if(this.$el.find("#syncBaseContext").is(":checked")) {
                 patch.push(
                     {
@@ -340,12 +300,24 @@ define([
                 );
             }
 
+            if(this.$el.find("#ssl").is(":checked") && this.$el.find("#certContainer").find('.certificate').val().length === 0 && connector.data.publicKey.length > 0) {
+                securityDelegate.deleteCert("truststore", "openidm_" +connectorConfig.name);
+                connector.data.publicKey = "";
+            } else if (this.$el.find("#ssl").is(":checked") && (connector.data.publicKey !== this.$el.find("#certContainer").find('.certificate').val())) {
+                securityDelegate.uploadCert("truststore", "openidm_" +connectorConfig.name, this.$el.find("#certContainer").find('.certificate').val());
+                connector.data.publicKey = this.$el.find("#certContainer").find('.certificate').val();
+            }
+
             return patch;
         },
 
         connectorCreate: function(details) {
             if(this.$el.find("#syncBaseContext").is(":checked")) {
                 details.configurationProperties.baseContextsToSynchronize = details.configurationProperties.baseContexts;
+            }
+
+            if(this.$el.find("#ssl").is(":checked") && this.$el.find("#certContainer").find('.certificate').val().length > 0) {
+                securityDelegate.uploadCert("truststore", "openidm_" +details.name, this.$el.find("#certContainer").find('.certificate').val());
             }
 
             return details;
