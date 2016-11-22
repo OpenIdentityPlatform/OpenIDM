@@ -81,7 +81,6 @@
             <artifactId>forgerock-util</artifactId>
         </dependency>
 
-
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jul-to-slf4j</artifactId>
@@ -98,6 +97,15 @@
                 <exclusion>
                     <artifactId>livetribe-jsr223</artifactId>
                     <groupId>org.livetribe</groupId>
+                </exclusion>
+                <!--exclude optional Activiti dependencies-->
+                <exclusion>
+                    <artifactId>spring-core</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-beans</artifactId>
+                    <groupId>org.springframework</groupId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -142,6 +150,15 @@
             <exclusions>
                 <exclusion>
                     <artifactId>spring-context</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <!--exclude optional Activiti dependencies-->
+                <exclusion>
+                    <artifactId>spring-core</artifactId>
+                    <groupId>org.springframework</groupId>
+                </exclusion>
+                <exclusion>
+                    <artifactId>spring-beans</artifactId>
                     <groupId>org.springframework</groupId>
                 </exclusion>
                 <exclusion>
