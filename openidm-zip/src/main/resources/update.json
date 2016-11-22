@@ -15,9 +15,11 @@
         "version": "5.0.0-SNAPSHOT"
     },
     "removeFile" : [
-        "bundle/json-patch-20.1.0.jar",
         "conf/endpoint-openam.json",
+        "bundle/json-patch-20.1.0.jar",
         "bin/defaults/script/ui/openamProxy.js"
+    ],
+    "removeConfig" : [
     ],
     "filesToBeIgnored" : [
         "security/keystore.jceks",
