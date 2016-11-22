@@ -15,8 +15,7 @@ define([
                 }
             ],
             selectConnector = ["connector", "ldap"],
-            selectManaged = ["managed", "User"];
-
+            selectManaged = ["managed", "User"],
             selectResult = AddMappingView.preselectMappingCard(selectConnector, connectors, managed);
 
             QUnit.equal(selectResult.name, "ldap", "Successfully selected LDAP connector");
