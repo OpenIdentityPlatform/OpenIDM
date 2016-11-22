@@ -211,6 +211,7 @@ define([
                 this.data.connectorDefaults.configurationProperties[filterProp] = filterString;
                 this.data.connectorDefaults.configurationProperties[filterProp.replace('Search', 'Synchronization')] = filterString;
                 $("#" + filterProp).val(filterString);
+                $("#" + filterProp + "Hidden").val(filterString);
             }, this));
         },
         toggleSyncBaseContext : function(event) {
