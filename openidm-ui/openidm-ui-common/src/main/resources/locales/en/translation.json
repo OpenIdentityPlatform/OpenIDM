@@ -1948,6 +1948,8 @@
             "pleaseStandBy": "Please wait.",
             "syncInProgress": "Reconciliation in progress.",
             "lastSyncCanceled": "Last reconciliation canceled.",
+            "lastSyncFailed": "Last reconciliation <span class='failure-display'>failed</span>",
+            "lastSyncFailedProgress": " after processing __processed__ of __total__ records.",
             "inProgress": "In Progress",
             "notYetSynced": "Not yet reconciled.",
             "syncStatus": "Reconciliation Status",

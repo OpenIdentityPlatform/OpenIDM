@@ -353,6 +353,10 @@ define([
                 this.setSyncCanceled(true);
                 this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
                 this.data.syncStatus = $.t("templates.mapping.lastSyncCanceled");
+            } else if(this.data.recon.state === "FAILED"){
+                this.data.syncLabel = $.t("templates.mapping.reconAnalysis.status");
+                this.data.syncStatus = $.t("templates.mapping.lastSyncFailed");
+                this.data.syncStatus += $.t("templates.mapping.lastSyncFailedProgress",{ processed: recon.progress.source.existing.processed, total: recon.progress.source.existing.total});
             } else {
                 this.data.syncLabel = $.t("templates.mapping.reconAnalysis.completed");
                 this.data.syncStatus = $.t("templates.mapping.lastSynced") + " " + dateUtil.formatDate(recon.ended,"MMMM dd, yyyy HH:mm");
