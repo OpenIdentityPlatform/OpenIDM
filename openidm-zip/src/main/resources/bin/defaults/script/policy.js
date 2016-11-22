@@ -885,9 +885,9 @@ policyProcessor = (function (policyConfig,policyImpl){
                 returnObject.result = true;
                 returnObject.failedPolicyRequirements = failedPolicyRequirements;
             } else {
-                fullObject = request.content;
                 // Perform the validation
                 if (action === "validateObject") {
+                    fullObject = request.content;
                     for (i = 0; i < resource.properties.length; i++) {
                         propName = resource.properties[i].name;
                         policies = resource.properties[i].policies;
@@ -898,6 +898,7 @@ policyProcessor = (function (policyConfig,policyImpl){
                                 propName, getPropertyValue(fullObject, propName), failedPolicyRequirements);
                     }
                 } else if (action === "validateProperty") {
+                    fullObject = openidm.read(request.resourcePath);
                     props = request.content;
                     for (propName in props) {
                         prop = getPropertyConfig(resource, propName);
