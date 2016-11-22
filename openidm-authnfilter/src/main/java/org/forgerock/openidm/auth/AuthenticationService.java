@@ -660,19 +660,15 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                             description ="Returns an auth-token used for OpenID Connect or OAuth flow.",
                             errors = {
                                     @ApiError(
-                                            id = "badRequest",
                                             code = 400,
                                             description = "Bad request"),
                                     @ApiError(
-                                            id = "idpNotFound",
                                             code = 404,
                                             description = "Identity provider not found"),
                                     @ApiError(
-                                            id = "tokenNotFound",
                                             code = 404,
                                             description = "Unable to retrieve token"),
                                     @ApiError(
-                                            id = "internalError",
                                             code = 500,
                                             description = "Unexpected condition"),
                             }),
@@ -693,7 +689,6 @@ public class AuthenticationService implements SingletonResourceProvider, Identit
                                     + " but that it does work if provided using traditional REST clients.",
                             errors = {
                                     @ApiError(
-                                            id = "forbidden",
                                             code = 403,
                                             description = "Reauthentication failure")
                             }),

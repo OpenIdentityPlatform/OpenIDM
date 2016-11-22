@@ -92,7 +92,6 @@ public class EmailServiceImpl implements SingletonResourceProvider {
             description = "Send email",
             errors = {
                     @ApiError(
-                            id = "badRequest",
                             code = 400,
                             description = "Indicates that the request could not be understood by "
                                     + "the resource due to malformed syntax.")

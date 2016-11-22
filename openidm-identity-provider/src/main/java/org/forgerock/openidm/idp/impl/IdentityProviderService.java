@@ -263,7 +263,6 @@ public class IdentityProviderService implements SingletonResourceProvider {
             description = "Retrieves all Identity Provider Configurations that are supported.",
             errors = {
                     @ApiError(
-                            id = "badRequest",
                             code = 400,
                             description = "Indicates that the request could not be understood by "
                                     + "the resource due to malformed syntax.")
@@ -279,7 +278,6 @@ public class IdentityProviderService implements SingletonResourceProvider {
             description = "Retrieves a user's profile from an Identity Provider.",
             errors = {
                     @ApiError(
-                            id = "badRequest",
                             code = 400,
                             description = "Indicates that the request could not be understood by "
                                     + "the resource due to malformed syntax.")
@@ -312,7 +310,6 @@ public class IdentityProviderService implements SingletonResourceProvider {
             description = "Retrieves all Identity Provider configurations with client-secrets removed.",
             errors = {
                     @ApiError(
-                            id = "badRequest",
                             code = 400,
                             description = "Indicates that the request could not be understood by "
                                     + "the resource due to malformed syntax.")
