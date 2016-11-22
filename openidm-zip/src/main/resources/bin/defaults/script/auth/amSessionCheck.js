@@ -17,7 +17,7 @@ var base64 = Packages.org.forgerock.util.encode.Base64url,
     id_token = (httpRequest.getHeaders().getFirst('authToken').toString()+""),
     provider = (httpRequest.getHeaders().getFirst('provider').toString()+""),
     resolverConfig = properties.resolvers.filter(function (r) {return r.name === provider;})[0],
-    referer = httpRequest.getHeaders().getFirst('Referer').toString(),
+    referer = (httpRequest.getHeaders().getFirst('Referer').toString()+""),
     parts = id_token.split('.'),
     claimsContent = parts[1],
     claims = JSON.parse(new java.lang.String(base64.decode(claimsContent))),
@@ -98,7 +98,9 @@ if (resolverConfig.end_session_endpoint) {
     });
     modifiedMap.logoutUrl = resolverConfig.end_session_endpoint +
         "?id_token_hint=" + id_token +
-        "&post_logout_redirect_uri=" + referer;
+        // Internet Explorer 11 (and possibly others) will include the hash fragment in the referer
+        // We have to strip it out to get the basic URL for the UI context.
+        "&post_logout_redirect_uri=" + referer.replace(/#.*/, '');
     security.authorization = modifiedMap;
 }
 security;
