@@ -263,7 +263,6 @@ public class RestService implements SingletonResourceProvider {
                     + "through in the response.",
             errors = {
                     @ApiError(
-                            id = "badRequest",
                             code = 400,
                             description = "Request could not be understood by the resource due to malformed syntax.")
             }),

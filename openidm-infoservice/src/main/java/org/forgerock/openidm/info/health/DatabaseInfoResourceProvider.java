@@ -65,7 +65,6 @@ public class DatabaseInfoResourceProvider extends AbstractInfoResourceProvider {
             description = "Read BoneCP DB connection pool statistics.",
             errors = {
                     @ApiError(
-                            id="notSupported",
                             code=ResourceException.UNAVAILABLE,
                             description = "If BoneCP is not configured as the data source connection pool."
                     )
