@@ -72,7 +72,9 @@ import org.forgerock.guava.common.base.Strings;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.CreateRequest;
+import org.forgerock.json.resource.DeleteRequest;
 import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotFoundException;
 import org.forgerock.json.resource.PatchOperation;
 import org.forgerock.json.resource.PatchRequest;
 import org.forgerock.json.resource.QueryRequest;
@@ -145,6 +147,7 @@ public class UpdateManagerImpl implements UpdateManager {
     static final JsonPointer UPDATE_RESOURCE = new JsonPointer("/update/resource");
     static final JsonPointer UPDATE_RESTARTREQUIRED = new JsonPointer("/update/restartRequired");
     static final JsonPointer REMOVEFILE = new JsonPointer("/removeFile");
+    static final JsonPointer REMOVECONFIG = new JsonPointer("/removeConfig");
     static final JsonPointer FILES_TO_BE_IGNORED = new JsonPointer("/filesToBeIgnored");
 
     protected final AtomicBoolean restartImmediately = new AtomicBoolean(false);
@@ -944,8 +947,18 @@ public class UpdateManagerImpl implements UpdateManager {
                     repoConfPath = Paths.get("db", getDbDirName(), "conf");
                 }
 
+                // get a list of paths to be ignored
+                final List<Path> pathsToBeIgnored = updateConfig.get(FILES_TO_BE_IGNORED)
+                        .as(listOf(new Function<JsonValue, Path, NeverThrowsException>() {
+                            @Override
+                            public Path apply(JsonValue value) throws NeverThrowsException {
+                                return Paths.get(value.asString());
+                            }
+                        }));
+
                 // Start by removing all files we no longer need
-                for (String file : updateConfig.get(REMOVEFILE).asList(String.class)) {
+                for (String file : updateConfig.get(REMOVEFILE).defaultTo(Collections.EMPTY_LIST)
+                        .asList(String.class)) {
                     try {
                         final FileState fileState = fileStateChecker.getCurrentFileState(Paths.get(file));
                         if (Files.deleteIfExists(Paths.get(installDir, file))) {
@@ -955,8 +968,28 @@ public class UpdateManagerImpl implements UpdateManager {
                                     .setActionTaken(UpdateAction.REMOVED.toString());
                             logUpdate(updateEntry.addFile(fileEntry.toJson()));
                         }
+                        // Also remove the file from the project if present
+                        Files.deleteIfExists(Paths.get(projectDir, file));
                     } catch (IOException e) {
-                        logger.debug("Unable to remove file " + file + ", continuing update", e);
+                        logger.warn("Unable to remove file " + file + ", continuing update", e);
+                    }
+                }
+
+                // Next remove no-longer-needed configs
+                for (String file : updateConfig.get(REMOVECONFIG).defaultTo(Collections.EMPTY_LIST)
+                        .asList(String.class)) {
+                    try {
+                        Path filepath = Paths.get("conf/" + file);
+                        if (getFileType(pathsToBeIgnored, filepath, repoConfPath).equals(FileType.CONF)) {
+                            try {
+                                deleteRepoConfig(filepath);
+                            } catch (NotFoundException e) {
+                                logger.warn("Could not find a config to remove for " + file
+                                        + ", continuing update", e);
+                            }
+                        }
+                    } catch (IOException e) {
+                        logger.warn("Unable to remove config " + file + ", continuing update", e);
                     }
                 }
 
@@ -978,7 +1011,7 @@ public class UpdateManagerImpl implements UpdateManager {
                                     fileEntry.setBackupFile(backupPath.toString().substring(installDir.length() + 1));
                                     logUpdate(updateEntry.addFile(fileEntry.toJson()));
                                 } catch (Exception e) {
-                                    logger.debug("Failed to log updated file: " + filePath.toString());
+                                    logger.warn("Failed to log updated file: " + filePath.toString(), e);
                                 }
                             }
                         });
@@ -987,14 +1020,6 @@ public class UpdateManagerImpl implements UpdateManager {
                 // if not in project, treat project/conf as static
                 // summary: prevent .json overwrite in project dir
 
-                // get a list of path to be ignored
-                final List<Path> pathsToBeIgnored = updateConfig.get(FILES_TO_BE_IGNORED)
-                        .as(listOf(new Function<JsonValue, Path, NeverThrowsException>() {
-                            @Override
-                            public Path apply(JsonValue value) throws NeverThrowsException {
-                                return Paths.get(value.asString());
-                            }
-                        }));
                 for (final Path path : archive.getFiles()) {
                     logger.trace("processing archive file: {}", path);
                     FileType filetype = getFileType(pathsToBeIgnored, path, repoConfPath);
@@ -1006,8 +1031,6 @@ public class UpdateManagerImpl implements UpdateManager {
                             replaceBundle(bundleHandler, path);
                             break;
                         case CONF:
-                            // TODO: Support config deletion
-
                             if (!projectDir.equals(installDir)
                                     && isLocalProject(projectDir, installDir)
                                     && path.startsWith(projectDir.substring(installDir.length() + 1) + "/" + CONF_PATH)) {
@@ -1168,6 +1191,15 @@ public class UpdateManagerImpl implements UpdateManager {
             logUpdate(updateEntry.addFile(fileEntry.toJson()));
         }
 
+        void deleteRepoConfig(Path path) throws IOException, UpdateException {
+            UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
+                    .setFilePath(path.toString())
+                    .setFileState(fileStateChecker.getCurrentFileState(path).name());
+            deleteConfig(ContextUtil.createInternalContext(), path);
+            fileEntry.setActionTaken(UpdateAction.REMOVED.toString());
+            logUpdate(updateEntry.addFile(fileEntry.toJson()));
+        }
+
         void updateStaticFile(Path path) throws IOException, UpdateException {
             UpdateFileLogEntry fileEntry = new UpdateFileLogEntry()
                     .setFilePath(path.toString())
@@ -1277,8 +1309,8 @@ public class UpdateManagerImpl implements UpdateManager {
         /**
          * Create a config object on the router.
          *
-         * @param context the context for the patch request.
-         * @param configFile the config file to be patched.
+         * @param context the context for the create request.
+         * @param configFile the config file to be created.
          * @param content a JsonValue containing the new config to be created.
          * @throws UpdateException
          */
@@ -1323,6 +1355,28 @@ public class UpdateManagerImpl implements UpdateManager {
             } catch (ResourceException e) {
                 throw new UpdateException("Patch request failed", e);
             }
+        }
+
+        /**
+         * Delete a config object on the router.
+         *
+         * @param context the context for the delete request.
+         * @param configFile the config file to be deleted.
+         * @throws ResourceException
+         */
+        private void deleteConfig(final Context context, final Path configFile) throws ResourceException {
+            final String pid = parsePid(configFile.getFileName().toString());
+
+            // XXX undo the work by parsePid to make sure we call delete on config properly
+            final String[] paths = pid.split("/");
+            final DeleteRequest request;
+            if (paths.length == 2)
+                request = Requests.newDeleteRequest("config/" + paths[0], paths[1]);
+            else {
+                request = Requests.newDeleteRequest("config", paths[0]);
+            }
+
+            UpdateManagerImpl.this.connectionFactory.getConnection().delete(new UpdateContext(context), request);
         }
 
         UpdateLogEntry getUpdateEntry() {
