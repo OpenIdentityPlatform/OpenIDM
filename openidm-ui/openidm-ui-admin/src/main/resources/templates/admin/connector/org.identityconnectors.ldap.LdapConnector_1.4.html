@@ -189,7 +189,6 @@
                            autocomplete="off"
                            type="text"
                            id="accountSearchFilter"
-                           name="configurationProperties.accountSearchFilter"
                            data-target="#userFilterModal"
                            placeholder="{{t "templates.connector.ldapConnector.noFilter"}}"
                            value="{{connectorDefaults.configurationProperties.accountSearchFilter}}">
@@ -199,7 +198,11 @@
                         </button>
                     </div>
 
-
+                    <input class="form-control"
+                           type="hidden"
+                           id="accountSearchFilterHidden"
+                           name="configurationProperties.accountSearchFilter"
+                           >
                 </div>
                 <div class="col-sm-offset-3">
                     <span class="help-block">{{t "templates.connector.ldapConnector.filterLdapAttr"}}</span>
@@ -256,7 +259,6 @@
                            autocomplete="off"
                            type="text"
                            id="groupSearchFilter"
-                           name="configurationProperties.groupSearchFilter"
                            data-target="#userFilterModal"
                            placeholder="{{t "templates.connector.ldapConnector.noFilter"}}"
                            value="{{connectorDefaults.configurationProperties.groupSearchFilter}}">
@@ -264,6 +266,12 @@
                         <button class="clean-btn filter" data-toggle="modal" type="button">
                             <i class="fa fa-pencil"></i>
                         </button>
+
+                        <input class="form-control"
+                           type="hidden"
+                           id="groupSearchFilterHidden"
+                           name="configurationProperties.groupSearchFilter"
+                           >
                     </div>
                 </div>
 
