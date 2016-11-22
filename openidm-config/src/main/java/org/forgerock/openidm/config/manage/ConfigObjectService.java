@@ -43,6 +43,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
@@ -61,6 +63,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -83,6 +86,7 @@ import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.script.ScriptedPatchValueTransformerFactory;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -112,7 +116,7 @@ import org.slf4j.LoggerFactory;
         @Property(name = ServerConstants.ROUTER_PREFIX, value = "/config*")
 })
 @Service(value = { RequestHandler.class })
-public class ConfigObjectService implements RequestHandler, ClusterEventListener {
+public class ConfigObjectService implements RequestHandler, ClusterEventListener, Describable<ApiDescription, Request> {
 
     private static final Logger logger = LoggerFactory.getLogger(ConfigObjectService.class);
     private final ConfigAuditEventLogger auditLogger;
@@ -128,12 +132,14 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
     private static final String EVENT_RESOURCE_ACTION = "action";
     private static final String EVENT_PATCH_OPERATIONS = "patchOperations";
 
-   private enum ConfigAction {
+    private enum ConfigAction {
         CREATE, UPDATE, DELETE, PATCH
-   }
+    }
 
     @Reference
     ConfigurationAdmin configAdmin;
+
+    private final ApiDescription apiDescription;
 
     /**
      * The ClusterManagementService used for sending and receiving cluster events
@@ -179,6 +185,7 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
 
     public ConfigObjectService(final ConfigAuditEventLogger configAuditEventLogger) {
         this.auditLogger = configAuditEventLogger;
+        this.apiDescription = ConfigObjectServiceApiDescription.build();
     }
 
     @Override
@@ -676,10 +683,11 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
                                     content.get(ConfigBootstrapHelper.CONFIG_ALIAS).asString(),
                                     content.get(ConfigBootstrapHelper.SERVICE_PID).asString(),
                                     content.get(ConfigBootstrapHelper.SERVICE_FACTORY_PID).asString());
-                            handler.handleResource(newResourceResponse(id, resource.getRevision(), config));
-
-                            auditContent.add(config);
-
+                            // filter out factory-group entries from result-set
+                            if (id != null && config.isNotNull()) {
+                                handler.handleResource(newResourceResponse(id, resource.getRevision(), config));
+                                auditContent.add(config);
+                            }
                             return true;
                         }
                     }))
@@ -889,6 +897,26 @@ public class ConfigObjectService implements RequestHandler, ClusterEventListener
             ops.add(patchOperation.toJsonValue().getObject());
         }
         return ops;
+    }
+
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> producer) {
+        return apiDescription;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return apiDescription;
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        // empty
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        // empty
     }
 
     /**
