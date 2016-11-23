@@ -195,7 +195,7 @@
                         "userEditable" : true
                     },
                     "address2" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "title" : "Address 2",
                         "viewable" : true,
                         "userEditable" : true
@@ -208,19 +208,19 @@
                         "userEditable" : true
                     },
                     "city" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "title" : "City",
                         "viewable" : true,
                         "userEditable" : true
                     },
                     "country" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "title" : "Country",
                         "viewable" : true,
                         "userEditable" : true
                     },
                     "postalCode" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "title" : "Postal Code",
                         "viewable" : true,
                         "userEditable" : true
@@ -235,19 +235,19 @@
                     "employeeNumber" : {
                         "title" : "Employee Number",
                         "viewable" : true,
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "searchable" : true,
                         "userEditable" : false
                     },
                     "displayName" : {
                         "title" : "Display Name",
                         "viewable" : true,
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "searchable" : true,
                         "userEditable" : false
                     },
                     "startDate" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "viewable" : true,
                         "searchable" : false,
                         "userEditable" : false,
@@ -258,7 +258,7 @@
                         ]
                     },
                     "endDate" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "viewable" : true,
                         "searchable" : false,
                         "userEditable" : false,
@@ -444,20 +444,20 @@
                         }
                     },
                     "telephoneNumber" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "title" : "Mobile Phone",
                         "viewable" : true,
                         "userEditable" : true,
                         "pattern" : "^\\+?([0-9\\- \\(\\)])*$"
                     },
                     "stateProvince" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "title" : "State/Province",
                         "viewable" : true,
                         "userEditable" : true
                     },
                     "postalAddress" : {
-                        "type" : "string",
+                        "type" : ["string","null"],
                         "title" : "Address 1",
                         "viewable" : true,
                         "userEditable" : true

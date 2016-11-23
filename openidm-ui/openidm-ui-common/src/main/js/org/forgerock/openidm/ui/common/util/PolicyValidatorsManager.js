@@ -85,7 +85,12 @@ define([
                             filteredPolicies = _.filter(property.policies, function (policy) {
                                 return obj.excludedClientSidePolicies.indexOf(policy.policyId) === -1;
                             }),
-                            policyNames = _.map(filteredPolicies, "policyId");
+                            policyNames = _.map(filteredPolicies, "policyId"),
+                            existingValidators = input.attr("data-validator");
+
+                        if (existingValidators) {
+                            policyNames = policyNames.concat(existingValidators.split(' '));
+                        }
 
                         if (input.length) {
                             input.attr("data-validator", policyNames.join(" "));
