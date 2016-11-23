@@ -264,9 +264,9 @@
         <openicf.dbtableconnector.version>1.1.0.2</openicf.dbtableconnector.version>
         <openicf.remoteconnectorserver.version />
         <openicf.ldapconnector.version>1.4.3.0</openicf.ldapconnector.version>
-        <openicf.groovyconnector.version>1.4.3.0</openicf.groovyconnector.version>
-        <openicf.sshconnector.version>1.4.1.0</openicf.sshconnector.version>
-        <openicf.kerberosconnector.version>1.4.1.0</openicf.kerberosconnector.version>
+        <openicf.groovyconnector.version>1.4.2.1</openicf.groovyconnector.version>
+        <openicf.sshconnector.version>1.4.0.0</openicf.sshconnector.version>
+        <openicf.kerberosconnector.version>1.4.0.0</openicf.kerberosconnector.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
