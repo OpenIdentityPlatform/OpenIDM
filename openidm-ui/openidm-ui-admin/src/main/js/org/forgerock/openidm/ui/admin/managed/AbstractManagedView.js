@@ -47,7 +47,7 @@ define([
 
             managedObject = this.handlePreferences(managedObject);
 
-            this.combineSchemaAndProperties();
+            this.data.currentManagedObject = this.combineSchemaAndProperties(this.data.currentManagedObject);
 
             promises.push(ConfigDelegate.updateEntity("managed", {"objects" : saveObject.objects}));
 
@@ -132,17 +132,21 @@ define([
             }
         },
 
-        combineSchemaAndProperties: function () {
-            if (this.data.currentManagedObject) {
-                _.each(this.data.currentManagedObject.properties, _.bind(function (property) {
+        combineSchemaAndProperties: function (managedObject) {
+            var currentManagedObject = _.clone(managedObject);
+
+            if (currentManagedObject) {
+                _.each(currentManagedObject.properties, _.bind(function (property) {
                     if (property.type === "virtual") {
-                        this.data.currentManagedObject.schema.properties[property.name].isVirtual = true;
+                        currentManagedObject.schema.properties[property.name].isVirtual = true;
                     }
-                    _.extend(this.data.currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectEvents"));
+                    _.extend(currentManagedObject.schema.properties[property.name], _.omit(property,"type","name","addedEvents","selectEvents"));
                 }, this));
 
-                delete this.data.currentManagedObject.properties;
+                delete currentManagedObject.properties;
             }
+
+            return currentManagedObject;
         },
         handlePreferences: function (managedObject) {
             var preferencesTabValue,
