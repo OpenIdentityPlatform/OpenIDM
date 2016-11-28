@@ -18,6 +18,8 @@ package org.forgerock.openidm.managed;
 import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
 
 import org.forgerock.json.JsonValue;
+import org.forgerock.json.resource.Connection;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourcePath;
@@ -32,10 +34,10 @@ public class ForwardRelationshipValidator extends RelationshipValidator {
     /**
      * Constructs a validator to validate forward only relationships.
      *
-     * @param relationshipProvider the provider that owns this validator.
+     * @param connectionFactory the ConnectionFactory used to obtain Connection instances to make repo requests
      */
-    public ForwardRelationshipValidator(RelationshipProvider relationshipProvider) {
-        super(relationshipProvider);
+    public ForwardRelationshipValidator(ConnectionFactory connectionFactory) {
+        super(connectionFactory);
     }
 
     /**

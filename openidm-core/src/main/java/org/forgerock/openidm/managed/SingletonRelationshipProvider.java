@@ -74,8 +74,8 @@ class SingletonRelationshipProvider extends RelationshipProvider implements Sing
      */
     public SingletonRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath,
             final SchemaField schemaField, final ActivityLogger activityLogger,
-            final ManagedObjectSetService managedObjectSyncService) {
-        super(connectionFactory, resourcePath, schemaField, activityLogger, managedObjectSyncService);
+            final ManagedObjectSetService managedObjectSyncService, final RelationshipValidator relationshipValidator) {
+        super(connectionFactory, resourcePath, schemaField, activityLogger, managedObjectSyncService, relationshipValidator);
 
         final Router router = new Router();
         router.addRoute(STARTS_WITH,

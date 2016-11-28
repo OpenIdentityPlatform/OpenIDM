@@ -18,7 +18,7 @@ package org.forgerock.openidm.managed;
 import static java.text.MessageFormat.format;
 import static org.forgerock.openidm.util.RelationshipUtil.REFERENCE_ID;
 
-import org.forgerock.openidm.util.ResourceUtil;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.util.annotations.VisibleForTesting;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
@@ -45,22 +45,10 @@ abstract class RelationshipValidator {
 
     private static final Logger logger = LoggerFactory.getLogger(RelationshipValidator.class);
 
-    /**
-     * The relationship provider that owns this validator.
-     */
-    private RelationshipProvider relationshipProvider;
+    protected final ConnectionFactory connectionFactory;
 
-    RelationshipValidator(RelationshipProvider relationshipProvider) {
-        this.relationshipProvider = relationshipProvider;
-    }
-
-    /**
-     * Simple getter to return the provider that owns this validator.
-     *
-     * @return the provider that owns this validator.
-     */
-    RelationshipProvider getRelationshipProvider() {
-        return relationshipProvider;
+    RelationshipValidator(ConnectionFactory connectionFactory) {
+        this.connectionFactory = connectionFactory;
     }
 
     /**
@@ -100,7 +88,7 @@ abstract class RelationshipValidator {
      *                                        existing relationships are specified in the invocation
      * @throws ResourceException BadRequestException when the relationship is invalid, otherwise for other issues.
      */
-    final void validateRelationship(final JsonValue relationshipField, ResourcePath referrerId, Context context,
+    void validateRelationship(final JsonValue relationshipField, ResourcePath referrerId, Context context,
                                     boolean performDuplicateAssignmentCheck)
             throws ResourceException {
         if (relationshipField.isNull()) {
@@ -114,8 +102,8 @@ abstract class RelationshipValidator {
             throw new BadRequestException(message);
         }
         try {
-            validateSuccessfulReadResponse(context, relationshipField, referrerId, relationshipProvider.getConnection()
-                    .read(context, newValidateRequest(relationshipField, context)), performDuplicateAssignmentCheck);
+            validateSuccessfulReadResponse(context, relationshipField, referrerId,
+                    connectionFactory.getConnection().read(context, newValidateRequest(relationshipField, context)), performDuplicateAssignmentCheck);
         } catch (NotFoundException e) {
             String message = format("The referenced relationship ''{0}'', does not exist",
                     relationshipField.get(REFERENCE_ID).asString());

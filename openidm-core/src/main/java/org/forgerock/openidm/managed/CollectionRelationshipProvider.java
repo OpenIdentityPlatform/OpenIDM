@@ -91,9 +91,9 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
      */
     public CollectionRelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
             final SchemaField schemaField, final ActivityLogger activityLogger,
-            final ManagedObjectSetService managedObjectSyncService) {
+            final ManagedObjectSetService managedObjectSyncService, final RelationshipValidator relationshipValidator) {
         super(connectionFactory, resourcePath, schemaField, activityLogger,
-                managedObjectSyncService);
+                managedObjectSyncService, relationshipValidator);
 
         final Router router = new Router();
         router.addRoute(RoutingMode.STARTS_WITH, 

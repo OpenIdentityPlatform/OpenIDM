@@ -57,7 +57,7 @@ final class RelationshipEqualityHash {
         The hashCode must be composed of the relationship _ref and all non _id and _rev fields of the _refProperties.
         Note that these values must compose the hash in the same order, so the fields are hashed in the same order.
          */
-        List<Object> hashConstituents = new ArrayList();
+        List<Object> hashConstituents = new ArrayList<Object>();
         hashConstituents.add(relationship.get(REFERENCE_ID).getObject());
         //A TreeSet is a SortedSet, so members will be retrieved in sorted order
         Set<String> refPropertyConstituentSet = new TreeSet<>(relationshipRefProperties.keys());

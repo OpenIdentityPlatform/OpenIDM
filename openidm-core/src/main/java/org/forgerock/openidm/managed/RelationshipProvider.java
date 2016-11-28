@@ -287,10 +287,10 @@ public abstract class RelationshipProvider {
             final ManagedObjectSetService managedObjectSetService) {
         if (relationshipField.isArray()) {
             return new CollectionRelationshipProvider(connectionFactory, resourcePath, relationshipField,
-                    activityLogger, managedObjectSetService);
+                    activityLogger, managedObjectSetService, newRelationshipValidator(connectionFactory, relationshipField));
         } else {
             return new SingletonRelationshipProvider(connectionFactory, resourcePath, relationshipField,
-                    activityLogger, managedObjectSetService);
+                    activityLogger, managedObjectSetService, newRelationshipValidator(connectionFactory, relationshipField));
         }
     }
 
@@ -302,19 +302,26 @@ public abstract class RelationshipProvider {
      * @param schemaField The field used to represent this relationship in the parent object
      * @param activityLogger The audit activity logger to use
      * @param managedObjectSetService Service to send sync events to
+     * @param relationshipValidator the RelationshipValidator to which relationship validation will be delegated
      */
     protected RelationshipProvider(final ConnectionFactory connectionFactory, final ResourcePath resourcePath, 
             final SchemaField schemaField, final ActivityLogger activityLogger,
-            final ManagedObjectSetService managedObjectSetService) {
+            final ManagedObjectSetService managedObjectSetService, final RelationshipValidator relationshipValidator) {
         this.connectionFactory = connectionFactory;
         this.resourceContainer = resourcePath;
         this.schemaField = schemaField;
         this.propertyPtr = new JsonPointer(schemaField.getName());
         this.activityLogger = activityLogger;
         this.managedObjectSetService = managedObjectSetService;
-        this.relationshipValidator = (schemaField.isReverseRelationship())
-                ? new ReverseRelationshipValidator(this)
-                : new ForwardRelationshipValidator(this);
+        this.relationshipValidator = relationshipValidator;
+    }
+
+    private static RelationshipValidator newRelationshipValidator(ConnectionFactory connectionFactory,
+            SchemaField relationshipField) {
+        if (relationshipField.isReverseRelationship()) {
+            return new ReverseRelationshipValidator(connectionFactory, relationshipField);
+        }
+        return new ForwardRelationshipValidator(connectionFactory);
     }
 
     /**

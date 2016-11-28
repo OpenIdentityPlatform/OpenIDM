@@ -29,6 +29,7 @@ import java.util.LinkedList;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
@@ -39,6 +40,7 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.services.context.Context;
+import org.forgerock.util.annotations.VisibleForTesting;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -50,7 +52,8 @@ import org.slf4j.LoggerFactory;
 public class ReverseRelationshipValidator extends RelationshipValidator {
     private static final Logger logger = LoggerFactory.getLogger(ReverseRelationshipValidator.class);
 
-    private enum ReverseReferenceType {
+    @VisibleForTesting
+    enum ReverseReferenceType {
         ARRAY, RELATIONSHIP, NA;
 
         private static ReverseReferenceType parseReverseReferenceType(JsonValue configResponse, String relationshipPropertyName) {
@@ -84,14 +87,14 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
 
     /**
      * Constructs the validator to validate reverse relationships.
-     *
-     * @param relationshipProvider the provider that owns this validator.
+     * @param connectionFactory the Connection used to access the repo
+     * @param relationshipField the SchemField corresponding to the relationship
      */
-    public ReverseRelationshipValidator(RelationshipProvider relationshipProvider) {
-        super(relationshipProvider);
-        relationshipIsArray = relationshipProvider.getSchemaField().isArray();
-        relationshipPropertyName = relationshipProvider.getSchemaField().getName();
-        relationshipReversePropertyName = relationshipProvider.getSchemaField().getReversePropertyName();
+    public ReverseRelationshipValidator(ConnectionFactory connectionFactory, SchemaField relationshipField) {
+        super(connectionFactory);
+        relationshipIsArray = relationshipField.isArray();
+        relationshipPropertyName = relationshipField.getName();
+        relationshipReversePropertyName = relationshipField.getReversePropertyName();
     }
 
     /**
@@ -227,7 +230,7 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
                     .setAdditionalParameter(EDGE_QUERY_VERTEX_2_ID, vertex2Id)
                     .setAdditionalParameter(EDGE_QUERY_VERTEX_2_FIELD_NAME, vertex2FieldName);
             Collection<ResourceResponse> edgeResponses = new LinkedList<>();
-            getRelationshipProvider().getConnection().query(context, edgeQueryRequest, edgeResponses);
+            connectionFactory.getConnection().query(context, edgeQueryRequest, edgeResponses);
             return edgeResponses;
         } finally {
             measure.end();
@@ -260,13 +263,14 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
         }
     }
 
-    private ReverseReferenceType getReverseReferenceType(String relationshipRef, Context context) {
+    @VisibleForTesting
+    ReverseReferenceType getReverseReferenceType(String relationshipRef, Context context) {
         if (relationshipRef.startsWith("managed/")) {
             final EventEntry measure = Publisher.start(
                     Name.get("openidm/internal/reverseRelationshipValidator/getReverseReferenceType"), null, null);
             try {
                 final String managedObjectName = getManagedObjectName(relationshipRef);
-                final ResourceResponse response = getRelationshipProvider().getConnection().read(context,
+                final ResourceResponse response = connectionFactory.getConnection().read(context,
                         Requests.newReadRequest(CONFIG_MANAGED_PATH));
                 final JsonValue configProperties = parsePropertiesFromConfigResponse(response.getContent(), managedObjectName);
                 return ReverseReferenceType.parseReverseReferenceType(configProperties, relationshipReversePropertyName);

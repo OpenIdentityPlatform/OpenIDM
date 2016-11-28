@@ -26,6 +26,7 @@ import org.forgerock.json.resource.PreconditionFailedException;
  * a _rev mismatch.
  */
 public class DuplicateRelationshipException extends PreconditionFailedException {
+    private static final long serialVersionUID = 1L;
     public DuplicateRelationshipException(String message) {
         super(message);
     }
