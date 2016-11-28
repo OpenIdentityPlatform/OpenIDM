@@ -42,6 +42,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -53,6 +55,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
@@ -65,6 +68,7 @@ import org.forgerock.openidm.repo.RepositoryService;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.util.DateUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -82,7 +86,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_VENDOR, value = ServerConstants.SERVER_VENDOR_NAME),
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Cluster Management Service"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/cluster*") })
-public class ClusterManager implements RequestHandler, ClusterManagementService {
+public class ClusterManager implements RequestHandler, ClusterManagementService, Describable<ApiDescription, Request> {
 
     private static final Logger logger = LoggerFactory.getLogger(ClusterManager.class);
 
@@ -95,12 +99,12 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      * Query ID for querying failed instances
      */
     public static final String QUERY_FAILED_INSTANCE = "query-cluster-failed-instances";
-    
+
     /**
      * Query ID for querying all instances
      */
     public static final String QUERY_INSTANCES = "query-cluster-instances";
-    
+
     /**
      * Query ID for getting pending cluster events
      */
@@ -109,13 +113,13 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     /**
      * Resource name when issuing requests over the router
      */
-    private static final ResourcePath REPO_RESOURCE_CONTAINER = new ResourcePath("repo", "cluster", "states");     
-    
+    private static final ResourcePath REPO_RESOURCE_CONTAINER = new ResourcePath("repo", "cluster", "states");
+
     /**
      * Resource name when issuing cluster state requests directly with the Repository Service
      */
-    private static final ResourcePath STATES_RESOURCE_CONTAINER = new ResourcePath("cluster", "states");    
-    
+    private static final ResourcePath STATES_RESOURCE_CONTAINER = new ResourcePath("cluster", "states");
+
     /**
      * Resource name when issuing cluster event requests directly with the Repository Service
      */
@@ -125,9 +129,11 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
      * The instance ID
      */
     private String instanceId;
-    
+
     @Reference
     protected RepositoryService repoService;
+
+    private ApiDescription apiDescription;
 
     /**
      * The Connection Factory
@@ -180,10 +186,10 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         JsonValue config = enhancedConfig.getConfigurationAsJson(compContext);
         init(config);
     }
-    
+
     /**
      * Initializes the Cluster Manager configuration
-     * 
+     *
      * @param config an {@link JsonValue} object representing the configuration
      */
     protected void init(JsonValue config) {
@@ -197,9 +203,10 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
         clusterConfig = clstrCfg;
         if (clusterConfig.isEnabled()) {
             enabled = true;
-            clusterManagerThread = new ClusterManagerThread(clusterConfig.getInstanceCheckInInterval(), 
+            clusterManagerThread = new ClusterManagerThread(clusterConfig.getInstanceCheckInInterval(),
             		clusterConfig.getInstanceCheckInOffset());
         }
+        apiDescription = ClusterManagerApiDescription.build();
     }
 
     @Deactivate
@@ -394,10 +401,10 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             repoService.update(updateRequest);
         }
     }
-    
+
     /**
      * Gets a list of all instances in the cluster
-     * 
+     *
      * @return a list of Map objects representing each instance in the cluster
      * @throws ResourceException
      */
@@ -685,9 +692,9 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
             logger.error("Error sending cluster event " + event.toJsonValue(), e);
         }
     }
-    
+
     /**
-     * Finds and processes any pending cluster events for this node.  The event will then 
+     * Finds and processes any pending cluster events for this node.  The event will then
      * be deleting if the processing was successful.
      */
     private void processPendingEvents() {
@@ -805,7 +812,7 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
 
                         // Check for pending cluster events
                         processPendingEvents();
-                        
+
                         // Find failed instances
                         logger.debug("Finding failed instances");
                         Map<String, InstanceState> failedInstances = findFailedInstances();
@@ -867,5 +874,25 @@ public class ClusterManager implements RequestHandler, ClusterManagementService 
     @Override
     public Promise<ResourceResponse, ResourceException> handleUpdate(Context context, UpdateRequest request) {
         return notSupported(request).asPromise();
+    }
+
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> producer) {
+        return apiDescription;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return apiDescription;
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        // empty
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        // empty
     }
 }
