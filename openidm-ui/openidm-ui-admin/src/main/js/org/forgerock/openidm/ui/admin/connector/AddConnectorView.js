@@ -69,32 +69,9 @@ define([
                 this.data.connectors = connectors.connectorRef;
 
                 //Build Connector type selection
-                this.data.versionDisplay = _.chain(this.data.connectors)
-                    .groupBy( function(connectorRef) {
-                        return connectorRef.displayName;
-                    })
-                    .pairs()
-                    .sortBy(function(connectorRef) {
-                        return connectorRef[0];
-                    })
-                    .map(function(connectorRef) {
-                        connectorRef[1].displayName = connectorRef[0];
+                this.data.versionDisplay = this.buildConnectorTypes(this.data.connectors);
 
-                        return {
-                            "groupName": connectorRef[0],
-                            "versions": connectorRef[1]
-                        };
-                    })
-                    .value();
-
-                this.data.versionDisplay = _.filter(this.data.versionDisplay, function(version) {
-                    var bundleName = version.versions[0].bundleName,
-                        excludes = [
-                            "org.forgerock.openicf.connectors.ssh-connector",
-                            "org.forgerock.openicf.connectors.groovy-connector"
-                        ];
-                    return !_.includes(excludes, bundleName);
-                }, this);
+                this.data.versionDisplay = this.filterConnectorTypes(this.data.versionDisplay);
 
                 this.data.editState = false;
                 this.data.connectorName = "";
@@ -105,6 +82,37 @@ define([
                     this.loadConnectorTemplate(callback);
                 }, this));
             }, this));
+        },
+
+        buildConnectorTypes: function(connectors) {
+            return _.chain(connectors)
+                .groupBy( function(connectorRef) {
+                    return connectorRef.displayName;
+                })
+                .pairs()
+                .sortBy(function(connectorRef) {
+                    return connectorRef[0];
+                })
+                .map(function(connectorRef) {
+                    connectorRef[1].displayName = connectorRef[0];
+
+                    return {
+                        "groupName": connectorRef[0],
+                        "versions": connectorRef[1]
+                    };
+                })
+                .value();
+        },
+
+        filterConnectorTypes: function(connectorVersions) {
+            return _.filter(connectorVersions, function(version) {
+                var bundleName = version.versions[0].bundleName,
+                    excludes = [
+                        "org.forgerock.openicf.connectors.ssh-connector",
+                        "org.forgerock.openicf.connectors.groovy-connector"
+                    ];
+                return !_.includes(excludes, bundleName);
+            }, this);
         },
 
         getProvisioner: function() {
@@ -157,7 +165,7 @@ define([
 
             ConnectorDelegate.testConnector(mergedResult).then(
                 _.bind(function(testResult) {
-                    
+
                     eventManager.sendEvent(constants.EVENT_DISPLAY_MESSAGE_REQUEST, "connectorSaved");
 
                     if (!mergedResult.objectTypes) {
