@@ -26,14 +26,11 @@ import static org.forgerock.openidm.managed.RelationshipProvider.REPO_RESOURCE_P
 import java.util.Collection;
 import java.util.LinkedList;
 
-import org.forgerock.api.models.ApiDescription;
-import org.forgerock.http.routing.Version;
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
-import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.ReadRequest;
-import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourcePath;
@@ -42,7 +39,6 @@ import org.forgerock.openidm.smartevent.EventEntry;
 import org.forgerock.openidm.smartevent.Name;
 import org.forgerock.openidm.smartevent.Publisher;
 import org.forgerock.services.context.Context;
-import org.forgerock.services.descriptor.Describable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,22 +53,18 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
     private enum ReverseReferenceType {
         ARRAY, RELATIONSHIP, NA;
 
-        private static ReverseReferenceType parseReverseReferenceType(JsonValue descriptorResponse, String relationshipPropertyName) {
-            final JsonValue relationshipProperties = descriptorResponse.get(relationshipPropertyName);
+        private static ReverseReferenceType parseReverseReferenceType(JsonValue configResponse, String relationshipPropertyName) {
+            final JsonValue relationshipProperties = configResponse.get(relationshipPropertyName);
             final JsonValue type = relationshipProperties.get("type");
-            final JsonValue isRelationship = relationshipProperties.get("isRelationship");
-            if ("array".equals(type.asString())) {
-                return ARRAY;
-            } else if ("object".equals(type.asString()) && isRelationship.isBoolean() && isRelationship.asBoolean()) {
-                /*
-                The relationship type is not json-schema-compliant, so the API Descriptor code transforms the
-                relationship type to the object type, adding an isRelationship qualifier when this transformation
-                occurs.
-                 */
-                return RELATIONSHIP;
+            if (type.isString()) {
+                if ("array".equals(type.asString())) {
+                    return ARRAY;
+                } else if ("relationship".equals(type.asString())) {
+                    return RELATIONSHIP;
+                }
             }
             logger.warn("Could not parse ReverseReferenceType for " + relationshipPropertyName + " from "
-                    + descriptorResponse.toString());
+                    + configResponse.toString());
             return NA;
         }
     };
@@ -83,7 +75,8 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
     private static final String EDGE_QUERY_VERTEX_2_ID = "vertex2Id";
     private static final String EDGE_QUERY_VERTEX_2_FIELD_NAME = "vertex2FieldName";
 
-    private static final Version IDM_VERSION = Version.version("0.0");
+    private static final ResourcePath CONFIG_MANAGED_PATH = ResourcePath.valueOf("config/managed");
+    private static final JsonPointer SCHEMA_PROPERTIES_PTR = new JsonPointer("schema/properties");
 
     private final boolean relationshipIsArray;
     private final String relationshipPropertyName;
@@ -268,27 +261,15 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
     }
 
     private ReverseReferenceType getReverseReferenceType(String relationshipRef, Context context) {
-        /*
-        Many to-be-validated relationship refs look like repo/internal/openidm-authorized. The 5.0 release only has
-        API descriptor support for managed/, and these are thus the only entities for which the type of the reverse
-        relationship ref is provided. Performing a ApiRequest against other endpoints generates an internal server error.
-        Because this method is called as part of the validation of every single relationship, I only want to disptach the
-        request if there is an expectation of its satisfaction.
-         */
         if (relationshipRef.startsWith("managed/")) {
             final EventEntry measure = Publisher.start(
                     Name.get("openidm/internal/reverseRelationshipValidator/getReverseReferenceType"), null, null);
             try {
-                final Connection connection = getRelationshipProvider().getConnection();
-                if (connection instanceof Describable) {
-                    final ApiDescription description = ((Describable<ApiDescription, Request>) connection).handleApiRequest(
-                            context, Requests.newApiRequest(getRelationshipRefResourcePath(relationshipRef)));
-                    return ReverseReferenceType.parseReverseReferenceType(parsePropertiesFromAPIDescription(description),
-                            relationshipReversePropertyName);
-                } else {
-                    logger.warn("Connection not Describable - cannot make API Request on relationship ref " + relationshipRef);
-                    return ReverseReferenceType.NA;
-                }
+                final String managedObjectName = getManagedObjectName(relationshipRef);
+                final ResourceResponse response = getRelationshipProvider().getConnection().read(context,
+                        Requests.newReadRequest(CONFIG_MANAGED_PATH));
+                final JsonValue configProperties = parsePropertiesFromConfigResponse(response.getContent(), managedObjectName);
+                return ReverseReferenceType.parseReverseReferenceType(configProperties, relationshipReversePropertyName);
             } catch (Exception e) {
                 logger.warn("Exception caught determining reverse reference type. This means duplicate assignment and " +
                         "cardinality checks cannot be performed", e);
@@ -300,21 +281,27 @@ public class ReverseRelationshipValidator extends RelationshipValidator {
         return ReverseReferenceType.NA;
     }
 
-    private ResourcePath getRelationshipRefResourcePath(String relationshipRef) {
+    private JsonValue parsePropertiesFromConfigResponse(JsonValue configReadResponse, String managedObjectName) throws ResourceException {
+        for (JsonValue object : configReadResponse.get("objects")) {
+            if (managedObjectName.equals(object.get("name").asString())) {
+                return object.get(SCHEMA_PROPERTIES_PTR);
+            }
+        }
+        throw ResourceException.newResourceException(ResourceException.INTERNAL_ERROR, "Could not find config entry " +
+                "for managed object " + managedObjectName);
+    }
+
+    /**
+     *
+     * @param relationshipRef the _ref value in a relationship - e.g. managed/user/bob or managed/role/superuser
+     * @return the type of object defined in managed.json - user or role in the examples above.
+     */
+    private String getManagedObjectName(String relationshipRef) {
         final ResourcePath fullPath = ResourcePath.valueOf(relationshipRef);
-        return fullPath.head(fullPath.size() - 1);
+        return fullPath.head(fullPath.size() - 1).leaf();
     }
 
     private boolean reverseReferenceIsSingleton(String relationshipRef, Context context) {
         return ReverseReferenceType.RELATIONSHIP == getReverseReferenceType(relationshipRef, context);
-    }
-
-    /*
-    A bit ugly, but necessary to get at the properites for managed. The first get("") is
-    not understood, but JamesP speculated that it was due to the fact that IDM does not
-    version its endpoints.
-     */
-    private JsonValue parsePropertiesFromAPIDescription(ApiDescription description) {
-        return description.getPaths().get("").get(IDM_VERSION).getResourceSchema().getSchema().get("properties");
     }
 }
