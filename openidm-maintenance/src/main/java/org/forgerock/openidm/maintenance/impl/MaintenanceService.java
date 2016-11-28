@@ -30,9 +30,20 @@ import org.apache.felix.scr.annotations.Properties;
 import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.Service;
-import org.forgerock.json.resource.*;
-import org.forgerock.services.context.Context;
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.json.resource.AbstractRequestHandler;
+import org.forgerock.json.resource.ActionRequest;
+import org.forgerock.json.resource.ActionResponse;
+import org.forgerock.json.resource.InternalServerErrorException;
+import org.forgerock.json.resource.NotSupportedException;
+import org.forgerock.json.resource.RequestHandler;
+import org.forgerock.json.resource.ResourceException;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.maintenance.impl.api.CallActionResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -40,8 +51,13 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Basis and entry point to initiate the product maintenance and upgrade mechanisms over REST
+ * Basis and entry point to initiate the product maintenance and update mechanisms over REST
  */
+@org.forgerock.api.annotations.RequestHandler(@Handler(
+        id = "maintenanceService:0",
+        title = "Maintenance",
+        description = "Basis and entry point to initiate the product maintenance and update mechanisms over REST.",
+        mvccSupported = false))
 @Component(name = MaintenanceService.PID, policy = ConfigurationPolicy.IGNORE, metatype = true,
         description = "OpenIDM Product Upgrade Management Service", immediate = true)
 @Service({ RequestHandler.class })
@@ -93,11 +109,9 @@ public class MaintenanceService extends AbstractRequestHandler {
                 case status:
                     return handleMaintenanceStatus();
                 case enable:
-                    enableMaintenanceMode();
-                    return handleMaintenanceStatus();
+                    return handleMaintenanceEnable();
                 case disable:
-                    disableMaintenanceMode();
-                    return handleMaintenanceStatus();
+                    return handleMaintenanceDisable();
                 default:
                     return new NotSupportedException(request.getAction() + " is not supported").asPromise();
             }
@@ -132,7 +146,50 @@ public class MaintenanceService extends AbstractRequestHandler {
         }
     }
 
-    private Promise<ActionResponse, ResourceException> handleMaintenanceStatus() {
+    @org.forgerock.api.annotations.Action(
+            operationDescription = @Operation(
+                    description ="Reads maintenance status.",
+                    errors = {
+                            @ApiError(
+                                    code = 400,
+                                    description = "Bad request")
+                    }),
+            name = "status",
+            response = @Schema(fromType = CallActionResponse.class)
+    )
+    public Promise<ActionResponse, ResourceException> handleMaintenanceStatus() {
         return newActionResponse(json(object(field("maintenanceEnabled", maintenanceEnabled.get())))).asPromise();
+    }
+
+    @org.forgerock.api.annotations.Action(
+            operationDescription = @Operation(
+                    description ="Enables maintenance mode.",
+                    errors = {
+                            @ApiError(
+                                    code = 400,
+                                    description = "Bad request")
+                    }),
+            name = "enable",
+            response = @Schema(fromType = CallActionResponse.class)
+    )
+    public Promise<ActionResponse, ResourceException> handleMaintenanceEnable() {
+        enableMaintenanceMode();
+        return handleMaintenanceStatus();
+    }
+
+    @org.forgerock.api.annotations.Action(
+            operationDescription = @Operation(
+                    description ="Disables maintenance mode.",
+                    errors = {
+                            @ApiError(
+                                    code = 400,
+                                    description = "Bad request")
+                    }),
+            name = "disable",
+            response = @Schema(fromType = CallActionResponse.class)
+    )
+    public Promise<ActionResponse, ResourceException> handleMaintenanceDisable() {
+        disableMaintenanceMode();
+        return handleMaintenanceStatus();
     }
 }
