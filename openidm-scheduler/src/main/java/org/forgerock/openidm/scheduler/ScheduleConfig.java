@@ -19,6 +19,7 @@ package org.forgerock.openidm.scheduler;
 import static org.forgerock.json.JsonValue.*;
 
 import java.util.Date;
+import java.util.Map;
 import java.util.TimeZone;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +50,7 @@ public class ScheduleConfig {
     private String cronSchedule = null;
     private TimeZone timeZone = null;
     private String invokeService = null;
-    private Object invokeContext = null;
+    private Map<String, Object> invokeContext = null;
     private String invokeLogLevel = null;
     private Boolean concurrentExecution = null;
 
@@ -108,7 +109,7 @@ public class ScheduleConfig {
                 invokeService = ServerConstants.SERVICE_RDN_PREFIX + fragment;
             }
         }
-        invokeContext = config.get(SchedulerService.SCHEDULE_INVOKE_CONTEXT).getObject();
+        invokeContext = config.get(SchedulerService.SCHEDULE_INVOKE_CONTEXT).asMap();
         invokeLogLevel = config.get(SchedulerService.SCHEDULE_INVOKE_LOG_LEVEL).defaultTo("info").asString();
         String timeZoneString = config.get(SchedulerService.SCHEDULE_TIME_ZONE).asString();
         String startTimeString = config.get(SchedulerService.SCHEDULE_START_TIME).asString();
@@ -215,7 +216,7 @@ public class ScheduleConfig {
         this.invokeService = invokeService;
     }
 
-    public void setInvokeContext(Object invokeContext) {
+    public void setInvokeContext(Map<String, Object> invokeContext) {
         this.invokeContext = invokeContext;
     }
 

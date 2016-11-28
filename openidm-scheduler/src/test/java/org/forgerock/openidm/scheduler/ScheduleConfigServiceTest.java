@@ -39,7 +39,6 @@ public class ScheduleConfigServiceTest {
         config.put(SchedulerService.SCHEDULE_CRON_SCHEDULE, "0 30 10-13 ? * WED,FRI");
         config.put(SchedulerService.SCHEDULE_TIME_ZONE, "America/Los_Angeles");
         config.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, "active-sync");
-        config.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, "system-x");
 
         ScheduleConfig scheduleConfig = new ScheduleConfig(new JsonValue(config));
 
@@ -57,7 +56,6 @@ public class ScheduleConfigServiceTest {
         config.put(SchedulerService.SCHEDULE_CRON_SCHEDULE, "0 30 10-13 ? * WED,FRI");
         config.put(SchedulerService.SCHEDULE_TIME_ZONE, "America/Los_Angeles");
         // test missing config.put(SchedulerService.SCHEDULE_INVOKE_SERVICE, "active-sync");
-        config.put(SchedulerService.SCHEDULE_INVOKE_CONTEXT, "system-x");
 
         new ScheduleConfig(new JsonValue(config));
 
