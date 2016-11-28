@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2012-2015 ForgeRock AS.
+ * Portions copyright 2012-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
@@ -46,7 +46,10 @@ import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferenceCardinality;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.resource.Request;
 import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.sync.ReconContext;
 import org.forgerock.openidm.sync.SynchronizationException;
@@ -73,6 +76,7 @@ import org.forgerock.json.resource.ResourceException;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.core.IdentityServer;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.osgi.service.component.ComponentContext;
 import org.slf4j.Logger;
@@ -89,7 +93,7 @@ import org.slf4j.LoggerFactory;
         @Property(name = "openidm.router.prefix", value = "/recon/*")
 })
 public class ReconciliationService
-        implements RequestHandler, Reconcile, ReconciliationServiceMBean {
+        implements RequestHandler, Reconcile, ReconciliationServiceMBean, Describable<ApiDescription, Request> {
     final static Logger logger = LoggerFactory.getLogger(ReconciliationService.class);
 
     public static final String PID = "org.forgerock.openidm.recon";
@@ -152,6 +156,8 @@ public class ReconciliationService
      *  The approximate max number of runs in COMPLETED state to keep in the recon runs list
      */
     private int maxCompletedRuns;
+
+    private final ApiDescription apiDescription = ReconciliationServiceApiDescription.build();
 
     /**
      * Get the the list of all reconciliations, or details of one specific recon instance
@@ -593,4 +599,25 @@ public class ReconciliationService
             throw new InternalServerErrorException("Unable to get the maximum pool size in recon thread pool");
         }
     }
+
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> producer) {
+        return apiDescription;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return apiDescription;
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        // empty
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        // empty
+    }
+
 }
