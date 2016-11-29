@@ -25,6 +25,7 @@ define([
     "org/forgerock/commons/ui/common/main/EventManager",
     "org/forgerock/commons/ui/common/util/Constants",
     "org/forgerock/openidm/ui/admin/util/AdminUtils",
+    "org/forgerock/openidm/ui/admin/delegates/RepoDelegate",
     "org/forgerock/openidm/ui/admin/delegates/SiteConfigurationDelegate",
     "org/forgerock/commons/ui/common/util/UIUtils",
     "org/forgerock/openidm/ui/admin/selfservice/UserRegistrationConfigView",
@@ -41,6 +42,7 @@ define([
             EventManager,
             Constants,
             AdminUtils,
+            RepoDelegate,
             SiteConfigurationDelegate,
             UIUtils,
             UserRegistrationConfigView,
@@ -201,7 +203,20 @@ define([
                 }).length;
 
                 if (enabled) {
-                    this.createConfig(this.model.providers[index]).then(() => {
+                    $.when(
+                        RepoDelegate.findRepoConfig()
+                            .then((repoConfig) => {
+                                if (RepoDelegate.getRepoTypeFromConfig(repoConfig) === "orientdb") {
+                                    return ConfigDelegate.updateEntity(repoConfig._id,
+                                        RepoDelegate.addManagedObjectToOrientClasses(
+                                            repoConfig,
+                                            this.model.providers[index].name
+                                        )
+                                    );
+                                }
+                            }),
+                            this.createConfig(this.model.providers[index])
+                    ).then(() => {
                         managedConfigPromise
                             .then((managedConfig) => {
                                 if (providerCount === 1) {
@@ -226,7 +241,20 @@ define([
                         card.find(".btn-link").trigger("click");
                     });
                 } else {
-                    this.deleteConfig(this.model.providers[index]).then(() => {
+                    $.when(
+                        RepoDelegate.findRepoConfig()
+                            .then((repoConfig) => {
+                                if (RepoDelegate.getRepoTypeFromConfig(repoConfig) === "orientdb") {
+                                    return ConfigDelegate.updateEntity(repoConfig._id,
+                                        RepoDelegate.removeManagedObjectFromOrientClasses(
+                                            repoConfig,
+                                            this.model.providers[index].name
+                                        )
+                                    );
+                                }
+                            }),
+                            this.deleteConfig(this.model.providers[index])
+                    ).then(() => {
                         managedConfigPromise
                             .then((managedConfig) => {
                                 if (providerCount === 0) {
