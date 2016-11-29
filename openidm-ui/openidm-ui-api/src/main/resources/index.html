@@ -87,8 +87,13 @@
                 },
                 onFailure: function (data) {
                     if (typeof data === 'string' && data.indexOf('401') !== -1) {
-                        // 401: Unauthorized, so redirect to login
-                        window.top.location.replace('/');
+                        // 401: Unauthorized, so force re-authentication
+                        if (window.top.location.href.indexOf('/admin/#apiExplorer') !== -1) {
+                            // location.replace will not work in this case
+                            window.top.location.reload(true);
+                        } else {
+                            window.top.location.replace('/admin/#apiExplorer');
+                        }
                     }
                 }
             });
