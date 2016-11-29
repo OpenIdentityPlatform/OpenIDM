@@ -75,7 +75,8 @@ public class ScheduleConfig {
         } else {
             concurrentExecution = concurrentExecutionValue.defaultTo(Boolean.FALSE).asBoolean();
         }
-        misfirePolicy = config.get(SchedulerService.SCHEDULE_MISFIRE_POLICY).defaultTo(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED).asString();
+        misfirePolicy = config.get(SchedulerService.SCHEDULE_MISFIRE_POLICY)
+                .defaultTo(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED).asString();
         cronSchedule = config.get(SchedulerService.SCHEDULE_CRON_SCHEDULE).asString();
         final String configTriggerType = config.get(SchedulerService.SCHEDULE_TYPE).asString();
         if (StringUtils.isNotBlank(configTriggerType)) {
@@ -93,7 +94,8 @@ public class ScheduleConfig {
             }
             if (!misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_FIRE_AND_PROCEED) &&
                     !misfirePolicy.equals(SchedulerService.MISFIRE_POLICY_DO_NOTHING)) {
-                throw new BadRequestException(new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
+                throw new BadRequestException(
+                        new StringBuilder("Invalid misfire policy: ").append(misfirePolicy).toString());
             }
         }
         invokeService = config.get(SchedulerService.SCHEDULE_INVOKE_SERVICE).asString();
