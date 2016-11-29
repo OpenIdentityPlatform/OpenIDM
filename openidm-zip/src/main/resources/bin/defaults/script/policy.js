@@ -724,14 +724,14 @@ policyProcessor = (function (policyConfig,policyImpl){
                             });
                         }
 
-                        if ((_.isArray(pair[1].type) && !_.contains(pair[1].type, "null")) ||
+                        if (((pair[1].type.constructor.name === "Array") && !_.contains(pair[1].type, "null")) ||
                             (_.isNumber(pair[1].minLength) && pair[1].minLength > 0)) {
                             standardPolicies.push({
                                 "policyId" : "not-empty"
                             });
                         }
 
-                        if ((_.isArray(pair[1].type) && _.contains(pair[1].type, "string")) ||
+                        if (((pair[1].type.constructor.name === "Array") && _.contains(pair[1].type, "string")) ||
                             (pair[1].type === "string")) {
 
                             if (!isNaN(parseInt(pair[1].minLength))) {
