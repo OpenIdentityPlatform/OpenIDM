@@ -182,5 +182,27 @@ function ($, _,
 
     };
 
+    /**
+    * This function overrides showPendingChanges to be able to handle the situation where
+    * an invalid password is entered. We need to be able to click the "Reset" button.
+    **/
+    EditUserView.prototype.showPendingChanges = function () {
+        var passwordText = this.$el.find("#input-password").val(),
+            changedFields = this.$el.find("#changedFields"),
+            passwordInvalidText = $.t("templates.admin.ResourceEdit.passwordInvalid");
+
+        GenericEditResourceView.showPendingChanges.call(this);
+
+        if (passwordText && passwordText.length) {
+            this.$el.find("#resetBtn").removeAttr('disabled');
+
+            if (this.$el.find("#password").find("[data-validation-status=error]").length > 0) {
+                this.$el.find("#saveBtn").attr('disabled',true);
+                changedFields.html(passwordInvalidText);
+                this.$el.find("#resourceChangesPending").show();
+            }
+        }
+    };
+
     return new EditUserView();
 });

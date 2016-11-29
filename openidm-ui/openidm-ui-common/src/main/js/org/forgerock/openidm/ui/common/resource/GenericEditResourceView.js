@@ -160,6 +160,8 @@ define([
                                 }
                             }, this)
                         );
+
+                        this.setTabChangeEvent();
                     });
                 },this));
             },this));
@@ -259,7 +261,11 @@ define([
                     if(changedFields.length) {
                         this.$el.find("#changedFields").html("<br/>- " + changedFields.join("<br/>- "));
 
-                        this.$el.find("#saveBtn").removeAttr("disabled");
+                        if (!ValidatorsManager.formValidated(this.$el)) {
+                            this.$el.find("#saveBtn").attr("disabled", true);
+                        } else {
+                            this.$el.find("#saveBtn").removeAttr("disabled");
+                        }
                         this.$el.find("#resetBtn").removeAttr("disabled");
 
                         this.$el.find("#resourceChangesPending").show();
@@ -374,10 +380,10 @@ define([
 
             if(e) {
                 e.preventDefault();
-            }
 
-            if ($(e.currentTarget).attr("disabled") === "disabled" ) {
-                return false;
+                if ($(e.currentTarget).attr("disabled") === "disabled" ) {
+                    return false;
+                }
             }
 
             if(this.data.newObject){
@@ -411,6 +417,8 @@ define([
             eventManager.sendEvent(constants.ROUTE_REQUEST, {routeName: routeName, args: this.data.args});
         },
         reset: function(e){
+            var thisTab = this.$el.find('.nav-tabs .active a')[0].hash;
+
             if (e) {
                 e.preventDefault();
             }
@@ -419,7 +427,9 @@ define([
                 return false;
             }
 
-            this.render(this.data.args);
+            this.render(this.data.args, () => {
+                this.$el.find('a[href="' + thisTab + '"]').tab('show');
+            });
         },
         deleteObject: function(e, callback){
             if (e) {
@@ -662,6 +672,66 @@ define([
             });
 
             return schema;
+        },
+        /**
+        * This function sets an event for each bootstrap tab on "show" which looks for any
+        * pending form changes in the currently visible tab. If there are changes the the tab
+        * change is halted and a dialog is displayed asking the user if he/she would like to discard
+        * or save the changes before actually changing tabs.
+        *
+        * @param {string} tabId - (optional) specific tab on which to set the change event...otherwise the event will be set on all tabs
+        **/
+        setTabChangeEvent: function (tabId) {
+            var scope = this.$el;
+
+            if (tabId) {
+                scope = scope.find("#" + tabId);
+            }
+
+            //look for all bootstrap tabs within "scope"
+            scope.on('show.bs.tab', 'a[data-toggle="tab"]', (e) => {
+                //check to see if there are changes pending
+                if (this.$el.find("#changedFields").length && this.$el.find("#changedFields").html().length) {
+                    //stop processing this tab change
+                    e.preventDefault();
+                    //throw up a confirmation dialog
+                    this.confirmSaveChanges(e.target.hash, () => {
+                        //once confirmed save the form then continue showing the new tab
+                        this.save(false, () => {
+                            this.$el.find('a[href="' + e.target.hash + '"]').tab('show');
+                        });
+                    });
+                }
+            });
+
+        },
+        /**
+         * @param {string} newTab a string representing a hash address to the anchor of the new tab to be viewed
+         * @param {Function} confirmCallback Fired when the "Save Changes" button is clicked
+         *
+         * @example
+         *  AdminUtils.confirmSaveChanges("#password",_.bind(function(){
+         *      //Useful stuff here
+         *  }, this));
+         */
+        confirmSaveChanges: function(newTab, confirmCallback){
+            var overrides = {
+                title : $.t("templates.admin.ResourceEdit.warningPendingChanges"),
+                okText : $.t("common.form.save"),
+                cancelText : $.t("templates.admin.ResourceEdit.discard"),
+                cancelCallback: () => {
+                    this.render(this.data.args, () => {
+                        this.$el.find('a[href="' + newTab + '"]').tab('show');
+                    });
+                }
+            };
+
+            if (!ValidatorsManager.formValidated(this.$el)) {
+                overrides.okText = $.t("common.form.cancel");
+                confirmCallback = $.noop();
+            }
+
+            uiUtils.confirmDialog("", "danger", confirmCallback, overrides);
         }
     });
 

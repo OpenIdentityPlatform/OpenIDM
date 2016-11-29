@@ -501,7 +501,10 @@
                 "conflictWithExistingRelationship": "Conflict with Existing Relationship",
                 "condition": "Condition",
                 "enableCondition": "Enable Condition",
-                "query": "Query"
+                "query": "Query",
+                "passwordInvalid": "<br>- Password (invalid will not be saved)",
+                "warningPendingChanges": "Warning: Pending Changes",
+                "discard": "Discard"
             },
             "RoleEdit": {
                 "conditionTabDescription" : "Dynamically assign members to this role based on a query filter.",
