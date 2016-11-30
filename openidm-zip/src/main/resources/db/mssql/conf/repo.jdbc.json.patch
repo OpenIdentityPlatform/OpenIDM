@@ -44,5 +44,13 @@
          "field" : "/queries/genericTables/find-relationships-for-resource",
          "value" : "SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties firstId ON (firstId.relationships_id = obj.id AND firstId.propkey = '/firstId' AND firstId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties firstPropertyName ON (firstPropertyName.relationships_id = obj.id AND firstPropertyName.propkey = '/firstPropertyName' AND firstPropertyName.propvalue = ${resourceFieldName}) UNION ALL SELECT obj.* FROM ${_dbSchema}.relationships obj INNER JOIN ${_dbSchema}.relationshipproperties secondId ON (secondId.relationships_id = obj.id AND secondId.propkey = '/secondId' AND secondId.propvalue = ${fullResourceId}) INNER JOIN ${_dbSchema}.relationshipproperties secondPropertyName ON (secondPropertyName.relationships_id = obj.id AND secondPropertyName.propkey = '/secondPropertyName' AND secondPropertyName.propvalue = ${resourceFieldName}) "
 
+    },
+    {
+        "operation" : "remove",
+        "field" : "/queries/explicitTables/scan-tasks"
+    },
+    {
+        "operation" : "remove",
+        "field" : "/queries/genericTables/scan-tasks"
     }
 ]

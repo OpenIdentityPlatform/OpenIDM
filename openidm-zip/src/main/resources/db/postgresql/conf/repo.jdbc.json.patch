@@ -42,5 +42,13 @@
         "operation" : "replace",
         "field" : "find-relationships-for-resource",
         "value" : "SELECT fullobject::text FROM ${_dbSchema}.relationships obj WHERE (((json_extract_path_text(obj.fullobject, 'firstId') = (${fullResourceId})) AND (json_extract_path_text(obj.fullobject, 'firstPropertyName') = (${resourceFieldName})))) OR (((json_extract_path_text(obj.fullobject, 'secondId') = (${fullResourceId})) AND (json_extract_path_text(obj.fullobject, 'secondPropertyName') = (${resourceFieldName}))))"
+    },
+    {
+        "operation" : "remove",
+        "field" : "/queries/explicitTables/scan-tasks"
+    },
+    {
+        "operation" : "remove",
+        "field" : "/queries/genericTables/scan-tasks"
     }
 ]

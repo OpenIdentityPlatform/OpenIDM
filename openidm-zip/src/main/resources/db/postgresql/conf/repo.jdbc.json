@@ -12,7 +12,6 @@
             "query-all" : "SELECT obj.fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource} LIMIT ${int:_pageSize} OFFSET ${int:_pagedResultsOffset}",
             "query-all-count" : "SELECT COUNT(obj.fullobject) AS total FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON obj.objecttypes_id = objtype.id WHERE objtype.objecttype = ${_resource}",
             "for-userName" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE  json_extract_path_text(fullobject, 'userName') = ${uid} AND objtype.objecttype = ${_resource}",
-            "scan-tasks" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj INNER JOIN ${_dbSchema}.objecttypes objtype ON objtype.id = obj.objecttypes_id WHERE (json_extract_path_text(fullobject, VARIADIC string_to_array(SUBSTR(${property},2),'/')) < ${condition.before} AND objtype.objecttype = ${_resource} ) AND ( json_extract_path_text(fullobject, VARIADIC string_to_array(SUBSTR(${taskState.completed},2),'/')) is NULL )",
 
             "query-cluster-failed-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'timestamp') <= ${timestamp} AND json_extract_path_text(fullobject, 'state') IN ('1','2')",
             "query-cluster-instances" : "SELECT fullobject::text FROM ${_dbSchema}.${_mainTable} obj WHERE json_extract_path_text(fullobject, 'type') = 'state'",
@@ -31,8 +30,6 @@
 
             "links-for-firstId" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType} AND firstid = ${firstId}",
             "links-for-linkType" : "SELECT * FROM ${_dbSchema}.${_table} WHERE linkType = ${linkType}",
-
-            "scan-tasks" : "SELECT * FROM ${_dbSchema}.${_table} WHERE ${property} < ${condition.before} AND ${taskState.completed} is NULL",
 
             "query-all" : "SELECT * FROM ${_dbSchema}.${_table}",
             "get-recons" : "SELECT reconid, activitydate, mapping FROM ${_dbSchema}.${_table} WHERE mapping LIKE ${includeMapping} AND mapping NOT LIKE ${excludeMapping} AND entrytype = 'summary' ORDER BY activitydate DESC"
