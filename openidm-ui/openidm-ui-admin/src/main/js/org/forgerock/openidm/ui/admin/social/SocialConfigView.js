@@ -519,13 +519,46 @@ define([
             if (!_.has(managedUser.actions, "unbind")) {
                 managedUser.actions.unbind = {
                     "type" : "text/javascript",
-                    "file" : "ui/unBindBehavior.js"
+                    "file" : "ui/unBindBehavior.js",
+                    "apiDescriptor" : {
+                        "parameters" : [
+                            {
+                                "name" : "provider",
+                                "type" : "string",
+                                "required" : true
+                            }
+                        ]
+                    }
                 };
             }
             if (!_.has(managedUser.actions, "bind")) {
                 managedUser.actions.bind = {
                     "type" : "text/javascript",
-                    "file" : "ui/bindBehavior.js"
+                    "file" : "ui/bindBehavior.js",
+                    "apiDescriptor" : {
+                        "parameters" : [
+                            {
+                                "name" : "provider",
+                                "type" : "string",
+                                "required" : true
+                            },
+                            {
+                                "name" : "code",
+                                "type" : "string",
+                                "required" : true
+                            },
+                            {
+                                "name" : "redirect_url",
+                                "type" : "string",
+                                "required" : true
+                            },
+                            {
+                                "name" : "nonce",
+                                "type" : "string",
+                                "required" : true
+                            }
+                        ]
+                    }
                 };
             }
             return updatedManagedConfig;
