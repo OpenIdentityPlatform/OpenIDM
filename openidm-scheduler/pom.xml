@@ -132,7 +132,8 @@
                     <instructions>
                         <Private-Package>org.forgerock.openidm.scheduler.impl.*</Private-Package>
                         <Export-Package>
-                            org.forgerock.openidm.scheduler;version="${project.version}"
+                            org.forgerock.openidm.scheduler;version="${project.version}",
+                            org.forgerock.openidm.scheduler.api;version="${project.version}"
                         </Export-Package>
                     </instructions>
                 </configuration>

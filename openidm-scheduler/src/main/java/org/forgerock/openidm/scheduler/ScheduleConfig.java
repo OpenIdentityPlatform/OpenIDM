@@ -40,7 +40,7 @@ public class ScheduleConfig {
      *
      * Please see https://bugster.forgerock.org/jira/browse/OPENIDM-6712.
      */
-    private static final String SCHEDULER_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
+    public static final String SCHEDULER_TIME_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     private Boolean enabled = null;
     private Boolean persisted = null;
     private String misfirePolicy = null;

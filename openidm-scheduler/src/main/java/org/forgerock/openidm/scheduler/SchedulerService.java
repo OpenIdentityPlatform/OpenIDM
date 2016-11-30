@@ -17,10 +17,13 @@
 package org.forgerock.openidm.scheduler;
 
 import static org.forgerock.http.routing.RoutingMode.STARTS_WITH;
-import static org.forgerock.json.JsonValue.*;
+import static org.forgerock.json.JsonValue.field;
+import static org.forgerock.json.JsonValue.json;
+import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.openidm.scheduler.JobRequestHandler.JOB_RESOURCE_PATH;
-import static org.forgerock.openidm.scheduler.RepoProxyRequestHandler.*;
+import static org.forgerock.openidm.scheduler.RepoProxyRequestHandler.ACQUIRED_TRIGGERS_RESOURCE_PATH;
+import static org.forgerock.openidm.scheduler.RepoProxyRequestHandler.WAITING_TRIGGERS_RESOURCE_PATH;
 import static org.forgerock.openidm.scheduler.TriggerRequestHandler.TRIGGER_RESOURCE_PATH;
 import static org.quartz.CronExpression.isValidExpression;
 
@@ -38,6 +41,8 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -51,6 +56,7 @@ import org.forgerock.json.resource.QueryRequest;
 import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.QueryResponse;
 import org.forgerock.json.resource.ReadRequest;
+import org.forgerock.json.resource.Request;
 import org.forgerock.json.resource.RequestHandler;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
@@ -60,9 +66,11 @@ import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.cluster.ClusterManagementService;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
 import org.forgerock.openidm.core.ServerConstants;
+import org.forgerock.openidm.crest.DescribableRouter;
 import org.forgerock.openidm.router.RouteService;
 import org.forgerock.openidm.util.ContextUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.osgi.framework.Constants;
 import org.osgi.service.component.ComponentContext;
@@ -87,7 +95,7 @@ import org.slf4j.LoggerFactory;
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "Scheduler Service using Quartz"),
     @Property(name = ServerConstants.ROUTER_PREFIX, value = "/scheduler*")
 })
-public class SchedulerService implements RequestHandler {
+public class SchedulerService implements RequestHandler, Describable<ApiDescription, Request> {
     private static final Logger logger = LoggerFactory.getLogger(SchedulerService.class);
 
     // Keys in the OSGi configuration
@@ -105,22 +113,26 @@ public class SchedulerService implements RequestHandler {
     static final String SCHEDULE_CONCURRENT_EXECUTION = "concurrentExecution";
 
     // Valid configuration values
-    static final String SCHEDULE_TYPE_CRON = "cron";
-    static final String SCHEDULE_TYPE_SIMPLE = "simple";
+    public static final String SCHEDULE_TYPE_CRON = "cron";
+    public static final String SCHEDULE_TYPE_SIMPLE = "simple";
 
     // Misfire Policies
-    static final String MISFIRE_POLICY_DO_NOTHING = "doNothing";
-    static final String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
+    public static final String MISFIRE_POLICY_DO_NOTHING = "doNothing";
+    public static final String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
 
     public static final String GROUP_NAME = "scheduler-service-group";
 
     static final String CONFIG = "schedule.config";
 
-    private static final String SCHEDULER_REPO_RESOURCE_PATH = "/repo/scheduler/";
+    private static final String SCHEDULER_REPO_RESOURCE_PATH = "/repo/scheduler";
 
-    private static final String WAITING_TRIGGERS_REPO_RESOURCE_PATH = SCHEDULER_REPO_RESOURCE_PATH + "waitingTriggers";
+    private static final String WAITING_TRIGGERS_REPO_RESOURCE_PATH = SCHEDULER_REPO_RESOURCE_PATH +
+            RepoProxyRequestHandler.WAITING_TRIGGERS_RESOURCE_PATH;
 
-    private static final String ACQUIRED_TRIGGERS_REPO_RESOURCE_PATH = SCHEDULER_REPO_RESOURCE_PATH + "acquiredTriggers";
+    private static final String ACQUIRED_TRIGGERS_REPO_RESOURCE_PATH = SCHEDULER_REPO_RESOURCE_PATH +
+            RepoProxyRequestHandler.ACQUIRED_TRIGGERS_RESOURCE_PATH;
+
+    private final ApiDescription apiDescription = SchedulerServiceApiDescription.build();
 
     /**
      * Supported actions on the scheduler service.
@@ -139,7 +151,7 @@ public class SchedulerService implements RequestHandler {
     private boolean executePersistentSchedules = false;
     private boolean started = false;
 
-    private final Router router = new Router();
+    private final Router router = new DescribableRouter();
 
     @Reference
     ClusterManagementService clusterManager;
@@ -434,5 +446,25 @@ public class SchedulerService implements RequestHandler {
             logger.warn(error, e);
             throw new SchedulerException(error, e);
         }
+    }
+
+    @Override
+    public ApiDescription api(ApiProducer<ApiDescription> apiProducer) {
+        return apiDescription;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(Context context, Request request) {
+        return apiDescription;
+    }
+
+    @Override
+    public void addDescriptorListener(Listener listener) {
+        // empty
+    }
+
+    @Override
+    public void removeDescriptorListener(Listener listener) {
+        // empty
     }
 }

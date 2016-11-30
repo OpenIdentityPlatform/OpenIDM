@@ -35,11 +35,11 @@ class RepoProxyRequestHandler extends AbstractRequestHandler {
     /**
      * The resource path for waiting triggers.
      */
-    static final String WAITING_TRIGGERS_RESOURCE_PATH = "/waitingTriggers";
+    public static final String WAITING_TRIGGERS_RESOURCE_PATH = "/waitingTriggers";
     /**
      * The resource path for the acquired triggers.
      */
-    static final String ACQUIRED_TRIGGERS_RESOURCE_PATH = "/acquiredTriggers";
+    public static final String ACQUIRED_TRIGGERS_RESOURCE_PATH = "/acquiredTriggers";
 
     private final String resource;
     private final ConnectionFactory connectionFactory;
