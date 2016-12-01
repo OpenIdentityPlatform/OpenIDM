@@ -123,6 +123,8 @@ Run The Sample In OpenIDM
           } ],
           "resultCount" : 3,
           "pagedResultsCookie" : null,
+          "totalPagedResultsPolicy" : "NONE",
+          "totalPagedResults" : -1,
           "remainingPagedResults" : -1
         }
 
@@ -142,6 +144,8 @@ Run The Sample In OpenIDM
           } ],
           "resultCount" : 3,
           "pagedResultsCookie" : null,
+          "totalPagedResultsPolicy" : "NONE",
+          "totalPagedResults" : -1,
           "remainingPagedResults" : -1
         }
 
