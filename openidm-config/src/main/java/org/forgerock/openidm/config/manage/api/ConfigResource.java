@@ -16,6 +16,8 @@
 
 package org.forgerock.openidm.config.manage.api;
 
+import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
+
 import javax.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -27,7 +29,7 @@ import org.forgerock.api.annotations.Description;
  */
 public class ConfigResource {
 
-    @JsonProperty("_id")
+    @JsonProperty(FIELD_CONTENT_ID)
     private String id;
 
     /**
