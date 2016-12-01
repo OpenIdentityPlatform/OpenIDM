@@ -201,12 +201,13 @@ policyImpl = (function (){
     };
 
     policyFunctions.notEmpty = function(fullObject, value, params, property) {
-        if (value !== undefined && (value === null || !value.length)) {
-            return [ {"policyRequirement": "REQUIRED"}];
-        }
-        else {
+        if (value === undefined) {
             return [];
         }
+        if (value === null || (value.hasOwnProperty('length') && !value.length)) {
+            return [{"policyRequirement": "REQUIRED"}];
+        }
+        return [];
     };
 
     policyFunctions.maxAttemptsTriggersLockCooldown = function(fullObject, value, params, property) {
