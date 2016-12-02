@@ -101,8 +101,19 @@ public class ReconciliationService
     private static final String AUDIT_RECON = "audit/recon";
     private static final String SUMMARY = "summary";
 
+    /**
+     * Actions supported by {@link ReconciliationService}.
+     */
     public enum ReconAction {
-        recon, reconByQuery, reconById;
+        /**
+         * Recon all available source identifiers.
+         */
+        recon,
+
+        /**
+         * Recon for a single source identifier.
+         */
+        reconById;
 
         /**
          * Convenience helper that checks if a given string

@@ -101,9 +101,9 @@ class ReconAuditEventLogger extends AbstractSyncAuditEventLogger<ReconAuditEvent
     }
 
     /**
-     * Sets the reconAction value from the ReconciliationService: recon, reconByQuery, reconById.
+     * Sets the reconAction value from the ReconciliationService: recon, reconById.
      *
-     * @param reconAction
+     * @param reconAction Recon action
      */
     public void setReconciliationServiceReconAction(ReconciliationService.ReconAction reconAction) {
         this.reconciliationServiceReconAction = reconAction;
