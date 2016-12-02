@@ -11,7 +11,7 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Copyright 2013-2015 ForgeRock AS.
+ * Copyright 2013-2016 ForgeRock AS.
  */
 
 package org.forgerock.openidm.script;
@@ -27,6 +27,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.http.ApiProducer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
@@ -59,6 +61,7 @@ import org.forgerock.script.scope.Function;
 import org.forgerock.script.scope.FunctionFactory;
 import org.forgerock.script.scope.Parameter;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.descriptor.Describable;
 import org.forgerock.util.promise.Promise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +69,7 @@ import org.slf4j.LoggerFactory;
 /**
  * A ScriptedRequestHandler implements a RequestHandler using a script.
  */
-public class ScriptedRequestHandler implements Scope, RequestHandler {
+public class ScriptedRequestHandler implements Scope, RequestHandler, Describable<ApiDescription, Request> {
 
     /**
      * Setup logging for the {@link ScriptedRequestHandler}.
@@ -79,7 +82,17 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
 
     private final boolean includeJavascriptDebugState;
 
-    public ScriptedRequestHandler(final ScriptEntry scriptEntry, final ScriptCustomizer customizer) {
+    private final ApiDescription apiDescription;
+
+    /**
+     * Creates a new {@code ScriptedRequestHandler}.
+     *
+     * @param scriptEntry Script-definition entry
+     * @param customizer Per-request CRUDPAQ binding customizations for the script
+     * @param apiDescription API Description or {@code null} if none is defined
+     */
+    public ScriptedRequestHandler(final ScriptEntry scriptEntry, final ScriptCustomizer customizer,
+            final ApiDescription apiDescription) {
         if (null == scriptEntry) {
             throw new NullPointerException();
         }
@@ -88,6 +101,7 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
         this.scriptEntry = new AtomicReference<ScriptEntry>(scriptEntry);
         this.customizer = customizer;
+        this.apiDescription = apiDescription;
         includeJavascriptDebugState =
                 Boolean.parseBoolean(IdentityServer.getInstance().getProperty("javascript.exception.debug.info", "false"));
     }
@@ -463,4 +477,25 @@ public class ScriptedRequestHandler implements Scope, RequestHandler {
         }
         return newResourceResponse(id, null, resultJson).asPromise();
     }
+
+    @Override
+    public ApiDescription api(final ApiProducer<ApiDescription> producer) {
+        return apiDescription;
+    }
+
+    @Override
+    public ApiDescription handleApiRequest(final Context context, final Request request) {
+        return apiDescription;
+    }
+
+    @Override
+    public void addDescriptorListener(final Listener listener) {
+        // empty
+    }
+
+    @Override
+    public void removeDescriptorListener(final Listener listener) {
+        // empty
+    }
+
 }

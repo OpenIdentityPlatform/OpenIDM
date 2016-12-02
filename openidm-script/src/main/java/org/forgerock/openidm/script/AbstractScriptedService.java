@@ -15,6 +15,8 @@
  */
 package org.forgerock.openidm.script;
 
+import static org.forgerock.openidm.config.enhanced.JSONEnhancedConfig.JSON_CONFIG_PROPERTY;
+
 import java.util.Dictionary;
 import java.util.EnumSet;
 
@@ -24,6 +26,12 @@ import javax.script.ScriptException;
 import org.apache.felix.scr.annotations.Component;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
+import org.forgerock.api.jackson.JacksonUtils;
+import org.forgerock.api.models.ApiDescription;
+import org.forgerock.api.models.Paths;
+import org.forgerock.api.models.Resource;
+import org.forgerock.api.models.VersionedPath;
+import org.forgerock.api.transform.OpenApiTransformer;
 import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.osgi.ComponentContextUtil;
 import org.forgerock.services.context.Context;
@@ -53,8 +61,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * An AbstractScriptedService does ...
- * 
+ * Base class for services that invoke scripts for their CRUDPAQ operations.
  */
 @Component(componentAbstract = true)
 public abstract class AbstractScriptedService implements ScriptCustomizer, ScriptListener {
@@ -105,6 +112,40 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
         return this;
     }
 
+    /**
+     * Builds API Description for a script, by reading the "apiDescription" field from its configuration file.
+     * The "apiDescription" field should contain JSON representing a populated {@link Resource} object.
+     * <p/>
+     * Subclasses can override this method to build a programmatic API Description for scripted endpoints.
+     *
+     * @param configuration Script configuration
+     * @return API Description or {@code null} if not defined
+     */
+    protected ApiDescription getApiDescription(final JsonValue configuration) {
+        final JsonValue value = configuration.get("apiDescription");
+        if (value.isNotNull()) {
+            try {
+                final byte[] bytes = JacksonUtils.OBJECT_MAPPER.writeValueAsBytes(value.getObject());
+                final Resource resource = JacksonUtils.OBJECT_MAPPER.readValue(bytes, Resource.class);
+                final ApiDescription apiDescription = ApiDescription.apiDescription()
+                        .id("temp")
+                        .version("0")
+                        .paths(Paths.paths()
+                                .put("/", VersionedPath.versionedPath()
+                                        .put(VersionedPath.UNVERSIONED, resource)
+                                        .build())
+                                .build())
+                        .build();
+                // dry-run generating the Swagger model, to catch runtime errors
+                OpenApiTransformer.execute(apiDescription);
+                return apiDescription;
+            } catch (Exception e) {
+                logger.info("Failed to generate API Description from script config: " + configuration, e);
+            }
+        }
+        return null;
+    }
+
     protected Dictionary<String, Object> getProperties() {
         return properties;
     }
@@ -124,7 +165,8 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
             ScriptEntry scriptEntry = scriptRegistry.takeScript(configuration);
             scriptEntry.addScriptListener(this);
             scriptName = scriptEntry.getName();
-            embeddedHandler = new ScriptedRequestHandler(scriptEntry, getScriptCustomizer());
+            embeddedHandler = new ScriptedRequestHandler(scriptEntry, getScriptCustomizer(),
+                    getApiDescription(configuration));
             selfRegistration = context.registerService(RequestHandler.class, embeddedHandler, getProperties());
         } catch (ScriptException e) {
             final String factoryPid = configuration.get(ServerConstants.CONFIG_FACTORY_PID).defaultTo("").asString();
@@ -174,11 +216,13 @@ public abstract class AbstractScriptedService implements ScriptCustomizer, Scrip
                     if (null == selfRegistration) {
                         final ScriptEntry scriptEntry = event.getScriptLibraryEntry();
                         scriptEntry.setBindings(bindings);
+                        final JsonValue configuration = (JsonValue) getProperties().get(JSON_CONFIG_PROPERTY);
                         selfRegistration =
                                 getBundleContext().registerService(
                                         RequestHandler.class,
-                                        new ScriptedRequestHandler(scriptEntry,
-                                                getScriptCustomizer()), getProperties());
+                                        new ScriptedRequestHandler(
+                                                scriptEntry, getScriptCustomizer(), getApiDescription(configuration)),
+                                        getProperties());
                     }
                 }
             }
