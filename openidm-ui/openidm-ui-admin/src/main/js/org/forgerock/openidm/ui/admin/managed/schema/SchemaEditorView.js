@@ -243,10 +243,6 @@ define([
                                     "displayType" : "Boolean",
                                     "format": "hidden"
                                 }, {
-                                    "title": "Integer",
-                                    "type": "string",
-                                    "format": "hidden"
-                                }, {
                                     "title": "Number",
                                     "type": "string",
                                     "format": "hidden"
