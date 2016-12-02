@@ -11,17 +11,17 @@
  * Header, with the fields enclosed by brackets [] replaced by your own identifying
  * information: "Portions copyright [year] [name of copyright owner]".
  *
- * Portions copyright 2011-2016 ForgeRock AS.
+ * Copyright 2011-2016 ForgeRock AS.
  */
 package org.forgerock.openidm.sync.impl;
 
+import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.array;
 import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
 import static org.forgerock.json.JsonValue.object;
 import static org.forgerock.json.resource.Requests.newQueryRequest;
 import static org.forgerock.json.resource.Requests.newReadRequest;
-import static org.forgerock.json.resource.ResourcePath.*;
+import static org.forgerock.json.resource.ResourcePath.resourcePath;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newResourceResponse;
 import static org.forgerock.openidm.util.ResourceUtil.notSupported;
@@ -41,35 +41,49 @@ import org.apache.felix.scr.annotations.Property;
 import org.apache.felix.scr.annotations.Reference;
 import org.apache.felix.scr.annotations.ReferencePolicy;
 import org.apache.felix.scr.annotations.Service;
+import org.forgerock.api.annotations.Actions;
+import org.forgerock.api.annotations.ApiError;
+import org.forgerock.api.annotations.Handler;
+import org.forgerock.api.annotations.Operation;
+import org.forgerock.api.annotations.Parameter;
+import org.forgerock.api.annotations.Schema;
+import org.forgerock.api.annotations.SingletonProvider;
+import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.audit.events.AuditEvent;
 import org.forgerock.guava.common.base.Function;
 import org.forgerock.guava.common.base.Predicate;
 import org.forgerock.guava.common.collect.FluentIterable;
-import org.forgerock.json.resource.Connection;
-import org.forgerock.json.resource.QueryResourceHandler;
-import org.forgerock.json.resource.ResourcePath;
-import org.forgerock.openidm.core.ServerConstants;
-import org.forgerock.openidm.router.IDMConnectionFactory;
-import org.forgerock.openidm.sync.SynchronizationException;
-import org.forgerock.services.context.Context;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
 import org.forgerock.json.resource.ActionRequest;
 import org.forgerock.json.resource.ActionResponse;
 import org.forgerock.json.resource.BadRequestException;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.json.resource.PatchRequest;
+import org.forgerock.json.resource.QueryResourceHandler;
 import org.forgerock.json.resource.ReadRequest;
 import org.forgerock.json.resource.Requests;
 import org.forgerock.json.resource.ResourceException;
+import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.json.resource.ResourceResponse;
 import org.forgerock.json.resource.SingletonResourceProvider;
 import org.forgerock.json.resource.UpdateRequest;
 import org.forgerock.openidm.config.enhanced.EnhancedConfig;
+import org.forgerock.openidm.core.ServerConstants;
 import org.forgerock.openidm.quartz.impl.ExecutionException;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
+import org.forgerock.openidm.router.IDMConnectionFactory;
 import org.forgerock.openidm.sync.ReconAction;
+import org.forgerock.openidm.sync.SynchronizationException;
+import org.forgerock.openidm.sync.impl.api.GetLinkedResourcesResponse;
+import org.forgerock.openidm.sync.impl.api.NotifyCreateRequest;
+import org.forgerock.openidm.sync.impl.api.NotifyDeleteRequest;
+import org.forgerock.openidm.sync.impl.api.NotifyResponse;
+import org.forgerock.openidm.sync.impl.api.NotifyUpdateRequest;
+import org.forgerock.openidm.sync.impl.api.PerformActionResponse;
+import org.forgerock.services.context.Context;
 import org.forgerock.util.AsyncFunction;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.promise.Promises;
@@ -84,6 +98,11 @@ import org.slf4j.LoggerFactory;
  * and targets listed in the synchronization mappings described by the injected Mappings.
  * Also supports invocation as a {@link ScheduledService}.
  */
+@SingletonProvider(@Handler(
+        id = "synchronizationService:0",
+        title = "Synchronization",
+        description = "Synchronization Service actions.",
+        mvccSupported = false))
 @Component(name = SynchronizationService.PID, policy = ConfigurationPolicy.IGNORE, immediate = true)
 @Properties({
     @Property(name = Constants.SERVICE_DESCRIPTION, value = "OpenIDM object synchronization service"),
@@ -316,6 +335,191 @@ public class SynchronizationService implements SingletonResourceProvider, Schedu
         }
     }
 
+    @Actions({
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description = "Informs the Synchronization Service that an object has been created and that "
+                                    + "the change should be synchronized across all relevant mappings.",
+                            errors = {
+                                    @ApiError(
+                                            code = 400,
+                                            description = "Request could not be understood by the resource due to malformed syntax.")
+                            },
+                            parameters = {
+                                    @Parameter(
+                                            name = "resourceContainer",
+                                            description = "Resource container for the source object (e.g., system/ldap/account)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "resourceId",
+                                            description = "Resource ID (e.g., bjensen)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL)
+                            }),
+                    name = "notifyCreate",
+                    request = @Schema(fromType = NotifyCreateRequest.class),
+                    response = @Schema(fromType = NotifyResponse.class)
+            ),
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description = "Informs the Synchronization Service that an object has been updated and "
+                                   + "that the change should be synchronized across all relevant mappings.",
+                            errors = {
+                                    @ApiError(
+                                            code = 400,
+                                            description = "Request could not be understood by the resource due to malformed syntax.")
+                            },
+                            parameters = {
+                                    @Parameter(
+                                            name = "resourceContainer",
+                                            description = "Resource container for the source object (e.g., system/ldap/account)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "resourceId",
+                                            description = "Resource ID (e.g., bjensen)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL)
+                            }),
+                    name = "notifyUpdate",
+                    request = @Schema(fromType = NotifyUpdateRequest.class),
+                    response = @Schema(fromType = NotifyResponse.class)
+            ),
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description = "Informs the Synchronization Service that an object has been deleted and "
+                                    + "that the change should be synchronized across all relevant mappings.",
+                            errors = {
+                                    @ApiError(
+                                            code = 400,
+                                            description = "Request could not be understood by the resource due to malformed syntax.")
+                            },
+                            parameters = {
+                                    @Parameter(
+                                            name = "resourceContainer",
+                                            description = "Resource container for the source object (e.g., system/ldap/account)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "resourceId",
+                                            description = "Resource ID (e.g., bjensen)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL)
+                            }),
+                    name = "notifyDelete",
+                    request = @Schema(fromType = NotifyDeleteRequest.class),
+                    response = @Schema(fromType = NotifyResponse.class)
+            ),
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description = "Perform an action on a resource.",
+                            errors = {
+                                    @ApiError(
+                                            code = 400,
+                                            description = "Request could not be understood by the resource due to malformed syntax."),
+                                    @ApiError(
+                                            code = 409,
+                                            description = "Conflict. No such mapping.")
+                            },
+                            parameters = {
+                                    @Parameter(
+                                            name = "action",
+                                            description = "The action to be taken",
+                                            enumValues = {"CREATE", "UPDATE", "DELETE", "LINK", "UNLINK", "EXCEPTION",
+                                                    "REPORT", "NOREPORT", "ASYNC", "IGNORE"},
+                                            enumTitles = {"A target object should be created and linked.",
+                                                    "A target object should be linked and updated.",
+                                                    "The target object should be deleted and unlinked.",
+                                                    "The correlated target object should be linked.",
+                                                    "The linked target object should be unlinked.",
+                                                    "The link situation is flagged as an exception.",
+                                                    "Does not perform the action. It reports only and then performs the post-action.",
+                                                    "Does not perform the action or the report. It performs the post-action only.",
+                                                    "Asynchronous process has been started, so it does not perform the action, report, or post-action.",
+                                                    "Jumps to the end and ignores every further steps, not even assess the situation."},
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "mapping",
+                                            description = "Mapping name (e.g., systemXmlfileAccounts_managedUser)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "sourceId",
+                                            description = "Source ID",
+                                            type = "string",
+                                            required = false,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "targetId",
+                                            description = "Target ID",
+                                            type = "string",
+                                            required = false,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "reconId",
+                                            description = "Recon ID",
+                                            type = "string",
+                                            required = false,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "linkQualifier",
+                                            description = "Link qualifier (e.g., default)",
+                                            type = "string",
+                                            required = false,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "linkType",
+                                            description = "The type of the link used for that mapping",
+                                            type = "string",
+                                            required = false,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "target",
+                                            description = "true or false for source-sync and omit for target-sync",
+                                            type = "boolean",
+                                            required = false,
+                                            source = ParameterSource.ADDITIONAL),
+                                    @Parameter(
+                                            name = "ignorePostAction",
+                                            description = "Ignore post action",
+                                            type = "boolean",
+                                            required = false,
+                                            source = ParameterSource.ADDITIONAL)
+                            }),
+                    name = "performAction",
+                    response = @Schema(fromType = PerformActionResponse.class)
+            ),
+            @org.forgerock.api.annotations.Action(
+                    operationDescription = @Operation(
+                            description = "Provides a list of linked resources for the given resource-name.",
+                            errors = {
+                                    @ApiError(
+                                            code = 400,
+                                            description = "Request could not be understood by the resource due to malformed syntax.")
+                            },
+                            parameters = {
+                                    @Parameter(
+                                            name = "resourceName",
+                                            description = "Resource name (e.g., system/xmlfile/account/bjensen)",
+                                            type = "string",
+                                            required = true,
+                                            source = ParameterSource.ADDITIONAL)
+                            }
+                    ),
+                    name = "getLinkedResources",
+                    response = @Schema(fromType = GetLinkedResourcesResponse.class)
+            )
+    })
     @Override
     public Promise<ActionResponse, ResourceException> actionInstance(Context context, ActionRequest request) {
         try {

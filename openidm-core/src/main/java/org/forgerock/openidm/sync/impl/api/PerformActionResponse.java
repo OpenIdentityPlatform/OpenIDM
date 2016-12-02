@@ -14,7 +14,34 @@
  * Copyright 2016 ForgeRock AS.
  */
 
-/**
- * API Descriptor models for {@link org.forgerock.openidm.sync.impl.SynchronizationService}.
- */
 package org.forgerock.openidm.sync.impl.api;
+
+import org.forgerock.api.annotations.Description;
+import org.forgerock.api.annotations.Title;
+
+/**
+ * {@link org.forgerock.openidm.sync.impl.SynchronizationService} performAction-action response.
+ */
+@Title("Perform Action Response")
+public class PerformActionResponse {
+    private String status;
+
+    /**
+     * Gets the returned status.
+     *
+     * @return the returned status
+     */
+    @Description("Status")
+    public String getStatus() {
+        return status;
+    }
+
+    /**
+     * Sets the returned status.
+     *
+     * @param status the returned status
+     */
+    public void setStatus(String status) {
+        this.status = status;
+    }
+}
