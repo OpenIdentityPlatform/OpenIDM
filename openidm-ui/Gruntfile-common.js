@@ -359,7 +359,7 @@ module.exports = function(grunt, options) {
 
     grunt.registerTask("deploy", [
         "sync:compose",
-        'babel:source',
+        "newer:babel",
         "less:dev",
         "sync:compiled",
         "sync:transpiled",
@@ -370,7 +370,7 @@ module.exports = function(grunt, options) {
         'eslint'
     ]);
 
-    grunt.registerTask("dev", ["copy:compose", "deploy", "watch"]);
+    grunt.registerTask("dev", ["copy:compose", "babel:source", "deploy", "watch"]);
     grunt.registerTask("default", "dev");
 
     grunt.task.run('notify_hooks');
