@@ -266,7 +266,7 @@
         <openicf.ldapconnector.version>1.4.3.0</openicf.ldapconnector.version>
         <openicf.groovyconnector.version>1.4.3.0</openicf.groovyconnector.version>
         <openicf.sshconnector.version>1.4.1.0</openicf.sshconnector.version>
-        <openicf.kerberosconnector.version>1.4.1.0</openicf.kerberosconnector.version>
+        <openicf.kerberosconnector.version>1.4.2.0</openicf.kerberosconnector.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
