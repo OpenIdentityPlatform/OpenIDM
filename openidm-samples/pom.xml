@@ -12,111 +12,18 @@
         <artifactId>forgerock-parent</artifactId>
         <version>2.0.11</version>
     </parent>
+
     <groupId>org.forgerock.openidm</groupId>
-    <artifactId>openidm-commercial</artifactId>
+    <artifactId>openidm-samples</artifactId>
     <version>5.0.0-SNAPSHOT</version>
+    <name>OpenIDM Sample parent</name>
     <packaging>pom</packaging>
-    <name>OpenIDM Commercial Project</name>
-    <description>OpenIDM is an open standards based Identity Management, Provisioning and Compliance solution.
-        Experience shows that the most important features of an identity management product are: high flexibility in
-        Business Process handling and compliance with open standards and interfaces. A highly flexible user interface
-        combined with a very robust workflow engine make OpenIDM ready for any Identity Management project.
-    </description>
-    <inceptionYear>2013</inceptionYear>
-    <url>http://openidm.forgerock.org</url>
-    <licenses>
-    </licenses>
-    <scm>
-        <connection>scm:git:ssh://git@stash.forgerock.org:7999/openidm/openidm-commercial.git</connection>
-        <developerConnection>scm:git:ssh://git@stash.forgerock.org:7999/openidm/openidm-commercial.git
-        </developerConnection>
-        <url>https://stash.forgerock.org/projects/OPENIDM/repos/openidm-commercial/browse</url>
-        <tag>HEAD</tag>
-    </scm>
-
-    <!-- For deployment to private ForgeRock Maven repositories -->
-    <distributionManagement>
-        <repository>
-            <id>forgerock-private-releases</id>
-            <name>maven.forgerock.org-releases</name>
-            <url>http://maven.forgerock.org/repo/private-releases</url>
-        </repository>
-        <snapshotRepository>
-            <id>forgerock-private-snapshots</id>
-            <name>maven.forgerock.org-snapshots</name>
-            <url>http://maven.forgerock.org/repo/private-snapshots</url>
-        </snapshotRepository>
-    </distributionManagement>
-
-    <repositories>
-        <repository>
-            <id>forgerock-staging-repository</id>
-            <name>ForgeRock Release Repository</name>
-            <url>http://maven.forgerock.org/repo/releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>forgerock-private-releases</id>
-            <name>ForgeRock Private Release Repository</name>
-            <url>http://maven.forgerock.org/repo/private-releases</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>forgerock-private-snapshots</id>
-            <name>ForgeRock Private Snapshot Repository</name>
-            <url>http://maven.forgerock.org/repo/private-snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
-
-    <pluginRepositories>
-        <pluginRepository>
-            <id>forgerock-plugins-repository</id>
-            <name>ForgeRock Plugin Repository</name>
-            <url>http://maven.forgerock.org/repo/repo</url>
-        </pluginRepository>
-    </pluginRepositories>
-
-    <issueManagement>
-        <system>jira</system>
-        <url>https://bugster.forgerock.org/jira/browse/OPENIDM</url>
-    </issueManagement>
-
-    <properties>
-        <salesforce.api.version>29</salesforce.api.version>
-        <provisioner.salesforcemodule.version>2.0.${salesforce.api.version}.4-SNAPSHOT</provisioner.salesforcemodule.version>
-        <openicf.googleconnector.version>1.4.1.0</openicf.googleconnector.version>
-        <openicf.marketoconnector.version>1.4.2.0</openicf.marketoconnector.version>
-
-        <!-- Documentation and site properties -->
-        <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>
-    </properties>
-
     <modules>
-        <module>openidm-commercial-samples</module>
-        <module>openidm-commercial-zip</module>
+        <module>googleapps-sample</module>
+        <module>salesforce-sample</module>
+        <module>cdm-sample</module>
+        <module>devops-postgres</module>
+        <module>devops-openidm</module>
+        <module>devops-gettingstarted</module>
     </modules>
-
-    <dependencyManagement>
-        <dependencies>
-            <!--
-                mvn versions:display-plugin-updates
-                mvn versions:display-dependency-updates
-                mvn versions:use-latest-versions
-            -->
-        </dependencies>
-    </dependencyManagement>
-
-    <build>
-        <pluginManagement>
-            <plugins>
-            </plugins>
-        </pluginManagement>
-    </build>
 </project>
