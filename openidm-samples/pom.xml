@@ -18,6 +18,7 @@
     <packaging>pom</packaging>
     <modules>
         <module>default</module>
+        <module>getting-started</module>
         <!--
         <module>googleapps-sample</module>
         <module>salesforce-sample</module>

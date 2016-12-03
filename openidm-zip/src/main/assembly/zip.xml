@@ -104,35 +104,6 @@
             </excludes>
             <outputDirectory>/openidm/logs</outputDirectory>
         </fileSet>
-        <!-- Setup getting-started sample (replaces Sample4) -->
-        <fileSet>
-            <directory>${basedir}/src/main/resources/samples/internal-common</directory>
-            <includes>
-                <include>**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/authentication.json</exclude>
-                <exclude>data/Example.ldif</exclude>
-                <exclude>data/xmlConnectorData.xml</exclude>
-                <exclude>data/resource-schema-extension.xsd</exclude>
-                <exclude>data/resource-schema-1.xsd</exclude>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/getting-started</outputDirectory>
-        </fileSet>
-        <!--
-        <fileSet>
-            <directory>${basedir}/src/main/resources</directory>
-            <includes>
-                <include>conf/**</include>
-                <include>script/**</include>
-            </includes>
-            <excludes>
-                <exclude>conf/*patch*</exclude>
-            </excludes>
-            <outputDirectory>/openidm/samples/getting-started</outputDirectory>
-        </fileSet>
-        -->
         <!-- Setup Sample1  -->
         <fileSet>
             <directory>${basedir}/src/main/resources/samples/internal-common</directory>
@@ -1359,6 +1330,16 @@
             <unpack>true</unpack>
             <includes>
                 <include>org.forgerock.openidm:default:zip:samples</include>
+            </includes>
+        </dependencySet>
+
+        <!-- include getting-started sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/getting-started</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:getting-started:zip:samples</include>
             </includes>
         </dependencySet>
 
