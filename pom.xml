@@ -93,6 +93,23 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
+        <repository>
+            <id>forgerock-private-releases</id>
+            <name>ForgeRock Private Release Repository</name>
+            <url>http://maven.forgerock.org/repo/private-releases</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+        <repository>
+            <id>forgerock-private-snapshots</id>
+            <name>ForgeRock Private Snapshot Repository</name>
+            <url>http://maven.forgerock.org/repo/private-snapshots</url>
+            <releases>
+                <enabled>false</enabled>
+            </releases>
+        </repository>
+
         <!--repository>
             <id>ops4j</id>
             <name>OPS4J Maven Repository</name>
@@ -267,6 +284,7 @@
         <openicf.groovyconnector.version>1.4.3.0</openicf.groovyconnector.version>
         <openicf.sshconnector.version>1.4.1.0</openicf.sshconnector.version>
         <openicf.kerberosconnector.version>1.4.2.0</openicf.kerberosconnector.version>
+        <openicf.marketoconnector.version>1.4.2.0</openicf.marketoconnector.version>
 
         <!-- Site properties -->
         <siteDistributionURL>scp://community.internal.forgerock.com/var/www/vhosts/openidm.forgerock.org/httpdocs</siteDistributionURL>

@@ -1343,6 +1343,23 @@
             </includes>
         </dependencySet>
 
+        <!-- include CDM sample -->
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/samples/cdm</outputDirectory>
+            <unpack>true</unpack>
+            <includes>
+                <include>org.forgerock.openidm:cdm:zip:samples</include>
+            </includes>
+        </dependencySet>
+        <dependencySet>
+            <useProjectArtifact>false</useProjectArtifact>
+            <outputDirectory>/openidm/connectors</outputDirectory>
+            <includes>
+                <include>org.forgerock.openicf.connectors:marketo-connector</include>
+            </includes>
+        </dependencySet>
+
         <!-- default sample as base for all other samples -->
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>

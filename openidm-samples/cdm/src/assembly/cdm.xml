@@ -16,25 +16,17 @@
         <!-- order here is important : this first set is from the cdm sample itself -->
         <fileSet>
             <directory>${project.basedir}/src/main/resources</directory>
-            <outputDirectory>samples/cdm</outputDirectory>
+            <outputDirectory></outputDirectory>
             <filtered>true</filtered>
-        </fileSet>
-        <!-- this set is the default project which apparently does not overwrite things in the first set -->
-        <fileSet>
-            <directory>${project.build.directory}/dependency/openidm</directory>
-            <outputDirectory>samples/cdm</outputDirectory>
-            <filtered>true</filtered>
-            <excludes>
-                <exclude>**/*.patch</exclude>
-            </excludes>
         </fileSet>
     </fileSets>
     <dependencySets>
         <dependencySet>
             <useProjectArtifact>false</useProjectArtifact>
-            <outputDirectory>connectors</outputDirectory>
+            <outputDirectory></outputDirectory>
+            <unpack>true</unpack>
             <includes>
-                <include>org.forgerock.openicf.connectors:marketo-connector</include>
+                <include>org.forgerock.openidm:default:zip:samples</include>
             </includes>
         </dependencySet>
     </dependencySets>

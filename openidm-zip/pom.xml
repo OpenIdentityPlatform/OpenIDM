@@ -249,6 +249,13 @@
         </dependency>
         <dependency>
             <groupId>org.forgerock.openidm</groupId>
+            <artifactId>cdm</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
             <artifactId>getting-started</artifactId>
             <version>${project.version}</version>
             <classifier>samples</classifier>
@@ -527,6 +534,11 @@
             <groupId>org.forgerock.openicf.connectors</groupId>
             <artifactId>kerberos-connector</artifactId>
             <version>${openicf.kerberosconnector.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors</groupId>
+            <artifactId>marketo-connector</artifactId>
+            <version>${openicf.marketoconnector.version}</version>
         </dependency>
         <!-- tomcat-jdbc and juli needed for scriptedsql 1.4 -->
         <dependency>
