@@ -8,22 +8,23 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
-        <groupId>org.forgerock</groupId>
-        <artifactId>forgerock-parent</artifactId>
-        <version>2.0.11</version>
+        <groupId>org.forgerock.openidm</groupId>
+        <artifactId>openidm-project</artifactId>
+        <version>5.5.0-SNAPSHOT</version>
     </parent>
 
-    <groupId>org.forgerock.openidm</groupId>
     <artifactId>openidm-samples</artifactId>
-    <version>5.0.0-SNAPSHOT</version>
     <name>OpenIDM Sample parent</name>
     <packaging>pom</packaging>
     <modules>
+        <module>default</module>
+        <!--
         <module>googleapps-sample</module>
         <module>salesforce-sample</module>
         <module>cdm-sample</module>
         <module>devops-postgres</module>
         <module>devops-openidm</module>
         <module>devops-gettingstarted</module>
+        -->
     </modules>
 </project>

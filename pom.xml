@@ -331,6 +331,7 @@
         <module>openidm-workflow-activiti</module>
         <module>openidm-maintenance</module>
         <!--module>openidm-workflow-remote</module-->
+        <module>openidm-samples</module>
         <module>openidm-zip</module>
         <module>custom-scripted-connector-bundler</module>
     </modules>

@@ -238,6 +238,13 @@
             <artifactId>openidm-felix-webconsole</artifactId>
             <version>${project.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>default</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
 
         <!-- Core OSGi -->
         <dependency>
