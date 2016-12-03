@@ -20,8 +20,8 @@
         <module>default</module>
         <module>cdm</module>
         <module>getting-started</module>
+        <module>googleapps</module>
         <!--
-        <module>googleapps-sample</module>
         <module>salesforce-sample</module>
         <module>devops-postgres</module>
         <module>devops-openidm</module>

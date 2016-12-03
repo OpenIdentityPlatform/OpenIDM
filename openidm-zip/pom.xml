@@ -261,6 +261,13 @@
             <classifier>samples</classifier>
             <type>zip</type>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openidm</groupId>
+            <artifactId>googleapps</artifactId>
+            <version>${project.version}</version>
+            <classifier>samples</classifier>
+            <type>zip</type>
+        </dependency>
 
         <!-- Core OSGi -->
         <dependency>
@@ -540,6 +547,60 @@
             <artifactId>marketo-connector</artifactId>
             <version>${openicf.marketoconnector.version}</version>
         </dependency>
+        <dependency>
+            <groupId>org.forgerock.openicf.connectors</groupId>
+            <artifactId>googleapps-connector</artifactId>
+            <version>${openicf.googleconnector.version}</version>
+        </dependency>
+
+        <!-- google connector dependencies -->
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>18.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-licensing</artifactId>
+            <version>v1-rev34-1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.apis</groupId>
+            <artifactId>google-api-services-admin-directory</artifactId>
+            <version>directory_v1-rev41-1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.oauth-client</groupId>
+            <artifactId>google-oauth-client-java6</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.api-client</groupId>
+            <artifactId>google-api-client</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client</artifactId>
+            <version>1.19.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.apache.httpcomponents</groupId>
+                    <artifactId>httpclient</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+        <dependency>
+            <groupId>com.google.http-client</groupId>
+            <artifactId>google-http-client-jackson2</artifactId>
+            <version>1.19.0</version>
+        </dependency>
+
         <!-- tomcat-jdbc and juli needed for scriptedsql 1.4 -->
         <dependency>
             <groupId>org.apache.tomcat</groupId>
