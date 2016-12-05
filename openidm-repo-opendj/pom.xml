@@ -38,13 +38,6 @@
             <version>2.3.20</version>
         </dependency>
 
-        <!-- Needed by rest2ldap for their (unused in idm) oauth2 support -->
-        <dependency>
-            <groupId>org.forgerock.openig</groupId>
-            <artifactId>openig-toolkit</artifactId>
-            <version>5.0.0-SNAPSHOT</version>
-        </dependency>
-
         <dependency>
             <groupId>org.forgerock.opendj</groupId>
             <artifactId>opendj-grizzly</artifactId>
