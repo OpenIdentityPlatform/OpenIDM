@@ -1338,6 +1338,7 @@
                 "tokenSigningAlgorithmValue": "RS256",
                 "impliedConsent": "Implied Consent",
                 "postLogoutRedirectURIs": "Post Logout Redirect URIs",
+                "genericWellKnownError" : "Specify the well-known endpoint for the provider",
                 "wellKnownError": "Specify the endpoint with OpenAM's OpenID Provider configuration",
                 "providerDialogTitle": "Configure ForgeRock Identity Provider",
                 "am": "Configure Access Manager",

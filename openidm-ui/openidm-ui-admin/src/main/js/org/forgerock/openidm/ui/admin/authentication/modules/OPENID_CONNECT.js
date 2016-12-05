@@ -30,6 +30,9 @@ define([
 
     var OpenIDConnectView = AuthenticationAbstractView.extend({
         template: "templates/admin/authentication/modules/OPENID_CONNECT.html",
+        partials: AuthenticationAbstractView.prototype.partials.concat([
+            "partials/_alert.html"
+        ]),
         events : _.extend({
             "change input[name='properties.resolvers[].well-known']" : "handleWellKnownChange"
         }, AuthenticationAbstractView.prototype.events),
@@ -48,9 +51,11 @@ define([
                 });
 
                 $("#submitAuth").prop("disabled", false);
+                $("#wellKnownURLError").hide();
             },
             () => {
                 $("#submitAuth").prop("disabled", true);
+                $("#wellKnownURLError").show();
             });
         },
 
@@ -91,9 +96,11 @@ define([
             this.data.userOrGroupDefault = this.getUserOrGroupDefault(this.data.config || {});
 
             ExternalAccessDelegate.externalRestRequest(this.$el.find("input[name='properties.resolvers[].well-known']").val()).then((config) => {
+                this.data.hideWellKnownError = true;
                 this.renderTemplate();
             },
             () => {
+                this.data.hideWellKnownError = false;
                 this.renderTemplate();
                 $("#submitAuth").prop("disabled", true);
             });

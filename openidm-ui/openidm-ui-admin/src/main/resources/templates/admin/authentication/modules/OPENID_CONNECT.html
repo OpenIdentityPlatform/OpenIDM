@@ -111,6 +111,14 @@
 
     {{> authentication/_augmentSecurityContext}}
     {{> authentication/_customProperties}}
-
     </div>
 </div>
+
+{{> _alert
+hidden=hideWellKnownError
+id="wellKnownURLError"
+type="danger"
+heading="common.form.error"
+message="templates.auth.providers.genericWellKnownError"
+}}
+
