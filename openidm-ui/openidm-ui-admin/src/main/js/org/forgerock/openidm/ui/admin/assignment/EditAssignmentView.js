@@ -55,11 +55,11 @@ define([
         events: {
             "click #saveAssignmentsDetails" :"saveAssignmentDetails",
             "click #saveAssignmentScripts" : "saveAssignmentScripts",
-            "click #saveAssignmentAttributes" : "saveAssignmentAttribute",
+            "click #saveAssignmentAttributes" : "saveAssignmentAttributeEvent",
             "click #deleteAssignment" : "deleteAssignment",
             "click #addAttribute": "eventAddAttribute",
-            "click .delete-attribute": "deleteAttribute",
-            "click .save-operations" : "saveOperations",
+            "click .delete-attribute": "deleteAttributeEvent",
+            "click .save-operations" : "saveOperationsEvent",
             "change .select-attribute" : "changeSchema",
             "onValidate": "onValidate"
         },
@@ -79,8 +79,7 @@ define([
         render: function(args, callback) {
             var resourcePromise,
                 configPromise = ConfigDelegate.readEntity("sync"),
-                systemType,
-                connectorUrl;
+                systemType;
 
             this.model.serviceUrl = ResourceDelegate.getServiceUrl(args);
             this.model.args = args;
@@ -325,7 +324,7 @@ define([
             });
         },
 
-        saveOperations : function(event) {
+        saveOperationsEvent : function(event) {
             event.preventDefault();
 
             var container = $(event.target).parents(".list-group-item"),
@@ -333,24 +332,54 @@ define([
                 index = this.$el.find("#assignmentAttributesList .list-group-item").index(container),
                 attributeDetails = this.model.assignmentAttributes[index];
 
-            attributeDetails.assignmentOperation = container.find(".onAssignment-select").val();
-            attributeDetails.unassignmentOperation =  container.find(".unAssignment-select").val();
+            this.saveOperations(attributeDetails, container.find(".onAssignment-select"), container.find(".onUnassignment-select"));
 
             $(button).trigger("click");
         },
 
-        deleteAttribute: function(event) {
+        /**
+         *
+         * @param attributeDetails - Object of the current attribute used for assignment operations
+         * @param onAssignmentEle - The assignment select dom element
+         * @param unAssignmentEle - the unassignment select dom element
+         * @returns {*} Updates the attribute details object with the correct assignment and unassignment operations based on dom selection
+         */
+        saveOperations : function(attributeDetails, onAssignmentEle, unAssignmentEle) {
+            attributeDetails.assignmentOperation = onAssignmentEle.val();
+            attributeDetails.unassignmentOperation =  unAssignmentEle.val();
+
+            return attributeDetails;
+        },
+
+        deleteAttributeEvent: function(event) {
             event.preventDefault();
 
-            console.log(($(event.target).parents(".list-group-item")));
-            console.log(this.$el.find("#assignmentAttributesList .list-group-item"));
+            var deleteResults = this.deleteAttribute($(event.target).parents(".list-group-item"), this.$el.find("#assignmentAttributesList .list-group-item"), this.model.schemaEditors, this.model.assignmentAttributes);
 
-            var editorIndex = this.$el.find("#assignmentAttributesList .list-group-item").index($(event.target).parents(".list-group-item"));
+            this.model.schemaEditors = deleteResults.schemaEditors;
+            this.model.assignmentAttributes = deleteResults.assignmentAttributes;
+        },
 
-            this.model.schemaEditors.splice(editorIndex, 1);
-            this.model.assignmentAttributes.splice(editorIndex, 1);
+        /**
+         *
+         * @param removeElement - Current dom attribute that was clicked for deleting
+         * @param elementList - Array of dom elements used for displaying attribute
+         * @param schemaEditors - Array of json editors used on the the attribute tab
+         * @param assignmentAttributes - Array of attribute objects used for saving
+         * @returns {{schemaEditors: *, assignmentAttributes: *}} - Returns the updated schemaEditors array and assignmentAttributes array
+         */
+        deleteAttribute: function(removeElement, elementList, schemaEditors, assignmentAttributes) {
+            var editorIndex = elementList.index(removeElement);
 
-            $(event.target).closest(".list-group-item").remove();
+            schemaEditors.splice(editorIndex, 1);
+            assignmentAttributes.splice(editorIndex, 1);
+
+            removeElement.remove();
+
+            return {
+                schemaEditors: schemaEditors,
+                assignmentAttributes: assignmentAttributes
+            };
         },
 
         saveAssignmentDetails: function(event) {
@@ -393,21 +422,13 @@ define([
             }, this));
         },
 
-        saveAssignmentAttribute: function(event) {
+        saveAssignmentAttributeEvent: function(event) {
             event.preventDefault();
 
-            var selectAttribute = $(".select-attribute"),
+            var selectAttributes = $(".select-attribute"),
                 resourceObject = _.clone(this.data.resource);
 
-            _.each(this.model.schemaEditors, _.bind(function(editor, index){
-                this.model.assignmentAttributes[index].name = $(selectAttribute[index]).val();
-
-                if(editor.schema) {
-                    this.model.assignmentAttributes[index].value = editor.getValue();
-                } else {
-                    this.model.assignmentAttributes[index].value = editor.val();
-                }
-            }, this));
+            this.model.assigmentAttributes = this.saveAssignmentAttribute(selectAttributes,  this.model.assignmentAttributes, this.model.schemaEditors);
 
             resourceObject.attributes = this.model.assignmentAttributes;
 
@@ -416,6 +437,27 @@ define([
 
                 this.data.resource = result;
             }, this));
+        },
+
+        /**
+         *
+         * @param selectAttributes - Array of name html inputs
+         * @param assignmentAttributes - Array of assignment attribute objects for saving
+         * @param schemaEditors - Array of inputs or jsonEditors used to generate attribute value
+         * @returns {*} - Returns the updated assignmentAttributes based on name and value
+         */
+        saveAssignmentAttribute: function(selectAttributes, assignmentAttributes, schemaEditors) {
+            _.each(schemaEditors, _.bind(function(editor, index){
+                assignmentAttributes[index].name = $(selectAttributes[index]).val();
+
+                if(editor.schema) {
+                    assignmentAttributes[index].value = editor.getValue();
+                } else {
+                    assignmentAttributes[index].value = editor.val();
+                }
+            }, this));
+
+            return assignmentAttributes;
         },
 
         deleteAssignment: function(event) {
