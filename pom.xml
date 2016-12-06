@@ -210,7 +210,7 @@
 
     <properties>
         <!-- Version management -->
-        <commons.commons-bom.version>21.0.0-alpha-23</commons.commons-bom.version>
+        <commons.commons-bom.version>21.0.0-alpha-26</commons.commons-bom.version>
 
         <!-- Commons versions -->
         <commons.forgerock-script.version>4.2.0</commons.forgerock-script.version>
