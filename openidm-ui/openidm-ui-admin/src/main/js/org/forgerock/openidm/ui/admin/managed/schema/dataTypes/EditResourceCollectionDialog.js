@@ -194,7 +194,7 @@ define([
                         cell: BackgridUtils.ButtonCell([
                             {
                                 className: "fa fa-times grid-icon col-sm-1 pull-right",
-                                callback: function(e){
+                                callback: (e) => {
                                     var itemIndex = SchemaUtils.getClickedRowIndex(e);
                                     this.data.currentValue.query.fields.splice(itemIndex, 1);
                                     this.data.currentValue.query.sortKeys.splice(itemIndex, 1);
