@@ -136,6 +136,8 @@ Run The Sample In OpenIDM
           } ],
           "resultCount" : 3,
           "pagedResultsCookie" : null,
+          "totalPagedResultsPolicy" : "NONE",
+          "totalPagedResults" : -1,
           "remainingPagedResults" : -1
         }
 
@@ -296,6 +298,8 @@ Note that the state of the account is now disabled and the date that the state c
           } ],
           "resultCount" : 3,
           "pagedResultsCookie" : null,
+          "totalPagedResultsPolicy" : "NONE",
+          "totalPagedResults" : -1,
           "remainingPagedResults" : -1
         }
 
