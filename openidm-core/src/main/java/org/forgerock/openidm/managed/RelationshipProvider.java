@@ -800,8 +800,7 @@ public abstract class RelationshipProvider {
      */
     protected final ResourcePath firstResourcePath(final Context context, final Request request)
             throws BadRequestException {
-        final String uriFirstId =
-                context.asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
+        final String uriFirstId = getManagedObjectId(context);
         final String firstId = uriFirstId != null ? uriFirstId : request.getAdditionalParameter(PARAM_MANAGED_OBJECT_ID);
 
         if (StringUtils.isNotBlank(firstId)) {
@@ -898,7 +897,20 @@ public abstract class RelationshipProvider {
      * @return a String representing the managed object's ID.
      */
     protected String getManagedObjectId(Context context) {
-        return context.asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
+        /*
+        Note that this method is called from both the SingletonRelationshipProvider, and the CollectionRelationshipProvider.
+        Ultimately, request to readInstance(for the SRP) or queryCollection (for the CRP) will be dispatched in CREST by
+        the InterfaceSingletonHandler and InterfaceCollectionHandler, respectively. The behavior in the InterfaceCollectionHandler
+        is to pop off the top-most Context instance prior to making the invocation. Thus the location of the UriTemplateVariable
+        Map which has the managedObjectId key whose value is the managed-object in question is either in the leaf context
+        (for the CRP), or the parent of the leaf context (for the SRP). The logic below handles both cases.
+         */
+        final String objectId = context.asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
+        if (objectId == null) {
+            return context.getParent().asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
+        } else {
+            return objectId;
+        }
     }
     
     /**
