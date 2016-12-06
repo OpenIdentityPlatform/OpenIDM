@@ -1,0 +1,32 @@
+{
+    "type" : "object",
+    "additionalProperties" : {
+        "type" : "array",
+        "description" : "List of trigger names",
+        "items" : {
+            "type" : "string"
+        }
+    },
+    "required" : [
+        "_rev",
+        "_id"
+    ],
+    "title" : "For each node, list array of triggers of type 'acquiredTriggers' or 'waitingTriggers'.",
+    "properties" : {
+        "_id" : {
+            "type" : "string",
+            "description" : "Either 'acquiredTriggers' or 'waitingTriggers'"
+        },
+        "_rev" : {
+            "type" : "string",
+            "description" : "Revision of the trigger repo state"
+        }
+    },
+    "example" : {
+        "_rev" : "4642",
+        "_id" : "acquiredTriggers",
+        "node1" : [
+            "scheduler-service-group_$x$x$_trigger-jobName"
+        ]
+    }
+}

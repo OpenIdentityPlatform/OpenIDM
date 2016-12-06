@@ -19,6 +19,8 @@ import static org.forgerock.api.commons.CommonsApi.Errors.BAD_REQUEST;
 import static org.forgerock.api.commons.CommonsApi.Errors.NOT_FOUND;
 import static org.forgerock.api.commons.CommonsApi.Errors.VERSION_MISMATCH;
 
+import java.util.Map;
+
 import org.forgerock.api.enums.CreateMode;
 import org.forgerock.api.enums.ParameterSource;
 import org.forgerock.api.enums.QueryType;
@@ -39,10 +41,10 @@ import org.forgerock.api.models.Update;
 import org.forgerock.api.models.VersionedPath;
 import org.forgerock.openidm.scheduler.api.ScheduleConfigResource;
 import org.forgerock.openidm.scheduler.api.SuccessResponse;
-import org.forgerock.openidm.scheduler.api.TriggerListResource;
 import org.forgerock.openidm.scheduler.api.TriggerResource;
 import org.forgerock.openidm.scheduler.api.ValidateQuartzCronExpressionRequest;
 import org.forgerock.openidm.scheduler.api.ValidateQuartzCronExpressionResponse;
+import org.forgerock.openidm.util.JsonUtil;
 
 /**
  * {@link ApiDescription} builder for {@link SchedulerService}.
@@ -66,6 +68,10 @@ class SchedulerServiceApiDescription {
                     .value(NOT_FOUND.getReference())
                     .build())
             .build();
+    private static final Schema triggerListResource =
+            Schema.schema().schema(
+                    JsonUtil.parseURL(SchedulerServiceApiDescription.class.getResource("api/triggerListResource.json"))
+            ).build();
 
     private SchedulerServiceApiDescription() {
         // empty
@@ -88,9 +94,7 @@ class SchedulerServiceApiDescription {
                         .title("Scheduler - Acquired Triggers")
                         .description("Returns an array of the triggers that have been acquired, per node.")
                         .mvccSupported(false)
-                        .resourceSchema(Schema.schema()
-                                .type(TriggerListResource.class)
-                                .build())
+                        .resourceSchema(triggerListResource)
                         .read(Read.read()
                                 .description("Queries the repo for acquired triggers.")
                                 .build())
@@ -99,9 +103,7 @@ class SchedulerServiceApiDescription {
                         .title("Scheduler - Waiting Triggers")
                         .description("Returns an array of the triggers that have not yet been acquired.")
                         .mvccSupported(false)
-                        .resourceSchema(Schema.schema()
-                                .type(TriggerListResource.class)
-                                .build())
+                        .resourceSchema(triggerListResource)
                         .read(Read.read()
                                 .description("Queries the repo for waiting triggers.")
                                 .build())
