@@ -230,12 +230,16 @@ define([
 
         },
 
-        alignProvidersArray: function(result) {
+        alignProvidersArray: function (result) {
             _.each(this.data.providers, (provider, index) => {
-                provider.active = result.idpData[provider.name].enabled;
+                if (result.idpData[provider.name]) {
+                    provider.active = result.idpData[provider.name].enabled;
+                } else {
+                    provider.active = false;
+                }
             });
         },
-
+        
         getUrl: function(provider) {
             let scopes = provider.scope.join(" ");
             let currentURL = Router.currentRoute;
