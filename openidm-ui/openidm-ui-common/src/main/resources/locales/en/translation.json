@@ -668,7 +668,7 @@
             },
             "termsAndConditions" : {
                 "title" : "Terms & Conditions",
-                "details" : "Add a end-user license agreement."
+                "details" : "Add an end-user license agreement."
             },
             "captcha" : {
                 "description" : "Use Google reCAPTCHA to stop bots.",
