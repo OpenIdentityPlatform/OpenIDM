@@ -258,7 +258,7 @@
         <felix.webconsole.packageadmin.version>1.0.2</felix.webconsole.packageadmin.version>
 
         <!-- OpenICF Framework and Connector versions -->
-        <openicf.framework.version>1.5.2.0-SNAPSHOT</openicf.framework.version>
+        <openicf.framework.version>1.5.2.0</openicf.framework.version>
         <openicf.xmlconnector.version>1.1.0.3</openicf.xmlconnector.version>
         <openicf.csvconnector.version>1.5.1.4</openicf.csvconnector.version>
         <openicf.dbtableconnector.version>1.1.0.2</openicf.dbtableconnector.version>
