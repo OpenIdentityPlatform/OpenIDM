@@ -125,32 +125,36 @@ define([
         },
 
         exitMaintenanceMode: function() {
-            MaintenanceDelegate.disable().then(_.bind(function(data) {
+            MaintenanceDelegate.disable().then((data) => {
 
                 this.$el.find(".resumeSchedules").show();
 
                 if (data.maintenanceEnabled === false) {
-                    SchedulerDelegate.resumeJobs().then(_.bind(function (schedulerResult) {
-
-                        if (schedulerResult.success) {
-
-                            this.$el.find(".success").show();
-
-                            // Give a moment to read the success string
-                            _.delay(_.bind(function() {
-                                this.model.success(this.model.data);
-                            }, this), 300);
-
-                        } else {
-                            this.model.error();
-                        }
-                    }, this));
-
+                    if (this.model.data.response.status === "COMPLETE") {
+                        this.showReport();
+                    } else {
+                        SchedulerDelegate.resumeJobs().then((schedulerResult) => {
+                            if (schedulerResult.success) {
+                                this.showReport();
+                            } else {
+                                this.model.error();
+                            }
+                        });
+                    }
                 } else {
                     this.model.error();
                 }
 
-            }, this));
+            });
+        },
+
+        showReport: function() {
+            this.$el.find(".success").show();
+
+            // Give a moment to read the success string
+            _.delay(() => {
+                this.model.success(this.model.data);
+            }, 300);
         }
     });
 
