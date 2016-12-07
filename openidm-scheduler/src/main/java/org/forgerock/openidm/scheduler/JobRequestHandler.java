@@ -16,10 +16,7 @@
 package org.forgerock.openidm.scheduler;
 
 import static java.lang.Math.min;
-import static org.forgerock.json.JsonValue.array;
-import static org.forgerock.json.JsonValue.field;
-import static org.forgerock.json.JsonValue.json;
-import static org.forgerock.json.JsonValue.object;
+import static org.forgerock.json.JsonValue.*;
 import static org.forgerock.json.resource.ResourceResponse.FIELD_CONTENT_ID;
 import static org.forgerock.json.resource.Responses.newActionResponse;
 import static org.forgerock.json.resource.Responses.newQueryResponse;
@@ -34,7 +31,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -69,12 +65,10 @@ import org.forgerock.openidm.filter.JsonValueFilterVisitor;
 import org.forgerock.openidm.quartz.impl.ScheduledService;
 import org.forgerock.openidm.quartz.impl.SchedulerServiceJob;
 import org.forgerock.openidm.quartz.impl.StatefulSchedulerServiceJob;
-import org.forgerock.openidm.scheduler.impl.TriggerFactory;
 import org.forgerock.openidm.util.JsonUtil;
 import org.forgerock.services.context.Context;
 import org.forgerock.util.promise.Promise;
 import org.forgerock.util.query.QueryFilter;
-import org.quartz.CronTrigger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.JobDetail;
@@ -89,10 +83,6 @@ import org.slf4j.LoggerFactory;
  */
 class JobRequestHandler extends AbstractRequestHandler {
     private static final Logger logger = LoggerFactory.getLogger(JobRequestHandler.class);
-
-    // Misfire Policies
-    private static final String MISFIRE_POLICY_DO_NOTHING = "doNothing";
-    private static final String MISFIRE_POLICY_FIRE_AND_PROCEED = "fireAndProceed";
 
     private static final JsonValueFilterVisitor JSONVALUE_FILTER_VISITOR = new JsonValueFilterVisitor();
 
@@ -346,10 +336,10 @@ class JobRequestHandler extends AbstractRequestHandler {
             switch (request.getActionAsEnum(JobAction.class)) {
                 case create:
                     String id = UUID.randomUUID().toString();
-                    params.put(ResourceResponse.FIELD_CONTENT_ID, id);
-                    if (jobExists(id)) {
-                        throw new BadRequestException("Schedule already exists");
+                    while (jobExists(id)) {
+                        id = UUID.randomUUID().toString();
                     }
+                    params.put(ResourceResponse.FIELD_CONTENT_ID, id);
                     CreateRequest createRequest = Requests.newCreateRequest(id, new JsonValue(params));
                     ResourceResponse response = handleCreate(context, createRequest).getOrThrow();
                     return newActionResponse(response.getContent()).asPromise();
