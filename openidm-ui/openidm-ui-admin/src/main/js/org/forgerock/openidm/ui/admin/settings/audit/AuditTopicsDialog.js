@@ -345,20 +345,22 @@ define([
             this.$el.parentsUntil(".model-content").find("#submitAuditEvent").prop('disabled', true);
         },
 
-        updateFilter: function(prop, value) {
-            if (!_.isEmpty(value) && !_.has(this.data.defaults.event, "filter")) {
-                this.data.defaults.event.filter = {};
+        updateFilter: function(event, prop, value) {
+            if (!_.isEmpty(value) && !_.has(event, "filter")) {
+                event.filter = {};
             }
 
-            if (_.isEmpty(value) && _.keys(this.data.defaults.event.filter).length === 0) {
-                delete this.data.defaults.event.filter;
+            if (_.isEmpty(value) && _.keys(event.filter).length === 0) {
+                delete event.filter;
             } else {
-                this.data.defaults.event.filter[prop] = value;
+                event.filter[prop] = value;
             }
+
+            return event;
         },
 
         updateFilterAction: function(e) {
-            this.updateFilter("actions", this.$el.find(".filterActions").val());
+            this.data.defaults.event = this.updateFilter(this.data.defaults.event, "actions", this.$el.find(".filterActions").val());
         },
 
         updateFilterTriggers: function(e) {
@@ -368,7 +370,7 @@ define([
                 triggers[key] = this.$el.find(".trigger-"+key).val() || [];
             }, this);
 
-            this.updateFilter("triggers", triggers);
+            this.data.defaults.event = this.updateFilter(this.data.defaults.event, "triggers", triggers);
         },
 
         addFilterField: function(e) {

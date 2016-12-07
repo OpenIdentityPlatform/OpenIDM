@@ -142,30 +142,39 @@ define([
             );
         },
 
-        editEvent:function(e) {
-            e.preventDefault();
+        getDialogConfig: function(eventName, topics, defaultTopicsList, eventActions) {
+            var dialogConfig = {
+                "event": topics[eventName],
+                "eventName": eventName,
+                "isDefault": _.contains(defaultTopicsList, eventName),
+                "definedEvents": _.keys(topics),
+                "newEvent": false
+            };
 
-            var eventName = $(e.currentTarget).attr("data-name"),
-                dialogConfig = {
-                    "event": this.model.topics[eventName],
-                    "eventName": eventName,
-                    "isDefault": _.contains(this.constants.DEFAULT_TOPICS_LIST, eventName),
-                    "definedEvents": _.keys(this.model.topics),
-                    "newEvent": false
-                };
-
-            if (_.contains(this.constants.DEFAULT_TOPICS_LIST, eventName) && eventName !== "custom") {
-                dialogConfig.eventDeclarativeActions = this.model.EVENT_ACTIONS[eventName];
+            if (_.contains(defaultTopicsList, eventName) && eventName !== "custom") {
+                dialogConfig.eventDeclarativeActions = eventActions[eventName];
                 dialogConfig.limitedEdits = true;
 
             } else {
-                dialogConfig.eventDeclarativeActions = this.model.EVENT_ACTIONS.custom;
+                dialogConfig.eventDeclarativeActions = eventActions.custom;
             }
 
             // Triggers only apply to recon and activity events, we can enhance this later if it becomes necessary.
             if (_.contains(["activity", "recon"], eventName)) {
-                dialogConfig.triggers = {"recon": this.model.EVENT_ACTIONS.recon};
+                dialogConfig.triggers = {"recon": eventActions.recon};
             }
+            return dialogConfig;
+        },
+
+        editEvent:function(e) {
+            e.preventDefault();
+
+            var dialogConfig = this.getDialogConfig(
+                $(e.currentTarget).attr("data-name"),
+                this.model.topics,
+                this.constants.DEFAULT_TOPICS_LIST,
+                this.model.EVENT_ACTIONS
+            );
 
             AuditTopicsDialog.render(dialogConfig,
                 _.bind(function(results) {
