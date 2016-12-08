@@ -1,0 +1,22 @@
+{
+    "mappings" : [
+        {
+            "name" : "testMapping",
+            "source" : "managed/user",
+            "target" : "system/ldap/account",
+            "enableLinking" : false,
+            "properties" : [
+                {
+                    "source" : "attributeWithNullValue",
+                    "target" : "attributeWithNullValue"
+                },
+                {
+                    "source" : "missingAttribute",
+                    "default" : "defaultValue",
+                    "target" : "missingAttributeWithDefaultValue"
+                }
+            ],
+            "policies" : []
+        }
+    ]
+}

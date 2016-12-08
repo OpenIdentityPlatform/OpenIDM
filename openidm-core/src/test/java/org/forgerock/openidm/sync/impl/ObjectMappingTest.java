@@ -27,10 +27,13 @@ import static org.mockito.Mockito.when;
 import java.io.File;
 import java.net.URL;
 import java.util.Map;
+
 import javax.script.Bindings;
 
+import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.JsonValueException;
+import org.forgerock.json.resource.Connection;
 import org.forgerock.json.resource.ConnectionFactory;
 import org.forgerock.openidm.sync.SynchronizationException;
 import org.forgerock.openidm.sync.ReconAction;
@@ -54,6 +57,8 @@ public class ObjectMappingTest {
     private ScriptEntry mockScriptEntry = mock(ScriptEntry.class);
     private Script mockScript = mock(Script.class);
     private Bindings mockBindings = mock(Bindings.class);
+    private Connection mockConnection = mock(Connection.class);
+    private ConnectionFactory mockConnectionFactory = mock(ConnectionFactory.class);
     
     @BeforeClass
     public void setUp() throws Exception {
@@ -61,7 +66,8 @@ public class ObjectMappingTest {
         when(mockScript.eval(any(Bindings.class))).thenReturn(true);
         when(mockScript.createBindings()).thenReturn(mockBindings);
         when(mockScriptEntry.getScript(any(Context.class))).thenReturn(mockScript);
-        when(mockScriptRegistry.takeScript(any(JsonValue.class))).thenReturn(mockScriptEntry);      
+        when(mockScriptRegistry.takeScript(any(JsonValue.class))).thenReturn(mockScriptEntry); 
+        when(mockConnectionFactory.getConnection()).thenReturn(mockConnection);
         Scripts.init(mockScriptRegistry);
     }
 
@@ -102,7 +108,82 @@ public class ObjectMappingTest {
         testSyncOperation.sourceObjectAccessor.getObject().get("json").get("pointer").put("key", "bar");
         assertThat(testSyncOperation.checkSourceConditions("default")).isFalse();
     }
+    
+    @Test
+    public void testUpdateActionWithNullAttributeValue() throws Exception {
+        SyncOperation testSyncOperation = createObjectMapping("/conf/sync_PropertyMappingTest.json").getSyncOperation();
+        JsonValue source = json(
+                object(
+                        field("_id", "sourceWithNullValue"),
+                        field("attributeWithNullValue", null)
+                ));
+        
+        JsonValue target = json(
+                object(
+                        field("_id", "emptyTarget")
+                ));
 
+        // Sync source attribute whose value is null
+        testSyncOperation.sourceObjectAccessor = new LazyObjectAccessor(null, null, source.get("_id").asString(), source);
+        testSyncOperation.targetObjectAccessor = new LazyObjectAccessor(null, null, target.get("_id").asString(), target);
+        testSyncOperation.action = ReconAction.UPDATE;
+        testSyncOperation.situation = Situation.CONFIRMED;
+        testSyncOperation.performAction();
+        
+        // Test that the target object contains the attribute and that the value is null
+        assertThat(testSyncOperation.targetObjectAccessor.getObject().get(new JsonPointer("/attributeWithNullValue"))).isNotNull();
+        assertThat(testSyncOperation.targetObjectAccessor.getObject().get(new JsonPointer("/attributeWithNullValue")).isNull()).isTrue();
+    }
+    
+    @Test
+    public void testDeleteOfUndefinedAttribute() throws Exception {
+        SyncOperation testSyncOperation = createObjectMapping("/conf/sync_PropertyMappingTest.json").getSyncOperation();
+          JsonValue source = json(
+                object(
+                        field("_id", "emptySource")
+                ));
+        
+        JsonValue target = json(
+                object(
+                        field("_id", "targetWithNullValue"),
+                        field("attributeWithNullValue", null)
+                ));
+
+        // Sync empty source object to a target which contains a mapped attribute with a null value
+        testSyncOperation.sourceObjectAccessor = new LazyObjectAccessor(null, null, source.get("_id").asString(), source);
+        testSyncOperation.targetObjectAccessor = new LazyObjectAccessor(null, null, target.get("_id").asString(), target);
+        testSyncOperation.action = ReconAction.UPDATE;
+        testSyncOperation.situation = Situation.CONFIRMED;
+        testSyncOperation.performAction();
+        
+        // Test that the mapped attribute has been deleted from the target object 
+        assertThat(testSyncOperation.targetObjectAccessor.getObject().get(new JsonPointer("/attributeWithNullValue"))).isNull();
+    }
+    
+    @Test
+    public void testDefaultValueForMissingAttribute() throws Exception {
+        SyncOperation testSyncOperation = createObjectMapping("/conf/sync_PropertyMappingTest.json").getSyncOperation();
+          JsonValue source = json(
+                object(
+                        field("_id", "emptySource")
+                ));
+        
+        JsonValue target = json(
+                object(
+                        field("_id", "emptyTarget")
+                ));
+
+        // Sync empty source object to a target which contains a mapped attribute with a null value
+        testSyncOperation.sourceObjectAccessor = new LazyObjectAccessor(null, null, source.get("_id").asString(), source);
+        testSyncOperation.targetObjectAccessor = new LazyObjectAccessor(null, null, target.get("_id").asString(), target);
+        testSyncOperation.action = ReconAction.UPDATE;
+        testSyncOperation.situation = Situation.CONFIRMED;
+        testSyncOperation.performAction();
+        
+        // Test that the mapped attribute has been assigned the default value
+        assertThat(testSyncOperation.targetObjectAccessor.getObject().get(new JsonPointer("/missingAttributeWithDefaultValue")).asString()).isEqualTo("defaultValue");
+    }
+    
     @Test
     public void testUpdateActionWithNullTargetObject() throws Exception {
         TestObjectMapping dummyMapping = createObjectMapping(json(
@@ -141,7 +222,7 @@ public class ObjectMappingTest {
     }
     
     private TestObjectMapping createObjectMapping(JsonValue syncConfig) throws Exception {
-        return new TestObjectMapping(null, syncConfig);
+        return new TestObjectMapping(mockConnectionFactory, syncConfig);
     }
     
     class TestObjectMapping extends ObjectMapping {

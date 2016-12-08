@@ -834,7 +834,7 @@ abstract class SyncOperation {
             final String id = target.get("_id").required().asString();
             final String fullId = LazyObjectAccessor.qualifiedId(objectMapping.getTargetObjectSet(), id);
             // Do simple comparison first, only if it fails handle case sensitivity
-            if (!targetId.equals(id) &&
+            if (!targetId.equals(id) && objectMapping.isLinkingEnabled() &&
                     !objectMapping.getLinkType().normalizeTargetId(targetId).equals(objectMapping.getLinkType().normalizeTargetId(id))) {
                 throw new SynchronizationException("target '_id' has changed");
             }

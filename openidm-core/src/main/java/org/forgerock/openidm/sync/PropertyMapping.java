@@ -136,10 +136,11 @@ public class PropertyMapping {
             return;
         }
         Object result = null;
+        JsonValue sourceValue = null;
         if (sourcePointer != null) { // optional source property
-            JsonValue jv = sourceObject.get(sourcePointer);
-            if (jv != null) { // null indicates no value
-                result = jv.getObject();
+            sourceValue = sourceObject.get(sourcePointer);
+            if (sourceValue != null) { // null indicates no value
+                result = sourceValue.getObject();
             }
         }
         if (transform != null) { // optional property mapping script
@@ -157,7 +158,13 @@ public class PropertyMapping {
         if (result == null) {
             result = defaultValue; // remains null if default not specified
         }
-        put(targetObject, targetPointer, result);
+        
+        // Delete target attribute if it does not exist in the source
+        if (sourcePointer != null && sourceValue == null && result == null) {
+            targetObject.remove(targetPointer);
+        } else {
+            put(targetObject, targetPointer, result);
+        }
     }
     
     /**
