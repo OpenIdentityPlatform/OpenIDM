@@ -386,6 +386,13 @@ public abstract class RelationshipProvider {
             boolean performDuplicateAssignmentCheck) throws ResourceException;
 
     /**
+     * Returns the managed object's ID corresponding to the passed in {@link Context}.
+     * @param context the Context object used to access the UriRouterContext and the encapsulated UriTemplateVariables map.
+     * @return a String representing the managed object's ID.
+     */
+    abstract String getManagedObjectId(Context context);
+
+    /**
      * Creates a relationship object.
      * 
      * @param context The current context.
@@ -889,30 +896,7 @@ public abstract class RelationshipProvider {
             ));
         }
     }
-    
-    /**
-     * Returns the managed object's ID corresponding to the passed in {@link Context}.
-     * 
-     * @param context the Context object.
-     * @return a String representing the managed object's ID.
-     */
-    protected String getManagedObjectId(Context context) {
-        /*
-        Note that this method is called from both the SingletonRelationshipProvider, and the CollectionRelationshipProvider.
-        Ultimately, request to readInstance(for the SRP) or queryCollection (for the CRP) will be dispatched in CREST by
-        the InterfaceSingletonHandler and InterfaceCollectionHandler, respectively. The behavior in the InterfaceCollectionHandler
-        is to pop off the top-most Context instance prior to making the invocation. Thus the location of the UriTemplateVariable
-        Map which has the managedObjectId key whose value is the managed-object in question is either in the leaf context
-        (for the CRP), or the parent of the leaf context (for the SRP). The logic below handles both cases.
-         */
-        final String objectId = context.asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
-        if (objectId == null) {
-            return context.getParent().asContext(UriRouterContext.class).getUriTemplateVariables().get(PARAM_MANAGED_OBJECT_ID);
-        } else {
-            return objectId;
-        }
-    }
-    
+
     /**
      * Returns the managed object's full path corresponding to the passed in {@link Context}.
      * 

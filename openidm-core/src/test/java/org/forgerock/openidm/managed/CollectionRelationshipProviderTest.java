@@ -15,6 +15,9 @@
  */
 package org.forgerock.openidm.managed;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import static org.forgerock.http.routing.UriRouterContext.uriRouterContext;
 import static org.forgerock.json.JsonValue.*;
 import static org.mockito.Mockito.*;
 
@@ -22,6 +25,7 @@ import java.util.AbstractMap;
 import java.util.Collections;
 import java.util.Map;
 
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.BadRequestException;
 import org.forgerock.json.resource.ConnectionFactory;
@@ -30,6 +34,7 @@ import org.forgerock.json.resource.ResourcePath;
 import org.forgerock.openidm.audit.util.ActivityLogger;
 import org.forgerock.openidm.util.RelationshipUtil;
 import org.forgerock.services.context.Context;
+import org.forgerock.services.context.RootContext;
 import org.testng.annotations.BeforeTest;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -113,6 +118,18 @@ public class CollectionRelationshipProviderTest {
                 makeField(RelationshipUtil.REFERENCE_ID, referenceId),
                 makeField(RelationshipUtil.REFERENCE_PROPERTIES, makeRefProperties(grantType, temporalConstraint))
         )).asMap();
+    }
+
+    @Test
+    public void testGetManagedObjectId() {
+        final RelationshipValidator relationshipValidator = mock(RelationshipValidator.class);
+        final CollectionRelationshipProvider relationshipProvider = new CollectionRelationshipProvider(connectionFactory,
+                new ResourcePath("managed/widget"), schemaField, activityLogger, managedObjectSyncService, relationshipValidator);
+        final String managedObjectId = "bjensen";
+        final UriRouterContext parent = uriRouterContext(new RootContext()).build();
+        final UriRouterContext context = uriRouterContext(parent).templateVariable("managedObjectId", managedObjectId).build();
+        assertThat(relationshipProvider.getManagedObjectId(context)).isEqualTo(managedObjectId);
+        assertThat(relationshipProvider.getManagedObjectId(parent)).isNull();
     }
 
     private Map<String, Object> makeRefProperties(String grantType, String temporalConstraint) {

@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.forgerock.http.routing.RoutingMode;
+import org.forgerock.http.routing.UriRouterContext;
 import org.forgerock.json.JsonPointer;
 import org.forgerock.json.JsonValue;
 import org.forgerock.json.resource.ActionRequest;
@@ -609,5 +610,23 @@ class CollectionRelationshipProvider extends RelationshipProvider implements Col
                 relationshipValidator.validateRelationship(newItem, referrerId, context, performDuplicateAssignmentCheck);
             }
         }
+    }
+
+    /** {@inheritDoc} */
+    String getManagedObjectId(Context context) {
+        /*
+        Resources.newHandler, called in this class' ctor to register the subclass on the router, will create an an internal Router
+        with a hierarchy of routes to allow a CollectionResourceProvider to handle routes to the collection, and to instances
+        within the collection. This additional Router results in an additional UriRouterContext on the Context stack. The
+        InterfaceCollectionHandler will pop this UriRouterContext off of the stack prior to making the invocation to the
+        RequestHandler, as the {managedObjectId} set in the UriTemplateVariables of this UriRouterContext is passed as the instance id
+        to the CollectionResourceProvider methods. This pattern is not followed for the InterfaceSingletonHandler, and thus
+        the UriTemplateVariables referencing the managed object id are in the parent of the outer-most UriRouterContext.
+        The implementation of this abstract method allows the CollectionRelationshipProvider and SingletonRelationshipProvider to handle this
+        difference.
+         */
+        return context.asContext(UriRouterContext.class)
+                .getUriTemplateVariables()
+                .get(PARAM_MANAGED_OBJECT_ID);
     }
 }
